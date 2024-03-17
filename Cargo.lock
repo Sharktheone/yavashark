@@ -7,5 +7,9 @@ name = "yavashark"
 version = "0.1.0"
 
 [[package]]
+name = "yavashark_lexer"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_parser"
 version = "0.1.0"
