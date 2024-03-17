@@ -1,0 +1,17 @@
+[package]
+name = "yavashark"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.76"
+description = "A new, experimental, JavaScript/TypeScript engine written in Rust"
+license = "MIT"
+keywords = ["javascript", "typescript", "rust", "interpreter"]
+
+[workspace]
+members = [
+    "crates/*"
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
