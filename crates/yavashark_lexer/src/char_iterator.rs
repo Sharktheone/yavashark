@@ -1,5 +1,4 @@
 use std::cell::{Cell, RefCell};
-
 pub struct CharIterator {
     position: RefCell<Position>,
     length: usize,
@@ -36,9 +35,18 @@ impl From<String> for CharIterator {
     }
 }
 
+impl From<&str> for CharIterator {
+    fn from(s: &str) -> Self {
+        
+        Self::new(
+            s.as_bytes().to_vec()
+        )
+    }
+}
+
 impl CharIterator {
     fn next(&self) -> Option<u8> {
-        if self.finished_streaming {
+        if self.finished_streaming.get() {
             return None;
         }
 
@@ -47,7 +55,7 @@ impl CharIterator {
 
     #[inline(always)]
     fn get_next_checked_eof(&self) -> Option<u8> {
-        let pos = self.position.try_borrow_mut().ok()?;
+        let mut pos = self.position.try_borrow_mut().ok()?;
 
         if let Some(byte) = self.buffer.try_borrow().ok()?.get(pos.pos) {
             let byte = *byte;
