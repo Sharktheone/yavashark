@@ -56,8 +56,8 @@ impl UnsafeBuffer {
         Self {
             buffer: vec![0; size].into_boxed_slice(),
             size,
-            read_pos: AtomicUsize::new(0),
             write_pos: AtomicUsize::new(0),
+            read_pos: AtomicUsize::new(usize::MAX), //no one will have a script that is 17,179,869,184GB long (17 exabytes)
             end: AtomicBool::new(false),
             other_dropped: AtomicBool::new(false),
         }
@@ -104,12 +104,12 @@ impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
         let buffer = Box::new(UnsafeBuffer {
             buffer,
             read_pos: AtomicUsize::new(0),
-            write_pos: AtomicUsize::new(len - 1),
-            size: len,
+            write_pos: AtomicUsize::new(len),
+            size: len + 1, // +1 because we need to point write_pos to the next byte, however it's not allocated
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), //we don't have the other side
         });
-        let Some(mut buffer) = NonNull::new(Box::into_raw(buffer)) else {
+        let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
             return Err(anyhow::anyhow!("Failed to allocate buffer for CharIteratorReceiver"));
         };
 
@@ -131,13 +131,13 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
     fn try_from(s: &str) -> Result<CharIteratorReceiver<'a>, Self::Error> {
         let buffer = Box::new(UnsafeBuffer {
             buffer: s.to_string().into_bytes().into_boxed_slice(),
-            size: s.len(),
+            size: s.len() + 1, // +1 because we need to point write_pos to the next byte, however it's not allocated
             read_pos: AtomicUsize::new(0),
-            write_pos: AtomicUsize::new(s.len() - 1),
+            write_pos: AtomicUsize::new(s.len()),
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), // we don't have the other side
         });
-        let Some(mut buffer) = NonNull::new(Box::into_raw(buffer)) else {
+        let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
             return Err(anyhow::anyhow!("Failed to allocate buffer for CharIteratorReceiver"));
         };
 
@@ -157,17 +157,18 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
 impl CharIteratorReceiver<'_> {
     #[inline(always)]
     fn next_with_pos(&mut self, read_pos: usize) -> Option<u8> {
-        if read_pos == self.buffer.write_pos.load(Ordering::Relaxed) {
-            if self.buffer.end.load(Ordering::Relaxed) {
-                None
+        loop {
+            if read_pos == self.buffer.write_pos.load(Ordering::Relaxed) {
+                if self.buffer.end.load(Ordering::Relaxed) {
+                    return None
+                } else {
+                    std::hint::spin_loop();
+                }
             } else {
-                std::hint::spin_loop();
-                self.next_with_pos(read_pos)
+                let byte = self.buffer.buffer[read_pos];
+                self.buffer.read_pos.store((read_pos + 1) % self.buffer.size, Ordering::Relaxed);
+                return Some(byte)
             }
-        } else {
-            let byte = self.buffer.buffer[read_pos];
-            self.buffer.read_pos.store((read_pos + 1) % self.buffer.size, Ordering::Relaxed);
-            Some(byte)
         }
     }
 }
@@ -177,7 +178,8 @@ impl Iterator for CharIteratorReceiver<'_> {
 
     fn next(&mut self) -> Option<u8> {
         let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
-        self.next_with_pos(read_pos)
+
+        self.next_with_pos(read_pos % usize::MAX)
     }
 }
 
@@ -186,16 +188,14 @@ impl CharIteratorSender<'_> {
         let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
         self.push_with_pos(byte, write_pos);
     }
-    
+
     #[inline(always)]
     fn push_with_pos(&mut self, byte: u8, write_pos: usize) {
         if write_pos == self.buffer.read_pos.load(Ordering::Relaxed) {
             if self.buffer.end.load(Ordering::Relaxed) {
-                panic!("Receiver has dropped");
                 return;
             }
-            
-            panic!("idk");
+
             std::hint::spin_loop();
             self.push_with_pos(byte, write_pos);
         } else {
@@ -239,3 +239,5 @@ mod tests {
         assert_eq!(receiver.next(), None);
     }
 }
+
+
