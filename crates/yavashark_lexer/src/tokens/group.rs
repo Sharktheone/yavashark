@@ -7,7 +7,6 @@ pub struct Group {
     pub span: Span,
 }
 
-
 pub enum Delimiter {
     Parenthesis,
     Brace,

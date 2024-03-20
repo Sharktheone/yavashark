@@ -6,7 +6,8 @@ pub struct Lit {
     pub span: Span,
 }
 
-pub enum LitKind { //probably most of them aren't needed in ts
+pub enum LitKind {
+    //probably most of them aren't needed in ts
     Number,
     String,
 }

@@ -6,7 +6,7 @@ pub struct CharIteratorReceiver<'a> {
     buffer: &'a UnsafeBuffer,
 }
 
-struct Position {
+pub struct Position {
     pos: usize,
     line: usize,
     column: usize,
@@ -19,7 +19,12 @@ pub struct CharIteratorSender<'a> {
 impl Drop for CharIteratorSender<'_> {
     fn drop(&mut self) {
         self.buffer.end.store(true, Ordering::Relaxed);
-        let res = self.buffer.other_dropped.compare_exchange(false, true, Ordering::Relaxed, Ordering::Relaxed);
+        let res = self.buffer.other_dropped.compare_exchange(
+            false,
+            true,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        );
 
         if res.is_err() {
             let buffer = unsafe { Box::from_raw(self.buffer as *mut _) };
@@ -30,10 +35,16 @@ impl Drop for CharIteratorSender<'_> {
 
 impl Drop for CharIteratorReceiver<'_> {
     fn drop(&mut self) {
-        let res = self.buffer.other_dropped.compare_exchange(false, true, std::sync::atomic::Ordering::Relaxed, std::sync::atomic::Ordering::Relaxed);
+        let res = self.buffer.other_dropped.compare_exchange(
+            false,
+            true,
+            Ordering::Relaxed,
+            Ordering::Relaxed,
+        );
 
         if res.is_err() {
-            let buffer = unsafe { Box::from_raw(self.buffer as *const UnsafeBuffer as *mut UnsafeBuffer) };
+            let buffer =
+                unsafe { Box::from_raw(self.buffer as *const UnsafeBuffer as *mut UnsafeBuffer) };
             drop(buffer);
         }
     }
@@ -64,7 +75,6 @@ impl UnsafeBuffer {
     }
 }
 
-
 struct CharIterator;
 
 impl CharIterator {
@@ -74,7 +84,7 @@ impl CharIterator {
         let mut buffer = NonNull::new(Box::into_raw(buffer))?;
 
         let sender = CharIteratorSender {
-            buffer: unsafe { buffer.as_mut() }
+            buffer: unsafe { buffer.as_mut() },
         };
 
         let receiver = CharIteratorReceiver {
@@ -94,7 +104,6 @@ impl CharIterator {
     }
 }
 
-
 impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
     type Error = anyhow::Error;
     fn try_from(s: String) -> Result<CharIteratorReceiver<'a>, Self::Error> {
@@ -110,7 +119,9 @@ impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
             other_dropped: AtomicBool::new(true), //we don't have the other side
         });
         let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
-            return Err(anyhow::anyhow!("Failed to allocate buffer for CharIteratorReceiver"));
+            return Err(anyhow::anyhow!(
+                "Failed to allocate buffer for CharIteratorReceiver"
+            ));
         };
 
         let receiver = CharIteratorReceiver {
@@ -138,7 +149,9 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
             other_dropped: AtomicBool::new(true), // we don't have the other side
         });
         let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
-            return Err(anyhow::anyhow!("Failed to allocate buffer for CharIteratorReceiver"));
+            return Err(anyhow::anyhow!(
+                "Failed to allocate buffer for CharIteratorReceiver"
+            ));
         };
 
         let receiver = CharIteratorReceiver {
@@ -160,14 +173,16 @@ impl CharIteratorReceiver<'_> {
         loop {
             if read_pos == self.buffer.write_pos.load(Ordering::Relaxed) {
                 if self.buffer.end.load(Ordering::Relaxed) {
-                    return None
+                    return None;
                 } else {
                     std::hint::spin_loop();
                 }
             } else {
                 let byte = self.buffer.buffer[read_pos];
-                self.buffer.read_pos.store((read_pos + 1) % self.buffer.size, Ordering::Relaxed);
-                return Some(byte)
+                self.buffer
+                    .read_pos
+                    .store((read_pos + 1) % self.buffer.size, Ordering::Relaxed);
+                return Some(byte);
             }
         }
     }
@@ -200,11 +215,12 @@ impl CharIteratorSender<'_> {
             self.push_with_pos(byte, write_pos);
         } else {
             self.buffer.buffer[write_pos] = byte;
-            self.buffer.write_pos.store((write_pos + 1) % self.buffer.size, Ordering::Relaxed);
+            self.buffer
+                .write_pos
+                .store((write_pos + 1) % self.buffer.size, Ordering::Relaxed);
         }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -239,5 +255,3 @@ mod tests {
         assert_eq!(receiver.next(), None);
     }
 }
-
-

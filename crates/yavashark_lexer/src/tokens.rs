@@ -4,8 +4,8 @@ use crate::tokens::keyword::Keyword;
 use crate::tokens::lit::Lit;
 use crate::tokens::punct::Punct;
 
-mod ident;
 mod group;
+mod ident;
 mod keyword;
 mod lit;
 mod punct;
