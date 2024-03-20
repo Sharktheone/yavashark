@@ -1,4 +1,4 @@
 mod tokens;
 mod span;
-mod lexer;
+// mod lexer;
 mod char_iterator;

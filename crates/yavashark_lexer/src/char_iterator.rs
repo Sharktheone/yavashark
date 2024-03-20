@@ -68,6 +68,7 @@ impl UnsafeBuffer {
 struct CharIterator;
 
 impl CharIterator {
+    #[allow(clippy::new_ret_no_self)]
     fn new<'send, 'recv>() -> Option<(CharIteratorSender<'send>, CharIteratorReceiver<'recv>)> {
         let buffer = Box::new(UnsafeBuffer::new(1024));
         let mut buffer = NonNull::new(Box::into_raw(buffer))?;
@@ -97,12 +98,15 @@ impl CharIterator {
 impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
     type Error = anyhow::Error;
     fn try_from(s: String) -> Result<CharIteratorReceiver<'a>, Self::Error> {
+        let len = s.len();
+        let buffer = s.into_bytes();
+        let buffer = buffer.into_boxed_slice();
         let buffer = Box::new(UnsafeBuffer {
-            buffer: s.into_bytes().into_boxed_slice(),
-            size: s.len(),
+            buffer,
             read_pos: AtomicUsize::new(0),
-            write_pos: AtomicUsize::new(s.len()),
-            end: AtomicBool::new(false),
+            write_pos: AtomicUsize::new(len - 1),
+            size: len,
+            end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), //we don't have the other side
         });
         let Some(mut buffer) = NonNull::new(Box::into_raw(buffer)) else {
@@ -129,7 +133,7 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
             buffer: s.to_string().into_bytes().into_boxed_slice(),
             size: s.len(),
             read_pos: AtomicUsize::new(0),
-            write_pos: AtomicUsize::new(s.len()),
+            write_pos: AtomicUsize::new(s.len() - 1),
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), // we don't have the other side
         });
@@ -154,7 +158,7 @@ impl CharIteratorReceiver<'_> {
     #[inline(always)]
     fn next_with_pos(&mut self, read_pos: usize) -> Option<u8> {
         if read_pos == self.buffer.write_pos.load(Ordering::Relaxed) {
-            return if self.buffer.end.load(Ordering::Relaxed) {
+            if self.buffer.end.load(Ordering::Relaxed) {
                 None
             } else {
                 std::hint::spin_loop();
@@ -186,11 +190,52 @@ impl CharIteratorSender<'_> {
     #[inline(always)]
     fn push_with_pos(&mut self, byte: u8, write_pos: usize) {
         if write_pos == self.buffer.read_pos.load(Ordering::Relaxed) {
+            if self.buffer.end.load(Ordering::Relaxed) {
+                panic!("Receiver has dropped");
+                return;
+            }
+            
+            panic!("idk");
             std::hint::spin_loop();
             self.push_with_pos(byte, write_pos);
         } else {
             self.buffer.buffer[write_pos] = byte;
             self.buffer.write_pos.store((write_pos + 1) % self.buffer.size, Ordering::Relaxed);
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_char_iterator() {
+        let (mut sender, mut receiver) = CharIterator::new().unwrap();
+        sender.push(b'a');
+        sender.push(b'b');
+        sender.push(b'c');
+        assert_eq!(receiver.next(), Some(b'a'));
+        assert_eq!(receiver.next(), Some(b'b'));
+        assert_eq!(receiver.next(), Some(b'c'));
+    }
+
+    #[test]
+    fn test_char_iterator_from_string() {
+        let mut receiver = CharIterator::from_string("abc".to_string()).unwrap();
+        assert_eq!(receiver.next(), Some(b'a'));
+        assert_eq!(receiver.next(), Some(b'b'));
+        assert_eq!(receiver.next(), Some(b'c'));
+        assert_eq!(receiver.next(), None);
+    }
+
+    #[test]
+    fn test_char_iterator_from_str() {
+        let mut receiver = CharIterator::from_string("abc".to_string()).unwrap();
+        assert_eq!(receiver.next(), Some(b'a'));
+        assert_eq!(receiver.next(), Some(b'b'));
+        assert_eq!(receiver.next(), Some(b'c'));
+        assert_eq!(receiver.next(), None);
     }
 }
