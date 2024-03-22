@@ -75,11 +75,11 @@ impl UnsafeBuffer {
     }
 }
 
-struct CharIterator;
+pub struct CharIterator;
 
 impl CharIterator {
     #[allow(clippy::new_ret_no_self)]
-    fn new<'send, 'recv>() -> Option<(CharIteratorSender<'send>, CharIteratorReceiver<'recv>)> {
+    pub fn new<'send, 'recv>() -> Option<(CharIteratorSender<'send>, CharIteratorReceiver<'recv>)> {
         let buffer = Box::new(UnsafeBuffer::new(1024));
         let mut buffer = NonNull::new(Box::into_raw(buffer))?;
 
@@ -99,7 +99,7 @@ impl CharIterator {
         Some((sender, receiver))
     }
 
-    fn from_string<'recv>(s: String) -> anyhow::Result<CharIteratorReceiver<'recv>> {
+    pub fn from_string<'recv>(s: String) -> anyhow::Result<CharIteratorReceiver<'recv>> {
         CharIteratorReceiver::try_from(s)
     }
 }
