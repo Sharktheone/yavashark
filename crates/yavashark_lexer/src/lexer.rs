@@ -1,3 +1,4 @@
+pub(crate) mod state;
 mod separators;
 
 use crate::char_iterator::CharIteratorReceiver;
@@ -6,6 +7,7 @@ use crate::char_iterator::CharIteratorReceiver;
 pub struct Lexer<'a> {
     input: CharIteratorReceiver<'a>,
     consumed: String,
+    state: state::LexerState,
 }
 
 impl<'a> Lexer<'a> {
@@ -13,6 +15,7 @@ impl<'a> Lexer<'a> {
         Lexer {
             input,
             consumed: String::new(),
+            state: state::LexerState::None,
         }
     }
     
