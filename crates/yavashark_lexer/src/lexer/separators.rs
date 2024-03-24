@@ -1,5 +1,3 @@
-
-
 //Separators are characters that are used to separate tokens in the source code. Such as keywords, identifiers, literals, etc.
 pub(crate) enum Separators {
     Space,
@@ -100,11 +98,11 @@ impl Separators {
             _ => None,
         }
     }
-    
+
     pub(crate) fn is_separator(c: char) -> bool {
         Self::from_char(c).is_some()
     }
-    
+
     pub(crate) fn is_separator_u8(c: u8) -> bool {
         Self::from_u8(c).is_some()
     }

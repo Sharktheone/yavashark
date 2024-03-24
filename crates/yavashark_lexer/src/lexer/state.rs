@@ -1,5 +1,3 @@
-
-
 pub(crate) enum LexerState {
     None,
     InComment,

@@ -1,8 +1,7 @@
-pub(crate) mod state;
 mod separators;
+pub(crate) mod state;
 
 use crate::char_iterator::CharIteratorReceiver;
-
 
 pub struct Lexer<'a> {
     input: CharIteratorReceiver<'a>,
@@ -18,14 +17,13 @@ impl<'a> Lexer<'a> {
             state: state::LexerState::None,
         }
     }
-    
+
     pub fn lex(&mut self) {
         for byte in self.input.by_ref() {
             println!("{}", byte as char);
         }
     }
 }
-
 
 impl<'a> TryFrom<String> for Lexer<'a> {
     type Error = anyhow::Error;
@@ -40,4 +38,3 @@ impl<'a> TryFrom<&str> for Lexer<'a> {
         Ok(Self::new(CharIteratorReceiver::try_from(s)?))
     }
 }
-
