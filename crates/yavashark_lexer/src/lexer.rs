@@ -2,11 +2,13 @@ mod separators;
 pub(crate) mod state;
 
 use crate::char_iterator::CharIteratorReceiver;
+use crate::span::Span;
 
 pub struct Lexer<'a> {
     input: CharIteratorReceiver<'a>,
     consumed: String,
     state: state::LexerState,
+    current_span: Span,
 }
 
 impl<'a> Lexer<'a> {
@@ -15,6 +17,7 @@ impl<'a> Lexer<'a> {
             input,
             consumed: String::new(),
             state: state::LexerState::None,
+            current_span: Span::new(0, 0),
         }
     }
 
