@@ -10,4 +10,6 @@ pub enum LitKind {
     //probably most of them aren't needed in ts
     Number,
     String,
+    StringTemplate,
+    Regex,
 }
