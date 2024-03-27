@@ -167,9 +167,145 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
     }
 }
 
+
+enum NextBuffer<'a, const N: usize> {
+    ///BorrowedRightLen will appear if we have more or exactly N bytes to read and the read pos is before the write_pos
+    /// ```text
+    ///    read pos             write pos
+    ///     ↓                    ↓
+    /// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    /// ```
+    /// we can just reference bytes 1, 2, 3, 4, 5, 6, 7, 8
+    BorrowedRightLen(&'a [u8; N]),
+
+    ///OwnedRightLen will appear if we have more or exactly N bytes to read and the read pos is after the write_pos
+    /// ```text
+    ///    write pos             read pos
+    ///     ↓                    ↓
+    /// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    /// ```
+    /// we need to copy bytes 9, 10, 11, 12, 1 to the buffer
+    OwnedRightLen(Box<[u8; N]>),
+
+    ///BorrowedWrongLen will appear if we are at the end of an EOF'd buffer where the write_pos is after the read_pos
+    /// ```text
+    ///    read pos             write pos
+    ///     ↓                    ↓
+    /// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    /// ```
+    /// we can just reference bytes 2, 3, 4, 5, 6, 7, 8
+    /// If the buffer is EOF'd, but we still have more or exactly N bytes to read it will use `BorrowedRightLen` instead
+    BorrowedWrongLen(&'a [u8]),
+
+    ///OwnedWrongLen will appear if we are at the end of an EOF'd buffer where the write_pos is before the read_pos
+    /// ```text
+    ///     write pos             read pos        
+    ///      ↓                    ↓
+    ///  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    /// ```
+    /// we need to copy bytes 9, 10, 11, 12, 1 to the buffer
+    /// If the buffer is EOF'd, but we still have more or exactly N bytes to read it will use `OwnedRightLen` instead
+    OwnedWrongLen(Box<[u8]>),
+}
+
+struct NextN<'a, T: FnOnce(), const N: usize> {
+    buffer: NextBuffer<'a, N>,
+    consume: T,
+}
+
+
+impl<T: FnOnce(), const N: usize> Drop for NextN<'_, T, N> {
+    fn drop(&mut self) {
+        (self.consume)();
+    }
+}
+
 impl CharIteratorReceiver<'_> {
-    #[inline(always)]
-    fn next_with_pos(&mut self, read_pos: usize) -> Option<u8> {
+    fn skip_n(&mut self, n: u8) {
+        let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
+        loop {
+            let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+            if read_pos == write_pos {
+                if self.buffer.end.load(Ordering::Relaxed) {
+                    return;
+                } else {
+                    std::hint::spin_loop();
+                }
+            } else {
+                let n = n as usize;
+
+                let mut end = write_pos;
+                if write_pos < read_pos {
+                    end += self.buffer.size;
+                }
+                if end - read_pos < n {
+                    return;
+                }
+                self.buffer
+                    .read_pos
+                    .store((read_pos + n) % self.buffer.size, Ordering::Relaxed);
+            }
+        }
+    }
+
+    // ///# Safety
+    // /// N must be less than or equal to the buffer size, otherwise this function will always return None
+    // fn next_n_with_pos<const N: usize>(&self, write: usize, read: usize) -> Option{
+    //     
+    // }
+
+    /// # Safety
+    /// The caller is responsible for ensuring that N is less than or equal to the buffer size, otherwise the caller will pay a performance penalty
+    pub fn next_n<const N: usize>(&mut self) -> Option<NextN<'_, impl FnOnce(), N>> {
+        let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
+
+        let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+        if read_pos == write_pos && self.buffer.end.load(Ordering::Relaxed) {
+            // return None;
+            todo!()
+        }
+        if self.buffer.size >= N {
+            // we have enough bytes to read
+            let end = (read_pos + N) % self.buffer.size;
+            loop {
+                let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+                todo!()
+            }
+        }
+        loop {
+            // let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+            // if read_pos == write_pos {
+            //     if self.buffer.end.load(Ordering::Relaxed) {
+            //         return None;
+            //     } else {
+            //         std::hint::spin_loop();
+            //     }
+            // } else {
+            //     let mut end = write_pos;
+            //     if write_pos < read_pos {
+            //         end += self.buffer.size;
+            //     }
+            //     if end - read_pos < N {
+            //         return None;
+            //     }
+            //     let start = read_pos;
+            //     let end = (read_pos + n) % self.buffer.size;
+            //     self.buffer
+            //         .read_pos
+            //         .store(end % self.buffer.size, Ordering::Relaxed);
+            //     Some(&self.buffer.buffer[start..end])
+            todo!()
+        }
+    }
+}
+
+
+impl Iterator for CharIteratorReceiver<'_> {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<u8> {
+        let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
+
         loop {
             if read_pos == self.buffer.write_pos.load(Ordering::Relaxed) {
                 if self.buffer.end.load(Ordering::Relaxed) {
@@ -185,16 +321,6 @@ impl CharIteratorReceiver<'_> {
                 return Some(byte);
             }
         }
-    }
-}
-
-impl Iterator for CharIteratorReceiver<'_> {
-    type Item = u8;
-
-    fn next(&mut self) -> Option<u8> {
-        let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
-
-        self.next_with_pos(read_pos % usize::MAX)
     }
 }
 
