@@ -2,7 +2,15 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 pub struct CharIteratorReceiver<'a> {
+    pub pos: Position,
     buffer: &'a mut UnsafeBuffer, //mut, so there can't be multiple receivers
+}
+
+
+pub struct Position {
+    pos: usize,
+    line: usize,
+    column: usize,
 }
 
 pub struct CharIteratorSender<'a> {
@@ -81,6 +89,11 @@ impl CharIterator {
         };
 
         let receiver = CharIteratorReceiver {
+            pos: Position {
+                pos: 0,
+                line: 1,
+                column: 1,
+            },
             buffer: unsafe { buffer.as_mut() },
         };
 
@@ -113,6 +126,11 @@ impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
         };
 
         let receiver = CharIteratorReceiver {
+            pos: Position {
+                pos: 0,
+                line: 1,
+                column: 1,
+            },
             buffer: unsafe { buffer.as_mut() },
         };
 
@@ -138,6 +156,11 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
         };
 
         let receiver = CharIteratorReceiver {
+            pos: Position {
+                pos: 0,
+                line: 1,
+                column: 1,
+            },
             buffer: unsafe { buffer.as_mut() },
         };
 
