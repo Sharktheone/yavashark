@@ -2,7 +2,7 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 pub struct CharIteratorReceiver<'a> {
-    pub pos: Position,
+    pos: Position,
     buffer: &'a mut UnsafeBuffer, //mut, so there can't be multiple receivers
 }
 
@@ -170,7 +170,7 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
 
 
 #[allow(clippy::enum_variant_names)]
-enum NextBuffer<'a, const N: usize> {
+pub enum NextBuffer<'a, const N: usize> {
     ///BorrowedRightLen will appear if we have more or exactly N bytes to read and the read pos is before the write_pos
     /// ```text
     ///    read pos             write pos
@@ -187,7 +187,7 @@ enum NextBuffer<'a, const N: usize> {
     /// [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     /// ```
     /// we need to copy bytes 9, 10, 11, 12, 1 to the buffer
-    OwnedRightLen(Box<[u8; N]>),
+    OwnedRightLen([u8; N]),
 
     ///BorrowedWrongLen will appear if we are at the end of an EOF'd buffer where the write_pos is after the read_pos
     /// ```text
@@ -211,7 +211,7 @@ enum NextBuffer<'a, const N: usize> {
 }
 
 impl<const N: usize> NextBuffer<'_, N> {
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         match self {
             NextBuffer::BorrowedRightLen(buf) => buf.len(),
             NextBuffer::OwnedRightLen(buf) => buf.len(),
@@ -222,7 +222,7 @@ impl<const N: usize> NextBuffer<'_, N> {
 }
 
 pub struct NextN<'a, const N: usize> {
-    buffer: NextBuffer<'a, N>,
+    pub buffer: NextBuffer<'a, N>,
     consume: Option<Box<dyn FnOnce() + 'a>>,
 }
 
@@ -237,6 +237,14 @@ impl<const N: usize> Drop for NextN<'_, N> {
 }
 
 impl CharIteratorReceiver<'_> {
+    
+    fn current_pos(&mut self) -> &Position {
+        let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
+        self.pos.pos = read_pos; //pos.pos won't be updated constantly, so we need to update it here
+        &self.pos
+        
+    }
+    
     fn skip_n(&mut self, n: u8) {
         let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
         loop {
@@ -391,7 +399,7 @@ impl CharIteratorReceiver<'_> {
                         //     ↓        ↓               ↓
                         // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-                        let mut buf = Box::new([0u8; N]);
+                        let mut buf = [0u8; N];
 
                         let elem_to_buffer_end = &self.buffer.buffer[read_pos..];
 
