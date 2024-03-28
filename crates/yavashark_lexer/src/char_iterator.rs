@@ -3,8 +3,9 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 pub struct CharIteratorReceiver<'a> {
     pub pos: Position,
-    buffer: &'a UnsafeBuffer,
+    buffer: &'a mut UnsafeBuffer, //mut, so there can't be multiple receivers
 }
+
 
 pub struct Position {
     pos: usize,
@@ -93,7 +94,7 @@ impl CharIterator {
                 line: 1,
                 column: 1,
             },
-            buffer: unsafe { buffer.as_ref() },
+            buffer: unsafe { buffer.as_mut() },
         };
 
         Some((sender, receiver))
@@ -118,7 +119,7 @@ impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), //we don't have the other side
         });
-        let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
+        let Some(mut buffer) = NonNull::new(Box::into_raw(buffer)) else {
             return Err(anyhow::anyhow!(
                 "Failed to allocate buffer for CharIteratorReceiver"
             ));
@@ -130,7 +131,7 @@ impl<'a> TryFrom<String> for CharIteratorReceiver<'a> {
                 line: 1,
                 column: 1,
             },
-            buffer: unsafe { buffer.as_ref() },
+            buffer: unsafe { buffer.as_mut() },
         };
 
         Ok(receiver)
@@ -148,7 +149,7 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), // we don't have the other side
         });
-        let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
+        let Some(mut buffer) = NonNull::new(Box::into_raw(buffer)) else {
             return Err(anyhow::anyhow!(
                 "Failed to allocate buffer for CharIteratorReceiver"
             ));
@@ -160,7 +161,7 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
                 line: 1,
                 column: 1,
             },
-            buffer: unsafe { buffer.as_ref() },
+            buffer: unsafe { buffer.as_mut() },
         };
 
         Ok(receiver)
@@ -263,12 +264,6 @@ impl CharIteratorReceiver<'_> {
         }
     }
 
-    // ///# Safety
-    // /// N must be less than or equal to the buffer size, otherwise this function will always return None
-    // fn next_n_with_pos<const N: usize>(&self, write: usize, read: usize) -> Option{
-    //     
-    // }
-
     /// # Safety
     /// The caller is responsible for ensuring that N is less than or equal to the buffer size, otherwise the caller will pay a performance penalty
     pub fn next_n<const N: usize>(&mut self) -> Option<NextN<N>> {
@@ -305,21 +300,24 @@ impl CharIteratorReceiver<'_> {
                                 NextBuffer::BorrowedWrongLen(buf)
                             }
                         };
-                        return Some(NextN {
-                            buffer,
-                            consume: Some(Box::new(move || {
-                                self.buffer
-                                    .read_pos
-                                    .store(end_pos, Ordering::Relaxed);
-                            })),
-                        });
+                        return {
+                            let self_buf = &self.buffer;
+                            Some(NextN {
+                                buffer,
+                                consume: Some(Box::new(move || {
+                                    self_buf
+                                        .read_pos
+                                        .store(end_pos, Ordering::Relaxed);
+                                })),
+                            })
+                        };
                     } else {
                         if self.buffer.end.load(Ordering::Relaxed) {
                             let end_pos = write_pos - 1;
                             let len = self.buffer.size - read_pos + end_pos;
 
                             let mut buf = vec![0; len].into_boxed_slice();
-                            
+
                             return if read_pos < write_pos {
                                 let buf = &self.buffer.buffer[read_pos..write_pos];
                                 let buf = NextBuffer::BorrowedWrongLen(buf);
@@ -376,7 +374,6 @@ impl CharIteratorReceiver<'_> {
                                     consume: None,
                                 })
                             };
-                            
                         }
                         std::hint::spin_loop();
                     }
