@@ -168,6 +168,7 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
 }
 
 
+#[allow(clippy::enum_variant_names)]
 enum NextBuffer<'a, const N: usize> {
     ///BorrowedRightLen will appear if we have more or exactly N bytes to read and the read pos is before the write_pos
     /// ```text
@@ -208,15 +209,29 @@ enum NextBuffer<'a, const N: usize> {
     OwnedWrongLen(Box<[u8]>),
 }
 
-struct NextN<'a, T: FnOnce(), const N: usize> {
+impl<const N: usize> NextBuffer<'_, N> {
+    fn len(&self) -> usize {
+        match self {
+            NextBuffer::BorrowedRightLen(buf) => buf.len(),
+            NextBuffer::OwnedRightLen(buf) => buf.len(),
+            NextBuffer::BorrowedWrongLen(buf) => buf.len(),
+            NextBuffer::OwnedWrongLen(buf) => buf.len(),
+        }
+    }
+}
+
+pub struct NextN<'a, const N: usize> {
     buffer: NextBuffer<'a, N>,
-    consume: T,
+    consume: Option<Box<dyn FnOnce() + 'a>>,
 }
 
 
-impl<T: FnOnce(), const N: usize> Drop for NextN<'_, T, N> {
+impl<const N: usize> Drop for NextN<'_, N> {
     fn drop(&mut self) {
-        (self.consume)();
+        let consume = self.consume.take();
+        if let Some(consume) = consume {
+            consume();
+        }
     }
 }
 
@@ -256,49 +271,249 @@ impl CharIteratorReceiver<'_> {
 
     /// # Safety
     /// The caller is responsible for ensuring that N is less than or equal to the buffer size, otherwise the caller will pay a performance penalty
-    pub fn next_n<const N: usize>(&mut self) -> Option<NextN<'_, impl FnOnce(), N>> {
+    pub fn next_n<const N: usize>(&mut self) -> Option<NextN<N>> {
         let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
 
         let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
         if read_pos == write_pos && self.buffer.end.load(Ordering::Relaxed) {
-            // return None;
-            todo!()
+            return None;
         }
-        if self.buffer.size >= N {
+        // check if we have enough bytes to read, > because if N is the same as the buffer size, we would end up waiting for bytes to be written, while the writer is waiting to write at the current read pos
+        if self.buffer.size > N {
             // we have enough bytes to read
-            let end = (read_pos + N) % self.buffer.size;
-            loop {
-                let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
-                todo!()
+            let end_pos = (read_pos + N) % self.buffer.size;
+            if end_pos > read_pos {
+                //The end pos is after the read pos
+
+                //   read pos             end pos
+                //     ↓                    ↓
+                // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                //
+                loop {
+                    let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+                    if write_pos > end_pos || write_pos < read_pos {
+                        let buffer = {
+                            let Some(buf) = self.buffer.buffer.get(read_pos..end_pos) else {
+                                //this case should never happen, but if it does, we just return None
+                                return None;
+                            };
+
+                            if let Ok(buf) = <&[u8; N]>::try_from(buf) {
+                                NextBuffer::BorrowedRightLen(buf)
+                            } else {
+                                //this case should never happen, but if it does, we just return the buffer with a different length
+                                NextBuffer::BorrowedWrongLen(buf)
+                            }
+                        };
+                        return Some(NextN {
+                            buffer,
+                            consume: Some(Box::new(move || {
+                                self.buffer
+                                    .read_pos
+                                    .store(end_pos, Ordering::Relaxed);
+                            })),
+                        });
+                    } else {
+                        if self.buffer.end.load(Ordering::Relaxed) {
+                            let end_pos = write_pos - 1;
+                            let len = self.buffer.size - read_pos + end_pos;
+
+                            let mut buf = vec![0; len].into_boxed_slice();
+                            
+                            return if read_pos < write_pos {
+                                let buf = &self.buffer.buffer[read_pos..write_pos];
+                                let buf = NextBuffer::BorrowedWrongLen(buf);
+                                Some(NextN {
+                                    buffer: buf,
+                                    consume: None,
+                                })
+                            } else {
+                                let elem_to_buffer_end = &self.buffer.buffer[read_pos..];
+
+                                // SAFETY: `elem_to_buffer_end` is valid for `elem_to_buffer_end.len()` elements by definition.
+                                // `buf` is valid for `buf.len()` elements by definition, which is ALWAYS more than `elem_to_buffer_end.len()`,
+                                // because we have already checked that `end_pos` is less than `read_pos` and `end_pos` is less than `write_pos`
+                                // self.buffer.size - read_pos + end_pos = len = buf.len()
+                                //^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ↑
+                                // elem_to_buffer_end.len()    PLUS, so there are more elements in buf than elem_to_buffer_end
+                                // elem_to_buffer_end (or self.buffer.buffer) and buf will never overlap since we just allocated buf
+                                unsafe {
+                                    std::ptr::copy_nonoverlapping(
+                                        elem_to_buffer_end.as_ptr(),
+                                        buf.as_mut_ptr(),
+                                        elem_to_buffer_end.len(),
+                                    );
+                                }
+
+                                let buf_to_end_pos = &mut buf[elem_to_buffer_end.len()..];
+                                let elem_to_end_pos = &self.buffer.buffer[..end_pos];
+
+                                // SAFETY: `elem_to_end_pos` is valid for `elem_to_end_pos.len()` elements by definition.
+                                // `buf_to_end_pos` is valid for `buf_to_end_pos.len()` elements by definition, which is ALWAYS the same as `elem_to_end_pos.len()`,
+                                // because we have already copied self.buffer.size - read_pos elements to buf, and we have N - (self.buffer.size - read_pos) elements left
+                                // assume len = 11, read_pos = 8, write_pos = 8, end_pos = 7, buffer.size = 12, N = 13+
+                                // we have copied 4 elements to buf, and we have 12 - 4 = 8 elements left
+                                //                  end  read, write
+                                //                    ↓  ↓
+                                // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                                //  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+                                // elements left         elements copied
+                                // elem_to_end_pos (or self.buffer.buffer) and buf_to_end_pos will never overlap since we just allocated buf
+
+                                unsafe {
+                                    std::ptr::copy_nonoverlapping(
+                                        elem_to_end_pos.as_ptr(),
+                                        buf_to_end_pos.as_mut_ptr(),
+                                        elem_to_end_pos.len(),
+                                    );
+                                }
+
+                                let buf = NextBuffer::OwnedWrongLen(buf);
+                                self.buffer.read_pos.store(end_pos, Ordering::Relaxed);
+
+                                Some(NextN {
+                                    buffer: buf,
+                                    consume: None,
+                                })
+                            };
+                            
+                        }
+                        std::hint::spin_loop();
+                    }
+                }
+            } else {
+                //the end pos is before the read pos, we need to copy the bytes
+                //   end pos             read pos
+                //     ↓                    ↓
+                // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                loop {
+                    let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+                    if write_pos > end_pos && write_pos < read_pos {
+                        //now it looks like this
+                        //   end pos  write pos     read pos
+                        //     ↓        ↓               ↓
+                        // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+
+                        let mut buf = Box::new([0u8; N]);
+
+                        let elem_to_buffer_end = &self.buffer.buffer[read_pos..];
+
+                        // SAFETY: `elem_to_buffer_end` is valid for `elem_to_buffer_end.len()` elements by definition.
+                        // `buf` is valid for `buf.len()` elements by definition, which is ALWAYS more than `elem_to_buffer_end.len()`,
+                        // because we have already checked that `end_pos` is less than `read_pos` and `end_pos` is less than `write_pos`
+                        // which means that self.buffer.size - read_pos + end_pos = N = buf.len()
+                        //                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ↑
+                        //             elem_to_buffer_end.len()        PLUS, so there are more elements in buf than elem_to_buffer_end
+                        // elem_to_buffer_end (or self.buffer.buffer) and buf will never overlap since we just allocated buf
+                        unsafe {
+                            std::ptr::copy_nonoverlapping(
+                                elem_to_buffer_end.as_ptr(),
+                                buf.as_mut_ptr(),
+                                elem_to_buffer_end.len(),
+                            );
+                        }
+
+                        let buf_to_end_pos = &mut buf[elem_to_buffer_end.len()..];
+                        let elem_to_end_pos = &self.buffer.buffer[..end_pos];
+
+                        // SAFETY: `elem_to_end_pos` is valid for `elem_to_end_pos.len()` elements by definition.
+                        // `buf_to_end_pos` is valid for `buf_to_end_pos.len()` elements by definition, which is ALWAYS the same as `elem_to_end_pos.len()`,
+                        // because we have already copied self.buffer.size - read_pos elements to buf, and we have N - (self.buffer.size - read_pos) elements left
+                        // assume N = 6, read_pos = 8, write_pos = 6, end_pos = 2, buffer.size = 12
+                        // we have copied 4 elements to buf, and we have 12 - 4 = 8 elements left
+                        //    end        write   read
+                        //     ↓           ↓     ↓
+                        // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                        //  ^^^^                 ^^^^^^^^^^^^^^^^
+                        // elements left         elements copied
+                        // elem_to_end_pos (or self.buffer.buffer) and buf_to_end_pos will never overlap since we just allocated buf
+
+                        unsafe {
+                            std::ptr::copy_nonoverlapping(
+                                elem_to_end_pos.as_ptr(),
+                                buf_to_end_pos.as_mut_ptr(),
+                                elem_to_end_pos.len(),
+                            );
+                        }
+
+                        let buf = NextBuffer::OwnedRightLen(buf);
+                        self.buffer.read_pos.store(end_pos, Ordering::Relaxed);
+
+                        return Some(NextN {
+                            buffer: buf,
+                            consume: None,
+                        });
+                    } else {
+                        std::hint::spin_loop();
+                    }
+                }
             }
-        }
-        loop {
-            // let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
-            // if read_pos == write_pos {
-            //     if self.buffer.end.load(Ordering::Relaxed) {
-            //         return None;
-            //     } else {
-            //         std::hint::spin_loop();
-            //     }
-            // } else {
-            //     let mut end = write_pos;
-            //     if write_pos < read_pos {
-            //         end += self.buffer.size;
-            //     }
-            //     if end - read_pos < N {
-            //         return None;
-            //     }
-            //     let start = read_pos;
-            //     let end = (read_pos + n) % self.buffer.size;
-            //     self.buffer
-            //         .read_pos
-            //         .store(end % self.buffer.size, Ordering::Relaxed);
-            //     Some(&self.buffer.buffer[start..end])
-            todo!()
+        } else {
+            //we don't have enough bytes to read, so we just wait for write_pos being the same as read_pos
+            //which also means that we will need to copy the bytes
+
+            let end_pos = read_pos - 1;
+            let len = self.buffer.size - 1; //same as self.buffer.size - read_pos + end_pos
+
+            loop {
+                let mut buf = vec![0; len].into_boxed_slice();
+
+                let write_pos = self.buffer.write_pos.load(Ordering::Relaxed);
+                if write_pos == read_pos {
+                    let elem_to_buffer_end = &self.buffer.buffer[read_pos..];
+
+                    // SAFETY: `elem_to_buffer_end` is valid for `elem_to_buffer_end.len()` elements by definition.
+                    // `buf` is valid for `buf.len()` elements by definition, which is ALWAYS more than `elem_to_buffer_end.len()`,
+                    // because we have already checked that `end_pos` is less than `read_pos` and `end_pos` is less than `write_pos`
+                    // self.buffer.size - read_pos + end_pos = len = buf.len()
+                    //^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ↑
+                    // elem_to_buffer_end.len()    PLUS, so there are more elements in buf than elem_to_buffer_end
+                    // elem_to_buffer_end (or self.buffer.buffer) and buf will never overlap since we just allocated buf
+                    unsafe {
+                        std::ptr::copy_nonoverlapping(
+                            elem_to_buffer_end.as_ptr(),
+                            buf.as_mut_ptr(),
+                            elem_to_buffer_end.len(),
+                        );
+                    }
+
+                    let buf_to_end_pos = &mut buf[elem_to_buffer_end.len()..];
+                    let elem_to_end_pos = &self.buffer.buffer[..end_pos];
+
+                    // SAFETY: `elem_to_end_pos` is valid for `elem_to_end_pos.len()` elements by definition.
+                    // `buf_to_end_pos` is valid for `buf_to_end_pos.len()` elements by definition, which is ALWAYS the same as `elem_to_end_pos.len()`,
+                    // because we have already copied self.buffer.size - read_pos elements to buf, and we have N - (self.buffer.size - read_pos) elements left
+                    // assume len = 11, read_pos = 8, write_pos = 8, end_pos = 7, buffer.size = 12, N = 13+
+                    // we have copied 4 elements to buf, and we have 12 - 4 = 8 elements left
+                    //                  end  read, write
+                    //                    ↓  ↓
+                    // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                    //  ^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^
+                    // elements left         elements copied
+                    // elem_to_end_pos (or self.buffer.buffer) and buf_to_end_pos will never overlap since we just allocated buf
+
+                    unsafe {
+                        std::ptr::copy_nonoverlapping(
+                            elem_to_end_pos.as_ptr(),
+                            buf_to_end_pos.as_mut_ptr(),
+                            elem_to_end_pos.len(),
+                        );
+                    }
+
+                    let buf = NextBuffer::OwnedWrongLen(buf);
+                    self.buffer.read_pos.store(end_pos, Ordering::Relaxed);
+
+                    return Some(NextN {
+                        buffer: buf,
+                        consume: None,
+                    });
+                } else {
+                    std::hint::spin_loop();
+                }
+            }
         }
     }
 }
-
 
 impl Iterator for CharIteratorReceiver<'_> {
     type Item = u8;
