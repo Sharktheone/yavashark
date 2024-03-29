@@ -1,32 +1,38 @@
-mod separators;
-pub(crate) mod state;
-
 use crate::char_iterator::CharIteratorReceiver;
 use crate::span::Span;
 
-pub struct Lexer<'a> {
-    input: CharIteratorReceiver<'a>,
+mod separators;
+pub(crate) mod state;
+
+
+struct InternalLexer {
     consumed: String,
     state: state::LexerState,
     current_span: Span,
+}
+
+pub struct Lexer<'a> {
+    input: CharIteratorReceiver<'a>,
+    internal: InternalLexer,
 }
 
 impl<'a> Lexer<'a> {
     pub fn new(input: CharIteratorReceiver<'a>) -> Self {
         Lexer {
             input,
-            consumed: String::new(),
-            state: state::LexerState::None,
-            current_span: Span::new(0, 0),
+            internal: InternalLexer {
+                consumed: String::new(),
+                state: state::LexerState::None,
+                current_span: Span::new(0, 0),
+            },
         }
     }
 
     pub fn lex(&mut self) {
-        for byte in self.input.by_ref() {
-            println!("{}", byte as char);
-        }
+        let input = &mut self.input;
     }
 }
+
 
 impl<'a> TryFrom<String> for Lexer<'a> {
     type Error = anyhow::Error;
