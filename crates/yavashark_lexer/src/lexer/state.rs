@@ -1,7 +1,12 @@
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum LexerState {
     None,
     InComment,
-    InString,
+    InStringSingle,
+    InStringDouble,
+    InStringTemplate,
     InChar,
     InNumber,
 }

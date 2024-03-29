@@ -1,3 +1,5 @@
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Span {
     pub start: usize,
     pub end: usize,
@@ -39,6 +41,11 @@ impl Span {
 
     pub(crate) fn shrink_by(&mut self, amount: usize) {
         self.end -= amount;
+    }
+    
+    
+    pub(crate) fn replace(&mut self) -> Self {
+        std::mem::replace(self, Span::new(0, 0))
     }
 
 }
