@@ -6,8 +6,26 @@ pub struct Punct {
 }
 
 pub enum PunctKind {
-    Colon,
-    Semicolon,
     Comma,
-    // ...
+    Dot,
+    Colon,
+    QuestionMark,
+    ExclamationMark,
+    Semicolon,
+    Equal,
+    Plus,
+    Minus,
+    Asterisk,
+    Slash,
+    And,
+    Percent,
+    Pipe,
+    BracketOpen,
+    BracketClose,
+    ParenthesesOpen,
+    ParenthesesClose,
+    CurlyBraceOpen,
+    CurlyBraceClose,
+    AngleBracketOpen,
+    AngleBracketClose,
 }
