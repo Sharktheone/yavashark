@@ -1,7 +1,7 @@
 use crate::span::Span;
 
 pub struct Keyword {
-    pub keyword: KeywordType,
+    pub ty: KeywordType,
     pub span: Span,
 }
 

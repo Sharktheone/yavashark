@@ -2,6 +2,8 @@ use crate::char_iterator::CharIteratorReceiver;
 use crate::lexer::separators::Separators;
 use crate::lexer::state::LexerState;
 use crate::span::Span;
+use crate::tokens::ident::Ident;
+use crate::tokens::keyword::{Keyword, KeywordType};
 use crate::tokens::lit::{Lit, LitKind};
 use crate::tokens::punct::{Punct, PunctKind};
 use crate::tokens::Token;
@@ -66,14 +68,14 @@ impl Skipper {
             save_hit: false,
         }
     }
-    
+
     fn next(&mut self) -> u8 {
         match &self.to {
             Skip::Single(c) => *c,
             Skip::Multiple(v) => v[self.hit],
         }
     }
-    
+
     fn hit(&mut self) -> bool {
         self.hit += 1;
         match &self.to {
@@ -205,6 +207,8 @@ impl InternalLexer {
                 }
             }
             Separators::Punct(p) => {
+                self.check_consumed()?;
+
                 match &p {
                     PunctKind::Slash => {
                         if self.consumed.last() == Some(&b'/') {
@@ -241,6 +245,43 @@ impl InternalLexer {
             span: self.current_span.replace(),
         }.into());
 
+        Ok(())
+    }
+
+    fn check_consumed(&mut self) -> LexResult {
+        if self.consumed.is_empty() {
+            return Ok(());
+        }
+
+        let symbol = String::from_utf8(self.consumed.clone()).map_err(|e| LexError {
+            span: self.current_span,
+            message: e.to_string(),
+        })?;
+        self.consumed.clear();
+
+
+        if let Some(ty) = KeywordType::from_string(&symbol) {
+            self.tokens.push(Keyword {
+                ty,
+                span: self.current_span.replace(),
+            }.into());
+            return Ok(());
+        }
+
+        //check if symbol is a number
+        if symbol.chars().all(|c| c.is_ascii_digit()) {
+            self.tokens.push(Lit {
+                kind: LitKind::Number,
+                symbol,
+                span: self.current_span.replace(),
+            }.into());
+            return Ok(());
+        }
+
+        self.tokens.push(Ident {
+            ident: symbol,
+            span: self.current_span.replace(),
+        }.into());
         Ok(())
     }
 }
