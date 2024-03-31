@@ -1,18 +1,21 @@
-use crate::tokens::ident::Ident;
-use crate::tokens::keyword::Keyword;
-use crate::tokens::lit::Lit;
-use crate::tokens::punct::Punct;
+use self::ident::Ident;
+use self::keyword::Keyword;
+use self::lit::Lit;
+use self::punct::Punct;
+use self::group::Group;
 
 pub mod ident;
 pub mod keyword;
 pub mod lit;
 pub mod punct;
+pub mod group;
 
 pub enum Token {
     Ident(Ident),
     Lit(Lit),
     Punct(Punct),
     Keyword(Keyword),
+    Group(Group)
 }
 
 
