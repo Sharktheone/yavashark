@@ -20,12 +20,4 @@ pub enum PunctKind {
     And,
     Percent,
     Pipe,
-    BracketOpen,
-    BracketClose,
-    ParenthesesOpen,
-    ParenthesesClose,
-    CurlyBraceOpen,
-    CurlyBraceClose,
-    AngleBracketOpen,
-    AngleBracketClose,
 }
