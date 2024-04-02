@@ -389,7 +389,7 @@ impl InternalLexer {
         if let Some(group) = self.groups.last_mut() {
             group.push(token);
         } else {
-            self.push_token(token);
+            self.tokens.push(token);
         }
     }
 }
