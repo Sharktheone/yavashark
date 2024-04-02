@@ -408,3 +408,17 @@ impl<'a> TryFrom<&str> for Lexer<'a> {
         Ok(Self::new(CharIteratorReceiver::try_from(s)?))
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lex() {
+        let mut lexer = Lexer::try_from("let a = 1;").unwrap();
+        lexer.lex().unwrap();
+        let tokens = lexer.internal.tokens;
+        println!("{:?}", tokens);
+    }
+}
