@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::char_iterator::CharIteratorReceiver;
 use crate::lexer::separators::Separators;
 use crate::lexer::state::LexerState;
@@ -8,7 +10,6 @@ use crate::tokens::keyword::{Keyword, KeywordType};
 use crate::tokens::lit::{Lit, LitKind};
 use crate::tokens::punct::{Punct, PunctKind};
 use crate::tokens::Token;
-use std::fmt::Display;
 
 mod separators;
 pub(crate) mod state;
@@ -37,6 +38,7 @@ struct Skipper {
     hit: usize,
     save: bool,
     save_hit: bool,
+    hit_fn: Option<fn(&mut InternalLexer) -> LexResult>
 }
 
 impl Skipper {
@@ -46,6 +48,7 @@ impl Skipper {
             hit: 0,
             save: true,
             save_hit: false,
+            hit_fn: None,
         }
     }
 
@@ -55,6 +58,7 @@ impl Skipper {
             hit: 0,
             save: false,
             save_hit: false,
+            hit_fn: None,
         }
     }
 
@@ -64,6 +68,7 @@ impl Skipper {
             hit: 0,
             save: true,
             save_hit: false,
+            hit_fn: None,
         }
     }
 
@@ -73,6 +78,7 @@ impl Skipper {
             hit: 0,
             save: false,
             save_hit: false,
+            hit_fn: None,
         }
     }
 
@@ -127,17 +133,22 @@ impl<'a> Lexer<'a> {
 
         for c in input {
             if let Some(skipper) = &mut int.skipper {
-                if c != skipper.next() {
+                if c == skipper.next() {
                     if skipper.save_hit {
                         int.consumed.push(c);
                     }
                     if skipper.hit() {
+                        if let Some(hit_fn) = skipper.hit_fn {
+                            hit_fn(int)?;
+                        }
                         int.skipper = None;
+                        int.current_span.start += 1;
                     }
-                    continue;
                 } else if skipper.save {
                     int.consumed.push(c);
                 }
+                int.current_span.extend();
+                continue
             }
             int.lex_char(c)?;
             int.current_span.extend();
@@ -165,11 +176,6 @@ impl InternalLexer {
         self.check_consumed()?;
         match sep {
             Separators::Quote => {
-                if self.consumed.last() == Some(&b'\\') {
-                    self.consumed.pop();
-                    return Ok(());
-                }
-
                 match self.state {
                     LexerState::InStringTemplate => {
                         self.state = LexerState::None;
@@ -177,16 +183,13 @@ impl InternalLexer {
                     }
                     _ => {
                         self.state = LexerState::InStringSingle;
-                        self.skipper = Some(Skipper::single(b'\''));
+                        let mut skip = Skipper::single(b'\'');
+                        skip.hit_fn = Some(InternalLexer::make_str_lit);
+                        self.skipper = Some(skip);
                     }
                 }
             }
             Separators::DoubleQuote => {
-                if self.consumed.last() == Some(&b'\\') {
-                    self.consumed.pop();
-                    return Ok(());
-                }
-
                 match self.state {
                     LexerState::InStringTemplate => {
                         self.state = LexerState::None;
@@ -194,16 +197,13 @@ impl InternalLexer {
                     }
                     _ => {
                         self.state = LexerState::InStringDouble;
-                        self.skipper = Some(Skipper::single(b'"'));
+                        let mut skip = Skipper::single(b'"');
+                        skip.hit_fn = Some(InternalLexer::make_str_lit);
+                        self.skipper = Some(skip);
                     }
                 }
             }
             Separators::Backtick => {
-                if self.consumed.last() == Some(&b'\\') {
-                    self.consumed.pop();
-                    return Ok(());
-                }
-
                 match self.state {
                     LexerState::InStringTemplate => {
                         self.state = LexerState::None;
@@ -211,12 +211,13 @@ impl InternalLexer {
                     }
                     _ => {
                         self.state = LexerState::InStringTemplate;
-                        self.skipper = Some(Skipper::single(b'`'));
+                        let mut skip = Skipper::single(b'`');
+                        skip.hit_fn = Some(InternalLexer::make_str_lit);
+                        self.skipper = Some(skip);
                     }
                 }
             }
             Separators::Punct(p) => {
-
                 match &p {
                     PunctKind::Slash => {
                         if self.consumed.last() == Some(&b'/') {
@@ -236,11 +237,9 @@ impl InternalLexer {
                 self.push_token(Punct { kind: p, span }.into());
             }
             Separators::ParenthesesOpen => {
-
                 self.groups.push(Group::paren(self.current_span))
             }
             Separators::ParenthesesClose => {
-
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_paren() {
                         return Err(LexError {
@@ -258,11 +257,9 @@ impl InternalLexer {
                 }
             }
             Separators::CurlyBraceOpen => {
-
                 self.groups.push(Group::brace(self.current_span))
             }
             Separators::CurlyBraceClose => {
-
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_brace() {
                         return Err(LexError {
@@ -283,7 +280,6 @@ impl InternalLexer {
                 self.groups.push(Group::bracket(self.current_span))
             }
             Separators::BracketClose => {
-
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_bracket() {
                         return Err(LexError {
@@ -301,11 +297,9 @@ impl InternalLexer {
                 }
             }
             Separators::AngleBracketOpen => {
-
                 self.groups.push(Group::angle_bracket(self.current_span))
             }
             Separators::AngleBracketClose => {
-
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_angle_bracket() {
                         return Err(LexError {
@@ -326,8 +320,8 @@ impl InternalLexer {
                 self.current_span.reset();
             } // ignore Space, NewLine, Tab
         }
-        
-        self.current_span.start +=1;
+
+        self.current_span.start += 1;
 
         Ok(())
     }
@@ -342,7 +336,7 @@ impl InternalLexer {
                 })?,
                 span,
             }
-            .into(),
+                .into(),
         );
 
         Ok(())
@@ -352,7 +346,7 @@ impl InternalLexer {
         if self.consumed.is_empty() {
             return Ok(());
         }
-        
+
         let symbol = String::from_utf8(self.consumed.clone()).map_err(|e| LexError {
             span: self.current_span,
             message: e.to_string(),
@@ -374,7 +368,7 @@ impl InternalLexer {
                     symbol,
                     span,
                 }
-                .into(),
+                    .into(),
             );
             return Ok(());
         }
@@ -385,7 +379,7 @@ impl InternalLexer {
                 ident: symbol,
                 span,
             }
-            .into(),
+                .into(),
         );
         Ok(())
     }
@@ -396,7 +390,26 @@ impl InternalLexer {
         } else {
             self.tokens.push(token);
         }
-        
+    }
+
+    fn make_str_lit(&mut self) -> LexResult {
+        let mut span = self.current_span.replace();
+        span.end -= 1;
+        self.push_token(
+            Lit {
+                kind: LitKind::String,
+                symbol: String::from_utf8(self.consumed.clone()).map_err(|e| LexError {
+                    span,
+                    message: e.to_string(),
+                })?,
+                span,
+            }
+                .into(),
+        );
+        self.consumed.clear();
+
+        Ok(())
+
     }
 }
 
@@ -419,31 +432,60 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_lex() {
+    fn simple() {
         let mut lexer = Lexer::try_from("let a = 1;").unwrap();
         lexer.lex().unwrap();
         let tokens = lexer.internal.tokens;
         assert_eq!(tokens.len(), 5);
-        assert_eq!(tokens[0], Token::Keyword(Keyword{
+        assert_eq!(tokens[0], Token::Keyword(Keyword {
             ty: KeywordType::Let,
             span: Span::new(0, 2),
         }));
-        assert_eq!(tokens[1], Token::Ident(Ident{
+        assert_eq!(tokens[1], Token::Ident(Ident {
             ident: "a".to_string(),
             span: Span::new(4, 4),
         }));
-        assert_eq!(tokens[2], Token::Punct(Punct{
+        assert_eq!(tokens[2], Token::Punct(Punct {
             kind: PunctKind::Equal,
             span: Span::new(6, 6),
         }));
-        assert_eq!(tokens[3], Token::Lit(Lit{
+        assert_eq!(tokens[3], Token::Lit(Lit {
             kind: LitKind::Number,
             symbol: "1".to_string(),
             span: Span::new(8, 8),
         }));
-        assert_eq!(tokens[4], Token::Punct(Punct{
+        assert_eq!(tokens[4], Token::Punct(Punct {
             kind: PunctKind::Semicolon,
             span: Span::new(9, 9),
+        }));
+    }
+
+    #[test]
+    fn string() {
+        let mut lexer = Lexer::try_from(r#"let a = "hello";"#).unwrap();
+        lexer.lex().unwrap();
+        let tokens = lexer.internal.tokens;
+        assert_eq!(tokens.len(), 5);
+        assert_eq!(tokens[0], Token::Keyword(Keyword {
+            ty: KeywordType::Let,
+            span: Span::new(0, 2),
+        }));
+        assert_eq!(tokens[1], Token::Ident(Ident {
+            ident: "a".to_string(),
+            span: Span::new(4, 4),
+        }));
+        assert_eq!(tokens[2], Token::Punct(Punct {
+            kind: PunctKind::Equal,
+            span: Span::new(6, 6),
+        }));
+        assert_eq!(tokens[3], Token::Lit(Lit {
+            kind: LitKind::String,
+            symbol: "hello".to_string(),
+            span: Span::new(9, 13),
+        }));
+        assert_eq!(tokens[4], Token::Punct(Punct {
+            kind: PunctKind::Semicolon,
+            span: Span::new(15, 15),
         }));
     }
 }
