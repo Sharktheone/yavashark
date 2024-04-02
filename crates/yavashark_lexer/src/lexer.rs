@@ -2,6 +2,7 @@ use crate::char_iterator::CharIteratorReceiver;
 use crate::lexer::separators::Separators;
 use crate::lexer::state::LexerState;
 use crate::span::Span;
+use crate::tokens::group::Group;
 use crate::tokens::ident::Ident;
 use crate::tokens::keyword::{Keyword, KeywordType};
 use crate::tokens::lit::{Lit, LitKind};
@@ -89,9 +90,9 @@ struct InternalLexer {
     consumed: Vec<u8>,
     state: LexerState,
     current_span: Span,
-
     tokens: Vec<Token>,
     skipper: Option<Skipper>,
+    groups: Vec<Group>,
 }
 
 pub struct Lexer<'a> {
@@ -109,6 +110,7 @@ impl<'a> Lexer<'a> {
                 current_span: Span::new(0, 0),
                 tokens: Vec::with_capacity(1024),
                 skipper: None,
+                groups: Vec::with_capacity(8),
             },
         }
     }
@@ -224,25 +226,112 @@ impl InternalLexer {
                     }
                     _ => {}
                 }
-                self.tokens.push(Punct {
+                let span = self.current_span.replace();
+                self.push_token(Punct {
                     kind: p,
-                    span: self.current_span.replace(),
+                    span,
                 }.into())
             }
-            _ => {}
+            Separators::ParenthesesOpen => {
+                self.check_consumed()?;
+                
+                self.groups.push(Group::paren(self.current_span))
+            }
+            Separators::ParenthesesClose => {
+                self.check_consumed()?;
+                
+                if let Some(mut group) = self.groups.pop() {
+                    if !group.is_paren() {
+                        return Err(LexError {
+                            span: self.current_span,
+                            message: format!("Expected `)` found `{}`", group.delimiter.get_closing()),
+                        });
+                    }
+                    
+                    group.update_span_end(self.current_span.end);
+
+
+                    self.push_token(group.into());
+                }
+            }
+            Separators::CurlyBraceOpen => {
+                self.check_consumed()?;
+                
+                self.groups.push(Group::brace(self.current_span))
+            }
+            Separators::CurlyBraceClose => {
+                self.check_consumed()?;
+                
+                if let Some(mut group) = self.groups.pop() {
+                    if !group.is_brace() {
+                        return Err(LexError {
+                            span: self.current_span,
+                            message: format!("Expected `{}` found `}}`", group.delimiter.get_closing()),
+                        });
+                    }
+                    
+                    group.update_span_end(self.current_span.end);
+                    
+                    self.push_token(group.into());
+                }
+            }
+            Separators::BracketOpen => {
+                self.check_consumed()?;
+                
+                self.groups.push(Group::bracket(self.current_span))
+            }
+            Separators::BracketClose => {
+                self.check_consumed()?;
+                
+                if let Some(mut group) = self.groups.pop() {
+                    if !group.is_bracket() {
+                        return Err(LexError {
+                            span: self.current_span,
+                            message: format!("Expected `{}` found `]`", group.delimiter.get_closing()),
+                        });
+                    }
+                    
+                    group.update_span_end(self.current_span.end);
+                    
+                    self.push_token(group.into());
+                }
+            }
+            Separators::AngleBracketOpen => {
+                self.check_consumed()?;
+                
+                self.groups.push(Group::angle_bracket(self.current_span))
+            }
+            Separators::AngleBracketClose => {
+                self.check_consumed()?;
+                
+                if let Some(mut group) = self.groups.pop() {
+                    if !group.is_angle_bracket() {
+                        return Err(LexError {
+                            span: self.current_span,
+                            message: format!("Expected `{}` found `>`", group.delimiter.get_closing()),
+                        });
+                    }
+                    
+                    group.update_span_end(self.current_span.end);
+                    
+                    self.push_token(group.into());
+                }
+            }
+            _ => {} // ignore Space, NewLine, Tab
         }
 
 
         Ok(())
     }
     fn make_string(&mut self) -> LexResult {
-        self.tokens.push(Lit {
+        let span = self.current_span.replace();
+        self.push_token(Lit {
             kind: LitKind::String,
             symbol: String::from_utf8(self.consumed.clone()).map_err(|e| LexError {
                 span: self.current_span,
                 message: e.to_string(),
             })?,
-            span: self.current_span.replace(),
+            span,
         }.into());
 
         Ok(())
@@ -261,28 +350,39 @@ impl InternalLexer {
 
 
         if let Some(ty) = KeywordType::from_string(&symbol) {
-            self.tokens.push(Keyword {
+            let span =self.current_span.replace();
+            self.push_token(Keyword {
                 ty,
-                span: self.current_span.replace(),
+                span,
             }.into());
             return Ok(());
         }
 
         //check if symbol is a number
         if symbol.chars().all(|c| c.is_ascii_digit()) {
-            self.tokens.push(Lit {
+            let span = self.current_span.replace();
+            self.push_token(Lit {
                 kind: LitKind::Number,
                 symbol,
-                span: self.current_span.replace(),
+                span,
             }.into());
             return Ok(());
         }
 
-        self.tokens.push(Ident {
+        let span = self.current_span.replace();
+        self.push_token(Ident {
             ident: symbol,
-            span: self.current_span.replace(),
+            span,
         }.into());
         Ok(())
+    }
+    
+    fn push_token(&mut self, token: Token) {
+        if let Some(group) = self.groups.last_mut() {
+            group.push(token);
+        } else {
+            self.push_token(token);
+        }
     }
 }
 

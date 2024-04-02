@@ -43,6 +43,12 @@ impl From<Keyword> for Token {
     }
 }
 
+impl From<Group> for Token {
+    fn from(group: Group) -> Self {
+        Token::Group(group)
+    }
+}
+
 impl Token {
     pub fn is_ident(&self) -> bool {
         matches!(self, Token::Ident(_))
@@ -58,5 +64,9 @@ impl Token {
 
     pub fn is_keyword(&self) -> bool {
         matches!(self, Token::Keyword(_))
+    }
+    
+    pub fn is_group(&self) -> bool {
+        matches!(self, Token::Group(_))
     }
 }
