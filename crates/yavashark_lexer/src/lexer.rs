@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::char_iterator::CharIteratorReceiver;
 use crate::lexer::separators::Separators;
 use crate::lexer::state::LexerState;
@@ -13,9 +14,16 @@ mod separators;
 pub(crate) mod state;
 
 
+#[derive(Debug)]
 pub struct LexError {
     span: Span,
     message: String,
+}
+
+impl Display for LexError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}@{}", self.message, self.span)
+    }
 }
 
 pub type LexResult = Result<(), LexError>;

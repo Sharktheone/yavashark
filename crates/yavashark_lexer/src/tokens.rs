@@ -10,6 +10,7 @@ pub mod lit;
 pub mod punct;
 pub mod group;
 
+#[derive(Debug, Clone)]
 pub enum Token {
     Ident(Ident),
     Lit(Lit),

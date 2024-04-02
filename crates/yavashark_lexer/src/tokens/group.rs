@@ -1,6 +1,8 @@
 use crate::span::Span;
 use crate::tokens::Token;
 
+
+#[derive(Debug, Clone)]
 pub struct Group {
     pub delimiter: Delimiter,
     pub tokens: Vec<Token>,

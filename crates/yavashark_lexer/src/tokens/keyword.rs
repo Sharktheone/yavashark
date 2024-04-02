@@ -1,10 +1,12 @@
 use crate::span::Span;
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Keyword {
     pub ty: KeywordType,
     pub span: Span,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum KeywordType {
     Break,
     Case,

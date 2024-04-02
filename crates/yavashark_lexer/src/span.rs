@@ -1,3 +1,4 @@
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Span {
@@ -48,4 +49,10 @@ impl Span {
         std::mem::replace(self, Span::new(0, 0))
     }
 
+}
+
+impl Display for Span {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "#{}..#{}", self.start, self.end)
+    }
 }
