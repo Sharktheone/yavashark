@@ -31,7 +31,6 @@ impl Span {
         self.end += 1;
     }
 
-
     pub(crate) fn extend_by(&mut self, amount: usize) {
         self.end += amount;
     }
@@ -48,7 +47,7 @@ impl Span {
         self.end -= 1;
         std::mem::replace(self, Span::new(new, new))
     }
-    
+
     pub(crate) fn replace_no_dec(&mut self) -> Self {
         let new = self.end + 1;
         std::mem::replace(self, Span::new(new, new))

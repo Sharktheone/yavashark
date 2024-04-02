@@ -74,12 +74,10 @@ pub enum KeywordType {
 
 impl KeywordType {
     pub fn from_string(str: &str) -> Option<Self> {
-        
-        
         if str.len() < 2 || str.len() > 11 {
             return None;
         }
-        
+
         match str {
             "break" => Some(KeywordType::Break),
             "case" => Some(KeywordType::Case),

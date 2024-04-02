@@ -1,14 +1,14 @@
+use self::group::Group;
 use self::ident::Ident;
 use self::keyword::Keyword;
 use self::lit::Lit;
 use self::punct::Punct;
-use self::group::Group;
 
+pub mod group;
 pub mod ident;
 pub mod keyword;
 pub mod lit;
 pub mod punct;
-pub mod group;
 
 #[derive(Debug, Clone)]
 pub enum Token {
@@ -16,9 +16,8 @@ pub enum Token {
     Lit(Lit),
     Punct(Punct),
     Keyword(Keyword),
-    Group(Group)
+    Group(Group),
 }
-
 
 impl From<Ident> for Token {
     fn from(ident: Ident) -> Self {
@@ -66,7 +65,7 @@ impl Token {
     pub fn is_keyword(&self) -> bool {
         matches!(self, Token::Keyword(_))
     }
-    
+
     pub fn is_group(&self) -> bool {
         matches!(self, Token::Group(_))
     }

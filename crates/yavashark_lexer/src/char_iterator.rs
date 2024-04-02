@@ -6,7 +6,6 @@ pub struct CharIteratorReceiver<'a> {
     buffer: &'a mut UnsafeBuffer, //mut, so there can't be multiple receivers
 }
 
-
 pub struct Position {
     pos: usize,
     line: usize,
@@ -168,7 +167,6 @@ impl<'a> TryFrom<&str> for CharIteratorReceiver<'a> {
     }
 }
 
-
 #[allow(clippy::enum_variant_names)]
 pub enum NextBuffer<'a, const N: usize> {
     ///BorrowedRightLen will appear if we have more or exactly N bytes to read and the read pos is before the write_pos
@@ -226,7 +224,6 @@ pub struct NextN<'a, const N: usize> {
     consume: Option<Box<dyn FnOnce() + 'a>>,
 }
 
-
 impl<const N: usize> Drop for NextN<'_, N> {
     fn drop(&mut self) {
         let consume = self.consume.take();
@@ -237,14 +234,12 @@ impl<const N: usize> Drop for NextN<'_, N> {
 }
 
 impl CharIteratorReceiver<'_> {
-    
     fn current_pos(&mut self) -> &Position {
         let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
         self.pos.pos = read_pos; //pos.pos won't be updated constantly, so we need to update it here
         &self.pos
-        
     }
-    
+
     fn skip_n(&mut self, n: u8) {
         let read_pos = self.buffer.read_pos.load(Ordering::Relaxed);
         loop {
@@ -313,9 +308,7 @@ impl CharIteratorReceiver<'_> {
                             Some(NextN {
                                 buffer,
                                 consume: Some(Box::new(move || {
-                                    self_buf
-                                        .read_pos
-                                        .store(end_pos, Ordering::Relaxed);
+                                    self_buf.read_pos.store(end_pos, Ordering::Relaxed);
                                 })),
                             })
                         };
