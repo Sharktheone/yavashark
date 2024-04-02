@@ -43,14 +43,17 @@ impl Span {
         self.end -= amount;
     }
     pub(crate) fn replace(&mut self) -> Self {
-        let new = self.end + 1;
+        std::mem::replace(self, Span::new(self.end, self.end))
+    }
+
+    pub(crate) fn replace_dec(&mut self) -> Self {
+        let new = self.end;
         self.end -= 1;
         std::mem::replace(self, Span::new(new, new))
     }
-
-    pub(crate) fn replace_no_dec(&mut self) -> Self {
-        let new = self.end + 1;
-        std::mem::replace(self, Span::new(new, new))
+    
+    pub(crate) fn reset(&mut self) {
+        self.start = self.end;
     }
 }
 

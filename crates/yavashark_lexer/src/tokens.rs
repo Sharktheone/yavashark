@@ -10,7 +10,7 @@ pub mod keyword;
 pub mod lit;
 pub mod punct;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Token {
     Ident(Ident),
     Lit(Lit),
