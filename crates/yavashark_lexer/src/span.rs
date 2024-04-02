@@ -43,12 +43,16 @@ impl Span {
     pub(crate) fn shrink_by(&mut self, amount: usize) {
         self.end -= amount;
     }
-    
-    
     pub(crate) fn replace(&mut self) -> Self {
-        std::mem::replace(self, Span::new(0, 0))
+        let new = self.end + 1;
+        self.end -= 1;
+        std::mem::replace(self, Span::new(new, new))
     }
-
+    
+    pub(crate) fn replace_no_dec(&mut self) -> Self {
+        let new = self.end + 1;
+        std::mem::replace(self, Span::new(new, new))
+    }
 }
 
 impl Display for Span {

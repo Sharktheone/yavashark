@@ -142,6 +142,7 @@ impl<'a> Lexer<'a> {
                 }
             }
             int.lex_char(c)?;
+            int.current_span.extend();
         };
 
         Ok(())
@@ -238,7 +239,7 @@ impl InternalLexer {
                 self.push_token(Punct {
                     kind: p,
                     span,
-                }.into())
+                }.into());
             }
             Separators::ParenthesesOpen => {
                 self.check_consumed()?;
@@ -264,12 +265,12 @@ impl InternalLexer {
             }
             Separators::CurlyBraceOpen => {
                 self.check_consumed()?;
-                
+
                 self.groups.push(Group::brace(self.current_span))
             }
             Separators::CurlyBraceClose => {
                 self.check_consumed()?;
-                
+
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_brace() {
                         return Err(LexError {
@@ -277,20 +278,20 @@ impl InternalLexer {
                             message: format!("Expected `{}` found `}}`", group.delimiter.get_closing()),
                         });
                     }
-                    
+
                     group.update_span_end(self.current_span.end);
-                    
+
                     self.push_token(group.into());
                 }
             }
             Separators::BracketOpen => {
                 self.check_consumed()?;
-                
+
                 self.groups.push(Group::bracket(self.current_span))
             }
             Separators::BracketClose => {
                 self.check_consumed()?;
-                
+
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_bracket() {
                         return Err(LexError {
@@ -298,20 +299,20 @@ impl InternalLexer {
                             message: format!("Expected `{}` found `]`", group.delimiter.get_closing()),
                         });
                     }
-                    
+
                     group.update_span_end(self.current_span.end);
-                    
+
                     self.push_token(group.into());
                 }
             }
             Separators::AngleBracketOpen => {
                 self.check_consumed()?;
-                
+
                 self.groups.push(Group::angle_bracket(self.current_span))
             }
             Separators::AngleBracketClose => {
                 self.check_consumed()?;
-                
+
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_angle_bracket() {
                         return Err(LexError {
@@ -319,13 +320,15 @@ impl InternalLexer {
                             message: format!("Expected `{}` found `>`", group.delimiter.get_closing()),
                         });
                     }
-                    
+
                     group.update_span_end(self.current_span.end);
-                    
+
                     self.push_token(group.into());
                 }
             }
-            _ => {} // ignore Space, NewLine, Tab
+            _ => {
+                self.check_consumed()?;
+            } // ignore Space, NewLine, Tab
         }
 
 
