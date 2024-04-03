@@ -127,7 +127,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn lex(&mut self) -> LexResult {
+    pub fn lex(&mut self) -> Result<&Vec<Token>, LexError> {
         let input = &mut self.input;
         let int = &mut self.internal;
 
@@ -154,7 +154,7 @@ impl<'a> Lexer<'a> {
             int.current_span.extend();
         }
 
-        Ok(())
+        Ok(&self.internal.tokens)
     }
 }
 
