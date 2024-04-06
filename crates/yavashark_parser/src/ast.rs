@@ -4,13 +4,13 @@ use slotmap::{DefaultKey, SlotMap};
 type NodeID = DefaultKey;
 
 pub struct AST {
-    nodes: SlotMap<NodeID, Node>,
-    root: NodeID,
+    pub nodes: SlotMap<NodeID, Node>,
+    pub root: NodeID,
 }
 
 pub struct Node {
-    children: Vec<NodeID>,
-    data: NodeData,
+    pub children: Vec<NodeID>,
+    pub data: NodeData,
 }
 
 pub enum NodeData {
