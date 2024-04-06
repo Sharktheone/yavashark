@@ -127,7 +127,7 @@ impl KeywordType {
             "yield" => Some(KeywordType::Yield),
             "any" => {
                 panic!("Contextual keyword 'any' is not supported");
-            },
+            }
             "boolean" => Some(KeywordType::Boolean),
             "constructor" => Some(KeywordType::Constructor),
             "declare" => Some(KeywordType::Declare),

@@ -8,7 +8,6 @@ pub struct FuncData {
     pub body: Block,
 }
 
-
 pub struct ArgType {
     pub name: String,
     pub ty: Type,

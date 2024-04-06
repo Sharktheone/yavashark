@@ -1,5 +1,5 @@
-use slotmap::{DefaultKey, SlotMap};
 use crate::function::FuncData;
+use slotmap::{DefaultKey, SlotMap};
 
 type NodeID = DefaultKey;
 
@@ -8,12 +8,10 @@ pub struct AST {
     root: NodeID,
 }
 
-
 pub struct Node {
     children: Vec<NodeID>,
     data: NodeData,
 }
-
 
 pub enum NodeData {
     Func(FuncData),
@@ -21,10 +19,7 @@ pub enum NodeData {
     Stmt(StatData),
     VarDecl(VarDeclData),
     Enum(EnumData),
-    
 }
-
-
 
 pub struct ExprData {}
 

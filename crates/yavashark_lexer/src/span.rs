@@ -51,7 +51,7 @@ impl Span {
         self.end -= 1;
         std::mem::replace(self, Span::new(new, new))
     }
-    
+
     pub(crate) fn reset(&mut self) {
         self.start = self.end;
     }

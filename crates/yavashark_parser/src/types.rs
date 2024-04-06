@@ -6,4 +6,3 @@ pub enum Type {
     Void,
     Other(String),
 }
-

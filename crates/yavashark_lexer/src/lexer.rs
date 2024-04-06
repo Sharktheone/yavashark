@@ -175,48 +175,42 @@ impl InternalLexer {
     fn separator(&mut self, sep: Separators) -> LexResult {
         self.check_consumed()?;
         match sep {
-            Separators::Quote => {
-                match self.state {
-                    LexerState::InStringTemplate => {
-                        self.state = LexerState::None;
-                        self.make_string()?;
-                    }
-                    _ => {
-                        self.state = LexerState::InStringSingle;
-                        let mut skip = Skipper::single(b'\'');
-                        skip.hit_fn = Some(InternalLexer::make_str_lit);
-                        self.skipper = Some(skip);
-                    }
+            Separators::Quote => match self.state {
+                LexerState::InStringTemplate => {
+                    self.state = LexerState::None;
+                    self.make_string()?;
                 }
-            }
-            Separators::DoubleQuote => {
-                match self.state {
-                    LexerState::InStringTemplate => {
-                        self.state = LexerState::None;
-                        self.make_string()?;
-                    }
-                    _ => {
-                        self.state = LexerState::InStringDouble;
-                        let mut skip = Skipper::single(b'"');
-                        skip.hit_fn = Some(InternalLexer::make_str_lit);
-                        self.skipper = Some(skip);
-                    }
+                _ => {
+                    self.state = LexerState::InStringSingle;
+                    let mut skip = Skipper::single(b'\'');
+                    skip.hit_fn = Some(InternalLexer::make_str_lit);
+                    self.skipper = Some(skip);
                 }
-            }
-            Separators::Backtick => {
-                match self.state {
-                    LexerState::InStringTemplate => {
-                        self.state = LexerState::None;
-                        self.make_string()?;
-                    }
-                    _ => {
-                        self.state = LexerState::InStringTemplate;
-                        let mut skip = Skipper::single(b'`');
-                        skip.hit_fn = Some(InternalLexer::make_str_lit);
-                        self.skipper = Some(skip);
-                    }
+            },
+            Separators::DoubleQuote => match self.state {
+                LexerState::InStringTemplate => {
+                    self.state = LexerState::None;
+                    self.make_string()?;
                 }
-            }
+                _ => {
+                    self.state = LexerState::InStringDouble;
+                    let mut skip = Skipper::single(b'"');
+                    skip.hit_fn = Some(InternalLexer::make_str_lit);
+                    self.skipper = Some(skip);
+                }
+            },
+            Separators::Backtick => match self.state {
+                LexerState::InStringTemplate => {
+                    self.state = LexerState::None;
+                    self.make_string()?;
+                }
+                _ => {
+                    self.state = LexerState::InStringTemplate;
+                    let mut skip = Skipper::single(b'`');
+                    skip.hit_fn = Some(InternalLexer::make_str_lit);
+                    self.skipper = Some(skip);
+                }
+            },
             Separators::Punct(p) => {
                 match &p {
                     PunctKind::Slash => {
@@ -236,9 +230,7 @@ impl InternalLexer {
                 let span = self.current_span.replace();
                 self.push_token(Punct { kind: p, span }.into());
             }
-            Separators::ParenthesesOpen => {
-                self.groups.push(Group::paren(self.current_span))
-            }
+            Separators::ParenthesesOpen => self.groups.push(Group::paren(self.current_span)),
             Separators::ParenthesesClose => {
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_paren() {
@@ -256,9 +248,7 @@ impl InternalLexer {
                     self.push_token(group.into());
                 }
             }
-            Separators::CurlyBraceOpen => {
-                self.groups.push(Group::brace(self.current_span))
-            }
+            Separators::CurlyBraceOpen => self.groups.push(Group::brace(self.current_span)),
             Separators::CurlyBraceClose => {
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_brace() {
@@ -276,9 +266,7 @@ impl InternalLexer {
                     self.push_token(group.into());
                 }
             }
-            Separators::BracketOpen => {
-                self.groups.push(Group::bracket(self.current_span))
-            }
+            Separators::BracketOpen => self.groups.push(Group::bracket(self.current_span)),
             Separators::BracketClose => {
                 if let Some(mut group) = self.groups.pop() {
                     if !group.is_bracket() {
@@ -336,7 +324,7 @@ impl InternalLexer {
                 })?,
                 span,
             }
-                .into(),
+            .into(),
         );
 
         Ok(())
@@ -368,7 +356,7 @@ impl InternalLexer {
                     symbol,
                     span,
                 }
-                    .into(),
+                .into(),
             );
             return Ok(());
         }
@@ -379,7 +367,7 @@ impl InternalLexer {
                 ident: symbol,
                 span,
             }
-                .into(),
+            .into(),
         );
         Ok(())
     }
@@ -404,7 +392,7 @@ impl InternalLexer {
                 })?,
                 span,
             }
-                .into(),
+            .into(),
         );
         self.consumed.clear();
 
@@ -438,27 +426,42 @@ mod tests {
         lexer.lex().unwrap();
         let tokens = lexer.internal.tokens;
         assert_eq!(tokens.len(), 5);
-        assert_eq!(tokens[0], Token::Keyword(Keyword {
-            ty: KeywordType::Let,
-            span: Span::new(0, 2),
-        }));
-        assert_eq!(tokens[1], Token::Ident(Ident {
-            ident: "a".to_string(),
-            span: Span::new(4, 4),
-        }));
-        assert_eq!(tokens[2], Token::Punct(Punct {
-            kind: PunctKind::Equal,
-            span: Span::new(6, 6),
-        }));
-        assert_eq!(tokens[3], Token::Lit(Lit {
-            kind: LitKind::Number,
-            symbol: "1".to_string(),
-            span: Span::new(8, 8),
-        }));
-        assert_eq!(tokens[4], Token::Punct(Punct {
-            kind: PunctKind::Semicolon,
-            span: Span::new(9, 9),
-        }));
+        assert_eq!(
+            tokens[0],
+            Token::Keyword(Keyword {
+                ty: KeywordType::Let,
+                span: Span::new(0, 2),
+            })
+        );
+        assert_eq!(
+            tokens[1],
+            Token::Ident(Ident {
+                ident: "a".to_string(),
+                span: Span::new(4, 4),
+            })
+        );
+        assert_eq!(
+            tokens[2],
+            Token::Punct(Punct {
+                kind: PunctKind::Equal,
+                span: Span::new(6, 6),
+            })
+        );
+        assert_eq!(
+            tokens[3],
+            Token::Lit(Lit {
+                kind: LitKind::Number,
+                symbol: "1".to_string(),
+                span: Span::new(8, 8),
+            })
+        );
+        assert_eq!(
+            tokens[4],
+            Token::Punct(Punct {
+                kind: PunctKind::Semicolon,
+                span: Span::new(9, 9),
+            })
+        );
     }
 
     #[test]
@@ -467,43 +470,64 @@ mod tests {
         lexer.lex().unwrap();
         let tokens = lexer.internal.tokens;
         assert_eq!(tokens.len(), 5);
-        assert_eq!(tokens[0], Token::Keyword(Keyword {
-            ty: KeywordType::Let,
-            span: Span::new(0, 2),
-        }));
-        assert_eq!(tokens[1], Token::Ident(Ident {
-            ident: "a".to_string(),
-            span: Span::new(4, 4),
-        }));
-        assert_eq!(tokens[2], Token::Punct(Punct {
-            kind: PunctKind::Equal,
-            span: Span::new(6, 6),
-        }));
-        assert_eq!(tokens[3], Token::Lit(Lit {
-            kind: LitKind::String,
-            symbol: "hello".to_string(),
-            span: Span::new(9, 13),
-        }));
-        assert_eq!(tokens[4], Token::Punct(Punct {
-            kind: PunctKind::Semicolon,
-            span: Span::new(15, 15),
-        }));
+        assert_eq!(
+            tokens[0],
+            Token::Keyword(Keyword {
+                ty: KeywordType::Let,
+                span: Span::new(0, 2),
+            })
+        );
+        assert_eq!(
+            tokens[1],
+            Token::Ident(Ident {
+                ident: "a".to_string(),
+                span: Span::new(4, 4),
+            })
+        );
+        assert_eq!(
+            tokens[2],
+            Token::Punct(Punct {
+                kind: PunctKind::Equal,
+                span: Span::new(6, 6),
+            })
+        );
+        assert_eq!(
+            tokens[3],
+            Token::Lit(Lit {
+                kind: LitKind::String,
+                symbol: "hello".to_string(),
+                span: Span::new(9, 13),
+            })
+        );
+        assert_eq!(
+            tokens[4],
+            Token::Punct(Punct {
+                kind: PunctKind::Semicolon,
+                span: Span::new(15, 15),
+            })
+        );
     }
 
     #[test]
     fn groups() {
-        let mut lexer = Lexer::try_from(r#"
+        let mut lexer = Lexer::try_from(
+            r#"
 function() {let a = "hello";}
 let b = {a: 1};
-"#).unwrap();
+"#,
+        )
+        .unwrap();
         lexer.lex().unwrap();
         let tokens = lexer.internal.tokens;
         println!("{:?}", tokens);
         assert_eq!(tokens.len(), 8);
-        assert_eq!(tokens[0], Token::Keyword(Keyword {
-            ty: KeywordType::Function,
-            span: Span::new(1, 8),
-        }));
+        assert_eq!(
+            tokens[0],
+            Token::Keyword(Keyword {
+                ty: KeywordType::Function,
+                span: Span::new(1, 8),
+            })
+        );
         if let Token::Group(group) = &tokens[1] {
             assert_eq!(group.delimiter, Delimiter::Parenthesis);
             assert_eq!(group.tokens.len(), 0);
@@ -516,83 +540,125 @@ let b = {a: 1};
             assert_eq!(group.delimiter, Delimiter::Brace);
             assert_eq!(group.tokens.len(), 5);
             assert_eq!(group.span, Span::new(12, 29));
-            assert_eq!(group.tokens[0], Token::Keyword(Keyword {
-                ty: KeywordType::Let,
-                span: Span::new(13, 15),
-            }));
-            assert_eq!(group.tokens[1], Token::Ident(Ident {
-                ident: "a".to_string(),
-                span: Span::new(17, 17),
-            }));
-            assert_eq!(group.tokens[2], Token::Punct(Punct {
-                kind: PunctKind::Equal,
-                span: Span::new(19, 19),
-            }));
-            assert_eq!(group.tokens[3], Token::Lit(Lit {
-                kind: LitKind::String,
-                symbol: "hello".to_string(),
-                span: Span::new(22, 26),
-            }));
-            assert_eq!(group.tokens[4], Token::Punct(Punct {
-                kind: PunctKind::Semicolon,
-                span: Span::new(28, 28),
-            }));
+            assert_eq!(
+                group.tokens[0],
+                Token::Keyword(Keyword {
+                    ty: KeywordType::Let,
+                    span: Span::new(13, 15),
+                })
+            );
+            assert_eq!(
+                group.tokens[1],
+                Token::Ident(Ident {
+                    ident: "a".to_string(),
+                    span: Span::new(17, 17),
+                })
+            );
+            assert_eq!(
+                group.tokens[2],
+                Token::Punct(Punct {
+                    kind: PunctKind::Equal,
+                    span: Span::new(19, 19),
+                })
+            );
+            assert_eq!(
+                group.tokens[3],
+                Token::Lit(Lit {
+                    kind: LitKind::String,
+                    symbol: "hello".to_string(),
+                    span: Span::new(22, 26),
+                })
+            );
+            assert_eq!(
+                group.tokens[4],
+                Token::Punct(Punct {
+                    kind: PunctKind::Semicolon,
+                    span: Span::new(28, 28),
+                })
+            );
         } else {
             panic!("Expected group");
         }
 
-        assert_eq!(tokens[3], Token::Keyword(Keyword {
-            ty: KeywordType::Let,
-            span: Span::new(31, 33),
-        }));
-        assert_eq!(tokens[4], Token::Ident(Ident {
-            ident: "b".to_string(),
-            span: Span::new(35, 35),
-        }));
-        assert_eq!(tokens[5], Token::Punct(Punct {
-            kind: PunctKind::Equal,
-            span: Span::new(37, 37),
-        }));
+        assert_eq!(
+            tokens[3],
+            Token::Keyword(Keyword {
+                ty: KeywordType::Let,
+                span: Span::new(31, 33),
+            })
+        );
+        assert_eq!(
+            tokens[4],
+            Token::Ident(Ident {
+                ident: "b".to_string(),
+                span: Span::new(35, 35),
+            })
+        );
+        assert_eq!(
+            tokens[5],
+            Token::Punct(Punct {
+                kind: PunctKind::Equal,
+                span: Span::new(37, 37),
+            })
+        );
         if let Token::Group(group) = &tokens[6] {
             assert_eq!(group.delimiter, Delimiter::Brace);
             assert_eq!(group.tokens.len(), 3);
             assert_eq!(group.span, Span::new(39, 44));
-            assert_eq!(group.tokens[0], Token::Ident(Ident {
-                ident: "a".to_string(),
-                span: Span::new(40, 40),
-            }));
-            assert_eq!(group.tokens[1], Token::Punct(Punct {
-                kind: PunctKind::Colon,
-                span: Span::new(41, 41),
-            }));
-            assert_eq!(group.tokens[2], Token::Lit(Lit {
-                kind: LitKind::Number,
-                symbol: "1".to_string(),
-                span: Span::new(43, 43),
-            }));
+            assert_eq!(
+                group.tokens[0],
+                Token::Ident(Ident {
+                    ident: "a".to_string(),
+                    span: Span::new(40, 40),
+                })
+            );
+            assert_eq!(
+                group.tokens[1],
+                Token::Punct(Punct {
+                    kind: PunctKind::Colon,
+                    span: Span::new(41, 41),
+                })
+            );
+            assert_eq!(
+                group.tokens[2],
+                Token::Lit(Lit {
+                    kind: LitKind::Number,
+                    symbol: "1".to_string(),
+                    span: Span::new(43, 43),
+                })
+            );
         } else {
             panic!("Expected group");
         }
-        assert_eq!(tokens[7], Token::Punct(Punct {
-            kind: PunctKind::Semicolon,
-            span: Span::new(45, 45),
-        }));
+        assert_eq!(
+            tokens[7],
+            Token::Punct(Punct {
+                kind: PunctKind::Semicolon,
+                span: Span::new(45, 45),
+            })
+        );
     }
 
     #[test]
     fn nested_groups() {
-        let mut lexer = Lexer::try_from(r#"
+        let mut lexer = Lexer::try_from(
+            r#"
 function() {let a = {x: "hello"};}
 let b = {a: {b: 1}};
-"#).unwrap();
+"#,
+        )
+        .unwrap();
         lexer.lex().unwrap();
         let tokens = lexer.internal.tokens;
         // println!("{:#?}", tokens);
         assert_eq!(tokens.len(), 8);
-        assert_eq!(tokens[0], Token::Keyword(Keyword {
-            ty: KeywordType::Function,
-            span: Span::new(1, 8),
-        }));
+        assert_eq!(
+            tokens[0],
+            Token::Keyword(Keyword {
+                ty: KeywordType::Function,
+                span: Span::new(1, 8),
+            })
+        );
         if let Token::Group(group) = &tokens[1] {
             assert_eq!(group.delimiter, Delimiter::Parenthesis);
             assert_eq!(group.tokens.len(), 0);
@@ -605,96 +671,144 @@ let b = {a: {b: 1}};
             assert_eq!(group.delimiter, Delimiter::Brace);
             assert_eq!(group.tokens.len(), 5);
             assert_eq!(group.span, Span::new(12, 34));
-            assert_eq!(group.tokens[0], Token::Keyword(Keyword {
-                ty: KeywordType::Let,
-                span: Span::new(13, 15),
-            }));
-            assert_eq!(group.tokens[1], Token::Ident(Ident {
-                ident: "a".to_string(),
-                span: Span::new(17, 17),
-            }));
-            assert_eq!(group.tokens[2], Token::Punct(Punct {
-                kind: PunctKind::Equal,
-                span: Span::new(19, 19),
-            }));
+            assert_eq!(
+                group.tokens[0],
+                Token::Keyword(Keyword {
+                    ty: KeywordType::Let,
+                    span: Span::new(13, 15),
+                })
+            );
+            assert_eq!(
+                group.tokens[1],
+                Token::Ident(Ident {
+                    ident: "a".to_string(),
+                    span: Span::new(17, 17),
+                })
+            );
+            assert_eq!(
+                group.tokens[2],
+                Token::Punct(Punct {
+                    kind: PunctKind::Equal,
+                    span: Span::new(19, 19),
+                })
+            );
             if let Token::Group(group) = &group.tokens[3] {
                 assert_eq!(group.delimiter, Delimiter::Brace);
                 assert_eq!(group.tokens.len(), 3);
                 assert_eq!(group.span, Span::new(21, 32));
-                assert_eq!(group.tokens[0], Token::Ident(Ident {
-                    ident: "x".to_string(),
-                    span: Span::new(22, 22),
-                }));
-                assert_eq!(group.tokens[1], Token::Punct(Punct {
-                    kind: PunctKind::Colon,
-                    span: Span::new(23, 23),
-                }));
-                assert_eq!(group.tokens[2], Token::Lit(Lit {
-                    kind: LitKind::String,
-                    symbol: "hello".to_string(),
-                    span: Span::new(26, 30),
-                }));
+                assert_eq!(
+                    group.tokens[0],
+                    Token::Ident(Ident {
+                        ident: "x".to_string(),
+                        span: Span::new(22, 22),
+                    })
+                );
+                assert_eq!(
+                    group.tokens[1],
+                    Token::Punct(Punct {
+                        kind: PunctKind::Colon,
+                        span: Span::new(23, 23),
+                    })
+                );
+                assert_eq!(
+                    group.tokens[2],
+                    Token::Lit(Lit {
+                        kind: LitKind::String,
+                        symbol: "hello".to_string(),
+                        span: Span::new(26, 30),
+                    })
+                );
             } else {
                 panic!("Expected group");
             }
-            assert_eq!(group.tokens[4], Token::Punct(Punct {
-                kind: PunctKind::Semicolon,
-                span: Span::new(33, 33),
-            }));
+            assert_eq!(
+                group.tokens[4],
+                Token::Punct(Punct {
+                    kind: PunctKind::Semicolon,
+                    span: Span::new(33, 33),
+                })
+            );
         } else {
             panic!("Expected group");
         }
 
-        assert_eq!(tokens[3], Token::Keyword(Keyword {
-            ty: KeywordType::Let,
-            span: Span::new(36, 38),
-        }));
-        assert_eq!(tokens[4], Token::Ident(Ident {
-            ident: "b".to_string(),
-            span: Span::new(40, 40),
-        }));
-        assert_eq!(tokens[5], Token::Punct(Punct {
-            kind: PunctKind::Equal,
-            span: Span::new(42, 42),
-        }));
+        assert_eq!(
+            tokens[3],
+            Token::Keyword(Keyword {
+                ty: KeywordType::Let,
+                span: Span::new(36, 38),
+            })
+        );
+        assert_eq!(
+            tokens[4],
+            Token::Ident(Ident {
+                ident: "b".to_string(),
+                span: Span::new(40, 40),
+            })
+        );
+        assert_eq!(
+            tokens[5],
+            Token::Punct(Punct {
+                kind: PunctKind::Equal,
+                span: Span::new(42, 42),
+            })
+        );
         if let Token::Group(group) = &tokens[6] {
             assert_eq!(group.delimiter, Delimiter::Brace);
             assert_eq!(group.tokens.len(), 3);
             assert_eq!(group.span, Span::new(44, 54));
-            assert_eq!(group.tokens[0], Token::Ident(Ident {
-                ident: "a".to_string(),
-                span: Span::new(45, 45),
-            }));
-            assert_eq!(group.tokens[1], Token::Punct(Punct {
-                kind: PunctKind::Colon,
-                span: Span::new(46, 46),
-            }));
+            assert_eq!(
+                group.tokens[0],
+                Token::Ident(Ident {
+                    ident: "a".to_string(),
+                    span: Span::new(45, 45),
+                })
+            );
+            assert_eq!(
+                group.tokens[1],
+                Token::Punct(Punct {
+                    kind: PunctKind::Colon,
+                    span: Span::new(46, 46),
+                })
+            );
             if let Token::Group(group) = &group.tokens[2] {
                 assert_eq!(group.delimiter, Delimiter::Brace);
                 assert_eq!(group.tokens.len(), 3);
                 assert_eq!(group.span, Span::new(48, 53));
-                assert_eq!(group.tokens[0], Token::Ident(Ident {
-                    ident: "b".to_string(),
-                    span: Span::new(49, 49),
-                }));
-                assert_eq!(group.tokens[1], Token::Punct(Punct {
-                    kind: PunctKind::Colon,
-                    span: Span::new(50, 50),
-                }));
-                assert_eq!(group.tokens[2], Token::Lit(Lit {
-                    kind: LitKind::Number,
-                    symbol: "1".to_string(),
-                    span: Span::new(52, 52),
-                }));
+                assert_eq!(
+                    group.tokens[0],
+                    Token::Ident(Ident {
+                        ident: "b".to_string(),
+                        span: Span::new(49, 49),
+                    })
+                );
+                assert_eq!(
+                    group.tokens[1],
+                    Token::Punct(Punct {
+                        kind: PunctKind::Colon,
+                        span: Span::new(50, 50),
+                    })
+                );
+                assert_eq!(
+                    group.tokens[2],
+                    Token::Lit(Lit {
+                        kind: LitKind::Number,
+                        symbol: "1".to_string(),
+                        span: Span::new(52, 52),
+                    })
+                );
             } else {
                 panic!("Expected group");
             }
         } else {
             panic!("Expected group");
         }
-        assert_eq!(tokens[7], Token::Punct(Punct {
-            kind: PunctKind::Semicolon,
-            span: Span::new(55, 55),
-        }));
+        assert_eq!(
+            tokens[7],
+            Token::Punct(Punct {
+                kind: PunctKind::Semicolon,
+                span: Span::new(55, 55),
+            })
+        );
     }
 }
