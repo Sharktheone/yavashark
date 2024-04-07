@@ -1,3 +1,3 @@
-pub struct Block {
+pub struct BlockData {
     //TODO: Implement Block struct
 }

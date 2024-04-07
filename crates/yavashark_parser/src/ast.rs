@@ -1,5 +1,6 @@
 use crate::function::FuncData;
 use slotmap::{DefaultKey, SlotMap};
+use crate::block::BlockData;
 
 type NodeID = DefaultKey;
 
@@ -19,6 +20,7 @@ pub enum NodeData {
     Stmt(StatData),
     VarDecl(VarDeclData),
     Enum(EnumData),
+    Block(BlockData),
 }
 
 pub struct ExprData {}
