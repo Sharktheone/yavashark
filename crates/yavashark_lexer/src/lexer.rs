@@ -107,13 +107,13 @@ struct InternalLexer {
     groups: Vec<Group>,
 }
 
-pub struct Lexer<'a> {
-    input: CharIteratorReceiver<'a>,
+pub struct Lexer {
+    input: CharIteratorReceiver,
     internal: InternalLexer,
 }
 
-impl<'a> Lexer<'a> {
-    pub fn new(input: CharIteratorReceiver<'a>) -> Self {
+impl Lexer {
+    pub fn new(input: CharIteratorReceiver) -> Self {
         Lexer {
             input,
             internal: InternalLexer {
@@ -400,14 +400,14 @@ impl InternalLexer {
     }
 }
 
-impl<'a> TryFrom<String> for Lexer<'a> {
+impl TryFrom<String> for Lexer {
     type Error = anyhow::Error;
     fn try_from(s: String) -> anyhow::Result<Self> {
         Ok(Self::new(CharIteratorReceiver::try_from(s)?))
     }
 }
 
-impl<'a> TryFrom<&str> for Lexer<'a> {
+impl TryFrom<&str> for Lexer {
     type Error = anyhow::Error;
     fn try_from(s: &str) -> anyhow::Result<Self> {
         Ok(Self::new(CharIteratorReceiver::try_from(s)?))
