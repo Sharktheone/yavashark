@@ -524,7 +524,7 @@ impl Iterator for CharIteratorReceiver {
 
     fn next(&mut self) -> Option<u8> {
         let buffer = unsafe { &*self.buffer };
-        let read_pos = buffer.read_pos.load(Ordering::Relaxed);
+        let read_pos = buffer.read_pos.load(Ordering::Relaxed) % usize::MAX;
 
         loop {
             if read_pos == buffer.write_pos.load(Ordering::Relaxed) {
