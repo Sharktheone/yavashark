@@ -29,7 +29,7 @@ impl Drop for CharIteratorSender {
         };
 
         if res.is_err() {
-            let buffer = unsafe { Box::from_raw(self.buffer as *mut _) };
+            let buffer = unsafe { Box::from_raw(self.buffer) };
             drop(buffer);
         }
     }
@@ -48,7 +48,7 @@ impl Drop for CharIteratorReceiver {
 
         if res.is_err() {
             let buffer =
-                unsafe { Box::from_raw(self.buffer as *const UnsafeBuffer as *mut UnsafeBuffer) };
+                unsafe { Box::from_raw(self.buffer) };
             drop(buffer);
         }
     }
