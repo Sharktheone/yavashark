@@ -1,4 +1,3 @@
-use std::ptr::NonNull;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 pub struct CharIteratorReceiver {
@@ -85,10 +84,10 @@ impl CharIterator {
     #[allow(clippy::new_ret_no_self)]
     pub fn new() -> Option<(CharIteratorSender, CharIteratorReceiver)> {
         let buffer = Box::new(UnsafeBuffer::new(1024));
-        let buffer = NonNull::new(Box::into_raw(buffer))?;
+        let buffer = Box::into_raw(buffer);
 
         let sender = CharIteratorSender {
-            buffer: buffer.as_ptr(),
+            buffer,
         };
 
         let receiver = CharIteratorReceiver {
@@ -97,7 +96,7 @@ impl CharIterator {
                 line: 1,
                 column: 1,
             },
-            buffer: buffer.as_ptr(),
+            buffer,
         };
 
         Some((sender, receiver))
@@ -122,19 +121,15 @@ impl TryFrom<String> for CharIteratorReceiver {
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), //we don't have the other side
         });
-        let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
-            return Err(anyhow::anyhow!(
-                "Failed to allocate buffer for CharIteratorReceiver"
-            ));
-        };
-
+        let buffer = Box::into_raw(buffer);
+        
         let receiver = CharIteratorReceiver {
             pos: Position {
                 pos: 0,
                 line: 1,
                 column: 1,
             },
-            buffer: buffer.as_ptr(),
+            buffer,
         };
 
         Ok(receiver)
@@ -152,19 +147,15 @@ impl TryFrom<&str> for CharIteratorReceiver {
             end: AtomicBool::new(true),
             other_dropped: AtomicBool::new(true), // we don't have the other side
         });
-        let Some(buffer) = NonNull::new(Box::into_raw(buffer)) else {
-            return Err(anyhow::anyhow!(
-                "Failed to allocate buffer for CharIteratorReceiver"
-            ));
-        };
 
+        let buffer = Box::into_raw(buffer);
         let receiver = CharIteratorReceiver {
             pos: Position {
                 pos: 0,
                 line: 1,
                 column: 1,
             },
-            buffer: buffer.as_ptr(),
+            buffer,
         };
 
         Ok(receiver)
