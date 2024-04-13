@@ -1,9 +1,10 @@
 //! 14 ECMAScript Language; Statements and *Declarations*
 
-pub enum Declaration { // Yield, Await
+pub enum Declaration {
+    // Yield, Await
     HoistableDecl(HoistableDecl), // ?Yield, ?Await, ~Default
-    ClassDecl(ClassDecl), // ?Yield, ?Await, ~Default
-    LexicalDecl(LexicalDecl), // +In ?Yield, ?Await
+    ClassDecl(ClassDecl),         // ?Yield, ?Await, ~Default
+    LexicalDecl(LexicalDecl),     // +In ?Yield, ?Await
 }
 
 pub struct HoistableDecl {
@@ -18,7 +19,8 @@ pub struct LexicalDecl {
     // declaration: LexicalDeclaration,
 }
 
-pub enum HoistableDeclaration { // Yield, Await, Default
+pub enum HoistableDeclaration {
+    // Yield, Await, Default
     FunctionDeclaration(FunctionDeclaration), // ?Yield, ?Await, ?Default
     GeneratorDeclaration(GeneratorDeclaration), // ?Yield, ?Await, ?Default
     AsyncFunctionDeclaration(AsyncFunctionDeclaration), // ?Yield, ?Await, ?Default

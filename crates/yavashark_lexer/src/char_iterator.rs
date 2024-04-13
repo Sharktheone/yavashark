@@ -46,8 +46,7 @@ impl Drop for CharIteratorReceiver {
         };
 
         if res.is_err() {
-            let buffer =
-                unsafe { Box::from_raw(self.buffer) };
+            let buffer = unsafe { Box::from_raw(self.buffer) };
             drop(buffer);
         }
     }
@@ -86,9 +85,7 @@ impl CharIterator {
         let buffer = Box::new(UnsafeBuffer::new(1024));
         let buffer = Box::into_raw(buffer);
 
-        let sender = CharIteratorSender {
-            buffer,
-        };
+        let sender = CharIteratorSender { buffer };
 
         let receiver = CharIteratorReceiver {
             pos: Position {
@@ -122,7 +119,7 @@ impl TryFrom<String> for CharIteratorReceiver {
             other_dropped: AtomicBool::new(true), //we don't have the other side
         });
         let buffer = Box::into_raw(buffer);
-        
+
         let receiver = CharIteratorReceiver {
             pos: Position {
                 pos: 0,

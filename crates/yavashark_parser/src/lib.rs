@@ -1,9 +1,9 @@
 pub mod ast;
 mod block;
-mod function;
-mod types;
-mod statement;
 mod declaration;
+mod function;
+mod statement;
+mod types;
 
 use yavashark_lexer::tokens::Token;
 
