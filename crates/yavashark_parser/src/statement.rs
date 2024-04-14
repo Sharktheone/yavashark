@@ -24,7 +24,7 @@ use labelled::LabelledStatement;
 use throw::ThrowStatement;
 use r#try::TryStatement;
 
-enum Statement {
+pub enum Statement {
     // Yield, Await, Return
     BlockStatement(BlockStatement),       // ?Yield, ?Await, ?Return
     VariableStatement(VariableStatement), // ?Yield, ?Await
