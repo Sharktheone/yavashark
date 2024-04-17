@@ -2,7 +2,7 @@ use crate::declaration::Declaration;
 use crate::statement::Statement;
 
 pub struct Block {
-    statements: Vec<StatementList>
+    statements: Vec<StatementList>,
 }
 
 struct StatementList {

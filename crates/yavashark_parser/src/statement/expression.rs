@@ -1,3 +1,1 @@
-pub struct ExpressionStatement {
-    
-}
+pub struct ExpressionStatement {}

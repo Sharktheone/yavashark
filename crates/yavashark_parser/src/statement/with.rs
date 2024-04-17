@@ -1,3 +1,1 @@
-pub struct WithStatement {
-    
-}
+pub struct WithStatement {}

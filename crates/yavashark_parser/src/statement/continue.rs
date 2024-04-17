@@ -1,3 +1,2 @@
- pub struct ContinueStatement {
-    
-}
+
+pub struct ContinueStatement {}

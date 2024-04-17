@@ -1,3 +1,1 @@
-pub struct TryStatement {
-    
-}
+pub struct TryStatement {}

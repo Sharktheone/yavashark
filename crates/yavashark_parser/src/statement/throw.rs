@@ -1,3 +1,1 @@
-pub struct ThrowStatement {
-    
-}
+pub struct ThrowStatement {}

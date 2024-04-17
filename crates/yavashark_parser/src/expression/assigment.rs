@@ -10,24 +10,24 @@ pub enum AssigmentExpression {
 }
 
 pub enum LeftHandSideExpression {
-    Equal(Box<AssigmentExpression>), // =
+    Equal(Box<AssigmentExpression>),                        // =
     Operator(AssignmentOperator, Box<AssigmentExpression>), // +=, -=, *=, /=, %=, **=, <<=, >>=, >>>=, &=, ^=, |=
-    AndAndEqual(Box<AssigmentExpression>), // &&=
-    OrOrEqual(Box<AssigmentExpression>), // ||=
-    QuestionQuestionEqual(Box<AssigmentExpression>), // ??=
+    AndAndEqual(Box<AssigmentExpression>),                  // &&=
+    OrOrEqual(Box<AssigmentExpression>),                    // ||=
+    QuestionQuestionEqual(Box<AssigmentExpression>),        // ??=
 }
 
 pub enum AssignmentOperator {
-    Asterisk, // *=
-    Slash, // /=
-    Percent, // %=
-    Plus, // +=
-    Minus, // -=
-    LessLess, // <<=
-    GreaterGreater, // >>=
+    Asterisk,              // *=
+    Slash,                 // /=
+    Percent,               // %=
+    Plus,                  // +=
+    Minus,                 // -=
+    LessLess,              // <<=
+    GreaterGreater,        // >>=
     GreaterGreaterGreater, // >>>=
-    And, // &=
-    Caret, // ^=
-    Or, // |=
-    AsteriskAsterisk, // **=
+    And,                   // &=
+    Caret,                 // ^=
+    Or,                    // |=
+    AsteriskAsterisk,      // **=
 }

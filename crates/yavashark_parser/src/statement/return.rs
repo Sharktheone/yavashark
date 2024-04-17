@@ -1,3 +1,1 @@
-pub struct ReturnStatement {
-    
-}
+pub struct ReturnStatement {}

@@ -1,3 +1,1 @@
-pub struct IfStatement {
-    
-}
+pub struct IfStatement {}

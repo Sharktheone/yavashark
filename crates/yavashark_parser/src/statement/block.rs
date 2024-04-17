@@ -1,5 +1,5 @@
-use std::ops::Deref;
 use crate::block::Block;
+use std::ops::Deref;
 
 pub struct BlockStatement {
     block: Block,

@@ -1,5 +1,5 @@
 pub enum Identifier {
-    //TODO: spec is a mess...    
+    //TODO: spec is a mess...
 }
 
 pub enum IdentifierReference {

@@ -1,28 +1,28 @@
 mod block;
-mod variable;
-mod expression;
-mod r#if;
+mod r#break;
 mod breakable;
 mod r#continue;
-mod r#break;
-mod r#return;
-mod with;
+mod expression;
+mod r#if;
 mod labelled;
+mod r#return;
 mod throw;
 mod r#try;
+mod variable;
+mod with;
 
 use block::BlockStatement;
-use variable::VariableStatement;
-use expression::ExpressionStatement;
-use r#if::IfStatement;
 use breakable::BreakableStatement;
-use r#continue::ContinueStatement;
-use r#break::BreakStatement;
-use r#return::ReturnStatement;
-use with::WithStatement;
+use expression::ExpressionStatement;
 use labelled::LabelledStatement;
-use throw::ThrowStatement;
+use r#break::BreakStatement;
+use r#continue::ContinueStatement;
+use r#if::IfStatement;
+use r#return::ReturnStatement;
 use r#try::TryStatement;
+use throw::ThrowStatement;
+use variable::VariableStatement;
+use with::WithStatement;
 
 pub enum Statement {
     // Yield, Await, Return

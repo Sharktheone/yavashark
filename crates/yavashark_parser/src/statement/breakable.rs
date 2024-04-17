@@ -1,3 +1,1 @@
-pub struct BreakableStatement {
-    
-}
+pub struct BreakableStatement {}

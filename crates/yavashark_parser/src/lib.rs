@@ -1,11 +1,11 @@
 pub mod ast;
 mod block;
 mod declaration;
+mod expression;
 mod function;
+mod identifier;
 mod statement;
 mod types;
-mod expression;
-mod identifier;
 
 use yavashark_lexer::tokens::Token;
 
