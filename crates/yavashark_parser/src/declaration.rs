@@ -1,5 +1,11 @@
 //! 14 ECMAScript Language; Statements and *Declarations*
 
+use crate::declaration::function::{AsyncFunctionDeclaration, FunctionDeclaration};
+use crate::declaration::generator::{AsyncGeneratorDeclaration, GeneratorDeclaration};
+
+mod function;
+mod generator;
+
 pub enum Declaration {
     // Yield, Await
     HoistableDecl(HoistableDecl), // ?Yield, ?Await, ~Default
