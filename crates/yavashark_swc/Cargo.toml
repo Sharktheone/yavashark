@@ -1,0 +1,7 @@
+[package]
+name = "yavashark_swc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+swc_ecma_parser = "0.143.16"
