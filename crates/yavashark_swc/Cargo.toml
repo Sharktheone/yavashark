@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+swc_common = "0.33.25"
+swc_ecma_ast = "0.112.8"
 swc_ecma_parser = "0.143.16"
