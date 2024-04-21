@@ -697,6 +697,15 @@ name = "yavashark"
 version = "0.1.0"
 
 [[package]]
+name = "yavashark_interpreter"
+version = "0.1.0"
+dependencies = [
+ "swc_ecma_ast",
+ "swc_ecma_parser",
+ "yavashark_value",
+]
+
+[[package]]
 name = "yavashark_lexer"
 version = "0.1.0"
 dependencies = [

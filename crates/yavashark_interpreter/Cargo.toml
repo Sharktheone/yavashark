@@ -1,0 +1,11 @@
+[package]
+name = "yavashark_interpreter"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+swc_ecma_parser = "0.143.16"
+swc_ecma_ast = "0.112.8"
+yavashark_value = { path = "../yavashark_value", features = ["js"] }

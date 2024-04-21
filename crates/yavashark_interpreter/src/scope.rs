@@ -1,6 +1,7 @@
 use std::collections::HashMap;
+use yavashark_value::Value;
 
-struct Scope {
-    parent: Option<Box<Scope>>,
+pub(crate) struct Scope<'ctx> {
+    parent: Option<&'ctx mut Scope<'ctx>>,
     variables: HashMap<String, Value>,
 }
