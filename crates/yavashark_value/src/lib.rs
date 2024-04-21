@@ -1,52 +1,18 @@
 pub mod error;
 
-pub enum Value<T: TSValue> {
-    Null,
-    Undefined,
-    Some(T),
-}
 
-impl<T: TSValue> Value<T> {
-    pub fn new(value: T) -> Self {
-        Value::Some(value)
-    }
+#[cfg(all(feature = "ts", feature = "js"))]
+compile_error!("Cannot enable both `ts` and `js` features at the same time");
 
-    pub fn type_of(&self) -> &'static str {
-        match self {
-            Value::Null => "null",
-            Value::Undefined => "undefined",
-            Value::Some(value) => value.type_of(),
-        }
-    }
+#[cfg(feature = "ts")]
+mod ts;
 
-    pub fn value_type(&self) -> ValueType {
-        match self {
-            Value::Null => ValueType::Null,
-            Value::Undefined => ValueType::Undefined,
-            Value::Some(value) => ValueType::Type(value.value_type()),
-        }
-    }
+#[cfg(feature = "ts")]
+pub use ts::*;
 
+#[cfg(feature = "js")]
+mod js;
 
-}
+#[cfg(feature = "js")]
+pub use js::*;
 
-
-pub trait TSValue {
-    fn type_of(&self) -> &'static str;
-    fn value_type(&self) -> TSValueType;
-}
-
-pub enum TSValueType {
-    Number,
-    String,
-    Boolean,
-    Object,
-    Array,
-    Function,
-}
-
-pub enum ValueType {
-    Null,
-    Undefined,
-    Type(TSValueType),
-}
