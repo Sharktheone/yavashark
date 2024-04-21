@@ -1,5 +1,6 @@
 mod context;
 mod scope;
+mod statement;
 
 use swc_ecma_ast::Script;
 
@@ -14,14 +15,11 @@ impl Interpreter {
             script,
         }
     }
-    
+
     pub fn run(&self) {
         let mut context = context::Context::new();
         let mut scope = scope::Scope::new();
         context.run_script(&self.script, &mut scope);
     }
-    
-    
-    
 }
 

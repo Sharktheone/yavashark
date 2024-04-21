@@ -1,4 +1,6 @@
-use swc_ecma_ast::Script;
+use swc_ecma_ast::{Script, Stmt};
+use yavashark_value::error::Error;
+use yavashark_value::Value;
 use crate::scope::Scope;
 
 pub struct Context {
@@ -11,9 +13,14 @@ impl Context {
         Self {}
     }
     
-    pub fn run_script(&mut self, script: &Script, scope: &mut Scope) {
-        todo!()
+    pub fn run_script(&mut self, script: &Script, scope: &mut Scope) -> Result<(), Error> {
+        for stmt in &script.body {
+            self.run_statement(stmt, scope)?;
+        }
+        
+        Ok(())
     }
+    
 
 }
 
