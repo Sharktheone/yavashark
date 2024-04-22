@@ -13,12 +13,13 @@ impl Context {
         Self {}
     }
     
-    pub fn run_script(&mut self, script: &Script, scope: &mut Scope) -> Result<(), Error> {
+    pub fn run_script(&mut self, script: &Script, scope: &mut Scope) -> Result<Value, Error> {
+        let mut last_value = Value::Undefined;
         for stmt in &script.body {
-            self.run_statement(stmt, scope)?;
+            last_value = self.run_statement(stmt, scope)?;
         }
         
-        Ok(())
+        Ok(last_value)
     }
     
 

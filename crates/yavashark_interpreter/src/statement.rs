@@ -17,15 +17,16 @@ mod expr;
 
 use swc_ecma_ast::Stmt;
 use yavashark_value::error::Error;
+use yavashark_value::Value;
 use crate::context::Context;
 use crate::scope::Scope;
 
 impl Context {
 
-    pub fn run_statement(&mut self, stmt: &Stmt, scope: &mut Scope) -> Result<(), Error> {
+    pub fn run_statement(&mut self, stmt: &Stmt, scope: &mut Scope) -> Result<Value, Error> {
         match stmt {
             Stmt::Block(block) => self.run_block(&block, scope),
-            Stmt::Empty(_) => Ok(()),
+            Stmt::Empty(_) => Ok(Value::Undefined),
             Stmt::Debugger(d) => self.run_debugger(d, scope),
             Stmt::With(w) => self.run_with(w, scope),
             Stmt::Return(r) => self.run_return(r, scope),
