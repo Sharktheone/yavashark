@@ -23,6 +23,15 @@ mod r#await;
 mod meta_prop;
 mod class;
 mod arrow;
+mod tpl;
+mod tagged_tpl;
+mod seq;
+mod new;
+mod lit;
+mod ident;
+mod cond;
+mod call;
+mod r#yield;
 
 impl Context {
     pub fn run_expr(&mut self, stmt: &ExprStmt, scope: &mut Scope) -> Result<Value, Error> {

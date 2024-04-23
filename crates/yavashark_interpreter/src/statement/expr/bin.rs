@@ -1,10 +1,10 @@
-use swc_ecma_ast::binExpr;
+use swc_ecma_ast::BinExpr;
 use yavashark_value::error::Error;
 use yavashark_value::Value;
 use crate::context::Context;
 
 impl Context {
-    pub fn run_bin(&mut self, stmt: &binExpr, scope: &mut crate::scope::Scope) -> Result<Value, Error> {
+    pub fn run_bin(&mut self, stmt: &BinExpr, scope: &mut crate::scope::Scope) -> Result<Value, Error> {
         todo!()
     }
 }
