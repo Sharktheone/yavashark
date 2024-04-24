@@ -291,3 +291,59 @@ impl Rem for Value {
         }
     }
 }
+
+impl PartialOrd for Value {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match (self, other) {
+            (Value::Null, Value::Null) => Some(Ordering::Equal),
+            (Value::Null, Value::Number(b)) => 0.0.partial_cmp(b),
+            (Value::Null, Value::String(b)) => {
+                let b = b.parse::<f64>().ok()?;
+                0.0.partial_cmp(&b)
+            },
+            (Value::Null, Value::Boolean(b)) => 0.0.partial_cmp(&b.num()),
+
+            (Value::Undefined, _) => None,
+            (_, Value::Undefined) => None,
+
+            (Value::Number(a), Value::Null) => a.partial_cmp(&0.0),
+            (Value::Number(a), Value::Number(b)) => a.partial_cmp(b),
+            (Value::Number(a), Value::String(b)) => {
+                let b = b.parse::<f64>().ok()?;
+                a.partial_cmp(&b)
+            },
+            (Value::Number(a), Value::Boolean(b)) => a.partial_cmp(&b.num()),
+
+            (Value::String(a), Value::Null) => {
+                if a.is_empty() {
+                    return Some(Ordering::Equal);
+                }
+                let a = a.parse::<f64>().ok()?;
+                a.partial_cmp(&0.0)
+            },
+            (Value::String(a), Value::Number(b)) => a.parse::<f64>().ok()?.partial_cmp(b),
+            (Value::String(a), Value::String(b)) => {
+                if a == b {
+                    return Some(Ordering::Equal);
+                }
+
+                let a = a.parse::<f64>().ok()?;
+                let b = b.parse::<f64>().ok()?;
+                a.partial_cmp(&b)
+            },
+            (Value::String(a), Value::Boolean(b)) => {
+                let a = a.parse::<f64>().ok()?;
+                a.partial_cmp(&b.num())
+            },
+            (Value::String(a), Value::Object(_)) => if a == "[object Object]" { Some(Ordering::Equal) } else { None },
+
+            (Value::Boolean(a), Value::Null) => a.num().partial_cmp(&0.0),
+            (Value::Boolean(a), Value::Number(b)) => a.num().partial_cmp(b),
+            (Value::Boolean(a), Value::String(b)) => a.num().partial_cmp(&b.parse::<f64>().ok()?),
+            (Value::Boolean(a), Value::Boolean(b)) => a.num().partial_cmp(&b.num()),
+
+            (Value::Object(_), _) => None,
+            (_, Value::Object(_)) => None,
+        }
+    }
+}
