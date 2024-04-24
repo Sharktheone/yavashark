@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 swc_ecma_parser = "0.143.16"
 swc_ecma_ast = "0.112.8"
+swc_common = "0.33.25"
 yavashark_value = { path = "../yavashark_value", features = ["js"] }

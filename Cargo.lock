@@ -700,6 +700,7 @@ version = "0.1.0"
 name = "yavashark_interpreter"
 version = "0.1.0"
 dependencies = [
+ "swc_common",
  "swc_ecma_ast",
  "swc_ecma_parser",
  "yavashark_value",

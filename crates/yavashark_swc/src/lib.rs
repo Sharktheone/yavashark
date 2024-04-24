@@ -6,7 +6,7 @@ use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
 
 #[test]
 fn test() {
-    let src = "1 + 2";
+    let src = "1 + 2 * 3 + 4";
     
     let c = TsConfig {
         ..Default::default()

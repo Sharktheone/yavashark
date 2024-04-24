@@ -2,6 +2,7 @@ use swc_ecma_ast::{Expr, ExprStmt};
 
 use yavashark_value::error::Error;
 use yavashark_value::Value;
+use swc_common::Span;
 
 use crate::context::Context;
 use crate::scope::Scope;
@@ -34,8 +35,11 @@ mod call;
 mod r#yield;
 
 impl Context {
-    pub fn run_expr(&mut self, stmt: &ExprStmt, scope: &mut Scope) -> Result<Value, Error> {
-        match *stmt.expr {
+    pub fn run_expr_stmt(&mut self, stmt: &ExprStmt, scope: &mut Scope) -> Result<Value, Error> {
+        self.run_expr(&stmt.expr, stmt.span, scope)
+    }
+    pub fn run_expr(&mut self, expr: &Expr, span: Span, scope: &mut Scope) -> Result<Value, Error> {
+        match expr {
             Expr::This(stmt) => { self.run_this(&stmt, scope) }
             Expr::Array(stmt) => { self.run_array(&stmt, scope) }
             Expr::Object(stmt) => { self.run_object(&stmt, scope) }
@@ -66,7 +70,7 @@ impl Context {
                 return Err(Error::new(format!("{:?}: Invalid expression.", stmt.span)));
             }
             _ => {
-                return Err(Error::new(format!("{:?}: TS and JSX are not supported.", stmt.span)));
+                return Err(Error::new(format!("{:?}: TS and JSX are not supported.", span)));
             }
         }
     }
