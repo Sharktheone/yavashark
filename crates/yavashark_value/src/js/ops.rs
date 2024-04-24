@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Div, Mul, Sub};
 
 use crate::Value;
 
@@ -89,7 +89,7 @@ impl Sub for Value {
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::Number(a), Value::Boolean(b)) => Value::Number(a - b.num()),
             (Value::Number(_), Value::Object(_)) => Value::Number(f64::NAN),
 
@@ -99,21 +99,21 @@ impl Sub for Value {
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::String(a), Value::Number(b)) => {
                 if let Ok(a) = a.parse::<f64>() {
                     Value::Number(a - b)
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::String(a), Value::Boolean(b)) => {
                 if let Ok(a) = a.parse::<f64>() {
                     Value::Number(a - b.num())
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
 
             (Value::String(a), Value::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
@@ -122,7 +122,7 @@ impl Sub for Value {
                     Value::Number(f64::NAN)
                 }
             }
-            
+
             (Value::String(_), _) => Value::Number(f64::NAN),
 
             (Value::Boolean(a), Value::Null) => Value::Number(a.num()),
@@ -152,8 +152,8 @@ impl Mul for Value {
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
-            (Value::Number(a), Value::Boolean(b)) 
+            }
+            (Value::Number(a), Value::Boolean(b))
             | (Value::Boolean(b), Value::Number(a)) => Value::Number(a * b.num()),
             (Value::String(a), Value::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
@@ -161,15 +161,78 @@ impl Mul for Value {
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::String(a), Value::Boolean(b)) | (Value::Boolean(b), Value::String(a)) => {
                 if let Ok(a) = a.parse::<f64>() {
                     Value::Number(a * b.num())
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() * b.num()),
+            (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
+        }
+    }
+}
+
+impl Div for Value {
+    type Output = Self;
+
+
+    //TODO: handle div by zero => return Infinity
+    fn div(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Value::Null, Value::Null)
+            | (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
+            (Value::Null, Value::Number(_)) => Value::Number(0.0),
+            (Value::Null, Value::String(b)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(0.0 / b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::Null, Value::Boolean(b)) => Value::Number(0.0 / b.num()),
+            (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
+            (Value::Number(a), Value::Null) => if a == 0.0 {
+                Value::Number(f64::NAN)
+            } else {
+                Value::Number(f64::INFINITY)
+            },
+            (Value::Number(a), Value::Number(b)) => Value::Number(a / b),
+            (Value::Number(a), Value::String(b))
+            | (Value::String(b), Value::Number(a)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(a / b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::Number(a), Value::Boolean(b))
+            | (Value::Boolean(b), Value::Number(a)) => Value::Number(a / b.num()),
+            (Value::String(a), Value::Null) => if a == "0" {
+                Value::Number(f64::NAN)
+            } else {
+                Value::Number(f64::INFINITY)
+            },
+            (Value::String(a), Value::String(b)) => {
+                if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
+                    Value::Number(a / b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::String(a), Value::Boolean(b))
+            | (Value::Boolean(b), Value::String(a)) => {
+                if let Ok(a) = a.parse::<f64>() {
+                    Value::Number(a / b.num())
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::Boolean(true), Value::Null) => Value::Number(f64::INFINITY),
+            (Value::Boolean(false), Value::Null) => Value::Number(f64::NAN),
+            (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() / b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
         }
     }
