@@ -1,6 +1,6 @@
-use std::ops::{Add, Div, Mul, Rem, Sub};
+use std::ops::{Add, Div, Mul, Rem, Shl, Sub};
 
-use crate::Value;
+use super::Value;
 
 trait ToNumber {
     fn num(&self) -> f64;
@@ -277,7 +277,7 @@ impl Rem for Value {
                     Value::Number(f64::NAN)
                 }
             }
-            
+
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() % b),
             (Value::Boolean(a), Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
