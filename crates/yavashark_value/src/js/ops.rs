@@ -1,4 +1,5 @@
-use std::ops::{Add, Div, Mul, Rem, Shl, Sub};
+use std::cmp::Ordering;
+use std::ops::{Add, Div, Mul, Rem, Sub};
 
 use super::Value;
 
