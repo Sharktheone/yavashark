@@ -28,8 +28,8 @@ impl Context {
                 BinaryOp::BitOr => { left | right }
                 BinaryOp::BitXor => { left ^ right }
                 BinaryOp::BitAnd => { left & right}
-                BinaryOp::LogicalOr => { left || right }
-                BinaryOp::LogicalAnd => { left && right }
+                BinaryOp::LogicalOr => { Value::Boolean(left || right) }
+                BinaryOp::LogicalAnd => { Value::Boolean(left && right) }
                 BinaryOp::In => { todo!() }
                 BinaryOp::InstanceOf => { todo!() }
                 BinaryOp::Exp => { left.pow(right) }
