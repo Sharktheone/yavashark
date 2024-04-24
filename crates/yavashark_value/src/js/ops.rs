@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::ops::{Add, Div, Mul, Rem, Sub};
+use std::ops::{Add, Div, Mul, Rem, Shl, Sub};
 
 use super::Value;
 
@@ -301,7 +301,7 @@ impl PartialOrd for Value {
             (Value::Null, Value::String(b)) => {
                 let b = b.parse::<f64>().ok()?;
                 0.0.partial_cmp(&b)
-            },
+            }
             (Value::Null, Value::Boolean(b)) => 0.0.partial_cmp(&b.num()),
 
             (Value::Undefined, _) => None,
@@ -312,7 +312,7 @@ impl PartialOrd for Value {
             (Value::Number(a), Value::String(b)) => {
                 let b = b.parse::<f64>().ok()?;
                 a.partial_cmp(&b)
-            },
+            }
             (Value::Number(a), Value::Boolean(b)) => a.partial_cmp(&b.num()),
 
             (Value::String(a), Value::Null) => {
@@ -321,7 +321,7 @@ impl PartialOrd for Value {
                 }
                 let a = a.parse::<f64>().ok()?;
                 a.partial_cmp(&0.0)
-            },
+            }
             (Value::String(a), Value::Number(b)) => a.parse::<f64>().ok()?.partial_cmp(b),
             (Value::String(a), Value::String(b)) => {
                 if a == b {
@@ -331,11 +331,11 @@ impl PartialOrd for Value {
                 let a = a.parse::<f64>().ok()?;
                 let b = b.parse::<f64>().ok()?;
                 a.partial_cmp(&b)
-            },
+            }
             (Value::String(a), Value::Boolean(b)) => {
                 let a = a.parse::<f64>().ok()?;
                 a.partial_cmp(&b.num())
-            },
+            }
             (Value::String(a), Value::Object(_)) => if a == "[object Object]" { Some(Ordering::Equal) } else { None },
 
             (Value::Boolean(a), Value::Null) => a.num().partial_cmp(&0.0),
@@ -345,6 +345,98 @@ impl PartialOrd for Value {
 
             (Value::Object(_), _) => None,
             (_, Value::Object(_)) => None,
+        }
+    }
+}
+
+impl Shl for Value {
+    type Output = Self;
+
+    fn shl(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Value::Null, _) => Value::Number(0.0),
+            (Value::Undefined, _) => Value::Number(0.0),
+
+            (Value::Number(a), Value::Null) => Value::Number(a as i64 as f64),
+            (Value::Number(a), Value::Undefined) => Value::Number(a as i64 as f64),
+            (Value::Number(a), Value::Number(b)) => Value::Number(((a as i64) << b as i64) as f64),
+            (Value::Number(a), Value::String(b)) => {
+                let Ok(b) = b.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(((a as i64) << b as i64) as f64)
+            }
+            (Value::Number(a), Value::Boolean(b)) => Value::Number(((a as i64) << b as i64) as f64),
+            (Value::Number(a), Value::Object(_)) => Value::Number(a as i64 as f64),
+
+            (Value::String(a), Value::Null) => {
+                let Ok(a) = a.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(a as i64 as f64)
+            }
+
+            (Value::String(a), Value::Undefined) => {
+                let Ok(a) = a.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(a as i64 as f64)
+            }
+
+            (Value::String(a), Value::Number(b)) => {
+                let Ok(a) = a.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(((a as i64) << b as i64) as f64)
+            }
+
+            (Value::String(a), Value::String(b)) => {
+                let Ok(a) = a.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                let Ok(b) = b.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(((a as i64) << b as i64) as f64)
+            }
+
+            (Value::String(a), Value::Boolean(b)) => {
+                let Ok(a) = a.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(((a as i64) << b as i64) as f64)
+            }
+
+            (Value::String(a), Value::Object(_)) => {
+                let Ok(a) = a.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(a as i64 as f64)
+            }
+            
+            (Value::Boolean(a), Value::Null) => Value::Number(a.num()),
+            (Value::Boolean(a), Value::Undefined) => Value::Number(a.num()),
+            (Value::Boolean(a), Value::Number(b)) => Value::Number(((a as i64) << b as i64) as f64),
+            (Value::Boolean(a), Value::String(b)) => {
+                let Ok(b) = b.parse::<f64>() else {
+                    return Value::Number(0.0);
+                };
+
+                Value::Number(((a as i64) << b as i64) as f64)
+            },
+            
+            (Value::Boolean(a), Value::Boolean(b)) => Value::Number(((a as i64) << b as i64) as f64),
+            (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
+            (Value::Object(_), _) => Value::Number(0.0),
+            
         }
     }
 }
