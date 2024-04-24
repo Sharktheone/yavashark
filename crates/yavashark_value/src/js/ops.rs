@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Rem, Sub};
 
 use crate::Value;
 
@@ -233,6 +233,60 @@ impl Div for Value {
             (Value::Boolean(true), Value::Null) => Value::Number(f64::INFINITY),
             (Value::Boolean(false), Value::Null) => Value::Number(f64::NAN),
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() / b.num()),
+            (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
+        }
+    }
+}
+
+impl Rem for Value {
+    type Output = Self;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (_, Value::Null) => Value::Number(f64::NAN),
+            (Value::Null, _) => Value::Number(0.0),
+            (_, Value::Undefined)
+            | (Value::Undefined, _) => Value::Number(f64::NAN),
+            (Value::Number(a), Value::Number(b)) => Value::Number(a % b),
+            (Value::Number(a), Value::String(b)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(a % b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::Number(a), Value::Boolean(b)) => Value::Number(a % b.num()),
+            (Value::String(a), Value::Number(b)) => {
+                if let Ok(a) = a.parse::<f64>() {
+                    Value::Number(a % b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::String(a), Value::String(b)) => {
+                if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
+                    Value::Number(a % b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::String(a), Value::Boolean(b)) => {
+                if let Ok(a) = a.parse::<f64>() {
+                    Value::Number(a % b.num())
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            
+            (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() % b),
+            (Value::Boolean(a), Value::String(b)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(a.num() % b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() % b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
         }
     }
