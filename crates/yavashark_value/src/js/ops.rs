@@ -402,7 +402,7 @@ impl Shl for Value {
             (Value::Number(a), Value::Number(b)) => Value::Number(((a as i64) << b as i64) as f64),
             (Value::Number(a), Value::String(b)) => {
                 let Ok(b) = b.parse::<f64>() else {
-                    return Value::Number(0.0);
+                    return Value::Number(a as i64 as f64);
                 };
 
                 Value::Number(((a as i64) << b as i64) as f64)
@@ -467,7 +467,7 @@ impl Shl for Value {
             (Value::Boolean(a), Value::Number(b)) => Value::Number(((a as i64) << b as i64) as f64),
             (Value::Boolean(a), Value::String(b)) => {
                 let Ok(b) = b.parse::<f64>() else {
-                    return Value::Number(0.0);
+                    return Value::Number(a.num());
                 };
 
                 Value::Number(((a as i64) << b as i64) as f64)
@@ -494,7 +494,7 @@ impl Shr for Value {
             (Value::Number(a), Value::Number(b)) => Value::Number(((a as i64) >> b as i64) as f64),
             (Value::Number(a), Value::String(b)) => {
                 let Ok(b) = b.parse::<f64>() else {
-                    return Value::Number(0.0);
+                    return Value::Number(a as i64 as f64);
                 };
 
                 Value::Number(((a as i64) >> b as i64) as f64)

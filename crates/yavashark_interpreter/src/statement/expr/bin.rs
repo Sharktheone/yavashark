@@ -5,8 +5,8 @@ use crate::context::Context;
 
 impl Context {
     pub fn run_bin(&mut self, stmt: &BinExpr, scope: &mut crate::scope::Scope) -> Result<Value, Error> {
-        let left = self.run_expr(&*stmt.left, stmt.span, scope)?;
-        let right = self.run_expr(&*stmt.right, stmt.span, scope)?;
+        let left = self.run_expr(&stmt.left, stmt.span, scope)?;
+        let right = self.run_expr(&stmt.right, stmt.span, scope)?;
 
             Ok(match stmt.op {
                 BinaryOp::EqEq => { todo!() }
