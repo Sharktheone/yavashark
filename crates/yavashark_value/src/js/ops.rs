@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::ops::{Add, Div, Mul, Rem, Shl, Shr, Sub};
+use std::ops::{Add, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub};
 
 use super::Value;
 
@@ -551,7 +551,32 @@ impl Shr for Value {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(((a as i64) >> b as i64) as f64),
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
-
         }
+    }
+}
+
+
+
+impl BitOr for Value {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Self::Number((self.to_int_or_null() | rhs.to_int_or_null()) as f64)
+    }
+}
+
+impl BitAnd for Value {
+    type Output = Self;
+
+    fn bitand(self, rhs: Self) -> Self::Output {
+        Self::Number((self.to_int_or_null() & rhs.to_int_or_null()) as f64)
+    }
+}
+
+impl BitXor for Value {
+    type Output = Self;
+
+    fn bitxor(self, rhs: Self) -> Self::Output {
+        Self::Number((self.to_int_or_null() ^ rhs.to_int_or_null()) as f64)
     }
 }
