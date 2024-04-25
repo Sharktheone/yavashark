@@ -17,6 +17,27 @@ impl ToNumber for bool {
     }
 }
 
+impl Value {
+    fn to_number_or_null(&self) -> f64 {
+        match self {
+            Value::Number(n) => *n,
+            Value::Boolean(b) => b.num(),
+            Value::String(s) => s.parse().unwrap_or(0.0),
+            _ => 0.0,
+        }
+    }
+
+    fn to_int_or_null(&self) -> i64 {
+        match self {
+            Value::Number(n) => *n as i64,
+            Value::Boolean(b) => *b as i64,
+            Value::String(s) => s.parse().unwrap_or(0),
+            _ => 0,
+        }
+    }
+}
+
+
 impl Add for Value {
     type Output = Self;
 
