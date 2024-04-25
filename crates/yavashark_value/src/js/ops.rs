@@ -27,12 +27,31 @@ impl Value {
         }
     }
 
+    fn to_number(&self) -> f64 {
+        match self {
+            Value::Number(n) => *n,
+            Value::Boolean(b) => b.num(),
+            Value::String(s) => if s.is_empty() { 0.0 } else { s.parse().unwrap_or(f64::NAN) },
+            _ => f64::NAN,
+        }
+    }
+
     fn to_int_or_null(&self) -> i64 {
         match self {
             Value::Number(n) => *n as i64,
             Value::Boolean(b) => *b as i64,
             Value::String(s) => s.parse().unwrap_or(0),
             _ => 0,
+        }
+    }
+
+    fn is_truthy(&self) -> bool {
+        match self {
+            Value::Null | Value::Undefined => false,
+            Value::Number(n) => *n != 0.0,
+            Value::String(s) => !s.is_empty(),
+            Value::Boolean(b) => *b,
+            Value::Object(_) => true,
         }
     }
 }
@@ -442,7 +461,7 @@ impl Shl for Value {
 
                 Value::Number(a as i64 as f64)
             }
-            
+
             (Value::Boolean(a), Value::Null) => Value::Number(a.num()),
             (Value::Boolean(a), Value::Undefined) => Value::Number(a.num()),
             (Value::Boolean(a), Value::Number(b)) => Value::Number(((a as i64) << b as i64) as f64),
@@ -452,16 +471,14 @@ impl Shl for Value {
                 };
 
                 Value::Number(((a as i64) << b as i64) as f64)
-            },
-            
+            }
+
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(((a as i64) << b as i64) as f64),
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
-            
         }
     }
 }
-
 
 
 impl Shr for Value {
@@ -546,7 +563,7 @@ impl Shr for Value {
                 };
 
                 Value::Number(((a as i64) >> b as i64) as f64)
-            },
+            }
 
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(((a as i64) >> b as i64) as f64),
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
@@ -554,7 +571,6 @@ impl Shr for Value {
         }
     }
 }
-
 
 
 impl BitOr for Value {
@@ -578,5 +594,27 @@ impl BitXor for Value {
 
     fn bitxor(self, rhs: Self) -> Self::Output {
         Self::Number((self.to_int_or_null() ^ rhs.to_int_or_null()) as f64)
+    }
+}
+
+impl Value {
+    pub fn log_or(&self, rhs: Self) -> Self {
+        if self.is_truthy() {
+            self.clone()
+        } else {
+            rhs
+        }
+    }
+
+    pub fn log_and(&self, rhs: Self) -> Self {
+        if self.is_truthy() {
+            rhs
+        } else {
+            self.clone()
+        }
+    }
+    
+    pub fn pow(&self, rhs: Self) -> Self {
+        Self::Number(self.to_number().powf(rhs.to_number()))
     }
 }
