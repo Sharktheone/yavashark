@@ -13,7 +13,9 @@ mod r#for;
 mod for_in;
 mod for_of;
 mod decl;
-mod expr;
+pub mod expr;
+mod r#break;
+mod throw;
 
 use swc_ecma_ast::Stmt;
 use yavashark_value::error::Error;
@@ -43,7 +45,7 @@ impl Context {
             Stmt::ForIn(f) => self.run_for_in(f, scope),
             Stmt::ForOf(f) => self.run_for_of(f, scope),
             Stmt::Decl(d) => self.run_decl(d, scope),
-            Stmt::Expr(expr) => self.run_expression(&expr.expr, scope),
+            Stmt::Expr(expr) => self.run_expr_stmt(&expr, scope),
         }
     }
 }
