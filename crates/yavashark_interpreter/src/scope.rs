@@ -6,34 +6,28 @@ use std::rc::Rc;
 
 
 pub struct Scope {
-    scope: Rc<NonNull<UnsafeScope>>,
+    scope: Rc<RefCell<ScopeInternal>>,
 }
 
 
-struct UnsafeScope {
-    parent: Option<Rc<NonNull<UnsafeScope>>>,
+struct ScopeInternal {
+    parent: Option<Rc<RefCell<ScopeInternal>>>,
     variables: HashMap<String, Value>,
 }
 
-impl UnsafeScope {
-    pub fn new() -> NonNull<Self>{
-        let ptr = Box::new(Self {
+impl ScopeInternal {
+    pub fn new() -> Self {
+        Self {
             parent: None,
             variables: HashMap::new(),
-        });
-
-        //Box::into_raw always returns a non-null pointer (except it was created unsafely, which is not the case here)
-        NonNull::new(Box::into_raw(ptr)).expect("inserted known good pointer into NonNull but it apparently was null")
+        }
     }
-    
-    pub fn with_parent(parent: Rc<NonNull<UnsafeScope>>) -> NonNull<Self> {
-        let ptr = Box::new(Self {
+
+    pub fn with_parent(parent: Rc<RefCell<ScopeInternal>>) -> Self {
+        Self {
             parent: Some(parent),
             variables: HashMap::new(),
-        });
-        
-        //Box::into_raw always returns a non-null pointer (except it was created unsafely, which is not the case here)
-        NonNull::new(Box::into_raw(ptr)).expect("inserted known good pointer into NonNull but it apparently was null")
+        }
     }
 
 }
@@ -42,16 +36,16 @@ impl UnsafeScope {
 impl Scope {
     pub fn new() -> Self {
         Self {
-            scope: Rc::new(UnsafeScope::new()),
+            scope: Rc::new(RefCell::new(ScopeInternal::new())),
         }
     }
-    
+
     pub fn with_parent(parent: &Scope) -> Self {
         Self {
-            scope: Rc::new(UnsafeScope::with_parent(Rc::clone(&parent.scope))),
+            scope: Rc::new(RefCell::new(ScopeInternal::with_parent(Rc::clone(&parent.scope)))),
         }
     }
-    
+
     pub fn clone(scope: &Self) -> Self {
         Self {
             scope: Rc::clone(&scope.scope),
