@@ -18,7 +18,7 @@ impl ToNumber for bool {
 }
 
 impl Value {
-    fn to_number_or_null(&self) -> f64 {
+    pub fn to_number_or_null(&self) -> f64 {
         match self {
             Value::Number(n) => *n,
             Value::Boolean(b) => b.num(),
@@ -27,7 +27,7 @@ impl Value {
         }
     }
 
-    fn to_number(&self) -> f64 {
+    pub fn to_number(&self) -> f64 {
         match self {
             Value::Number(n) => *n,
             Value::Boolean(b) => b.num(),
@@ -36,7 +36,7 @@ impl Value {
         }
     }
 
-    fn to_int_or_null(&self) -> i64 {
+    pub fn to_int_or_null(&self) -> i64 {
         match self {
             Value::Number(n) => *n as i64,
             Value::Boolean(b) => *b as i64,
@@ -45,7 +45,7 @@ impl Value {
         }
     }
 
-    fn is_truthy(&self) -> bool {
+    pub fn is_truthy(&self) -> bool {
         match self {
             Value::Null | Value::Undefined => false,
             Value::Number(n) => *n != 0.0,
