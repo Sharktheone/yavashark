@@ -13,6 +13,7 @@ use yavashark_value::Value;
 enum ControlFlow {
     Continue,
     Break,
+    Return(Value),
     Error(Error),
 }
 
@@ -54,6 +55,7 @@ impl Interpreter {
         context.run_statements(&self.script, &mut scope).or_else(|e| {
             match e {
                 ControlFlow::Error(e) => Err(e),
+                ControlFlow::Return(v) => Ok(v),
                 _ => Ok(Value::Undefined),
             }
         })
