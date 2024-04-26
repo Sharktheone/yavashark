@@ -1,6 +1,7 @@
 use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
 use yavashark_value::Value;
+use crate::RuntimeResult;
 use crate::scope::Scope;
 
 pub struct Context {
@@ -13,7 +14,7 @@ impl Context {
         Self {}
     }
     
-    pub fn run_statements(&mut self, script: &Vec<Stmt>, scope: &mut Scope) -> Result<Value, Error> {
+    pub fn run_statements(&mut self, script: &Vec<Stmt>, scope: &mut Scope) -> RuntimeResult {
         let mut last_value = Value::Undefined;
         for stmt in script {
             last_value = self.run_statement(stmt, scope)?;

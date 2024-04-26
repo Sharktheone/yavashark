@@ -31,6 +31,7 @@ use yavashark_value::error::Error;
 use yavashark_value::Value;
 
 use crate::context::Context;
+use crate::{ControlFlow, RuntimeResult};
 use crate::scope::Scope;
 
 mod this;
@@ -86,10 +87,10 @@ mod call;
 mod r#yield;
 
 impl Context {
-    pub fn run_expr_stmt(&mut self, stmt: &ExprStmt, scope: &mut Scope) -> Result<Value, Error> {
+    pub fn run_expr_stmt(&mut self, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
         self.run_expr(&stmt.expr, stmt.span, scope)
     }
-    pub fn run_expr(&mut self, expr: &Expr, span: Span, scope: &mut Scope) -> Result<Value, Error> {
+    pub fn run_expr(&mut self, expr: &Expr, span: Span, scope: &mut Scope) -> RuntimeResult {
         match expr {
             Expr::This(stmt) => { self.run_this(stmt, scope) }
             Expr::Array(stmt) => { self.run_array(stmt, scope) }
@@ -117,8 +118,8 @@ impl Context {
             Expr::Paren(stmt) => { self.run_paren(stmt, scope) }
             Expr::PrivateName(stmt) => { self.run_private_name(stmt, scope) }
             Expr::OptChain(stmt) => { self.run_opt_chain(stmt, scope) }
-            Expr::Invalid(stmt) => Err(Error::new(format!("{:?}: Invalid expression.", stmt.span))),
-            _ => Err(Error::new(format!("{:?}: TS and JSX are not supported.", span))),
+            Expr::Invalid(stmt) => Err(ControlFlow::error(format!("{:?}: Invalid expression.", stmt.span))),
+            _ => Err(ControlFlow::error(format!("{:?}: TS and JSX are not supported.", span))),
         }
     }
 }

@@ -9,6 +9,32 @@ use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
 use yavashark_value::Value;
 
+
+enum ControlFlow {
+    Continue,
+    Break,
+    Error(Error),
+}
+
+impl ControlFlow {
+    fn error(e: String) -> Self {
+        ControlFlow::Error(Error::new(e))
+    }
+}
+
+type Result = std::result::Result<Value, Error>;
+
+type RuntimeResult = std::result::Result<Value, ControlFlow>;
+
+
+impl From<Error> for ControlFlow {
+    fn from(e: Error) -> Self {
+        ControlFlow::Error(e)
+    }
+}
+
+
+
 pub struct Interpreter {
     script: Vec<Stmt>,
 }
@@ -21,10 +47,16 @@ impl Interpreter {
         }
     }
 
-    pub fn run(&self) -> Result<Value, Error> {
+    pub fn run(&self) -> Result {
         let mut context = context::Context::new();
         let mut scope = scope::Scope::new();
-        context.run_statements(&self.script, &mut scope)
+        
+        context.run_statements(&self.script, &mut scope).or_else(|e| {
+            match e {
+                ControlFlow::Error(e) => Err(e),
+                _ => Ok(Value::Undefined),
+            }
+        })
     }
 }
 
@@ -41,13 +73,13 @@ mod tests {
     fn math() {
         
         let src = r#"
-        
+
         if (false) {
             1 + 2;
         } else {
         2-3;
         }
-        
+
         "#;
         
         let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
