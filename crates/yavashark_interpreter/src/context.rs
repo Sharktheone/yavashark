@@ -13,9 +13,9 @@ impl Context {
         Self {}
     }
     
-    pub fn run_script(&mut self, script: &Script, scope: &mut Scope) -> Result<Value, Error> {
+    pub fn run_script(&mut self, script: &Vec<Stmt>, scope: &mut Scope) -> Result<Value, Error> {
         let mut last_value = Value::Undefined;
-        for stmt in &script.body {
+        for stmt in script {
             last_value = self.run_statement(stmt, scope)?;
         }
         

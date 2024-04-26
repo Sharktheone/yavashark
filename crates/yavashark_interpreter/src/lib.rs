@@ -5,17 +5,17 @@ mod context;
 mod scope;
 mod statement;
 
-use swc_ecma_ast::Script;
+use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
 use yavashark_value::Value;
 
 pub struct Interpreter {
-    script: Script,
+    script: Vec<Stmt>,
 }
 
 
 impl Interpreter {
-    pub fn new(script: Script) -> Self {
+    pub fn new(script: Vec<Stmt>) -> Self {
         Self {
             script,
         }
@@ -49,7 +49,7 @@ mod tests {
         let mut p = Parser::new(Syntax::Es(c),input, None);
         let script = p.parse_script().unwrap();
         
-        let interpreter = Interpreter::new(script);
+        let interpreter = Interpreter::new(script.body);
         let result = interpreter.run().unwrap();
         assert_eq!(result, Value::Number(3.0));
     }
