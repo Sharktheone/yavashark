@@ -1,12 +1,23 @@
+mod var;
+mod class;
+mod r#fn;
+mod using;
+
 use swc_ecma_ast::Decl;
 use yavashark_value::error::Error;
 use yavashark_value::Value;
 use crate::context::Context;
-use crate::RuntimeResult;
+use crate::{ControlFlow, RuntimeResult};
 use crate::scope::Scope;
 
 impl Context {
     pub fn run_decl(&mut self, stmt: &Decl, scope: &mut Scope) -> RuntimeResult {
-        todo!()
+        match stmt {
+            Decl::Class(c) => self.decl_class(c, scope),
+            Decl::Fn(f) => self.decl_fn(f, scope),
+            Decl::Var(v) => self.decl_var(v, scope),
+            Decl::Using(u) => self.decl_using(u, scope),
+            _ => Err(ControlFlow::error("Unsupported declaration".to_string()))
+        }
     }
 }
