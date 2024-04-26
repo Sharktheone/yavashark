@@ -6,6 +6,8 @@ use crate::scope::Scope;
 
 impl Context {
     pub fn run_block(&mut self, stmt: &BlockStmt, scope: &mut Scope) -> Result<Value, Error> {
-        todo!()
+        let scope = &mut Scope::with_parent(scope);
+        
+        self.run_statements(&stmt.stmts, scope)
     }
 }

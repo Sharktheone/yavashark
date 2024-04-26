@@ -13,7 +13,7 @@ impl Context {
         Self {}
     }
     
-    pub fn run_script(&mut self, script: &Vec<Stmt>, scope: &mut Scope) -> Result<Value, Error> {
+    pub fn run_statements(&mut self, script: &Vec<Stmt>, scope: &mut Scope) -> Result<Value, Error> {
         let mut last_value = Value::Undefined;
         for stmt in script {
             last_value = self.run_statement(stmt, scope)?;
