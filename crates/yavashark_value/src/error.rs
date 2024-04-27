@@ -25,6 +25,15 @@ impl Error {
             },
         }
     }
+    
+    pub fn ty(error: String) -> Self {
+        Self {
+            kind: ErrorKind::TypeError(error),
+            stacktrace: StackTrace {
+                frames: vec![],
+            },
+        }
+    }
 }
 
 

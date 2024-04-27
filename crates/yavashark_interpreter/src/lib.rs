@@ -1,3 +1,4 @@
+#![feature(unboxed_closures)]
 #![allow(unused)]
 
 
@@ -5,10 +6,14 @@ pub mod context;
 pub mod scope;
 pub mod statement;
 pub mod variable;
+mod value;
+mod function;
+
+pub use value::*;
+pub use function::*;
 
 use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
-use yavashark_value::Value;
 
 
 pub enum ControlFlow {
@@ -22,7 +27,7 @@ impl ControlFlow {
     fn error(e: String) -> Self {
         ControlFlow::Error(Error::new(e))
     }
-    
+
     fn error_reference(e: String) -> Self {
         ControlFlow::Error(Error::reference(e))
     }
@@ -94,11 +99,22 @@ mod tests {
         
         let src = r#"
 
-        let x = 1 + 2;
-        
-        let y = x + true;
-        
-        x + y
+        let x = 1 + 2
+
+        let y = x + true
+
+        let k = x + y
+
+
+        if (k > 0) {
+            var z = 1337
+        } else {
+            var z = 42
+        }
+
+        log(3)
+
+        z
         "#;
         
         let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
