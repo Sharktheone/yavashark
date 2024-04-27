@@ -28,7 +28,7 @@ impl Context {
 
     pub fn run_statement(&mut self, stmt: &Stmt, scope: &mut Scope) -> RuntimeResult {
         match stmt {
-            Stmt::Block(block) => self.run_block(&block, scope),
+            Stmt::Block(block) => self.run_block(block, scope),
             Stmt::Empty(_) => Ok(Value::Undefined),
             Stmt::Debugger(d) => self.run_debugger(d, scope),
             Stmt::With(w) => self.run_with(w, scope),
@@ -45,8 +45,8 @@ impl Context {
             Stmt::For(f) => self.run_for(f, scope),
             Stmt::ForIn(f) => self.run_for_in(f, scope),
             Stmt::ForOf(f) => self.run_for_of(f, scope),
-            Stmt::Decl(d) => self.run_decl(d, scope),
-            Stmt::Expr(expr) => self.run_expr_stmt(&expr, scope),
+            Stmt::Decl(d) => self.run_decl(d, scope).map(|_| Value::Undefined).map_err(|e| e.into()),
+            Stmt::Expr(expr) => self.run_expr_stmt(expr, scope),
         }
     }
 }
