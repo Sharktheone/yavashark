@@ -14,7 +14,7 @@ impl Context {
         let callee = self.run_expr(callee_expr, stmt.span, scope)?;
 
         return if let Value::Object(obj) = callee {
-            let mut obj = obj.try_borrow_mut()?;
+            let mut obj = obj.try_borrow_mut().map_err(|_| Error::reference("Cannot borrow object".to_string()))?;
 
 
             if let Some(f) = &mut obj.call {

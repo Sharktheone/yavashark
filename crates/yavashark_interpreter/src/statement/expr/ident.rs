@@ -10,7 +10,7 @@ impl Context {
         let ident = stmt.sym.to_string();
         let value = scope.resolve(&ident);
         match value {
-            Some(value) => Ok(value.clone()),
+            Some(value) => Ok(value.copy()),
             None => Err(ControlFlow::error_reference(format!("{} is not defined", ident)))
         }
     }

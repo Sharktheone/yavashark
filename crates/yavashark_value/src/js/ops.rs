@@ -1,4 +1,5 @@
 use std::cmp::Ordering;
+use std::fmt::Debug;
 use std::ops::{Add, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub};
 
 use super::Value;
@@ -17,7 +18,7 @@ impl ToNumber for bool {
     }
 }
 
-impl Value {
+impl<F: Debug> Value<F> {
     pub fn to_number_or_null(&self) -> f64 {
         match self {
             Value::Number(n) => *n,
@@ -57,7 +58,7 @@ impl Value {
 }
 
 
-impl Add for Value {
+impl<F: Debug> Add for Value<F> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -107,7 +108,7 @@ impl Add for Value {
     }
 }
 
-impl Sub for Value {
+impl<F: Debug> Sub for Value<F> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -178,7 +179,7 @@ impl Sub for Value {
     }
 }
 
-impl Mul for Value {
+impl<F: Debug> Mul for Value<F> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -216,7 +217,7 @@ impl Mul for Value {
     }
 }
 
-impl Div for Value {
+impl<F: Debug> Div for Value<F> {
     type Output = Self;
 
 
@@ -279,7 +280,7 @@ impl Div for Value {
     }
 }
 
-impl Rem for Value {
+impl<F: Debug> Rem for Value<F> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -333,7 +334,7 @@ impl Rem for Value {
     }
 }
 
-impl PartialOrd for Value {
+impl<F: Debug + PartialEq> PartialOrd for Value<F> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
             (Value::Null, Value::Null) => Some(Ordering::Equal),
@@ -389,7 +390,7 @@ impl PartialOrd for Value {
     }
 }
 
-impl Shl for Value {
+impl<F: Debug> Shl for Value<F> {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
@@ -481,7 +482,7 @@ impl Shl for Value {
 }
 
 
-impl Shr for Value {
+impl<F: Debug> Shr for Value<F> {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
@@ -573,7 +574,7 @@ impl Shr for Value {
 }
 
 
-impl BitOr for Value {
+impl<F: Debug> BitOr for Value<F> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -581,7 +582,7 @@ impl BitOr for Value {
     }
 }
 
-impl BitAnd for Value {
+impl<F: Debug> BitAnd for Value<F> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -589,7 +590,7 @@ impl BitAnd for Value {
     }
 }
 
-impl BitXor for Value {
+impl<F: Debug> BitXor for Value<F> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
@@ -597,10 +598,10 @@ impl BitXor for Value {
     }
 }
 
-impl Value {
+impl<F: Debug> Value<F> {
     pub fn log_or(&self, rhs: Self) -> Self {
         if self.is_truthy() {
-            self.clone()
+            self.copy()
         } else {
             rhs
         }
@@ -610,7 +611,7 @@ impl Value {
         if self.is_truthy() {
             rhs
         } else {
-            self.clone()
+            self.copy()
         }
     }
     

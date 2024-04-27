@@ -6,7 +6,12 @@ use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
 
 #[test]
 fn test() {
-    let src = "let x = 1 + a";
+    let src = r#"log('Hello, World!');
+
+    function add(a, b) {
+        return a + b;
+    }
+    "#;
     
     let c = TsConfig {
         ..Default::default()

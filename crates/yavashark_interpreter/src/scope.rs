@@ -182,7 +182,7 @@ impl ScopeInternal {
         if self.state.is_global() || self.state.is_function() {
             self.variables.insert(name, Variable::new(value));
         } else if let Some(p) = self.parent.as_ref() {
-            p.borrow_mut().declare_global_var(name.clone(), value.clone());
+            p.borrow_mut().declare_global_var(name.clone(), value.copy());
         } else  {
             self.variables.insert(name, Variable::new(value));
         }
@@ -190,7 +190,7 @@ impl ScopeInternal {
 
     pub fn resolve(&self, name: &str) -> Option<Value> {
         if let Some(v) = self.variables.get(name) {
-            return Some(v.cloned());
+            return Some(v.copy());
         }
 
         if let Some(p) = self.parent.as_ref() {

@@ -49,7 +49,7 @@ impl<F: Debug> Value<F> {
 }
 
 
-impl<F> Display for Value<F> {
+impl<F: Debug> Display for Value<F> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Value::Null => write!(f, "null"),

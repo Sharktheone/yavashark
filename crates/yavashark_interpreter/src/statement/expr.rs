@@ -103,7 +103,7 @@ impl Context {
             Expr::Member(stmt) => { self.run_member(stmt, scope) }
             Expr::SuperProp(stmt) => { self.run_super_prop(stmt, scope) }
             Expr::Cond(stmt) => { self.run_cond(stmt, scope) }
-            Expr::Call(stmt) => { self.run_call(stmt, scope) }
+            Expr::Call(stmt) => { Ok(self.run_call(stmt, scope)?) }
             Expr::New(stmt) => { self.run_new(stmt, scope) }
             Expr::Seq(stmt) => { self.run_seq(stmt, scope) }
             Expr::Ident(stmt) => { self.run_ident(stmt, scope) }

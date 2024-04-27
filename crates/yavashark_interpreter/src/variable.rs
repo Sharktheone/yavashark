@@ -36,8 +36,8 @@ impl Variable {
         &self.value
     }
 
-    pub fn cloned(&self) -> Value {
-        self.value.clone()
+    pub fn copy(&self) -> Value {
+        self.value.copy()
     }
 
     pub fn is_writable(&self) -> bool {
