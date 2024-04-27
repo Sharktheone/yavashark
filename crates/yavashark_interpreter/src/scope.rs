@@ -184,16 +184,23 @@ impl ScopeInternal {
         }
     }
     
-    pub fn resolve_var(&self, name: &str) -> Option<Value> {
+    pub fn resolve(&self, name: &str) -> Option<Value> {
         if let Some(v) = self.variables.get(name) {
             return Some(v.cloned());
         }
         
         if let Some(p) = self.parent.as_ref() {
-            return p.borrow().resolve_var(name);
+            return p.borrow().resolve(name);
         }
         
         None
+    }
+}
+
+
+impl Default for Scope {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -227,5 +234,9 @@ impl Scope {
     
     pub fn declare_global_var(&mut self, name: String, value: Value) {
         self.scope.borrow_mut().declare_global_var(name, value);
+    }
+    
+    pub fn resolve(&self, name: &str) -> Option<Value> {
+        self.scope.borrow().resolve(name)
     }
 }

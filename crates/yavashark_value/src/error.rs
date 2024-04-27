@@ -15,6 +15,16 @@ impl Error {
             },
         }
     }
+    
+    
+    pub fn reference(error: String) -> Self {
+        Self {
+            kind: ErrorKind::ReferenceError(error),
+            stacktrace: StackTrace {
+                frames: vec![],
+            },
+        }
+    }
 }
 
 
