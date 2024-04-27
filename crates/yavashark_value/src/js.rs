@@ -52,7 +52,7 @@ impl<F: Debug> Display for Value<F> {
             Value::Number(n) => write!(f, "{}", n),
             Value::String(s) => write!(f, "{}", s),
             Value::Boolean(b) => write!(f, "{}", b),
-            Value::Object(o) => write!(f, "[object Object]"),
+            Value::Object(_) => write!(f, "[object Object]"),
         }
     }
 }

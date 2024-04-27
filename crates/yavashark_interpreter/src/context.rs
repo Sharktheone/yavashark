@@ -4,15 +4,19 @@ use crate::Value;
 use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
 
+
+#[derive(Debug, Default)]
 pub struct Context {
     //TODO: figure out, what needs to be here
 }
 
 impl Context {
+    
+    
     pub fn new() -> Self {
-        Self {}
+        Self::default()
     }
-
+    
     pub fn run_statements(&mut self, script: &Vec<Stmt>, scope: &mut Scope) -> RuntimeResult {
         let mut last_value = Value::Undefined;
         for stmt in script {

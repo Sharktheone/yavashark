@@ -4,8 +4,10 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
 
+type NativeFn = Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>;
+
 pub enum Function {
-    Native(Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>),
+    Native(NativeFn),
 }
 
 impl Function {
@@ -15,17 +17,18 @@ impl Function {
         }
     }
 
-    pub fn native(f: Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>) -> Self {
+    pub fn native(f: NativeFn) -> Self {
         Function::Native(f)
     }
 
-    pub fn native_val(f: Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>) -> Value {
+    pub fn native_val(f: NativeFn) -> Value {
         let obj = Function::native(f).into();
         let ohj = Rc::new(RefCell::new(obj));
         Value::Object(ohj)
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<Object> for Function {
     fn into(self) -> Object {
         let mut obj = Object::new();

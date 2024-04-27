@@ -10,6 +10,6 @@ edition = "2021"
 
 
 [features]
-default = ["ts"]
+default = []
 js = []
 ts = []

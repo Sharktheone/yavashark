@@ -9,6 +9,7 @@ use yavashark_value::error::Error;
 
 use crate::variable::Variable;
 
+#[derive(Debug, Clone, Default)]
 pub struct ScopeState {
     state: u8,
 }
@@ -44,7 +45,7 @@ impl ScopeState {
         Self { state: 0 }
     }
 
-    pub fn clone(state: &Self) -> Self {
+    pub fn copy(state: &Self) -> Self {
         let mut state = state.state;
 
         state &= !Self::FUNCTION; // Remove the function state
