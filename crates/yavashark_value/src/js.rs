@@ -19,8 +19,10 @@ pub enum Value<F: Debug> {
     Object(Rc<RefCell<Object<F>>>),
 }
 
-impl<F: Debug> Clone for Value<F> {
-    fn clone(&self) -> Self {
+
+impl<F: Debug> Value<F> {
+
+    pub fn copy(&self) -> Self {
         match self {
             Value::Null => Value::Null,
             Value::Undefined => Value::Undefined,
