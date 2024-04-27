@@ -1,9 +1,10 @@
 #![allow(unused)]
 
 
-mod context;
-mod scope;
-mod statement;
+pub mod context;
+pub mod scope;
+pub mod statement;
+pub mod variable;
 
 use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
@@ -23,7 +24,11 @@ impl ControlFlow {
     }
 }
 
-type Result = std::result::Result<Value, Error>;
+type ValueResult = std::result::Result<Value, Error>;
+
+type Result<T> = std::result::Result<T, Error>;
+
+type Res = Result<()>;
 
 type RuntimeResult = std::result::Result<Value, ControlFlow>;
 
@@ -31,6 +36,15 @@ type RuntimeResult = std::result::Result<Value, ControlFlow>;
 impl From<Error> for ControlFlow {
     fn from(e: Error) -> Self {
         ControlFlow::Error(e)
+    }
+}
+
+impl From<ControlFlow> for Error {
+    fn from(e: ControlFlow) -> Self {
+        match e {
+            ControlFlow::Error(e) => e,
+            _ => Error::new("Incorrect ControlFlow".to_string())
+        }
     }
 }
 
@@ -48,7 +62,7 @@ impl Interpreter {
         }
     }
 
-    pub fn run(&self) -> Result {
+    pub fn run(&self) -> ValueResult {
         let mut context = context::Context::new();
         let mut scope = scope::Scope::new();
         
