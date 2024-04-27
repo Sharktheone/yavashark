@@ -1,12 +1,11 @@
+use crate::object::Object;
 use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::rc::Rc;
-use crate::object::Object;
 
 pub mod object;
 mod ops;
-
 
 #[derive(Debug, PartialEq)]
 pub enum Value<F: Debug> {
@@ -19,9 +18,7 @@ pub enum Value<F: Debug> {
     Object(Rc<RefCell<Object<F>>>),
 }
 
-
 impl<F: Debug> Value<F> {
-
     pub fn copy(&self) -> Self {
         match self {
             Value::Null => Value::Null,
@@ -33,7 +30,6 @@ impl<F: Debug> Value<F> {
         }
     }
 }
-
 
 impl<F: Debug> Value<F> {
     pub fn type_of(&self) -> &'static str {
@@ -47,7 +43,6 @@ impl<F: Debug> Value<F> {
         }
     }
 }
-
 
 impl<F: Debug> Display for Value<F> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

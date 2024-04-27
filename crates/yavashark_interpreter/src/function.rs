@@ -1,14 +1,12 @@
+use crate::scope::Scope;
+use crate::{Object, Res, RuntimeResult, Value, ValueResult};
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
-use crate::scope::Scope;
-use crate::{Object, Res, RuntimeResult, Value, ValueResult};
-
 
 pub enum Function {
     Native(Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>),
 }
-
 
 impl Function {
     pub fn call(&mut self, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
@@ -17,18 +15,16 @@ impl Function {
         }
     }
 
-
     pub fn native(f: Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>) -> Self {
         Function::Native(f)
     }
-    
+
     pub fn native_val(f: Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>) -> Value {
         let obj = Function::native(f).into();
         let ohj = Rc::new(RefCell::new(obj));
         Value::Object(ohj)
     }
 }
-
 
 impl Into<Object> for Function {
     fn into(self) -> Object {

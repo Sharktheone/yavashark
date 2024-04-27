@@ -1,6 +1,3 @@
-
-
-
 pub enum Value<T: TSValue> {
     Null,
     Undefined,
@@ -27,15 +24,12 @@ impl<T: TSValue> Value<T> {
             Value::Some(value) => ValueType::Type(value.value_type()),
         }
     }
-
-
 }
 
 pub trait TSValue {
     fn type_of(&self) -> &'static str;
     fn value_type(&self) -> TSValueType;
 }
-
 
 pub enum TSValueType {
     Number,

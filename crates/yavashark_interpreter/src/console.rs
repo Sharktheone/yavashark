@@ -1,28 +1,29 @@
+use crate::{Function, Object, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
-use crate::{Function, Object, Value};
 
 pub fn get_console() -> Value {
     let mut console = Object::new();
 
+    console.define_property(
+        "log".to_string(),
+        Function::native_val(Box::new(|args, _| {
+            let mut str = String::new();
 
-    console.define_property("log".to_string(), Function::native_val(Box::new(|args, _| {
-        let mut str = String::new();
-        
-        for arg in args {
-            str.push_str(&arg.to_string());
-            str.push(' ');
-        }
-        
-        str.pop();
+            for arg in args {
+                str.push_str(&arg.to_string());
+                str.push(' ');
+            }
 
-        println!("{}", str);
+            str.pop();
 
-        Ok(Value::Undefined)
-    })));
-    
-    
+            println!("{}", str);
+
+            Ok(Value::Undefined)
+        })),
+    );
+
     let console = Rc::new(RefCell::new(console));
-    
+
     Value::Object(console)
 }

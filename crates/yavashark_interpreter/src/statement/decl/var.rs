@@ -1,9 +1,9 @@
+use crate::context::Context;
+use crate::scope::Scope;
+use crate::Value;
+use crate::{Res, RuntimeResult};
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
 use yavashark_value::error::Error;
-use crate::Value;
-use crate::context::Context;
-use crate::{Res, RuntimeResult};
-use crate::scope::Scope;
 
 impl Context {
     pub fn decl_var(&mut self, stmt: &VarDecl, scope: &mut Scope) -> Res {
@@ -25,7 +25,7 @@ impl Context {
                 }
 
                 Ok(())
-            },
+            }
             VarDeclKind::Let => {
                 for decl in &stmt.decls {
                     let id = &decl.name;
@@ -42,7 +42,7 @@ impl Context {
                     }
                 }
                 Ok(())
-            },
+            }
             VarDeclKind::Const => {
                 for decl in &stmt.decls {
                     let id = &decl.name;
@@ -55,11 +55,13 @@ impl Context {
                         let value = self.run_expr(init, stmt.span, scope)?;
                         scope.declare_read_only_var(id.sym.to_string(), value);
                     } else {
-                        return Err(Error::new("Const declaration must have an initializer".to_owned()));
+                        return Err(Error::new(
+                            "Const declaration must have an initializer".to_owned(),
+                        ));
                     }
                 }
                 Ok(())
-            },
+            }
         }
     }
 }

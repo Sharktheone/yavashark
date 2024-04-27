@@ -1,12 +1,11 @@
-use yavashark_value::error::Error;
-use crate::Value;
 use crate::Res;
+use crate::Value;
+use yavashark_value::error::Error;
 
 pub struct Variable {
     pub value: Value,
     pub properties: Attributes,
 }
-
 
 impl Variable {
     pub fn new(value: Value) -> Self {
@@ -25,7 +24,9 @@ impl Variable {
 
     pub fn mutate(&mut self, value: Value) -> Res {
         if !self.properties.is_writable() {
-            return Err(Error::new("Cannot assign to read-only variable".to_string()));
+            return Err(Error::new(
+                "Cannot assign to read-only variable".to_string(),
+            ));
         }
 
         self.value = value;
@@ -64,7 +65,6 @@ impl Variable {
         self.properties.make_configurable();
     }
 }
-
 
 pub struct Attributes(u8);
 
@@ -105,7 +105,6 @@ impl Attributes {
         self.0 |= Self::CONFIGURABLE;
     }
 }
-
 
 impl Default for Attributes {
     fn default() -> Self {

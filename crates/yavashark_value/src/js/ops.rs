@@ -32,7 +32,13 @@ impl<F: Debug> Value<F> {
         match self {
             Value::Number(n) => *n,
             Value::Boolean(b) => b.num(),
-            Value::String(s) => if s.is_empty() { 0.0 } else { s.parse().unwrap_or(f64::NAN) },
+            Value::String(s) => {
+                if s.is_empty() {
+                    0.0
+                } else {
+                    s.parse().unwrap_or(f64::NAN)
+                }
+            }
             _ => f64::NAN,
         }
     }
@@ -57,7 +63,6 @@ impl<F: Debug> Value<F> {
     }
 }
 
-
 impl<F: Debug> Add for Value<F> {
     type Output = Self;
 
@@ -75,14 +80,18 @@ impl<F: Debug> Add for Value<F> {
             (Value::Undefined, Value::Number(b)) => Value::Number(b),
             (Value::Undefined, Value::String(b)) => Value::String("undefined".to_string() + &b),
             (Value::Undefined, Value::Boolean(_)) => Value::Number(f64::NAN),
-            (Value::Undefined, Value::Object(_)) => Value::String("undefined[object Object]".to_owned()),
+            (Value::Undefined, Value::Object(_)) => {
+                Value::String("undefined[object Object]".to_owned())
+            }
 
             (Value::Number(a), Value::Null) => Value::Number(a),
             (Value::Number(_), Value::Undefined) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a + b),
             (Value::Number(a), Value::String(b)) => Value::String(a.to_string() + &b),
             (Value::Number(a), Value::Boolean(b)) => Value::Number(a + b.num()),
-            (Value::Number(a), Value::Object(_)) => Value::String(a.to_string() + "[object Object]"),
+            (Value::Number(a), Value::Object(_)) => {
+                Value::String(a.to_string() + "[object Object]")
+            }
 
             (Value::String(a), Value::Null) => Value::String(a + "null"),
             (Value::String(a), Value::Undefined) => Value::String(a + "undefined"),
@@ -96,14 +105,26 @@ impl<F: Debug> Add for Value<F> {
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() + b),
             (Value::Boolean(a), Value::String(b)) => Value::String(a.to_string() + &b),
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() + b.num()),
-            (Value::Boolean(a), Value::Object(_)) => Value::String(a.to_string() + "[object Object]"),
+            (Value::Boolean(a), Value::Object(_)) => {
+                Value::String(a.to_string() + "[object Object]")
+            }
 
             (Value::Object(_), Value::Null) => Value::String("[object Object]null".to_owned()),
-            (Value::Object(_), Value::Undefined) => Value::String("[object Object]undefined".to_owned()),
-            (Value::Object(_), Value::Number(b)) => Value::String("[object Object]".to_owned() + &b.to_string()),
-            (Value::Object(_), Value::String(b)) => Value::String("[object Object]".to_owned() + &b),
-            (Value::Object(_), Value::Boolean(b)) => Value::String("[object Object]".to_owned() + &b.to_string()),
-            (Value::Object(_), Value::Object(_)) => Value::String("[object Object][object Object]".to_owned()),
+            (Value::Object(_), Value::Undefined) => {
+                Value::String("[object Object]undefined".to_owned())
+            }
+            (Value::Object(_), Value::Number(b)) => {
+                Value::String("[object Object]".to_owned() + &b.to_string())
+            }
+            (Value::Object(_), Value::String(b)) => {
+                Value::String("[object Object]".to_owned() + &b)
+            }
+            (Value::Object(_), Value::Boolean(b)) => {
+                Value::String("[object Object]".to_owned() + &b.to_string())
+            }
+            (Value::Object(_), Value::Object(_)) => {
+                Value::String("[object Object][object Object]".to_owned())
+            }
         }
     }
 }
@@ -187,16 +208,16 @@ impl<F: Debug> Mul for Value<F> {
             (Value::Null, _) | (_, Value::Null) => Value::Number(0.0),
             (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a * b),
-            (Value::Number(a), Value::String(b))
-            | (Value::String(b), Value::Number(a)) => {
+            (Value::Number(a), Value::String(b)) | (Value::String(b), Value::Number(a)) => {
                 if let Ok(b) = b.parse::<f64>() {
                     Value::Number(a * b)
                 } else {
                     Value::Number(f64::NAN)
                 }
             }
-            (Value::Number(a), Value::Boolean(b))
-            | (Value::Boolean(b), Value::Number(a)) => Value::Number(a * b.num()),
+            (Value::Number(a), Value::Boolean(b)) | (Value::Boolean(b), Value::Number(a)) => {
+                Value::Number(a * b.num())
+            }
             (Value::String(a), Value::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
                     Value::Number(a * b)
@@ -220,12 +241,10 @@ impl<F: Debug> Mul for Value<F> {
 impl<F: Debug> Div for Value<F> {
     type Output = Self;
 
-
     //TODO: handle div by zero => return Infinity
     fn div(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
-            (Value::Null, Value::Null)
-            | (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
+            (Value::Null, Value::Null) | (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Null, Value::Number(_)) => Value::Number(0.0),
             (Value::Null, Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
@@ -236,27 +255,31 @@ impl<F: Debug> Div for Value<F> {
             }
             (Value::Null, Value::Boolean(b)) => Value::Number(0.0 / b.num()),
             (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
-            (Value::Number(a), Value::Null) => if a == 0.0 {
-                Value::Number(f64::NAN)
-            } else {
-                Value::Number(f64::INFINITY)
-            },
+            (Value::Number(a), Value::Null) => {
+                if a == 0.0 {
+                    Value::Number(f64::NAN)
+                } else {
+                    Value::Number(f64::INFINITY)
+                }
+            }
             (Value::Number(a), Value::Number(b)) => Value::Number(a / b),
-            (Value::Number(a), Value::String(b))
-            | (Value::String(b), Value::Number(a)) => {
+            (Value::Number(a), Value::String(b)) | (Value::String(b), Value::Number(a)) => {
                 if let Ok(b) = b.parse::<f64>() {
                     Value::Number(a / b)
                 } else {
                     Value::Number(f64::NAN)
                 }
             }
-            (Value::Number(a), Value::Boolean(b))
-            | (Value::Boolean(b), Value::Number(a)) => Value::Number(a / b.num()),
-            (Value::String(a), Value::Null) => if a == "0" {
-                Value::Number(f64::NAN)
-            } else {
-                Value::Number(f64::INFINITY)
-            },
+            (Value::Number(a), Value::Boolean(b)) | (Value::Boolean(b), Value::Number(a)) => {
+                Value::Number(a / b.num())
+            }
+            (Value::String(a), Value::Null) => {
+                if a == "0" {
+                    Value::Number(f64::NAN)
+                } else {
+                    Value::Number(f64::INFINITY)
+                }
+            }
             (Value::String(a), Value::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
                     Value::Number(a / b)
@@ -264,8 +287,7 @@ impl<F: Debug> Div for Value<F> {
                     Value::Number(f64::NAN)
                 }
             }
-            (Value::String(a), Value::Boolean(b))
-            | (Value::Boolean(b), Value::String(a)) => {
+            (Value::String(a), Value::Boolean(b)) | (Value::Boolean(b), Value::String(a)) => {
                 if let Ok(a) = a.parse::<f64>() {
                     Value::Number(a / b.num())
                 } else {
@@ -287,8 +309,7 @@ impl<F: Debug> Rem for Value<F> {
         match (self, rhs) {
             (_, Value::Null) => Value::Number(f64::NAN),
             (Value::Null, _) => Value::Number(0.0),
-            (_, Value::Undefined)
-            | (Value::Undefined, _) => Value::Number(f64::NAN),
+            (_, Value::Undefined) | (Value::Undefined, _) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a % b),
             (Value::Number(a), Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
@@ -377,7 +398,13 @@ impl<F: Debug + PartialEq> PartialOrd for Value<F> {
                 let a = a.parse::<f64>().ok()?;
                 a.partial_cmp(&b.num())
             }
-            (Value::String(a), Value::Object(_)) => if a == "[object Object]" { Some(Ordering::Equal) } else { None },
+            (Value::String(a), Value::Object(_)) => {
+                if a == "[object Object]" {
+                    Some(Ordering::Equal)
+                } else {
+                    None
+                }
+            }
 
             (Value::Boolean(a), Value::Null) => a.num().partial_cmp(&0.0),
             (Value::Boolean(a), Value::Number(b)) => a.num().partial_cmp(b),
@@ -474,13 +501,14 @@ impl<F: Debug> Shl for Value<F> {
                 Value::Number(((a as i64) << b as i64) as f64)
             }
 
-            (Value::Boolean(a), Value::Boolean(b)) => Value::Number(((a as i64) << b as i64) as f64),
+            (Value::Boolean(a), Value::Boolean(b)) => {
+                Value::Number(((a as i64) << b as i64) as f64)
+            }
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
         }
     }
 }
-
 
 impl<F: Debug> Shr for Value<F> {
     type Output = Self;
@@ -566,13 +594,14 @@ impl<F: Debug> Shr for Value<F> {
                 Value::Number(((a as i64) >> b as i64) as f64)
             }
 
-            (Value::Boolean(a), Value::Boolean(b)) => Value::Number(((a as i64) >> b as i64) as f64),
+            (Value::Boolean(a), Value::Boolean(b)) => {
+                Value::Number(((a as i64) >> b as i64) as f64)
+            }
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
         }
     }
 }
-
 
 impl<F: Debug> BitOr for Value<F> {
     type Output = Self;
@@ -614,7 +643,7 @@ impl<F: Debug> Value<F> {
             self.copy()
         }
     }
-    
+
     pub fn pow(&self, rhs: Self) -> Self {
         Self::Number(self.to_number().powf(rhs.to_number()))
     }

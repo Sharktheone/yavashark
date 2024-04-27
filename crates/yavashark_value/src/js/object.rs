@@ -1,7 +1,6 @@
+use super::Value;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
-use super::Value;
-
 
 #[derive(Debug, PartialEq)]
 pub struct Object<F: Debug> {
@@ -10,8 +9,7 @@ pub struct Object<F: Debug> {
     pub construct: Option<F>,
 }
 
-
-impl <F: Debug> Object<F> {
+impl<F: Debug> Object<F> {
     pub fn new() -> Self {
         Self {
             properties: HashMap::new(),

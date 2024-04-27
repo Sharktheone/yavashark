@@ -1,31 +1,30 @@
 mod block;
-mod debugger;
-mod with;
-mod r#return;
-mod labeled;
+mod r#break;
 mod r#continue;
-mod r#if;
-mod switch;
-mod r#try;
-mod r#while;
+mod debugger;
+mod decl;
 mod do_while;
+pub mod expr;
 mod r#for;
 mod for_in;
 mod for_of;
-mod decl;
-pub mod expr;
-mod r#break;
+mod r#if;
+mod labeled;
+mod r#return;
+mod switch;
 mod throw;
+mod r#try;
+mod r#while;
+mod with;
 
+use crate::context::Context;
+use crate::scope::Scope;
+use crate::RuntimeResult;
+use crate::Value;
 use swc_ecma_ast::Stmt;
 use yavashark_value::error::Error;
-use crate::Value;
-use crate::context::Context;
-use crate::RuntimeResult;
-use crate::scope::Scope;
 
 impl Context {
-
     pub fn run_statement(&mut self, stmt: &Stmt, scope: &mut Scope) -> RuntimeResult {
         match stmt {
             Stmt::Block(block) => self.run_block(block, scope),
@@ -45,7 +44,10 @@ impl Context {
             Stmt::For(f) => self.run_for(f, scope),
             Stmt::ForIn(f) => self.run_for_in(f, scope),
             Stmt::ForOf(f) => self.run_for_of(f, scope),
-            Stmt::Decl(d) => self.run_decl(d, scope).map(|_| Value::Undefined).map_err(|e| e.into()),
+            Stmt::Decl(d) => self
+                .run_decl(d, scope)
+                .map(|_| Value::Undefined)
+                .map_err(|e| e.into()),
             Stmt::Expr(expr) => self.run_expr_stmt(expr, scope),
         }
     }

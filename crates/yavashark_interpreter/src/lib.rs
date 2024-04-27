@@ -1,20 +1,18 @@
 #![allow(unused)]
 
-
+mod console;
 pub mod context;
+mod function;
 pub mod scope;
 pub mod statement;
-pub mod variable;
 mod value;
-mod function;
-mod console;
+pub mod variable;
 
-pub use value::*;
 pub use function::*;
+pub use value::*;
 
 use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
-
 
 pub enum ControlFlow {
     Continue,
@@ -41,7 +39,6 @@ type Res = Result<()>;
 
 type RuntimeResult = std::result::Result<Value, ControlFlow>;
 
-
 impl From<Error> for ControlFlow {
     fn from(e: Error) -> Self {
         ControlFlow::Error(e)
@@ -52,51 +49,43 @@ impl From<ControlFlow> for Error {
     fn from(e: ControlFlow) -> Self {
         match e {
             ControlFlow::Error(e) => e,
-            _ => Error::new("Incorrect ControlFlow".to_string())
+            _ => Error::new("Incorrect ControlFlow".to_string()),
         }
     }
 }
-
-
 
 pub struct Interpreter {
     script: Vec<Stmt>,
 }
 
-
 impl Interpreter {
     pub fn new(script: Vec<Stmt>) -> Self {
-        Self {
-            script,
-        }
+        Self { script }
     }
 
     pub fn run(&self) -> ValueResult {
         let mut context = context::Context::new();
         let mut scope = scope::Scope::new();
-        
-        context.run_statements(&self.script, &mut scope).or_else(|e| {
-            match e {
+
+        context
+            .run_statements(&self.script, &mut scope)
+            .or_else(|e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
                 _ => Ok(Value::Undefined),
-            }
-        })
+            })
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
-    use swc_common::BytePos;
-    use swc_common::input::StringInput;
-    use swc_ecma_parser::{Parser, Syntax};
     use super::*;
-    
+    use swc_common::input::StringInput;
+    use swc_common::BytePos;
+    use swc_ecma_parser::{Parser, Syntax};
+
     #[test]
     fn math() {
-        
         let src = r#"
 
         let x = 1 + 2
@@ -116,19 +105,16 @@ mod tests {
 
         z
         "#;
-        
+
         let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 
         let c = Default::default();
-        
-        let mut p = Parser::new(Syntax::Es(c),input, None);
+
+        let mut p = Parser::new(Syntax::Es(c), input, None);
         let script = p.parse_script().unwrap();
-        
+
         let interpreter = Interpreter::new(script.body);
         let result = interpreter.run().unwrap();
         println!("{:?}", result);
     }
-    
 }
-
-

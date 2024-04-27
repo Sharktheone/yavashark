@@ -2,10 +2,10 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use yavashark_value::error::Error;
 use crate::console::get_console;
-use crate::Value;
 use crate::Res;
+use crate::Value;
+use yavashark_value::error::Error;
 
 use crate::variable::Variable;
 
@@ -21,29 +21,36 @@ impl ScopeState {
     const ITERATION: u8 = 0b100;
     const BREAKABLE: u8 = 0b1000;
     const RETURNABLE: u8 = 0b10000;
-    const STATE_NONE: ScopeState = ScopeState { state: ScopeState::NONE };
-    const STATE_GLOBAL: ScopeState = ScopeState { state: ScopeState::GLOBAL };
-    const STATE_FUNCTION: ScopeState = ScopeState { state: ScopeState::FUNCTION };
-    const STATE_ITERATION: ScopeState = ScopeState { state: ScopeState::ITERATION };
-    const STATE_BREAKABLE: ScopeState = ScopeState { state: ScopeState::BREAKABLE };
-    const STATE_RETURNABLE: ScopeState = ScopeState { state: ScopeState::RETURNABLE };
+    const STATE_NONE: ScopeState = ScopeState {
+        state: ScopeState::NONE,
+    };
+    const STATE_GLOBAL: ScopeState = ScopeState {
+        state: ScopeState::GLOBAL,
+    };
+    const STATE_FUNCTION: ScopeState = ScopeState {
+        state: ScopeState::FUNCTION,
+    };
+    const STATE_ITERATION: ScopeState = ScopeState {
+        state: ScopeState::ITERATION,
+    };
+    const STATE_BREAKABLE: ScopeState = ScopeState {
+        state: ScopeState::BREAKABLE,
+    };
+    const STATE_RETURNABLE: ScopeState = ScopeState {
+        state: ScopeState::RETURNABLE,
+    };
 
     pub fn new() -> Self {
-        Self {
-            state: 0,
-        }
+        Self { state: 0 }
     }
 
     pub fn clone(state: &Self) -> Self {
         let mut state = state.state;
 
-
         state &= !Self::FUNCTION; // Remove the function state
         state &= !Self::GLOBAL; // Remove the global state
 
-        Self {
-            state,
-        }
+        Self { state }
     }
 
     pub fn set_global(&mut self) {
@@ -92,11 +99,9 @@ impl ScopeState {
     }
 }
 
-
 pub struct Scope {
     scope: Rc<RefCell<ScopeInternal>>,
 }
-
 
 struct ScopeInternal {
     parent: Option<Rc<RefCell<ScopeInternal>>>,
@@ -109,13 +114,31 @@ impl ScopeInternal {
     pub fn new() -> Self {
         let mut variables = HashMap::with_capacity(8);
 
-        variables.insert("undefined".to_string(), Variable::new_read_only(Value::Undefined));
-        variables.insert("NaN".to_string(), Variable::new_read_only(Value::Number(f64::NAN)));
-        variables.insert("Infinity".to_string(), Variable::new_read_only(Value::Number(f64::INFINITY)));
+        variables.insert(
+            "undefined".to_string(),
+            Variable::new_read_only(Value::Undefined),
+        );
+        variables.insert(
+            "NaN".to_string(),
+            Variable::new_read_only(Value::Number(f64::NAN)),
+        );
+        variables.insert(
+            "Infinity".to_string(),
+            Variable::new_read_only(Value::Number(f64::INFINITY)),
+        );
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
-        variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
-        variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
-        variables.insert("console".to_string(), Variable::new_read_only(get_console()));
+        variables.insert(
+            "true".to_string(),
+            Variable::new_read_only(Value::Boolean(true)),
+        );
+        variables.insert(
+            "false".to_string(),
+            Variable::new_read_only(Value::Boolean(false)),
+        );
+        variables.insert(
+            "console".to_string(),
+            Variable::new_read_only(get_console()),
+        );
         Self {
             parent: None,
             variables,
@@ -124,17 +147,34 @@ impl ScopeInternal {
         }
     }
 
-
     pub fn global() -> Self {
         let mut variables = HashMap::with_capacity(8);
 
-        variables.insert("undefined".to_string(), Variable::new_read_only(Value::Undefined));
-        variables.insert("NaN".to_string(), Variable::new_read_only(Value::Number(f64::NAN)));
-        variables.insert("Infinity".to_string(), Variable::new_read_only(Value::Number(f64::INFINITY)));
+        variables.insert(
+            "undefined".to_string(),
+            Variable::new_read_only(Value::Undefined),
+        );
+        variables.insert(
+            "NaN".to_string(),
+            Variable::new_read_only(Value::Number(f64::NAN)),
+        );
+        variables.insert(
+            "Infinity".to_string(),
+            Variable::new_read_only(Value::Number(f64::INFINITY)),
+        );
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
-        variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
-        variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
-        variables.insert("console".to_string(), Variable::new_read_only(get_console()));
+        variables.insert(
+            "true".to_string(),
+            Variable::new_read_only(Value::Boolean(true)),
+        );
+        variables.insert(
+            "false".to_string(),
+            Variable::new_read_only(Value::Boolean(false)),
+        );
+        variables.insert(
+            "console".to_string(),
+            Variable::new_read_only(get_console()),
+        );
 
         Self {
             parent: None,
@@ -147,13 +187,31 @@ impl ScopeInternal {
     pub fn with_parent(parent: Rc<RefCell<ScopeInternal>>) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
-        variables.insert("undefined".to_string(), Variable::new_read_only(Value::Undefined));
-        variables.insert("NaN".to_string(), Variable::new_read_only(Value::Number(f64::NAN)));
-        variables.insert("Infinity".to_string(), Variable::new_read_only(Value::Number(f64::INFINITY)));
+        variables.insert(
+            "undefined".to_string(),
+            Variable::new_read_only(Value::Undefined),
+        );
+        variables.insert(
+            "NaN".to_string(),
+            Variable::new_read_only(Value::Number(f64::NAN)),
+        );
+        variables.insert(
+            "Infinity".to_string(),
+            Variable::new_read_only(Value::Number(f64::INFINITY)),
+        );
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
-        variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
-        variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
-        variables.insert("console".to_string(), Variable::new_read_only(get_console()));
+        variables.insert(
+            "true".to_string(),
+            Variable::new_read_only(Value::Boolean(true)),
+        );
+        variables.insert(
+            "false".to_string(),
+            Variable::new_read_only(Value::Boolean(false)),
+        );
+        variables.insert(
+            "console".to_string(),
+            Variable::new_read_only(get_console()),
+        );
 
         Self {
             parent: Some(parent),
@@ -182,8 +240,9 @@ impl ScopeInternal {
         if self.state.is_global() || self.state.is_function() {
             self.variables.insert(name, Variable::new(value));
         } else if let Some(p) = self.parent.as_ref() {
-            p.borrow_mut().declare_global_var(name.clone(), value.copy());
-        } else  {
+            p.borrow_mut()
+                .declare_global_var(name.clone(), value.copy());
+        } else {
             self.variables.insert(name, Variable::new(value));
         }
     }
@@ -201,13 +260,11 @@ impl ScopeInternal {
     }
 }
 
-
 impl Default for Scope {
     fn default() -> Self {
         Self::new()
     }
 }
-
 
 impl Scope {
     pub fn new() -> Self {
@@ -224,7 +281,9 @@ impl Scope {
 
     pub fn with_parent(parent: &Scope) -> Self {
         Self {
-            scope: Rc::new(RefCell::new(ScopeInternal::with_parent(Rc::clone(&parent.scope)))),
+            scope: Rc::new(RefCell::new(ScopeInternal::with_parent(Rc::clone(
+                &parent.scope,
+            )))),
         }
     }
 
