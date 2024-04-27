@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use yavashark_value::error::Error;
-use yavashark_value::Value;
+use crate::Value;
 use crate::Res;
 
 use crate::variable::Variable;
@@ -121,18 +121,18 @@ impl ScopeInternal {
             state: ScopeState::new(),
         }
     }
-    
-    
+
+
     pub fn global() -> Self {
         let mut variables = HashMap::with_capacity(8);
-        
+
         variables.insert("undefined".to_string(), Variable::new_read_only(Value::Undefined));
         variables.insert("NaN".to_string(), Variable::new_read_only(Value::Number(f64::NAN)));
         variables.insert("Infinity".to_string(), Variable::new_read_only(Value::Number(f64::INFINITY)));
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
         variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
         variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
-        
+
         Self {
             parent: None,
             variables,
@@ -183,16 +183,16 @@ impl ScopeInternal {
             self.variables.insert(name, Variable::new(value));
         }
     }
-    
+
     pub fn resolve(&self, name: &str) -> Option<Value> {
         if let Some(v) = self.variables.get(name) {
             return Some(v.cloned());
         }
-        
+
         if let Some(p) = self.parent.as_ref() {
             return p.borrow().resolve(name);
         }
-        
+
         None
     }
 }
@@ -211,7 +211,7 @@ impl Scope {
             scope: Rc::new(RefCell::new(ScopeInternal::new())),
         }
     }
-    
+
     pub fn global() -> Self {
         Self {
             scope: Rc::new(RefCell::new(ScopeInternal::global())),
@@ -223,19 +223,19 @@ impl Scope {
             scope: Rc::new(RefCell::new(ScopeInternal::with_parent(Rc::clone(&parent.scope)))),
         }
     }
-    
+
     pub fn declare_var(&mut self, name: String, value: Value) {
         self.scope.borrow_mut().declare_var(name, value);
     }
-    
+
     pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
         self.scope.borrow_mut().declare_read_only_var(name, value)
     }
-    
+
     pub fn declare_global_var(&mut self, name: String, value: Value) {
         self.scope.borrow_mut().declare_global_var(name, value);
     }
-    
+
     pub fn resolve(&self, name: &str) -> Option<Value> {
         self.scope.borrow().resolve(name)
     }

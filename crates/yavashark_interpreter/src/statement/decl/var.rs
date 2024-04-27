@@ -1,6 +1,6 @@
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
 use yavashark_value::error::Error;
-use yavashark_value::Value;
+use crate::Value;
 use crate::context::Context;
 use crate::{Res, RuntimeResult};
 use crate::scope::Scope;
@@ -14,7 +14,7 @@ impl Context {
                     let Pat::Ident(id) = id else {
                         return Err(Error::new("Pattern is not an identifier".to_owned()));
                     };
-                    
+
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = self.run_expr(init, stmt.span, scope)?;
@@ -23,7 +23,7 @@ impl Context {
                         scope.declare_global_var(id.sym.to_string(), Value::Undefined);
                     }
                 }
-                
+
                 Ok(())
             },
             VarDeclKind::Let => {
@@ -32,7 +32,7 @@ impl Context {
                     let Pat::Ident(id) = id else {
                         return Err(Error::new("Pattern is not an identifier".to_owned()));
                     };
-                    
+
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = self.run_expr(init, stmt.span, scope)?;
@@ -49,7 +49,7 @@ impl Context {
                     let Pat::Ident(id) = id else {
                         return Err(Error::new("Pattern is not an identifier".to_owned()));
                     };
-                    
+
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = self.run_expr(init, stmt.span, scope)?;

@@ -1,6 +1,6 @@
 use swc_ecma_ast::WhileStmt;
 use yavashark_value::error::Error;
-use yavashark_value::Value;
+use crate::Value;
 use crate::context::Context;
 use crate::RuntimeResult;
 use crate::scope::Scope;
