@@ -8,6 +8,7 @@ pub mod statement;
 pub mod variable;
 mod value;
 mod function;
+mod console;
 
 pub use value::*;
 pub use function::*;

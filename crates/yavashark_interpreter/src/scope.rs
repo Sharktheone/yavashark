@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use yavashark_value::error::Error;
+use crate::console::get_console;
 use crate::Value;
 use crate::Res;
 
@@ -114,6 +115,7 @@ impl ScopeInternal {
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
         variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
         variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
+        variables.insert("console".to_string(), Variable::new_read_only(get_console()));
         Self {
             parent: None,
             variables,
@@ -132,6 +134,7 @@ impl ScopeInternal {
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
         variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
         variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
+        variables.insert("console".to_string(), Variable::new_read_only(get_console()));
 
         Self {
             parent: None,
@@ -150,6 +153,7 @@ impl ScopeInternal {
         variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
         variables.insert("true".to_string(), Variable::new_read_only(Value::Boolean(true)));
         variables.insert("false".to_string(), Variable::new_read_only(Value::Boolean(false)));
+        variables.insert("console".to_string(), Variable::new_read_only(get_console()));
 
         Self {
             parent: Some(parent),
