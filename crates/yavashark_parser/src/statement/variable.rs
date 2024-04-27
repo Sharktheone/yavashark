@@ -17,23 +17,26 @@ pub enum VariableDeclaration {
     Pattern(Pattern, Initializer),
 }
 
-struct Initializer {
+pub struct Initializer {
     // =
     expr: AssigmentExpression,
 }
 
-enum BindingIdentifier {
+pub enum BindingIdentifier {
     Identifier(Identifier),
     Yield,
     Await,
 }
 
-enum Pattern {
+pub enum Pattern {
     ObjectBindingPattern(ObjectBindingPattern),
     ArrayBindingPattern(ArrayBindingPattern),
 }
 
-enum ObjectBindingPattern {
+
+pub struct ArrayBindingPattern;
+
+pub enum ObjectBindingPattern {
     // { }
     Empty,
     // { BindingRestProperty }
@@ -44,30 +47,32 @@ enum ObjectBindingPattern {
     BindingPropertyListRest(BindingPropertyList, BindingRestProperty),
 }
 
-struct BindingRestProperty {
+pub struct BindingRestProperty {
     // ... BindingIdentifier
     ident: BindingIdentifier,
 }
 
-struct BindingPropertyList {
+pub struct BindingPropertyList {
     property: BindingProperty,
     list: Option<Box<BindingPropertyList>>,
 }
 
-enum BindingProperty {
+pub enum BindingProperty {
     // SingleNameBinding
     SingleNameBinding(SingleNameBinding),
     // PropertyName : BindingElement
     PropertyNameBindingElement(PropertyName, BindingElement),
 }
 
-struct SingleNameBinding {
+pub struct BindingElement;
+
+pub struct SingleNameBinding {
     // BindingIdentifier
     ident: BindingIdentifier,
     // Initializer
     init: Initializer,
 }
 
-struct PropertyName {
+pub struct PropertyName {
     //TODO
 }

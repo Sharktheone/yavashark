@@ -1,4 +1,4 @@
-use crate::block::BlockData;
+use crate::block::Block;
 use crate::function::FuncData;
 use slotmap::{DefaultKey, SlotMap};
 
@@ -20,7 +20,7 @@ pub enum NodeData {
     Stmt(StatData),
     VarDecl(VarDeclData),
     Enum(EnumData),
-    Block(BlockData),
+    Block(Block),
 }
 
 pub struct ExprData {}

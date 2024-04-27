@@ -1,9 +1,8 @@
-use std::mem;
-use swc_common::BytePos;
-use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
 
 #[test]
 fn test() {
+    use swc_common::BytePos;
+    use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
     let src = r#"log('Hello, World!');
 
     function add(a, b) {

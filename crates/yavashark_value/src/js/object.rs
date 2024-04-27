@@ -1,6 +1,7 @@
-use super::Value;
 use std::collections::HashMap;
-use std::fmt::{Debug, Display};
+use std::fmt::Debug;
+
+use super::Value;
 
 #[derive(Debug, PartialEq)]
 pub struct Object<F: Debug> {

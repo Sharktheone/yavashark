@@ -26,18 +26,18 @@ use with::WithStatement;
 
 pub enum Statement {
     // Yield, Await, Return
-    BlockStatement(BlockStatement),       // ?Yield, ?Await, ?Return
-    VariableStatement(VariableStatement), // ?Yield, ?Await
-    EmptyStatement,
-    ExpressionStatement(ExpressionStatement), // ?Yield, ?Await
-    IfStatement(IfStatement),                 // ?Yield, ?Await, ?Return
-    BreakableStatement(BreakableStatement),   // ?Yield, ?Await, ?Return
-    ContinueStatement(ContinueStatement),     // ?Yield, ?Await
-    BreakStatement(BreakStatement),           // ?Yield, ?Await
-    ReturnStatement(ReturnStatement),         // +Return, ?Yield, ?Await
-    WithStatement(WithStatement),             // ?Yield, ?Await, ?Return
-    LabelledStatement(LabelledStatement),     // ?Yield, ?Await, ?Return
-    ThrowStatement(ThrowStatement),           // ?Yield, ?Await
-    TryStatement(TryStatement),               // ?Yield, ?Await, ?Return
-    DebuggerStatement,
+    Block(BlockStatement),       // ?Yield, ?Await, ?Return
+    Variable(VariableStatement), // ?Yield, ?Await
+    Empty,
+    Expression(ExpressionStatement), // ?Yield, ?Await
+    If(IfStatement),                 // ?Yield, ?Await, ?Return
+    Breakable(BreakableStatement),   // ?Yield, ?Await, ?Return
+    Continue(ContinueStatement),     // ?Yield, ?Await
+    Break(BreakStatement),           // ?Yield, ?Await
+    Return(ReturnStatement),         // +Return, ?Yield, ?Await
+    With(WithStatement),             // ?Yield, ?Await, ?Return
+    Labelled(LabelledStatement),     // ?Yield, ?Await, ?Return
+    Throw(ThrowStatement),           // ?Yield, ?Await
+    Try(TryStatement),               // ?Yield, ?Await, ?Return
+    Debugger,
 }

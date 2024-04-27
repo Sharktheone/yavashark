@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused)]
+
+
 pub mod ast;
 mod block;
 mod declaration;

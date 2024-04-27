@@ -8,9 +8,9 @@ mod generator;
 
 pub enum Declaration {
     // Yield, Await
-    HoistableDecl(HoistableDecl), // ?Yield, ?Await, ~Default
-    ClassDecl(ClassDecl),         // ?Yield, ?Await, ~Default
-    LexicalDecl(LexicalDecl),     // +In ?Yield, ?Await
+    Hoistable(HoistableDecl), // ?Yield, ?Await, ~Default
+    Class(ClassDecl),         // ?Yield, ?Await, ~Default
+    Lexical(LexicalDecl),     // +In ?Yield, ?Await
 }
 
 pub struct HoistableDecl {
@@ -27,8 +27,8 @@ pub struct LexicalDecl {
 
 pub enum HoistableDeclaration {
     // Yield, Await, Default
-    FunctionDeclaration(FunctionDeclaration), // ?Yield, ?Await, ?Default
-    GeneratorDeclaration(GeneratorDeclaration), // ?Yield, ?Await, ?Default
-    AsyncFunctionDeclaration(AsyncFunctionDeclaration), // ?Yield, ?Await, ?Default
-    AsyncGeneratorDeclaration(AsyncGeneratorDeclaration), // ?Yield, ?Await, ?Default
+    Function(FunctionDeclaration), // ?Yield, ?Await, ?Default
+    Generator(GeneratorDeclaration), // ?Yield, ?Await, ?Default
+    AsyncFunction(AsyncFunctionDeclaration), // ?Yield, ?Await, ?Default
+    AsyncGenerator(AsyncGeneratorDeclaration), // ?Yield, ?Await, ?Default
 }
