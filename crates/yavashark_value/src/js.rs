@@ -29,6 +29,13 @@ impl<F: Debug> Value<F> {
             Value::Object(o) => Value::Object(Rc::clone(o)),
         }
     }
+    
+    pub fn is_nan(&self) -> bool {
+        match self {
+            Value::Number(n) => n.is_nan(),
+            _ => false,
+        }
+    }
 }
 
 impl<F: Debug> Value<F> {

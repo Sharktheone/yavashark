@@ -77,7 +77,7 @@ impl<F: Debug> Add for Value<F> {
 
             (Value::Undefined, Value::Null) => Value::Number(f64::NAN),
             (Value::Undefined, Value::Undefined) => Value::Number(f64::NAN),
-            (Value::Undefined, Value::Number(b)) => Value::Number(b),
+            (Value::Undefined, Value::Number(_)) => Value::Number(f64::NAN),
             (Value::Undefined, Value::String(b)) => Value::String("undefined".to_string() + &b),
             (Value::Undefined, Value::Boolean(_)) => Value::Number(f64::NAN),
             (Value::Undefined, Value::Object(_)) => {
@@ -646,5 +646,332 @@ impl<F: Debug> Value<F> {
 
     pub fn pow(&self, rhs: Self) -> Self {
         Self::Number(self.to_number().powf(rhs.to_number()))
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    use crate::object::Object;
+
+    type Value = super::Value<()>;
+
+
+    #[test]
+    fn add_null_null() {
+        let a = Value::Null;
+        let b = Value::Null;
+        assert_eq!(a + b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn add_null_undefined() {
+        let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_null_number() {
+        let a = Value::Null;
+        let b = Value::Number(1.0);
+        assert_eq!(a + b, Value::Number(1.0));
+    }
+
+    #[test]
+    fn add_null_string() {
+        let a = Value::Null;
+        let b = Value::String("hello".to_string());
+        assert_eq!(a + b, Value::String("nullhello".to_string()));
+
+        let a = Value::Null;
+        let b = Value::String("1".to_string());
+        assert_eq!(a + b, Value::String("null1".to_string()));
+    }
+
+    #[test]
+    fn add_null_boolean() {
+        let a = Value::Null;
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::Number(1.0));
+
+        let a = Value::Null;
+        let b = Value::Boolean(false);
+        assert_eq!(a + b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn add_null_object() {
+        let a = Value::Null;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("null[object Object]".to_string()));
+    }
+
+    #[test]
+    fn add_undefined_null() {
+        let a = Value::Undefined;
+        let b = Value::Null;
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_undefined_undefined() {
+        let a = Value::Undefined;
+        let b = Value::Undefined;
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_undefined_number() {
+        let a = Value::Undefined;
+        let b = Value::Number(1.0);
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_undefined_string() {
+        let a = Value::Undefined;
+        let b = Value::String("hello".to_string());
+        assert_eq!(a + b, Value::String("undefinedhello".to_string()));
+
+        let a = Value::Undefined;
+        let b = Value::String("1".to_string());
+        assert_eq!(a + b, Value::String("undefined1".to_string()));
+    }
+
+    #[test]
+    fn add_undefined_boolean() {
+        let a = Value::Undefined;
+        let b = Value::Boolean(true);
+        assert!((a + b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Boolean(false);
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_undefined_object() {
+        let a = Value::Undefined;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("undefined[object Object]".to_string()));
+    }
+
+    #[test]
+    fn add_number_null() {
+        let a = Value::Number(1.0);
+        let b = Value::Null;
+        assert_eq!(a + b, Value::Number(1.0));
+    }
+
+    #[test]
+    fn add_number_undefined() {
+        let a = Value::Number(1.0);
+        let b = Value::Undefined;
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_numbers_number() {
+        let a = Value::Number(1.0);
+        let b = Value::Number(2.0);
+        assert_eq!(a + b, Value::Number(3.0));
+    }
+
+    #[test]
+    fn add_numbers_string() {
+        let a = Value::Number(1.0);
+        let b = Value::String("2".to_string());
+        assert_eq!(a + b, Value::String("12".to_string()));
+
+        let a = Value::Number(1.0);
+        let b = Value::String("a".to_string());
+        assert_eq!(a + b, Value::String("1a".to_string()));
+    }
+
+    #[test]
+    fn add_number_boolean() {
+        let a = Value::Number(1.0);
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::Number(2.0));
+
+        let a = Value::Number(1.0);
+        let b = Value::Boolean(false);
+        assert_eq!(a + b, Value::Number(1.0));
+    }
+
+
+    #[test]
+    fn add_number_object() {
+        let a = Value::Number(1.0);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("1[object Object]".to_string()));
+    }
+
+
+    #[test]
+    fn add_string_null() {
+        let a = Value::String("hello".to_string());
+        let b = Value::Null;
+        assert_eq!(a + b, Value::String("hellonull".to_string()));
+    }
+
+    #[test]
+    fn add_string_undefined() {
+        let a = Value::String("hello".to_string());
+        let b = Value::Undefined;
+        assert_eq!(a + b, Value::String("helloundefined".to_string()));
+    }
+
+    #[test]
+    fn add_string_number() {
+        let a = Value::String("1".to_string());
+        let b = Value::Number(2.0);
+        assert_eq!(a + b, Value::String("12".to_string()));
+    }
+
+    #[test]
+    fn add_string_string() {
+        let a = Value::String("1".to_string());
+        let b = Value::String("2".to_string());
+        assert_eq!(a + b, Value::String("12".to_string()));
+
+
+        let a = Value::String("hello".to_string());
+        let b = Value::String("world".to_string());
+        assert_eq!(a + b, Value::String("helloworld".to_string()));
+    }
+
+    #[test]
+    fn add_string_boolean() {
+        let a = Value::String("1".to_string());
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::String("1true".to_string()));
+
+        let a = Value::String("hello".to_string());
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::String("hellotrue".to_string()));
+    }
+
+    #[test]
+    fn add_string_object() {
+        let a = Value::String("hello".to_string());
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("hello[object Object]".to_string()));
+    }
+
+    #[test]
+    fn add_boolean_null() {
+        let a = Value::Boolean(true);
+        let b = Value::Null;
+        assert_eq!(a + b, Value::Number(1.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Null;
+        assert_eq!(a + b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn add_boolean_undefined() {
+        let a = Value::Boolean(true);
+        let b = Value::Undefined;
+        assert!((a + b).is_nan());
+
+        let a = Value::Boolean(false);
+        let b = Value::Undefined;
+        assert!((a + b).is_nan());
+    }
+
+    #[test]
+    fn add_boolean_number() {
+        let a = Value::Boolean(true);
+        let b = Value::Number(2.0);
+        assert_eq!(a + b, Value::Number(3.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Number(2.0);
+        assert_eq!(a + b, Value::Number(2.0));
+    }
+
+    #[test]
+    fn add_boolean_string() {
+        let a = Value::Boolean(true);
+        let b = Value::String("2".to_string());
+        assert_eq!(a + b, Value::String("true2".to_string()));
+
+        let a = Value::Boolean(false);
+        let b = Value::String("2".to_string());
+        assert_eq!(a + b, Value::String("false2".to_string()));
+    }
+
+    #[test]
+    fn add_boolean_boolean() {
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::Number(2.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::Number(1.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Boolean(false);
+        assert_eq!(a + b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn add_boolean_object() {
+        let a = Value::Boolean(true);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("true[object Object]".to_string()));
+
+        let a = Value::Boolean(false);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("false[object Object]".to_string()));
+    }
+
+    #[test]
+    fn add_object_null() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Null;
+        assert_eq!(a + b, Value::String("[object Object]null".to_string()));
+    }
+
+    #[test]
+    fn add_object_undefined() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Undefined;
+        assert_eq!(a + b, Value::String("[object Object]undefined".to_string()));
+    }
+
+    #[test]
+    fn add_object_number() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Number(1.0);
+        assert_eq!(a + b, Value::String("[object Object]1".to_string()));
+    }
+
+    #[test]
+    fn add_object_string() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::String("hello".to_string());
+        assert_eq!(a + b, Value::String("[object Object]hello".to_string()));
+    }
+
+    #[test]
+    fn add_object_boolean() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Boolean(true);
+        assert_eq!(a + b, Value::String("[object Object]true".to_string()));
+    }
+
+    #[test]
+    fn add_object_object() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a + b, Value::String("[object Object][object Object]".to_string()));
     }
 }
