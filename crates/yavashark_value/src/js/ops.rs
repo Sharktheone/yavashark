@@ -2163,8 +2163,8 @@ mod tests {
         let a = Value::String("10".to_string());
         let b = Value::Number(2.0);
         assert_eq!(a >> b, Value::Number(2.0));
-        
-        
+
+
         let a = Value::String("a".to_string());
         let b = Value::Number(2.0);
         assert_eq!(a >> b, Value::Number(0.0));
@@ -2175,7 +2175,7 @@ mod tests {
         let a = Value::Number(10.0);
         let b = Value::String("2".to_string());
         assert_eq!(a >> b, Value::Number(2.0));
-        
+
         let a = Value::Number(10.0);
         let b = Value::String("a".to_string());
         assert_eq!(a >> b, Value::Number(10.0));
@@ -2207,5 +2207,32 @@ mod tests {
         let a = Value::Number(10.0);
         let b = Value::Object(Rc::new(RefCell::new(Object::new())));
         assert_eq!(a >> b, Value::Number(10.0));
+    }
+
+    #[test]
+    fn bit_or() {
+        assert_eq!(Value::Number(10.0) | Value::Number(2.0), Value::Number((10 | 2) as f64));
+        assert_eq!(Value::Number(10.0) | Value::Boolean(true), Value::Number((10 | 1) as f64));
+        assert_eq!(Value::String("10".to_string()) | Value::Number(2.0), Value::Number((10 | 2) as f64));
+        assert_eq!(Value::String("invalid".to_string()) | Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) | Value::Number(2.0), Value::Number(0.0));
+    }
+
+    #[test]
+    fn bit_and() {
+        assert_eq!(Value::Number(10.0) & Value::Number(2.0), Value::Number((10 & 2) as f64));
+        assert_eq!(Value::Number(10.0) & Value::Boolean(true), Value::Number((10 & 1) as f64));
+        assert_eq!(Value::String("10".to_string()) & Value::Number(2.0), Value::Number((10 & 2) as f64));
+        assert_eq!(Value::String("invalid".to_string()) & Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) & Value::Number(2.0), Value::Number(0.0));
+    }
+
+    #[test]
+    fn bit_xor() {
+        assert_eq!(Value::Number(10.0) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
+        assert_eq!(Value::Number(10.0) ^ Value::Boolean(true), Value::Number((10 ^ 1) as f64));
+        assert_eq!(Value::String("10".to_string()) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
+        assert_eq!(Value::String("invalid".to_string()) ^ Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) ^ Value::Number(2.0), Value::Number(0.0));
     }
 }
