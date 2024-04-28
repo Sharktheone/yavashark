@@ -137,7 +137,13 @@ impl<F: Debug> Sub for Value<F> {
             (Value::Null, Value::Null) => Value::Number(0.0),
             (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Null, Value::Number(b)) => Value::Number(-b),
-            (Value::Null, Value::String(_)) => Value::Number(f64::NAN),
+            (Value::Null, Value::String(b)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(-b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            },
             (Value::Null, Value::Boolean(b)) => Value::Number(-b.num()),
             (Value::Null, Value::Object(_)) => Value::Number(f64::NAN),
 
@@ -211,6 +217,15 @@ impl<F: Debug> Mul for Value<F> {
 
     fn mul(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
+            (Value::Null, Value::String(b)) => {
+                if b.parse::<f64>().is_ok() {
+                    Value::Number(0.0)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            (Value::Null, Value::Object(_)) => Value::Number(f64::NAN),
+            (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Null, _) | (_, Value::Null) => Value::Number(0.0),
             (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a * b),
@@ -269,23 +284,32 @@ impl<F: Debug> Div for Value<F> {
                 }
             }
             (Value::Number(a), Value::Number(b)) => Value::Number(a / b),
-            (Value::Number(a), Value::String(b)) | (Value::String(b), Value::Number(a)) => {
+            (Value::Number(a), Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
                     Value::Number(a / b)
                 } else {
                     Value::Number(f64::NAN)
                 }
             }
-            (Value::Number(a), Value::Boolean(b)) | (Value::Boolean(b), Value::Number(a)) => {
+            (Value::Number(a), Value::Boolean(b)) => {
                 Value::Number(a / b.num())
             }
             (Value::String(a), Value::Null) => {
-                if a == "0" {
+                if a == "0" || a == "0.0" || a.parse::<f64>().is_err() {
                     Value::Number(f64::NAN)
                 } else {
                     Value::Number(f64::INFINITY)
                 }
             }
+
+            (Value::String(a), Value::Number(b)) => {
+                if let Ok(a) = a.parse::<f64>() {
+                    Value::Number(a / b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
+            
             (Value::String(a), Value::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
                     Value::Number(a / b)
@@ -302,6 +326,7 @@ impl<F: Debug> Div for Value<F> {
             }
             (Value::Boolean(true), Value::Null) => Value::Number(f64::INFINITY),
             (Value::Boolean(false), Value::Null) => Value::Number(f64::NAN),
+            (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() / b),
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() / b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
         }
@@ -314,6 +339,15 @@ impl<F: Debug> Rem for Value<F> {
     fn rem(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
             (_, Value::Null) => Value::Number(f64::NAN),
+            (Value::Null, Value::Object(_)) => Value::Number(f64::NAN),
+            (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
+            (Value::Null, Value::String(b)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(0.0 % b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            }
             (Value::Null, _) => Value::Number(0.0),
             (_, Value::Undefined) | (Value::Undefined, _) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a % b),
@@ -1263,6 +1297,10 @@ mod tests {
     #[test]
     fn mul_null_any() {
         let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a * b).is_nan());
+        
+        let a = Value::Null;
         let b = Value::Number(1.0);
         assert_eq!(a * b, Value::Number(0.0));
 
@@ -1500,8 +1538,9 @@ mod tests {
 
         let a = Value::Number(0.0);
         let b = Value::Null;
-        assert_eq!(a / b, Value::Number(f64::NAN));
+        assert!((a / b).is_nan());
     }
+    
 
     #[test]
     fn div_number_number() {
@@ -1512,7 +1551,7 @@ mod tests {
 
         let a = Value::Number(0.0);
         let b = Value::Number(0.0);
-        assert_eq!(a / b, Value::Number(f64::NAN));
+        assert!((a / b).is_nan());
     }
 
     #[test]
@@ -1534,7 +1573,7 @@ mod tests {
 
         let a = Value::Number(6.0);
         let b = Value::Boolean(false);
-        assert!((a / b).is_nan());
+        assert_eq!(a / b, Value::Number(f64::INFINITY));
     }
 
 
@@ -1550,7 +1589,7 @@ mod tests {
 
         let a = Value::String("0".to_string());
         let b = Value::Null;
-        assert_eq!(a / b, Value::Number(f64::NAN));
+        assert!((a / b).is_nan());
     }
 
     #[test]
@@ -1609,7 +1648,7 @@ mod tests {
 
         let a = Value::Boolean(false);
         let b = Value::Boolean(false);
-        assert_eq!(a / b, Value::Number(f64::NAN));
+        assert!((a / b).is_nan());
     }
 
     #[test]
@@ -2068,7 +2107,7 @@ mod tests {
     fn shl_any_undefined() {
         let a = Value::Number(10.0);
         let b = Value::Undefined;
-        assert_eq!(a << b, Value::Number(0.0));
+        assert_eq!(a << b, Value::Number(10.0));
     }
 
 
@@ -2090,7 +2129,7 @@ mod tests {
     fn shl_boolean_number() {
         let a = Value::Boolean(true);
         let b = Value::Number(2.0);
-        assert_eq!(a << b, Value::Number(2.0));
+        assert_eq!(a << b, Value::Number(4.0));
     }
 
     #[test]
@@ -2214,8 +2253,8 @@ mod tests {
         assert_eq!(Value::Number(10.0) | Value::Number(2.0), Value::Number((10 | 2) as f64));
         assert_eq!(Value::Number(10.0) | Value::Boolean(true), Value::Number((10 | 1) as f64));
         assert_eq!(Value::String("10".to_string()) | Value::Number(2.0), Value::Number((10 | 2) as f64));
-        assert_eq!(Value::String("invalid".to_string()) | Value::Number(2.0), Value::Number(0.0));
-        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) | Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(Value::String("invalid".to_string()) | Value::Number(2.0), Value::Number(2.0));
+        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) | Value::Number(2.0), Value::Number(2.0));
     }
 
     #[test]
@@ -2232,7 +2271,7 @@ mod tests {
         assert_eq!(Value::Number(10.0) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
         assert_eq!(Value::Number(10.0) ^ Value::Boolean(true), Value::Number((10 ^ 1) as f64));
         assert_eq!(Value::String("10".to_string()) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
-        assert_eq!(Value::String("invalid".to_string()) ^ Value::Number(2.0), Value::Number(0.0));
-        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) ^ Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(Value::String("invalid".to_string()) ^ Value::Number(2.0), Value::Number(2.0));
+        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) ^ Value::Number(2.0), Value::Number(2.0));
     }
 }
