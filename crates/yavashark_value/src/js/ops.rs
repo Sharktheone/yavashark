@@ -1425,4 +1425,233 @@ mod tests {
 
 
     #[test]
+    fn div_null_null() {
+        let a = Value::Null;
+        let b = Value::Null;
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_null_undefined() {
+        let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_null_number() {
+        let a = Value::Null;
+        let b = Value::Number(2.0);
+        assert_eq!(a / b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn div_null_string() {
+        let a = Value::Null;
+        let b = Value::String("2".to_string());
+        assert_eq!(a / b, Value::Number(0.0));
+
+        let a = Value::Null;
+        let b = Value::String("a".to_string());
+        assert!((a / b).is_nan());
+    }
+
+
+    #[test]
+    fn div_null_boolean() {
+        let a = Value::Null;
+        let b = Value::Boolean(true);
+        assert_eq!(a / b, Value::Number(0.0));
+
+        let a = Value::Null;
+        let b = Value::Boolean(false);
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_undefined_any() {
+        let a = Value::Undefined;
+        let b = Value::Null;
+        assert!((a / b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Number(1.0);
+        assert!((a / b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::String("1".to_string());
+        assert!((a / b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Boolean(true);
+        assert!((a / b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a / b).is_nan());
+    }
+
+
+
+    #[test]
+    fn div_number_null() {
+        let a = Value::Number(6.0);
+        let b = Value::Null;
+        assert_eq!(a / b, Value::Number(f64::INFINITY));
+
+        let a = Value::Number(0.0);
+        let b = Value::Null;
+        assert_eq!(a / b, Value::Number(f64::NAN));
+    }
+
+    #[test]
+    fn div_number_number() {
+        let a = Value::Number(6.0);
+        let b = Value::Number(2.0);
+        assert_eq!(a / b, Value::Number(3.0));
+
+
+        let a = Value::Number(0.0);
+        let b = Value::Number(0.0);
+        assert_eq!(a / b, Value::Number(f64::NAN));
+    }
+
+    #[test]
+    fn div_number_string() {
+        let a = Value::Number(6.0);
+        let b = Value::String("2".to_string());
+        assert_eq!(a / b, Value::Number(3.0));
+
+        let a = Value::Number(6.0);
+        let b = Value::String("a".to_string());
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_number_boolean() {
+        let a = Value::Number(6.0);
+        let b = Value::Boolean(true);
+        assert_eq!(a / b, Value::Number(6.0));
+
+        let a = Value::Number(6.0);
+        let b = Value::Boolean(false);
+        assert!((a / b).is_nan());
+    }
+
+
+    #[test]
+    fn div_string_null() {
+        let a = Value::String("6".to_string());
+        let b = Value::Null;
+        assert_eq!(a / b, Value::Number(f64::INFINITY));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Null;
+        assert!((a / b).is_nan());
+
+        let a = Value::String("0".to_string());
+        let b = Value::Null;
+        assert_eq!(a / b, Value::Number(f64::NAN));
+    }
+
+    #[test]
+    fn div_string_number() {
+        let a = Value::String("6".to_string());
+        let b = Value::Number(2.0);
+        assert_eq!(a / b, Value::Number(3.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Number(2.0);
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_string_string() {
+        let a = Value::String("6".to_string());
+        let b = Value::String("2".to_string());
+        assert_eq!(a / b, Value::Number(3.0));
+
+        let a = Value::String("6".to_string());
+        let b = Value::String("a".to_string());
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_string_boolean() {
+        let a = Value::String("6".to_string());
+        let b = Value::Boolean(true);
+        assert_eq!(a / b, Value::Number(6.0));
+
+        let a = Value::String("6".to_string());
+        let b = Value::Boolean(false);
+        assert_eq!(a / b, Value::Number(f64::INFINITY));
+    }
+
+    #[test]
+    fn div_boolean_number() {
+        let a = Value::Boolean(true);
+        let b = Value::Number(2.0);
+        assert_eq!(a / b, Value::Number(0.5));
+
+        let a = Value::Boolean(false);
+        let b = Value::Number(2.0);
+        assert_eq!(a / b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn div_boolean_boolean() {
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(true);
+        assert_eq!(a / b, Value::Number(1.0));
+
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(false);
+        assert_eq!(a / b, Value::Number(f64::INFINITY));
+
+        let a = Value::Boolean(false);
+        let b = Value::Boolean(false);
+        assert_eq!(a / b, Value::Number(f64::NAN));
+    }
+
+    #[test]
+    fn div_object_any() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Number(1.0);
+        assert!((a / b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::String("1".to_string());
+        assert!((a / b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Boolean(true);
+        assert!((a / b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a / b).is_nan());
+    }
+
+    #[test]
+    fn div_any_undefined() {
+        let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a / b).is_nan());
+
+        let a = Value::Number(1.0);
+        let b = Value::Undefined;
+        assert!((a / b).is_nan());
+
+        let a = Value::String("1".to_string());
+        let b = Value::Undefined;
+        assert!((a / b).is_nan());
+
+        let a = Value::Boolean(true);
+        let b = Value::Undefined;
+        assert!((a / b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Undefined;
+        assert!((a / b).is_nan());
+    }
 }
