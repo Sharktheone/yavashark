@@ -197,7 +197,7 @@ impl<F: Debug> Sub for Value<F> {
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() - b.num()),
             (Value::Boolean(_), Value::Object(_)) => Value::Number(f64::NAN),
 
@@ -1007,6 +1007,10 @@ mod tests {
     fn sub_null_string() {
         let a = Value::Null;
         let b = Value::String("1".to_string());
+        assert_eq!(a - b, Value::Number(-1.0));
+
+        let a = Value::Null;
+        let b = Value::String("a".to_string());
         assert!((a - b).is_nan());
     }
 
@@ -1036,6 +1040,10 @@ mod tests {
 
         let a = Value::Undefined;
         let b = Value::Number(1.0);
+        assert!((a - b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::String("a".to_string());
         assert!((a - b).is_nan());
 
         let a = Value::Undefined;
@@ -1201,7 +1209,7 @@ mod tests {
         let a = Value::Boolean(false);
         let b = Value::String("1".to_string());
         assert_eq!(a - b, Value::Number(-1.0));
-        
+
         let a = Value::Boolean(true);
         let b = Value::String("a".to_string());
         assert!((a - b).is_nan());
@@ -1251,4 +1259,170 @@ mod tests {
         let b = Value::Object(Rc::new(RefCell::new(Object::new())));
         assert!((a - b).is_nan());
     }
+
+    #[test]
+    fn mul_null_any() {
+        let a = Value::Null;
+        let b = Value::Number(1.0);
+        assert_eq!(a * b, Value::Number(0.0));
+
+        let a = Value::Null;
+        let b = Value::String("1".to_string());
+        assert_eq!(a * b, Value::Number(0.0));
+
+        let a = Value::Null;
+        let b = Value::String("a".to_string());
+        assert!((a * b).is_nan());
+
+        let a = Value::Null;
+        let b = Value::Boolean(true);
+        assert_eq!(a * b, Value::Number(0.0));
+
+        let a = Value::Null;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_undefined_any() {
+        let a = Value::Undefined;
+        let b = Value::Number(1.0);
+        assert!((a * b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::String("1".to_string());
+        assert!((a * b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::String("a".to_string());
+        assert!((a * b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Boolean(true);
+        assert!((a * b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_numbers_number() {
+        let a = Value::Number(2.0);
+        let b = Value::Number(3.0);
+        assert_eq!(a * b, Value::Number(6.0));
+    }
+
+    #[test]
+    fn mul_numbers_string() {
+        let a = Value::Number(2.0);
+        let b = Value::String("3".to_string());
+        assert_eq!(a * b, Value::Number(6.0));
+
+        let a = Value::Number(2.0);
+        let b = Value::String("a".to_string());
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_number_boolean() {
+        let a = Value::Number(2.0);
+        let b = Value::Boolean(true);
+        assert_eq!(a * b, Value::Number(2.0));
+
+        let a = Value::Number(2.0);
+        let b = Value::Boolean(false);
+        assert_eq!(a * b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn mul_number_object() {
+        let a = Value::Number(2.0);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_string_string() {
+        let a = Value::String("2".to_string());
+        let b = Value::String("3".to_string());
+        assert_eq!(a * b, Value::Number(6.0));
+
+        let a = Value::String("2".to_string());
+        let b = Value::String("a".to_string());
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_string_boolean() {
+        let a = Value::String("2".to_string());
+        let b = Value::Boolean(true);
+        assert_eq!(a * b, Value::Number(2.0));
+
+        let a = Value::String("2".to_string());
+        let b = Value::Boolean(false);
+        assert_eq!(a * b, Value::Number(0.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Boolean(true);
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_string_object() {
+        let a = Value::String("2".to_string());
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_boolean_number() {
+        let a = Value::Boolean(true);
+        let b = Value::Number(2.0);
+        assert_eq!(a * b, Value::Number(2.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Number(2.0);
+        assert_eq!(a * b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn mul_boolean_boolean() {
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(true);
+        assert_eq!(a * b, Value::Number(1.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Boolean(true);
+        assert_eq!(a * b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn mul_boolean_object() {
+        let a = Value::Boolean(true);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a * b).is_nan());
+    }
+
+    #[test]
+    fn mul_object_any() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Number(1.0);
+        assert!((a * b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::String("1".to_string());
+        assert!((a * b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Boolean(true);
+        assert!((a * b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a * b).is_nan());
+    }
+
+
+    #[test]
 }
