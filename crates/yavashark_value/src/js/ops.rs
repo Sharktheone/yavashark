@@ -1492,7 +1492,6 @@ mod tests {
     }
 
 
-
     #[test]
     fn div_number_null() {
         let a = Value::Number(6.0);
@@ -1653,5 +1652,243 @@ mod tests {
         let a = Value::Object(Rc::new(RefCell::new(Object::new())));
         let b = Value::Undefined;
         assert!((a / b).is_nan());
+    }
+
+
+    
+    #[test]
+    fn rem_null_any() {
+        let a = Value::Null;
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Null;
+        let b = Value::Number(1.0);
+        assert_eq!(a % b, Value::Number(0.0));
+        
+        let a = Value::Null;
+        let b = Value::String("1".to_string());
+        assert_eq!(a % b, Value::Number(0.0));
+        
+        let a = Value::Null;
+        let b = Value::String("a".to_string());
+        assert!((a % b).is_nan());
+        
+        let a = Value::Null;
+        let b = Value::Boolean(true);
+        assert_eq!(a % b, Value::Number(0.0));
+        
+        let a = Value::Null;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_any_null() {
+        let a = Value::Number(1.0);
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::String("1".to_string());
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::String("a".to_string());
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Boolean(true);
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_undefined_any() {
+        let a = Value::Undefined;
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::Number(1.0);
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::String("1".to_string());
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::String("a".to_string());
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::Boolean(true);
+        assert!((a % b).is_nan());
+        
+        let a = Value::Undefined;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_any_undefined() {
+        let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Number(1.0);
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::String("1".to_string());
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Boolean(true);
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_number_number() {
+        let a = Value::Number(10.0);
+        let b = Value::Number(3.0);
+        assert_eq!(a % b, Value::Number(1.0));
+    }
+
+    #[test]
+    fn rem_number_string() {
+        let a = Value::Number(10.0);
+        let b = Value::String("3".to_string());
+        assert_eq!(a % b, Value::Number(1.0));
+
+        let a = Value::Number(10.0);
+        let b = Value::String("a".to_string());
+        assert!((a % b).is_nan());
+    }
+
+    #[test]
+    fn rem_string_number() {
+        let a = Value::String("10".to_string());
+        let b = Value::Number(3.0);
+        assert_eq!(a % b, Value::Number(1.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Number(3.0);
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_string_boolean() {
+        let a = Value::String("10".to_string());
+        let b = Value::Boolean(true);
+        assert_eq!(a % b, Value::Number(0.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Boolean(true);
+        assert!((a % b).is_nan());
+    }
+
+    #[test]
+    fn rem_boolean_number() {
+        let a = Value::Boolean(true);
+        let b = Value::Number(2.0);
+        assert_eq!(a % b, Value::Number(1.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Number(2.0);
+        assert_eq!(a % b, Value::Number(0.0));
+    }
+    
+    #[test]
+    fn rem_boolean_string() {
+        let a = Value::Boolean(true);
+        let b = Value::String("2".to_string());
+        assert_eq!(a % b, Value::Number(1.0));
+
+        let a = Value::Boolean(true);
+        let b = Value::String("a".to_string());
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_boolean_boolean() {
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(true);
+        assert_eq!(a % b, Value::Number(0.0));
+
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(false);
+        assert!((a % b).is_nan());
+    }
+    
+    
+    #[test]
+    fn rem_object_any() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Null;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Undefined;
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Number(1.0);
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::String("1".to_string());
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Boolean(true);
+        assert!((a % b).is_nan());
+        
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+    }
+    
+    #[test]
+    fn rem_any_object() {
+        let a = Value::Null;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+
+        let a = Value::Number(1.0);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+
+        let a = Value::String("1".to_string());
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+
+        let a = Value::Boolean(true);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a % b).is_nan());
     }
 }
