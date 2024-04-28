@@ -2012,4 +2012,113 @@ mod tests {
         assert!(!(a < b));
         assert_ne!(a, b);
     }
+
+
+    #[test]
+    fn shl_number_number() {
+        let a = Value::Number(10.0);
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(40.0));
+    }
+
+    #[test]
+    fn shl_float_number() {
+        let a = Value::Number(10.5);
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(40.0)); 
+    }
+
+    #[test]
+    fn shl_number_float() {
+        let a = Value::Number(10.0);
+        let b = Value::Number(2.5);
+        assert_eq!(a << b, Value::Number(40.0)); 
+    }
+
+    #[test]
+    fn shl_null_any() {
+        let a = Value::Null;
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(0.0));
+
+        let a = Value::Null;
+        let b = Value::Null;
+        assert_eq!(a << b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn shl_any_null() {
+        let a = Value::Number(10.0);
+        let b = Value::Null;
+        assert_eq!(a << b, Value::Number(10.0));
+    }
+
+    #[test]
+    fn shl_undefined_any() {
+        let a = Value::Undefined;
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(0.0));
+
+        let a = Value::Undefined;
+        let b = Value::Undefined;
+        assert_eq!(a << b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn shl_any_undefined() {
+        let a = Value::Number(10.0);
+        let b = Value::Undefined;
+        assert_eq!(a << b, Value::Number(0.0));
+    }
+
+
+    #[test]
+    fn shl_string_number() {
+        let a = Value::String("10".to_string());
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(40.0)); 
+    }
+
+    #[test]
+    fn shl_number_string() {
+        let a = Value::Number(10.0);
+        let b = Value::String("2".to_string());
+        assert_eq!(a << b, Value::Number(40.0)); 
+    }
+
+    #[test]
+    fn shl_boolean_number() {
+        let a = Value::Boolean(true);
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(2.0)); 
+    }
+
+    #[test]
+    fn shl_number_boolean() {
+        let a = Value::Number(10.0);
+        let b = Value::Boolean(true);
+        assert_eq!(a << b, Value::Number(20.0)); 
+    }
+
+    #[test]
+    fn shl_object_any() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Number(2.0);
+        assert_eq!(a << b, Value::Number(0.0)); 
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::String("2".to_string());
+        assert_eq!(a << b, Value::Number(0.0)); 
+    }
+
+    #[test]
+    fn shl_any_object() {
+        let a = Value::Number(10.0);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a << b, Value::Number(10.0)); 
+
+        let a = Value::String("10".to_string());
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert_eq!(a << b, Value::Number(10.0)); 
+    }
 }
