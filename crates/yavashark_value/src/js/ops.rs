@@ -191,7 +191,13 @@ impl<F: Debug> Sub for Value<F> {
             (Value::Boolean(a), Value::Null) => Value::Number(a.num()),
             (Value::Boolean(_), Value::Undefined) => Value::Number(f64::NAN),
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() - b),
-            (Value::Boolean(_), Value::String(_)) => Value::Number(f64::NAN),
+            (Value::Boolean(a), Value::String(b)) => {
+                if let Ok(b) = b.parse::<f64>() {
+                    Value::Number(a.num() - b)
+                } else {
+                    Value::Number(f64::NAN)
+                }
+            },
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() - b.num()),
             (Value::Boolean(_), Value::Object(_)) => Value::Number(f64::NAN),
 
@@ -973,5 +979,276 @@ mod tests {
         let a = Value::Object(Rc::new(RefCell::new(Object::new())));
         let b = Value::Object(Rc::new(RefCell::new(Object::new())));
         assert_eq!(a + b, Value::String("[object Object][object Object]".to_string()));
+    }
+
+
+    #[test]
+    fn sub_null_null() {
+        let a = Value::Null;
+        let b = Value::Null;
+        assert_eq!(a - b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn sub_null_undefined() {
+        let a = Value::Null;
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_null_number() {
+        let a = Value::Null;
+        let b = Value::Number(1.0);
+        assert_eq!(a - b, Value::Number(-1.0));
+    }
+
+    #[test]
+    fn sub_null_string() {
+        let a = Value::Null;
+        let b = Value::String("1".to_string());
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_null_boolean() {
+        let a = Value::Null;
+        let b = Value::Boolean(true);
+        assert_eq!(a - b, Value::Number(-1.0));
+    }
+
+    #[test]
+    fn sub_null_object() {
+        let a = Value::Null;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_undefined_any() {
+        let a = Value::Undefined;
+        let b = Value::Null;
+        assert!((a - b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Number(1.0);
+        assert!((a - b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::String("1".to_string());
+        assert!((a - b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Boolean(true);
+        assert!((a - b).is_nan());
+
+        let a = Value::Undefined;
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_number_null() {
+        let a = Value::Number(1.0);
+        let b = Value::Null;
+        assert_eq!(a - b, Value::Number(1.0));
+    }
+
+    #[test]
+    fn sub_number_undefined() {
+        let a = Value::Number(1.0);
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_numbers_number() {
+        let a = Value::Number(1.0);
+        let b = Value::Number(2.0);
+        assert_eq!(a - b, Value::Number(-1.0));
+    }
+
+    #[test]
+    fn sub_numbers_string() {
+        let a = Value::Number(1.0);
+        let b = Value::String("2".to_string());
+        assert_eq!(a - b, Value::Number(-1.0));
+
+        let a = Value::Number(1.0);
+        let b = Value::String("a".to_string());
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_number_boolean() {
+        let a = Value::Number(1.0);
+        let b = Value::Boolean(true);
+        assert_eq!(a - b, Value::Number(0.0));
+
+        let a = Value::Number(1.0);
+        let b = Value::Boolean(false);
+        assert_eq!(a - b, Value::Number(1.0));
+    }
+
+    #[test]
+    fn sub_number_object() {
+        let a = Value::Number(1.0);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_string_null() {
+        let a = Value::String("2".to_string());
+        let b = Value::Null;
+        assert_eq!(a - b, Value::Number(2.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Null;
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_string_undefined() {
+        let a = Value::String("2".to_string());
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_string_number() {
+        let a = Value::String("2".to_string());
+        let b = Value::Number(1.0);
+        assert_eq!(a - b, Value::Number(1.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Number(1.0);
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_string_string() {
+        let a = Value::String("2".to_string());
+        let b = Value::String("1".to_string());
+        assert_eq!(a - b, Value::Number(1.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::String("1".to_string());
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_string_boolean() {
+        let a = Value::String("2".to_string());
+        let b = Value::Boolean(true);
+        assert_eq!(a - b, Value::Number(1.0));
+
+        let a = Value::String("a".to_string());
+        let b = Value::Boolean(true);
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_string_object() {
+        let a = Value::String("2".to_string());
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_boolean_null() {
+        let a = Value::Boolean(true);
+        let b = Value::Null;
+        assert_eq!(a - b, Value::Number(1.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Null;
+        assert_eq!(a - b, Value::Number(0.0));
+    }
+
+    #[test]
+    fn sub_boolean_undefined() {
+        let a = Value::Boolean(true);
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+
+        let a = Value::Boolean(false);
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_boolean_number() {
+        let a = Value::Boolean(true);
+        let b = Value::Number(1.0);
+        assert_eq!(a - b, Value::Number(0.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Number(1.0);
+        assert_eq!(a - b, Value::Number(-1.0));
+    }
+
+    #[test]
+    fn sub_boolean_string() {
+        let a = Value::Boolean(true);
+        let b = Value::String("1".to_string());
+        assert_eq!(a - b, Value::Number(0.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::String("1".to_string());
+        assert_eq!(a - b, Value::Number(-1.0));
+        
+        let a = Value::Boolean(true);
+        let b = Value::String("a".to_string());
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_boolean_boolean() {
+        let a = Value::Boolean(true);
+        let b = Value::Boolean(true);
+        assert_eq!(a - b, Value::Number(0.0));
+
+        let a = Value::Boolean(false);
+        let b = Value::Boolean(true);
+        assert_eq!(a - b, Value::Number(-1.0));
+    }
+
+    #[test]
+    fn sub_boolean_object() {
+        let a = Value::Boolean(true);
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a - b).is_nan());
+    }
+
+    #[test]
+    fn sub_object_any() {
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Null;
+        assert!((a - b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Undefined;
+        assert!((a - b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Number(1.0);
+        assert!((a - b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::String("1".to_string());
+        assert!((a - b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Boolean(true);
+        assert!((a - b).is_nan());
+
+        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        assert!((a - b).is_nan());
     }
 }
