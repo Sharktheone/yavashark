@@ -1,6 +1,8 @@
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
+
+use crate::error::{Error, StackTrace};
 use crate::object::Object;
 use crate::Value;
 
@@ -16,7 +18,7 @@ impl<T: Debug> From<String> for Value<T> {
     }
 }
 
-impl <T: Debug> From<&String> for Value<T> {
+impl<T: Debug> From<&String> for Value<T> {
     fn from(s: &String) -> Self {
         Value::String(s.clone())
     }
@@ -118,3 +120,34 @@ impl<T: Debug> From<f32> for Value<T> {
         Value::Number(n as f64)
     }
 }
+
+
+impl<T: Debug> From<Error> for Value<T> {
+    fn from(e: Error) -> Self {
+        Value::Object(Rc::new(RefCell::new(e.into())))
+    }
+}
+
+impl<T: Debug> From<Error> for Object<T> {
+    fn from(e: Error) -> Self {
+        let mut obj = Object::new();
+
+        obj.define_property("message".to_string(), e.message().into());
+        obj.define_property("stack".to_string(), e.stack().into());
+        obj.define_property("name".to_string(), e.name().into());
+        obj.define_property("fileName".to_string(), e.file_name().into());
+        obj.define_property("lineNumber".to_string(), e.line_number().into());
+        obj.define_property("columnNumber".to_string(), e.column_number().into());
+
+        obj
+    }
+}
+
+
+impl<T: Debug> From<&StackTrace>  for Value<T> {
+    fn from(s: &StackTrace) -> Self {
+        Value::String(format!("{:#?}", s)) //TODO: Implement a better way to convert stack traces
+    }
+}
+
+
