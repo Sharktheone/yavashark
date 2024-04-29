@@ -29,6 +29,14 @@ impl ControlFlow {
     fn error_reference(e: String) -> Self {
         ControlFlow::Error(Error::reference(e))
     }
+    
+    fn get_error(self) -> std::result::Result<Error, ControlFlow> {
+        match self {
+            ControlFlow::Error(e) => Ok(e),
+            (e) => Err(e),
+        }
+    
+    }
 }
 
 type ValueResult = std::result::Result<Value, Error>;
