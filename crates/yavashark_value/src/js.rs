@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 pub mod object;
 mod ops;
+mod conversion;
 
 #[derive(Debug, PartialEq)]
 pub enum Value<F: Debug> {
