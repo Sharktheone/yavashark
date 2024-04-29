@@ -67,14 +67,14 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         PropName::Ident(ident) => {
                                             ident.sym.to_string()
                                         }
-                                        _ => {todo!()}
+                                        _ => { todo!() }
                                     };
-                                    
+
                                     let name = match *kv.value {
                                         Pat::Ident(ref ident) => ident.sym.to_string(),
-                                        _ => {todo!()}
+                                        _ => { todo!() }
                                     };
-                                    
+
                                     match key.as_str() {
                                         "message" => {
                                             scope.declare_var(name, err.message().into());
@@ -99,7 +99,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         }
                                     }
                                 }
-                                _ => {todo!()}
+                                _ => { todo!() }
                             }
                         }
                     }
@@ -107,9 +107,9 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                 }
             }
 
-            Ok(Value::Undefined)
+            ctx.run_block(&catch.body, scope)
         } else {
-            Ok(Value::Undefined)
+            Err(err.into())
         }
     } else {
         try_block
