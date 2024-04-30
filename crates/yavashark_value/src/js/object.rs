@@ -28,4 +28,8 @@ impl<F: Func> Object<F> {
     pub fn get_property(&self, name: &str) -> Option<&Value<F>> {
         self.properties.get(name)
     }
+    
+    pub fn get_property_mut(&mut self, name: &str) -> Option<&mut Value<F>> {
+        self.properties.get_mut(name)
+    }
 }

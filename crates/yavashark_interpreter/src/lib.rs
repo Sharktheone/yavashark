@@ -1,5 +1,11 @@
 #![allow(unused)]
 
+use swc_ecma_ast::Stmt;
+
+pub use function::*;
+pub use value::*;
+use yavashark_value::error::Error;
+
 mod console;
 pub mod context;
 mod function;
@@ -7,12 +13,6 @@ pub mod scope;
 pub mod statement;
 mod value;
 pub mod variable;
-
-pub use function::*;
-pub use value::*;
-
-use swc_ecma_ast::{Script, Stmt};
-use yavashark_value::error::Error;
 
 pub enum ControlFlow {
     Continue(Option<String>),
@@ -29,17 +29,16 @@ impl ControlFlow {
     fn error_reference(e: String) -> Self {
         ControlFlow::Error(Error::reference(e))
     }
-    
-    fn syntax_error(e: &str) -> Self {
+fn syntax_error(e: &str) -> Self {
         ControlFlow::Error(Error::syntax(e))
     }
-    
+
     fn get_error(self) -> std::result::Result<Error, ControlFlow> {
         match self {
             ControlFlow::Error(e) => Ok(e),
             (e) => Err(e),
         }
-   
+
     }
 }
 
@@ -91,10 +90,11 @@ impl Interpreter {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use swc_common::input::StringInput;
     use swc_common::BytePos;
+    use swc_common::input::StringInput;
     use swc_ecma_parser::{Parser, Syntax};
+
+    use super::*;
 
     #[test]
     fn math() {
@@ -112,9 +112,9 @@ mod tests {
         }
 
         if (k > 0) {
-            var z = 1337
+            z = 1337
         } else {
-            var z = 42
+            z = 42
         }
 
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)

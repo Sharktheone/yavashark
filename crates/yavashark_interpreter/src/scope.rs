@@ -3,12 +3,22 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use swc_ecma_ast::Str;
 
+pub use get::*;
+use yavashark_value::error::Error;
+
 use crate::console::get_console;
 use crate::Res;
 use crate::Value;
-use yavashark_value::error::Error;
-
 use crate::variable::Variable;
+
+mod get;
+
+
+pub struct MutValue {
+    pub(crate) name: String,
+    pub(crate) scope: Rc<RefCell<ScopeInternal>>,
+}
+
 
 #[derive(Debug, Clone, Default)]
 pub struct ScopeState {
@@ -276,6 +286,48 @@ impl ScopeInternal {
 
         None
     }
+
+
+    pub fn has_value(&self, name: &str) -> bool {
+        return if !self.variables.contains_key(name) {
+            if let Some(p) = self.parent.as_ref() {
+                p.borrow().has_value(name)
+            } else {
+                false
+            }
+        } else { true };
+    }
+
+    pub fn get_ref(&self, name: &str) -> Option<&Value> {
+        if let Some(v) = self.variables.get(name) {
+            return Some(&v.value);
+        }
+
+        None
+    }
+
+    pub fn get_ref_mut(&mut self, name: &str) -> Option<&mut Value> {
+        if let Some(v) = self.variables.get_mut(name) {
+            return Some(&mut v.value);
+        }
+
+        None
+    }
+
+
+    pub fn get_parent_mut(&self, name: &str) -> Option<MutValue> {
+        if let Some(par) = self.parent.as_ref() {
+            let p = par.borrow();
+            if p.has_value(name) {
+                return Some(MutValue {
+                    name: name.to_string(),
+                    scope: Rc::clone(par),
+                });
+            }
+        }
+
+        None
+    }
     
     pub fn has_label(&self, label: &str) -> bool {
         self.available_labels.contains(&label.to_string())
@@ -346,6 +398,27 @@ impl ScopeInternal {
 impl Default for Scope {
     fn default() -> Self {
         Self::new()
+    }
+
+    pub fn has_value(&self, name: &str) -> bool {
+        self.scope.borrow().has_value(name)
+    }
+
+
+    pub fn get_mut(&mut self, name: &str) -> Option<MutValue> {
+        let scope = self.scope.borrow();
+        if scope.has_value(name) {
+            return Some(MutValue {
+                name: name.to_string(),
+                scope: Rc::clone(&self.scope),
+            });
+        }
+
+        if let Some(p) = scope.parent.as_ref() {
+            return p.borrow().get_parent_mut(name);
+        }
+
+        None
     }
 }
 
