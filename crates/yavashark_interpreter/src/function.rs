@@ -28,6 +28,7 @@ impl Function {
             }
             Function::JS(param, block) => {
                 let mut scope = Scope::with_parent(scope);
+                scope.state_set_function();
 
                 for (i, p) in param.iter().enumerate() {
                     

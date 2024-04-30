@@ -9,8 +9,12 @@ use crate::RuntimeResult;
 
 impl Context {
     pub fn run_break(&mut self, stmt: &BreakStmt, scope: &mut Scope) -> RuntimeResult {
+        if !scope.state_is_breakable() {
+            return Err(ControlFlow::syntax_error("Illegal break statement"));
+        }
+        
         if let Some(label) = &stmt.label {
-            if !scope.has_label(&label.sym.to_string()) {
+            if !scope.has_label(label.sym.as_ref()) {
                 return Err(ControlFlow::error_reference(format!("Label {} not found", label.sym)));
             }
         }

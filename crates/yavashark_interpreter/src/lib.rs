@@ -30,12 +30,16 @@ impl ControlFlow {
         ControlFlow::Error(Error::reference(e))
     }
     
+    fn syntax_error(e: &str) -> Self {
+        ControlFlow::Error(Error::syntax(e))
+    }
+    
     fn get_error(self) -> std::result::Result<Error, ControlFlow> {
         match self {
             ControlFlow::Error(e) => Ok(e),
             (e) => Err(e),
         }
-    
+   
     }
 }
 
