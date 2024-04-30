@@ -146,6 +146,10 @@ mod tests {
             default:
                 console.log("default")
         }
+        
+        for (let i = 0; i < 10; i++) {
+            console.log(i)
+        }
 
         z
         "#;

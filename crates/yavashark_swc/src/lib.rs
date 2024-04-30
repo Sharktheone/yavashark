@@ -4,8 +4,7 @@ fn test() {
     use swc_common::BytePos;
     use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
     let src = r#"
-    try {}
-    catch ({ name, message: m }) {}
+    i++;
     "#;
 
     let c = TsConfig {

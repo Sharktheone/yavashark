@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::ops::{Add, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub};
+use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 use crate::Func;
 
 use super::Value;
@@ -686,6 +686,20 @@ impl<F: Func> Value<F> {
 
     pub fn pow(&self, rhs: Self) -> Self {
         Self::Number(self.to_number().powf(rhs.to_number()))
+    }
+}
+
+
+
+impl<F: Func> AddAssign for Value<F> {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = self.copy() + rhs; //TODO: don't copy the value
+    }
+}
+
+impl<F: Func> SubAssign for Value<F> {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = self.copy() - rhs; //TODO: don't copy the value
     }
 }
 
