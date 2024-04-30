@@ -7,42 +7,55 @@ pub struct Error {
 impl Error {
     pub fn new(error: String) -> Self {
         Self {
-            kind: ErrorKind::RuntimeError(error),
+            kind: ErrorKind::Runtime(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     pub fn reference(error: String) -> Self {
         Self {
-            kind: ErrorKind::ReferenceError(error),
+            kind: ErrorKind::Reference(error),
             stacktrace: StackTrace { frames: vec![] },
         }
+    }
+    
+    pub fn syntax_error(error: String) -> Self {
+        Self {
+            kind: ErrorKind::Syntax(error),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+    
+    pub fn syntax(error: &str) -> Self {
+        Self::syntax_error(error.to_string())
     }
 
     pub fn ty(error: String) -> Self {
         Self {
-            kind: ErrorKind::TypeError(error),
+            kind: ErrorKind::Type(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
     
     pub fn name(&self) -> &str {
         match &self.kind {
-            ErrorKind::TypeError(_) => "TypeError",
-            ErrorKind::ReferenceError(_) => "ReferenceError",
-            ErrorKind::RangeError(_) => "RangeError",
-            ErrorKind::InternalError(_) => "InternalError",
-            ErrorKind::RuntimeError(_) => "RuntimeError",
+            ErrorKind::Type(_) => "TypeError",
+            ErrorKind::Reference(_) => "ReferenceError",
+            ErrorKind::Range(_) => "RangeError",
+            ErrorKind::Internal(_) => "InternalError",
+            ErrorKind::Runtime(_) => "RuntimeError",
+            ErrorKind::Syntax(_) => "SyntaxError",
         }
     }
     
     pub fn message(&self) -> &str {
         match &self.kind {
-            ErrorKind::TypeError(msg) => msg,
-            ErrorKind::ReferenceError(msg) => msg,
-            ErrorKind::RangeError(msg) => msg,
-            ErrorKind::InternalError(msg) => msg,
-            ErrorKind::RuntimeError(msg) => msg,
+            ErrorKind::Type(msg) => msg,
+            ErrorKind::Reference(msg) => msg,
+            ErrorKind::Range(msg) => msg,
+            ErrorKind::Internal(msg) => msg,
+            ErrorKind::Runtime(msg) => msg,
+            ErrorKind::Syntax(msg) => msg,
         }
     }
     
@@ -65,11 +78,12 @@ impl Error {
 
 #[derive(Debug)]
 pub enum ErrorKind {
-    TypeError(String),
-    ReferenceError(String),
-    RangeError(String),
-    InternalError(String),
-    RuntimeError(String),
+    Type(String),
+    Reference(String),
+    Range(String),
+    Internal(String),
+    Runtime(String),
+    Syntax(String),
 }
 
 #[derive(Debug)]

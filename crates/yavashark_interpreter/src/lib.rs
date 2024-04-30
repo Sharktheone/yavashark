@@ -15,8 +15,8 @@ use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
 
 pub enum ControlFlow {
-    Continue,
-    Break,
+    Continue(Option<String>),
+    Break(Option<String>),
     Return(Value),
     Error(Error),
 }
@@ -30,12 +30,16 @@ impl ControlFlow {
         ControlFlow::Error(Error::reference(e))
     }
     
+    fn syntax_error(e: &str) -> Self {
+        ControlFlow::Error(Error::syntax(e))
+    }
+    
     fn get_error(self) -> std::result::Result<Error, ControlFlow> {
         match self {
             ControlFlow::Error(e) => Ok(e),
             (e) => Err(e),
         }
-    
+   
     }
 }
 
@@ -103,6 +107,10 @@ mod tests {
         let k = x + y
 
 
+        function hello(a, b) {
+            return a + b
+        }
+
         if (k > 0) {
             var z = 1337
         } else {
@@ -110,6 +118,27 @@ mod tests {
         }
 
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+        console.log("3+4 is", hello(3, 4))
+
+
+        let yyy = 1 + 2
+
+        switch (yyy) {
+            case 1:
+                console.log("one")
+                break
+            case 2:
+                console.log("two")
+                break
+            case 3:
+                console.log("three")
+            case 4:
+                console.log("four")
+            case 5:
+                console.log("five")
+            default:
+                console.log("default")
+        }
 
         z
         "#;

@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use swc_ecma_ast::Str;
 
 use crate::console::get_console;
 use crate::Res;
@@ -22,6 +23,7 @@ impl ScopeState {
     const ITERATION: u8 = 0b100;
     const BREAKABLE: u8 = 0b1000;
     const RETURNABLE: u8 = 0b10000;
+    const CONTINUABLE: u8 = 0b100000;
     const STATE_NONE: ScopeState = ScopeState {
         state: ScopeState::NONE,
     };
@@ -40,13 +42,17 @@ impl ScopeState {
     const STATE_RETURNABLE: ScopeState = ScopeState {
         state: ScopeState::RETURNABLE,
     };
+    
+    const STATE_CONTINUABLE: ScopeState = ScopeState {
+        state: ScopeState::CONTINUABLE,
+    };
 
     pub fn new() -> Self {
         Self { state: 0 }
     }
 
-    pub fn copy(state: &Self) -> Self {
-        let mut state = state.state;
+    pub fn copy(&self) -> Self {
+        let mut state = self.state;
 
         state &= !Self::FUNCTION; // Remove the function state
         state &= !Self::GLOBAL; // Remove the global state
@@ -74,6 +80,11 @@ impl ScopeState {
     pub fn set_returnable(&mut self) {
         self.state |= Self::RETURNABLE;
     }
+    
+    pub fn set_loop(&mut self) {
+        self.state |= Self::CONTINUABLE;
+        self.state |= Self::BREAKABLE;
+    }
 
     pub fn is_function(&self) -> bool {
         self.state & Self::FUNCTION != 0
@@ -98,13 +109,17 @@ impl ScopeState {
     pub fn is_none(&self) -> bool {
         self.state == Self::NONE
     }
+    
+    pub fn is_continuable(&self) -> bool {
+        self.state & Self::CONTINUABLE != 0
+    }
 }
 
 pub struct Scope {
     scope: Rc<RefCell<ScopeInternal>>,
 }
 
-struct ScopeInternal {
+pub(crate) struct ScopeInternal {
     parent: Option<Rc<RefCell<ScopeInternal>>>,
     variables: HashMap<String, Variable>,
     pub available_labels: Vec<String>,
@@ -213,12 +228,14 @@ impl ScopeInternal {
             "console".to_string(),
             Variable::new_read_only(get_console()),
         );
+        
+        let state = parent.borrow().state.copy();
 
         Self {
             parent: Some(parent),
             variables,
             available_labels: Vec::new(),
-            state: ScopeState::new(),
+            state,
         }
     }
 
@@ -259,6 +276,71 @@ impl ScopeInternal {
 
         None
     }
+    
+    pub fn has_label(&self, label: &str) -> bool {
+        self.available_labels.contains(&label.to_string())
+    }
+    
+    pub fn declare_label(&mut self, label: String) {
+        self.available_labels.push(label);
+    }
+    
+    pub fn last_label(&mut self) -> Option<&String> {
+        self.available_labels.last()
+    }
+    
+    pub fn state_set_global(&mut self) {
+        self.state.set_global();
+    }
+    
+    pub fn state_set_function(&mut self) {
+        self.state.set_function();
+    }
+    
+    pub fn state_set_iteration(&mut self) {
+        self.state.set_iteration();
+    }
+    
+    pub fn state_set_breakable(&mut self) {
+        self.state.set_breakable();
+    }
+    
+    pub fn state_set_returnable(&mut self) {
+        self.state.set_returnable();
+    }
+    
+    pub fn state_set_loop(&mut self) {
+        self.state.set_loop();
+    }
+    
+    pub fn state_is_function(&self) -> bool {
+        self.state.is_function()
+    }
+    
+    pub fn state_is_global(&self) -> bool {
+        self.state.is_global()
+    }
+    
+    pub fn state_is_iteration(&self) -> bool {
+        self.state.is_iteration()
+    }
+    
+    pub fn state_is_breakable(&self) -> bool {
+        self.state.is_breakable()
+    }
+    
+    pub fn state_is_returnable(&self) -> bool {
+        self.state.is_returnable()
+    }
+    
+    pub fn state_is_none(&self) -> bool {
+        self.state.is_none()
+    }
+    
+    pub fn state_is_continuable(&self) -> bool {
+        self.state.is_continuable()
+    }
+    
 }
 
 impl Default for Scope {
@@ -302,5 +384,88 @@ impl Scope {
 
     pub fn resolve(&self, name: &str) -> Option<Value> {
         self.scope.borrow().resolve(name)
+    }
+    
+    pub fn has_label(&self, label: &str) -> bool {
+        self.scope.borrow().has_label(label)
+    }
+    
+    pub fn declare_label(&mut self, label: String) {
+        self.scope.borrow_mut().declare_label(label);
+    }
+    
+    pub fn last_label(&self) -> Option<String> {
+        self.scope.borrow_mut().last_label().cloned()
+    }
+    
+    pub fn state(&self) -> ScopeState {
+        self.scope.borrow().state.clone()
+    }
+    
+    pub fn state_set_global(&mut self) {
+        self.scope.borrow_mut().state_set_global();
+    }
+    
+    pub fn state_set_function(&mut self) {
+        self.scope.borrow_mut().state_set_function();
+    }
+    
+    pub fn state_set_iteration(&mut self) {
+        self.scope.borrow_mut().state_set_iteration();
+    }
+    
+    pub fn state_set_breakable(&mut self) {
+        self.scope.borrow_mut().state_set_breakable();
+    }
+    
+    pub fn state_set_returnable(&mut self) {
+        self.scope.borrow_mut().state_set_returnable();
+    }
+    
+    pub fn state_set_loop(&mut self) {
+        self.scope.borrow_mut().state_set_loop();
+    }
+    
+    pub fn state_is_function(&self) -> bool {
+        self.scope.borrow().state_is_function()
+    }
+    
+    pub fn state_is_global(&self) -> bool {
+        self.scope.borrow().state_is_global()
+    }
+    
+    pub fn state_is_iteration(&self) -> bool {
+        self.scope.borrow().state_is_iteration()
+    }
+    
+    pub fn state_is_breakable(&self) -> bool {
+        self.scope.borrow().state_is_breakable()
+    }
+    
+    pub fn state_is_returnable(&self) -> bool {
+        self.scope.borrow().state_is_returnable()
+    }
+    
+    pub fn state_is_none(&self) -> bool {
+        self.scope.borrow().state_is_none()
+    }
+    
+    pub fn state_is_continuable(&self) -> bool {
+        self.scope.borrow().state_is_continuable()
+    }
+}
+
+
+impl From<ScopeInternal> for Scope {
+    fn from(scope: ScopeInternal) -> Self {
+        Self {
+            scope: Rc::new(RefCell::new(scope)),
+        }
+    }
+}
+
+impl From<Rc<RefCell<ScopeInternal>>> for Scope {
+    fn from(scope: Rc<RefCell<ScopeInternal>>) -> Self {
+        Self { scope }
     }
 }

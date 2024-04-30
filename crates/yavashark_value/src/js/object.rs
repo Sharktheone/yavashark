@@ -1,16 +1,18 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+use crate::Func;
 
 use super::Value;
 
 #[derive(Debug, PartialEq)]
-pub struct Object<F: Debug> {
+pub struct Object<F: Func> {
     pub properties: HashMap<String, Value<F>>,
     pub call: Option<F>,
     pub construct: Option<F>,
 }
 
-impl<F: Debug> Object<F> {
+impl<F: Func> Object<F> {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         Self {
             properties: HashMap::new(),
@@ -25,11 +27,5 @@ impl<F: Debug> Object<F> {
 
     pub fn get_property(&self, name: &str) -> Option<&Value<F>> {
         self.properties.get(name)
-    }
-}
-
-impl Default for Object<()> {
-    fn default() -> Self {
-        Self::new()
     }
 }

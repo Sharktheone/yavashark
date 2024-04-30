@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
-use std::fmt::Debug;
 use std::ops::{Add, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub};
+use crate::Func;
 
 use super::Value;
 
@@ -18,7 +18,7 @@ impl ToNumber for bool {
     }
 }
 
-impl<F: Debug> Value<F> {
+impl<F: Func> Value<F> {
     pub fn to_number_or_null(&self) -> f64 {
         match self {
             Value::Number(n) => *n,
@@ -63,7 +63,7 @@ impl<F: Debug> Value<F> {
     }
 }
 
-impl<F: Debug> Add for Value<F> {
+impl<F: Func> Add for Value<F> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -129,7 +129,7 @@ impl<F: Debug> Add for Value<F> {
     }
 }
 
-impl<F: Debug> Sub for Value<F> {
+impl<F: Func> Sub for Value<F> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -212,7 +212,7 @@ impl<F: Debug> Sub for Value<F> {
     }
 }
 
-impl<F: Debug> Mul for Value<F> {
+impl<F: Func> Mul for Value<F> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -259,7 +259,7 @@ impl<F: Debug> Mul for Value<F> {
     }
 }
 
-impl<F: Debug> Div for Value<F> {
+impl<F: Func> Div for Value<F> {
     type Output = Self;
 
     //TODO: handle div by zero => return Infinity
@@ -333,7 +333,7 @@ impl<F: Debug> Div for Value<F> {
     }
 }
 
-impl<F: Debug> Rem for Value<F> {
+impl<F: Func> Rem for Value<F> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -395,7 +395,7 @@ impl<F: Debug> Rem for Value<F> {
     }
 }
 
-impl<F: Debug + PartialEq> PartialOrd for Value<F> {
+impl<F: Func + PartialEq> PartialOrd for Value<F> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
             (Value::Null, Value::Null) => Some(Ordering::Equal),
@@ -457,7 +457,7 @@ impl<F: Debug + PartialEq> PartialOrd for Value<F> {
     }
 }
 
-impl<F: Debug> Shl for Value<F> {
+impl<F: Func> Shl for Value<F> {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
@@ -550,7 +550,7 @@ impl<F: Debug> Shl for Value<F> {
     }
 }
 
-impl<F: Debug> Shr for Value<F> {
+impl<F: Func> Shr for Value<F> {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
@@ -643,7 +643,7 @@ impl<F: Debug> Shr for Value<F> {
     }
 }
 
-impl<F: Debug> BitOr for Value<F> {
+impl<F: Func> BitOr for Value<F> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -651,7 +651,7 @@ impl<F: Debug> BitOr for Value<F> {
     }
 }
 
-impl<F: Debug> BitAnd for Value<F> {
+impl<F: Func> BitAnd for Value<F> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -659,7 +659,7 @@ impl<F: Debug> BitAnd for Value<F> {
     }
 }
 
-impl<F: Debug> BitXor for Value<F> {
+impl<F: Func> BitXor for Value<F> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
@@ -667,7 +667,7 @@ impl<F: Debug> BitXor for Value<F> {
     }
 }
 
-impl<F: Debug> Value<F> {
+impl<F: Func> Value<F> {
     pub fn log_or(&self, rhs: Self) -> Self {
         if self.is_truthy() {
             self.copy()
@@ -697,7 +697,12 @@ mod tests {
 
     use crate::object::Object;
 
-    type Value = super::Value<()>;
+    #[derive(Debug, PartialEq)]
+    struct Function;
+    
+    impl super::Func for Function {}
+    
+    type Value = super::Value<Function>;
 
 
     #[test]

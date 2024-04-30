@@ -1,19 +1,54 @@
-use crate::scope::Scope;
-use crate::{Object, Res, RuntimeResult, Value, ValueResult};
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
+
+use swc_ecma_ast::{BlockStmt, Param, Pat};
+
+use yavashark_value::error::Error;
+use yavashark_value::Func;
+
+use crate::{ControlFlow, Value, ValueResult};
+use crate::context::Context;
+use crate::scope::Scope;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>;
 
 pub enum Function {
     Native(NativeFn),
+    NativeScope(NativeFn, Scope),
+    JS(Vec<Param>, Option<BlockStmt>, Scope),
 }
 
 impl Function {
-    pub fn call(&mut self, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
+    pub fn call(&mut self, ctx: &mut Context, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
         match self {
             Function::Native(f) => f(args, scope),
+            Function::NativeScope(f, scope) => {
+                f(args, scope)
+            }
+            Function::JS(param, block, scope) => {
+                for (i, p) in param.iter().enumerate() {
+                    let name = match p.pat {
+                        Pat::Ident(ref i) => i.sym.to_string(),
+                        _ => todo!("call args pat")
+                    };
+
+
+                    scope.declare_var(name, args.get(i).unwrap_or(&Value::Undefined).copy());
+                }
+
+                if let Some(block) = block {
+                    if let Err(e) = ctx.run_block(block, scope) {
+                        return match e {
+                            ControlFlow::Error(e) => Err(e),
+                            ControlFlow::Return(v) => Ok(v),
+                            ControlFlow::Break(_) => Err(Error::syntax("Illegal break statement")),
+                            ControlFlow::Continue(_) => Err(Error::syntax("Illegal continue statement")),
+                        };
+                    }
+                }
+                Ok(Value::Undefined)
+            }
         }
     }
 
@@ -28,15 +63,6 @@ impl Function {
     }
 }
 
-#[allow(clippy::from_over_into)]
-impl Into<Object> for Function {
-    fn into(self) -> Object {
-        let mut obj = Object::new();
-        obj.call = Some(self);
-        obj
-    }
-}
-
 impl Debug for Function {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[Function]")
@@ -48,3 +74,5 @@ impl PartialEq for Function {
         false //TODO
     }
 }
+
+impl Func for Function {}
