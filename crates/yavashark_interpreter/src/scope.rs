@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+use swc_ecma_ast::Str;
 
 use crate::console::get_console;
 use crate::Res;
@@ -259,6 +260,18 @@ impl ScopeInternal {
 
         None
     }
+    
+    pub fn has_label(&self, label: &str) -> bool {
+        self.available_labels.contains(&label.to_string())
+    }
+    
+    pub fn declare_label(&mut self, label: String) {
+        self.available_labels.push(label);
+    }
+    
+    pub fn last_label(&mut self) -> Option<&String> {
+        self.available_labels.last()
+    }
 }
 
 impl Default for Scope {
@@ -302,6 +315,14 @@ impl Scope {
 
     pub fn resolve(&self, name: &str) -> Option<Value> {
         self.scope.borrow().resolve(name)
+    }
+    
+    pub fn has_label(&self, label: &str) -> bool {
+        self.scope.borrow().has_label(label)
+    }
+    
+    pub fn declare_label(&mut self, label: String) {
+        self.scope.borrow_mut().declare_label(label);
     }
 }
 

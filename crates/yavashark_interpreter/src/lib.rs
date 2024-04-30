@@ -15,8 +15,8 @@ use swc_ecma_ast::{Script, Stmt};
 use yavashark_value::error::Error;
 
 pub enum ControlFlow {
-    Continue,
-    Break,
+    Continue(Option<String>),
+    Break(Option<String>),
     Return(Value),
     Error(Error),
 }
