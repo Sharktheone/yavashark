@@ -3,52 +3,48 @@ use std::fmt::Debug;
 use std::rc::Rc;
 
 use swc_ecma_ast::{BlockStmt, Param, Pat};
+
 use yavashark_value::error::Error;
 use yavashark_value::Func;
 
-use crate::{ControlFlow, Object, Value, ValueResult};
+use crate::{ControlFlow, Value, ValueResult};
 use crate::context::Context;
-use crate::scope::{Scope, ScopeInternal};
+use crate::scope::Scope;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>;
 
 pub enum Function {
     Native(NativeFn),
-    NativeScope(NativeFn, Rc<RefCell<ScopeInternal>>),
-    JS(Vec<Param>, Option<BlockStmt>),
+    NativeScope(NativeFn, Scope),
+    JS(Vec<Param>, Option<BlockStmt>, Scope),
 }
 
 impl Function {
     pub fn call(&mut self, ctx: &mut Context, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
         match self {
             Function::Native(f) => f(args, scope),
-            Function::NativeScope(f, s) => {
-                let mut scope = Scope::from(Rc::clone(s));
-                f(args, &mut scope)
+            Function::NativeScope(f, scope) => {
+                f(args, scope)
             }
-            Function::JS(param, block) => {
-                let mut scope = Scope::with_parent(scope);
-                scope.state_set_function();
-
+            Function::JS(param, block, scope) => {
                 for (i, p) in param.iter().enumerate() {
-                    
-                    let name = match p.pat { 
+                    let name = match p.pat {
                         Pat::Ident(ref i) => i.sym.to_string(),
                         _ => todo!("call args pat")
                     };
-                    
-                    
+
+
                     scope.declare_var(name, args.get(i).unwrap_or(&Value::Undefined).copy());
                 }
 
                 if let Some(block) = block {
-                    if let Err(e) = ctx.run_block(&block, &mut scope) {
+                    if let Err(e) = ctx.run_block(block, scope) {
                         return match e {
                             ControlFlow::Error(e) => Err(e),
                             ControlFlow::Return(v) => Ok(v),
                             ControlFlow::Break(_) => Err(Error::syntax("Illegal break statement")),
                             ControlFlow::Continue(_) => Err(Error::syntax("Illegal continue statement")),
-                        }
+                        };
                     }
                 }
                 Ok(Value::Undefined)
