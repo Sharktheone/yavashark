@@ -25,7 +25,7 @@ impl Context {
                     .map(|arg| self.run_expr(&arg.expr, arg.spread.unwrap_or(stmt.span), scope))
                     .collect::<Result<Vec<Value>, ControlFlow>>()?;
 
-                f.call(args, scope)
+                f.call(self, args, scope)
             } else {
                 Err(Error::ty(format!("{:?} ia not a function", stmt.callee)))
             }

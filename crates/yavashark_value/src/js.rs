@@ -9,7 +9,7 @@ mod ops;
 mod conversion;
 
 #[derive(Debug, PartialEq)]
-pub enum Value<F: Debug> {
+pub enum Value<F: Func> {
     Null,
     Undefined,
     Number(f64),
@@ -19,7 +19,7 @@ pub enum Value<F: Debug> {
     Object(Rc<RefCell<Object<F>>>),
 }
 
-impl<F: Debug> Value<F> {
+impl<F: Func> Value<F> {
     pub fn copy(&self) -> Self {
         match self {
             Value::Null => Value::Null,
@@ -39,7 +39,7 @@ impl<F: Debug> Value<F> {
     }
 }
 
-impl<F: Debug> Value<F> {
+impl<F: Func> Value<F> {
     pub fn type_of(&self) -> &'static str {
         match self {
             Value::Null => "null",
@@ -52,7 +52,7 @@ impl<F: Debug> Value<F> {
     }
 }
 
-impl<F: Debug> Display for Value<F> {
+impl<F: Func> Display for Value<F> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Value::Null => write!(f, "null"),
@@ -64,3 +64,6 @@ impl<F: Debug> Display for Value<F> {
         }
     }
 }
+
+
+pub trait Func: Debug + PartialEq {}
