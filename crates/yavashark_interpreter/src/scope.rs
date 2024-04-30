@@ -104,7 +104,7 @@ pub struct Scope {
     scope: Rc<RefCell<ScopeInternal>>,
 }
 
-struct ScopeInternal {
+pub(crate) struct ScopeInternal {
     parent: Option<Rc<RefCell<ScopeInternal>>>,
     variables: HashMap<String, Variable>,
     pub available_labels: Vec<String>,
@@ -302,5 +302,20 @@ impl Scope {
 
     pub fn resolve(&self, name: &str) -> Option<Value> {
         self.scope.borrow().resolve(name)
+    }
+}
+
+
+impl From<ScopeInternal> for Scope {
+    fn from(scope: ScopeInternal) -> Self {
+        Self {
+            scope: Rc::new(RefCell::new(scope)),
+        }
+    }
+}
+
+impl From<Rc<RefCell<ScopeInternal>>> for Scope {
+    fn from(scope: Rc<RefCell<ScopeInternal>>) -> Self {
+        Self { scope }
     }
 }

@@ -103,6 +103,10 @@ mod tests {
         let k = x + y
 
 
+        function hello(a, b) {
+            return a + b
+        }
+
         if (k > 0) {
             var z = 1337
         } else {
@@ -110,6 +114,7 @@ mod tests {
         }
 
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+        console.log("3+4 is", hello(3, 4))
 
         z
         "#;
