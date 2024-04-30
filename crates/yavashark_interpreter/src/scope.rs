@@ -318,11 +318,13 @@ impl ScopeInternal {
     pub fn get_parent_mut(&self, name: &str) -> Option<MutValue> {
         if let Some(par) = self.parent.as_ref() {
             let p = par.borrow();
-            if p.has_value(name) {
-                return Some(MutValue {
+            return if p.has_value(name) {
+                Some(MutValue {
                     name: name.to_string(),
                     scope: Rc::clone(par),
-                });
+                })
+            } else {
+                p.get_parent_mut(name)
             }
         }
 
@@ -400,26 +402,6 @@ impl Default for Scope {
         Self::new()
     }
 
-    pub fn has_value(&self, name: &str) -> bool {
-        self.scope.borrow().has_value(name)
-    }
-
-
-    pub fn get_mut(&mut self, name: &str) -> Option<MutValue> {
-        let scope = self.scope.borrow();
-        if scope.has_value(name) {
-            return Some(MutValue {
-                name: name.to_string(),
-                scope: Rc::clone(&self.scope),
-            });
-        }
-
-        if let Some(p) = scope.parent.as_ref() {
-            return p.borrow().get_parent_mut(name);
-        }
-
-        None
-    }
 }
 
 impl Scope {
@@ -525,6 +507,23 @@ impl Scope {
     
     pub fn state_is_continuable(&self) -> bool {
         self.scope.borrow().state_is_continuable()
+    }
+    
+    pub fn has_value(&self, name: &str) -> bool {
+        self.scope.borrow().has_value(name)
+    }
+
+
+    pub fn get_mut(&mut self, name: &str) -> Option<MutValue> {
+        let scope = self.scope.borrow();
+        if scope.variables.contains_key(name) {
+            return Some(MutValue {
+                name: name.to_string(),
+                scope: Rc::clone(&self.scope),
+            });
+        }
+
+        scope.get_parent_mut(name)
     }
 }
 

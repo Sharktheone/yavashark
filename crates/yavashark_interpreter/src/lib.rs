@@ -29,7 +29,7 @@ impl ControlFlow {
     fn error_reference(e: String) -> Self {
         ControlFlow::Error(Error::reference(e))
     }
-fn syntax_error(e: &str) -> Self {
+    fn syntax_error(e: &str) -> Self {
         ControlFlow::Error(Error::syntax(e))
     }
 
@@ -38,7 +38,6 @@ fn syntax_error(e: &str) -> Self {
             ControlFlow::Error(e) => Ok(e),
             (e) => Err(e),
         }
-
     }
 }
 
@@ -105,8 +104,16 @@ mod tests {
         let y = x + true
 
         let k = x + y
+        
+        try { 
+            console.log(k)
+            k = k + 2
+            console.log(k)
+        } catch (e) {
+            console.log("i don't care")
+        }
 
-
+        let z = 69;
         function hello(a, b) {
             return a + b
         }

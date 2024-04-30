@@ -32,7 +32,7 @@ impl Scope {
                 if let Some(value) = value {
                     Ok(AssignValue::MutValue(value))
                 } else {
-                    Err(Error::reference("Variable does not exist".to_owned()))
+                    Err(Error::reference(format!("{id} is not defined")))
                 }
             }
 
