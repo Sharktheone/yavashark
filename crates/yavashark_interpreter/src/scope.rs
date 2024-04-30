@@ -324,6 +324,10 @@ impl Scope {
     pub fn declare_label(&mut self, label: String) {
         self.scope.borrow_mut().declare_label(label);
     }
+    
+    pub fn last_label(&self) -> Option<String> {
+        self.scope.borrow_mut().last_label().cloned()
+    }
 }
 
 

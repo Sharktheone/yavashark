@@ -45,8 +45,8 @@ impl Function {
                         return match e {
                             ControlFlow::Error(e) => Err(e),
                             ControlFlow::Return(v) => Ok(v),
-                            ControlFlow::Break => Err(Error::syntax("Illegal break statement")),
-                            ControlFlow::Continue => Err(Error::syntax("Illegal continue statement")),
+                            ControlFlow::Break(_) => Err(Error::syntax("Illegal break statement")),
+                            ControlFlow::Continue(_) => Err(Error::syntax("Illegal continue statement")),
                         }
                     }
                 }

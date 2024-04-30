@@ -37,6 +37,16 @@ impl<F: Func> Value<F> {
             _ => false,
         }
     }
+    
+    pub fn is_falsey(&self) -> bool {
+        match self {
+            Value::Null | Value::Undefined => true,
+            Value::Number(n) => n == &0.0,
+            Value::String(s) => s.is_empty(),
+            Value::Boolean(b) => !b,
+            Value::Object(_) => false,
+        }
+    }
 }
 
 impl<F: Func> Value<F> {
