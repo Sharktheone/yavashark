@@ -13,6 +13,7 @@ pub struct Object {
 }
 
 impl Object {
+    #[allow(clippy::new_ret_no_self)]
     pub fn new() -> ObjWrapper<Context> {
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
@@ -32,22 +33,19 @@ impl Obj<Context> for Object {
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        todo!()
+        self.properties.get_mut(name)
     }
 
-    fn update_or_define_property(&mut self, name: Value, value: Value) {
-        todo!()
-    }
 
     fn contains_key(&self, name: &Value) -> bool {
-        todo!()
+        self.properties.contains_key(name)
     }
 
     fn name(&self) -> &str {
-        todo!()
+        "Object"
     }
 
     fn to_string(&self) -> String {
-        todo!()
+        "[object Object]".to_string()
     }
 }

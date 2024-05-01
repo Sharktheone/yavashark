@@ -1,11 +1,9 @@
-use std::cell::RefCell;
 use std::fmt::Debug;
-use std::rc::Rc;
 
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 
-use yavashark_value::{Ctx, Obj};
 use yavashark_value::Func;
+use yavashark_value::Obj;
 
 use crate::{ControlFlow, Error, Value, ValueResult};
 use crate::context::Context;
@@ -21,14 +19,13 @@ pub enum Function {
 }
 
 impl Function {
-   
-
     pub fn native(f: NativeFn) -> Self {
         Function::Native(f)
     }
 
     pub fn native_val(f: NativeFn) -> Value {
-        Self::native_val(f).into()
+        let this: Box<dyn Func<Context>> = Box::new(Self::native(f));
+        this.into()
     }
 }
 
