@@ -1,7 +1,7 @@
 use swc_ecma_ast::LabeledStmt;
 
 use crate::Value;
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::context::Context;
 use crate::scope::Scope;

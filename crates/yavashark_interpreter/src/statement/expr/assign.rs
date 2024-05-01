@@ -1,6 +1,6 @@
 use swc_ecma_ast::{AssignExpr, AssignTarget, Ident, MemberExpr, MemberProp, SimpleAssignTarget};
 
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::{Res, RuntimeResult};
 use crate::context::Context;
@@ -38,8 +38,8 @@ impl Context {
             }
         }
     }
-    
-    
+
+
     pub fn assign_member(&mut self, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {

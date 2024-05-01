@@ -4,7 +4,7 @@ use crate::scope::Scope;
 use crate::{ControlFlow, Object, RuntimeResult};
 use crate::Value;
 use swc_ecma_ast::NewExpr;
-use yavashark_value::error::Error;
+use crate::Error;
 
 impl Context {
     pub fn run_new(&mut self, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
@@ -20,20 +20,20 @@ impl Context {
 
                 if let Some(args) = &stmt.args {
                     call_args.reserve(args.len());
-                    
+
                     for arg in args {
                         call_args.push(self.run_expr(&arg.expr, arg.spread.unwrap_or(stmt.span), scope)?);
                         if arg.spread.is_some() {
                             todo!("spread")
                         }
-                    } 
+                    }
                 }
 
                 let this: Value = Object::new().into();
-                
+
 
                 let _ = f.call(self, call_args, this.copy())?;
-                
+
                 Ok(this) //This is always an object, so it will also be updated when we copy it
             } else {
                 Err(ControlFlow::error_type(format!("{:?} ia not a constructor", stmt.callee)))

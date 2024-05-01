@@ -28,7 +28,7 @@ pub use this::*;
 pub use tpl::*;
 pub use unary::*;
 pub use update::*;
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::context::Context;
 use crate::scope::Scope;

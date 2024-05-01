@@ -22,7 +22,7 @@ use crate::scope::Scope;
 use crate::RuntimeResult;
 use crate::Value;
 use swc_ecma_ast::Stmt;
-use yavashark_value::error::Error;
+use crate::Error;
 
 impl Context {
     pub fn run_statement(&mut self, stmt: &Stmt, scope: &mut Scope) -> RuntimeResult {

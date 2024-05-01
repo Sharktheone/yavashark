@@ -8,7 +8,7 @@ use crate::scope::Scope;
 use crate::Value;
 use crate::{ControlFlow, Res, RuntimeResult};
 use swc_ecma_ast::Decl;
-use yavashark_value::error::Error;
+use crate::Error;
 
 impl Context {
     pub fn run_decl(&mut self, stmt: &Decl, scope: &mut Scope) -> Res {

@@ -2,7 +2,7 @@ use crate::scope::Scope;
 use crate::RuntimeResult;
 use crate::Value;
 use swc_ecma_ast::{Script, Stmt};
-use yavashark_value::error::Error;
+use crate::Error;
 
 
 #[derive(Debug, Default)]

@@ -3,7 +3,7 @@ use crate::scope::Scope;
 use crate::Value;
 use crate::{Res, RuntimeResult};
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
-use yavashark_value::error::Error;
+use crate::Error;
 
 impl Context {
     pub fn decl_var(&mut self, stmt: &VarDecl, scope: &mut Scope) -> Res {

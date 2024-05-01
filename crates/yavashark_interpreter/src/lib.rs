@@ -4,7 +4,6 @@ use swc_ecma_ast::Stmt;
 
 pub use function::*;
 pub use value::*;
-use yavashark_value::error::Error;
 
 mod console;
 pub mod context;
@@ -13,6 +12,10 @@ pub mod scope;
 pub mod statement;
 mod value;
 pub mod variable;
+mod error;
+
+
+type Error = yavashark_value::error::Error<Function>;
 
 pub enum ControlFlow {
     Continue(Option<String>),
@@ -41,6 +44,10 @@ impl ControlFlow {
             ControlFlow::Error(e) => Ok(e),
             (e) => Err(e),
         }
+    }
+
+    fn throw(val: Value) -> Self {
+        ControlFlow::Error(Error::throw(val))
     }
 }
 
@@ -129,7 +136,7 @@ mod tests {
 
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         console.log("3+4 is", hello(3, 4))
-        
+
 
         let yyy = 1 + 2
 
@@ -156,8 +163,25 @@ mod tests {
 
         console.log(this)
 
+
+        function Hello() {
+            this.x = 1
+            this.y = 2
+        }
+
+
+        console.log(new Hello())
+
+
+        try {
+            throw 1
+        } catch ({message}) {
+            console.log("error:", message)
+        }
+
         z
         "#;
+
 
         let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 

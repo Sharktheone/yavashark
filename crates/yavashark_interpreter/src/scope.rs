@@ -2,9 +2,10 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::console::get_console;
+use crate::error::get_error;
 use crate::Res;
 use crate::Value;
 use crate::variable::Variable;
@@ -196,6 +197,12 @@ impl ScopeInternal {
         variables.insert(
             "console".to_string(),
             Variable::new_read_only(get_console()),
+        );
+        
+        
+        variables.insert(
+            "Error".to_string(),
+            Variable::new_read_only(get_error()),
         );
 
         Self {

@@ -3,7 +3,7 @@ use crate::scope::Scope;
 use crate::RuntimeResult;
 use crate::{ControlFlow, Value};
 use swc_ecma_ast::{MemberExpr, MemberProp};
-use yavashark_value::error::Error;
+use crate::Error;
 
 impl Context {
     pub fn run_member(&mut self, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {

@@ -1,6 +1,6 @@
 use swc_ecma_ast::{Callee, CallExpr};
 
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::{Value, ValueResult};
 use crate::context::Context;

@@ -1,7 +1,7 @@
 use swc_ecma_ast::BreakStmt;
 
 use crate::{ControlFlow, Value};
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::context::Context;
 use crate::scope::Scope;

@@ -4,7 +4,7 @@ use std::rc::Rc;
 
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 
-use yavashark_value::error::Error;
+use crate::Error;
 use yavashark_value::Func;
 
 use crate::{ControlFlow, Value, ValueResult};

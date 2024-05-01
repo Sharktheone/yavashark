@@ -123,14 +123,14 @@ impl<T: Func> From<f32> for Value<T> {
 }
 
 
-impl<T: Func> From<Error> for Value<T> {
-    fn from(e: Error) -> Self {
+impl<T: Func> From<Error<T>> for Value<T> {
+    fn from(e: Error<T>) -> Self {
         Value::Object(Rc::new(RefCell::new(e.into())))
     }
 }
 
-impl<T: Func> From<Error> for Object<T> {
-    fn from(e: Error) -> Self {
+impl<T: Func> From<Error<T>> for Object<T> {
+    fn from(e: Error<T>) -> Self {
         let mut obj = Object::new();
 
         obj.define_property("message".to_string(), e.message().into());

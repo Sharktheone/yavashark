@@ -1,6 +1,6 @@
 use crate::Res;
 use crate::Value;
-use yavashark_value::error::Error;
+use crate::Error;
 
 pub struct Variable {
     pub value: Value,

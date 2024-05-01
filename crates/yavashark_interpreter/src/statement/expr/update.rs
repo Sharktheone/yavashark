@@ -1,6 +1,6 @@
 use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
 
-use yavashark_value::error::Error;
+use crate::Error;
 
 use crate::context::Context;
 use crate::RuntimeResult;
@@ -36,9 +36,9 @@ impl Context {
             }
             Expr::Member(m) => {
                 let value = self.run_member(m, scope)?;
-                
+
                 let up = update(value, stmt.op);
-                
+
                 self.assign_member(m, up.0, scope);
                 Ok(up.1)
             }

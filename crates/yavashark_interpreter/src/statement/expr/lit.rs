@@ -2,7 +2,7 @@ use crate::context::Context;
 use crate::Value;
 use crate::{ControlFlow, RuntimeResult};
 use swc_ecma_ast::Lit;
-use yavashark_value::error::Error;
+use crate::Error;
 
 impl Context {
     pub fn run_lit(&mut self, stmt: &Lit) -> RuntimeResult {
