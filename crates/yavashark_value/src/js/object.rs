@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+
 use crate::Func;
 
 use super::Value;
@@ -28,8 +29,16 @@ impl<F: Func> Object<F> {
     pub fn get_property(&self, name: &str) -> Option<&Value<F>> {
         self.properties.get(name)
     }
-    
+
     pub fn get_property_mut(&mut self, name: &str) -> Option<&mut Value<F>> {
         self.properties.get_mut(name)
+    }
+
+    pub fn update_or_define_property(&mut self, name: String, value: Value<F>) {
+        if let Some(prop) = self.properties.get_mut(&name) {
+            *prop = value;
+        } else {
+            self.define_property(name, value);
+        }
     }
 }

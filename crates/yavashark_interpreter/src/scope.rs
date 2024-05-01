@@ -2,16 +2,12 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub use get::*;
 use yavashark_value::error::Error;
 
 use crate::console::get_console;
 use crate::Res;
 use crate::Value;
 use crate::variable::Variable;
-
-mod get;
-
 
 pub struct MutValue {
     pub(crate) name: String,
@@ -298,39 +294,6 @@ impl ScopeInternal {
         } else { true };
     }
 
-    pub fn get_ref(&self, name: &str) -> Option<&Value> {
-        if let Some(v) = self.variables.get(name) {
-            return Some(&v.value);
-        }
-
-        None
-    }
-
-    pub fn get_ref_mut(&mut self, name: &str) -> Option<&mut Value> {
-        if let Some(v) = self.variables.get_mut(name) {
-            return Some(&mut v.value);
-        }
-
-        None
-    }
-
-
-    pub fn get_parent_mut(&self, name: &str) -> Option<MutValue> {
-        if let Some(par) = self.parent.as_ref() {
-            let p = par.borrow();
-            return if p.has_value(name) {
-                Some(MutValue {
-                    name: name.to_string(),
-                    scope: Rc::clone(par),
-                })
-            } else {
-                p.get_parent_mut(name)
-            };
-        }
-
-        None
-    }
-
     pub fn has_label(&self, label: &str) -> bool {
         self.available_labels.contains(&label.to_string())
     }
@@ -393,6 +356,20 @@ impl ScopeInternal {
 
     pub fn state_is_continuable(&self) -> bool {
         self.state.is_continuable()
+    }
+
+    pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
+        if let Some(v) = self.variables.get_mut(&name) {
+            if !v.properties.is_writable() {
+                return Err(Error::ty("Assignment to constant variable".to_string()));
+            }
+
+            v.value = value;
+        } else {
+            self.declare_var(name, value);
+        }
+
+        Ok(())
     }
 }
 
@@ -524,16 +501,8 @@ impl Scope {
     }
 
 
-    pub fn get_mut(&mut self, name: &str) -> Option<MutValue> {
-        let scope = self.scope.borrow();
-        if scope.variables.contains_key(name) {
-            return Some(MutValue {
-                name: name.to_string(),
-                scope: Rc::clone(&self.scope),
-            });
-        }
-
-        scope.get_parent_mut(name)
+    pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
+        self.scope.borrow_mut().update_or_define(name, value)
     }
 }
 
