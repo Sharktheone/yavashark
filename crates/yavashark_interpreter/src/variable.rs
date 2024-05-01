@@ -1,6 +1,6 @@
+use crate::Error;
 use crate::Res;
 use crate::Value;
-use crate::Error;
 
 pub struct Variable {
     pub value: Value,
@@ -25,7 +25,7 @@ impl Variable {
     pub fn mutate(&mut self, value: Value) -> Res {
         if !self.properties.is_writable() {
             return Err(Error::new(
-                "Cannot assign to read-only variable".to_string(),
+                "Cannot assign to read-only variable"
             ));
         }
 

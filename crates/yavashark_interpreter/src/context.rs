@@ -1,11 +1,11 @@
 use crate::scope::Scope;
 use crate::RuntimeResult;
-use crate::Value;
 use swc_ecma_ast::{Script, Stmt};
-use crate::Error;
+use yavashark_value::Ctx;
+use crate::{Error, Value};
 
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 pub struct Context {
     //TODO: figure out, what needs to be here
 }
@@ -26,3 +26,6 @@ impl Context {
         Ok(last_value)
     }
 }
+
+
+impl Ctx for Context {}

@@ -1,9 +1,9 @@
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::RuntimeResult;
-use crate::{ControlFlow, Value};
+use crate::{ControlFlow};
 use swc_ecma_ast::{MemberExpr, MemberProp};
-use crate::Error;
+use crate::{Error, Value};
 
 impl Context {
     pub fn run_member(&mut self, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -24,9 +24,9 @@ impl Context {
 
         match obj {
             Value::Object(o) => {
-                let o = o.borrow();
+                let o = o.get()?;
 
-                if let Some(v) = o.get_property(&name) {
+                if let Some(v) = o.get_property(&name.clone().into()) {
                     Ok(v.copy())
                 } else {
                     Err(ControlFlow::error(format!("Property {} not found", name)))

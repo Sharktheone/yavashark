@@ -12,7 +12,7 @@ impl Context {
                 for decl in &stmt.decls {
                     let id = &decl.name;
                     let Pat::Ident(id) = id else {
-                        return Err(Error::new("Pattern is not an identifier".to_owned()));
+                        return Err(Error::new("Pattern is not an identifier"));
                     };
 
                     let init = &decl.init;
@@ -30,7 +30,7 @@ impl Context {
                 for decl in &stmt.decls {
                     let id = &decl.name;
                     let Pat::Ident(id) = id else {
-                        return Err(Error::new("Pattern is not an identifier".to_owned()));
+                        return Err(Error::new("Pattern is not an identifier"));
                     };
 
                     let init = &decl.init;
@@ -47,7 +47,7 @@ impl Context {
                 for decl in &stmt.decls {
                     let id = &decl.name;
                     let Pat::Ident(id) = id else {
-                        return Err(Error::new("Pattern is not an identifier".to_owned()));
+                        return Err(Error::new("Pattern is not an identifier"));
                     };
 
                     let init = &decl.init;
@@ -56,7 +56,7 @@ impl Context {
                         scope.declare_read_only_var(id.sym.to_string(), value);
                     } else {
                         return Err(Error::new(
-                            "Const declaration must have an initializer".to_owned(),
+                            "Const declaration must have an initializer",
                         ));
                     }
                 }

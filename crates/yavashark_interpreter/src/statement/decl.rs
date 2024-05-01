@@ -17,7 +17,7 @@ impl Context {
             Decl::Fn(f) => self.decl_fn(f, scope),
             Decl::Var(v) => self.decl_var(v, scope),
             Decl::Using(u) => self.decl_using(u, scope),
-            _ => Err(Error::new("Unsupported declaration".to_string())),
+            _ => Err(Error::new("Unsupported declaration")),
         }
     }
 }

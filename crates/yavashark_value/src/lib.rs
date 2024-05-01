@@ -1,4 +1,5 @@
-pub mod error;
+mod error;
+pub use error::*;
 
 #[cfg(all(feature = "ts", feature = "js"))]
 compile_error!("Cannot enable both `ts` and `js` features at the same time");

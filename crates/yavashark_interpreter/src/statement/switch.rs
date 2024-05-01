@@ -1,7 +1,8 @@
 use swc_ecma_ast::SwitchStmt;
+use crate::Value;
 
-use crate::{ControlFlow, Value};
 use crate::context::Context;
+use crate::ControlFlow;
 use crate::RuntimeResult;
 use crate::scope::Scope;
 
@@ -10,7 +11,7 @@ impl Context {
         let discriminant = self.run_expr(&stmt.discriminant, stmt.span, scope)?;
         let scope = &mut Scope::with_parent(scope);
         scope.state_set_breakable();
-        
+
         for case in &stmt.cases {
             if let Some(test) = &case.test {
                 let test = self.run_expr(test, case.span, scope)?;

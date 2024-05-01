@@ -1,6 +1,7 @@
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
+use crate::Value;
 
-use crate::{ControlFlow, RuntimeResult, Value};
+use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
 

@@ -198,8 +198,8 @@ impl ScopeInternal {
             "console".to_string(),
             Variable::new_read_only(get_console()),
         );
-        
-        
+
+
         variables.insert(
             "Error".to_string(),
             Variable::new_read_only(get_error()),
@@ -258,7 +258,7 @@ impl ScopeInternal {
 
     pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
         if self.variables.contains_key(&name) {
-            return Err(Error::new("Variable already declared".to_string()));
+            return Err(Error::new("Variable already declared"));
         }
 
         self.variables.insert(name, Variable::new_read_only(value));

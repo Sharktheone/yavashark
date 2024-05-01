@@ -1,27 +1,48 @@
-use crate::{Func, Value};
+use crate::{Ctx, Value};
 
 #[derive(Debug)]
-pub struct Error<F: Func> {
-    pub kind: ErrorKind<F>,
+pub struct Error<C: Ctx> {
+    pub kind: ErrorKind<C>,
     pub stacktrace: StackTrace,
 }
 
-impl<F: Func> Error<F> {
-    pub fn new(error: String) -> Self {
+impl<C: Ctx> Error<C> {
+    pub fn new(error: &str) -> Self {
+        Self {
+            kind: ErrorKind::Runtime(error.to_string()),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+    
+    pub fn new_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Runtime(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn reference(error: String) -> Self {
+    pub fn reference(error: &str) -> Self {
+        Self {
+            kind: ErrorKind::Reference(error.to_string()),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+    
+    pub fn reference_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Reference(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn syntax_error(error: String) -> Self {
+    pub fn syn(error: &str) -> Self {
+        Self {
+            kind: ErrorKind::Syntax(error.to_string()),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+    
+    pub fn syn_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Syntax(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -34,9 +55,12 @@ impl<F: Func> Error<F> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-
-    pub fn syntax(error: &str) -> Self {
-        Self::syntax_error(error.to_string())
+    
+    pub fn unknown_error(error: String) -> Self {
+        Self {
+            kind: ErrorKind::Error(Some(error)),
+            stacktrace: StackTrace { frames: vec![] },
+        }
     }
 
     pub fn ty(error: String) -> Self {
@@ -45,8 +69,15 @@ impl<F: Func> Error<F> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
+    
+    pub fn ty_error(error: String) -> Self {
+        Self {
+            kind: ErrorKind::Type(error),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
 
-    pub fn throw(val: Value<F>) -> Self {
+    pub fn throw(val: Value<C>) -> Self {
         Self {
             kind: ErrorKind::Throw(val),
             stacktrace: StackTrace { frames: vec![] },
@@ -97,14 +128,14 @@ impl<F: Func> Error<F> {
 }
 
 #[derive(Debug)]
-pub enum ErrorKind<F: Func> {
+pub enum ErrorKind<C: Ctx> {
     Type(String),
     Reference(String),
     Range(String),
     Internal(String),
     Runtime(String),
     Syntax(String),
-    Throw(Value<F>),
+    Throw(Value<C>),
     Error(Option<String>),
 }
 

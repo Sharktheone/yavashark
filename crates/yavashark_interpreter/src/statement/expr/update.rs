@@ -29,7 +29,7 @@ impl Context {
         match &*stmt.arg {
             Expr::Ident(i) => {
                 let name = i.sym.to_string();
-                let value = scope.resolve(&name).ok_or(Error::reference(format!("{name} is not defined")))?;
+                let value = scope.resolve(&name).ok_or(Error::reference_error(format!("{name} is not defined")))?;
                 let up = update(value, stmt.op);
                 scope.update_or_define(name, up.0);
                 Ok(up.1)

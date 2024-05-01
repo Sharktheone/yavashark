@@ -1,11 +1,10 @@
 use swc_ecma_ast::{Callee, CallExpr};
 
-use crate::Error;
-
-use crate::{Value, ValueResult};
+use crate::{Error, Value};
 use crate::context::Context;
 use crate::ControlFlow;
 use crate::scope::Scope;
+use crate::ValueResult;
 
 impl Context {
     pub fn run_call(&mut self, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
@@ -15,22 +14,14 @@ impl Context {
 
         let callee = self.run_expr(callee_expr, stmt.span, scope)?;
 
-        if let Value::Object(obj) = callee {
-            let mut obj = obj
-                .try_borrow_mut()
-                .map_err(|_| Error::reference("Cannot borrow object".to_string()))?;
+        if let Value::Function(f) = callee {
+            let args = stmt
+                .args
+                .iter()
+                .map(|arg| self.run_expr(&arg.expr, arg.spread.unwrap_or(stmt.span), scope))
+                .collect::<Result<Vec<Value>, ControlFlow>>()?;
 
-            if let Some(f) = &mut obj.call {
-                let args = stmt
-                    .args
-                    .iter()
-                    .map(|arg| self.run_expr(&arg.expr, arg.spread.unwrap_or(stmt.span), scope))
-                    .collect::<Result<Vec<Value>, ControlFlow>>()?;
-
-                f.call(self, args, scope.this.copy()) //In strict mode, this is undefined
-            } else {
-                Err(Error::ty(format!("{:?} ia not a function", stmt.callee)))
-            }
+            f.call(self, args, scope.this.copy()) //In strict mode, this is undefined
         } else {
             Err(Error::ty(format!("{:?} ia not a function", stmt.callee)))
         }

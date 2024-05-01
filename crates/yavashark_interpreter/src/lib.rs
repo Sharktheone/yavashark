@@ -3,19 +3,22 @@
 use swc_ecma_ast::Stmt;
 
 pub use function::*;
-pub use value::*;
+use crate::context::Context;
 
 mod console;
 pub mod context;
 mod function;
 pub mod scope;
 pub mod statement;
-mod value;
 pub mod variable;
 mod error;
+mod object;
 
 
-type Error = yavashark_value::error::Error<Function>;
+
+type Value = yavashark_value::Value<Context>;
+type Error = yavashark_value::Error<Context>;
+
 
 pub enum ControlFlow {
     Continue(Option<String>),
@@ -26,14 +29,14 @@ pub enum ControlFlow {
 
 impl ControlFlow {
     fn error(e: String) -> Self {
-        ControlFlow::Error(Error::new(e))
+        ControlFlow::Error(Error::new_error(e))
     }
 
     fn error_reference(e: String) -> Self {
-        ControlFlow::Error(Error::reference(e))
+        ControlFlow::Error(Error::reference_error(e))
     }
     fn error_syntax(e: &str) -> Self {
-        ControlFlow::Error(Error::syntax(e))
+        ControlFlow::Error(Error::syn(e))
     }
     fn error_type(e: String) -> Self {
         ControlFlow::Error(Error::ty(e))
@@ -69,7 +72,7 @@ impl From<ControlFlow> for Error {
     fn from(e: ControlFlow) -> Self {
         match e {
             ControlFlow::Error(e) => e,
-            _ => Error::new("Incorrect ControlFlow".to_string()),
+            _ => Error::new("Incorrect ControlFlow"),
         }
     }
 }

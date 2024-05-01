@@ -1,44 +1,107 @@
-use std::collections::HashMap;
-use std::fmt::Debug;
+use std::cell::{Ref, RefCell, RefMut};
+use std::fmt::{Debug, Display};
+use std::hash::Hash;
+use std::rc::Rc;
 
-use crate::Func;
+use crate::Error;
+use crate::js::context::Ctx;
 
 use super::Value;
 
-#[derive(Debug, PartialEq)]
-pub struct Object<F: Func> {
-    pub properties: HashMap<String, Value<F>>,
-    pub call: Option<F>,
-    pub construct: Option<F>,
-}
+pub trait Obj<C: Ctx>: Debug {
+    fn define_property(&mut self, name: Value<C>, value: Value<C>);
+    fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
+    // 
+    fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
 
-impl<F: Func> Object<F> {
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        Self {
-            properties: HashMap::new(),
-            call: None,
-            construct: None,
-        }
-    }
-
-    pub fn define_property(&mut self, name: String, value: Value<F>) {
-        self.properties.insert(name, value);
-    }
-
-    pub fn get_property(&self, name: &str) -> Option<&Value<F>> {
-        self.properties.get(name)
-    }
-
-    pub fn get_property_mut(&mut self, name: &str) -> Option<&mut Value<F>> {
-        self.properties.get_mut(name)
-    }
-
-    pub fn update_or_define_property(&mut self, name: String, value: Value<F>) {
-        if let Some(prop) = self.properties.get_mut(&name) {
+    fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) {
+        if let Some(prop) = self.get_property_mut(&name) {
             *prop = value;
         } else {
             self.define_property(name, value);
         }
+    }
+
+    fn contains_key(&self, name: &Value<C>) -> bool {
+        self.get_property(name).is_some()
+    }
+
+    fn name(&self) -> &str;
+
+
+    fn to_string(&self) -> String;
+}
+
+
+#[derive(Debug, Clone)]
+pub struct Object<C: Ctx>(Rc<RefCell<Box<dyn Obj<C>>>>);
+
+impl<C: Ctx> Hash for Object<C> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        Rc::as_ptr(&self.0).hash(state); //TODO only the ptr is hashed, not the content
+    }
+}
+
+impl<C: Ctx> Eq for Object<C> {}
+
+impl<C: Ctx> PartialEq for Object<C> {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl<C: Ctx> Object<C> {
+    pub fn get(&self) -> Result<Ref<Box<dyn Obj<C>>>, Error<C>> {
+        self.0.try_borrow().map_err(|_| Error::new("failed to borrow object"))
+    }
+
+    pub fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
+        self.0.try_borrow_mut().map_err(|_| Error::new("failed to borrow object"))
+    }
+    
+    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        self.get_mut()?.define_property(name, value);
+        Ok(())
+    }
+    
+    pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
+        self.get()?.get_property(name)
+            .map(|v| v.copy())
+            .ok_or(Error::reference_error(format!("{} does not exist on object", name)))
+    }
+    
+    pub fn update_or_define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        self.get_mut()?.update_or_define_property(name, value);
+        Ok(())
+    }
+    
+    pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
+        Ok(self.get()?.contains_key(name))
+    }
+    
+    pub fn name(&self) -> String {
+        if let Ok(o) = self.get() {
+            o.name().to_string()
+        } else {
+            "Object".to_string()
+        }
+    }
+}
+
+
+impl<C: Ctx> Display for Object<C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if let Ok(o) = self.get() {
+            write!(f, "{}", o.to_string())
+        } else {
+            write!(f, "[object Object]")
+        }
+    }
+}
+
+
+impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
+    fn from(obj: Box<dyn Obj<C>>) -> Self {
+        Object(Rc::new(RefCell::new(obj)))
     }
 }

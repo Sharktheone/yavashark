@@ -4,10 +4,10 @@ use std::rc::Rc;
 
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 
-use crate::Error;
+use yavashark_value::{Ctx, Obj};
 use yavashark_value::Func;
 
-use crate::{ControlFlow, Value, ValueResult};
+use crate::{ControlFlow, Error, Value, ValueResult};
 use crate::context::Context;
 use crate::scope::Scope;
 
@@ -21,7 +21,53 @@ pub enum Function {
 }
 
 impl Function {
-    pub fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
+   
+
+    pub fn native(f: NativeFn) -> Self {
+        Function::Native(f)
+    }
+
+    pub fn native_val(f: NativeFn) -> Value {
+        Self::native_val(f).into()
+    }
+}
+
+impl Debug for Function {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[Function]")
+    }
+}
+
+impl PartialEq for Function {
+    fn eq(&self, _other: &Self) -> bool {
+        false //TODO
+    }
+}
+
+impl Obj<Context> for Function {
+    fn define_property(&mut self, name: Value, value: Value) {
+        todo!()
+    }
+
+    fn get_property(&self, name: &Value) -> Option<&Value> {
+        todo!()
+    }
+
+    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
+        todo!()
+    }
+
+    fn name(&self) -> &str {
+        todo!()
+    }
+
+    fn to_string(&self) -> String {
+        todo!()
+    }
+}
+
+impl Func<Context> for Function {
+    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         match self {
             Function::Native(f) => f(args),
             Function::NativeScope(f, scope) => {
@@ -43,8 +89,8 @@ impl Function {
                         return match e {
                             ControlFlow::Error(e) => Err(e),
                             ControlFlow::Return(v) => Ok(v),
-                            ControlFlow::Break(_) => Err(Error::syntax("Illegal break statement")),
-                            ControlFlow::Continue(_) => Err(Error::syntax("Illegal continue statement")),
+                            ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
+                            ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
                         };
                     }
                 }
@@ -52,28 +98,4 @@ impl Function {
             }
         }
     }
-
-    pub fn native(f: NativeFn) -> Self {
-        Function::Native(f)
-    }
-
-    pub fn native_val(f: NativeFn) -> Value {
-        let obj = Function::native(f).into();
-        let ohj = Rc::new(RefCell::new(obj));
-        Value::Object(ohj)
-    }
 }
-
-impl Debug for Function {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[Function]")
-    }
-}
-
-impl PartialEq for Function {
-    fn eq(&self, _other: &Self) -> bool {
-        false //TODO
-    }
-}
-
-impl Func for Function {}

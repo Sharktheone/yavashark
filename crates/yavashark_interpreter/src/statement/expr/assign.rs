@@ -43,9 +43,8 @@ impl Context {
     pub fn assign_member(&mut self, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
-            let mut obj = obj.try_borrow_mut()
-                .map_err(|_| Error::new("failed to borrow object".to_string()))?;
-
+            let mut obj = obj.get_mut()?;
+            
             let name = match &m.prop {
                 MemberProp::Ident(i) => i.sym.to_string(),
                 MemberProp::PrivateName(p) => { p.id.sym.to_string() }
@@ -53,7 +52,7 @@ impl Context {
                     let name = self.run_expr(&c.expr, c.span, scope)?;
                     value.to_string() //TODO: numbers will have problems
                 }
-            };
+            }.into();
 
 
             obj.update_or_define_property(name, value);

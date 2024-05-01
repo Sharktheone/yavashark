@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
-use crate::Func;
+
+use crate::{Ctx, Func};
 
 use super::Value;
 
@@ -18,7 +19,7 @@ impl ToNumber for bool {
     }
 }
 
-impl<F: Func> Value<F> {
+impl<C: Ctx> Value<C> {
     pub fn to_number_or_null(&self) -> f64 {
         match self {
             Value::Number(n) => *n,
@@ -59,11 +60,12 @@ impl<F: Func> Value<F> {
             Value::String(s) => !s.is_empty(),
             Value::Boolean(b) => *b,
             Value::Object(_) => true,
+            Value::Function(_) => true,
         }
     }
 }
 
-impl<F: Func> Add for Value<F> {
+impl<C: Ctx> Add for Value<C> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -105,37 +107,21 @@ impl<F: Func> Add for Value<F> {
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() + b),
             (Value::Boolean(a), Value::String(b)) => Value::String(a.to_string() + &b),
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() + b.num()),
-            (Value::Boolean(a), Value::Object(_)) => {
-                Value::String(a.to_string() + "[object Object]")
+            (Value::Boolean(a), Value::Object(o)) => {
+                Value::String(a.to_string() + &o.to_string())
             }
 
-            (Value::Object(_), Value::Null) => Value::String("[object Object]null".to_owned()),
-            (Value::Object(_), Value::Undefined) => {
-                Value::String("[object Object]undefined".to_owned())
-            }
-            (Value::Object(_), Value::Number(b)) => {
-                Value::String("[object Object]".to_owned() + &b.to_string())
-            }
-            (Value::Object(_), Value::String(b)) => {
-                Value::String("[object Object]".to_owned() + &b)
-            }
-            (Value::Object(_), Value::Boolean(b)) => {
-                Value::String("[object Object]".to_owned() + &b.to_string())
-            }
-            (Value::Object(_), Value::Object(_)) => {
-                Value::String("[object Object][object Object]".to_owned())
-            }
+            (a, b) => Value::String(a.to_string() + &b.to_string()),
         }
     }
 }
 
-impl<F: Func> Sub for Value<F> {
+impl<C: Ctx> Sub for Value<C> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
         match (self, rhs) {
             (Value::Null, Value::Null) => Value::Number(0.0),
-            (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Null, Value::Number(b)) => Value::Number(-b),
             (Value::Null, Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
@@ -143,14 +129,10 @@ impl<F: Func> Sub for Value<F> {
                 } else {
                     Value::Number(f64::NAN)
                 }
-            },
+            }
             (Value::Null, Value::Boolean(b)) => Value::Number(-b.num()),
-            (Value::Null, Value::Object(_)) => Value::Number(f64::NAN),
-
-            (Value::Undefined, _) => Value::Number(f64::NAN),
 
             (Value::Number(a), Value::Null) => Value::Number(a),
-            (Value::Number(_), Value::Undefined) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a - b),
             (Value::Number(a), Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
@@ -160,7 +142,6 @@ impl<F: Func> Sub for Value<F> {
                 }
             }
             (Value::Number(a), Value::Boolean(b)) => Value::Number(a - b.num()),
-            (Value::Number(_), Value::Object(_)) => Value::Number(f64::NAN),
 
             (Value::String(a), Value::Null) => {
                 if let Ok(a) = a.parse::<f64>() {
@@ -195,7 +176,6 @@ impl<F: Func> Sub for Value<F> {
             (Value::String(_), _) => Value::Number(f64::NAN),
 
             (Value::Boolean(a), Value::Null) => Value::Number(a.num()),
-            (Value::Boolean(_), Value::Undefined) => Value::Number(f64::NAN),
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() - b),
             (Value::Boolean(a), Value::String(b)) => {
                 if let Ok(b) = b.parse::<f64>() {
@@ -207,12 +187,14 @@ impl<F: Func> Sub for Value<F> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() - b.num()),
             (Value::Boolean(_), Value::Object(_)) => Value::Number(f64::NAN),
 
-            (Value::Object(_), _) => Value::Number(f64::NAN),
+            (Value::Object(_), _) | (_, Value::Object(_)) => Value::Number(f64::NAN),
+            (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
         }
     }
 }
 
-impl<F: Func> Mul for Value<F> {
+impl<C: Ctx> Mul for Value<C> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -224,10 +206,7 @@ impl<F: Func> Mul for Value<F> {
                     Value::Number(f64::NAN)
                 }
             }
-            (Value::Null, Value::Object(_)) => Value::Number(f64::NAN),
-            (Value::Null, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Null, _) | (_, Value::Null) => Value::Number(0.0),
-            (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Number(a), Value::Number(b)) => Value::Number(a * b),
             (Value::Number(a), Value::String(b)) | (Value::String(b), Value::Number(a)) => {
                 if let Ok(b) = b.parse::<f64>() {
@@ -255,11 +234,13 @@ impl<F: Func> Mul for Value<F> {
             }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() * b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
+            (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
         }
     }
 }
 
-impl<F: Func> Div for Value<F> {
+impl<C: Ctx> Div for Value<C> {
     type Output = Self;
 
     //TODO: handle div by zero => return Infinity
@@ -309,7 +290,7 @@ impl<F: Func> Div for Value<F> {
                     Value::Number(f64::NAN)
                 }
             }
-            
+
             (Value::String(a), Value::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
                     Value::Number(a / b)
@@ -329,11 +310,12 @@ impl<F: Func> Div for Value<F> {
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() / b),
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() / b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
         }
     }
 }
 
-impl<F: Func> Rem for Value<F> {
+impl<C: Ctx> Rem for Value<C> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -391,11 +373,12 @@ impl<F: Func> Rem for Value<F> {
             }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() % b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
         }
     }
 }
 
-impl<F: Func + PartialEq> PartialOrd for Value<F> {
+impl<C: Ctx> PartialOrd for Value<C> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
             (Value::Null, Value::Null) => Some(Ordering::Equal),
@@ -453,11 +436,12 @@ impl<F: Func + PartialEq> PartialOrd for Value<F> {
 
             (Value::Object(_), _) => None,
             (_, Value::Object(_)) => None,
+            (Value::Function(_), _) | (_, Value::Function(_)) => None,
         }
     }
 }
 
-impl<F: Func> Shl for Value<F> {
+impl<C: Ctx> Shl for Value<C> {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
@@ -546,11 +530,12 @@ impl<F: Func> Shl for Value<F> {
             }
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(0.0),
         }
     }
 }
 
-impl<F: Func> Shr for Value<F> {
+impl<C: Ctx> Shr for Value<C> {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
@@ -639,11 +624,12 @@ impl<F: Func> Shr for Value<F> {
             }
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(0.0),
         }
     }
 }
 
-impl<F: Func> BitOr for Value<F> {
+impl<C: Ctx> BitOr for Value<C> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -651,7 +637,7 @@ impl<F: Func> BitOr for Value<F> {
     }
 }
 
-impl<F: Func> BitAnd for Value<F> {
+impl<C: Ctx> BitAnd for Value<C> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -659,7 +645,7 @@ impl<F: Func> BitAnd for Value<F> {
     }
 }
 
-impl<F: Func> BitXor for Value<F> {
+impl<C: Ctx> BitXor for Value<C> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
@@ -667,7 +653,7 @@ impl<F: Func> BitXor for Value<F> {
     }
 }
 
-impl<F: Func> Value<F> {
+impl<C: Ctx> Value<C> {
     pub fn log_or(&self, rhs: Self) -> Self {
         if self.is_truthy() {
             self.copy()
@@ -690,14 +676,13 @@ impl<F: Func> Value<F> {
 }
 
 
-
-impl<F: Func> AddAssign for Value<F> {
+impl<C: Ctx> AddAssign for Value<C> {
     fn add_assign(&mut self, rhs: Self) {
         *self = self.copy() + rhs; //TODO: don't copy the value
     }
 }
 
-impl<F: Func> SubAssign for Value<F> {
+impl<C: Ctx> SubAssign for Value<C> {
     fn sub_assign(&mut self, rhs: Self) {
         *self = self.copy() - rhs; //TODO: don't copy the value
     }
@@ -706,18 +691,41 @@ impl<F: Func> SubAssign for Value<F> {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::RefCell;
-    use std::rc::Rc;
+    use crate::Obj;
 
-    use crate::object::Object;
+    use super::*;
+    
+    type Value = super::Value<()>;
+    type Error = crate::Error<()>;
 
     #[derive(Debug, PartialEq)]
-    struct Function;
-    
-    impl super::Func for Function {}
-    
-    type Value = super::Value<Function>;
+    struct Object;
 
+    impl Obj<()> for Object {
+        fn define_property(&mut self, name: Value, value: Value) {}
+
+        fn get_property(&self, name: &impl Into<Value>) -> Option<&Value> {
+            None
+        }
+
+        fn get_property_mut(&mut self, name: &impl Into<Value>) -> Option<&mut Value> {
+            None
+        }
+
+        fn name(&self) -> &str {
+            "Object"
+        }
+        
+        fn to_string(&self) -> String {
+            format!("[object {}]", self.name())
+        }
+    }
+
+    impl Func<()> for Object {
+        fn call(&self, ctx: (), args: Vec<Value>, this: Value) -> Result<Value, Error> {
+            Ok(Value::Undefined)
+        }
+    }
 
     #[test]
     fn add_null_null() {
@@ -765,7 +773,7 @@ mod tests {
     #[test]
     fn add_null_object() {
         let a = Value::Null;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("null[object Object]".to_string()));
     }
 
@@ -815,7 +823,7 @@ mod tests {
     #[test]
     fn add_undefined_object() {
         let a = Value::Undefined;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("undefined[object Object]".to_string()));
     }
 
@@ -866,7 +874,7 @@ mod tests {
     #[test]
     fn add_number_object() {
         let a = Value::Number(1.0);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("1[object Object]".to_string()));
     }
 
@@ -918,7 +926,7 @@ mod tests {
     #[test]
     fn add_string_object() {
         let a = Value::String("hello".to_string());
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("hello[object Object]".to_string()));
     }
 
@@ -984,53 +992,53 @@ mod tests {
     #[test]
     fn add_boolean_object() {
         let a = Value::Boolean(true);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("true[object Object]".to_string()));
 
         let a = Value::Boolean(false);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("false[object Object]".to_string()));
     }
 
     #[test]
     fn add_object_null() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Null;
         assert_eq!(a + b, Value::String("[object Object]null".to_string()));
     }
 
     #[test]
     fn add_object_undefined() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Undefined;
         assert_eq!(a + b, Value::String("[object Object]undefined".to_string()));
     }
 
     #[test]
     fn add_object_number() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(1.0);
         assert_eq!(a + b, Value::String("[object Object]1".to_string()));
     }
 
     #[test]
     fn add_object_string() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::String("hello".to_string());
         assert_eq!(a + b, Value::String("[object Object]hello".to_string()));
     }
 
     #[test]
     fn add_object_boolean() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Boolean(true);
         assert_eq!(a + b, Value::String("[object Object]true".to_string()));
     }
 
     #[test]
     fn add_object_object() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
+        let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("[object Object][object Object]".to_string()));
     }
 
@@ -1077,7 +1085,7 @@ mod tests {
     #[test]
     fn sub_null_object() {
         let a = Value::Null;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a - b).is_nan());
     }
 
@@ -1108,7 +1116,7 @@ mod tests {
         assert!((a - b).is_nan());
 
         let a = Value::Undefined;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a - b).is_nan());
     }
 
@@ -1158,7 +1166,7 @@ mod tests {
     #[test]
     fn sub_number_object() {
         let a = Value::Number(1.0);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a - b).is_nan());
     }
 
@@ -1216,7 +1224,7 @@ mod tests {
     #[test]
     fn sub_string_object() {
         let a = Value::String("2".to_string());
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a - b).is_nan());
     }
 
@@ -1282,34 +1290,34 @@ mod tests {
     #[test]
     fn sub_boolean_object() {
         let a = Value::Boolean(true);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a - b).is_nan());
     }
 
     #[test]
     fn sub_object_any() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Null;
         assert!((a - b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Undefined;
         assert!((a - b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(1.0);
         assert!((a - b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::String("1".to_string());
         assert!((a - b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Boolean(true);
         assert!((a - b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
+        let b = Value::Object(Object.into());
         assert!((a - b).is_nan());
     }
 
@@ -1318,7 +1326,7 @@ mod tests {
         let a = Value::Null;
         let b = Value::Undefined;
         assert!((a * b).is_nan());
-        
+
         let a = Value::Null;
         let b = Value::Number(1.0);
         assert_eq!(a * b, Value::Number(0.0));
@@ -1336,7 +1344,7 @@ mod tests {
         assert_eq!(a * b, Value::Number(0.0));
 
         let a = Value::Null;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a * b).is_nan());
     }
 
@@ -1359,7 +1367,7 @@ mod tests {
         assert!((a * b).is_nan());
 
         let a = Value::Undefined;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a * b).is_nan());
     }
 
@@ -1395,7 +1403,7 @@ mod tests {
     #[test]
     fn mul_number_object() {
         let a = Value::Number(2.0);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a * b).is_nan());
     }
 
@@ -1428,7 +1436,7 @@ mod tests {
     #[test]
     fn mul_string_object() {
         let a = Value::String("2".to_string());
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a * b).is_nan());
     }
 
@@ -1457,26 +1465,26 @@ mod tests {
     #[test]
     fn mul_boolean_object() {
         let a = Value::Boolean(true);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a * b).is_nan());
     }
 
     #[test]
     fn mul_object_any() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(1.0);
         assert!((a * b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::String("1".to_string());
         assert!((a * b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Boolean(true);
         assert!((a * b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
+        let b = Value::Object(Object.into());
         assert!((a * b).is_nan());
     }
 
@@ -1544,7 +1552,7 @@ mod tests {
         assert!((a / b).is_nan());
 
         let a = Value::Undefined;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a / b).is_nan());
     }
 
@@ -1559,7 +1567,7 @@ mod tests {
         let b = Value::Null;
         assert!((a / b).is_nan());
     }
-    
+
 
     #[test]
     fn div_number_number() {
@@ -1672,20 +1680,20 @@ mod tests {
 
     #[test]
     fn div_object_any() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(1.0);
         assert!((a / b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::String("1".to_string());
         assert!((a / b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Boolean(true);
         assert!((a / b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
+        let b = Value::Object(Object.into());
         assert!((a / b).is_nan());
     }
 
@@ -1707,7 +1715,7 @@ mod tests {
         let b = Value::Undefined;
         assert!((a / b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Undefined;
         assert!((a / b).is_nan());
     }
@@ -1740,7 +1748,7 @@ mod tests {
         assert_eq!(a % b, Value::Number(0.0));
 
         let a = Value::Null;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
     }
 
@@ -1766,7 +1774,7 @@ mod tests {
         let b = Value::Null;
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Null;
         assert!((a % b).is_nan());
     }
@@ -1798,7 +1806,7 @@ mod tests {
         assert!((a % b).is_nan());
 
         let a = Value::Undefined;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
     }
 
@@ -1820,7 +1828,7 @@ mod tests {
         let b = Value::Undefined;
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Undefined;
         assert!((a % b).is_nan());
     }
@@ -1901,51 +1909,51 @@ mod tests {
 
     #[test]
     fn rem_object_any() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Null;
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Undefined;
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(1.0);
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::String("1".to_string());
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Boolean(true);
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
     }
 
     #[test]
     fn rem_any_object() {
         let a = Value::Null;
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
 
         let a = Value::Number(1.0);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
 
         let a = Value::String("1".to_string());
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
 
         let a = Value::Boolean(true);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
+        let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
     }
 
@@ -2061,7 +2069,7 @@ mod tests {
     #[test]
     #[allow(clippy::neg_cmp_op_on_partial_ord)]
     fn object_not_comparable() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Null;
         assert!(!(a >= b));
         assert!(!(a <= b));
@@ -2160,11 +2168,11 @@ mod tests {
 
     #[test]
     fn shl_object_any() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(2.0);
         assert_eq!(a << b, Value::Number(0.0));
 
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::String("2".to_string());
         assert_eq!(a << b, Value::Number(0.0));
     }
@@ -2172,11 +2180,11 @@ mod tests {
     #[test]
     fn shl_any_object() {
         let a = Value::Number(10.0);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a << b, Value::Number(10.0));
 
         let a = Value::String("10".to_string());
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a << b, Value::Number(10.0));
     }
 
@@ -2255,7 +2263,7 @@ mod tests {
 
     #[test]
     fn shr_object_any() {
-        let a = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let a = Value::Object(Object.into());
         let b = Value::Number(2.0);
         assert_eq!(a >> b, Value::Number(0.0));
     }
@@ -2263,7 +2271,7 @@ mod tests {
     #[test]
     fn shr_any_object() {
         let a = Value::Number(10.0);
-        let b = Value::Object(Rc::new(RefCell::new(Object::new())));
+        let b = Value::Object(Object.into());
         assert_eq!(a >> b, Value::Number(10.0));
     }
 
@@ -2273,7 +2281,7 @@ mod tests {
         assert_eq!(Value::Number(10.0) | Value::Boolean(true), Value::Number((10 | 1) as f64));
         assert_eq!(Value::String("10".to_string()) | Value::Number(2.0), Value::Number((10 | 2) as f64));
         assert_eq!(Value::String("invalid".to_string()) | Value::Number(2.0), Value::Number(2.0));
-        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) | Value::Number(2.0), Value::Number(2.0));
+        assert_eq!(Value::Object(Object.into()) | Value::Number(2.0), Value::Number(2.0));
     }
 
     #[test]
@@ -2282,7 +2290,7 @@ mod tests {
         assert_eq!(Value::Number(10.0) & Value::Boolean(true), Value::Number((10 & 1) as f64));
         assert_eq!(Value::String("10".to_string()) & Value::Number(2.0), Value::Number((10 & 2) as f64));
         assert_eq!(Value::String("invalid".to_string()) & Value::Number(2.0), Value::Number(0.0));
-        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) & Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(Value::Object(Object.into()) & Value::Number(2.0), Value::Number(0.0));
     }
 
     #[test]
@@ -2291,6 +2299,6 @@ mod tests {
         assert_eq!(Value::Number(10.0) ^ Value::Boolean(true), Value::Number((10 ^ 1) as f64));
         assert_eq!(Value::String("10".to_string()) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
         assert_eq!(Value::String("invalid".to_string()) ^ Value::Number(2.0), Value::Number(2.0));
-        assert_eq!(Value::Object(Rc::new(RefCell::new(Object::new()))) ^ Value::Number(2.0), Value::Number(2.0));
+        assert_eq!(Value::Object(Object.into()) ^ Value::Number(2.0), Value::Number(2.0));
     }
 }

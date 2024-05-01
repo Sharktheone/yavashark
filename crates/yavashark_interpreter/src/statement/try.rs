@@ -1,7 +1,10 @@
+use std::fmt::format;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 
-use crate::{RuntimeResult, Value};
+use crate::Value;
+
 use crate::context::Context;
+use crate::RuntimeResult;
 use crate::scope::Scope;
 
 impl Context {
@@ -27,7 +30,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
             if let Some(param) = &catch.param {
                 match param {
                     Pat::Ident(ident) => {
-                        scope.declare_var(ident.sym.to_string(), err.into());
+                        scope.declare_var(ident.sym.to_string(), format!("{:?}", err).into()); //TODO impl Obj for Error
                     }
                     Pat::Object(obj) => {
                         for prop in &obj.props {
@@ -38,7 +41,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                             scope.declare_var("message".to_string(), err.message().into());
                                         }
                                         "stack" => {
-                                            scope.declare_var("stack".to_string(), err.stack().into());
+                                            scope.declare_var("stack".to_string(), format!("{:?}", err.stack()).into()); //TODO impl Obj for StackTrace
                                         }
                                         "name" => {
                                             scope.declare_var("name".to_string(), err.name().into());
@@ -80,7 +83,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                             scope.declare_var(name, err.message().into());
                                         }
                                         "stack" => {
-                                            scope.declare_var(name, err.stack().into());
+                                            scope.declare_var(name, format!("{:?}", err.stack()).into());
                                         }
                                         "name" => {
                                             scope.declare_var(name, err.name().into());
