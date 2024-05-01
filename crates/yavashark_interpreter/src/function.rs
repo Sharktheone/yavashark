@@ -11,7 +11,7 @@ use crate::{ControlFlow, Value, ValueResult};
 use crate::context::Context;
 use crate::scope::Scope;
 
-type NativeFn = Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>;
+type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Scope) -> ValueResult>;
 
 pub enum Function {
     Native(NativeFn),
@@ -20,11 +20,11 @@ pub enum Function {
 }
 
 impl Function {
-    pub fn call(&mut self, ctx: &mut Context, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
+    pub fn call(&mut self, ctx: &mut Context, this: Value, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
         match self {
-            Function::Native(f) => f(args, scope),
+            Function::Native(f) => f(args, this, scope),
             Function::NativeScope(f, scope) => {
-                f(args, scope)
+                f(args, this, scope)
             }
             Function::JS(param, block, scope) => {
                 for (i, p) in param.iter().enumerate() {

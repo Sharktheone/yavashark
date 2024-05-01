@@ -75,7 +75,7 @@ impl Interpreter {
 
     pub fn run(&self) -> ValueResult {
         let mut context = context::Context::new();
-        let mut scope = scope::Scope::new();
+        let mut scope = scope::Scope::global();
 
         context
             .run_statements(&self.script, &mut scope)
@@ -150,6 +150,8 @@ mod tests {
         for (let i = 0; i < 10; i++) {
             console.log(i)
         }
+
+        console.log(this)
 
         z
         "#;
