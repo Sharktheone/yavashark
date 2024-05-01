@@ -8,7 +8,7 @@ use yavashark_value::error::Error;
 impl Context {
     pub fn run_continue(&mut self, stmt: &ContinueStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_continuable() {
-            return Err(ControlFlow::syntax_error("Illegal continue statement"));
+            return Err(ControlFlow::error_syntax("Illegal continue statement"));
         }
         
         if let Some(label) = &stmt.label {

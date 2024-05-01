@@ -27,7 +27,7 @@ impl Context {
                     .map(|arg| self.run_expr(&arg.expr, arg.spread.unwrap_or(stmt.span), scope))
                     .collect::<Result<Vec<Value>, ControlFlow>>()?;
 
-                f.call(self, scope.this.copy(), args, scope) //In strict mode, this is undefined
+                f.call(self, args, scope.this.copy()) //In strict mode, this is undefined
             } else {
                 Err(Error::ty(format!("{:?} ia not a function", stmt.callee)))
             }

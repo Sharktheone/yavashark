@@ -29,8 +29,11 @@ impl ControlFlow {
     fn error_reference(e: String) -> Self {
         ControlFlow::Error(Error::reference(e))
     }
-    fn syntax_error(e: &str) -> Self {
+    fn error_syntax(e: &str) -> Self {
         ControlFlow::Error(Error::syntax(e))
+    }
+    fn error_type(e: String) -> Self {
+        ControlFlow::Error(Error::ty(e))
     }
 
     fn get_error(self) -> std::result::Result<Error, ControlFlow> {
@@ -126,7 +129,7 @@ mod tests {
 
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         console.log("3+4 is", hello(3, 4))
-
+        
 
         let yyy = 1 + 2
 

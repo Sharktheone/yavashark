@@ -7,6 +7,8 @@ use yavashark_value::error::Error;
 
 impl Context {
     pub fn run_this(&mut self, stmt: &ThisExpr, scope: &mut Scope) -> RuntimeResult {
-        todo!()
+        let this = scope.this.copy();
+        println!("this: {}", scope.this);
+        Ok(scope.this.copy())
     }
 }

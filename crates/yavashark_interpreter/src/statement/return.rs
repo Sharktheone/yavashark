@@ -8,7 +8,7 @@ use yavashark_value::error::Error;
 impl Context {
     pub fn run_return(&mut self, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_returnable() {
-            return Err(ControlFlow::syntax_error("Illegal return statement"));
+            return Err(ControlFlow::error_syntax("Illegal return statement"));
         }
         
         let value = if let Some(arg) = &stmt.arg {

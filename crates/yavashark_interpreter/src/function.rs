@@ -11,20 +11,21 @@ use crate::{ControlFlow, Value, ValueResult};
 use crate::context::Context;
 use crate::scope::Scope;
 
-type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Scope) -> ValueResult>;
+type NativeScopedFn = Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>;
+type NativeFn = Box<dyn FnMut(Vec<Value>) -> ValueResult>;
 
 pub enum Function {
     Native(NativeFn),
-    NativeScope(NativeFn, Scope),
+    NativeScope(NativeScopedFn, Scope),
     JS(Vec<Param>, Option<BlockStmt>, Scope),
 }
 
 impl Function {
-    pub fn call(&mut self, ctx: &mut Context, this: Value, args: Vec<Value>, scope: &mut Scope) -> ValueResult {
+    pub fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         match self {
-            Function::Native(f) => f(args, this, scope),
+            Function::Native(f) => f(args),
             Function::NativeScope(f, scope) => {
-                f(args, this, scope)
+                f(args, scope)
             }
             Function::JS(param, block, scope) => {
                 for (i, p) in param.iter().enumerate() {
@@ -38,7 +39,7 @@ impl Function {
                 }
 
                 if let Some(block) = block {
-                    if let Err(e) = ctx.run_block(block, scope) {
+                    if let Err(e) = ctx.run_block_this(block, scope, this) {
                         return match e {
                             ControlFlow::Error(e) => Err(e),
                             ControlFlow::Return(v) => Ok(v),
