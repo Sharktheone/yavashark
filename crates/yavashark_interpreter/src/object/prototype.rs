@@ -3,9 +3,10 @@ mod common;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use lazy_static::lazy_static;
 use crate::{NativeFunction, Value};
 use common::*;
+use yavashark_value::Obj;
+use crate::context::Context;
 
 
 #[derive(Debug, PartialEq, Eq)]
@@ -51,5 +52,143 @@ impl Prototype {
             to_string: NativeFunction::new("toString", to_string).into(),
             value_of: NativeFunction::new("valueOf", value_of).into(),
         }
+    }
+}
+
+
+impl Obj<Context> for Prototype {
+    fn define_property(&mut self, name: Value, value: Value) {
+        if let Value::String(name) = &name {
+            match name.as_str() {
+                "__define_getter__" => {
+                    self.defined_getter = value;
+                    return;
+                },
+                "__define_setter__" => {
+                    self.defined_setter = value;
+                    return;
+                },
+                
+                "__lookup_getter__" => {
+                    self.lookup_getter = value;
+                    return;
+                },
+                
+                "__lookup_setter__" => {
+                    self.lookup_setter = value;
+                    return;
+                },
+                
+                "constructor" => {
+                    self.constructor = value;
+                    return;
+                },
+                
+                "hasOwnProperty" => {
+                    self.has_own_property = value;
+                    return;
+                },
+                
+                "isPrototypeOf" => {
+                    self.is_prototype_of = value;
+                    return;
+                },
+                
+                "propertyIsEnumerable" => {
+                    self.property_is_enumerable = value;
+                    return;
+                },
+                
+                "toLocaleString" => {
+                    self.to_locale_string = value;
+                    return;
+                },
+                
+                "toString" => {
+                    self.to_string = value;
+                    return;
+                },
+                
+                "valueOf" => {
+                    self.value_of = value;
+                    return;
+                },
+                
+                _ => {}
+            }
+        }
+        
+        self.properties.insert(name, value);
+    }
+
+    fn get_property(&self, name: &Value) -> Option<&Value> {
+        if let Value::String(name) = name {
+            match name.as_str() {
+                "__define_getter__" => return Some(&self.defined_getter),
+                "__define_setter__" => return Some(&self.defined_setter),
+                "__lookup_getter__" => return Some(&self.lookup_getter),
+                "__lookup_setter__" => return Some(&self.lookup_setter),
+                "constructor" => return Some(&self.constructor),
+                "hasOwnProperty" => return Some(&self.has_own_property),
+                "isPrototypeOf" => return Some(&self.is_prototype_of),
+                "propertyIsEnumerable" => return Some(&self.property_is_enumerable),
+                "toLocaleString" => return Some(&self.to_locale_string),
+                "toString" => return Some(&self.to_string),
+                "valueOf" => return Some(&self.value_of),
+                _ => {}
+            }
+        }
+        
+        self.properties.get(name)
+    }
+
+    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
+        if let Value::String(name) = name {
+            match name.as_str() {
+                "__define_getter__" => return Some(&mut self.defined_getter),
+                "__define_setter__" => return Some(&mut self.defined_setter),
+                "__lookup_getter__" => return Some(&mut self.lookup_getter),
+                "__lookup_setter__" => return Some(&mut self.lookup_setter),
+                "constructor" => return Some(&mut self.constructor),
+                "hasOwnProperty" => return Some(&mut self.has_own_property),
+                "isPrototypeOf" => return Some(&mut self.is_prototype_of),
+                "propertyIsEnumerable" => return Some(&mut self.property_is_enumerable),
+                "toLocaleString" => return Some(&mut self.to_locale_string),
+                "toString" => return Some(&mut self.to_string),
+                "valueOf" => return Some(&mut self.value_of),
+                _ => {}
+            }
+        }
+        
+        self.properties.get_mut(name)
+    }
+
+    fn contains_key(&self, name: &Value) -> bool {
+        if let Value::String(name) = name {
+            match name.as_str() {
+                "__define_getter__" => return true,
+                "__define_setter__" => return true,
+                "__lookup_getter__" => return true,
+                "__lookup_setter__" => return true,
+                "constructor" => return true,
+                "hasOwnProperty" => return true,
+                "isPrototypeOf" => return true,
+                "propertyIsEnumerable" => return true,
+                "toLocaleString" => return true,
+                "toString" => return true,
+                "valueOf" => return true,
+                _ => {}
+            }
+        }
+        
+        self.properties.contains_key(name)
+    }
+
+    fn name(&self) -> &str {
+        "Object"
+    }
+
+    fn to_string(&self) -> String {
+        "[object Object]".to_string()
     }
 }
