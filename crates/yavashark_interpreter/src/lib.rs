@@ -18,6 +18,8 @@ mod object;
 
 type Value = yavashark_value::Value<Context>;
 type Error = yavashark_value::Error<Context>;
+type Function = yavashark_value::Function<Context>;
+type Object = yavashark_value::Object<Context>;
 
 
 pub enum ControlFlow {

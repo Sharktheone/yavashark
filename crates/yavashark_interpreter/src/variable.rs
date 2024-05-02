@@ -1,7 +1,9 @@
+use std::fmt::Debug;
 use crate::Error;
 use crate::Res;
 use crate::Value;
 
+#[derive(Debug)]
 pub struct Variable {
     pub value: Value,
     pub properties: Attributes,
@@ -67,6 +69,26 @@ impl Variable {
 }
 
 pub struct Attributes(u8);
+
+impl Debug for Attributes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut s = String::new();
+        if self.is_writable() {
+            s.push_str("writable, ");
+        }
+        if self.is_enumerable() {
+            s.push_str("enumerable, ");
+        }
+        if self.is_configurable() {
+            s.push_str("configurable, ");
+        }
+        
+        s.pop();
+        s.pop();
+
+        write!(f, "[{}]", s)
+    }
+}
 
 impl Attributes {
     const WRITABLE: u8 = 0b1;

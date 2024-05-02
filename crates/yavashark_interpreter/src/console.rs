@@ -1,15 +1,13 @@
-use crate::{Function};
-use std::cell::RefCell;
-use std::rc::Rc;
-use crate::Value;
+use crate::NativeFunction;
 use crate::object::Object;
+use crate::Value;
 
 pub fn get_console() -> Value {
     let mut console = Object::new();
 
     console.define_property(
         "log".into(),
-        Function::native_val(Box::new(|args | {
+        NativeFunction::new("log".to_string(), Box::new(|args| {
             let mut str = String::new();
 
             for arg in args {
@@ -22,7 +20,7 @@ pub fn get_console() -> Value {
             println!("{}", str);
 
             Ok(Value::Undefined)
-        })),
+        })).into(),
     );
 
 

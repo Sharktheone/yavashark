@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 use yavashark_value::Obj;
-use yavashark_value::Object as ObjWrapper;
 
 use crate::context::Context;
 use crate::Value;
@@ -14,7 +13,7 @@ pub struct Object {
 
 impl Object {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> ObjWrapper<Context> {
+    pub fn new() -> crate::Object {
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
         });

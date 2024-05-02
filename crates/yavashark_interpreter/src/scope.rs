@@ -121,11 +121,14 @@ impl ScopeState {
     }
 }
 
+#[derive(Debug)]
 pub struct Scope {
     scope: Rc<RefCell<ScopeInternal>>,
     pub this: Value,
 }
 
+
+#[derive(Debug)]
 pub(crate) struct ScopeInternal {
     parent: Option<Rc<RefCell<ScopeInternal>>>,
     variables: HashMap<String, Variable>,
