@@ -7,7 +7,7 @@ pub fn get_console() -> Value {
 
     console.define_property(
         "log".into(),
-        NativeFunction::new("log".to_string(), Box::new(|args| {
+        NativeFunction::new_boxed("log".to_string(), Box::new(|args| {
             let mut str = String::new();
 
             for arg in args {

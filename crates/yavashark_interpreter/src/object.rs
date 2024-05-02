@@ -1,3 +1,5 @@
+mod prototype;
+pub use prototype::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 

@@ -1,3 +1,5 @@
+mod prototype;
+
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -10,8 +12,9 @@ use crate::{ControlFlow, Error, Function, Value, ValueResult};
 use crate::context::Context;
 use crate::scope::Scope;
 
-type NativeScopedFn = Box<dyn FnMut(Vec<Value>, &mut Scope) -> ValueResult>;
-type NativeFn = Box<dyn FnMut(Vec<Value>) -> ValueResult>;
+
+
+type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
 
 
 pub struct NativeFunction {
@@ -21,10 +24,19 @@ pub struct NativeFunction {
 }
 
 impl NativeFunction {
-    pub fn new(name: String, f: NativeFn) -> Function {
+    pub fn new_boxed(name: String, f: NativeFn) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name,
             f,
+            properties: HashMap::new(),
+        });
+
+        this.into()
+    }
+    pub fn new(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult) -> Function {
+        let this: Box<dyn Func<Context>> = Box::new(Self {
+            name: name.to_string(),
+            f: Box::new(f),
             properties: HashMap::new(),
         });
 
@@ -66,8 +78,8 @@ impl Obj<Context> for NativeFunction {
 }
 
 impl Func<Context> for NativeFunction {
-    fn call(&mut self, _ctx: &mut Context, args: Vec<Value>, _this: Value) -> ValueResult {
-        (self.f)(args)
+    fn call(&mut self, _ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
+        (self.f)(args, this)
     }
 }
 
