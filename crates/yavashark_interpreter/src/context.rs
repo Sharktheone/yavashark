@@ -23,7 +23,6 @@ impl Default for Context {
         
         let obj_prototype = Object::new(obj_prototype);
 
-        dbg!(&obj_prototype.type_id());
         let func_prototype: Box<dyn Obj<Context>> = Box::new(FunctionPrototype::new(&obj_prototype.clone().into()));
         let func_prototype = Object::new(func_prototype);
 

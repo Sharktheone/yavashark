@@ -184,6 +184,12 @@ mod tests {
             console.log("error:", message)
         }
 
+        let a = 1
+        while (a < 10) {
+            console.log("infinite loop")
+            a++;
+        }
+
         z
         "#;
 
