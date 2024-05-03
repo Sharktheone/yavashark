@@ -430,7 +430,15 @@ impl Scope {
     }
 
     pub fn has_label(&self, label: &str) -> bool {
-        self.scope.borrow().has_label(label)
+        let scope = self.scope.borrow();
+        if !scope.has_label(label) {
+            if let Some(p) = scope.parent.as_ref() {
+                return p.borrow().has_label(label);
+            }
+            false
+        } else {
+            true
+        }
     }
 
     pub fn declare_label(&mut self, label: String) {
