@@ -5,6 +5,7 @@ use std::rc::Rc;
 use crate::Error;
 
 use crate::console::get_console;
+use crate::context::Context;
 use crate::error::get_error;
 use crate::Res;
 use crate::Value;
@@ -137,7 +138,7 @@ pub(crate) struct ScopeInternal {
 }
 
 impl ScopeInternal {
-    pub fn new() -> Self {
+    pub fn new(ctx: &mut Context) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -163,7 +164,7 @@ impl ScopeInternal {
         );
         variables.insert(
             "console".to_string(),
-            Variable::new_read_only(get_console()),
+            Variable::new_read_only(get_console(ctx)),
         );
         Self {
             parent: None,
@@ -173,7 +174,7 @@ impl ScopeInternal {
         }
     }
 
-    pub fn global() -> Self {
+    pub fn global(ctx: &mut Context) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -199,7 +200,7 @@ impl ScopeInternal {
         );
         variables.insert(
             "console".to_string(),
-            Variable::new_read_only(get_console()),
+            Variable::new_read_only(get_console(ctx)),
         );
 
 
@@ -239,10 +240,6 @@ impl ScopeInternal {
         variables.insert(
             "false".to_string(),
             Variable::new_read_only(Value::Boolean(false)),
-        );
-        variables.insert(
-            "console".to_string(),
-            Variable::new_read_only(get_console()),
         );
 
         let state = parent.borrow().state.copy();
@@ -383,23 +380,17 @@ impl ScopeInternal {
     }
 }
 
-impl Default for Scope {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl Scope {
-    pub fn new() -> Self {
+    pub fn new(ctx: &mut Context) -> Self {
         Self {
-            scope: Rc::new(RefCell::new(ScopeInternal::new())),
+            scope: Rc::new(RefCell::new(ScopeInternal::new(ctx))),
             this: Value::Undefined,
         }
     }
 
-    pub fn global() -> Self {
+    pub fn global(ctx: &mut Context) -> Self {
         Self {
-            scope: Rc::new(RefCell::new(ScopeInternal::global())),
+            scope: Rc::new(RefCell::new(ScopeInternal::global(ctx))),
             this: Value::String("global".to_string()), //TODO: globalThis
         }
     }

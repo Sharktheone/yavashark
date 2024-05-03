@@ -1,9 +1,10 @@
+use crate::context::Context;
 use crate::NativeFunction;
 use crate::object::Object;
 use crate::Value;
 
-pub fn get_console() -> Value {
-    let mut console = Object::new();
+pub fn get_console(ctx: &mut Context) -> Value {
+    let mut console = Object::new(ctx);
 
     console.define_property(
         "log".into(),

@@ -1,16 +1,25 @@
 use std::cell::{Ref, RefCell};
 use std::rc::Rc;
 use crate::scope::Scope;
-use crate::RuntimeResult;
+use crate::{Object, RuntimeResult};
 use swc_ecma_ast::{Script, Stmt};
-use yavashark_value::Ctx;
+use yavashark_value::{Ctx, Obj};
 use crate::{Error, Value};
 use crate::object::Prototype;
 
 
-#[derive(Debug, Default, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Context {
-    obj_prototype: Rc<RefCell<Prototype>>,
+    pub(crate) obj_prototype: Object,
+}
+
+
+impl Default for Context {
+    fn default() -> Self {
+        let obj_prototype: Box<dyn Obj<Context>> = Box::new(Prototype::new());
+        let obj_prototype = Object::new(obj_prototype);
+        Self { obj_prototype }
+    }
 }
 
 impl Context {

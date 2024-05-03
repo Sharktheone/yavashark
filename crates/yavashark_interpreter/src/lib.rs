@@ -89,8 +89,8 @@ impl Interpreter {
     }
 
     pub fn run(&self) -> ValueResult {
-        let mut context = context::Context::new();
-        let mut scope = scope::Scope::global();
+        let mut context = &mut Context::new();
+        let mut scope = scope::Scope::global(context);
 
         context
             .run_statements(&self.script, &mut scope)

@@ -25,7 +25,7 @@ impl Context {
                 }
             }
 
-            let this: Value = Object::new().into();
+            let this: Value = Object::new(self).into();
 
 
             let _ = f.call(self, call_args, this.copy())?;
