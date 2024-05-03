@@ -206,6 +206,9 @@ impl<C: Ctx> Mul for Value<C> {
                     Value::Number(f64::NAN)
                 }
             }
+            (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
+            (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
+            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
             (Value::Null, _) | (_, Value::Null) => Value::Number(0.0),
             (Value::Number(a), Value::Number(b)) => Value::Number(a * b),
             (Value::Number(a), Value::String(b)) | (Value::String(b), Value::Number(a)) => {
@@ -233,9 +236,6 @@ impl<C: Ctx> Mul for Value<C> {
                 }
             }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() * b.num()),
-            (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
-            (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
-            (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
         }
     }
 }
@@ -700,15 +700,21 @@ mod tests {
 
     #[derive(Debug, PartialEq)]
     struct Object;
+    
+    impl Ctx for () {}
 
     impl Obj<()> for Object {
-        fn define_property(&mut self, name: Value, value: Value) {}
+        fn define_property(&mut self, _name: Value, _value: Value) {}
 
-        fn get_property(&self, name: &impl Into<Value>) -> Option<&Value> {
+        fn resolve_property(&self, _name: &Value) -> Option<Value> {
             None
         }
 
-        fn get_property_mut(&mut self, name: &impl Into<Value>) -> Option<&mut Value> {
+        fn get_property(&self, _name: &Value) -> Option<&Value> {
+            None
+        }
+
+        fn get_property_mut(&mut self, _name: &Value) -> Option<&mut Value> {
             None
         }
 
@@ -722,8 +728,16 @@ mod tests {
     }
 
     impl Func<()> for Object {
-        fn call(&self, ctx: (), args: Vec<Value>, this: Value) -> Result<Value, Error> {
+        fn call(&mut self, _ctx: &mut (), _args: Vec<Value>, _this: Value) -> Result<Value, Error> {
             Ok(Value::Undefined)
+        }
+    }
+    
+    
+    impl From<Object> for crate::Object<()> {
+        fn from(obj: Object) -> Self {
+            let boxed: Box<dyn Obj<()>> = Box::new(obj);
+            crate::Object::new(boxed)
         }
     }
 

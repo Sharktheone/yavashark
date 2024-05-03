@@ -10,6 +10,9 @@ use super::Value;
 
 pub trait Obj<C: Ctx>: Debug {
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
+    
+    fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>; 
+    
     fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
     // 
     fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
@@ -102,6 +105,13 @@ impl<C: Ctx> Display for Object<C> {
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
+        Object(Rc::new(RefCell::new(obj)))
+    }
+}
+
+
+impl<C: Ctx> Object<C> {
+    pub fn new(obj: Box<dyn Obj<C>>) -> Self {
         Object(Rc::new(RefCell::new(obj)))
     }
 }
