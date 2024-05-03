@@ -1,5 +1,6 @@
 mod prototype;
 
+use std::any::Any;
 use std::cell::{Ref, RefCell};
 pub use prototype::*;
 use std::collections::HashMap;
@@ -30,6 +31,16 @@ impl Object {
 
         this.into()
     }
+    
+    pub fn with_proto(context: &mut Context, proto: Value) -> crate::Object {
+        
+        let this: Box<dyn Obj<Context>> = Box::new(Self {
+            properties: HashMap::new(),
+            prototype: proto,
+        });
+
+        this.into()
+    }
 }
 
 impl Obj<Context> for Object {
@@ -41,7 +52,13 @@ impl Obj<Context> for Object {
         if name == &Value::String("__proto__".to_string()) {
             return Some(self.prototype.copy());
         }
-        self.properties.get(&name).map(|v| v.copy())
+        self.properties.get(name).map(|v| v.copy()).or_else(|| {
+            match &self.prototype {
+                Value::Object(o) => o.get_property(name).ok(),
+                Value::Function(f) => f.get_property(name).ok(),
+                _ => None
+            }
+        })
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -72,5 +89,12 @@ impl Obj<Context> for Object {
 
     fn to_string(&self) -> String {
         "[object Object]".to_string()
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }

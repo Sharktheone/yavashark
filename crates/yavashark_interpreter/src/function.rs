@@ -1,5 +1,7 @@
 mod prototype;
 
+use std::any::Any;
+pub use prototype::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -21,25 +23,39 @@ pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
     pub properties: HashMap<Value, Value>,
+    pub prototype: Value,
 }
 
 impl NativeFunction {
-    pub fn new_boxed(name: String, f: NativeFn) -> Function {
+    pub fn new_boxed(name: String, f: NativeFn, ctx: &mut Context) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name,
             f,
             properties: HashMap::new(),
+            prototype: ctx.func_prototype.clone().into()
         });
 
         this.into()
     }
     
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Function {
+    pub fn new(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static, ctx: &mut Context) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
             properties: HashMap::new(),
+            prototype: ctx.func_prototype.clone().into()
+        });
+
+        this.into()
+    }
+    
+    pub fn new_with_proto(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static, proto: Value) -> Function {
+        let this: Box<dyn Func<Context>> = Box::new(Self {
+            name: name.to_string(),
+            f: Box::new(f),
+            properties: HashMap::new(),
+            prototype: proto, 
         });
 
         this.into()
@@ -81,6 +97,14 @@ impl Obj<Context> for NativeFunction {
 
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [Native code] }}]", self.name)
+    }
+    
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
 
@@ -141,6 +165,14 @@ impl Obj<Context> for JSFunction {
 
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [JS code] }}]", self.name)
+    }
+    
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
 

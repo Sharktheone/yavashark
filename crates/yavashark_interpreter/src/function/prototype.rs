@@ -1,11 +1,13 @@
+use std::any::Any;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
+
 use yavashark_value::{Func, Obj};
-use crate::object::Prototype;
+
 use crate::{NativeFunction, Value, ValueResult};
 use crate::context::Context;
-
+use crate::object::Prototype;
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -20,25 +22,25 @@ pub struct FunctionPrototype {
 }
 
 
-impl Default for FunctionPrototype {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl FunctionPrototype {
-    pub fn new() -> Self {
-        Self {
+    pub fn new(obj: &Value) -> Self {
+        let mut this = Self {
             properties: HashMap::new(),
             parent: Rc::new(RefCell::new(Prototype::new())),
-            apply: NativeFunction::new("apply", apply).into(),
-            bind: NativeFunction::new("bind", bind).into(),
-            call: NativeFunction::new("call", call).into(),
-            constructor: NativeFunction::new("Function", constructor).into(),
+            apply: Value::Undefined,
+            bind: Value::Undefined,
+            call: Value::Undefined,
+            constructor: Value::Undefined,
             length: Value::Number(0.0),
             name: Value::String("Function".to_string()),
-            
-        }
+
+        };
+        this.apply = NativeFunction::new_with_proto("apply", apply, obj.copy()).into();
+        this.bind = NativeFunction::new_with_proto("bind", bind, obj.copy()).into();
+        this.call = NativeFunction::new_with_proto("call", call, obj.copy()).into();
+        this.constructor = NativeFunction::new_with_proto("Function", constructor, obj.copy()).into();
+        
+        this
     }
 }
 
@@ -60,7 +62,6 @@ fn constructor(args: Vec<Value>, this: Value) -> ValueResult {
 }
 
 
-
 impl Obj<Context> for FunctionPrototype {
     fn define_property(&mut self, name: Value, value: Value) {
         if let Value::String(name) = &name {
@@ -68,31 +69,31 @@ impl Obj<Context> for FunctionPrototype {
                 "apply" => {
                     self.apply = value;
                     return;
-                },
+                }
                 "bind" => {
                     self.bind = value;
                     return;
-                },
+                }
                 "call" => {
                     self.call = value;
                     return;
-                },
+                }
                 "constructor" => {
                     self.constructor = value;
                     return;
-                },
+                }
                 "length" => {
                     self.length = value;
                     return;
-                },
+                }
                 "name" => {
                     self.name = value;
                     return;
-                },
+                }
                 _ => {}
             }
         }
-        
+
         self.properties.insert(name, value);
     }
 
@@ -112,7 +113,7 @@ impl Obj<Context> for FunctionPrototype {
                 _ => {}
             }
         }
-        
+
         self.properties.get(name)
     }
 
@@ -128,7 +129,7 @@ impl Obj<Context> for FunctionPrototype {
                 _ => {}
             }
         }
-        
+
         self.properties.get_mut(name)
     }
 
@@ -144,7 +145,7 @@ impl Obj<Context> for FunctionPrototype {
                 _ => {}
             }
         }
-        
+
         self.properties.contains_key(name)
     }
 
@@ -155,8 +156,15 @@ impl Obj<Context> for FunctionPrototype {
     fn to_string(&self) -> String {
         "function() { [Native code] }".to_string()
     }
-}
 
+    fn as_any_mut(&mut self) -> &mut dyn Any { 
+        self
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
 
 
 impl Func<Context> for FunctionPrototype {

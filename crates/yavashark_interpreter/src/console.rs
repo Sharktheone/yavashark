@@ -21,7 +21,7 @@ pub fn get_console(ctx: &mut Context) -> Value {
             println!("{}", str);
 
             Ok(Value::Undefined)
-        }).into(),
+        }, ctx).into(),
     );
 
 

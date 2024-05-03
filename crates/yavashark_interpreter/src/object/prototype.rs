@@ -1,13 +1,21 @@
-mod common;
-
+use std::any::Any;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
-use crate::{NativeFunction, Value};
+
 use common::*;
 use yavashark_value::Obj;
+
+use crate::{NativeFunction, Value};
 use crate::context::Context;
 
+mod common;
+
+
+
+pub trait Proto: Obj<Context> {
+    fn as_any(&mut self) -> &mut dyn Any;
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Prototype {
@@ -40,18 +48,32 @@ impl Prototype {
         Self {
             properties: HashMap::new(),
             parent: None,
-            defined_getter: NativeFunction::new("__define_getter__", define_getter).into(),
-            defined_setter: NativeFunction::new("__define_setter__", define_setter).into(),
-            lookup_getter: NativeFunction::new("__lookup_getter__", lookup_getter).into(),
-            lookup_setter: NativeFunction::new("__lookup_setter__", lookup_setter).into(),
-            constructor: NativeFunction::new("Object", object_constructor).into(),
-            has_own_property: NativeFunction::new("hasOwnProperty", has_own_property).into(),
-            is_prototype_of: NativeFunction::new("isPrototypeOf", is_prototype_of).into(),
-            property_is_enumerable: NativeFunction::new("propertyIsEnumerable", &property_is_enumerable).into(),
-            to_locale_string: NativeFunction::new("toLocaleString", to_locale_string).into(),
-            to_string: NativeFunction::new("toString", to_string).into(),
-            value_of: NativeFunction::new("valueOf", value_of).into(),
+            defined_getter: Value::Undefined,
+            defined_setter: Value::Undefined,
+            lookup_getter: Value::Undefined,
+            lookup_setter: Value::Undefined,
+            constructor: Value::Undefined,
+            has_own_property: Value::Undefined,
+            is_prototype_of: Value::Undefined,
+            property_is_enumerable: Value::Undefined,
+            to_locale_string: Value::Undefined,
+            to_string: Value::Undefined,
+            value_of: Value::Undefined,
         }
+    }
+
+    pub(crate) fn initialize(&mut self, func: Value) {
+        self.defined_getter = NativeFunction::new_with_proto("__define_getter__", define_getter, func.copy()).into();
+        self.defined_setter = NativeFunction::new_with_proto("__define_setter__", define_setter, func.copy()).into();
+        self.lookup_getter = NativeFunction::new_with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
+        self.lookup_setter = NativeFunction::new_with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
+        self.constructor = NativeFunction::new_with_proto("Object", object_constructor, func.copy()).into();
+        self.has_own_property = NativeFunction::new_with_proto("hasOwnProperty", has_own_property, func.copy()).into();
+        self.is_prototype_of = NativeFunction::new_with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
+        self.property_is_enumerable = NativeFunction::new_with_proto("propertyIsEnumerable", &property_is_enumerable, func.copy()).into();
+        self.to_locale_string = NativeFunction::new_with_proto("toLocaleString", to_locale_string, func.copy()).into();
+        self.to_string = NativeFunction::new_with_proto("toString", to_string, func.copy()).into();
+        self.value_of = NativeFunction::new_with_proto("valueOf", value_of, func).into();
     }
 }
 
@@ -63,65 +85,65 @@ impl Obj<Context> for Prototype {
                 "__define_getter__" => {
                     self.defined_getter = value;
                     return;
-                },
+                }
                 "__define_setter__" => {
                     self.defined_setter = value;
                     return;
-                },
-                
+                }
+
                 "__lookup_getter__" => {
                     self.lookup_getter = value;
                     return;
-                },
-                
+                }
+
                 "__lookup_setter__" => {
                     self.lookup_setter = value;
                     return;
-                },
-                
+                }
+
                 "constructor" => {
                     self.constructor = value;
                     return;
-                },
-                
+                }
+
                 "hasOwnProperty" => {
                     self.has_own_property = value;
                     return;
-                },
-                
+                }
+
                 "isPrototypeOf" => {
                     self.is_prototype_of = value;
                     return;
-                },
-                
+                }
+
                 "propertyIsEnumerable" => {
                     self.property_is_enumerable = value;
                     return;
-                },
-                
+                }
+
                 "toLocaleString" => {
                     self.to_locale_string = value;
                     return;
-                },
-                
+                }
+
                 "toString" => {
                     self.to_string = value;
                     return;
-                },
-                
+                }
+
                 "valueOf" => {
                     self.value_of = value;
                     return;
-                },
-                
+                }
+
                 _ => {}
             }
         }
-        
+
         self.properties.insert(name, value);
     }
-    
-    
+
+
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(&name).map(|v| v.copy())
     }
@@ -143,7 +165,7 @@ impl Obj<Context> for Prototype {
                 _ => {}
             }
         }
-        
+
         self.properties.get(name)
     }
 
@@ -164,7 +186,7 @@ impl Obj<Context> for Prototype {
                 _ => {}
             }
         }
-        
+
         self.properties.get_mut(name)
     }
 
@@ -185,7 +207,7 @@ impl Obj<Context> for Prototype {
                 _ => {}
             }
         }
-        
+
         self.properties.contains_key(name)
     }
 
@@ -195,5 +217,20 @@ impl Obj<Context> for Prototype {
 
     fn to_string(&self) -> String {
         "[object Object]".to_string()
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
+
+impl Proto for Prototype {
+    fn as_any(&mut self) -> &mut dyn Any {
+        self
     }
 }

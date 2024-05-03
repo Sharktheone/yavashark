@@ -206,7 +206,7 @@ impl ScopeInternal {
 
         variables.insert(
             "Error".to_string(),
-            Variable::new_read_only(get_error()),
+            Variable::new_read_only(get_error(ctx)),
         );
 
         Self {

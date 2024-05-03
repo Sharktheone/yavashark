@@ -1,6 +1,8 @@
+use std::any::Any;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
+use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 use crate::Error;
@@ -8,7 +10,7 @@ use crate::js::context::Ctx;
 
 use super::Value;
 
-pub trait Obj<C: Ctx>: Debug {
+pub trait Obj<C: Ctx>: Debug{
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
 
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
@@ -33,6 +35,11 @@ pub trait Obj<C: Ctx>: Debug {
 
 
     fn to_string(&self) -> String;
+    
+    
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+    
+    fn as_any(&self) -> &dyn Any;
 }
 
 
