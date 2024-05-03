@@ -2,7 +2,6 @@ use std::any::Any;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
-use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 use crate::js::context::Ctx;

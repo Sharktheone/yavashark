@@ -127,6 +127,8 @@ pub struct JSFunction {
 }
 
 impl JSFunction {
+    
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(
         name: String,
         params: Vec<Param>,

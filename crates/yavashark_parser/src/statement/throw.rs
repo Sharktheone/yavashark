@@ -1,1 +1,1 @@
-pub struct ThrowStatement {global}
+pub struct ThrowStatement {}

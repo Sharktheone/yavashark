@@ -76,7 +76,7 @@ impl Prototype {
             NativeFunction::new_with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
         self.property_is_enumerable = NativeFunction::new_with_proto(
             "propertyIsEnumerable",
-            &property_is_enumerable,
+            property_is_enumerable,
             func.copy(),
         )
         .into();
@@ -153,7 +153,7 @@ impl Obj<Context> for Prototype {
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.properties.get(&name).map(|v| v.copy())
+        self.properties.get(name).map(|v| v.copy())
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {

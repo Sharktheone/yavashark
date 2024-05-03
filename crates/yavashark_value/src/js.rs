@@ -105,8 +105,8 @@ impl<C: Ctx> Display for Value<C> {
             Value::Number(n) => write!(f, "{}", n),
             Value::String(s) => write!(f, "{}", s),
             Value::Boolean(b) => write!(f, "{}", b),
-            Value::Object(o) => write!(f, "{}", o.to_string()),
-            Value::Function(func) => write!(f, "{}", func.to_string()),
+            Value::Object(o) => write!(f, "{}", o),
+            Value::Function(func) => write!(f, "{}", func),
         }
     }
 }

@@ -27,8 +27,8 @@ pub struct LexicalDecl {
 
 pub enum HoistableDeclaration {
     // Yield, Await, Default
-    Function(FunctionDeclaration), // ?Yield, ?Await, ?Default
-    Generator(GeneratorDeclaration), // ?Yield, ?Await, ?Default
+    Function(FunctionDeclaration),           // ?Yield, ?Await, ?Default
+    Generator(GeneratorDeclaration),         // ?Yield, ?Await, ?Default
     AsyncFunction(AsyncFunctionDeclaration), // ?Yield, ?Await, ?Default
     AsyncGenerator(AsyncGeneratorDeclaration), // ?Yield, ?Await, ?Default
 }

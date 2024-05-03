@@ -33,7 +33,6 @@ pub enum Pattern {
     ArrayBindingPattern(ArrayBindingPattern),
 }
 
-
 pub struct ArrayBindingPattern;
 
 pub enum ObjectBindingPattern {
