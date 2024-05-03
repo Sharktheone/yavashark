@@ -2,10 +2,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::Error;
-
 use crate::console::get_console;
 use crate::context::Context;
+use crate::Error;
 use crate::error::get_error;
 use crate::Res;
 use crate::Value;
@@ -365,6 +364,17 @@ impl ScopeInternal {
         self.state.is_continuable()
     }
 
+    pub fn update(&mut self, name: &str, value: Value) -> bool {
+        if let Some(v) = self.variables.get_mut(name) {
+            v.value = value;
+            return true;
+        } else if let Some(p) = self.parent.as_ref() {
+            return p.borrow_mut().update(name, value);
+        }
+
+        false
+    }
+
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
         if let Some(v) = self.variables.get_mut(&name) {
             if !v.properties.is_writable() {
@@ -372,9 +382,15 @@ impl ScopeInternal {
             }
 
             v.value = value;
-        } else {
-            self.declare_var(name, value);
+            return Ok(());
+        } else if let Some(p) = self.parent.as_ref() {
+            if p.borrow_mut().update(&name, value.copy()) {
+                return Ok(());
+            }
         }
+
+        self.declare_var(name, value);
+
 
         Ok(())
     }
@@ -508,7 +524,10 @@ impl Scope {
     pub fn has_value(&self, name: &str) -> bool {
         self.scope.borrow().has_value(name)
     }
-
+    
+    pub fn update(&mut self, name: &str, value: Value) -> bool {
+        self.scope.borrow_mut().update(name, value)
+    }
 
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
         self.scope.borrow_mut().update_or_define(name, value)
