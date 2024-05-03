@@ -1,9 +1,9 @@
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::Error;
 use crate::Value;
 use crate::{ControlFlow, RuntimeResult};
 use swc_ecma_ast::Ident;
-use crate::Error;
 
 impl Context {
     pub fn run_ident(&mut self, stmt: &Ident, scope: &mut Scope) -> RuntimeResult {

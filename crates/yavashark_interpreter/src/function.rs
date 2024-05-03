@@ -1,7 +1,7 @@
 mod prototype;
 
-use std::any::Any;
 pub use prototype::*;
+use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -10,14 +10,11 @@ use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_value::Func;
 use yavashark_value::Obj;
 
-use crate::{ControlFlow, Error, Function, Value, ValueResult};
 use crate::context::Context;
 use crate::scope::Scope;
-
-
+use crate::{ControlFlow, Error, Function, Value, ValueResult};
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
-
 
 pub struct NativeFunction {
     pub name: String,
@@ -32,36 +29,43 @@ impl NativeFunction {
             name,
             f,
             properties: HashMap::new(),
-            prototype: ctx.func_prototype.clone().into()
+            prototype: ctx.func_prototype.clone().into(),
         });
 
         this.into()
     }
-    
+
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static, ctx: &mut Context) -> Function {
+    pub fn new(
+        name: &str,
+        f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static,
+        ctx: &mut Context,
+    ) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
             properties: HashMap::new(),
-            prototype: ctx.func_prototype.clone().into()
+            prototype: ctx.func_prototype.clone().into(),
         });
 
         this.into()
     }
-    
-    pub fn new_with_proto(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static, proto: Value) -> Function {
+
+    pub fn new_with_proto(
+        name: &str,
+        f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static,
+        proto: Value,
+    ) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
             properties: HashMap::new(),
-            prototype: proto, 
+            prototype: proto,
         });
 
         this.into()
     }
 }
-
 
 impl Debug for NativeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -77,7 +81,6 @@ impl Obj<Context> for NativeFunction {
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(name).map(|v| v.copy())
     }
-
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
         self.properties.get(name)
@@ -98,7 +101,7 @@ impl Obj<Context> for NativeFunction {
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [Native code] }}]", self.name)
     }
-    
+
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -124,7 +127,12 @@ pub struct JSFunction {
 }
 
 impl JSFunction {
-    pub fn new(name: String, params: Vec<Param>, block: Option<BlockStmt>, scope: Scope) -> Function {
+    pub fn new(
+        name: String,
+        params: Vec<Param>,
+        block: Option<BlockStmt>,
+        scope: Scope,
+    ) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name,
             params,
@@ -142,11 +150,10 @@ impl Obj<Context> for JSFunction {
         self.properties.insert(name, value);
     }
 
-
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(name).map(|v| v.copy())
     }
-    
+
     fn get_property(&self, name: &Value) -> Option<&Value> {
         self.properties.get(name)
     }
@@ -166,7 +173,7 @@ impl Obj<Context> for JSFunction {
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [JS code] }}]", self.name)
     }
-    
+
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -176,16 +183,14 @@ impl Obj<Context> for JSFunction {
     }
 }
 
-
 impl Func<Context> for JSFunction {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope);
         for (i, p) in self.params.iter().enumerate() {
             let name = match p.pat {
                 Pat::Ident(ref i) => i.sym.to_string(),
-                _ => todo!("call args pat")
+                _ => todo!("call args pat"),
             };
-
 
             scope.declare_var(name, args.get(i).unwrap_or(&Value::Undefined).copy());
         }

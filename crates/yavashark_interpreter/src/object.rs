@@ -1,8 +1,8 @@
 mod prototype;
 
+pub use prototype::*;
 use std::any::Any;
 use std::cell::{Ref, RefCell};
-pub use prototype::*;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::rc::Rc;
@@ -15,15 +15,14 @@ use crate::Value;
 #[derive(Debug)]
 pub struct Object {
     properties: HashMap<Value, Value>,
-    prototype: Value
+    prototype: Value,
 }
 
 impl Object {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(context: &mut Context) -> crate::Object {
-        
         let prototype = context.obj_prototype.clone().into();
-        
+
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
             prototype,
@@ -31,9 +30,8 @@ impl Object {
 
         this.into()
     }
-    
+
     pub fn with_proto(context: &mut Context, proto: Value) -> crate::Object {
-        
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
             prototype: proto,
@@ -52,13 +50,14 @@ impl Obj<Context> for Object {
         if name == &Value::String("__proto__".to_string()) {
             return Some(self.prototype.copy());
         }
-        self.properties.get(name).map(|v| v.copy()).or_else(|| {
-            match &self.prototype {
+        self.properties
+            .get(name)
+            .map(|v| v.copy())
+            .or_else(|| match &self.prototype {
                 Value::Object(o) => o.get_property(name).ok(),
                 Value::Function(f) => f.get_property(name).ok(),
-                _ => None
-            }
-        })
+                _ => None,
+            })
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -74,7 +73,6 @@ impl Obj<Context> for Object {
         }
         self.properties.get_mut(name)
     }
-
 
     fn contains_key(&self, name: &Value) -> bool {
         if name == &Value::String("__proto__".to_string()) {

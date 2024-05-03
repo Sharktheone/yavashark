@@ -1,14 +1,14 @@
-use std::any::{Any, type_name, type_name_of_val, TypeId};
+use std::any::{type_name, type_name_of_val, Any, TypeId};
 use std::cell::RefMut;
 
 use swc_ecma_ast::Stmt;
 
 use yavashark_value::{Ctx, Obj};
 
-use crate::{FunctionPrototype, Object, RuntimeResult};
 use crate::object::Prototype;
 use crate::scope::Scope;
 use crate::Value;
+use crate::{FunctionPrototype, Object, RuntimeResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Context {
@@ -16,26 +16,31 @@ pub struct Context {
     pub(crate) func_prototype: Object,
 }
 
-
 impl Default for Context {
     fn default() -> Self {
         let obj_prototype: Box<dyn Obj<Context>> = Box::new(Prototype::new());
-        
+
         let obj_prototype = Object::new(obj_prototype);
 
-        let func_prototype: Box<dyn Obj<Context>> = Box::new(FunctionPrototype::new(&obj_prototype.clone().into()));
+        let func_prototype: Box<dyn Obj<Context>> =
+            Box::new(FunctionPrototype::new(&obj_prototype.clone().into()));
         let func_prototype = Object::new(func_prototype);
 
         {
             let mut obj: RefMut<Box<dyn Obj<Context>>> = obj_prototype.get_mut().unwrap();
             let obj = obj.as_any_mut();
-            
-            let proto = obj.downcast_mut::<Prototype>().expect("Failed to get prototype");
+
+            let proto = obj
+                .downcast_mut::<Prototype>()
+                .expect("Failed to get prototype");
 
             proto.initialize(func_prototype.clone().into())
         }
 
-        Self { obj_prototype, func_prototype }
+        Self {
+            obj_prototype,
+            func_prototype,
+        }
     }
 }
 
@@ -53,6 +58,5 @@ impl Context {
         Ok(last_value)
     }
 }
-
 
 impl Ctx for Context {}

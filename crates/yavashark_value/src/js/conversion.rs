@@ -21,7 +21,6 @@ impl<C: Ctx> From<&String> for Value<C> {
     }
 }
 
-
 impl<C: Ctx> From<()> for Value<C> {
     fn from(_: ()) -> Self {
         Value::Undefined
@@ -106,13 +105,11 @@ impl<C: Ctx> From<f32> for Value<C> {
     }
 }
 
-
-impl<O: Into<Object<C>>, C: Ctx > From<O> for Value<C> {
+impl<O: Into<Object<C>>, C: Ctx> From<O> for Value<C> {
     fn from(o: O) -> Self {
         Value::Object(o.into())
     }
 }
-
 
 impl<C: Ctx> From<Function<C>> for Value<C> {
     fn from(f: Function<C>) -> Self {

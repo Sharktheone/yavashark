@@ -107,9 +107,7 @@ impl<C: Ctx> Add for Value<C> {
             (Value::Boolean(a), Value::Number(b)) => Value::Number(a.num() + b),
             (Value::Boolean(a), Value::String(b)) => Value::String(a.to_string() + &b),
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() + b.num()),
-            (Value::Boolean(a), Value::Object(o)) => {
-                Value::String(a.to_string() + &o.to_string())
-            }
+            (Value::Boolean(a), Value::Object(o)) => Value::String(a.to_string() + &o.to_string()),
 
             (a, b) => Value::String(a.to_string() + &b.to_string()),
         }
@@ -272,9 +270,7 @@ impl<C: Ctx> Div for Value<C> {
                     Value::Number(f64::NAN)
                 }
             }
-            (Value::Number(a), Value::Boolean(b)) => {
-                Value::Number(a / b.num())
-            }
+            (Value::Number(a), Value::Boolean(b)) => Value::Number(a / b.num()),
             (Value::String(a), Value::Null) => {
                 if a == "0" || a == "0.0" || a.parse::<f64>().is_err() {
                     Value::Number(f64::NAN)
@@ -675,7 +671,6 @@ impl<C: Ctx> Value<C> {
     }
 }
 
-
 impl<C: Ctx> AddAssign for Value<C> {
     fn add_assign(&mut self, rhs: Self) {
         *self = self.copy() + rhs; //TODO: don't copy the value
@@ -688,20 +683,19 @@ impl<C: Ctx> SubAssign for Value<C> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use std::any::Any;
     use crate::{Func, Obj};
+    use std::any::Any;
 
     use super::*;
-    
+
     type Value = super::Value<()>;
     type Error = crate::Error<()>;
 
     #[derive(Debug, PartialEq)]
     struct Object;
-    
+
     impl Ctx for () {}
 
     impl Obj<()> for Object {
@@ -722,12 +716,13 @@ mod tests {
         fn name(&self) -> String {
             "Object".to_string()
         }
-        
+
         fn to_string(&self) -> String {
             format!("[object {}]", self.name())
         }
 
-        fn as_any_mut(&mut self) -> &mut dyn Any { self
+        fn as_any_mut(&mut self) -> &mut dyn Any {
+            self
         }
 
         fn as_any(&self) -> &dyn Any {
@@ -740,8 +735,7 @@ mod tests {
             Ok(Value::Undefined)
         }
     }
-    
-    
+
     impl From<Object> for crate::Object<()> {
         fn from(obj: Object) -> Self {
             let boxed: Box<dyn Obj<()>> = Box::new(obj);
@@ -892,14 +886,12 @@ mod tests {
         assert_eq!(a + b, Value::Number(1.0));
     }
 
-
     #[test]
     fn add_number_object() {
         let a = Value::Number(1.0);
         let b = Value::Object(Object.into());
         assert_eq!(a + b, Value::String("1[object Object]".to_string()));
     }
-
 
     #[test]
     fn add_string_null() {
@@ -927,7 +919,6 @@ mod tests {
         let a = Value::String("1".to_string());
         let b = Value::String("2".to_string());
         assert_eq!(a + b, Value::String("12".to_string()));
-
 
         let a = Value::String("hello".to_string());
         let b = Value::String("world".to_string());
@@ -1061,9 +1052,11 @@ mod tests {
     fn add_object_object() {
         let a = Value::Object(Object.into());
         let b = Value::Object(Object.into());
-        assert_eq!(a + b, Value::String("[object Object][object Object]".to_string()));
+        assert_eq!(
+            a + b,
+            Value::String("[object Object][object Object]".to_string())
+        );
     }
-
 
     #[test]
     fn sub_null_null() {
@@ -1510,7 +1503,6 @@ mod tests {
         assert!((a * b).is_nan());
     }
 
-
     #[test]
     fn div_null_null() {
         let a = Value::Null;
@@ -1542,7 +1534,6 @@ mod tests {
         let b = Value::String("a".to_string());
         assert!((a / b).is_nan());
     }
-
 
     #[test]
     fn div_null_boolean() {
@@ -1578,7 +1569,6 @@ mod tests {
         assert!((a / b).is_nan());
     }
 
-
     #[test]
     fn div_number_null() {
         let a = Value::Number(6.0);
@@ -1590,13 +1580,11 @@ mod tests {
         assert!((a / b).is_nan());
     }
 
-
     #[test]
     fn div_number_number() {
         let a = Value::Number(6.0);
         let b = Value::Number(2.0);
         assert_eq!(a / b, Value::Number(3.0));
-
 
         let a = Value::Number(0.0);
         let b = Value::Number(0.0);
@@ -1624,7 +1612,6 @@ mod tests {
         let b = Value::Boolean(false);
         assert_eq!(a / b, Value::Number(f64::INFINITY));
     }
-
 
     #[test]
     fn div_string_null() {
@@ -1741,7 +1728,6 @@ mod tests {
         let b = Value::Undefined;
         assert!((a / b).is_nan());
     }
-
 
     #[test]
     fn rem_null_any() {
@@ -1928,7 +1914,6 @@ mod tests {
         assert!((a % b).is_nan());
     }
 
-
     #[test]
     fn rem_object_any() {
         let a = Value::Object(Object.into());
@@ -1978,7 +1963,6 @@ mod tests {
         let b = Value::Object(Object.into());
         assert!((a % b).is_nan());
     }
-
 
     #[test]
     fn null_equals_null() {
@@ -2101,7 +2085,6 @@ mod tests {
         assert_ne!(a, b);
     }
 
-
     #[test]
     fn shl_number_number() {
         let a = Value::Number(10.0);
@@ -2159,7 +2142,6 @@ mod tests {
         assert_eq!(a << b, Value::Number(10.0));
     }
 
-
     #[test]
     fn shl_string_number() {
         let a = Value::String("10".to_string());
@@ -2210,7 +2192,6 @@ mod tests {
         assert_eq!(a << b, Value::Number(10.0));
     }
 
-
     #[test]
     fn shr_number_number() {
         let a = Value::Number(10.0);
@@ -2251,7 +2232,6 @@ mod tests {
         let a = Value::String("10".to_string());
         let b = Value::Number(2.0);
         assert_eq!(a >> b, Value::Number(2.0));
-
 
         let a = Value::String("a".to_string());
         let b = Value::Number(2.0);
@@ -2299,28 +2279,73 @@ mod tests {
 
     #[test]
     fn bit_or() {
-        assert_eq!(Value::Number(10.0) | Value::Number(2.0), Value::Number((10 | 2) as f64));
-        assert_eq!(Value::Number(10.0) | Value::Boolean(true), Value::Number((10 | 1) as f64));
-        assert_eq!(Value::String("10".to_string()) | Value::Number(2.0), Value::Number((10 | 2) as f64));
-        assert_eq!(Value::String("invalid".to_string()) | Value::Number(2.0), Value::Number(2.0));
-        assert_eq!(Value::Object(Object.into()) | Value::Number(2.0), Value::Number(2.0));
+        assert_eq!(
+            Value::Number(10.0) | Value::Number(2.0),
+            Value::Number((10 | 2) as f64)
+        );
+        assert_eq!(
+            Value::Number(10.0) | Value::Boolean(true),
+            Value::Number((10 | 1) as f64)
+        );
+        assert_eq!(
+            Value::String("10".to_string()) | Value::Number(2.0),
+            Value::Number((10 | 2) as f64)
+        );
+        assert_eq!(
+            Value::String("invalid".to_string()) | Value::Number(2.0),
+            Value::Number(2.0)
+        );
+        assert_eq!(
+            Value::Object(Object.into()) | Value::Number(2.0),
+            Value::Number(2.0)
+        );
     }
 
     #[test]
     fn bit_and() {
-        assert_eq!(Value::Number(10.0) & Value::Number(2.0), Value::Number((10 & 2) as f64));
-        assert_eq!(Value::Number(10.0) & Value::Boolean(true), Value::Number((10 & 1) as f64));
-        assert_eq!(Value::String("10".to_string()) & Value::Number(2.0), Value::Number((10 & 2) as f64));
-        assert_eq!(Value::String("invalid".to_string()) & Value::Number(2.0), Value::Number(0.0));
-        assert_eq!(Value::Object(Object.into()) & Value::Number(2.0), Value::Number(0.0));
+        assert_eq!(
+            Value::Number(10.0) & Value::Number(2.0),
+            Value::Number((10 & 2) as f64)
+        );
+        assert_eq!(
+            Value::Number(10.0) & Value::Boolean(true),
+            Value::Number((10 & 1) as f64)
+        );
+        assert_eq!(
+            Value::String("10".to_string()) & Value::Number(2.0),
+            Value::Number((10 & 2) as f64)
+        );
+        assert_eq!(
+            Value::String("invalid".to_string()) & Value::Number(2.0),
+            Value::Number(0.0)
+        );
+        assert_eq!(
+            Value::Object(Object.into()) & Value::Number(2.0),
+            Value::Number(0.0)
+        );
     }
 
     #[test]
     fn bit_xor() {
-        assert_eq!(Value::Number(10.0) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
-        assert_eq!(Value::Number(10.0) ^ Value::Boolean(true), Value::Number((10 ^ 1) as f64));
-        assert_eq!(Value::String("10".to_string()) ^ Value::Number(2.0), Value::Number((10 ^ 2) as f64));
-        assert_eq!(Value::String("invalid".to_string()) ^ Value::Number(2.0), Value::Number(2.0));
-        assert_eq!(Value::Object(Object.into()) ^ Value::Number(2.0), Value::Number(2.0));
+        assert_eq!(
+            Value::Number(10.0) ^ Value::Number(2.0),
+            Value::Number((10 ^ 2) as f64)
+        );
+        assert_eq!(
+            Value::Number(10.0) ^ Value::Boolean(true),
+            Value::Number((10 ^ 1) as f64)
+        );
+        assert_eq!(
+            Value::String("10".to_string()) ^ Value::Number(2.0),
+            Value::Number((10 ^ 2) as f64)
+        );
+        assert_eq!(
+            Value::String("invalid".to_string()) ^ Value::Number(2.0),
+            Value::Number(2.0)
+        );
+        assert_eq!(
+            Value::Object(Object.into()) ^ Value::Number(2.0),
+            Value::Number(2.0)
+        );
     }
 }

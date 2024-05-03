@@ -1,9 +1,9 @@
-use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 use crate::Value;
+use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 
-use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_for(&mut self, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
@@ -46,7 +46,7 @@ impl Context {
                             return Err(ControlFlow::Continue(l));
                         }
                     }
-                    (c) => return Err(c)
+                    (c) => return Err(c),
                 }
             }
 

@@ -1,9 +1,9 @@
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::ControlFlow;
 use crate::RuntimeResult;
-use crate::{ControlFlow};
-use swc_ecma_ast::{MemberExpr, MemberProp};
 use crate::{Error, Value};
+use swc_ecma_ast::{MemberExpr, MemberProp};
 
 impl Context {
     pub fn run_member(&mut self, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {

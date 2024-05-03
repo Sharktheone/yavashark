@@ -2,25 +2,22 @@
 
 use swc_ecma_ast::Stmt;
 
-pub use function::*;
 use crate::context::Context;
+pub use function::*;
 
 mod console;
 pub mod context;
+mod error;
 mod function;
+mod object;
 pub mod scope;
 pub mod statement;
 pub mod variable;
-mod error;
-mod object;
-
-
 
 type Value = yavashark_value::Value<Context>;
 type Error = yavashark_value::Error<Context>;
 type Function = yavashark_value::Function<Context>;
 type Object = yavashark_value::Object<Context>;
-
 
 pub enum ControlFlow {
     Continue(Option<String>),
@@ -104,8 +101,8 @@ impl Interpreter {
 
 #[cfg(test)]
 mod tests {
-    use swc_common::BytePos;
     use swc_common::input::StringInput;
+    use swc_common::BytePos;
     use swc_ecma_parser::{Parser, Syntax};
 
     use super::*;
@@ -192,7 +189,6 @@ mod tests {
 
         z
         "#;
-
 
         let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 

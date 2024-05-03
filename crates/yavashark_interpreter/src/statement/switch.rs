@@ -1,10 +1,10 @@
-use swc_ecma_ast::SwitchStmt;
 use crate::Value;
+use swc_ecma_ast::SwitchStmt;
 
 use crate::context::Context;
+use crate::scope::Scope;
 use crate::ControlFlow;
 use crate::RuntimeResult;
-use crate::scope::Scope;
 
 impl Context {
     pub fn run_switch(&mut self, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
@@ -15,7 +15,8 @@ impl Context {
         for case in &stmt.cases {
             if let Some(test) = &case.test {
                 let test = self.run_expr(test, case.span, scope)?;
-                if discriminant == test {} else {
+                if discriminant == test {
+                } else {
                     continue;
                 }
             }

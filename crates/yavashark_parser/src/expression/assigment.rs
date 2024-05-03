@@ -9,12 +9,9 @@ pub enum AssigmentExpression {
     LeftHandSideExpression(LeftHandSideExpression),
 }
 
+pub struct ArrowFunction {}
 
-pub struct ArrowFunction {
-}
-
-pub struct AsyncArrowFunction {
-}
+pub struct AsyncArrowFunction {}
 
 pub enum LeftHandSideExpression {
     Equal(Box<AssigmentExpression>),                        // =

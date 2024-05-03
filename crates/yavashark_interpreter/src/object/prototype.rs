@@ -6,12 +6,10 @@ use std::rc::Rc;
 use common::*;
 use yavashark_value::Obj;
 
-use crate::{NativeFunction, Value};
 use crate::context::Context;
+use crate::{NativeFunction, Value};
 
 mod common;
-
-
 
 pub trait Proto: Obj<Context> {
     fn as_any(&mut self) -> &mut dyn Any;
@@ -35,7 +33,6 @@ pub struct Prototype {
     to_string: Value,
     value_of: Value,
 }
-
 
 impl Default for Prototype {
     fn default() -> Self {
@@ -63,20 +60,32 @@ impl Prototype {
     }
 
     pub(crate) fn initialize(&mut self, func: Value) {
-        self.defined_getter = NativeFunction::new_with_proto("__define_getter__", define_getter, func.copy()).into();
-        self.defined_setter = NativeFunction::new_with_proto("__define_setter__", define_setter, func.copy()).into();
-        self.lookup_getter = NativeFunction::new_with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
-        self.lookup_setter = NativeFunction::new_with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
-        self.constructor = NativeFunction::new_with_proto("Object", object_constructor, func.copy()).into();
-        self.has_own_property = NativeFunction::new_with_proto("hasOwnProperty", has_own_property, func.copy()).into();
-        self.is_prototype_of = NativeFunction::new_with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
-        self.property_is_enumerable = NativeFunction::new_with_proto("propertyIsEnumerable", &property_is_enumerable, func.copy()).into();
-        self.to_locale_string = NativeFunction::new_with_proto("toLocaleString", to_locale_string, func.copy()).into();
+        self.defined_getter =
+            NativeFunction::new_with_proto("__define_getter__", define_getter, func.copy()).into();
+        self.defined_setter =
+            NativeFunction::new_with_proto("__define_setter__", define_setter, func.copy()).into();
+        self.lookup_getter =
+            NativeFunction::new_with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
+        self.lookup_setter =
+            NativeFunction::new_with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
+        self.constructor =
+            NativeFunction::new_with_proto("Object", object_constructor, func.copy()).into();
+        self.has_own_property =
+            NativeFunction::new_with_proto("hasOwnProperty", has_own_property, func.copy()).into();
+        self.is_prototype_of =
+            NativeFunction::new_with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
+        self.property_is_enumerable = NativeFunction::new_with_proto(
+            "propertyIsEnumerable",
+            &property_is_enumerable,
+            func.copy(),
+        )
+        .into();
+        self.to_locale_string =
+            NativeFunction::new_with_proto("toLocaleString", to_locale_string, func.copy()).into();
         self.to_string = NativeFunction::new_with_proto("toString", to_string, func.copy()).into();
         self.value_of = NativeFunction::new_with_proto("valueOf", value_of, func).into();
     }
 }
-
 
 impl Obj<Context> for Prototype {
     fn define_property(&mut self, name: Value, value: Value) {
@@ -142,7 +151,6 @@ impl Obj<Context> for Prototype {
 
         self.properties.insert(name, value);
     }
-
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(&name).map(|v| v.copy())
@@ -227,7 +235,6 @@ impl Obj<Context> for Prototype {
         self
     }
 }
-
 
 impl Proto for Prototype {
     fn as_any(&mut self) -> &mut dyn Any {

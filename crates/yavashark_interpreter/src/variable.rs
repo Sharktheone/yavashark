@@ -1,7 +1,7 @@
-use std::fmt::Debug;
 use crate::Error;
 use crate::Res;
 use crate::Value;
+use std::fmt::Debug;
 
 #[derive(Debug)]
 pub struct Variable {
@@ -26,9 +26,7 @@ impl Variable {
 
     pub fn mutate(&mut self, value: Value) -> Res {
         if !self.properties.is_writable() {
-            return Err(Error::new(
-                "Cannot assign to read-only variable"
-            ));
+            return Err(Error::new("Cannot assign to read-only variable"));
         }
 
         self.value = value;
@@ -82,7 +80,7 @@ impl Debug for Attributes {
         if self.is_configurable() {
             s.push_str("configurable, ");
         }
-        
+
         s.pop();
         s.pop();
 

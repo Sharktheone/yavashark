@@ -4,17 +4,16 @@ use std::rc::Rc;
 
 use crate::console::get_console;
 use crate::context::Context;
-use crate::Error;
 use crate::error::get_error;
+use crate::variable::Variable;
+use crate::Error;
 use crate::Res;
 use crate::Value;
-use crate::variable::Variable;
 
 pub struct MutValue {
     pub(crate) name: String,
     pub(crate) scope: Rc<RefCell<ScopeInternal>>,
 }
-
 
 #[derive(Debug, Clone, Default)]
 pub struct ScopeState {
@@ -127,7 +126,6 @@ pub struct Scope {
     pub this: Value,
 }
 
-
 #[derive(Debug)]
 pub(crate) struct ScopeInternal {
     parent: Option<Rc<RefCell<ScopeInternal>>>,
@@ -202,11 +200,7 @@ impl ScopeInternal {
             Variable::new_read_only(get_console(ctx)),
         );
 
-
-        variables.insert(
-            "Error".to_string(),
-            Variable::new_read_only(get_error(ctx)),
-        );
+        variables.insert("Error".to_string(), Variable::new_read_only(get_error(ctx)));
 
         Self {
             parent: None,
@@ -289,7 +283,6 @@ impl ScopeInternal {
         None
     }
 
-
     pub fn has_value(&self, name: &str) -> bool {
         return if !self.variables.contains_key(name) {
             if let Some(p) = self.parent.as_ref() {
@@ -297,7 +290,9 @@ impl ScopeInternal {
             } else {
                 false
             }
-        } else { true };
+        } else {
+            true
+        };
     }
 
     pub fn has_label(&self, label: &str) -> bool {
@@ -390,7 +385,6 @@ impl ScopeInternal {
         }
 
         self.declare_var(name, value);
-
 
         Ok(())
     }
@@ -524,7 +518,7 @@ impl Scope {
     pub fn has_value(&self, name: &str) -> bool {
         self.scope.borrow().has_value(name)
     }
-    
+
     pub fn update(&mut self, name: &str, value: Value) -> bool {
         self.scope.borrow_mut().update(name, value)
     }
@@ -533,7 +527,6 @@ impl Scope {
         self.scope.borrow_mut().update_or_define(name, value)
     }
 }
-
 
 impl From<ScopeInternal> for Scope {
     fn from(scope: ScopeInternal) -> Self {
@@ -546,6 +539,9 @@ impl From<ScopeInternal> for Scope {
 
 impl From<Rc<RefCell<ScopeInternal>>> for Scope {
     fn from(scope: Rc<RefCell<ScopeInternal>>) -> Self {
-        Self { scope, this: Value::Undefined }
+        Self {
+            scope,
+            this: Value::Undefined,
+        }
     }
 }

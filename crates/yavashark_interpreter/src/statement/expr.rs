@@ -1,6 +1,7 @@
 use swc_common::Span;
 use swc_ecma_ast::{Expr, ExprStmt};
 
+use crate::Error;
 use crate::Value;
 pub use arrow::*;
 pub use assign::*;
@@ -28,7 +29,6 @@ pub use this::*;
 pub use tpl::*;
 pub use unary::*;
 pub use update::*;
-use crate::Error;
 
 use crate::context::Context;
 use crate::scope::Scope;

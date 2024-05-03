@@ -1,4 +1,3 @@
-
 #[test]
 fn test() {
     use swc_common::BytePos;

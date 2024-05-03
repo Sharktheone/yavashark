@@ -4,8 +4,8 @@ use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 use crate::Value;
 
 use crate::context::Context;
-use crate::RuntimeResult;
 use crate::scope::Scope;
+use crate::RuntimeResult;
 
 impl Context {
     pub fn run_try(&mut self, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
@@ -19,7 +19,6 @@ impl Context {
     }
 }
 
-
 fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
     let try_block = ctx.run_block(&stmt.block, scope);
 
@@ -30,7 +29,8 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
             if let Some(param) = &catch.param {
                 match param {
                     Pat::Ident(ident) => {
-                        scope.declare_var(ident.sym.to_string(), format!("{:?}", err).into()); //TODO impl Obj for Error
+                        scope.declare_var(ident.sym.to_string(), format!("{:?}", err).into());
+                        //TODO impl Obj for Error
                     }
                     Pat::Object(obj) => {
                         for prop in &obj.props {
@@ -38,22 +38,38 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                 ObjectPatProp::Assign(assign) => {
                                     match assign.key.sym.to_string().as_str() {
                                         "message" => {
-                                            scope.declare_var("message".to_string(), err.message().into());
+                                            scope.declare_var(
+                                                "message".to_string(),
+                                                err.message().into(),
+                                            );
                                         }
                                         "stack" => {
-                                            scope.declare_var("stack".to_string(), format!("{:?}", err.stack()).into()); //TODO impl Obj for StackTrace
+                                            scope.declare_var(
+                                                "stack".to_string(),
+                                                format!("{:?}", err.stack()).into(),
+                                            ); //TODO impl Obj for StackTrace
                                         }
                                         "name" => {
-                                            scope.declare_var("name".to_string(), err.name().into());
+                                            scope
+                                                .declare_var("name".to_string(), err.name().into());
                                         }
                                         "fileName" => {
-                                            scope.declare_var("fileName".to_string(), err.file_name().into());
+                                            scope.declare_var(
+                                                "fileName".to_string(),
+                                                err.file_name().into(),
+                                            );
                                         }
                                         "lineNumber" => {
-                                            scope.declare_var("lineNumber".to_string(), err.line_number().into());
+                                            scope.declare_var(
+                                                "lineNumber".to_string(),
+                                                err.line_number().into(),
+                                            );
                                         }
                                         "columnNumber" => {
-                                            scope.declare_var("columnNumber".to_string(), err.column_number().into());
+                                            scope.declare_var(
+                                                "columnNumber".to_string(),
+                                                err.column_number().into(),
+                                            );
                                         }
                                         (name) => {
                                             let value = if let Some(v) = assign.value.as_ref() {
@@ -67,15 +83,17 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                 }
                                 ObjectPatProp::KeyValue(kv) => {
                                     let key = match &kv.key {
-                                        PropName::Ident(ident) => {
-                                            ident.sym.to_string()
+                                        PropName::Ident(ident) => ident.sym.to_string(),
+                                        _ => {
+                                            todo!()
                                         }
-                                        _ => { todo!() }
                                     };
 
                                     let name = match *kv.value {
                                         Pat::Ident(ref ident) => ident.sym.to_string(),
-                                        _ => { todo!() }
+                                        _ => {
+                                            todo!()
+                                        }
                                     };
 
                                     match key.as_str() {
@@ -83,7 +101,10 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                             scope.declare_var(name, err.message().into());
                                         }
                                         "stack" => {
-                                            scope.declare_var(name, format!("{:?}", err.stack()).into());
+                                            scope.declare_var(
+                                                name,
+                                                format!("{:?}", err.stack()).into(),
+                                            );
                                         }
                                         "name" => {
                                             scope.declare_var(name, err.name().into());
@@ -102,7 +123,9 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         }
                                     }
                                 }
-                                _ => { todo!() }
+                                _ => {
+                                    todo!()
+                                }
                             }
                         }
                     }

@@ -1,9 +1,9 @@
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::Error;
 use crate::RuntimeResult;
 use crate::Value;
 use swc_ecma_ast::{BinExpr, BinaryOp};
-use crate::Error;
 
 impl Context {
     pub fn run_bin(&mut self, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {

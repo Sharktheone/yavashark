@@ -1,9 +1,9 @@
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::Error;
 use crate::Value;
 use crate::{Res, RuntimeResult};
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
-use crate::Error;
 
 impl Context {
     pub fn decl_var(&mut self, stmt: &VarDecl, scope: &mut Scope) -> Res {
@@ -55,9 +55,7 @@ impl Context {
                         let value = self.run_expr(init, stmt.span, scope)?;
                         scope.declare_read_only_var(id.sym.to_string(), value);
                     } else {
-                        return Err(Error::new(
-                            "Const declaration must have an initializer",
-                        ));
+                        return Err(Error::new("Const declaration must have an initializer"));
                     }
                 }
                 Ok(())

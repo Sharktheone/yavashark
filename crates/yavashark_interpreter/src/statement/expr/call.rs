@@ -1,10 +1,10 @@
-use swc_ecma_ast::{Callee, CallExpr};
+use swc_ecma_ast::{CallExpr, Callee};
 
-use crate::{Error, Value};
 use crate::context::Context;
-use crate::ControlFlow;
 use crate::scope::Scope;
+use crate::ControlFlow;
 use crate::ValueResult;
+use crate::{Error, Value};
 
 impl Context {
     pub fn run_call(&mut self, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {

@@ -5,9 +5,9 @@ use std::rc::Rc;
 
 use yavashark_value::{Func, Obj};
 
-use crate::{NativeFunction, Value, ValueResult};
 use crate::context::Context;
 use crate::object::Prototype;
+use crate::{NativeFunction, Value, ValueResult};
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -21,7 +21,6 @@ pub struct FunctionPrototype {
     pub name: Value,
 }
 
-
 impl FunctionPrototype {
     pub fn new(obj: &Value) -> Self {
         let mut this = Self {
@@ -33,17 +32,16 @@ impl FunctionPrototype {
             constructor: Value::Undefined,
             length: Value::Number(0.0),
             name: Value::String("Function".to_string()),
-
         };
         this.apply = NativeFunction::new_with_proto("apply", apply, obj.copy()).into();
         this.bind = NativeFunction::new_with_proto("bind", bind, obj.copy()).into();
         this.call = NativeFunction::new_with_proto("call", call, obj.copy()).into();
-        this.constructor = NativeFunction::new_with_proto("Function", constructor, obj.copy()).into();
-        
+        this.constructor =
+            NativeFunction::new_with_proto("Function", constructor, obj.copy()).into();
+
         this
     }
 }
-
 
 fn apply(args: Vec<Value>, this: Value) -> ValueResult {
     todo!()
@@ -60,7 +58,6 @@ fn call(args: Vec<Value>, this: Value) -> ValueResult {
 fn constructor(args: Vec<Value>, this: Value) -> ValueResult {
     todo!()
 }
-
 
 impl Obj<Context> for FunctionPrototype {
     fn define_property(&mut self, name: Value, value: Value) {
@@ -157,7 +154,7 @@ impl Obj<Context> for FunctionPrototype {
         "function() { [Native code] }".to_string()
     }
 
-    fn as_any_mut(&mut self) -> &mut dyn Any { 
+    fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 
@@ -165,7 +162,6 @@ impl Obj<Context> for FunctionPrototype {
         self
     }
 }
-
 
 impl Func<Context> for FunctionPrototype {
     fn call(&mut self, _ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {

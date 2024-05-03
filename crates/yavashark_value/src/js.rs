@@ -5,11 +5,11 @@ use std::hash::Hash;
 pub use function::*;
 pub use object::*;
 
-mod object;
-mod ops;
+mod context;
 mod conversion;
 mod function;
-mod context;
+mod object;
+mod ops;
 
 pub use context::*;
 
@@ -52,8 +52,6 @@ impl<C: Ctx> Hash for Value<C> {
         }
     }
 }
-
-
 
 impl<C: Ctx> Value<C> {
     pub fn copy(&self) -> Self {
@@ -110,6 +108,5 @@ impl<C: Ctx> Display for Value<C> {
             Value::Object(o) => write!(f, "{}", o.to_string()),
             Value::Function(func) => write!(f, "{}", func.to_string()),
         }
-
     }
 }

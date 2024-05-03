@@ -1,6 +1,6 @@
 use crate::context::Context;
-use crate::NativeFunction;
 use crate::object::Object;
+use crate::NativeFunction;
 use crate::Value;
 
 pub fn get_console(ctx: &mut Context) -> Value {
@@ -8,22 +8,26 @@ pub fn get_console(ctx: &mut Context) -> Value {
 
     console.define_property(
         "log".into(),
-        NativeFunction::new("log", |args, _| {
-            let mut str = String::new();
+        NativeFunction::new(
+            "log",
+            |args, _| {
+                let mut str = String::new();
 
-            for arg in args {
-                str.push_str(&arg.to_string());
-                str.push(' ');
-            }
+                for arg in args {
+                    str.push_str(&arg.to_string());
+                    str.push(' ');
+                }
 
-            str.pop();
+                str.pop();
 
-            println!("{}", str);
+                println!("{}", str);
 
-            Ok(Value::Undefined)
-        }, ctx).into(),
+                Ok(Value::Undefined)
+            },
+            ctx,
+        )
+        .into(),
     );
-
 
     console.into()
 }

@@ -13,7 +13,7 @@ impl<C: Ctx> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     pub fn new_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Runtime(error),
@@ -27,7 +27,7 @@ impl<C: Ctx> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     pub fn reference_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Reference(error),
@@ -41,7 +41,7 @@ impl<C: Ctx> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     pub fn syn_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Syntax(error),
@@ -55,7 +55,7 @@ impl<C: Ctx> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     pub fn unknown_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Error(Some(error)),
@@ -69,7 +69,7 @@ impl<C: Ctx> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     pub fn ty_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Type(error),
@@ -93,7 +93,7 @@ impl<C: Ctx> Error<C> {
             ErrorKind::Runtime(_) => "RuntimeError",
             ErrorKind::Syntax(_) => "SyntaxError",
             ErrorKind::Error(_) => "Error",
-            ErrorKind::Throw(_) => "TODO: Throw"
+            ErrorKind::Throw(_) => "TODO: Throw",
         }
     }
 
@@ -106,7 +106,7 @@ impl<C: Ctx> Error<C> {
             ErrorKind::Runtime(msg) => msg.clone(),
             ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(),
-            ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new())
+            ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         }
     }
 
@@ -115,7 +115,11 @@ impl<C: Ctx> Error<C> {
     }
 
     pub fn file_name(&self) -> &str {
-        self.stacktrace.frames.first().map(|f| f.file.as_str()).unwrap_or("")
+        self.stacktrace
+            .frames
+            .first()
+            .map(|f| f.file.as_str())
+            .unwrap_or("")
     }
 
     pub fn line_number(&self) -> u32 {
@@ -123,7 +127,11 @@ impl<C: Ctx> Error<C> {
     }
 
     pub fn column_number(&self) -> u32 {
-        self.stacktrace.frames.first().map(|f| f.column).unwrap_or(0)
+        self.stacktrace
+            .frames
+            .first()
+            .map(|f| f.column)
+            .unwrap_or(0)
     }
 }
 

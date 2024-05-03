@@ -5,10 +5,10 @@ mod var;
 
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::Error;
 use crate::Value;
 use crate::{ControlFlow, Res, RuntimeResult};
 use swc_ecma_ast::Decl;
-use crate::Error;
 
 impl Context {
     pub fn run_decl(&mut self, stmt: &Decl, scope: &mut Scope) -> Res {

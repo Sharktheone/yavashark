@@ -5,18 +5,18 @@ use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
-use crate::Error;
 use crate::js::context::Ctx;
+use crate::Error;
 
 use super::Value;
 
-pub trait Obj<C: Ctx>: Debug{
+pub trait Obj<C: Ctx>: Debug {
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
 
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
 
     fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
-    // 
+    //
     fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
 
     fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) {
@@ -33,15 +33,12 @@ pub trait Obj<C: Ctx>: Debug{
 
     fn name(&self) -> String;
 
-
     fn to_string(&self) -> String;
-    
-    
+
     fn as_any_mut(&mut self) -> &mut dyn Any;
-    
+
     fn as_any(&self) -> &dyn Any;
 }
-
 
 #[derive(Debug, Clone)]
 pub struct Object<C: Ctx>(Rc<RefCell<Box<dyn Obj<C>>>>);
@@ -62,33 +59,45 @@ impl<C: Ctx> PartialEq for Object<C> {
 
 impl<C: Ctx> Object<C> {
     pub fn get(&self) -> Result<Ref<Box<dyn Obj<C>>>, Error<C>> {
-        self.0.try_borrow().map_err(|_| Error::new("failed to borrow object"))
+        self.0
+            .try_borrow()
+            .map_err(|_| Error::new("failed to borrow object"))
     }
 
     pub fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
-        self.0.try_borrow_mut().map_err(|_| Error::new("failed to borrow object"))
+        self.0
+            .try_borrow_mut()
+            .map_err(|_| Error::new("failed to borrow object"))
     }
-    
+
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         self.get_mut()?.define_property(name, value);
         Ok(())
     }
-    
+
     pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
-        self.get()?.get_property(name)
+        self.get()?
+            .get_property(name)
             .map(|v| v.copy())
-            .ok_or(Error::reference_error(format!("{} does not exist on object", name)))
+            .ok_or(Error::reference_error(format!(
+                "{} does not exist on object",
+                name
+            )))
     }
-    
-    pub fn update_or_define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+
+    pub fn update_or_define_property(
+        &self,
+        name: Value<C>,
+        value: Value<C>,
+    ) -> Result<(), Error<C>> {
         self.get_mut()?.update_or_define_property(name, value);
         Ok(())
     }
-    
+
     pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
         Ok(self.get()?.contains_key(name))
     }
-    
+
     pub fn name(&self) -> String {
         if let Ok(o) = self.get() {
             o.name().to_string()
@@ -97,7 +106,6 @@ impl<C: Ctx> Object<C> {
         }
     }
 }
-
 
 impl<C: Ctx> Display for Object<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -109,13 +117,11 @@ impl<C: Ctx> Display for Object<C> {
     }
 }
 
-
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
         Object(Rc::new(RefCell::new(obj)))
     }
 }
-
 
 impl<C: Ctx> Object<C> {
     pub fn new(obj: Box<dyn Obj<C>>) -> Self {
