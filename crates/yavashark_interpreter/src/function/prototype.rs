@@ -96,6 +96,10 @@ impl Obj<Context> for FunctionPrototype {
         self.properties.insert(name, value);
     }
 
+    fn resolve_property(&self, name: &Value) -> Option<Value> {
+        self.properties.get(name).map(|v| v.copy())
+    }
+
     fn get_property(&self, name: &Value) -> Option<&Value> {
         if let Value::String(name) = name {
             match name.as_str() {
@@ -144,8 +148,8 @@ impl Obj<Context> for FunctionPrototype {
         self.properties.contains_key(name)
     }
 
-    fn name(&self) -> &str {
-        self.name.to_string().as_str()
+    fn name(&self) -> String {
+        self.name.to_string()
     }
 
     fn to_string(&self) -> String {

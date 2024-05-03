@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 
-use crate::{Ctx, Func};
+use crate::Ctx;
 
 use super::Value;
 
@@ -691,7 +691,7 @@ impl<C: Ctx> SubAssign for Value<C> {
 
 #[cfg(test)]
 mod tests {
-    use crate::Obj;
+    use crate::{Func, Obj};
 
     use super::*;
     
@@ -718,8 +718,8 @@ mod tests {
             None
         }
 
-        fn name(&self) -> &str {
-            "Object"
+        fn name(&self) -> String {
+            "Object".to_string()
         }
         
         fn to_string(&self) -> String {

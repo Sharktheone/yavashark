@@ -33,7 +33,9 @@ impl NativeFunction {
 
         this.into()
     }
-    pub fn new(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult) -> Function {
+    
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(name: &str, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Function {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
@@ -56,6 +58,11 @@ impl Obj<Context> for NativeFunction {
         self.properties.insert(name, value);
     }
 
+    fn resolve_property(&self, name: &Value) -> Option<Value> {
+        self.properties.get(name).map(|v| v.copy())
+    }
+
+
     fn get_property(&self, name: &Value) -> Option<&Value> {
         self.properties.get(name)
     }
@@ -68,8 +75,8 @@ impl Obj<Context> for NativeFunction {
         self.properties.contains_key(name)
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn name(&self) -> String {
+        self.name.to_string()
     }
 
     fn to_string(&self) -> String {
@@ -111,6 +118,11 @@ impl Obj<Context> for JSFunction {
         self.properties.insert(name, value);
     }
 
+
+    fn resolve_property(&self, name: &Value) -> Option<Value> {
+        self.properties.get(name).map(|v| v.copy())
+    }
+    
     fn get_property(&self, name: &Value) -> Option<&Value> {
         self.properties.get(name)
     }
@@ -123,8 +135,8 @@ impl Obj<Context> for JSFunction {
         self.properties.contains_key(name)
     }
 
-    fn name(&self) -> &str {
-        &self.name
+    fn name(&self) -> String {
+        self.name.clone()
     }
 
     fn to_string(&self) -> String {

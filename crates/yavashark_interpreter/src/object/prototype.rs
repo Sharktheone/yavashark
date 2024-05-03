@@ -120,6 +120,11 @@ impl Obj<Context> for Prototype {
         
         self.properties.insert(name, value);
     }
+    
+    
+    fn resolve_property(&self, name: &Value) -> Option<Value> {
+        self.properties.get(&name).map(|v| v.copy())
+    }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
         if let Value::String(name) = name {
@@ -184,8 +189,8 @@ impl Obj<Context> for Prototype {
         self.properties.contains_key(name)
     }
 
-    fn name(&self) -> &str {
-        "Object"
+    fn name(&self) -> String {
+        "Object".to_string()
     }
 
     fn to_string(&self) -> String {

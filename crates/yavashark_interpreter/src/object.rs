@@ -28,6 +28,10 @@ impl Obj<Context> for Object {
     fn define_property(&mut self, name: Value, value: Value) {
         self.properties.insert(name, value);
     }
+    
+    fn resolve_property(&self, name: &Value) -> Option<Value> {
+        self.properties.get(&name).map(|v| v.copy())
+    }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
         self.properties.get(name)
@@ -42,8 +46,8 @@ impl Obj<Context> for Object {
         self.properties.contains_key(name)
     }
 
-    fn name(&self) -> &str {
-        "Object"
+    fn name(&self) -> String {
+        "Object".to_string()
     }
 
     fn to_string(&self) -> String {
