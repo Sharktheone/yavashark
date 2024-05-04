@@ -33,7 +33,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
 
     fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
-    //
+    
     fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
 
     fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) {
