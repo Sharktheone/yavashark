@@ -1,7 +1,7 @@
 use crate::{Error, NativeFunction, Value};
 
 use crate::context::Context;
-use crate::Function;
+use crate::FunctionHandle;
 
 pub fn get_error(ctx: &mut Context) -> Value {
     NativeFunction::new(

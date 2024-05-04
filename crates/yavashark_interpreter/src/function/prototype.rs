@@ -33,11 +33,11 @@ impl FunctionPrototype {
             length: Value::Number(0.0),
             name: Value::String("Function".to_string()),
         };
-        this.apply = NativeFunction::new_with_proto("apply", apply, obj.copy()).into();
-        this.bind = NativeFunction::new_with_proto("bind", bind, obj.copy()).into();
-        this.call = NativeFunction::new_with_proto("call", call, obj.copy()).into();
+        this.apply = NativeFunction::with_proto("apply", apply, obj.copy()).into();
+        this.bind = NativeFunction::with_proto("bind", bind, obj.copy()).into();
+        this.call = NativeFunction::with_proto("call", call, obj.copy()).into();
         this.constructor =
-            NativeFunction::new_with_proto("Function", constructor, obj.copy()).into();
+            NativeFunction::with_proto("Function", constructor, obj.copy()).into();
 
         this
     }

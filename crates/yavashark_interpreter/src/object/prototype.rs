@@ -61,29 +61,29 @@ impl Prototype {
 
     pub(crate) fn initialize(&mut self, func: Value) {
         self.defined_getter =
-            NativeFunction::new_with_proto("__define_getter__", define_getter, func.copy()).into();
+            NativeFunction::with_proto("__define_getter__", define_getter, func.copy()).into();
         self.defined_setter =
-            NativeFunction::new_with_proto("__define_setter__", define_setter, func.copy()).into();
+            NativeFunction::with_proto("__define_setter__", define_setter, func.copy()).into();
         self.lookup_getter =
-            NativeFunction::new_with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
+            NativeFunction::with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
         self.lookup_setter =
-            NativeFunction::new_with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
+            NativeFunction::with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
         self.constructor =
-            NativeFunction::new_with_proto("Object", object_constructor, func.copy()).into();
+            NativeFunction::with_proto("Object", object_constructor, func.copy()).into();
         self.has_own_property =
-            NativeFunction::new_with_proto("hasOwnProperty", has_own_property, func.copy()).into();
+            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
         self.is_prototype_of =
-            NativeFunction::new_with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
-        self.property_is_enumerable = NativeFunction::new_with_proto(
+            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
+        self.property_is_enumerable = NativeFunction::with_proto(
             "propertyIsEnumerable",
             property_is_enumerable,
             func.copy(),
         )
         .into();
         self.to_locale_string =
-            NativeFunction::new_with_proto("toLocaleString", to_locale_string, func.copy()).into();
-        self.to_string = NativeFunction::new_with_proto("toString", to_string, func.copy()).into();
-        self.value_of = NativeFunction::new_with_proto("valueOf", value_of, func).into();
+            NativeFunction::with_proto("toLocaleString", to_locale_string, func.copy()).into();
+        self.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
+        self.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
     }
 }
 

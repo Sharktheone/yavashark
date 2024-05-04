@@ -8,23 +8,23 @@ use yavashark_value::{Ctx, Obj};
 use crate::object::Prototype;
 use crate::scope::Scope;
 use crate::Value;
-use crate::{FunctionPrototype, Object, RuntimeResult};
+use crate::{FunctionPrototype, ObjectHandle, RuntimeResult};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Context {
-    pub(crate) obj_prototype: Object,
-    pub(crate) func_prototype: Object,
+    pub(crate) obj_prototype: ObjectHandle,
+    pub(crate) func_prototype: ObjectHandle,
 }
 
 impl Default for Context {
     fn default() -> Self {
         let obj_prototype: Box<dyn Obj<Context>> = Box::new(Prototype::new());
 
-        let obj_prototype = Object::new(obj_prototype);
+        let obj_prototype = ObjectHandle::new(obj_prototype);
 
         let func_prototype: Box<dyn Obj<Context>> =
             Box::new(FunctionPrototype::new(&obj_prototype.clone().into()));
-        let func_prototype = Object::new(func_prototype);
+        let func_prototype = ObjectHandle::new(func_prototype);
 
         {
             let mut obj: RefMut<Box<dyn Obj<Context>>> = obj_prototype.get_mut().unwrap();

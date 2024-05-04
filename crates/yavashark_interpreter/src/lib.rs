@@ -16,8 +16,8 @@ pub mod variable;
 
 type Value = yavashark_value::Value<Context>;
 type Error = yavashark_value::Error<Context>;
-type Function = yavashark_value::Function<Context>;
-type Object = yavashark_value::Object<Context>;
+type FunctionHandle = yavashark_value::Function<Context>;
+type ObjectHandle = yavashark_value::Object<Context>;
 
 pub enum ControlFlow {
     Continue(Option<String>),

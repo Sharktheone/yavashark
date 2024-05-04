@@ -12,24 +12,29 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::{ControlFlow, Error, Function, Value, ValueResult};
+use crate::{ControlFlow, Error, FunctionHandle, ObjectHandle, Value, ValueResult};
+use crate::object::Object;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
+
+
+
+pub struct NativeFunctionBuilder(NativeFunction);
 
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
-    pub properties: HashMap<Value, Value>,
-    pub prototype: Value,
+    pub object: Object,
+    pub data: Option<Box<dyn Any>>,
 }
 
 impl NativeFunction {
-    pub fn new_boxed(name: String, f: NativeFn, ctx: &mut Context) -> Function {
+    pub fn new_boxed(name: String, f: NativeFn, ctx: &mut Context) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name,
             f,
-            properties: HashMap::new(),
-            prototype: ctx.func_prototype.clone().into(),
+            object: Object::raw_with_proto(ctx.func_prototype.clone().into()),
+            data: None,
         });
 
         this.into()
@@ -40,29 +45,89 @@ impl NativeFunction {
         name: &str,
         f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static,
         ctx: &mut Context,
-    ) -> Function {
+    ) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
-            properties: HashMap::new(),
-            prototype: ctx.func_prototype.clone().into(),
+            object: Object::raw_with_proto(ctx.func_prototype.clone().into()),
+            data: None,
         });
 
         this.into()
     }
 
-    pub fn new_with_proto(
+    pub fn with_proto(
         name: &str,
         f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static,
         proto: Value,
-    ) -> Function {
+    ) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
-            properties: HashMap::new(),
-            prototype: proto,
+            object: Object::raw_with_proto(proto),
+            data: None,
         });
 
+        this.into()
+    }
+
+    pub fn builder() -> NativeFunctionBuilder {
+        NativeFunctionBuilder(NativeFunction {
+            name: "".to_string(),
+            f: Box::new(|_, _| Ok(Value::Undefined)),
+            object: Object::raw_with_proto(Value::Undefined),
+            data: None,
+        })
+    }
+}
+
+
+
+impl NativeFunctionBuilder {
+    pub fn name(mut self, name: &str) -> Self {
+        self.0.name = name.to_string();
+        self
+    }
+
+    pub fn func(mut self, f: NativeFn) -> Self {
+        self.0.f = f;
+        self
+    }
+
+    
+    pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Self {
+        self.0.f = Box::new(f);
+        self
+    }
+
+    /// Note: Overwrites a potential prototype that was previously set
+    pub fn object(mut self, object: Object) -> Self {
+        self.0.object = object;
+        self
+    }
+
+
+    /// Note: Overwrites a potential object that was previously set
+    pub fn proto(mut self, proto: Value) -> Self {
+        self.0.object.prototype = proto; //TODO: this doesn't work when you want to also set an object
+        self
+    }
+
+    /// Note: Overrides the prototype of the object
+    pub fn context(mut self, ctx: &mut Context) -> Self {
+        self.0.object.prototype = ctx.func_prototype.clone().into();
+        self
+    }
+
+    // Sets the data that can be accessed by the function
+    pub fn data(mut self, data: Box<dyn Any>) -> Self {
+        self.0.data = Some(data);
+        self
+    }
+
+    /// Builds the function handle.
+    pub fn build(self) -> FunctionHandle {
+        let this: Box<dyn Func<Context>> = Box::new(self.0);
         this.into()
     }
 }
@@ -75,23 +140,23 @@ impl Debug for NativeFunction {
 
 impl Obj<Context> for NativeFunction {
     fn define_property(&mut self, name: Value, value: Value) {
-        self.properties.insert(name, value);
+        self.object.define_property(name, value);
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.properties.get(name).map(|v| v.copy())
+        self.object.resolve_property(name)
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
-        self.properties.get(name)
+        self.object.get_property(name)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        self.properties.get_mut(name)
+        self.object.get_property_mut(name)
     }
 
     fn contains_key(&self, name: &yavashark_value::Value<Context>) -> bool {
-        self.properties.contains_key(name)
+        self.object.contains_key(name)
     }
 
     fn name(&self) -> String {
@@ -115,7 +180,7 @@ pub struct JSFunction {
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
     pub scope: Scope,
-    pub properties: HashMap<Value, Value>,
+    pub object: Object,
 }
 
 impl JSFunction {
@@ -126,13 +191,14 @@ impl JSFunction {
         params: Vec<Param>,
         block: Option<BlockStmt>,
         scope: Scope,
-    ) -> Function {
+        ctx: &mut Context,
+    ) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name,
             params,
             block,
             scope,
-            properties: HashMap::new(),
+            object: Object::raw_with_proto(ctx.func_prototype.clone().into()),
         });
 
         this.into()
@@ -141,23 +207,23 @@ impl JSFunction {
 
 impl Obj<Context> for JSFunction {
     fn define_property(&mut self, name: Value, value: Value) {
-        self.properties.insert(name, value);
+        self.object.define_property(name, value);
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.properties.get(name).map(|v| v.copy())
+        self.object.resolve_property(name).map(|v| v.copy())
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
-        self.properties.get(name)
+        self.object.get_property(name)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        self.properties.get_mut(name)
+        self.object.get_property_mut(name)
     }
 
     fn contains_key(&self, name: &yavashark_value::Value<Context>) -> bool {
-        self.properties.contains_key(name)
+        self.object.contains_key(name)
     }
 
     fn name(&self) -> String {

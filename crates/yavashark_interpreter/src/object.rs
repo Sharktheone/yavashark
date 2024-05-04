@@ -14,13 +14,13 @@ use crate::Value;
 
 #[derive(Debug)]
 pub struct Object {
-    properties: HashMap<Value, Value>,
-    prototype: Value,
+    pub properties: HashMap<Value, Value>,
+    pub prototype: Value,
 }
 
 impl Object {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(context: &mut Context) -> crate::Object {
+    pub fn new(context: &mut Context) -> crate::ObjectHandle {
         let prototype = context.obj_prototype.clone().into();
 
         let this: Box<dyn Obj<Context>> = Box::new(Self {
@@ -31,13 +31,31 @@ impl Object {
         this.into()
     }
 
-    pub fn with_proto(context: &mut Context, proto: Value) -> crate::Object {
+    pub fn with_proto(proto: Value) -> crate::ObjectHandle {
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
             prototype: proto,
         });
 
         this.into()
+    }
+    
+    
+    pub fn raw(context: &mut Context) -> Self {
+        let prototype = context.obj_prototype.clone().into();
+        
+        Self {
+            properties: HashMap::new(),
+            prototype,
+        }
+    }
+    
+    
+    pub fn raw_with_proto(proto: Value) -> Self {
+        Self {
+            properties: HashMap::new(),
+            prototype: proto,
+        }
     }
 }
 

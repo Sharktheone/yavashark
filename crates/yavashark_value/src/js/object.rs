@@ -77,6 +77,11 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
+    
+    pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
+        self.get().ok()?.resolve_property(name)
+    }
+    
     pub fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
         self.0
             .try_borrow_mut()
