@@ -88,11 +88,4 @@ impl Obj<Context> for Object {
     fn to_string(&self) -> String {
         "[object Object]".to_string()
     }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 }

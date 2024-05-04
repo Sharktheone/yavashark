@@ -9,7 +9,26 @@ use crate::Error;
 
 use super::Value;
 
-pub trait Obj<C: Ctx>: Debug {
+
+
+pub trait AsAny {
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+    fn as_any(&self) -> &dyn Any;
+}
+
+impl<T: Sized + 'static> AsAny for T {
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+} 
+
+
+pub trait Obj<C: Ctx>: Debug + AsAny {
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
 
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
@@ -33,10 +52,6 @@ pub trait Obj<C: Ctx>: Debug {
     fn name(&self) -> String;
 
     fn to_string(&self) -> String;
-
-    fn as_any_mut(&mut self) -> &mut dyn Any;
-
-    fn as_any(&self) -> &dyn Any;
 }
 
 #[derive(Debug, Clone)]

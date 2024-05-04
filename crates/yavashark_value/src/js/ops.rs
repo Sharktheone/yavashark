@@ -720,14 +720,6 @@ mod tests {
         fn to_string(&self) -> String {
             format!("[object {}]", self.name())
         }
-
-        fn as_any_mut(&mut self) -> &mut dyn Any {
-            self
-        }
-
-        fn as_any(&self) -> &dyn Any {
-            self
-        }
     }
 
     impl Func<()> for Object {

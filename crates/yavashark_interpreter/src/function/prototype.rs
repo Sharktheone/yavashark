@@ -153,14 +153,6 @@ impl Obj<Context> for FunctionPrototype {
     fn to_string(&self) -> String {
         "function() { [Native code] }".to_string()
     }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl Func<Context> for FunctionPrototype {

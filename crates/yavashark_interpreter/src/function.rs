@@ -101,14 +101,6 @@ impl Obj<Context> for NativeFunction {
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [Native code] }}]", self.name)
     }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
-    }
 }
 
 impl Func<Context> for NativeFunction {
@@ -174,14 +166,6 @@ impl Obj<Context> for JSFunction {
 
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [JS code] }}]", self.name)
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn Any {
-        self
     }
 }
 
