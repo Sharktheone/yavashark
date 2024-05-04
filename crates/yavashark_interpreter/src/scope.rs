@@ -388,6 +388,33 @@ impl ScopeInternal {
 
         Ok(())
     }
+    
+    
+    pub fn with_mut(&mut self, name: &str, f: &impl Fn(&mut Value)) -> Res {
+        if let Some(v) = self.variables.get_mut(name) {
+            if !v.properties.is_writable() {
+                return Err(Error::ty("Assignment to constant variable".to_string()));
+            }
+            
+            f(&mut v.value);
+            Ok(())
+        } else if let Some(p) = self.parent.as_ref() {
+            p.borrow_mut().with_mut(name, f)
+        } else {
+            Err(Error::new("Variable not found"))
+        }
+    }
+    
+    pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
+        if let Some(v) = self.variables.get(name) {
+            f(&v.value);
+            Ok(())
+        } else if let Some(p) = self.parent.as_ref() {
+            p.borrow().with(name, f)
+        } else {
+            Err(Error::new("Variable not found"))
+        }
+    }
 }
 
 impl Scope {
@@ -525,6 +552,14 @@ impl Scope {
 
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
         self.scope.borrow_mut().update_or_define(name, value)
+    }
+    
+    pub fn with_mut(&mut self, name: &str, f: &impl Fn(&mut Value)) -> Res {
+        self.scope.borrow_mut().with_mut(name, f)
+    }
+    
+    pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
+        self.scope.borrow().with(name, f)
     }
 }
 
