@@ -373,7 +373,7 @@ impl ScopeInternal {
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
         if let Some(v) = self.variables.get_mut(&name) {
             if !v.properties.is_writable() {
-                return Err(Error::ty("Assignment to constant variable".to_string()));
+                return Err(Error::ty("Assignment to constant variable"));
             }
 
             v.value = value;
@@ -392,7 +392,7 @@ impl ScopeInternal {
     pub fn with_mut(&mut self, name: &str, f: &impl Fn(&mut Value)) -> Res {
         if let Some(v) = self.variables.get_mut(name) {
             if !v.properties.is_writable() {
-                return Err(Error::ty("Assignment to constant variable".to_string()));
+                return Err(Error::ty("Assignment to constant variable"));
             }
 
             f(&mut v.value);

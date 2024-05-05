@@ -63,9 +63,9 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    pub fn ty(error: String) -> Self {
+    pub fn ty(error: &str) -> Self {
         Self {
-            kind: ErrorKind::Type(error),
+            kind: ErrorKind::Type(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }

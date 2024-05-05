@@ -84,7 +84,7 @@ impl Context {
             Ok(())
         } else {
             Err(Error::ty(
-                "Invalid left-hand side in assignment".to_string(),
+                "Invalid left-hand side in assignment"
             ))
         }
     }
@@ -107,7 +107,7 @@ impl Context {
 
             let value = obj
                 .get_property_mut(&name)
-                .ok_or(Error::ty("Property not found".to_string()))?;
+                .ok_or(Error::ty("Property not found"))?;
             f(value);
         } else if let Value::Function(obj) = obj {
             let mut obj = obj.get_mut()?;
@@ -124,7 +124,7 @@ impl Context {
             scope.with_mut(&name, f)?;
         } else {
             return Err(Error::ty(
-                "Invalid left-hand side in assignment".to_string(),
+                "Invalid left-hand side in assignment",
             ));
         }
 
