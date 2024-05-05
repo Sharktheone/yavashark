@@ -13,6 +13,7 @@ mod object;
 pub mod scope;
 pub mod statement;
 pub mod variable;
+mod pat;
 
 type Value = yavashark_value::Value<Context>;
 type Error = yavashark_value::Error<Context>;
@@ -38,7 +39,7 @@ impl ControlFlow {
         ControlFlow::Error(Error::syn(e))
     }
     fn error_type(e: String) -> Self {
-        ControlFlow::Error(Error::ty(e))
+        ControlFlow::Error(Error::ty_error(e))
     }
 
     fn get_error(self) -> std::result::Result<Error, ControlFlow> {
@@ -110,38 +111,38 @@ mod tests {
     #[test]
     fn math() {
         let src = r#"
-        
+
         let x = 1 + 2
-        
+
         let y = x + true
-        
+
         let k = x + y
-        
-        try { 
+
+        try {
             console.log(k)
             k = k + 2
             console.log(k)
         } catch (e) {
             console.log("i don't care")
         }
-        
+
         let z = 69;
         function hello(a, b) {
             return a + b
         }
-        
+
         if (k > 0) {
             z = 1337
         } else {
             z = 42
         }
-        
+
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         console.log("3+4 is", hello(3, 4))
-        
-        
+
+
         let yyy = 1 + 2
-        
+
         switch (yyy) {
             case 1:
                 console.log("one")
@@ -158,49 +159,49 @@ mod tests {
             default:
                 console.log("default")
         }
-        
+
         for (let i = 0; i < 10; i++) {
             console.log(i)
         }
-        
+
         console.log(this)
-        
-        
+
+
         function Hello() {
             this.x = 1
             this.y = 2
         }
-        
-        
+
+
         console.log(new Hello())
-        
-        
+
+
         try {
             throw 1
         } catch ({message}) {
             console.log("error:", message)
         }
-        
+
         let a = 1
         while (a < 10) {
             console.log("infinite loop")
             a++;
         }
-        
-        
+
+
         function array() {}
-        
+
         array[0] = 1
         array[1] = 2
         array[2] = 3
         array[3] = 4
-        
+
         console.log(array[0], array[1], array[2], array[3])
-        
+
         for (let i in array) {
             console.log("in", i)
         }
-        
+
         for (let i of array) {
             console.log("of", i)
         }

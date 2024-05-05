@@ -3,7 +3,7 @@ fn test() {
     use swc_common::BytePos;
     use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
     let src = r#"
-    for (let x, y in obj) {}
+    let  = {y: 2, c: 3} 
     "#;
 
     let c = TsConfig {
