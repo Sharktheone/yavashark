@@ -11,13 +11,11 @@ use yavashark_value::Func;
 use yavashark_value::Obj;
 
 use crate::context::Context;
+use crate::object::Object;
 use crate::scope::Scope;
 use crate::{ControlFlow, Error, FunctionHandle, ObjectHandle, Value, ValueResult};
-use crate::object::Object;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
-
-
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
@@ -81,8 +79,6 @@ impl NativeFunction {
     }
 }
 
-
-
 impl NativeFunctionBuilder {
     pub fn name(mut self, name: &str) -> Self {
         self.0.name = name.to_string();
@@ -94,7 +90,6 @@ impl NativeFunctionBuilder {
         self
     }
 
-    
     pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Self {
         self.0.f = Box::new(f);
         self
@@ -105,7 +100,6 @@ impl NativeFunctionBuilder {
         self.0.object = object;
         self
     }
-
 
     /// Note: Overwrites a potential object that was previously set
     pub fn proto(mut self, proto: Value) -> Self {
@@ -166,15 +160,15 @@ impl Obj<Context> for NativeFunction {
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [Native code] }}]", self.name)
     }
-    
+
     fn properties(&self) -> Vec<(Value, Value)> {
         self.object.properties()
     }
-    
+
     fn keys(&self) -> Vec<Value> {
         self.object.keys()
     }
-    
+
     fn values(&self) -> Vec<Value> {
         self.object.values()
     }
@@ -196,7 +190,6 @@ pub struct JSFunction {
 }
 
 impl JSFunction {
-    
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         name: String,
@@ -245,15 +238,19 @@ impl Obj<Context> for JSFunction {
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [JS code] }}]", self.name)
     }
-    
+
     fn properties(&self) -> Vec<(Value, Value)> {
-        self.object.properties().iter().map(|(k, v)| (k.copy(), v.copy())).collect()
+        self.object
+            .properties()
+            .iter()
+            .map(|(k, v)| (k.copy(), v.copy()))
+            .collect()
     }
-    
+
     fn keys(&self) -> Vec<Value> {
         self.object.keys()
     }
-    
+
     fn values(&self) -> Vec<Value> {
         self.object.values()
     }

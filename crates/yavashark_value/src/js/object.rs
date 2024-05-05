@@ -9,8 +9,6 @@ use crate::Error;
 
 use super::Value;
 
-
-
 pub trait AsAny {
     fn as_any_mut(&mut self) -> &mut dyn Any;
     fn as_any(&self) -> &dyn Any;
@@ -24,8 +22,7 @@ impl<T: Sized + 'static> AsAny for T {
     fn as_any(&self) -> &dyn Any {
         self
     }
-} 
-
+}
 
 pub trait Obj<C: Ctx>: Debug + AsAny {
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
@@ -33,7 +30,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
 
     fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
-    
+
     fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
 
     fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) {
@@ -51,13 +48,12 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn name(&self) -> String;
 
     fn to_string(&self) -> String;
-    
-    fn properties(&self) -> Vec<(Value<C>, Value<C>)>; 
-    
+
+    fn properties(&self) -> Vec<(Value<C>, Value<C>)>;
+
     fn keys(&self) -> Vec<Value<C>>;
-    
+
     fn values(&self) -> Vec<Value<C>>;
-    
 }
 
 #[derive(Debug, Clone)]
@@ -84,11 +80,10 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    
     pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
         self.get().ok()?.resolve_property(name)
     }
-    
+
     pub fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
         self.0
             .try_borrow_mut()
@@ -130,17 +125,16 @@ impl<C: Ctx> Object<C> {
             "Object".to_string()
         }
     }
-    
-    
+
     #[allow(clippy::type_complexity)]
     pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
         Ok(self.get()?.properties())
     }
-    
+
     pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.keys())
     }
-    
+
     pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.values())
     }

@@ -1,10 +1,10 @@
 use swc_ecma_ast::{AssignExpr, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget};
 
-use crate::{Res, RuntimeResult};
 use crate::context::Context;
-use crate::Error;
 use crate::scope::Scope;
+use crate::Error;
 use crate::Value;
+use crate::{Res, RuntimeResult};
 
 impl Context {
     pub fn run_assign(&mut self, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
@@ -15,7 +15,12 @@ impl Context {
             .map(|_| Value::Undefined)?)
     }
 
-    pub fn with_target(&mut self, target: &AssignTarget, f: &impl Fn(&mut Value), scope: &mut Scope) -> Res {
+    pub fn with_target(
+        &mut self,
+        target: &AssignTarget,
+        f: &impl Fn(&mut Value),
+        scope: &mut Scope,
+    ) -> Res {
         match target {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
@@ -27,13 +32,12 @@ impl Context {
                 }
 
                 _ => todo!("assign targets"),
-            }
+            },
 
             AssignTarget::Pat(_) => {
                 todo!("Pattern assignment")
             }
         }
-
 
         Ok(())
     }
@@ -54,7 +58,6 @@ impl Context {
         }
     }
 
-
     pub fn assign_member(&mut self, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
@@ -63,9 +66,7 @@ impl Context {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
-                MemberProp::Computed(c) => {
-                    self.run_expr(&c.expr, c.span, scope)?
-                }
+                MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
             };
 
             obj.update_or_define_property(name, value);
@@ -76,19 +77,24 @@ impl Context {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
-                MemberProp::Computed(c) => {
-                    self.run_expr(&c.expr, c.span, scope)?
-                }
+                MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
             };
 
             obj.update_or_define_property(name, value);
             Ok(())
         } else {
-            Err(Error::ty("Invalid left-hand side in assignment".to_string()))
+            Err(Error::ty(
+                "Invalid left-hand side in assignment".to_string(),
+            ))
         }
     }
 
-    pub fn with_member(&mut self, m: &MemberExpr, f: &impl Fn(&mut Value), scope: &mut Scope) -> Res {
+    pub fn with_member(
+        &mut self,
+        m: &MemberExpr,
+        f: &impl Fn(&mut Value),
+        scope: &mut Scope,
+    ) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
             let mut obj = obj.get_mut()?;
@@ -96,12 +102,12 @@ impl Context {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
-                MemberProp::Computed(c) => {
-                    self.run_expr(&c.expr, c.span, scope)?
-                }
+                MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
             };
 
-            let value = obj.get_property_mut(&name).ok_or(Error::ty("Property not found".to_string()))?;
+            let value = obj
+                .get_property_mut(&name)
+                .ok_or(Error::ty("Property not found".to_string()))?;
             f(value);
         } else if let Value::Function(obj) = obj {
             let mut obj = obj.get_mut()?;
@@ -117,7 +123,9 @@ impl Context {
 
             scope.with_mut(&name, f)?;
         } else {
-            return Err(Error::ty("Invalid left-hand side in assignment".to_string()));
+            return Err(Error::ty(
+                "Invalid left-hand side in assignment".to_string(),
+            ));
         }
 
         Ok(())

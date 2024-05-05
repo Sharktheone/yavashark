@@ -74,12 +74,9 @@ impl Prototype {
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
         self.is_prototype_of =
             NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
-        self.property_is_enumerable = NativeFunction::with_proto(
-            "propertyIsEnumerable",
-            property_is_enumerable,
-            func.copy(),
-        )
-        .into();
+        self.property_is_enumerable =
+            NativeFunction::with_proto("propertyIsEnumerable", property_is_enumerable, func.copy())
+                .into();
         self.to_locale_string =
             NativeFunction::with_proto("toLocaleString", to_locale_string, func.copy()).into();
         self.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
@@ -226,15 +223,18 @@ impl Obj<Context> for Prototype {
     fn to_string(&self) -> String {
         "[object Object]".to_string()
     }
-    
+
     fn properties(&self) -> Vec<(Value, Value)> {
-        self.properties.iter().map(|(k, v)| (k.copy(), v.copy())).collect()
+        self.properties
+            .iter()
+            .map(|(k, v)| (k.copy(), v.copy()))
+            .collect()
     }
-    
+
     fn keys(&self) -> Vec<Value> {
         self.properties.keys().map(|v| v.copy()).collect()
     }
-    
+
     fn values(&self) -> Vec<Value> {
         self.properties.values().map(|v| v.copy()).collect()
     }

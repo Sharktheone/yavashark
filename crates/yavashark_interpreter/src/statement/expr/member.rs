@@ -11,9 +11,7 @@ impl Context {
 
         let name = match &stmt.prop {
             MemberProp::Ident(i) => Value::String(i.sym.to_string()),
-            MemberProp::Computed(e) => {
-                self.run_expr(&e.expr, stmt.span, scope)?
-            }
+            MemberProp::Computed(e) => self.run_expr(&e.expr, stmt.span, scope)?,
             _ => {
                 return Err(ControlFlow::error(
                     "Unsupported member expression property".to_owned(),

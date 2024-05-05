@@ -17,7 +17,7 @@ impl Context {
             stmt.function.params.clone(),
             stmt.function.body.clone(),
             fn_scope,
-            self
+            self,
         );
         scope.declare_var(name, function.into());
 

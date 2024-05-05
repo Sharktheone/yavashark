@@ -7,13 +7,12 @@ use crate::error::Error;
 use crate::js::context::Ctx;
 use crate::{Obj, Value};
 
-
 pub trait AsObject<C: Ctx> {
     fn as_object(&self) -> &dyn Obj<C>;
     fn as_object_mut(&mut self) -> &mut dyn Obj<C>;
 }
 
-impl <T: Obj<C>, C: Ctx> AsObject<C> for T {
+impl<T: Obj<C>, C: Ctx> AsObject<C> for T {
     fn as_object(&self) -> &dyn Obj<C> {
         self
     }
@@ -30,7 +29,6 @@ pub trait Func<C: Ctx>: Debug + Obj<C> + AsObject<C> {
         args: Vec<Value<C>>,
         this: Value<C>,
     ) -> Result<Value<C>, Error<C>>;
-    
 }
 
 #[derive(Debug, Clone)]
@@ -107,16 +105,16 @@ impl<C: Ctx> Function<C> {
             "Function".to_string()
         }
     }
-   
+
     #[allow(clippy::type_complexity)]
     pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
         Ok(self.get()?.properties())
     }
-    
+
     pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.keys())
     }
-    
+
     pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.values())
     }

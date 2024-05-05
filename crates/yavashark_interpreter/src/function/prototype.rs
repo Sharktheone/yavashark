@@ -5,12 +5,12 @@ use std::rc::Rc;
 
 use yavashark_value::{Func, Obj};
 
-use crate::{NativeFunction, Value, ValueResult};
 use crate::context::Context;
 use crate::object::Prototype;
 use crate::{NativeFunction, Value, ValueResult};
 
 #[derive(Debug)]
+// #[object(prototype, direct(apply, bind, call, length, name), constructor)]
 pub struct FunctionPrototype {
     pub properties: HashMap<Value, Value>,
     pub parent: Rc<RefCell<Prototype>>,
@@ -22,7 +22,12 @@ pub struct FunctionPrototype {
     pub name: Value,
 }
 
+// #[properties]
 impl FunctionPrototype {
+    // #[call]
+    // #[constructor]
+    // #[attributes(writable = false, enumerable = false, configurable = false)]
+    // #[name("Function")]
     pub fn new(obj: &Value) -> Self {
         let mut this = Self {
             properties: HashMap::new(),
@@ -37,8 +42,7 @@ impl FunctionPrototype {
         this.apply = NativeFunction::with_proto("apply", apply, obj.copy()).into();
         this.bind = NativeFunction::with_proto("bind", bind, obj.copy()).into();
         this.call = NativeFunction::with_proto("call", call, obj.copy()).into();
-        this.constructor =
-            NativeFunction::with_proto("Function", constructor, obj.copy()).into();
+        this.constructor = NativeFunction::with_proto("Function", constructor, obj.copy()).into();
 
         this
     }
@@ -156,13 +160,16 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {
-        self.properties.iter().map(|(k, v)| (k.copy(), v.copy())).collect()
+        self.properties
+            .iter()
+            .map(|(k, v)| (k.copy(), v.copy()))
+            .collect()
     }
 
     fn keys(&self) -> Vec<Value> {
         self.properties.keys().map(|v| v.copy()).collect()
     }
-    
+
     fn values(&self) -> Vec<Value> {
         self.properties.values().map(|v| v.copy()).collect()
     }

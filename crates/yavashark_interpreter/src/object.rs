@@ -41,7 +41,6 @@ impl Object {
         this.into()
     }
 
-
     pub fn raw(context: &mut Context) -> Self {
         let prototype = context.obj_prototype.clone().into();
 
@@ -52,7 +51,6 @@ impl Object {
         }
     }
 
-
     pub fn raw_with_proto(proto: Value) -> Self {
         Self {
             properties: HashMap::new(),
@@ -61,14 +59,17 @@ impl Object {
         }
     }
 
-
     pub fn array_position(&self, index: usize) -> (usize, bool) {
         if self.array.is_empty() {
             return (0, false);
         }
 
         if self.array.len() > 100 {
-            return self.array.binary_search_by(|(i, _)| i.cmp(&index)).map(|i| (i, true)).unwrap_or_else(|i| (i, false));
+            return self
+                .array
+                .binary_search_by(|(i, _)| i.cmp(&index))
+                .map(|i| (i, true))
+                .unwrap_or_else(|i| (i, false));
         }
 
         for (i, (j, _)) in self.array.iter().enumerate() {
@@ -83,7 +84,6 @@ impl Object {
 
         (self.array.len(), false)
     }
-
 
     pub fn insert_array(&mut self, index: usize, value: Value) {
         let (i, found) = self.array_position(index);
@@ -142,7 +142,6 @@ impl Obj<Context> for Object {
             return;
         }
 
-
         self.properties.insert(name, value);
     }
 
@@ -169,7 +168,7 @@ impl Obj<Context> for Object {
         if name == &Value::String("__proto__".to_string()) {
             return Some(&self.prototype);
         }
-        
+
         if let Value::Number(n) = name {
             return self.get_array(*n as usize);
         }
@@ -182,7 +181,6 @@ impl Obj<Context> for Object {
             return Some(&mut self.prototype);
         }
 
-
         if let Value::Number(n) = name {
             return self.get_array_mut(*n as usize);
         }
@@ -194,7 +192,6 @@ impl Obj<Context> for Object {
         if name == &Value::String("__proto__".to_string()) {
             return true;
         }
-
 
         if let Value::Number(n) = name {
             return self.contains_array_key(*n as usize);
@@ -210,22 +207,27 @@ impl Obj<Context> for Object {
     fn to_string(&self) -> String {
         "[object Object]".to_string()
     }
-    
-    
+
     fn properties(&self) -> Vec<(Value, Value)> {
-        self.array.iter().map(|(i, v)| (Value::Number(*i as f64), v.copy()))
+        self.array
+            .iter()
+            .map(|(i, v)| (Value::Number(*i as f64), v.copy()))
             .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.copy())))
             .collect()
     }
-    
+
     fn keys(&self) -> Vec<Value> {
-        self.array.iter().map(|(i, _)| Value::Number(*i as f64))
+        self.array
+            .iter()
+            .map(|(i, _)| Value::Number(*i as f64))
             .chain(self.properties.keys().map(|k| k.copy()))
             .collect()
     }
-    
+
     fn values(&self) -> Vec<Value> {
-        self.array.iter().map(|(_, v)| v.copy())
+        self.array
+            .iter()
+            .map(|(_, v)| v.copy())
             .chain(self.properties.values().map(|v| v.copy()))
             .collect()
     }
