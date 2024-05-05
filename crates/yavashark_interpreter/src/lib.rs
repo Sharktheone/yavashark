@@ -196,6 +196,14 @@ mod tests {
         array[3] = 4
         
         console.log(array[0], array[1], array[2], array[3])
+        
+        for (let i in array) {
+            console.log("in", i)
+        }
+        
+        for (let i of array) {
+            console.log("of", i)
+        }
 
         z
         "#;

@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use yavashark_value::{Func, Obj};
 
+use crate::{NativeFunction, Value, ValueResult};
 use crate::context::Context;
 use crate::object::Prototype;
 use crate::{NativeFunction, Value, ValueResult};
@@ -159,11 +160,11 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn keys(&self) -> Vec<Value> {
-        self.properties.keys().cloned().collect()
+        self.properties.keys().map(|v| v.copy()).collect()
     }
     
     fn values(&self) -> Vec<Value> {
-        self.properties.values().cloned().collect()
+        self.properties.values().map(|v| v.copy()).collect()
     }
 }
 

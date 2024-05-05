@@ -7,13 +7,30 @@ use crate::error::Error;
 use crate::js::context::Ctx;
 use crate::{Obj, Value};
 
-pub trait Func<C: Ctx>: Debug + Obj<C> {
+
+pub trait AsObject<C: Ctx> {
+    fn as_object(&self) -> &dyn Obj<C>;
+    fn as_object_mut(&mut self) -> &mut dyn Obj<C>;
+}
+
+impl <T: Obj<C>, C: Ctx> AsObject<C> for T {
+    fn as_object(&self) -> &dyn Obj<C> {
+        self
+    }
+
+    fn as_object_mut(&mut self) -> &mut dyn Obj<C> {
+        self
+    }
+}
+
+pub trait Func<C: Ctx>: Debug + Obj<C> + AsObject<C> {
     fn call(
         &mut self,
         ctx: &mut C,
         args: Vec<Value<C>>,
         this: Value<C>,
     ) -> Result<Value<C>, Error<C>>;
+    
 }
 
 #[derive(Debug, Clone)]
@@ -89,6 +106,18 @@ impl<C: Ctx> Function<C> {
         } else {
             "Function".to_string()
         }
+    }
+    
+    pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
+        Ok(self.get()?.properties())
+    }
+    
+    pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
+        Ok(self.get()?.keys())
+    }
+    
+    pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
+        Ok(self.get()?.values())
     }
 }
 

@@ -232,11 +232,11 @@ impl Obj<Context> for Prototype {
     }
     
     fn keys(&self) -> Vec<Value> {
-        self.properties.keys().cloned().collect()
+        self.properties.keys().map(|v| v.copy()).collect()
     }
     
     fn values(&self) -> Vec<Value> {
-        self.properties.values().cloned().collect()
+        self.properties.values().map(|v| v.copy()).collect()
     }
 }
 
