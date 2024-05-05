@@ -40,7 +40,9 @@ impl<C: Ctx> Value<C> {
                     s.parse().unwrap_or(f64::NAN)
                 }
             }
+            Value::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
             _ => f64::NAN,
+            
         }
     }
 
@@ -49,6 +51,7 @@ impl<C: Ctx> Value<C> {
             Value::Number(n) => *n as i64,
             Value::Boolean(b) => *b as i64,
             Value::String(s) => s.parse().unwrap_or(0),
+            Value::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
             _ => 0,
         }
     }
@@ -61,6 +64,7 @@ impl<C: Ctx> Value<C> {
             Value::Boolean(b) => *b,
             Value::Object(_) => true,
             Value::Function(_) => true,
+            Value::Symbol(_) => true,
         }
     }
 }
@@ -109,6 +113,7 @@ impl<C: Ctx> Add for Value<C> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() + b.num()),
             (Value::Boolean(a), Value::Object(o)) => Value::String(a.to_string() + &o.to_string()),
 
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
             (a, b) => Value::String(a.to_string() + &b.to_string()),
         }
     }
@@ -188,6 +193,7 @@ impl<C: Ctx> Sub for Value<C> {
             (Value::Object(_), _) | (_, Value::Object(_)) => Value::Number(f64::NAN),
             (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }
@@ -234,6 +240,7 @@ impl<C: Ctx> Mul for Value<C> {
                 }
             }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() * b.num()),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }
@@ -307,6 +314,7 @@ impl<C: Ctx> Div for Value<C> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() / b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }
@@ -370,6 +378,7 @@ impl<C: Ctx> Rem for Value<C> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() % b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }
@@ -433,6 +442,7 @@ impl<C: Ctx> PartialOrd for Value<C> {
             (Value::Object(_), _) => None,
             (_, Value::Object(_)) => None,
             (Value::Function(_), _) | (_, Value::Function(_)) => None,
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }
@@ -527,6 +537,7 @@ impl<C: Ctx> Shl for Value<C> {
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(0.0),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }
@@ -621,6 +632,7 @@ impl<C: Ctx> Shr for Value<C> {
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(0.0),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
         }
     }
 }

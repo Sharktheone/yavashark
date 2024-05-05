@@ -23,6 +23,7 @@ pub enum Value<C: Ctx> {
     //TODO: This can create cyclic references: we need a GC like thing for that
     Object(Object<C>),
     Function(Function<C>),
+    Symbol(String),
 }
 
 impl<C: Ctx> Eq for Value<C> {}
@@ -36,6 +37,7 @@ pub enum Type {
     Boolean,
     Object,
     Function,
+    Symbol,
 }
 
 impl<C: Ctx> Hash for Value<C> {
@@ -49,6 +51,7 @@ impl<C: Ctx> Hash for Value<C> {
             Value::Boolean(b) => (Type::Boolean, b).hash(state),
             Value::Object(o) => (Type::Object, o).hash(state),
             Value::Function(f) => (Type::Function, f).hash(state),
+            Value::Symbol(s) => (Type::Symbol, s).hash(state),
         }
     }
 }
@@ -63,6 +66,7 @@ impl<C: Ctx> Value<C> {
             Value::Boolean(b) => Value::Boolean(*b),
             Value::Object(o) => Value::Object(Object::clone(o)),
             Value::Function(f) => Value::Function(Function::clone(f)),
+            Value::Symbol(s) => Value::Symbol(s.clone()),
         }
     }
 
@@ -81,6 +85,7 @@ impl<C: Ctx> Value<C> {
             Value::Boolean(b) => !b,
             Value::Object(_) => false,
             Value::Function(_) => false,
+            Value::Symbol(_) => false,
         }
     }
 
@@ -93,6 +98,7 @@ impl<C: Ctx> Value<C> {
             Value::Boolean(_) => "boolean",
             Value::Object(_) => "object",
             Value::Function(_) => "function",
+            Value::Symbol(_) => "symbol",
         }
     }
 }
@@ -107,6 +113,7 @@ impl<C: Ctx> Display for Value<C> {
             Value::Boolean(b) => write!(f, "{}", b),
             Value::Object(o) => write!(f, "{}", o),
             Value::Function(func) => write!(f, "{}", func),
+            Value::Symbol(s) => write!(f, "Symbol({})", s),
         }
     }
 }
