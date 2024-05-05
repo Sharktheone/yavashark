@@ -1,0 +1,193 @@
+use proc_macro::{TokenStream as TokenStream1};
+
+use proc_macro2::{Ident, TokenStream};
+use quote::quote;
+use syn::{FieldMutability, Fields, Path, PathSegment};
+use syn::spanned::Spanned;
+
+pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
+    let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
+    let mut proto = false;
+    let mut direct = Vec::new();
+    let mut constructor = false;
+
+    let span = input.span();
+
+    let mut obj_path = Path::from(PathSegment::from(Ident::new("Object", span)));
+    let mut variable = Path::from(PathSegment::from(Ident::new("Variable", span)));
+    let mut context = Path::from(PathSegment::from(Ident::new("Context", span)));
+    let mut value = Path::from(PathSegment::from(Ident::new("Value", span)));
+
+
+    let attr_parser = syn::meta::parser(|meta| {
+        if meta.path.is_ident("prototype") {
+            proto = true;
+            return Ok(());
+        }
+        if meta.path.is_ident("direct") {
+            meta.parse_nested_meta(|meta| {
+                direct.push(meta.path);
+                Ok(())
+            })?;
+            return Ok(());
+        }
+        if meta.path.is_ident("object") {
+            obj_path = meta.path;
+            return Ok(());
+        }
+
+        if meta.path.is_ident("variable") {
+            variable = meta.path;
+            return Ok(());
+        }
+
+        if meta.path.is_ident("context") {
+            context = meta.path;
+            return Ok(());
+        }
+
+        if meta.path.is_ident("value") {
+            value = meta.path;
+            return Ok(());
+        }
+
+        if meta.path.is_ident("constructor") {
+            constructor = true;
+            return Ok(());
+        }
+
+        Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
+    });
+
+    syn::parse_macro_input!(attrs with attr_parser);
+
+    let Fields::Named(fields) = &mut input.fields else {
+        return syn::Error::new(input.span(), "Object must have named fields").to_compile_error().into();
+    };
+
+    fields.named.push(syn::Field {
+        attrs: Vec::new(),
+        vis: syn::Visibility::Inherited,
+        mutability: FieldMutability::None,
+        ident: Some(Ident::new("object", span)),
+        colon_token: None,
+        ty: syn::Type::Path(syn::TypePath {
+            qself: None,
+            path: obj_path.clone(),
+        }),
+    });
+
+    if constructor {
+        direct.push(Ident::new("constructor", span).into());
+    }
+
+    for path in &direct {
+        fields.named.push(syn::Field {
+            attrs: Vec::new(),
+            vis: syn::Visibility::Inherited,
+            mutability: FieldMutability::None,
+            ident: path.get_ident().cloned(),
+            colon_token: None,
+            ty: syn::Type::Path(syn::TypePath {
+                qself: None,
+                path: variable.clone(),
+            }),
+        });
+    }
+
+    let struct_name = &input.ident;
+
+    let properties_define = match_prop(&direct, Act::Set);
+    let properties_resolve = match_prop(&direct, Act::None);
+    let properties_get = match_prop(&direct, Act::Ref);
+    let properties_get_mut = match_prop(&direct, Act::RefMut);
+    let properties_contains = match_prop(&direct, Act::Contains);
+
+
+    let construct = TokenStream::new();
+
+    let expanded = quote! {
+        #input
+        
+        impl yavashark_value::Obj<#context> for #struct_name {
+            fn define_property(&mut self, name: #value, value: #value) {
+                #properties_define
+                self.object.define_property(name, value);
+            }
+            
+            fn resolve_property(&self, name: &#value) -> Option<#value> {
+                #properties_resolve
+                self.object.resolve_property(name)
+            }
+            
+            fn get_property(&self, name: &#value) -> Option<&#value> {
+                #properties_get
+                self.object.get_property(name)
+            }
+            
+            fn get_property_mut(&mut self, name: &#value) -> Option<&mut #value> {
+                #properties_get_mut
+                self.object.get_property_mut(name)
+            }
+            
+            fn contains_key(&self, name: &#value) -> bool {
+                #properties_contains
+                self.object.contains_key(name)
+            }
+            
+            fn name(&self) -> String {
+                self.object.name()
+            }
+            
+            fn to_string(&self) -> String {
+                self.object.to_string()
+            }
+        }
+    };
+
+
+    TokenStream1::from(expanded)
+}
+
+enum Act {
+    Ref,
+    RefMut,
+    None,
+    Set,
+    Contains
+}
+
+fn match_prop(properties: &Vec<Path>, r: Act) -> TokenStream {
+    let span = properties[0].span();
+    let mut match_properties_define = TokenStream::new();
+
+    for field in properties {
+        let act = match r {
+            Act::Ref => quote! {Some(& #field)},
+            Act::RefMut => quote! {Some(&mut #field)},
+            Act::None => quote! {Some(#field)},
+            Act::Set => quote! {#field = value; return;},
+            Act::Contains => quote! {true},
+        };
+        let expanded = quote! {
+            stringify!(#field) =>  {
+                return #act;
+            }
+        };
+
+        match_properties_define.extend(expanded);
+    }
+
+    if !properties.is_empty() {
+        match_properties_define = quote! {
+            if let Value::String(name) = &name {
+                match name.as_str() {
+                    #match_properties_define
+                    _ => {}
+                }
+            }
+        };
+    }
+
+    match_properties_define
+}

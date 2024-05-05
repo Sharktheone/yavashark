@@ -714,6 +714,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "yavashark_parser"
 version = "0.1.0"
 dependencies = [
