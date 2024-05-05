@@ -12,6 +12,7 @@ mod object;
 mod ops;
 
 pub use context::*;
+use crate::Error;
 
 #[derive(Debug, PartialEq)]
 pub enum Value<C: Ctx> {
@@ -117,3 +118,49 @@ impl<C: Ctx> Display for Value<C> {
         }
     }
 }
+
+
+impl<C: Ctx> Value<C> {
+    // pub fn iter(&self) -> Result<Iter<C>, Error<C>> {
+    //    todo!() 
+    // }
+    
+    pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
+        match self {
+            Value::Object(o) => o.get_property(name),
+            Value::Function(f) => f.get_property(name),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+    pub fn update_or_define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        match self {
+            Value::Object(o) => o.update_or_define_property(name, value),
+            Value::Function(f) => f.update_or_define_property(name, value),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        match self {
+            Value::Object(o) => o.define_property(name, value),
+            Value::Function(f) => f.define_property(name, value),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+    pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
+        match self {
+            Value::Object(o) => o.contains_key(name),
+            Value::Function(f) => f.contains_key(name),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+
+}
+
+// struct Iter'a, C: Ctx> {
+//     value: &'a Value<C>,
+//     index: usize,
+// }
