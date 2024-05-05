@@ -3,7 +3,7 @@ fn test() {
     use swc_common::BytePos;
     use swc_ecma_parser::{Parser, StringInput, Syntax, TsConfig};
     let src = r#"
-        console.log(array[0], array[1], array[2], array[3])
+    for (let x, y in obj) {}
     "#;
 
     let c = TsConfig {

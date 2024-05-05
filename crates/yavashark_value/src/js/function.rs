@@ -107,7 +107,8 @@ impl<C: Ctx> Function<C> {
             "Function".to_string()
         }
     }
-    
+   
+    #[allow(clippy::type_complexity)]
     pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
         Ok(self.get()?.properties())
     }

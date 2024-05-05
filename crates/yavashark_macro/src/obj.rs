@@ -1,4 +1,4 @@
-use proc_macro::{TokenStream as TokenStream1};
+use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
@@ -102,10 +102,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_get = match_prop(&direct, Act::Ref);
     let properties_get_mut = match_prop(&direct, Act::RefMut);
     let properties_contains = match_prop(&direct, Act::Contains);
-
-
-    let construct = TokenStream::new();
-
+    
+    
+    let properties = match_list(&direct, List::Properties, &value);
+    let keys = match_list(&direct, List::Keys, &value);
+    let values = match_list(&direct, List::Values, &value);
+    
+    
     let expanded = quote! {
         #input
         
@@ -142,6 +145,24 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn to_string(&self) -> String {
                 self.object.to_string()
             }
+            
+            fn properties(&self) -> Vec<(#value, #value)> {
+                let props = self.object.properties()
+                #properties
+                properties
+            }
+            
+            fn keys(&self) -> Vec<#value> {
+                let keys = self.object.keys()
+                #keys
+                keys
+            }
+            
+            fn values(&self) -> Vec<#value> {
+                let values = self.object.values()
+                #values
+                values
+            }
         }
     };
 
@@ -154,11 +175,10 @@ enum Act {
     RefMut,
     None,
     Set,
-    Contains
+    Contains,
 }
 
 fn match_prop(properties: &Vec<Path>, r: Act) -> TokenStream {
-    let span = properties[0].span();
     let mut match_properties_define = TokenStream::new();
 
     for field in properties {
@@ -182,6 +202,47 @@ fn match_prop(properties: &Vec<Path>, r: Act) -> TokenStream {
         match_properties_define = quote! {
             if let Value::String(name) = &name {
                 match name.as_str() {
+                    #match_properties_define
+                    _ => {}
+                }
+            }
+        };
+    }
+
+    match_properties_define
+}
+
+
+
+enum List {
+    Properties,
+    Keys,
+    Values,
+}
+
+
+fn match_list(properties: &Vec<Path>, r: List, value: &Path) -> TokenStream {
+    let mut match_properties_define = TokenStream::new();
+
+    for field in properties {
+        let act = match r {
+            List::Properties => quote! {props.push((#value::String(stringify!(#field)), self.#field.copy()));},
+            List::Keys => quote! {keys.push(#value::String(stringify!(#field)));},
+            List::Values => quote! {values.push(self.#field.copy());},
+        };
+        let expanded = quote! {
+            #field =>  {
+                #act
+            }
+        };
+
+        match_properties_define.extend(expanded);
+    }
+
+    if !properties.is_empty() {
+        match_properties_define = quote! {
+            for name in self.object.keys() {
+                match name {
                     #match_properties_define
                     _ => {}
                 }
