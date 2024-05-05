@@ -226,6 +226,18 @@ impl Obj<Context> for Prototype {
     fn to_string(&self) -> String {
         "[object Object]".to_string()
     }
+    
+    fn properties(&self) -> Vec<(Value, Value)> {
+        self.properties.iter().map(|(k, v)| (k.copy(), v.copy())).collect()
+    }
+    
+    fn keys(&self) -> Vec<Value> {
+        self.properties.keys().cloned().collect()
+    }
+    
+    fn values(&self) -> Vec<Value> {
+        self.properties.values().cloned().collect()
+    }
 }
 
 impl Proto for Prototype {

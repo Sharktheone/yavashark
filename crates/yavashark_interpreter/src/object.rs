@@ -210,4 +210,23 @@ impl Obj<Context> for Object {
     fn to_string(&self) -> String {
         "[object Object]".to_string()
     }
+    
+    
+    fn properties(&self) -> Vec<(Value, Value)> {
+        self.array.iter().map(|(i, v)| (Value::Number(*i as f64), v.copy()))
+            .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.copy())))
+            .collect()
+    }
+    
+    fn keys(&self) -> Vec<Value> {
+        self.array.iter().map(|(i, _)| Value::Number(*i as f64))
+            .chain(self.properties.keys().map(|k| k.copy()))
+            .collect()
+    }
+    
+    fn values(&self) -> Vec<Value> {
+        self.array.iter().map(|(_, v)| v.copy())
+            .chain(self.properties.values().map(|v| v.copy()))
+            .collect()
+    }
 }

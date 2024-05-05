@@ -51,6 +51,13 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn name(&self) -> String;
 
     fn to_string(&self) -> String;
+    
+    fn properties(&self) -> Vec<(Value<C>, Value<C>)>; 
+    
+    fn keys(&self) -> Vec<Value<C>>;
+    
+    fn values(&self) -> Vec<Value<C>>;
+    
 }
 
 #[derive(Debug, Clone)]
@@ -122,6 +129,20 @@ impl<C: Ctx> Object<C> {
         } else {
             "Object".to_string()
         }
+    }
+    
+    
+    #[allow(clippy::type_complexity)]
+    pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
+        Ok(self.get()?.properties())
+    }
+    
+    pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
+        Ok(self.get()?.keys())
+    }
+    
+    pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
+        Ok(self.get()?.values())
     }
 }
 

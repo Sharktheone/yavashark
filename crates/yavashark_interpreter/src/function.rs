@@ -166,6 +166,18 @@ impl Obj<Context> for NativeFunction {
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [Native code] }}]", self.name)
     }
+    
+    fn properties(&self) -> Vec<(Value, Value)> {
+        self.object.properties()
+    }
+    
+    fn keys(&self) -> Vec<Value> {
+        self.object.keys()
+    }
+    
+    fn values(&self) -> Vec<Value> {
+        self.object.values()
+    }
 }
 
 impl Func<Context> for NativeFunction {
@@ -232,6 +244,18 @@ impl Obj<Context> for JSFunction {
 
     fn to_string(&self) -> String {
         format!("[Function: {}() {{ [JS code] }}]", self.name)
+    }
+    
+    fn properties(&self) -> Vec<(Value, Value)> {
+        self.object.properties().iter().map(|(k, v)| (k.copy(), v.copy())).collect()
+    }
+    
+    fn keys(&self) -> Vec<Value> {
+        self.object.keys()
+    }
+    
+    fn values(&self) -> Vec<Value> {
+        self.object.values()
     }
 }
 

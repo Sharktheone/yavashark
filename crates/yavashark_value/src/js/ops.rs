@@ -720,6 +720,18 @@ mod tests {
         fn to_string(&self) -> String {
             format!("[object {}]", self.name())
         }
+
+        fn properties(&self) -> Vec<(Value, Value)> {
+            vec![]
+        }
+
+        fn keys(&self) -> Vec<crate::Value<()>> {
+            vec![]
+        }
+
+        fn values(&self) -> Vec<crate::Value<()>> {
+            vec![]
+        }
     }
 
     impl Func<()> for Object {
