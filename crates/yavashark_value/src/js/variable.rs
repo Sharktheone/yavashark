@@ -1,30 +1,29 @@
-use crate::Error;
-use crate::Res;
+use crate::{Ctx, Error};
 use crate::Value;
 use std::fmt::Debug;
 
 #[derive(Debug)]
-pub struct Variable {
-    pub value: Value,
+pub struct Variable<C: Ctx> {
+    pub value: Value<C>,
     pub properties: Attributes,
 }
 
-impl Variable {
-    pub fn new(value: Value) -> Self {
+impl<C: Ctx> Variable<C> {
+    pub fn new(value: Value<C>) -> Self {
         Self {
             value,
             properties: Attributes::new(),
         }
     }
 
-    pub fn new_read_only(value: Value) -> Self {
+    pub fn new_read_only(value: Value<C>) -> Self {
         Self {
             value,
             properties: Attributes::new_read_only(),
         }
     }
 
-    pub fn mutate(&mut self, value: Value) -> Res {
+    pub fn mutate(&mut self, value: Value<C>) -> Result<(), Error<C>> {
         if !self.properties.is_writable() {
             return Err(Error::new("Cannot assign to read-only variable"));
         }
@@ -33,11 +32,11 @@ impl Variable {
         Ok(())
     }
 
-    pub fn get_value(&self) -> &Value {
+    pub fn get_value(&self) -> &Value<C> {
         &self.value
     }
 
-    pub fn copy(&self) -> Value {
+    pub fn copy(&self) -> Value<C> {
         self.value.copy()
     }
 
@@ -129,5 +128,12 @@ impl Attributes {
 impl Default for Attributes {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+
+impl<C: Ctx, V: Into<Value<C>>> From<V> for Variable<C> {
+    fn from(value: V) -> Self {
+        Self::new(value.into())
     }
 }

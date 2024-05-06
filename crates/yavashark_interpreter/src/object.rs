@@ -4,17 +4,19 @@ use std::fmt::Debug;
 
 pub use prototype::*;
 use yavashark_value::Obj;
+use crate::Variable;
 
 use crate::context::Context;
 use crate::Value;
 
 mod prototype;
+mod array;
 
 #[derive(Debug)]
 pub struct Object {
-    pub properties: HashMap<Value, Value>,
+    pub properties: HashMap<Value, Variable>,
     pub array: Vec<(usize, Value)>,
-    pub prototype: Value,
+    pub prototype: Variable,
 }
 
 impl Object {
@@ -34,7 +36,7 @@ impl Object {
     pub fn with_proto(proto: Value) -> crate::ObjectHandle {
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
-            prototype: proto,
+            prototype: proto.into(),
             array: Vec::new(),
         });
 
@@ -54,7 +56,7 @@ impl Object {
     pub fn raw_with_proto(proto: Value) -> Self {
         Self {
             properties: HashMap::new(),
-            prototype: proto,
+            prototype: proto.into(),
             array: Vec::new(),
         }
     }
@@ -142,7 +144,7 @@ impl Obj<Context> for Object {
             return;
         }
 
-        self.properties.insert(name, value);
+        self.properties.insert(name, value.into());
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
@@ -157,7 +159,7 @@ impl Obj<Context> for Object {
         self.properties
             .get(name)
             .map(|v| v.copy())
-            .or_else(|| match &self.prototype {
+            .or_else(|| match &self.prototype.value {
                 Value::Object(o) => o.get_property(name).ok(),
                 Value::Function(f) => f.get_property(name).ok(),
                 _ => None,
@@ -166,26 +168,26 @@ impl Obj<Context> for Object {
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
         if name == &Value::String("__proto__".to_string()) {
-            return Some(&self.prototype);
+            return Some(&self.prototype.value);
         }
 
         if let Value::Number(n) = name {
             return self.get_array(*n as usize);
         }
 
-        self.properties.get(name)
+        Some(&self.properties.get(name)?.value)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
         if name == &Value::String("__proto__".to_string()) {
-            return Some(&mut self.prototype);
+            return Some(&mut self.prototype.value);
         }
 
         if let Value::Number(n) = name {
             return self.get_array_mut(*n as usize);
         }
 
-        self.properties.get_mut(name)
+        Some(&mut self.properties.get_mut(name)?.value)
     }
 
     fn contains_key(&self, name: &Value) -> bool {
