@@ -15,6 +15,25 @@ mod function;
 mod object;
 mod ops;
 mod symbol;
+pub mod variable;
+
+
+#[derive(Debug, PartialEq, Hash, Clone)]
+enum ConstString {
+    String(&'static str),
+    Owned(String),
+}
+
+impl Display for ConstString {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            ConstString::String(s) => write!(f, "{}", s)?,
+            ConstString::Owned(s) => write!(f, "{}", s)?,
+        }
+        
+        Ok(())
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub enum Value<C: Ctx> {
@@ -26,7 +45,7 @@ pub enum Value<C: Ctx> {
     //TODO: This can create cyclic references: we need a GC like thing for that
     Object(Object<C>),
     Function(Function<C>),
-    Symbol(String),
+    Symbol(ConstString),
 }
 
 impl<C: Ctx> Clone for Value<C> {
@@ -80,8 +99,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn symbol(name: &str) -> Self {
-        Value::Symbol(name.to_string())
+    pub const fn symbol(name: &'static str) -> Self {
+        Value::Symbol(ConstString::String(name))
     }
 
     pub fn string(s: &str) -> Self {
@@ -131,20 +150,31 @@ impl<C: Ctx> Display for Value<C> {
             Value::Boolean(b) => write!(f, "{}", b),
             Value::Object(o) => write!(f, "{}", o),
             Value::Function(func) => write!(f, "{}", func),
-            Value::Symbol(s) => write!(f, "Symbol({})", s),
+            Value::Symbol(s) => write!(f, "Symbol({})", s.to_string()),
         }
     }
 }
 
 
 impl<C: Ctx> Value<C> {
-    pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<Iter<'a, C>, Error<C>> {
-        let iter = self.get_property(&Symbol::iterator())
+    pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
+        let iter = self.get_property(&Symbol::ITERATOR)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
         match iter {
-            Value::Function(f) => Ok(Iter { next: f, ctx }),
+            Value::Function(f) => Ok(CtxIter { next: f, ctx }),
+            _ => Err(Error::ty("Value is not a function")),
+        }
+    }
+    
+    pub fn iter_no_ctx(&self, ctx: &mut C) -> Result<Iter<C>, Error<C>> {
+        let iter = self.get_property(&Symbol::ITERATOR)
+            .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
+        let iter = iter.call(ctx, Vec::new(), self.copy())?;
+
+        match iter {
+            Value::Function(f) => Ok(Iter { next: f }),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
@@ -190,13 +220,17 @@ impl<C: Ctx> Value<C> {
 }
 
 
-pub struct Iter<'a, C: Ctx> {
+pub struct Iter<C: Ctx> {
+    next: Function<C>,
+}
+
+pub struct CtxIter<'a, C: Ctx> {
     next: Function<C>,
     ctx: &'a mut C,
 }
 
 
-impl<C: Ctx> Iterator for Iter<'_, C> {
+impl<C: Ctx> Iterator for CtxIter<'_, C> {
     type Item = Result<Value<C>, Error<C>>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -217,10 +251,17 @@ impl<C: Ctx> Iterator for Iter<'_, C> {
             return None
         }
             
-        let value = next.get_property(&Value::string("value");
-        
-        
-        
-        
+        Some(next.get_property(&Value::string("value")))
+    }
+}
+
+impl<C: Ctx> Iter<C> {
+    pub fn next(&self, ctx: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+        let next = self.next.call(ctx, Vec::new(), Value::Undefined)?;
+        let done = next.get_property(&Value::string("done"))?;
+        if done.is_truthy() {
+            return Ok(None);
+        }
+        next.get_property(&Value::string("value")).map(Some)
     }
 }

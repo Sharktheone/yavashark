@@ -12,13 +12,14 @@ mod function;
 mod object;
 pub mod scope;
 pub mod statement;
-pub mod variable;
 mod pat;
 
 type Value = yavashark_value::Value<Context>;
 type Error = yavashark_value::Error<Context>;
 type FunctionHandle = yavashark_value::Function<Context>;
 type ObjectHandle = yavashark_value::Object<Context>;
+type Variable = yavashark_value::variable::Variable<Context>;
+type Symbol = yavashark_value::Symbol<Context>;
 
 pub enum ControlFlow {
     Continue(Option<String>),
