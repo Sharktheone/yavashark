@@ -91,9 +91,27 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     for func in &item.items {
-        let ImplItem::Fn(_func) = func else {
+        let ImplItem::Fn(func) = func else {
             continue;
         };
+        
+        
+        for attr in &func.attrs {
+            if attr.path().is_ident("call") {
+                todo!()
+            }
+            if attr.path().is_ident("constructor") {
+                todo!()
+            }
+            if attr.path().is_ident("rename") {
+                todo!()
+            }
+            if attr.path().is_ident("attributes") {
+                todo!()
+            }
+        }
+        
+        
 
         todo!("Walk through the function block and replace Self::DIRECT_PROPERTIES with the properties");
     }

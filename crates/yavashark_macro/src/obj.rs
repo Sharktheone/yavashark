@@ -25,7 +25,16 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
         if meta.path.is_ident("direct") {
             meta.parse_nested_meta(|meta| {
-                direct.push(meta.path);
+                
+                let mut rename = None;
+               
+                let _ = meta.parse_nested_meta(|meta| {
+                    rename = Some(meta.path);
+                    Ok(())
+                });
+                
+                direct.push((meta.path, rename));
+                
                 Ok(())
             })?;
             return Ok(());
@@ -79,10 +88,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     });
 
     if constructor {
-        direct.push(Ident::new("constructor", span).into());
+        direct.push((Ident::new("constructor", span).into(), None));
     }
 
-    for path in &direct {
+    for (path, _) in &direct {
         fields.named.push(syn::Field {
             attrs: Vec::new(),
             vis: syn::Visibility::Inherited,
@@ -146,19 +155,19 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
             fn properties(&self) -> Vec<(#value, #value)> {
-                let props = self.object.properties();
+                let mut props = self.object.properties();
                 #properties
                 props
             }
 
             fn keys(&self) -> Vec<#value> {
-                let keys = self.object.keys();
+                let mut keys = self.object.keys();
                 #keys
                 keys
             }
 
             fn values(&self) -> Vec<#value> {
-                let values = self.object.values();
+                let mut values = self.object.values();
                 #values
                 values
             }
@@ -176,17 +185,29 @@ enum Act {
     Contains,
 }
 
-fn match_prop(properties: &Vec<Path>, r: Act) -> TokenStream {
+fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
     let mut match_properties_define = TokenStream::new();
+    let mut match_non_string = TokenStream::new();
 
-    for field in properties {
+    for (field, rename) in properties {
         let act = match r {
-            Act::Ref => quote! {Some(& #field)},
-            Act::RefMut => quote! {Some(&mut #field)},
-            Act::None => quote! {Some(#field)},
-            Act::Set => quote! {#field = value; return;},
+            Act::Ref => quote! {Some(& self.#field.value)},
+            Act::RefMut => quote! {Some(&mut self.#field.value)},
+            Act::None => quote! {Some(self.#field.value.copy())},
+            Act::Set => quote! {self.#field = value.into()},
             Act::Contains => quote! {true},
         };
+        if let Some(rename) = rename {
+            let expanded = quote! {
+                #rename => {
+                    return #act;
+                }
+            };
+            
+            match_non_string.extend(expanded);
+            continue;
+        }
+        
         let expanded = quote! {
             stringify!(#field) =>  {
                 return #act;
@@ -196,13 +217,24 @@ fn match_prop(properties: &Vec<Path>, r: Act) -> TokenStream {
         match_properties_define.extend(expanded);
     }
 
-    if !properties.is_empty() {
+    if !match_properties_define.is_empty() {
         match_properties_define = quote! {
             if let Value::String(name) = &name {
                 match name.as_str() {
                     #match_properties_define
                     _ => {}
                 }
+            }
+        };
+    }
+    
+    if !match_non_string.is_empty() {
+        match_properties_define = quote! {
+            #match_properties_define
+            
+            match name {
+                #match_non_string
+                _ => {}
             }
         };
     }
@@ -216,17 +248,30 @@ enum List {
     Values,
 }
 
-fn match_list(properties: &Vec<Path>, r: List, value: &Path) -> TokenStream {
+fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> TokenStream {
     let mut match_properties_define = TokenStream::new();
+    let mut match_non_string = TokenStream::new();
 
-    for field in properties {
+    for (field, rename) in properties {
         let act = match r {
             List::Properties => {
-                quote! {props.push((#value::String(stringify!(#field)), self.#field.copy()));}
+                quote! {props.push((#value::string(stringify!(#field)), self.#field.copy()));}
             }
-            List::Keys => quote! {keys.push(#value::String(stringify!(#field)));},
+            List::Keys => quote! {keys.push(#value::string(stringify!(#field)));},
             List::Values => quote! {values.push(self.#field.copy());},
         };
+        
+        if let Some(rename) = rename {
+            let expanded = quote! {
+                #rename => {
+                    #act
+                }
+            };
+            
+            match_non_string.extend(expanded);
+            continue;
+        }
+        
         let expanded = quote! {
             #field =>  {
                 #act
@@ -236,13 +281,24 @@ fn match_list(properties: &Vec<Path>, r: List, value: &Path) -> TokenStream {
         match_properties_define.extend(expanded);
     }
 
-    if !properties.is_empty() {
+    if !match_properties_define.is_empty() {
         match_properties_define = quote! {
             for name in self.object.keys() {
                 match name {
                     #match_properties_define
                     _ => {}
                 }
+            }
+        };
+    }
+    
+    if !match_non_string.is_empty() {
+        match_properties_define = quote! {
+            #match_properties_define
+            
+            match name {
+                #match_non_string
+                _ => {}
             }
         };
     }
