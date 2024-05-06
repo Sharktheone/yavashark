@@ -146,19 +146,19 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
             fn properties(&self) -> Vec<(#value, #value)> {
-                let props = self.object.properties()
+                let props = self.object.properties();
                 #properties
-                properties
+                props
             }
 
             fn keys(&self) -> Vec<#value> {
-                let keys = self.object.keys()
+                let keys = self.object.keys();
                 #keys
                 keys
             }
 
             fn values(&self) -> Vec<#value> {
-                let values = self.object.values()
+                let values = self.object.values();
                 #values
                 values
             }
