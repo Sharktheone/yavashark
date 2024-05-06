@@ -29,6 +29,13 @@ pub enum Value<C: Ctx> {
     Symbol(String),
 }
 
+impl<C: Ctx> Clone for Value<C> {
+    fn clone(&self) -> Self {
+        self.copy()
+    }
+}
+
+
 impl<C: Ctx> Eq for Value<C> {}
 
 #[derive(Debug, Hash)]
@@ -71,6 +78,14 @@ impl<C: Ctx> Value<C> {
             Value::Function(f) => Value::Function(Function::clone(f)),
             Value::Symbol(s) => Value::Symbol(s.clone()),
         }
+    }
+
+    pub fn symbol(name: &str) -> Self {
+        Value::Symbol(name.to_string())
+    }
+
+    pub fn string(s: &str) -> Self {
+        Value::String(s.to_string())
     }
 
     pub fn is_nan(&self) -> bool {
@@ -123,10 +138,17 @@ impl<C: Ctx> Display for Value<C> {
 
 
 impl<C: Ctx> Value<C> {
-    // pub fn iter(&self) -> Result<Iter<C>, Error<C>> {
-    //    todo!() 
-    // }
-    
+    pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<Iter<'a, C>, Error<C>> {
+        let iter = self.get_property(&Symbol::iterator())
+            .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
+        let iter = iter.call(ctx, Vec::new(), self.copy())?;
+
+        match iter {
+            Value::Function(f) => Ok(Iter { next: f, ctx }),
+            _ => Err(Error::ty("Value is not a function")),
+        }
+    }
+
     pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
         match self {
             Value::Object(o) => o.get_property(name),
@@ -134,7 +156,7 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
+
     pub fn update_or_define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         match self {
             Value::Object(o) => o.update_or_define_property(name, value),
@@ -142,7 +164,7 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
+
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         match self {
             Value::Object(o) => o.define_property(name, value),
@@ -150,7 +172,7 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
+
     pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
         match self {
             Value::Object(o) => o.contains_key(name),
@@ -158,11 +180,47 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
 
+    pub fn call(&self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
+        match self {
+            Value::Function(f) => f.call(ctx, args, this),
+            _ => Err(Error::ty("Value is not a function")),
+        }
+    }
 }
 
-// struct Iter'a, C: Ctx> {
-//     value: &'a Value<C>,
-//     index: usize,
-// }
+
+pub struct Iter<'a, C: Ctx> {
+    next: Function<C>,
+    ctx: &'a mut C,
+}
+
+
+impl<C: Ctx> Iterator for Iter<'_, C> {
+    type Item = Result<Value<C>, Error<C>>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.next.call(self.ctx, Vec::new(), Value::Undefined);
+        let next = match next {
+            Ok(next) => next,
+            Err(e) => return Some(Err(e)),
+        };
+
+        let done = next.get_property(&Value::string("done"));
+        
+        let done = match done {
+            Ok(done) => done.is_truthy(),
+            Err(e) => return Some(Err(e)),
+        };
+        
+        if done {
+            return None
+        }
+            
+        let value = next.get_property(&Value::string("value");
+        
+        
+        
+        
+    }
+}
