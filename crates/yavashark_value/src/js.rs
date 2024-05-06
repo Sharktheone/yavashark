@@ -2,17 +2,19 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 
+pub use context::*;
 pub use function::*;
 pub use object::*;
+pub use symbol::*;
+
+use crate::Error;
 
 mod context;
 mod conversion;
 mod function;
 mod object;
 mod ops;
-
-pub use context::*;
-use crate::Error;
+mod symbol;
 
 #[derive(Debug, PartialEq)]
 pub enum Value<C: Ctx> {
