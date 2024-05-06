@@ -1,9 +1,9 @@
 use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
-use quote::quote;
-use syn::spanned::Spanned;
+use quote::{quote, ToTokens};
 use syn::{FieldMutability, Fields, Path, PathSegment};
+use syn::spanned::Spanned;
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -25,16 +25,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
         if meta.path.is_ident("direct") {
             meta.parse_nested_meta(|meta| {
-                
                 let mut rename = None;
-               
+
                 let _ = meta.parse_nested_meta(|meta| {
                     rename = Some(meta.path);
                     Ok(())
                 });
-                
+
                 direct.push((meta.path, rename));
-                
+
                 Ok(())
             })?;
             return Ok(());
@@ -203,11 +202,11 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
                     return #act;
                 }
             };
-            
+
             match_non_string.extend(expanded);
             continue;
         }
-        
+
         let expanded = quote! {
             stringify!(#field) =>  {
                 return #act;
@@ -227,7 +226,7 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
             }
         };
     }
-    
+
     if !match_non_string.is_empty() {
         match_properties_define = quote! {
             #match_properties_define
@@ -249,59 +248,27 @@ enum List {
 }
 
 fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> TokenStream {
-    let mut match_properties_define = TokenStream::new();
-    let mut match_non_string = TokenStream::new();
+    let mut add = TokenStream::new();
 
     for (field, rename) in properties {
+        let name = if let Some(rename) = rename {
+            quote! { #rename }
+        } else {
+            quote! {
+                #value::string(stringify!(#field))
+            }
+        };
+
         let act = match r {
             List::Properties => {
-                quote! {props.push((#value::string(stringify!(#field)), self.#field.copy()));}
+                quote! {props.push((#name, self.#field.copy()));}
             }
-            List::Keys => quote! {keys.push(#value::string(stringify!(#field)));},
+            List::Keys => quote! {keys.push(#name);},
             List::Values => quote! {values.push(self.#field.copy());},
         };
-        
-        if let Some(rename) = rename {
-            let expanded = quote! {
-                #rename => {
-                    #act
-                }
-            };
-            
-            match_non_string.extend(expanded);
-            continue;
-        }
-        
-        let expanded = quote! {
-            #field =>  {
-                #act
-            }
-        };
 
-        match_properties_define.extend(expanded);
+        add.extend(act);
     }
 
-    if !match_properties_define.is_empty() {
-        match_properties_define = quote! {
-            for name in self.object.keys() {
-                match name {
-                    #match_properties_define
-                    _ => {}
-                }
-            }
-        };
-    }
-    
-    if !match_non_string.is_empty() {
-        match_properties_define = quote! {
-            #match_properties_define
-            
-            match name {
-                #match_non_string
-                _ => {}
-            }
-        };
-    }
-
-    match_properties_define
+    add
 }
