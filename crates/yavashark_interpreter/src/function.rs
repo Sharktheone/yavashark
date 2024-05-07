@@ -13,7 +13,7 @@ use yavashark_value::Obj;
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
-use crate::{ControlFlow, Error, FunctionHandle, ObjectHandle, Value, ValueResult};
+use crate::{ControlFlow, Error, FunctionHandle, ObjectHandle, Value, ValueResult, Variable};
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
 
@@ -103,7 +103,7 @@ impl NativeFunctionBuilder {
 
     /// Note: Overwrites a potential object that was previously set
     pub fn proto(mut self, proto: Value) -> Self {
-        self.0.object.prototype = proto; //TODO: this doesn't work when you want to also set an object
+        self.0.object.prototype = proto.into(); //TODO: this doesn't work when you want to also set an object
         self
     }
 
@@ -137,6 +137,10 @@ impl Obj<Context> for NativeFunction {
         self.object.define_property(name, value);
     }
 
+    fn define_variable(&mut self, name: Value, value: Variable) {
+        self.object.define_variable(name, value);
+    }
+    
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.object.resolve_property(name)
     }
@@ -213,6 +217,10 @@ impl JSFunction {
 impl Obj<Context> for JSFunction {
     fn define_property(&mut self, name: Value, value: Value) {
         self.object.define_property(name, value);
+    }
+
+    fn define_variable(&mut self, name: Value, value: Variable) {
+        self.object.define_variable(name, value)
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {

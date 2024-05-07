@@ -7,19 +7,19 @@ use yavashark_value::{Func, Obj};
 
 use crate::context::Context;
 use crate::object::Prototype;
-use crate::{NativeFunction, Value, ValueResult};
+use crate::{NativeFunction, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 // #[object(prototype, direct(apply, bind, call, length, name), constructor)]
 pub struct FunctionPrototype {
-    pub properties: HashMap<Value, Value>,
+    pub properties: HashMap<Value, Variable>,
     pub parent: Rc<RefCell<Prototype>>,
-    pub apply: Value,
-    pub bind: Value,
-    pub call: Value,
-    pub constructor: Value,
-    pub length: Value,
-    pub name: Value,
+    pub apply: Variable,
+    pub bind: Variable,
+    pub call: Variable,
+    pub constructor: Variable,
+    pub length: Variable,
+    pub name: Variable,
 }
 
 // #[properties]
@@ -32,12 +32,12 @@ impl FunctionPrototype {
         let mut this = Self {
             properties: HashMap::new(),
             parent: Rc::new(RefCell::new(Prototype::new())),
-            apply: Value::Undefined,
-            bind: Value::Undefined,
-            call: Value::Undefined,
-            constructor: Value::Undefined,
-            length: Value::Number(0.0),
-            name: Value::String("Function".to_string()),
+            apply: Value::Undefined.into(),
+            bind: Value::Undefined.into(),
+            call: Value::Undefined.into(),
+            constructor: Value::Undefined.into(),
+            length: Value::Number(0.0).into(),
+            name: Value::String("Function".to_string()).into(),
         };
         this.apply = NativeFunction::with_proto("apply", apply, obj.copy()).into();
         this.bind = NativeFunction::with_proto("bind", bind, obj.copy()).into();
@@ -66,6 +66,41 @@ fn constructor(args: Vec<Value>, this: Value) -> ValueResult {
 
 impl Obj<Context> for FunctionPrototype {
     fn define_property(&mut self, name: Value, value: Value) {
+        if let Value::String(name) = &name {
+            match name.as_str() {
+                "apply" => {
+                    self.apply = value.into();
+                    return;
+                }
+                "bind" => {
+                    self.bind = value.into();
+                    return;
+                }
+                "call" => {
+                    self.call = value.into();
+                    return;
+                }
+                "constructor" => {
+                    self.constructor = value.into();
+                    return;
+                }
+                "length" => {
+                    self.length = value.into();
+                    return;
+                }
+                "name" => {
+                    self.name = value.into();
+                    return;
+                }
+                _ => {}
+            }
+        }
+
+        self.properties.insert(name, value.into());
+    }
+
+
+    fn define_variable(&mut self, name: Value, value: Variable) {
         if let Value::String(name) = &name {
             match name.as_str() {
                 "apply" => {
@@ -98,7 +133,7 @@ impl Obj<Context> for FunctionPrototype {
 
         self.properties.insert(name, value);
     }
-
+    
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(name).map(|v| v.copy())
     }
@@ -106,33 +141,33 @@ impl Obj<Context> for FunctionPrototype {
     fn get_property(&self, name: &Value) -> Option<&Value> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return Some(&self.apply),
-                "bind" => return Some(&self.bind),
-                "call" => return Some(&self.call),
-                "constructor" => return Some(&self.constructor),
-                "length" => return Some(&self.length),
-                "name" => return Some(&self.name),
+                "apply" => return Some(&self.apply.value),
+                "bind" => return Some(&self.bind.value),
+                "call" => return Some(&self.call.value),
+                "constructor" => return Some(&self.constructor.value),
+                "length" => return Some(&self.length.value),
+                "name" => return Some(&self.name.value),
                 _ => {}
             }
         }
 
-        self.properties.get(name)
+        Some(&self.properties.get(name)?.value)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return Some(&mut self.apply),
-                "bind" => return Some(&mut self.bind),
-                "call" => return Some(&mut self.call),
-                "constructor" => return Some(&mut self.constructor),
-                "length" => return Some(&mut self.length),
-                "name" => return Some(&mut self.name),
+                "apply" => return Some(&mut self.apply.value),
+                "bind" => return Some(&mut self.bind.value),
+                "call" => return Some(&mut self.call.value),
+                "constructor" => return Some(&mut self.constructor.value),
+                "length" => return Some(&mut self.length.value),
+                "name" => return Some(&mut self.name.value),
                 _ => {}
             }
         }
 
-        self.properties.get_mut(name)
+        Some(&mut self.properties.get_mut(name)?.value)
     }
 
     fn contains_key(&self, name: &Value) -> bool {

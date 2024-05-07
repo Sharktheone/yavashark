@@ -699,6 +699,7 @@ impl<C: Ctx> SubAssign for Value<C> {
 mod tests {
     use crate::{Func, Obj};
     use std::any::Any;
+    use crate::variable::Variable;
 
     use super::*;
 
@@ -713,6 +714,9 @@ mod tests {
     impl Obj<()> for Object {
         fn define_property(&mut self, _name: Value, _value: Value) {}
 
+        fn define_variable(&mut self, name: crate::Value<()>, value: Variable<()>) {
+        }
+        
         fn resolve_property(&self, _name: &Value) -> Option<Value> {
             None
         }

@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 use crate::js::context::Ctx;
 use crate::Error;
+use crate::variable::Variable;
 
 use super::Value;
 
@@ -26,6 +27,8 @@ impl<T: Sized + 'static> AsAny for T {
 
 pub trait Obj<C: Ctx>: Debug + AsAny {
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
+    
+    fn define_variable(&mut self, name: Value<C>, value: Variable<C>);
 
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
 

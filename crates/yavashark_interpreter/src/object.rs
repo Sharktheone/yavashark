@@ -15,7 +15,7 @@ mod array;
 #[derive(Debug)]
 pub struct Object {
     pub properties: HashMap<Value, Variable>,
-    pub array: Vec<(usize, Value)>,
+    pub array: Vec<(usize, Variable)>,
     pub prototype: Variable,
 }
 
@@ -87,7 +87,7 @@ impl Object {
         (self.array.len(), false)
     }
 
-    pub fn insert_array(&mut self, index: usize, value: Value) {
+    pub fn insert_array(&mut self, index: usize, value: Variable) {
         let (i, found) = self.array_position(index);
 
         if found {
@@ -114,7 +114,7 @@ impl Object {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).map(|v| &v.1);
+            return self.array.get(i).map(|v| &v.1.value);
         }
 
         None
@@ -124,7 +124,7 @@ impl Object {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get_mut(i).map(|v| &mut v.1);
+            return self.array.get_mut(i).map(|v| &mut v.1.value); //TODO: Check for perms
         }
 
         None
@@ -140,13 +140,21 @@ impl Object {
 impl Obj<Context> for Object {
     fn define_property(&mut self, name: Value, value: Value) {
         if let Value::Number(n) = &name {
-            self.insert_array(*n as usize, value);
+            self.insert_array(*n as usize, value.into());
             return;
         }
 
         self.properties.insert(name, value.into());
     }
 
+    fn define_variable(&mut self, name: Value, value: Variable) {
+        if let Value::Number(n) = &name {
+            self.insert_array(*n as usize, value.into());
+            return;
+        }
+        self.properties.insert(name, value);
+    }
+    
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         if name == &Value::String("__proto__".to_string()) {
             return Some(self.prototype.copy());

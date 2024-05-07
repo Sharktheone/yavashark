@@ -7,7 +7,7 @@ use common::*;
 use yavashark_value::Obj;
 
 use crate::context::Context;
-use crate::{NativeFunction, Value};
+use crate::{NativeFunction, Value, Variable};
 
 mod common;
 
@@ -17,21 +17,21 @@ pub trait Proto: Obj<Context> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Prototype {
-    properties: HashMap<Value, Value>,
+    properties: HashMap<Value, Variable>,
     parent: Option<Rc<RefCell<Prototype>>>,
 
     //common properties
-    defined_getter: Value,
-    defined_setter: Value,
-    lookup_getter: Value,
-    lookup_setter: Value,
-    constructor: Value,
-    has_own_property: Value,
-    is_prototype_of: Value,
-    property_is_enumerable: Value,
-    to_locale_string: Value,
-    to_string: Value,
-    value_of: Value,
+    defined_getter: Variable,
+    defined_setter: Variable,
+    lookup_getter: Variable,
+    lookup_setter: Variable,
+    constructor: Variable,
+    has_own_property: Variable,
+    is_prototype_of: Variable,
+    property_is_enumerable: Variable,
+    to_locale_string: Variable,
+    to_string: Variable,
+    value_of: Variable,
 }
 
 impl Default for Prototype {
@@ -45,17 +45,17 @@ impl Prototype {
         Self {
             properties: HashMap::new(),
             parent: None,
-            defined_getter: Value::Undefined,
-            defined_setter: Value::Undefined,
-            lookup_getter: Value::Undefined,
-            lookup_setter: Value::Undefined,
-            constructor: Value::Undefined,
-            has_own_property: Value::Undefined,
-            is_prototype_of: Value::Undefined,
-            property_is_enumerable: Value::Undefined,
-            to_locale_string: Value::Undefined,
-            to_string: Value::Undefined,
-            value_of: Value::Undefined,
+            defined_getter: Value::Undefined.into(),
+            defined_setter: Value::Undefined.into(),
+            lookup_getter: Value::Undefined.into(),
+            lookup_setter: Value::Undefined.into(),
+            constructor: Value::Undefined.into(),
+            has_own_property: Value::Undefined.into(),
+            is_prototype_of: Value::Undefined.into(),
+            property_is_enumerable: Value::Undefined.into(),
+            to_locale_string: Value::Undefined.into(),
+            to_string: Value::Undefined.into(),
+            value_of: Value::Undefined.into(),
         }
     }
 
@@ -89,56 +89,56 @@ impl Obj<Context> for Prototype {
         if let Value::String(name) = &name {
             match name.as_str() {
                 "__define_getter__" => {
-                    self.defined_getter = value;
+                    self.defined_getter = value.into();
                     return;
                 }
                 "__define_setter__" => {
-                    self.defined_setter = value;
+                    self.defined_setter = value.into();
                     return;
                 }
 
                 "__lookup_getter__" => {
-                    self.lookup_getter = value;
+                    self.lookup_getter = value.into();
                     return;
                 }
 
                 "__lookup_setter__" => {
-                    self.lookup_setter = value;
+                    self.lookup_setter = value.into();
                     return;
                 }
 
                 "constructor" => {
-                    self.constructor = value;
+                    self.constructor = value.into();
                     return;
                 }
 
                 "hasOwnProperty" => {
-                    self.has_own_property = value;
+                    self.has_own_property = value.into();
                     return;
                 }
 
                 "isPrototypeOf" => {
-                    self.is_prototype_of = value;
+                    self.is_prototype_of = value.into();
                     return;
                 }
 
                 "propertyIsEnumerable" => {
-                    self.property_is_enumerable = value;
+                    self.property_is_enumerable = value.into();
                     return;
                 }
 
                 "toLocaleString" => {
-                    self.to_locale_string = value;
+                    self.to_locale_string = value.into();
                     return;
                 }
 
                 "toString" => {
-                    self.to_string = value;
+                    self.to_string = value.into();
                     return;
                 }
 
                 "valueOf" => {
-                    self.value_of = value;
+                    self.value_of = value.into();
                     return;
                 }
 
@@ -146,9 +146,13 @@ impl Obj<Context> for Prototype {
             }
         }
 
-        self.properties.insert(name, value);
+        self.properties.insert(name, value.into());
     }
 
+    fn define_variable(&mut self, name: Value, value: Variable) {
+        todo!()
+    }
+    
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(name).map(|v| v.copy())
     }
@@ -156,43 +160,43 @@ impl Obj<Context> for Prototype {
     fn get_property(&self, name: &Value) -> Option<&Value> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "__define_getter__" => return Some(&self.defined_getter),
-                "__define_setter__" => return Some(&self.defined_setter),
-                "__lookup_getter__" => return Some(&self.lookup_getter),
-                "__lookup_setter__" => return Some(&self.lookup_setter),
-                "constructor" => return Some(&self.constructor),
-                "hasOwnProperty" => return Some(&self.has_own_property),
-                "isPrototypeOf" => return Some(&self.is_prototype_of),
-                "propertyIsEnumerable" => return Some(&self.property_is_enumerable),
-                "toLocaleString" => return Some(&self.to_locale_string),
-                "toString" => return Some(&self.to_string),
-                "valueOf" => return Some(&self.value_of),
+                "__define_getter__" => return Some(&self.defined_getter.value),
+                "__define_setter__" => return Some(&self.defined_setter.value),
+                "__lookup_getter__" => return Some(&self.lookup_getter.value),
+                "__lookup_setter__" => return Some(&self.lookup_setter.value),
+                "constructor" => return Some(&self.constructor.value),
+                "hasOwnProperty" => return Some(&self.has_own_property.value),
+                "isPrototypeOf" => return Some(&self.is_prototype_of.value),
+                "propertyIsEnumerable" => return Some(&self.property_is_enumerable.value),
+                "toLocaleString" => return Some(&self.to_locale_string.value),
+                "toString" => return Some(&self.to_string.value),
+                "valueOf" => return Some(&self.value_of.value),
                 _ => {}
             }
         }
 
-        self.properties.get(name)
+        Some(&self.properties.get(name)?.value)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "__define_getter__" => return Some(&mut self.defined_getter),
-                "__define_setter__" => return Some(&mut self.defined_setter),
-                "__lookup_getter__" => return Some(&mut self.lookup_getter),
-                "__lookup_setter__" => return Some(&mut self.lookup_setter),
-                "constructor" => return Some(&mut self.constructor),
-                "hasOwnProperty" => return Some(&mut self.has_own_property),
-                "isPrototypeOf" => return Some(&mut self.is_prototype_of),
-                "propertyIsEnumerable" => return Some(&mut self.property_is_enumerable),
-                "toLocaleString" => return Some(&mut self.to_locale_string),
-                "toString" => return Some(&mut self.to_string),
-                "valueOf" => return Some(&mut self.value_of),
+                "__define_getter__" => return Some(&mut self.defined_getter.value),
+                "__define_setter__" => return Some(&mut self.defined_setter.value),
+                "__lookup_getter__" => return Some(&mut self.lookup_getter.value),
+                "__lookup_setter__" => return Some(&mut self.lookup_setter.value),
+                "constructor" => return Some(&mut self.constructor.value),
+                "hasOwnProperty" => return Some(&mut self.has_own_property.value),
+                "isPrototypeOf" => return Some(&mut self.is_prototype_of.value),
+                "propertyIsEnumerable" => return Some(&mut self.property_is_enumerable.value),
+                "toLocaleString" => return Some(&mut self.to_locale_string.value),
+                "toString" => return Some(&mut self.to_string.value),
+                "valueOf" => return Some(&mut self.value_of.value),
                 _ => {}
             }
         }
 
-        self.properties.get_mut(name)
+        Some(&mut self.properties.get_mut(name)?.value) //TODO: Check if &mut is allowed (is_writable)
     }
 
     fn contains_key(&self, name: &Value) -> bool {
