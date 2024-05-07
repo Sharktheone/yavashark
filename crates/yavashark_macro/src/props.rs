@@ -2,7 +2,7 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{ImplItem, ItemFn, LitBool};
+use syn::{ImplItem, LitBool, Path, PathSegment};
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 
@@ -11,6 +11,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut call = None;
     let mut constructor = None;
+
+    let mut context = Path::from(PathSegment::from(Ident::new("Context", item.span())));
+    let mut error = Path::from(PathSegment::from(Ident::new("Error", item.span())));
+    let mut native_function = Path::from(PathSegment::from(Ident::new("NativeFunction", item.span())));
+    let mut variable = Path::from(PathSegment::from(Ident::new("Variable", item.span())));
+
+
 
     struct Property {
         name: syn::Ident,
@@ -93,9 +100,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         properties.push(prop);
     }
 
-    let mut call = None;
     let mut constructor = None;
-    let mut properties: Vec<(Ident, Option<Attributes>, Option<Ident>)> = Vec::new();
+    let mut properties: Vec<(Ident, Option<Attributes>, Option<Path>)> = Vec::new();
 
     for func in &mut item.items {
         let ImplItem::Fn(func) = func else {
@@ -105,18 +111,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let mut remove = Vec::new();
 
         'func_attrs: for (idx, attr) in func.attrs.iter().enumerate() {
-            if attr.path().is_ident("call") {
-                if call.is_some() {
-                    return syn::Error::new(attr.span(), "Duplicate call attribute")
-                        .to_compile_error()
-                        .into();
-                }
-
-
-                call = Some(func.sig.ident.clone());
-                remove.push(idx);
-                continue;
-            }
             if attr.path().is_ident("constructor") {
                 constructor = Some(func.sig.ident.clone());
                 remove.push(idx);
@@ -168,7 +162,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
-                let rename = attr.parse_args::<Ident>().ok();
+                let rename = attr.parse_args::<Path>().ok();
 
                 remove.push(idx);
                 properties.push((func.sig.ident.clone(), None, rename));
@@ -195,25 +189,27 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let enumerable = attrs.enumerable;
         let configurable = attrs.configurable;
 
-        let fn_name = prop.2.as_ref().unwrap_or(name);
-
+        let fn_name = prop.2.as_ref().map(|i| i.to_token_stream()).unwrap_or(quote! {
+            stringify!(#name)
+        });
+        
         let prop = quote! {
-            let function = NativeFunction::new(stringify!(#fn_name), |args, this| {
+            let function = #native_function::new(stringify!(#name), |args, this| {
                 let deez = this.as_any().downcast_ref::<Self>()
-                    .ok_or(Error::ty(strinfify!(Function #fn_name was not called with the a this value)))?;
+                    .ok_or(Error::ty_error(format!("Function {:?} was not called with the a this value", #fn_name)))?;
                 
                 deez.#name(args)
-            });
+            }, ctx).into();
             
             self.define_variable(
-                #fn_name
-                Variable::new_with_attributes(
+                #fn_name.into(),
+                #variable::new_with_attributes(
                     function,
                     #writable,
                     #enumerable,
                     #configurable
                 )
-            ).unwrap();
+            );
         };
 
         props.extend(prop);
@@ -223,13 +219,15 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
 
     let new_fn = quote! {
-        fn initialize(&mut self) {
+        fn initialize(&mut self, ctx: &mut #context) -> Result<(), #error> {
+            use yavashark_value::{AsAny, Obj};
             #props
+            Ok(())
         }
     };
-    
+
     let new_fn = ImplItem::Verbatim(new_fn);
-    
+
     item.items.push(new_fn);
 
     item.to_token_stream().into()
