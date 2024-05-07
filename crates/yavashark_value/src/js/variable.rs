@@ -2,7 +2,7 @@ use crate::{Ctx, Error};
 use crate::Value;
 use std::fmt::Debug;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Variable<C: Ctx> {
     pub value: Value<C>,
     pub properties: Attributes,
@@ -72,6 +72,7 @@ impl<C: Ctx> Variable<C> {
     }
 }
 
+#[derive(PartialEq, Eq)]
 pub struct Attributes(u8);
 
 impl Debug for Attributes {

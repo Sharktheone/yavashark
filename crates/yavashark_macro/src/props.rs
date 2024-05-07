@@ -2,7 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{ImplItem, ImplItemFn, LitBool, Visibility};
+use syn::{ImplItem, ItemFn, LitBool};
+use syn::parse::Parse;
 use syn::spanned::Spanned;
 
 pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
@@ -94,7 +95,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut call = None;
     let mut constructor = None;
-    let mut properties: Vec<(Ident, Option<Attributes>)> = Vec::new();
+    let mut properties: Vec<(Ident, Option<Attributes>, Option<Ident>)> = Vec::new();
 
     for func in &mut item.items {
         let ImplItem::Fn(func) = func else {
@@ -156,7 +157,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }
 
                 remove.push(idx);
-                properties.push((func.sig.ident.clone(), Some(attrs)));
+                properties.push((func.sig.ident.clone(), Some(attrs), None));
             }
             if attr.path().is_ident("prop") {
                 for prop in &mut properties {
@@ -167,10 +168,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
-                let rename = attr.parse_args::<syn::Ident>().unwrap_or(func.sig.ident.clone());
+                let rename = attr.parse_args::<Ident>().ok();
 
                 remove.push(idx);
-                properties.push((rename, None));
+                properties.push((func.sig.ident.clone(), None, rename));
             }
         }
 
@@ -179,10 +180,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     }
 
-    
 
-    let props = TokenStream::new();
-    
+    let mut props = TokenStream::new();
+
     for prop in properties {
         let name = &prop.0;
         let attrs = prop.1.as_ref().unwrap_or(&Attributes {
@@ -195,22 +195,43 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let enumerable = attrs.enumerable;
         let configurable = attrs.configurable;
 
+        let fn_name = prop.2.as_ref().unwrap_or(name);
+
         let prop = quote! {
-            self.
+            let function = NativeFunction::new(stringify!(#fn_name), |args, this| {
+                let deez = this.as_any().downcast_ref::<Self>()
+                    .ok_or(Error::ty(strinfify!(Function #fn_name was not called with the a this value)))?;
+                
+                deez.#name(args)
+            });
+            
+            self.define_variable(
+                #fn_name
+                Variable::new_with_attributes(
+                    function,
+                    #writable,
+                    #enumerable,
+                    #configurable
+                )
+            ).unwrap();
         };
 
         props.extend(prop);
-        
+
         //TODO
     }
-    
-    
-    let new_func = quote! {
+
+
+    let new_fn = quote! {
         fn initialize(&mut self) {
             #props
         }
     };
     
+    let new_fn = ImplItem::Verbatim(new_fn);
+    
+    item.items.push(new_fn);
+
     item.to_token_stream().into()
 }
 
