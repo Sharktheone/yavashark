@@ -197,9 +197,18 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
             Act::Contains => quote! {true},
         };
         if let Some(rename) = rename {
-            let expanded = quote! {
-                #rename => {
-                    return #act;
+            let expanded = if matches!(r, Act::Set) {
+                quote! {
+                    #rename => {
+                        self.#field = value.into();
+                        return;
+                    }
+                }
+            } else {
+                quote! {
+                    & #rename => {
+                        return #act;
+                    }
                 }
             };
 

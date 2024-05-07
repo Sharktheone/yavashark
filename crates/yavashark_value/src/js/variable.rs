@@ -22,6 +22,13 @@ impl<C: Ctx> Variable<C> {
             properties: Attributes::new_read_only(),
         }
     }
+    
+    pub fn new_with_attributes(value: Value<C>, writable: bool, enumerable: bool, configurable: bool) -> Self {
+        Self {
+            value,
+            properties: Attributes::from_values(writable, enumerable, configurable)
+        }
+    }
 
     pub fn mutate(&mut self, value: Value<C>) -> Result<(), Error<C>> {
         if !self.properties.is_writable() {
@@ -122,6 +129,21 @@ impl Attributes {
 
     pub fn make_configurable(&mut self) {
         self.0 |= Self::CONFIGURABLE;
+    }
+    
+    pub fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
+        let mut attributes = Self::new_read_only();
+        if writable {
+            attributes.make_writable();
+        }
+        if enumerable {
+            attributes.make_enumerable();
+        }
+        if configurable {
+            attributes.make_configurable();
+        }
+
+        attributes
     }
 }
 
