@@ -107,6 +107,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let struct_name = &input.ident;
 
     let properties_define = match_prop(&direct, Act::Set);
+    let properties_variable_define = match_prop(&direct, Act::SetVar);
     let properties_resolve = match_prop(&direct, Act::None);
     let properties_get = match_prop(&direct, Act::Ref);
     let properties_get_mut = match_prop(&direct, Act::RefMut);
@@ -123,6 +124,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn define_property(&mut self, name: #value, value: #value) {
                 #properties_define
                 self.object.define_property(name, value);
+            }
+            
+            fn define_variable(&mut self, name: #value, value: #variable) {
+                #properties_variable_define
+                
+                self.object.define_variable(name, value);
             }
 
             fn resolve_property(&self, name: &#value) -> Option<#value> {
@@ -181,6 +188,7 @@ enum Act {
     RefMut,
     None,
     Set,
+    SetVar,
     Contains,
 }
 
@@ -194,10 +202,11 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
             Act::RefMut => quote! {Some(&mut self.#field.value)},
             Act::None => quote! {Some(self.#field.value.copy())},
             Act::Set => quote! {self.#field = value.into()},
+            Act::SetVar => quote! {self.#field = value},
             Act::Contains => quote! {true},
         };
         if let Some(rename) = rename {
-            let expanded = if matches!(r, Act::Set) {
+            let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
                     #rename => {
                         self.#field = value.into();
