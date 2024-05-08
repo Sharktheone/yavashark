@@ -234,11 +234,15 @@ impl ScopeInternal {
         );
 
         let state = parent.borrow().state.copy();
+        
+        let par_scope = parent.borrow();
+        let mut available_labels = par_scope.available_labels.clone();
+        drop(par_scope);
 
         Self {
             parent: Some(parent),
             variables,
-            available_labels: Vec::new(),
+            available_labels,
             state,
         }
     }
