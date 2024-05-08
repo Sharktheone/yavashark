@@ -1,6 +1,6 @@
 use crate::{Ctx, Value};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Error<C: Ctx> {
     pub kind: ErrorKind<C>,
     pub stacktrace: StackTrace,
@@ -135,7 +135,7 @@ impl<C: Ctx> Error<C> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum ErrorKind<C: Ctx> {
     Type(String),
     Reference(String),
@@ -147,12 +147,12 @@ pub enum ErrorKind<C: Ctx> {
     Error(Option<String>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct StackFrame {
     pub function: String,
     pub file: String,

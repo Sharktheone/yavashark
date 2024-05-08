@@ -187,7 +187,7 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn name(&self) -> String {
-        self.name.to_string()
+        self.name.value.to_string()
     }
 
     fn to_string(&self) -> String {
