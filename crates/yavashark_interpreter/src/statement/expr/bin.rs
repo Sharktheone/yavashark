@@ -38,8 +38,8 @@ impl Context {
             BinaryOp::BitAnd => left & right,
             BinaryOp::LogicalOr => left.log_or(right),
             BinaryOp::LogicalAnd => left.log_and(right),
-            BinaryOp::In => {
-                todo!()
+            BinaryOp::In => { 
+                right.contains_key(&left)?.into()
             }
             BinaryOp::InstanceOf => {
                 todo!()
