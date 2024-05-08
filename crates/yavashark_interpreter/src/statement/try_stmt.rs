@@ -1,11 +1,9 @@
-use std::fmt::format;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 
-use crate::Value;
-
 use crate::context::Context;
-use crate::scope::Scope;
 use crate::RuntimeResult;
+use crate::scope::Scope;
+use crate::Value;
 
 impl Context {
     pub fn run_try(&mut self, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
@@ -40,7 +38,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         "message" => {
                                             scope.declare_var(
                                                 "message".to_string(),
-                                                err.message().into(),
+                                                Value::String(err.message()),
                                             );
                                         }
                                         "stack" => {
@@ -139,5 +137,111 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
         }
     } else {
         try_block
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::{test_eval, Value};
+
+    #[test]
+    fn try_stmt() {
+        test_eval!(
+            r#"
+            try {
+                throw new Error("error message");
+            } catch ({message}) {
+                message
+            }
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("error message".to_string())
+        );
+    }
+
+    #[test]
+    fn try_catch_with_error_thrown() {
+        test_eval!(
+            r#"
+            try {
+                throw new Error("error message");
+            } catch (e) {
+                e.message
+            }
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("error message".to_string())
+        );
+    }
+
+    #[test]
+    fn try_catch_without_error_thrown() {
+        test_eval!(
+            r#"
+            try {
+                "no error"
+            } catch (e) {
+                e.message
+            }
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("no error".to_string())
+        );
+    }
+
+    #[test]
+    fn try_catch_with_error_thrown_and_finalizer() {
+        test_eval!(
+            r#"
+            try {
+                throw new Error("error message");
+            } catch (e) {
+                e.message
+            } finally {
+                "finalizer executed"
+            }
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("finalizer executed".to_string())
+        );
+    }
+
+    #[test]
+    fn try_catch_with_no_error_thrown_and_finalizer() {
+        test_eval!(
+            r#"
+            try {
+                "no error"
+            } catch (e) {
+                e.message
+            } finally {
+                "finalizer executed"
+            }
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("finalizer executed".to_string())
+        );
+    }
+
+    #[test]
+    fn try_catch_with_error_thrown_and_no_catch_block() {
+        test_eval!(
+            r#"
+            try {
+                throw new Error("error message");
+            } finally {
+                "finalizer executed"
+            }
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("finalizer executed".to_string())
+        );
     }
 }
