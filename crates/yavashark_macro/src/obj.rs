@@ -1,7 +1,7 @@
 use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
-use quote::{quote, ToTokens};
+use quote::quote;
 use syn::{FieldMutability, Fields, Path, PathSegment};
 use syn::spanned::Spanned;
 

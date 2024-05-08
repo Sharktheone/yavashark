@@ -19,7 +19,7 @@ pub mod variable;
 
 
 #[derive(Debug, PartialEq, Hash, Clone)]
-enum ConstString {
+pub enum ConstString {
     String(&'static str),
     Owned(String),
 }

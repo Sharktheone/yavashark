@@ -3,9 +3,9 @@ use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
 use syn::{ImplItem, LitBool, Path, PathSegment};
-use syn::parse::Parse;
 use syn::spanned::Spanned;
 
+#[allow(unused)]
 pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
 
