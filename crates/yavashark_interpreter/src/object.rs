@@ -242,3 +242,157 @@ impl Obj<Context> for Object {
             .collect()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::context::Context;
+    use crate::Value;
+
+    #[test]
+    fn object_creation_with_proto() {
+        let mut context = Context::new();
+        let proto = Value::Number(42.0);
+        let object = Object::with_proto(proto);
+        
+
+        // assert_eq!(obj.prototype.value, proto); //TODO: Add a function "get_proto" to Object
+    }
+
+    #[test]
+    fn object_creation_raw_with_proto() {
+        let proto = Value::Number(42.0);
+        let object = Object::raw_with_proto(proto.copy());
+
+        assert_eq!(object.prototype.value, proto);
+    }
+
+    #[test]
+    fn array_position_empty_array() {
+        let mut context = Context::new();
+        let object = Object::raw(&mut context);
+
+        let (index, found) = object.array_position(0);
+
+        assert_eq!(index, 0);
+        assert!(!found);
+    }
+
+    #[test]
+    fn array_position_non_empty_array() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.insert_array(0, Value::Number(42.0).into());
+
+        let (index, found) = object.array_position(0);
+
+        assert_eq!(index, 0);
+        assert!(found);
+    }
+
+    #[test]
+    fn insert_array() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.insert_array(0, Value::Number(42.0).into());
+
+        assert_eq!(object.array[0].1.value, Value::Number(42.0));
+    }
+
+    #[test]
+    fn resolve_array() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.insert_array(0, Value::Number(42.0).into());
+
+        let value = object.resolve_array(0);
+
+        assert_eq!(value, Some(Value::Number(42.0)));
+    }
+
+    #[test]
+    fn get_array() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.insert_array(0, Value::Number(42.0).into());
+
+        let value = object.get_array(0);
+
+        assert_eq!(value, Some(&Value::Number(42.0)));
+    }
+
+    #[test]
+    fn get_array_mut() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.insert_array(0, Value::Number(42.0).into());
+
+        let value = object.get_array_mut(0);
+
+        assert_eq!(value, Some(&mut Value::Number(42.0)));
+    }
+
+    #[test]
+    fn contains_array_key() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.insert_array(0, Value::Number(42.0).into());
+
+        let contains = object.contains_array_key(0);
+
+        assert!(contains);
+    }
+
+    #[test]
+    fn define_property() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.define_property(Value::String("key".to_string()), Value::Number(42.0));
+
+        assert_eq!(object.properties.get(&Value::String("key".to_string())).unwrap().value, Value::Number(42.0));
+    }
+
+    #[test]
+    fn resolve_property() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.define_property(Value::String("key".to_string()), Value::Number(42.0));
+
+        let value = object.resolve_property(&Value::String("key".to_string()));
+
+        assert_eq!(value, Some(Value::Number(42.0)));
+    }
+
+    #[test]
+    fn get_property() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.define_property(Value::String("key".to_string()), Value::Number(42.0));
+
+        let value = object.get_property(&Value::String("key".to_string()));
+
+        assert_eq!(value, Some(&Value::Number(42.0)));
+    }
+
+    #[test]
+    fn get_property_mut() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.define_property(Value::String("key".to_string()), Value::Number(42.0));
+
+        let value = object.get_property_mut(&Value::String("key".to_string()));
+
+        assert_eq!(value, Some(&mut Value::Number(42.0)));
+    }
+
+    #[test]
+    fn contains_key() {
+        let mut context = Context::new();
+        let mut object = Object::raw(&mut context);
+        object.define_property(Value::String("key".to_string()), Value::Number(42.0));
+
+        let contains = object.contains_key(&Value::String("key".to_string()));
+
+        assert!(contains);
+    }
+}
