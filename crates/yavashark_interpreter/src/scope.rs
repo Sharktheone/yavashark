@@ -359,6 +359,9 @@ impl ScopeInternal {
 
     pub fn update(&mut self, name: &str, value: Value) -> bool {
         if let Some(v) = self.variables.get_mut(name) {
+            if !v.properties.is_writable() {
+                return false;
+            }
             v.value = value;
             return true;
         } else if let Some(p) = self.parent.as_ref() {
@@ -575,5 +578,98 @@ impl From<Rc<RefCell<ScopeInternal>>> for Scope {
             scope,
             this: Value::Undefined,
         }
+    }
+}
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    #[test]
+    fn scope_state_new_is_none() {
+        let state = ScopeState::new();
+        assert!(state.is_none());
+    }
+
+    #[test]
+    fn scope_state_set_global_is_global() {
+        let mut state = ScopeState::new();
+        state.set_global();
+        assert!(state.is_global());
+    }
+
+    #[test]
+    fn scope_state_set_function_is_function() {
+        let mut state = ScopeState::new();
+        state.set_function();
+        assert!(state.is_function());
+    }
+
+    #[test]
+    fn scope_state_set_iteration_is_iteration() {
+        let mut state = ScopeState::new();
+        state.set_iteration();
+        assert!(state.is_iteration());
+    }
+
+    #[test]
+    fn scope_state_set_breakable_is_breakable() {
+        let mut state = ScopeState::new();
+        state.set_breakable();
+        assert!(state.is_breakable());
+    }
+
+    #[test]
+    fn scope_state_set_returnable_is_returnable() {
+        let mut state = ScopeState::new();
+        state.set_returnable();
+        assert!(state.is_returnable());
+    }
+
+    #[test]
+    fn scope_state_set_loop_is_continuable() {
+        let mut state = ScopeState::new();
+        state.set_loop();
+        assert!(state.is_continuable());
+    }
+
+    #[test]
+    fn scope_internal_declare_var_and_resolve() {
+        let mut ctx = Context::new();
+        let mut scope = ScopeInternal::new(&mut ctx);
+        scope.declare_var("test".to_string(), Value::Number(42.0));
+        let value = scope.resolve("test").unwrap();
+        assert_eq!(value, Value::Number(42.0));
+    }
+
+    #[test]
+    fn scope_internal_declare_read_only_var_and_update_fails() {
+        let mut ctx = Context::new();
+        let mut scope = ScopeInternal::new(&mut ctx);
+        scope.declare_read_only_var("test".to_string(), Value::Number(42.0)).unwrap();
+        let result = scope.update("test", Value::Number(43.0));
+        assert!(!result);
+    }
+
+    #[test]
+    fn scope_internal_declare_global_var_and_resolve() {
+        let mut ctx = Context::new();
+        let mut scope = ScopeInternal::new(&mut ctx);
+        scope.declare_global_var("test".to_string(), Value::Number(42.0));
+        let value = scope.resolve("test").unwrap();
+        assert_eq!(value, Value::Number(42.0));
+    }
+
+    #[test]
+    fn scope_internal_update_or_define_and_resolve() {
+        let mut ctx = Context::new();
+        let mut scope = ScopeInternal::new(&mut ctx);
+        scope.update_or_define("test".to_string(), Value::Number(42.0)).unwrap();
+        let value = scope.resolve("test").unwrap();
+        assert_eq!(value, Value::Number(42.0));
     }
 }
