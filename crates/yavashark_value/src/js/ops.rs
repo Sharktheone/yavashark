@@ -55,17 +55,6 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn is_truthy(&self) -> bool {
-        match self {
-            Value::Null | Value::Undefined => false,
-            Value::Number(n) => *n != 0.0,
-            Value::String(s) => !s.is_empty(),
-            Value::Boolean(b) => *b,
-            Value::Object(_) => true,
-            Value::Function(_) => true,
-            Value::Symbol(_) => true,
-        }
-    }
 }
 
 impl<C: Ctx> Add for Value<C> {

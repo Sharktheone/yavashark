@@ -40,7 +40,11 @@ impl Context {
             }
             BinaryOp::Exp => left.pow(right),
             BinaryOp::NullishCoalescing => {
-                todo!()
+                if left.is_nullish() {
+                    right
+                } else {
+                    left
+                }
             }
         })
     }

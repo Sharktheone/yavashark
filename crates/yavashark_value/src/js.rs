@@ -125,6 +125,23 @@ impl<C: Ctx> Value<C> {
             Value::Symbol(_) => false,
         }
     }
+    
+    pub fn is_truthy(&self) -> bool {
+        match self {
+            Value::Null | Value::Undefined => false,
+            Value::Number(n) => *n != 0.0,
+            Value::String(s) => !s.is_empty(),
+            Value::Boolean(b) => *b,
+            Value::Object(_) => true,
+            Value::Function(_) => true,
+            Value::Symbol(_) => true,
+        }
+    }
+
+
+    pub fn is_nullish(&self) -> bool {
+        matches!(self, Value::Null | Value::Undefined)
+    }
 
     pub fn type_of(&self) -> &'static str {
         match self {
