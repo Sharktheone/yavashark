@@ -16,6 +16,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut error = Path::from(PathSegment::from(Ident::new("Error", item.span())));
     let mut native_function = Path::from(PathSegment::from(Ident::new("NativeFunction", item.span())));
     let mut variable = Path::from(PathSegment::from(Ident::new("Variable", item.span())));
+    let mut object = Path::from(PathSegment::from(Ident::new("ObjectHandle", item.span())));
+    let mut value = Path::from(PathSegment::from(Ident::new("Value", item.span())));
 
 
 
@@ -181,8 +183,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let name = &prop.0;
         let attrs = prop.1.as_ref().unwrap_or(&Attributes {
             writable: true,
-            enumerable: true,
-            configurable: true,
+            enumerable: false,
+            configurable: false,
         });
 
         let writable = attrs.writable;
@@ -192,7 +194,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let fn_name = prop.2.as_ref().map(|i| i.to_token_stream()).unwrap_or(quote! {
             stringify!(#name)
         });
-        
+
         let prop = quote! {
             let function = #native_function::new(stringify!(#name), |args, this| {
                 let deez = this.as_any().downcast_ref::<Self>()
@@ -217,12 +219,44 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         //TODO
     }
 
+    
+    let mut construct = TokenStream::new();
+
+    if let Some(constructor) = constructor {
+        let prop = quote! {
+            let function: #value = #native_function::new("constructor", |args, this| {
+                let deez = this.as_any().downcast_ref::<Self>()
+                    .ok_or(Error::ty("Function constructor was not called with the a this value"))?;
+                
+                deez.#constructor(args)
+            }, ctx).into();
+            
+            function.define_property("prototype".into(), obj.clone().into());
+            
+            obj.define_variable(
+                "constructor".into(),
+                #variable::new_with_attributes(
+                    function,
+                    true,
+                    false,
+                    false
+                )
+            );
+        };
+
+        construct.extend(prop);
+    }
 
     let new_fn = quote! {
-        fn initialize(&mut self, ctx: &mut #context) -> Result<(), #error> {
+        fn initialize(mut self, ctx: &mut #context) -> Result<#object, #error> {
             use yavashark_value::{AsAny, Obj};
             #props
-            Ok(())
+            
+            let obj: #object = self.into_object();
+            
+            #construct
+            
+            Ok(obj)
         }
     };
 

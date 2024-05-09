@@ -57,6 +57,13 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn keys(&self) -> Vec<Value<C>>;
 
     fn values(&self) -> Vec<Value<C>>;
+    
+    
+    fn into_object(self) -> Object<C> where Self: Sized + 'static {
+        let boxed: Box<dyn Obj<C>> = Box::new(self);
+        
+        Object::new(boxed)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -95,6 +102,11 @@ impl<C: Ctx> Object<C> {
 
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         self.get_mut()?.define_property(name, value);
+        Ok(())
+    }
+    
+    pub fn define_variable(&self, name: Value<C>, value: Variable<C>) -> Result<(), Error<C>> {
+        self.get_mut()?.define_variable(name, value);
         Ok(())
     }
 

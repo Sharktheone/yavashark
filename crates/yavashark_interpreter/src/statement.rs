@@ -13,7 +13,7 @@ mod labeled;
 mod r#return;
 mod switch;
 mod throw;
-mod r#try;
+mod try_stmt;
 mod r#while;
 mod with;
 
