@@ -1,14 +1,12 @@
 use yavashark_macro::{object, properties};
 
-use crate::{Context, Error, NativeFunction, Value, ValueResult, Variable, ObjectHandle};
-use crate::Symbol;
 use crate::object::Object;
+use crate::Symbol;
+use crate::{Context, Error, NativeFunction, ObjectHandle, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 #[object(direct(iter(Symbol::ITERATOR)))]
 struct Array {}
-
-
 
 #[properties]
 impl Array {
@@ -16,22 +14,17 @@ impl Array {
     fn length(&self, args: Vec<Value>) -> ValueResult {
         todo!()
     }
-    
+
     #[prop(Symbol::ITERATOR)]
     fn iterator(&self, args: Vec<Value>) -> ValueResult {
-        
         todo!()
     }
-    
-    
+
     #[constructor]
     fn construct(&self, args: Vec<Value>) -> ValueResult {
         todo!()
     }
 }
-
-
-
 
 #[derive(Debug)]
 #[object]

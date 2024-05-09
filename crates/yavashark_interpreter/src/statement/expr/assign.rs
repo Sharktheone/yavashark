@@ -83,9 +83,7 @@ impl Context {
             obj.update_or_define_property(name, value);
             Ok(())
         } else {
-            Err(Error::ty(
-                "Invalid left-hand side in assignment"
-            ))
+            Err(Error::ty("Invalid left-hand side in assignment"))
         }
     }
 
@@ -123,9 +121,7 @@ impl Context {
 
             scope.with_mut(&name, f)?;
         } else {
-            return Err(Error::ty(
-                "Invalid left-hand side in assignment",
-            ));
+            return Err(Error::ty("Invalid left-hand side in assignment"));
         }
 
         Ok(())

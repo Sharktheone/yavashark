@@ -38,7 +38,7 @@ mod tests {
     use crate::{test_eval, Value};
 
     #[test]
-    fn run_switch_case(){
+    fn run_switch_case() {
         test_eval!(
             r#"
             let a = 1;
@@ -59,7 +59,6 @@ mod tests {
             Value::Number(2.0)
         );
     }
-
 
     #[test]
     fn switch_case_with_no_match() {

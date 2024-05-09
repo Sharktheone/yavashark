@@ -7,7 +7,6 @@ use crate::context::Context;
 use crate::error::get_error;
 use crate::{Error, Res, Value, Variable};
 
-
 pub struct MutValue {
     pub(crate) name: String,
     pub(crate) scope: Rc<RefCell<ScopeInternal>>,
@@ -234,7 +233,7 @@ impl ScopeInternal {
         );
 
         let state = parent.borrow().state.copy();
-        
+
         let par_scope = parent.borrow();
         let mut available_labels = par_scope.available_labels.clone();
         drop(par_scope);
@@ -585,8 +584,6 @@ impl From<Rc<RefCell<ScopeInternal>>> for Scope {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -654,7 +651,9 @@ mod tests {
     fn scope_internal_declare_read_only_var_and_update_fails() {
         let mut ctx = Context::new();
         let mut scope = ScopeInternal::new(&mut ctx);
-        scope.declare_read_only_var("test".to_string(), Value::Number(42.0)).unwrap();
+        scope
+            .declare_read_only_var("test".to_string(), Value::Number(42.0))
+            .unwrap();
         let result = scope.update("test", Value::Number(43.0));
         assert!(!result);
     }
@@ -672,7 +671,9 @@ mod tests {
     fn scope_internal_update_or_define_and_resolve() {
         let mut ctx = Context::new();
         let mut scope = ScopeInternal::new(&mut ctx);
-        scope.update_or_define("test".to_string(), Value::Number(42.0)).unwrap();
+        scope
+            .update_or_define("test".to_string(), Value::Number(42.0))
+            .unwrap();
         let value = scope.resolve("test").unwrap();
         assert_eq!(value, Value::Number(42.0));
     }

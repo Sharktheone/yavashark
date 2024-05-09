@@ -21,12 +21,10 @@ impl Context {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use crate::{test_eval, Value};
-    
+
     #[test]
     fn run_return() {
         test_eval!(
@@ -41,7 +39,7 @@ mod tests {
             Value::Number(1.0)
         );
     }
-    
+
     #[test]
     fn run_return_undefined() {
         test_eval!(
@@ -56,7 +54,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_return_no_return() {
         test_eval!(
@@ -71,7 +69,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_return_no_return_null() {
         test_eval!(
@@ -86,7 +84,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_return_no_return_undefined() {
         test_eval!(
@@ -103,5 +101,4 @@ mod tests {
             Value::Number(1.0)
         );
     }
-    
 }

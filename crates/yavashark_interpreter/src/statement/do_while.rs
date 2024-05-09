@@ -1,8 +1,8 @@
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::{ControlFlow, Error};
 use crate::RuntimeResult;
 use crate::Value;
+use crate::{ControlFlow, Error};
 use swc_ecma_ast::DoWhileStmt;
 
 impl Context {
@@ -10,12 +10,11 @@ impl Context {
         let mut result = Value::Undefined;
 
         let last_loop = scope.last_label();
-        
+
         loop {
-            
             let scope = &mut Scope::with_parent(scope);
             scope.state_set_loop();
-            
+
             result = match self.run_statement(&stmt.body, scope) {
                 Ok(v) => v,
                 Err(c) => match c {
@@ -36,9 +35,8 @@ impl Context {
                     _ => return Err(c),
                 },
                 Err(e) => return Err(e),
-            
             };
-            
+
             let condition = self.run_expr(&stmt.test, stmt.span, scope)?;
 
             if condition.is_falsey() {
@@ -49,8 +47,6 @@ impl Context {
         Ok(result)
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -71,8 +67,7 @@ mod tests {
             Value::Number(3.0)
         );
     }
-    
-    
+
     #[test]
     fn run_do_while_false() {
         test_eval!(
@@ -88,7 +83,7 @@ mod tests {
             Value::Number(1.0)
         );
     }
-    
+
     #[test]
     fn run_do_while_break() {
         test_eval!(
@@ -107,7 +102,7 @@ mod tests {
             Value::Number(2.0)
         );
     }
-    
+
     #[test]
     fn run_do_while_continue() {
         test_eval!(
@@ -126,7 +121,7 @@ mod tests {
             Value::Number(3.0)
         );
     }
-    
+
     #[test]
     fn run_do_while_break_and_continue() {
         test_eval!(

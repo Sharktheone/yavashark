@@ -2,15 +2,15 @@ use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
+use crate::Variable;
 pub use prototype::*;
 use yavashark_value::Obj;
-use crate::Variable;
 
 use crate::context::Context;
 use crate::Value;
 
-mod prototype;
 mod array;
+mod prototype;
 
 #[derive(Debug)]
 pub struct Object {
@@ -154,7 +154,7 @@ impl Obj<Context> for Object {
         }
         self.properties.insert(name, value);
     }
-    
+
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         if name == &Value::String("__proto__".to_string()) {
             return Some(self.prototype.copy());
@@ -254,7 +254,6 @@ mod tests {
         let mut context = Context::new();
         let proto = Value::Number(42.0);
         let object = Object::with_proto(proto);
-        
 
         // assert_eq!(obj.prototype.value, proto); //TODO: Add a function "get_proto" to Object
     }
@@ -349,7 +348,14 @@ mod tests {
         let mut object = Object::raw(&mut context);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
-        assert_eq!(object.properties.get(&Value::String("key".to_string())).unwrap().value, Value::Number(42.0));
+        assert_eq!(
+            object
+                .properties
+                .get(&Value::String("key".to_string()))
+                .unwrap()
+                .value,
+            Value::Number(42.0)
+        );
     }
 
     #[test]

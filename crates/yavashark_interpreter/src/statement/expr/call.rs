@@ -23,7 +23,10 @@ impl Context {
 
             f.call(self, args, scope.this.copy()) //In strict mode, this is undefined
         } else {
-            Err(Error::ty_error(format!("{:?} ia not a function", stmt.callee)))
+            Err(Error::ty_error(format!(
+                "{:?} ia not a function",
+                stmt.callee
+            )))
         }
     }
 }

@@ -12,9 +12,9 @@ pub mod context;
 mod error;
 mod function;
 mod object;
+mod pat;
 pub mod scope;
 pub mod statement;
-mod pat;
 
 #[cfg(test)]
 mod tests;
@@ -25,7 +25,6 @@ type FunctionHandle = yavashark_value::Function<Context>;
 type ObjectHandle = yavashark_value::Object<Context>;
 type Variable = yavashark_value::variable::Variable<Context>;
 type Symbol = yavashark_value::Symbol<Context>;
-
 
 #[derive(Debug, PartialEq)]
 pub enum ControlFlow {
@@ -106,27 +105,25 @@ impl Interpreter {
                 _ => Ok(Value::Undefined),
             })
     }
-    
-    
+
     #[cfg(test)]
     pub fn run_test(&self) -> (ValueResult, Rc<RefCell<tests::State>>) {
         let mut context = &mut Context::new();
         let mut scope = scope::Scope::global(context);
-        
-        let (mock, state) = tests::mock_object(context);
-        
-        scope.declare_global_var("mock".into(), mock);
 
+        let (mock, state) = tests::mock_object(context);
+
+        scope.declare_global_var("mock".into(), mock);
 
         (
             context
-            .run_statements(&self.script, &mut scope)
-            .or_else(|e| match e {
-                ControlFlow::Error(e) => Err(e),
-                ControlFlow::Return(v) => Ok(v),
-                _ => Ok(Value::Undefined),
-            }),
-         state
+                .run_statements(&self.script, &mut scope)
+                .or_else(|e| match e {
+                    ControlFlow::Error(e) => Err(e),
+                    ControlFlow::Return(v) => Ok(v),
+                    _ => Ok(Value::Undefined),
+                }),
+            state,
         )
     }
 }
@@ -248,7 +245,7 @@ mod temp_test {
         let script = p.parse_script().unwrap();
 
         let interpreter = Interpreter::new(script.body);
-        
+
         let result = interpreter.run().unwrap();
         println!("{:?}", result);
     }

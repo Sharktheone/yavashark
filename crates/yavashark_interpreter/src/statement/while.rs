@@ -1,9 +1,9 @@
 use swc_ecma_ast::WhileStmt;
 
-use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::Value;
+use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_while(&mut self, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
@@ -45,7 +45,6 @@ impl Context {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use crate::{test_eval, Value};
@@ -64,7 +63,6 @@ mod tests {
             10,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
-
         );
     }
 
@@ -85,7 +83,6 @@ mod tests {
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(5.0)
-
         );
     }
 
@@ -106,7 +103,6 @@ mod tests {
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
-
         );
     }
 

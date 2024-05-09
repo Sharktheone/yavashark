@@ -140,7 +140,7 @@ impl Obj<Context> for NativeFunction {
     fn define_variable(&mut self, name: Value, value: Variable) {
         self.object.define_variable(name, value);
     }
-    
+
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.object.resolve_property(name)
     }

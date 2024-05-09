@@ -19,8 +19,6 @@ impl Context {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use crate::{test_eval, Value};
@@ -38,7 +36,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_false() {
         test_eval!(
@@ -52,7 +50,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_else() {
         test_eval!(
@@ -68,7 +66,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_else_if() {
         test_eval!(
@@ -84,7 +82,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_else_if_else() {
         test_eval!(
@@ -102,7 +100,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_truthy_number() {
         test_eval!(
@@ -116,7 +114,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_falsy_number() {
         test_eval!(
@@ -130,7 +128,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_truthy_string() {
         test_eval!(
@@ -144,7 +142,7 @@ mod tests {
             Value::Undefined
         );
     }
-    
+
     #[test]
     fn run_if_falsy_string() {
         test_eval!(
@@ -158,5 +156,4 @@ mod tests {
             Value::Undefined
         );
     }
-    
 }

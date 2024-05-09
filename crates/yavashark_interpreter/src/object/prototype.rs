@@ -152,7 +152,7 @@ impl Obj<Context> for Prototype {
     fn define_variable(&mut self, name: Value, value: Variable) {
         todo!()
     }
-    
+
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(name).map(|v| v.copy())
     }

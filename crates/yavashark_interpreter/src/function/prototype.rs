@@ -99,7 +99,6 @@ impl Obj<Context> for FunctionPrototype {
         self.properties.insert(name, value.into());
     }
 
-
     fn define_variable(&mut self, name: Value, value: Variable) {
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -133,7 +132,7 @@ impl Obj<Context> for FunctionPrototype {
 
         self.properties.insert(name, value);
     }
-    
+
     fn resolve_property(&self, name: &Value) -> Option<Value> {
         self.properties.get(name).map(|v| v.copy())
     }

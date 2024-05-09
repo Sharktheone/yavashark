@@ -1,8 +1,8 @@
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 
 use crate::context::Context;
-use crate::RuntimeResult;
 use crate::scope::Scope;
+use crate::RuntimeResult;
 use crate::Value;
 
 impl Context {
@@ -139,7 +139,6 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
         try_block
     }
 }
-
 
 #[cfg(test)]
 mod tests {
