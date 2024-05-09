@@ -64,6 +64,10 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
         
         Object::new(boxed)
     }
+    
+    fn into_value(self) -> Value<C> where Self: Sized + 'static {
+        Value::Object(self.into_object())
+    }
 }
 
 #[derive(Debug, Clone)]

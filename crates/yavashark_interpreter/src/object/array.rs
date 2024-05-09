@@ -6,7 +6,7 @@ use crate::{Context, Error, NativeFunction, ObjectHandle, Value, ValueResult, Va
 
 #[derive(Debug)]
 #[object(direct(iter(Symbol::ITERATOR)))]
-struct Array {}
+pub struct Array {}
 
 #[properties]
 impl Array {
@@ -28,4 +28,13 @@ impl Array {
 
 #[derive(Debug)]
 #[object]
-struct ArrayIterator {}
+pub struct ArrayIterator {}
+
+
+
+
+impl From<Vec<Value>> for Array {
+    fn from(v: Vec<Value>) -> Self {
+        todo!()
+    }
+}

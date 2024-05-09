@@ -9,7 +9,7 @@ use yavashark_value::Obj;
 use crate::context::Context;
 use crate::Value;
 
-mod array;
+pub mod array;
 mod prototype;
 
 #[derive(Debug)]
