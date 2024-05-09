@@ -22,7 +22,7 @@ impl Context {
             BinaryOp::LShift => left << right,
             BinaryOp::RShift => left >> right,
             BinaryOp::ZeroFillRShift => {
-                todo!()
+                Value::Number((left.to_int_or_null() as u32 >> (right.to_int_or_null() as u32 % 32)) as f64)
             }
             BinaryOp::Add => left + right,
             BinaryOp::Sub => left - right,
