@@ -42,7 +42,6 @@ impl<C: Ctx> Value<C> {
             }
             Value::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
             _ => f64::NAN,
-            
         }
     }
 
@@ -681,6 +680,62 @@ impl<C: Ctx> Value<C> {
     pub fn pow(&self, rhs: Self) -> Self {
         Self::Number(self.to_number().powf(rhs.to_number()))
     }
+
+
+    pub fn normal_eq(&self, rhs: &Self) -> bool {
+        match (self, rhs) {
+            (Value::Null, Value::Null) => true,
+            (Value::Undefined, Value::Undefined) => true,
+            (Value::Number(a), Value::Number(b)) => a == b,
+            (Value::String(a), Value::String(b)) => a == b,
+            (Value::Boolean(a), Value::Boolean(b)) => a == b,
+            (Value::Object(a), Value::Object(b)) => a == b,
+            (Value::Function(a), Value::Function(b)) => a == b,
+            (Value::Symbol(a), Value::Symbol(b)) => a == b,
+
+            (Value::Number(a), Value::String(b)) | (Value::String(b), Value::Number(a)) => {
+                a.to_string() == *b
+            }
+
+            (Value::Number(a), Value::Boolean(b)) | (Value::Boolean(b), Value::Number(a)) => {
+                *a == b.num()
+            }
+
+            (Value::Number(a), Value::Object(b)) | (Value::Object(b), Value::Number(a)) => {
+                a.to_string() == b.to_string()
+            }
+
+            (Value::Number(a), Value::Function(b)) | (Value::Function(b), Value::Number(a)) => {
+                a.to_string() == b.to_string()
+            }
+
+            (Value::String(a), Value::Object(b)) | (Value::Object(b), Value::String(a)) => {
+                *a == b.to_string()
+            }
+
+            (Value::String(a), Value::Function(b)) | (Value::Function(b), Value::String(a)) => {
+                *a == b.to_string()
+            }
+
+            (Value::String(a), Value::Boolean(b)) | (Value::Boolean(b), Value::String(a)) => {
+                *a == b.num().to_string()
+            }
+
+            (Value::Boolean(a), Value::Object(b)) | (Value::Object(b), Value::Boolean(a)) => {
+                a.num().to_string() == b.to_string()
+            }
+
+            (Value::Boolean(a), Value::Function(b)) | (Value::Function(b), Value::Boolean(a)) => {
+                a.num().to_string() == b.to_string()
+            }
+
+            (Value::Object(a), Value::Function(b)) | (Value::Function(b), Value::Object(a)) => {
+                todo!()
+            }
+
+            _ => false,
+        }
+    }
 }
 
 impl<C: Ctx> AddAssign for Value<C> {
@@ -698,7 +753,6 @@ impl<C: Ctx> SubAssign for Value<C> {
 #[cfg(test)]
 mod tests {
     use crate::{Func, Obj};
-    use std::any::Any;
     use crate::variable::Variable;
 
     use super::*;
@@ -714,9 +768,8 @@ mod tests {
     impl Obj<()> for Object {
         fn define_property(&mut self, _name: Value, _value: Value) {}
 
-        fn define_variable(&mut self, name: crate::Value<()>, value: Variable<()>) {
-        }
-        
+        fn define_variable(&mut self, name: crate::Value<()>, value: Variable<()>) {}
+
         fn resolve_property(&self, _name: &Value) -> Option<Value> {
             None
         }

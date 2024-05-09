@@ -11,12 +11,8 @@ impl Context {
         let right = self.run_expr(&stmt.right, stmt.span, scope)?;
 
         Ok(match stmt.op {
-            BinaryOp::EqEq => {
-                todo!()
-            }
-            BinaryOp::NotEq => {
-                todo!()
-            }
+            BinaryOp::EqEq => Value::Boolean(left.normal_eq(&right)),
+            BinaryOp::NotEq => Value::Boolean(!left.normal_eq(&right)),
             BinaryOp::EqEqEq => Value::Boolean(left == right),
             BinaryOp::NotEqEq => Value::Boolean(left != right),
             BinaryOp::Lt => Value::Boolean(left < right),
