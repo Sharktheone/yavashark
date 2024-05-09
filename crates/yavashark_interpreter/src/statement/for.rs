@@ -1,9 +1,9 @@
-use crate::Value;
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 
+use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::{ControlFlow, RuntimeResult};
+use crate::Value;
 
 impl Context {
     pub fn run_for(&mut self, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
@@ -57,5 +57,93 @@ impl Context {
                 self.run_expr(update, stmt.span, scope)?;
             }
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::{test_eval, Value};
+
+    #[test]
+    fn run_for_loop() {
+        test_eval!(
+            r#"
+            let a = 0;
+            for (let i = 0; i < 10; i++) {
+                a++;
+                mock.send();
+            }
+            a
+            "#,
+            10,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(10.0)
+        );
+    }
+
+    #[test]
+    fn run_for_loop_with_break() {
+        test_eval!(
+            r#"
+            let a = 0;
+            for (let i = 0; i < 5; i++) {
+                if (i === 2) {
+                    break;
+                }
+                mock.send();
+                a++;
+            }
+            a
+            "#,
+            2,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(2.0)
+        );
+    }
+
+    #[test]
+    fn run_for_loop_with_continue() {
+        test_eval!(
+            r#"
+            let a = 0;
+            for (let i = 0; i < 5; i++) {
+                if (i === 2) {
+                    continue;
+                }
+                a++;
+                mock.send();
+            }
+            a
+            "#,
+            4,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(4.0)
+        );
+    }
+
+    #[test]
+    fn run_for_loop_with_break_and_continue() {
+        test_eval!(
+            r#"
+            let a = 0;
+            for (let i = 0; i < 5; i++) {
+                if (i === 3) {
+                    break;
+                }
+                
+                a++;
+                
+                if (i === 2) {
+                    continue;
+                }
+                mock.send();
+            }
+            a
+            "#,
+            2,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(3.0)
+        );
     }
 }
