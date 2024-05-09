@@ -32,3 +32,98 @@ impl Context {
         Ok(Value::Undefined)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{test_eval, Value};
+
+    #[test]
+    fn run_switch_case(){
+        test_eval!(
+            r#"
+            let a = 1;
+            switch(a){
+                case 1:
+                    a = 2;
+                    break;
+                case 2:
+                    a = 3;
+                    break;
+                default:
+                    a = 4;
+            }
+            a
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(2.0)
+        );
+    }
+
+
+    #[test]
+    fn switch_case_with_no_match() {
+        test_eval!(
+            r#"
+            let a = 1;
+            switch(a){
+                case 2:
+                    a = 3;
+                    break;
+                case 3:
+                    a = 4;
+                    break;
+                default:
+                    a = 5;
+            }
+            a
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(5.0)
+        );
+    }
+
+    #[test]
+    fn switch_case_with_multiple_matches() {
+        test_eval!(
+            r#"
+            let a = 1;
+            switch(a){
+                case 1:
+                    a = 2;
+                case 1:
+                    a = 3;
+                    break;
+                default:
+                    a = 4;
+            }
+            a
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(3.0)
+        );
+    }
+
+    #[test]
+    fn switch_case_with_no_default() {
+        test_eval!(
+            r#"
+            let a = 1;
+            switch(a){
+                case 2:
+                    a = 3;
+                    break;
+                case 3:
+                    a = 4;
+                    break;
+            }
+            a
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(1.0)
+        );
+    }
+}
