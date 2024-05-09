@@ -41,6 +41,9 @@ impl Context {
                     }
                     ControlFlow::Continue(l) => {
                         if label.as_ref() == l.as_ref() {
+                            if let Some(update) = &stmt.update {
+                                self.run_expr(update, stmt.span, scope)?;
+                            }
                             continue;
                         } else {
                             return Err(ControlFlow::Continue(l));
