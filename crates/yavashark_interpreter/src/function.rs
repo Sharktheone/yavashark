@@ -271,8 +271,11 @@ impl Func<Context> for JSFunction {
             let Pat::Ident(name) = &p.pat else {
                 return Err(Error::syn("Invalid function parameter"));
             };
-            
-            scope.declare_var(name.sym.to_string(), args.get(i).unwrap_or(&Value::Undefined).copy());
+
+            scope.declare_var(
+                name.sym.to_string(),
+                args.get(i).unwrap_or(&Value::Undefined).copy(),
+            );
         }
 
         if let Some(block) = &self.block {

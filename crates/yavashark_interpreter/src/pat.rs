@@ -1,21 +1,27 @@
-use swc_common::{DUMMY_SP, Span};
+use swc_common::{Span, DUMMY_SP};
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 
 use yavashark_value::Obj;
 
-use crate::{Error, Res, Value, ValueResult};
 use crate::context::Context;
 use crate::object::array::Array;
 use crate::object::Object;
 use crate::scope::Scope;
+use crate::{Error, Res, Value, ValueResult};
 
 impl Context {
     pub fn run_pat(&mut self, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
         self.run_pat_internal(stmt, scope, value, false, DUMMY_SP)
     }
-    
-    
-    pub fn run_pat_internal(&mut self, stmt: &Pat, scope: &mut Scope, value: Value, for_in_of: bool, span: Span) -> Res {
+
+    pub fn run_pat_internal(
+        &mut self,
+        stmt: &Pat,
+        scope: &mut Scope,
+        value: Value,
+        for_in_of: bool,
+        span: Span,
+    ) -> Res {
         match stmt {
             Pat::Ident(id) => {
                 scope.declare_var(id.sym.to_string(), value);
@@ -69,7 +75,9 @@ impl Context {
                         }
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
-                            let mut value = value.get_property(&key.clone().into()).unwrap_or(Value::Undefined);
+                            let mut value = value
+                                .get_property(&key.clone().into())
+                                .unwrap_or(Value::Undefined);
 
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
@@ -98,24 +106,23 @@ impl Context {
             }
             Pat::Assign(assign) => {
                 let value = self.run_expr(&assign.right, assign.span, scope)?;
-                
+
                 self.run_pat(&assign.left, scope, value)?;
             }
             Pat::Expr(expr) => {
                 if !for_in_of {
                     return Err(Error::syn("Invalid pattern"));
                 }
-                
+
                 self.run_expr(expr, span, scope)?;
             }
             Pat::Invalid(i) => {
                 return Err(Error::syn("Invalid pattern"));
-            },
+            }
         }
 
         Ok(())
     }
-
 
     pub fn prop_name_to_value(&mut self, prop: &PropName, scope: &mut Scope) -> ValueResult {
         Ok(match prop {

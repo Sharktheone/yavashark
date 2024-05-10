@@ -135,15 +135,14 @@ impl Object {
 
         found
     }
-    
-    
+
     pub fn from_values(values: Vec<(Value, Value)>, ctx: &mut Context) -> Self {
         let mut object = Self::raw(ctx);
-        
+
         for (key, value) in values {
             object.define_property(key, value);
         }
-        
+
         object
     }
 }
@@ -253,7 +252,6 @@ impl Obj<Context> for Object {
             .collect()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

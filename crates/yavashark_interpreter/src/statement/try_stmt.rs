@@ -25,8 +25,6 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
         if let Some(catch) = &stmt.handler {
             let scope = &mut Scope::with_parent(scope);
             if let Some(param) = &catch.param {
-                
-                
                 //TODO: Error must be an object, then replace it with self.run_pat
                 match param {
                     Pat::Ident(ident) => {
