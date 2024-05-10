@@ -718,7 +718,7 @@ impl<C: Ctx> Value<C> {
                 a.num().to_string() == b.to_string()
             }
 
-            (Value::Object(a), Value::Function(b)) | (Value::Function(b), Value::Object(a)) => {
+            (Value::Object(_a), Value::Function(_b)) | (Value::Function(_b), Value::Object(_a)) => {
                 todo!()
             }
 

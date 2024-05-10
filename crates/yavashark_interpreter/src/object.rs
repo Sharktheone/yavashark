@@ -159,7 +159,7 @@ impl Obj<Context> for Object {
 
     fn define_variable(&mut self, name: Value, value: Variable) {
         if let Value::Number(n) = &name {
-            self.insert_array(*n as usize, value.into());
+            self.insert_array(*n as usize, value);
             return;
         }
         self.properties.insert(name, value);

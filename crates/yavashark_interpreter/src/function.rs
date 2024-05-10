@@ -24,6 +24,7 @@ pub struct NativeFunction {
     pub f: NativeFn,
     pub object: Object,
     pub data: Option<Box<dyn Any>>,
+    // pub prototype: ConstructorPrototype,
 }
 
 impl NativeFunction {

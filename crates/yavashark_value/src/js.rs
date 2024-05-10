@@ -167,7 +167,7 @@ impl<C: Ctx> Display for Value<C> {
             Value::Boolean(b) => write!(f, "{}", b),
             Value::Object(o) => write!(f, "{}", o),
             Value::Function(func) => write!(f, "{}", func),
-            Value::Symbol(s) => write!(f, "Symbol({})", s.to_string()),
+            Value::Symbol(s) => write!(f, "Symbol({})", s),
         }
     }
 }
