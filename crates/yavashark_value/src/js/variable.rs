@@ -1,5 +1,5 @@
-use crate::{Ctx, Error};
 use crate::Value;
+use crate::{Ctx, Error};
 use std::fmt::Debug;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -22,11 +22,16 @@ impl<C: Ctx> Variable<C> {
             properties: Attributes::new_read_only(),
         }
     }
-    
-    pub fn new_with_attributes(value: Value<C>, writable: bool, enumerable: bool, configurable: bool) -> Self {
+
+    pub fn new_with_attributes(
+        value: Value<C>,
+        writable: bool,
+        enumerable: bool,
+        configurable: bool,
+    ) -> Self {
         Self {
             value,
-            properties: Attributes::from_values(writable, enumerable, configurable)
+            properties: Attributes::from_values(writable, enumerable, configurable),
         }
     }
 
@@ -131,7 +136,7 @@ impl Attributes {
     pub fn make_configurable(&mut self) {
         self.0 |= Self::CONFIGURABLE;
     }
-    
+
     pub fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
         let mut attributes = Self::new_read_only();
         if writable {
@@ -153,7 +158,6 @@ impl Default for Attributes {
         Self::new()
     }
 }
-
 
 impl<C: Ctx, V: Into<Value<C>>> From<V> for Variable<C> {
     fn from(value: V) -> Self {

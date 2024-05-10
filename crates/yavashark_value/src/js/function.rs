@@ -29,9 +29,11 @@ pub trait Func<C: Ctx>: Debug + Obj<C> + AsObject<C> {
         args: Vec<Value<C>>,
         this: Value<C>,
     ) -> Result<Value<C>, Error<C>>;
-    
-    
-    fn into_func_value(self) -> Value<C> where Self: Sized + 'static {
+
+    fn into_func_value(self) -> Value<C>
+    where
+        Self: Sized + 'static,
+    {
         let boxed: Box<dyn Func<C>> = Box::new(self);
         Value::Function(Function::from(boxed))
     }

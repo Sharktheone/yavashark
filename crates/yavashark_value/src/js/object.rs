@@ -5,8 +5,8 @@ use std::hash::Hash;
 use std::rc::Rc;
 
 use crate::js::context::Ctx;
-use crate::Error;
 use crate::variable::Variable;
+use crate::Error;
 
 use super::Value;
 
@@ -27,7 +27,7 @@ impl<T: Sized + 'static> AsAny for T {
 
 pub trait Obj<C: Ctx>: Debug + AsAny {
     fn define_property(&mut self, name: Value<C>, value: Value<C>);
-    
+
     fn define_variable(&mut self, name: Value<C>, value: Variable<C>);
 
     fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
@@ -57,15 +57,20 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn keys(&self) -> Vec<Value<C>>;
 
     fn values(&self) -> Vec<Value<C>>;
-    
-    
-    fn into_object(self) -> Object<C> where Self: Sized + 'static {
+
+    fn into_object(self) -> Object<C>
+    where
+        Self: Sized + 'static,
+    {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
-        
+
         Object::new(boxed)
     }
-    
-    fn into_value(self) -> Value<C> where Self: Sized + 'static {
+
+    fn into_value(self) -> Value<C>
+    where
+        Self: Sized + 'static,
+    {
         Value::Object(self.into_object())
     }
 }
@@ -108,7 +113,7 @@ impl<C: Ctx> Object<C> {
         self.get_mut()?.define_property(name, value);
         Ok(())
     }
-    
+
     pub fn define_variable(&self, name: Value<C>, value: Variable<C>) -> Result<(), Error<C>> {
         self.get_mut()?.define_variable(name, value);
         Ok(())

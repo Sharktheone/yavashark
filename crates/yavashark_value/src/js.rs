@@ -17,7 +17,6 @@ mod ops;
 mod symbol;
 pub mod variable;
 
-
 #[derive(Debug, PartialEq, Hash, Clone)]
 pub enum ConstString {
     String(&'static str),
@@ -30,7 +29,7 @@ impl Display for ConstString {
             ConstString::String(s) => write!(f, "{}", s)?,
             ConstString::Owned(s) => write!(f, "{}", s)?,
         }
-        
+
         Ok(())
     }
 }
@@ -53,7 +52,6 @@ impl<C: Ctx> Clone for Value<C> {
         self.copy()
     }
 }
-
 
 impl<C: Ctx> Eq for Value<C> {}
 
@@ -125,7 +123,7 @@ impl<C: Ctx> Value<C> {
             Value::Symbol(_) => false,
         }
     }
-    
+
     pub fn is_truthy(&self) -> bool {
         match self {
             Value::Null | Value::Undefined => false,
@@ -137,7 +135,6 @@ impl<C: Ctx> Value<C> {
             Value::Symbol(_) => true,
         }
     }
-
 
     pub fn is_nullish(&self) -> bool {
         matches!(self, Value::Null | Value::Undefined)
@@ -172,10 +169,10 @@ impl<C: Ctx> Display for Value<C> {
     }
 }
 
-
 impl<C: Ctx> Value<C> {
     pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
-        let iter = self.get_property(&Symbol::ITERATOR)
+        let iter = self
+            .get_property(&Symbol::ITERATOR)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
@@ -184,9 +181,10 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not a function")),
         }
     }
-    
+
     pub fn iter_no_ctx(&self, ctx: &mut C) -> Result<Iter<C>, Error<C>> {
-        let iter = self.get_property(&Symbol::ITERATOR)
+        let iter = self
+            .get_property(&Symbol::ITERATOR)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
@@ -204,7 +202,11 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn update_or_define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+    pub fn update_or_define_property(
+        &self,
+        name: Value<C>,
+        value: Value<C>,
+    ) -> Result<(), Error<C>> {
         match self {
             Value::Object(o) => o.update_or_define_property(name, value),
             Value::Function(f) => f.update_or_define_property(name, value),
@@ -228,14 +230,18 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn call(&self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
+    pub fn call(
+        &self,
+        ctx: &mut C,
+        args: Vec<Value<C>>,
+        this: Value<C>,
+    ) -> Result<Value<C>, Error<C>> {
         match self {
             Value::Function(f) => f.call(ctx, args, this),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
-    
-    
+
     #[allow(clippy::type_complexity)]
     ///(name, value)
     pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
@@ -245,7 +251,7 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
+
     pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
         match self {
             Value::Object(o) => o.keys(),
@@ -253,7 +259,7 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
+
     pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
         match self {
             Value::Object(o) => o.values(),
@@ -263,7 +269,6 @@ impl<C: Ctx> Value<C> {
     }
 }
 
-
 pub struct Iter<C: Ctx> {
     next: Function<C>,
 }
@@ -272,7 +277,6 @@ pub struct CtxIter<'a, C: Ctx> {
     next: Function<C>,
     ctx: &'a mut C,
 }
-
 
 impl<C: Ctx> Iterator for CtxIter<'_, C> {
     type Item = Result<Value<C>, Error<C>>;
@@ -285,16 +289,16 @@ impl<C: Ctx> Iterator for CtxIter<'_, C> {
         };
 
         let done = next.get_property(&Value::string("done"));
-        
+
         let done = match done {
             Ok(done) => done.is_truthy(),
             Err(e) => return Some(Err(e)),
         };
-        
+
         if done {
-            return None
+            return None;
         }
-            
+
         Some(next.get_property(&Value::string("value")))
     }
 }

@@ -54,7 +54,6 @@ impl<C: Ctx> Value<C> {
             _ => 0,
         }
     }
-
 }
 
 impl<C: Ctx> Add for Value<C> {
@@ -101,7 +100,9 @@ impl<C: Ctx> Add for Value<C> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() + b.num()),
             (Value::Boolean(a), Value::Object(o)) => Value::String(a.to_string() + &o.to_string()),
 
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
             (a, b) => Value::String(a.to_string() + &b.to_string()),
         }
     }
@@ -181,7 +182,9 @@ impl<C: Ctx> Sub for Value<C> {
             (Value::Object(_), _) | (_, Value::Object(_)) => Value::Number(f64::NAN),
             (Value::Undefined, _) | (_, Value::Undefined) => Value::Number(f64::NAN),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -228,7 +231,9 @@ impl<C: Ctx> Mul for Value<C> {
                 }
             }
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() * b.num()),
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -302,7 +307,9 @@ impl<C: Ctx> Div for Value<C> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() / b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -366,7 +373,9 @@ impl<C: Ctx> Rem for Value<C> {
             (Value::Boolean(a), Value::Boolean(b)) => Value::Number(a.num() % b.num()),
             (_, Value::Object(_)) | (Value::Object(_), _) => Value::Number(f64::NAN),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(f64::NAN),
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -430,7 +439,9 @@ impl<C: Ctx> PartialOrd for Value<C> {
             (Value::Object(_), _) => None,
             (_, Value::Object(_)) => None,
             (Value::Function(_), _) | (_, Value::Function(_)) => None,
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -525,7 +536,9 @@ impl<C: Ctx> Shl for Value<C> {
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(0.0),
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -620,7 +633,9 @@ impl<C: Ctx> Shr for Value<C> {
             (Value::Boolean(a), Value::Object(_)) => Value::Number(a.num()),
             (Value::Object(_), _) => Value::Number(0.0),
             (Value::Function(_), _) | (_, Value::Function(_)) => Value::Number(0.0),
-            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => todo!("return a Result here.... to throw an TypeError"),
+            (Value::Symbol(_), _) | (_, Value::Symbol(_)) => {
+                todo!("return a Result here.... to throw an TypeError")
+            }
         }
     }
 }
@@ -669,7 +684,6 @@ impl<C: Ctx> Value<C> {
     pub fn pow(&self, rhs: Self) -> Self {
         Self::Number(self.to_number().powf(rhs.to_number()))
     }
-
 
     pub fn normal_eq(&self, rhs: &Self) -> bool {
         match (self, rhs) {
@@ -741,8 +755,8 @@ impl<C: Ctx> SubAssign for Value<C> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Func, Obj};
     use crate::variable::Variable;
+    use crate::{Func, Obj};
 
     use super::*;
 

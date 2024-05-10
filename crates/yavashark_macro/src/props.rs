@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{ImplItem, LitBool, Path, PathSegment};
 use syn::spanned::Spanned;
+use syn::{ImplItem, LitBool, Path, PathSegment};
 
 #[allow(unused)]
 pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
@@ -11,30 +11,38 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut call = None;
     let mut constructor = None;
-    
-    
+
     let crate_path = Path::from(Ident::new("crate", item.span()));
-    
-    
+
     let mut context = crate_path.clone();
-    context.segments.push(PathSegment::from(Ident::new("Context", item.span())));
-    
+    context
+        .segments
+        .push(PathSegment::from(Ident::new("Context", item.span())));
+
     let mut error = crate_path.clone();
-    error.segments.push(PathSegment::from(Ident::new("Error", item.span())));
-    
+    error
+        .segments
+        .push(PathSegment::from(Ident::new("Error", item.span())));
+
     let mut native_function = crate_path.clone();
-    native_function.segments.push(PathSegment::from(Ident::new("NativeFunction", item.span())));
-    
+    native_function
+        .segments
+        .push(PathSegment::from(Ident::new("NativeFunction", item.span())));
+
     let mut variable = crate_path.clone();
-    variable.segments.push(PathSegment::from(Ident::new("Variable", item.span())));
-    
+    variable
+        .segments
+        .push(PathSegment::from(Ident::new("Variable", item.span())));
+
     let mut object = crate_path.clone();
-    object.segments.push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
-    
+    object
+        .segments
+        .push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
+
     let mut value = crate_path.clone();
-    value.segments.push(PathSegment::from(Ident::new("Value", item.span())));
-
-
+    value
+        .segments
+        .push(PathSegment::from(Ident::new("Value", item.span())));
 
     struct Property {
         name: syn::Ident,
@@ -159,7 +167,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     Ok(())
                 });
 
-
                 for prop in &mut properties {
                     if prop.0 == func.sig.ident {
                         prop.1 = Some(attrs);
@@ -191,7 +198,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     }
 
-
     let mut props = TokenStream::new();
 
     for prop in properties {
@@ -206,18 +212,22 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let enumerable = attrs.enumerable;
         let configurable = attrs.configurable;
 
-        let fn_name = prop.2.as_ref().map(|i| i.to_token_stream()).unwrap_or(quote! {
-            stringify!(#name)
-        });
+        let fn_name = prop
+            .2
+            .as_ref()
+            .map(|i| i.to_token_stream())
+            .unwrap_or(quote! {
+                stringify!(#name)
+            });
 
         let prop = quote! {
             let function = #native_function::new(stringify!(#name), |args, this| {
                 let deez = this.as_any().downcast_ref::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with the a this value", #fn_name)))?;
-                
+
                 deez.#name(args)
             }, ctx).into();
-            
+
             self.define_variable(
                 #fn_name.into(),
                 #variable::new_with_attributes(
@@ -234,7 +244,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         //TODO
     }
 
-    
     let mut construct = TokenStream::new();
 
     if let Some(constructor) = constructor {
@@ -242,12 +251,12 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let function: #value = #native_function::new("constructor", |args, this| {
                 let deez = this.as_any().downcast_ref::<Self>()
                     .ok_or(Error::ty("Function constructor was not called with the a this value"))?;
-                
+
                 deez.#constructor(args)
             }, ctx).into();
-            
+
             function.define_property("prototype".into(), obj.clone().into());
-            
+
             obj.define_variable(
                 "constructor".into(),
                 #variable::new_with_attributes(
@@ -266,11 +275,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn initialize(mut self, ctx: &mut #context) -> Result<#object, #error> {
             use yavashark_value::{AsAny, Obj};
             #props
-            
+
             let obj: #object = self.into_object();
-            
+
             #construct
-            
+
             Ok(obj)
         }
     };
@@ -281,7 +290,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.to_token_stream().into()
 }
-
 
 #[derive(Debug)]
 struct Attributes {

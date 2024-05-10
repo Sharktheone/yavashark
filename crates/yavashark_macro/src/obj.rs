@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{FieldMutability, Fields, Path, PathSegment};
 use syn::spanned::Spanned;
+use syn::{FieldMutability, Fields, Path, PathSegment};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -13,21 +13,30 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let span = input.span();
 
-
     let crate_path = Path::from(Ident::new("crate", input.span()));
 
     let mut obj_path = crate_path.clone();
-    obj_path.segments.push(PathSegment::from(Ident::new("object", input.span())));
-    obj_path.segments.push(PathSegment::from(Ident::new("Object", input.span())));
+    obj_path
+        .segments
+        .push(PathSegment::from(Ident::new("object", input.span())));
+    obj_path
+        .segments
+        .push(PathSegment::from(Ident::new("Object", input.span())));
 
     let mut variable = crate_path.clone();
-    variable.segments.push(PathSegment::from(Ident::new("Variable", input.span())));
+    variable
+        .segments
+        .push(PathSegment::from(Ident::new("Variable", input.span())));
 
     let mut context = crate_path.clone();
-    context.segments.push(PathSegment::from(Ident::new("Context", input.span())));
+    context
+        .segments
+        .push(PathSegment::from(Ident::new("Context", input.span())));
 
     let mut value = crate_path.clone();
-    value.segments.push(PathSegment::from(Ident::new("Value", input.span())));
+    value
+        .segments
+        .push(PathSegment::from(Ident::new("Value", input.span())));
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -136,10 +145,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #properties_define
                 self.object.define_property(name, value);
             }
-            
+
             fn define_variable(&mut self, name: #value, value: #variable) {
                 #properties_variable_define
-                
+
                 self.object.define_variable(name, value);
             }
 
@@ -259,7 +268,7 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
     if !match_non_string.is_empty() {
         match_properties_define = quote! {
             #match_properties_define
-            
+
             match name {
                 #match_non_string
                 _ => {}
