@@ -11,13 +11,28 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut call = None;
     let mut constructor = None;
-
-    let mut context = Path::from(PathSegment::from(Ident::new("Context", item.span())));
-    let mut error = Path::from(PathSegment::from(Ident::new("Error", item.span())));
-    let mut native_function = Path::from(PathSegment::from(Ident::new("NativeFunction", item.span())));
-    let mut variable = Path::from(PathSegment::from(Ident::new("Variable", item.span())));
-    let mut object = Path::from(PathSegment::from(Ident::new("ObjectHandle", item.span())));
-    let mut value = Path::from(PathSegment::from(Ident::new("Value", item.span())));
+    
+    
+    let crate_path = Path::from(Ident::new("crate", item.span()));
+    
+    
+    let mut context = crate_path.clone();
+    context.segments.push(PathSegment::from(Ident::new("Context", item.span())));
+    
+    let mut error = crate_path.clone();
+    error.segments.push(PathSegment::from(Ident::new("Error", item.span())));
+    
+    let mut native_function = crate_path.clone();
+    native_function.segments.push(PathSegment::from(Ident::new("NativeFunction", item.span())));
+    
+    let mut variable = crate_path.clone();
+    variable.segments.push(PathSegment::from(Ident::new("Variable", item.span())));
+    
+    let mut object = crate_path.clone();
+    object.segments.push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
+    
+    let mut value = crate_path.clone();
+    value.segments.push(PathSegment::from(Ident::new("Value", item.span())));
 
 
 

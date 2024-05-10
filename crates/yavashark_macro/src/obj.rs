@@ -13,10 +13,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let span = input.span();
 
-    let mut obj_path = Path::from(PathSegment::from(Ident::new("Object", span)));
-    let mut variable = Path::from(PathSegment::from(Ident::new("Variable", span)));
-    let mut context = Path::from(PathSegment::from(Ident::new("Context", span)));
-    let mut value = Path::from(PathSegment::from(Ident::new("Value", span)));
+
+    let crate_path = Path::from(Ident::new("crate", input.span()));
+
+    let mut obj_path = crate_path.clone();
+    obj_path.segments.push(PathSegment::from(Ident::new("object", input.span())));
+    obj_path.segments.push(PathSegment::from(Ident::new("Object", input.span())));
+
+    let mut variable = crate_path.clone();
+    variable.segments.push(PathSegment::from(Ident::new("Variable", input.span())));
+
+    let mut context = crate_path.clone();
+    context.segments.push(PathSegment::from(Ident::new("Context", input.span())));
+
+    let mut value = crate_path.clone();
+    value.segments.push(PathSegment::from(Ident::new("Value", input.span())));
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
