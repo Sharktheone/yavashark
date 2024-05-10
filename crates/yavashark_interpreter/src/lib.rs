@@ -233,6 +233,29 @@ mod temp_test {
         for (let i of array) {
             console.log("of", i)
         }
+        
+        
+        
+        let arrow = (a, b) => {
+            return a + b
+        }
+        
+        console.log("arrow", arrow(1, 2))
+        
+        function Arrows() {
+            this.x = "hello"
+            this.y = "world"
+            
+            this.arrow = (a, b) => {
+                console.log("from_arrows", this.x, this.y, this.arrow)
+                return a + b
+            }
+        }
+        
+        let arr = new Arrows()
+        
+        console.log("arrow", arr.arrow(1, 2))
+        
 
         z
         "#;

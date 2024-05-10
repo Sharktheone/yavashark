@@ -117,7 +117,7 @@ impl ScopeState {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Scope {
     scope: Rc<RefCell<ScopeInternal>>,
     pub this: Value,
@@ -563,6 +563,11 @@ impl Scope {
 
     pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
         self.scope.borrow().with(name, f)
+    }
+    
+    
+    pub fn child(&self) -> Self {
+        Self::with_parent(self)
     }
 }
 
