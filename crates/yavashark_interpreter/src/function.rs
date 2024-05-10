@@ -268,12 +268,11 @@ impl Func<Context> for JSFunction {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope);
         for (i, p) in self.params.iter().enumerate() {
-            let name = match p.pat {
-                Pat::Ident(ref i) => i.sym.to_string(),
-                _ => todo!("call args pat"),
+            let Pat::Ident(name) = &p.pat else {
+                return Err(Error::syn("Invalid function parameter"));
             };
-
-            scope.declare_var(name, args.get(i).unwrap_or(&Value::Undefined).copy());
+            
+            scope.declare_var(name.sym.to_string(), args.get(i).unwrap_or(&Value::Undefined).copy());
         }
 
         if let Some(block) = &self.block {
