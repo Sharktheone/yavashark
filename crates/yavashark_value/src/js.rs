@@ -234,6 +234,33 @@ impl<C: Ctx> Value<C> {
             _ => Err(Error::ty("Value is not a function")),
         }
     }
+    
+    
+    #[allow(clippy::type_complexity)]
+    ///(name, value)
+    pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
+        match self {
+            Value::Object(o) => o.properties(),
+            Value::Function(f) => f.properties(),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+    pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
+        match self {
+            Value::Object(o) => o.keys(),
+            Value::Function(f) => f.keys(),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+    pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
+        match self {
+            Value::Object(o) => o.values(),
+            Value::Function(f) => f.values(),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
 }
 
 
