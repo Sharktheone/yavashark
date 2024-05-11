@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
+use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 use syn::spanned::Spanned;
-use syn::{ImplItem, LitBool, Path, PathSegment};
 
 #[allow(unused)]
 pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
@@ -126,7 +126,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let mut constructor = None;
-    let mut properties: Vec<(Ident, Option<Attributes>, Option<Path>)> = Vec::new();
+    let mut properties: Vec<(Ident, Option<Attributes>, Option<Path>, bool)> = Vec::new();
 
     for func in &mut item.items {
         let ImplItem::Fn(func) = func else {
@@ -137,7 +137,15 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         'func_attrs: for (idx, attr) in func.attrs.iter().enumerate() {
             if attr.path().is_ident("constructor") {
-                constructor = Some(func.sig.ident.clone());
+                let mut self_mut = false;
+                
+                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
+                    if self_arg.mutability.is_some() {
+                        self_mut = true;
+                    }
+                }
+                
+                constructor = Some((func.sig.ident.clone(), self_mut));
                 remove.push(idx);
                 continue;
             }
@@ -174,8 +182,16 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
+                let mut self_mut = false;
+
+                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
+                    if self_arg.mutability.is_some() {
+                        self_mut = true;
+                    }
+                }
+
                 remove.push(idx);
-                properties.push((func.sig.ident.clone(), Some(attrs), None));
+                properties.push((func.sig.ident.clone(), Some(attrs), None, self_mut));
             }
             if attr.path().is_ident("prop") {
                 for prop in &mut properties {
@@ -188,8 +204,17 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let rename = attr.parse_args::<Path>().ok();
 
+
+                let mut self_mut = false;
+
+                if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
+                    if self_arg.mutability.is_some() {
+                        self_mut = true;
+                    }
+                }
+
                 remove.push(idx);
-                properties.push((func.sig.ident.clone(), None, rename));
+                properties.push((func.sig.ident.clone(), None, rename, self_mut));
             }
         }
 
@@ -220,9 +245,19 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 stringify!(#name)
             });
 
+        let any_cast = if prop.3 {
+            quote! {
+                this.as_any_mut().downcast_mut::<Self>()
+            }
+        } else {
+            quote! {
+                this.as_any().downcast_ref::<Self>()
+            }
+        };
+
         let prop = quote! {
             let function = #native_function::new(stringify!(#name), |args, this| {
-                let deez = this.as_any().downcast_ref::<Self>()
+                let deez = #any_cast
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with the a this value", #fn_name)))?;
 
                 deez.#name(args)
@@ -246,10 +281,21 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut construct = TokenStream::new();
 
-    if let Some(constructor) = constructor {
+    if let Some((constructor, mutability)) = constructor {
+        
+        let any_cast = if mutability {
+            quote! {
+                this.as_any_mut().downcast_mut::<Self>()
+            }
+        } else {
+            quote! {
+                this.as_any().downcast_ref::<Self>()
+            }
+        };
+        
         let prop = quote! {
-            let function: #value = #native_function::new("constructor", |args, this| {
-                let deez = this.as_any().downcast_ref::<Self>()
+            let function: #value = #native_function::new("constructor", |args, mut this| {
+                let deez = #any_cast 
                     .ok_or(Error::ty("Function constructor was not called with the a this value"))?;
 
                 deez.#constructor(args)
@@ -272,7 +318,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let new_fn = quote! {
-        fn initialize(mut self, ctx: &mut #context) -> Result<#object, #error> {
+        fn initialize_proto(mut self, ctx: &mut #context) -> Result<#object, #error> {
             use yavashark_value::{AsAny, Obj};
             #props
 
