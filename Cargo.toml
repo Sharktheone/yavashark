@@ -15,3 +15,27 @@ members = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+
+
+[workspace.lints.clippy]
+panic = "deny"
+pref = "deny"
+unwrap_used = "deny"
+
+pedantic = "warn"
+nursery = "warn"
+restriction = "warn"
+cargo = "warn"
+clone_on_ref_ptr = "warn"
+empty_enum_variants_with_braces = "warn"
+empty_structs_with_braces = "warn"
+enum_glob_use = "warn"
+error_impl_error = "warn"
+format_push_string = "warn"
+infinitely_recursive_function = "warn"
+infinite_loop = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+rc_ref = "warn"
+expect_used = "warn"
