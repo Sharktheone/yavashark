@@ -14,6 +14,7 @@ impl Context {
         self.run_pat_internal(stmt, scope, value, false, DUMMY_SP)
     }
 
+    #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
     pub fn run_pat_internal(
         &mut self,
         stmt: &Pat,
@@ -39,6 +40,7 @@ impl Context {
                     let next = iter.next(self)?.unwrap_or(Value::Undefined);
 
                     if matches!(elem, Some(Pat::Rest(_))) {
+                        #[allow(clippy::unwrap_used)]
                         let rest = elem.as_ref().unwrap(); // Safe to unwrap because of the match above
 
                         let mut elems = Vec::new();
@@ -130,7 +132,7 @@ impl Context {
             PropName::Str(str_) => Value::String(str_.value.to_string()),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => self.run_expr(&expr.expr, expr.span, scope)?,
-            _ => todo!(),
+            PropName::BigInt(_) => todo!(),
         })
     }
 }

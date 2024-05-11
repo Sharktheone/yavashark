@@ -1,90 +1,90 @@
 use crate::{Ctx, Value};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Error<C: Ctx> {
     pub kind: ErrorKind<C>,
     pub stacktrace: StackTrace,
 }
 
 impl<C: Ctx> Error<C> {
-    pub fn new(error: &str) -> Self {
+    #[must_use] pub fn new(error: &str) -> Self {
         Self {
             kind: ErrorKind::Runtime(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn new_error(error: String) -> Self {
+    #[must_use] pub fn new_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Runtime(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn reference(error: &str) -> Self {
+    #[must_use] pub fn reference(error: &str) -> Self {
         Self {
             kind: ErrorKind::Reference(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn reference_error(error: String) -> Self {
+    #[must_use] pub fn reference_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Reference(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn syn(error: &str) -> Self {
+    #[must_use] pub fn syn(error: &str) -> Self {
         Self {
             kind: ErrorKind::Syntax(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn syn_error(error: String) -> Self {
+    #[must_use] pub fn syn_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Syntax(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn unknown(error: Option<String>) -> Self {
+    #[must_use] pub fn unknown(error: Option<String>) -> Self {
         Self {
             kind: ErrorKind::Error(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn unknown_error(error: String) -> Self {
+    #[must_use] pub fn unknown_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Error(Some(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn ty(error: &str) -> Self {
+    #[must_use] pub fn ty(error: &str) -> Self {
         Self {
             kind: ErrorKind::Type(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn ty_error(error: String) -> Self {
+    #[must_use] pub fn ty_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Type(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn throw(val: Value<C>) -> Self {
+    #[must_use] pub fn throw(val: Value<C>) -> Self {
         Self {
             kind: ErrorKind::Throw(val),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    pub fn name(&self) -> &str {
+    #[must_use] pub const fn name(&self) -> &str {
         match &self.kind {
             ErrorKind::Type(_) => "TypeError",
             ErrorKind::Reference(_) => "ReferenceError",
@@ -97,45 +97,43 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    pub fn message(&self) -> String {
+    #[must_use] pub fn message(&self) -> String {
         match &self.kind {
-            ErrorKind::Type(msg) => msg.clone(),
-            ErrorKind::Reference(msg) => msg.clone(),
-            ErrorKind::Range(msg) => msg.clone(),
-            ErrorKind::Internal(msg) => msg.clone(),
-            ErrorKind::Runtime(msg) => msg.clone(),
-            ErrorKind::Syntax(msg) => msg.clone(),
+            ErrorKind::Type(msg)
+            | ErrorKind::Reference(msg)
+            | ErrorKind::Range(msg)
+            | ErrorKind::Internal(msg)
+            | ErrorKind::Runtime(msg)
+            | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(),
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         }
     }
 
-    pub fn stack(&self) -> &StackTrace {
+    #[must_use] pub const fn stack(&self) -> &StackTrace {
         &self.stacktrace
     }
 
-    pub fn file_name(&self) -> &str {
+    #[must_use] pub fn file_name(&self) -> &str {
         self.stacktrace
             .frames
             .first()
-            .map(|f| f.file.as_str())
-            .unwrap_or("")
+            .map_or("", |f| f.file.as_str())
     }
 
-    pub fn line_number(&self) -> u32 {
-        self.stacktrace.frames.first().map(|f| f.line).unwrap_or(0)
+    #[must_use] pub fn line_number(&self) -> u32 {
+        self.stacktrace.frames.first().map_or(0, |f| f.line)
     }
 
-    pub fn column_number(&self) -> u32 {
+    #[must_use] pub fn column_number(&self) -> u32 {
         self.stacktrace
             .frames
             .first()
-            .map(|f| f.column)
-            .unwrap_or(0)
+            .map_or(0, |f| f.column)
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ErrorKind<C: Ctx> {
     Type(String),
     Reference(String),
@@ -147,12 +145,12 @@ pub enum ErrorKind<C: Ctx> {
     Error(Option<String>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct StackFrame {
     pub function: String,
     pub file: String,

@@ -40,7 +40,7 @@ mod tests {
     #[test]
     fn run_switch_case() {
         test_eval!(
-            r#"
+            r"
             let a = 1;
             switch(a){
                 case 1:
@@ -53,7 +53,7 @@ mod tests {
                     a = 4;
             }
             a
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(2.0)
@@ -63,7 +63,7 @@ mod tests {
     #[test]
     fn switch_case_with_no_match() {
         test_eval!(
-            r#"
+            r"
             let a = 1;
             switch(a){
                 case 2:
@@ -76,7 +76,7 @@ mod tests {
                     a = 5;
             }
             a
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(5.0)
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn switch_case_with_multiple_matches() {
         test_eval!(
-            r#"
+            r"
             let a = 1;
             switch(a){
                 case 1:
@@ -98,7 +98,7 @@ mod tests {
                     a = 4;
             }
             a
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn switch_case_with_no_default() {
         test_eval!(
-            r#"
+            r"
             let a = 1;
             switch(a){
                 case 2:
@@ -119,7 +119,7 @@ mod tests {
                     break;
             }
             a
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)

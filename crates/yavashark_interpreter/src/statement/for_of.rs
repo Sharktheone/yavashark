@@ -2,11 +2,11 @@ use swc_ecma_ast::{ForHead, ForOfStmt};
 
 use yavashark_value::Obj;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-use crate::Value;
 use crate::{ControlFlow, Error};
+use crate::context::Context;
+use crate::RuntimeResult;
+use crate::scope::Scope;
+use crate::Value;
 
 impl Context {
     pub fn run_for_of(&mut self, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
@@ -15,13 +15,13 @@ impl Context {
         match obj {
             Value::Object(obj) => self.run_for_of_obj(&**obj.get()?, stmt, scope),
             Value::Function(func) => self.run_for_of_obj(func.get()?.as_object(), stmt, scope),
-            _ => Err(Error::ty_error(format!("{:?} is not an object", obj)).into()),
+            _ => Err(Error::ty_error(format!("{obj:?} is not an object")).into()),
         }
     }
 
     pub fn run_for_of_obj(
         &mut self,
-        obj: &dyn Obj<Context>,
+        obj: &dyn Obj<Self>,
         stmt: &ForOfStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {
@@ -58,19 +58,11 @@ impl Context {
             match result {
                 Ok(_) => {}
                 Err(ControlFlow::Return(v)) => return Ok(v),
-                Err(ControlFlow::Break(l)) => {
-                    if label.as_ref() == l.as_ref() {
-                        break;
-                    } else {
-                        return Err(ControlFlow::Break(l));
-                    }
+                Err(ControlFlow::Break(l)) if label.as_ref() == l.as_ref() => {
+                    break;
                 }
-                Err(ControlFlow::Continue(l)) => {
-                    if label.as_ref() == l.as_ref() {
-                        continue;
-                    } else {
-                        return Err(ControlFlow::Continue(l));
-                    }
+                Err(ControlFlow::Continue(l)) if label.as_ref() == l.as_ref() => {
+                    continue;
                 }
                 Err(e) => return Err(e),
             }

@@ -42,7 +42,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
         got_values: Vec::new(),
     }));
 
-    let send_state = state.clone();
+    let send_state = Rc::clone(&state);
     obj.define_property(
         "send".into(),
         NativeFunction::new(
@@ -58,7 +58,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
         .into(),
     );
 
-    let values_state = state.clone();
+    let values_state = Rc::clone(&state);
     obj.define_property(
         "values".into(),
         NativeFunction::new(

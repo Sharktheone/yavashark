@@ -11,6 +11,7 @@ use crate::{ControlFlow, FunctionPrototype, RuntimeResult, ValueResult};
 
 #[object]
 #[derive(Debug)]
+#[allow(clippy::module_name_repetitions)]
 pub struct ArrowFunction {
     expr: ArrowExpr,
     this: Value,

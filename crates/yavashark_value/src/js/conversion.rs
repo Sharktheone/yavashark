@@ -5,126 +5,126 @@ use crate::{Ctx, Func, Function, Object, Value};
 
 impl<C: Ctx> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
-        Value::String(s.to_string())
+        Self::String(s.to_string())
     }
 }
 
 impl<C: Ctx> From<String> for Value<C> {
     fn from(s: String) -> Self {
-        Value::String(s)
+        Self::String(s)
     }
 }
 
 impl<C: Ctx> From<&String> for Value<C> {
     fn from(s: &String) -> Self {
-        Value::String(s.clone())
+        Self::String(s.clone())
     }
 }
 
 impl<C: Ctx> From<()> for Value<C> {
-    fn from(_: ()) -> Self {
-        Value::Undefined
+    fn from((): ()) -> Self {
+        Self::Undefined
     }
 }
 
 impl<C: Ctx> From<f64> for Value<C> {
     fn from(n: f64) -> Self {
-        Value::Number(n)
+        Self::Number(n)
     }
 }
 
 impl<C: Ctx> From<bool> for Value<C> {
     fn from(b: bool) -> Self {
-        Value::Boolean(b)
+        Self::Boolean(b)
     }
 }
 
 impl<C: Ctx> From<u8> for Value<C> {
     fn from(n: u8) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<C: Ctx> From<u16> for Value<C> {
     fn from(n: u16) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<C: Ctx> From<u32> for Value<C> {
     fn from(n: u32) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<C: Ctx> From<u64> for Value<C> {
     fn from(n: u64) -> Self {
-        Value::Number(n as f64)
+        Self::Number(n as f64)
     }
 }
 
 impl<C: Ctx> From<i8> for Value<C> {
     fn from(n: i8) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<C: Ctx> From<i16> for Value<C> {
     fn from(n: i16) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<C: Ctx> From<i32> for Value<C> {
     fn from(n: i32) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<C: Ctx> From<i64> for Value<C> {
     fn from(n: i64) -> Self {
-        Value::Number(n as f64)
+        Self::Number(n as f64)
     }
 }
 
 impl<C: Ctx> From<usize> for Value<C> {
     fn from(n: usize) -> Self {
-        Value::Number(n as f64)
+        Self::Number(n as f64)
     }
 }
 
 impl<C: Ctx> From<isize> for Value<C> {
     fn from(n: isize) -> Self {
-        Value::Number(n as f64)
+        Self::Number(n as f64)
     }
 }
 
 impl<C: Ctx> From<f32> for Value<C> {
     fn from(n: f32) -> Self {
-        Value::Number(n as f64)
+        Self::Number(f64::from(n))
     }
 }
 
 impl<O: Into<Object<C>>, C: Ctx> From<O> for Value<C> {
     fn from(o: O) -> Self {
-        Value::Object(o.into())
+        Self::Object(o.into())
     }
 }
 
 impl<C: Ctx> From<Function<C>> for Value<C> {
     fn from(f: Function<C>) -> Self {
-        Value::Function(f)
+        Self::Function(f)
     }
 }
 
 impl<C: Ctx> From<Rc<RefCell<Box<dyn Func<C>>>>> for Value<C> {
     fn from(f: Rc<RefCell<Box<dyn Func<C>>>>) -> Self {
-        Value::Function(Function::from(f))
+        Self::Function(Function::from(f))
     }
 }
 
 impl<C: Ctx> From<Box<dyn Func<C>>> for Value<C> {
     fn from(f: Box<dyn Func<C>>) -> Self {
-        Value::Function(Function::from(f))
+        Self::Function(Function::from(f))
     }
 }

@@ -1,9 +1,9 @@
 use swc_ecma_ast::WhileStmt;
 
+use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::Value;
-use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_while(&mut self, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
@@ -24,19 +24,11 @@ impl Context {
             match result {
                 Ok(_) => {}
                 Err(e) => match &e {
-                    ControlFlow::Break(l) => {
-                        if *l == label {
-                            break Ok(Value::Undefined);
-                        } else {
-                            return Err(e);
-                        }
+                    ControlFlow::Break(l) if *l == label => {
+                        break Ok(Value::Undefined);
                     }
-                    ControlFlow::Continue(l) => {
-                        if *l == label {
-                            continue;
-                        } else {
-                            return Err(e);
-                        }
+                    ControlFlow::Continue(l)  if *l == label => {
+                        continue;
                     }
                     _ => return Err(e),
                 },
@@ -52,14 +44,14 @@ mod tests {
     #[test]
     fn while_ten() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
                 mock.send()
             }
             i
-            "#,
+            ",
             10,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -69,7 +61,7 @@ mod tests {
     #[test]
     fn while_break() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -79,7 +71,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(5.0)
@@ -89,7 +81,7 @@ mod tests {
     #[test]
     fn while_continue() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -99,7 +91,7 @@ mod tests {
                 mock.send()
             }
             i
-            "#,
+            ",
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -109,7 +101,7 @@ mod tests {
     #[test]
     fn while_nested() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -120,7 +112,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             100,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -130,7 +122,7 @@ mod tests {
     #[test]
     fn while_nested_break() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -144,7 +136,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             50,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -154,7 +146,7 @@ mod tests {
     #[test]
     fn while_nested_continue() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -168,7 +160,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             50,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -178,7 +170,7 @@ mod tests {
     #[test]
     fn while_nested_break_outer() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -195,7 +187,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             25,
             Vec::<Vec<Value>>::new(),
             Value::Number(5.0)
@@ -205,7 +197,7 @@ mod tests {
     #[test]
     fn while_nested_continue_outer() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             while (i < 10) {
                 i++;
@@ -222,7 +214,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             50,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -232,7 +224,7 @@ mod tests {
     #[test]
     fn while_nested_break_outer_label() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -246,7 +238,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)
@@ -256,7 +248,7 @@ mod tests {
     #[test]
     fn while_nested_continue_outer_label() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -270,7 +262,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             10,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -280,7 +272,7 @@ mod tests {
     #[test]
     fn while_nested_break_outer_label_inner() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -294,7 +286,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)
@@ -304,7 +296,7 @@ mod tests {
     #[test]
     fn while_nested_continue_outer_label_inner() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -318,7 +310,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             10,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -328,7 +320,7 @@ mod tests {
     #[test]
     fn while_nested_break_inner_label() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -342,7 +334,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             50,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -352,7 +344,7 @@ mod tests {
     #[test]
     fn while_nested_continue_inner_label() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -366,7 +358,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             50,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -376,7 +368,7 @@ mod tests {
     #[test]
     fn while_nested_break_inner_label_outer() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -390,7 +382,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             5,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)
@@ -400,7 +392,7 @@ mod tests {
     #[test]
     fn while_nested_continue_inner_label_outer() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             outer: while (i < 10) {
                 i++;
@@ -414,7 +406,7 @@ mod tests {
                 }
             }
             i
-            "#,
+            ",
             10,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)

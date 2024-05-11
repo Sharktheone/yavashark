@@ -46,8 +46,8 @@ impl Context {
             Stmt::ForOf(f) => self.run_for_of(f, scope),
             Stmt::Decl(d) => self
                 .run_decl(d, scope)
-                .map(|_| Value::Undefined)
-                .map_err(|e| e.into()),
+                .map(|()| Value::Undefined)
+                .map_err(std::convert::Into::into),
             Stmt::Expr(expr) => self.run_expr_stmt(expr, scope),
         }
     }

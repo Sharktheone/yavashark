@@ -22,7 +22,7 @@ impl Context {
             BinaryOp::LShift => left << right,
             BinaryOp::RShift => left >> right,
             BinaryOp::ZeroFillRShift => Value::Number(
-                (left.to_int_or_null() as u32 >> (right.to_int_or_null() as u32 % 32)) as f64,
+                f64::from(left.to_int_or_null() as u32 >> (right.to_int_or_null() as u32 % 32)),
             ),
             BinaryOp::Add => left + right,
             BinaryOp::Sub => left - right,
@@ -38,7 +38,7 @@ impl Context {
             BinaryOp::InstanceOf => {
                 todo!()
             }
-            BinaryOp::Exp => left.pow(right),
+            BinaryOp::Exp => left.pow(&right),
             BinaryOp::NullishCoalescing => {
                 if left.is_nullish() {
                     right

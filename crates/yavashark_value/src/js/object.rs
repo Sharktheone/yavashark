@@ -99,7 +99,7 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
+    #[must_use] pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
         self.get().ok()?.resolve_property(name)
     }
 
@@ -122,10 +122,9 @@ impl<C: Ctx> Object<C> {
     pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
         self.get()?
             .get_property(name)
-            .map(|v| v.copy())
+            .map(super::Value::copy)
             .ok_or(Error::reference_error(format!(
-                "{} does not exist on object",
-                name
+                "{name} does not exist on object"
             )))
     }
 
@@ -142,12 +141,9 @@ impl<C: Ctx> Object<C> {
         Ok(self.get()?.contains_key(name))
     }
 
-    pub fn name(&self) -> String {
-        if let Ok(o) = self.get() {
-            o.name().to_string()
-        } else {
-            "Object".to_string()
-        }
+    #[must_use] pub fn name(&self) -> String {
+        self.get()
+            .map_or_else(|_| "Object".to_string(), |o| o.name())
     }
 
     #[allow(clippy::type_complexity)]
@@ -176,12 +172,12 @@ impl<C: Ctx> Display for Object<C> {
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
-        Object(Rc::new(RefCell::new(obj)))
+        Self(Rc::new(RefCell::new(obj)))
     }
 }
 
 impl<C: Ctx> Object<C> {
-    pub fn new(obj: Box<dyn Obj<C>>) -> Self {
-        Object(Rc::new(RefCell::new(obj)))
+    #[must_use] pub fn new(obj: Box<dyn Obj<C>>) -> Self {
+        Self(Rc::new(RefCell::new(obj)))
     }
 }

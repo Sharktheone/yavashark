@@ -1,9 +1,9 @@
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 
+use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::Value;
-use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_for(&mut self, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
@@ -32,22 +32,14 @@ impl Context {
 
             if let Err(e) = self.run_statement(&stmt.body, scope) {
                 match e {
-                    ControlFlow::Break(l) => {
-                        if label.as_ref() == l.as_ref() {
-                            break Ok(Value::Undefined);
-                        } else {
-                            return Err(ControlFlow::Break(l));
-                        }
+                    ControlFlow::Break(l) if label.as_ref() == l.as_ref() => {
+                        break Ok(Value::Undefined);
                     }
-                    ControlFlow::Continue(l) => {
-                        if label.as_ref() == l.as_ref() {
-                            if let Some(update) = &stmt.update {
-                                self.run_expr(update, stmt.span, scope)?;
-                            }
-                            continue;
-                        } else {
-                            return Err(ControlFlow::Continue(l));
+                    ControlFlow::Continue(l) if label.as_ref() == l.as_ref() => {
+                        if let Some(update) = &stmt.update {
+                            self.run_expr(update, stmt.span, scope)?;
                         }
+                        continue;
                     }
                     (c) => return Err(c),
                 }
@@ -67,14 +59,14 @@ mod tests {
     #[test]
     fn run_for_loop() {
         test_eval!(
-            r#"
+            r"
             let a = 0;
             for (let i = 0; i < 10; i++) {
                 a++;
                 mock.send();
             }
             a
-            "#,
+            ",
             10,
             Vec::<Vec<Value>>::new(),
             Value::Number(10.0)
@@ -84,7 +76,7 @@ mod tests {
     #[test]
     fn run_for_loop_with_break() {
         test_eval!(
-            r#"
+            r"
             let a = 0;
             for (let i = 0; i < 5; i++) {
                 if (i === 2) {
@@ -94,7 +86,7 @@ mod tests {
                 a++;
             }
             a
-            "#,
+            ",
             2,
             Vec::<Vec<Value>>::new(),
             Value::Number(2.0)
@@ -104,7 +96,7 @@ mod tests {
     #[test]
     fn run_for_loop_with_continue() {
         test_eval!(
-            r#"
+            r"
             let a = 0;
             for (let i = 0; i < 5; i++) {
                 if (i === 2) {
@@ -114,7 +106,7 @@ mod tests {
                 mock.send();
             }
             a
-            "#,
+            ",
             4,
             Vec::<Vec<Value>>::new(),
             Value::Number(4.0)
@@ -124,7 +116,7 @@ mod tests {
     #[test]
     fn run_for_loop_with_break_and_continue() {
         test_eval!(
-            r#"
+            r"
             let a = 0;
             for (let i = 0; i < 5; i++) {
                 if (i === 3) {
@@ -139,7 +131,7 @@ mod tests {
                 mock.send();
             }
             a
-            "#,
+            ",
             2,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)

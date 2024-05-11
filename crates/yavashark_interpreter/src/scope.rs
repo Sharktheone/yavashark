@@ -2,10 +2,10 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+use crate::{Error, Res, Value, Variable};
 use crate::console::get_console;
 use crate::context::Context;
 use crate::error::get_error;
-use crate::{Error, Res, Value, Variable};
 
 pub struct MutValue {
     pub(crate) name: String,
@@ -13,6 +13,7 @@ pub struct MutValue {
 }
 
 #[derive(Debug, Clone, Default)]
+#[allow(clippy::module_name_repetitions)]
 pub struct ScopeState {
     state: u8,
 }
@@ -25,35 +26,37 @@ impl ScopeState {
     const ITERATION: u8 = 0b100;
     const BREAKABLE: u8 = 0b1000;
     const RETURNABLE: u8 = 0b10000;
-    const CONTINUABLE: u8 = 0b100000;
-    const STATE_NONE: ScopeState = ScopeState {
-        state: ScopeState::NONE,
+    const CONTINUABLE: u8 = 0b10_0000;
+    const STATE_NONE: Self = Self {
+        state: Self::NONE,
     };
-    const STATE_GLOBAL: ScopeState = ScopeState {
-        state: ScopeState::GLOBAL,
+    const STATE_GLOBAL: Self = Self {
+        state: Self::GLOBAL,
     };
-    const STATE_FUNCTION: ScopeState = ScopeState {
-        state: ScopeState::FUNCTION,
+    const STATE_FUNCTION: Self = Self {
+        state: Self::FUNCTION,
     };
-    const STATE_ITERATION: ScopeState = ScopeState {
-        state: ScopeState::ITERATION,
+    const STATE_ITERATION: Self = Self {
+        state: Self::ITERATION,
     };
-    const STATE_BREAKABLE: ScopeState = ScopeState {
-        state: ScopeState::BREAKABLE,
+    const STATE_BREAKABLE: Self = Self {
+        state: Self::BREAKABLE,
     };
-    const STATE_RETURNABLE: ScopeState = ScopeState {
-        state: ScopeState::RETURNABLE,
-    };
-
-    const STATE_CONTINUABLE: ScopeState = ScopeState {
-        state: ScopeState::CONTINUABLE,
+    const STATE_RETURNABLE: Self = Self {
+        state: Self::RETURNABLE,
     };
 
-    pub fn new() -> Self {
+    const STATE_CONTINUABLE: Self = Self {
+        state: Self::CONTINUABLE,
+    };
+
+    #[must_use]
+    pub const fn new() -> Self {
         Self { state: 0 }
     }
 
-    pub fn copy(&self) -> Self {
+    #[must_use]
+    pub const fn copy(&self) -> Self {
         let mut state = self.state;
 
         state &= !Self::FUNCTION; // Remove the function state
@@ -88,31 +91,38 @@ impl ScopeState {
         self.state |= Self::BREAKABLE;
     }
 
-    pub fn is_function(&self) -> bool {
+    #[must_use]
+    pub const fn is_function(&self) -> bool {
         self.state & Self::FUNCTION != 0
     }
 
-    pub fn is_global(&self) -> bool {
+    #[must_use]
+    pub const fn is_global(&self) -> bool {
         self.state & Self::GLOBAL != 0
     }
 
-    pub fn is_iteration(&self) -> bool {
+    #[must_use]
+    pub const fn is_iteration(&self) -> bool {
         self.state & Self::ITERATION != 0
     }
 
-    pub fn is_breakable(&self) -> bool {
+    #[must_use]
+    pub const fn is_breakable(&self) -> bool {
         self.state & Self::BREAKABLE != 0
     }
 
-    pub fn is_returnable(&self) -> bool {
+    #[must_use]
+    pub const fn is_returnable(&self) -> bool {
         self.state & Self::RETURNABLE != 0
     }
 
-    pub fn is_none(&self) -> bool {
+    #[must_use]
+    pub const fn is_none(&self) -> bool {
         self.state == Self::NONE
     }
 
-    pub fn is_continuable(&self) -> bool {
+    #[must_use]
+    pub const fn is_continuable(&self) -> bool {
         self.state & Self::CONTINUABLE != 0
     }
 }
@@ -207,7 +217,7 @@ impl ScopeInternal {
         }
     }
 
-    pub fn with_parent(parent: Rc<RefCell<ScopeInternal>>) -> Self {
+    pub fn with_parent(parent: Rc<RefCell<Self>>) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -266,7 +276,7 @@ impl ScopeInternal {
             self.variables.insert(name, Variable::new(value));
         } else if let Some(p) = self.parent.as_ref() {
             p.borrow_mut()
-                .declare_global_var(name.clone(), value.copy());
+                .declare_global_var(name, value.copy());
         } else {
             self.variables.insert(name, Variable::new(value));
         }
@@ -285,14 +295,11 @@ impl ScopeInternal {
     }
 
     pub fn has_value(&self, name: &str) -> bool {
-        return if !self.variables.contains_key(name) {
-            if let Some(p) = self.parent.as_ref() {
-                p.borrow().has_value(name)
-            } else {
-                false
-            }
-        } else {
+        return if self.variables.contains_key(name) {
             true
+        } else {
+            self.parent.as_ref()
+                .map_or(false, |p| p.borrow().has_value(name))
         };
     }
 
@@ -332,31 +339,31 @@ impl ScopeInternal {
         self.state.set_loop();
     }
 
-    pub fn state_is_function(&self) -> bool {
+    pub const fn state_is_function(&self) -> bool {
         self.state.is_function()
     }
 
-    pub fn state_is_global(&self) -> bool {
+    pub const fn state_is_global(&self) -> bool {
         self.state.is_global()
     }
 
-    pub fn state_is_iteration(&self) -> bool {
+    pub const fn state_is_iteration(&self) -> bool {
         self.state.is_iteration()
     }
 
-    pub fn state_is_breakable(&self) -> bool {
+    pub const fn state_is_breakable(&self) -> bool {
         self.state.is_breakable()
     }
 
-    pub fn state_is_returnable(&self) -> bool {
+    pub const fn state_is_returnable(&self) -> bool {
         self.state.is_returnable()
     }
 
-    pub fn state_is_none(&self) -> bool {
+    pub const fn state_is_none(&self) -> bool {
         self.state.is_none()
     }
 
-    pub fn state_is_continuable(&self) -> bool {
+    pub const fn state_is_continuable(&self) -> bool {
         self.state.is_continuable()
     }
 
@@ -409,14 +416,12 @@ impl ScopeInternal {
     }
 
     pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
-        if let Some(v) = self.variables.get(name) {
-            f(&v.value);
-            Ok(())
-        } else if let Some(p) = self.parent.as_ref() {
-            p.borrow().with(name, f)
-        } else {
-            Err(Error::new("Variable not found"))
-        }
+        self.variables.get(name)
+            .map_or_else(|| self.parent.as_ref()
+                .map_or_else(|| Err(Error::new("Variable not found")), |p| p.borrow().with(name, f)), |v| {
+                f(&v.value);
+                Ok(())
+            })
     }
 }
 
@@ -435,7 +440,8 @@ impl Scope {
         }
     }
 
-    pub fn with_parent(parent: &Scope) -> Self {
+    #[must_use]
+    pub fn with_parent(parent: &Self) -> Self {
         Self {
             scope: Rc::new(RefCell::new(ScopeInternal::with_parent(Rc::clone(
                 &parent.scope,
@@ -444,7 +450,8 @@ impl Scope {
         }
     }
 
-    pub fn with_parent_this(parent: &Scope, this: Value) -> Self {
+    #[must_use]
+    pub fn with_parent_this(parent: &Self, this: Value) -> Self {
         Self {
             scope: Rc::new(RefCell::new(ScopeInternal::with_parent(Rc::clone(
                 &parent.scope,
@@ -465,19 +472,21 @@ impl Scope {
         self.scope.borrow_mut().declare_global_var(name, value);
     }
 
+    #[must_use]
     pub fn resolve(&self, name: &str) -> Option<Value> {
         self.scope.borrow().resolve(name)
     }
 
+    #[must_use]
     pub fn has_label(&self, label: &str) -> bool {
         let scope = self.scope.borrow();
-        if !scope.has_label(label) {
+        if scope.has_label(label) {
+            true
+        } else {
             if let Some(p) = scope.parent.as_ref() {
                 return p.borrow().has_label(label);
             }
             false
-        } else {
-            true
         }
     }
 
@@ -485,10 +494,12 @@ impl Scope {
         self.scope.borrow_mut().declare_label(label);
     }
 
+    #[must_use]
     pub fn last_label(&self) -> Option<String> {
         self.scope.borrow_mut().last_label().cloned()
     }
 
+    #[must_use]
     pub fn state(&self) -> ScopeState {
         self.scope.borrow().state.clone()
     }
@@ -517,34 +528,42 @@ impl Scope {
         self.scope.borrow_mut().state_set_loop();
     }
 
+    #[must_use]
     pub fn state_is_function(&self) -> bool {
         self.scope.borrow().state_is_function()
     }
 
+    #[must_use]
     pub fn state_is_global(&self) -> bool {
         self.scope.borrow().state_is_global()
     }
 
+    #[must_use]
     pub fn state_is_iteration(&self) -> bool {
         self.scope.borrow().state_is_iteration()
     }
 
+    #[must_use]
     pub fn state_is_breakable(&self) -> bool {
         self.scope.borrow().state_is_breakable()
     }
 
+    #[must_use]
     pub fn state_is_returnable(&self) -> bool {
         self.scope.borrow().state_is_returnable()
     }
 
+    #[must_use]
     pub fn state_is_none(&self) -> bool {
         self.scope.borrow().state_is_none()
     }
 
+    #[must_use]
     pub fn state_is_continuable(&self) -> bool {
         self.scope.borrow().state_is_continuable()
     }
 
+    #[must_use]
     pub fn has_value(&self, name: &str) -> bool {
         self.scope.borrow().has_value(name)
     }
@@ -565,6 +584,7 @@ impl Scope {
         self.scope.borrow().with(name, f)
     }
 
+    #[must_use]
     pub fn child(&self) -> Self {
         Self::with_parent(self)
     }
@@ -591,8 +611,6 @@ impl From<Rc<RefCell<ScopeInternal>>> for Scope {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::cell::RefCell;
-    use std::rc::Rc;
 
     #[test]
     fn scope_state_new_is_none() {
@@ -644,7 +662,7 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_var_and_resolve() {
-        let mut ctx = Context::new();
+        let mut ctx = Context::new().unwrap();
         let mut scope = ScopeInternal::new(&mut ctx);
         scope.declare_var("test".to_string(), Value::Number(42.0));
         let value = scope.resolve("test").unwrap();
@@ -653,7 +671,7 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_read_only_var_and_update_fails() {
-        let mut ctx = Context::new();
+        let mut ctx = Context::new().unwrap();
         let mut scope = ScopeInternal::new(&mut ctx);
         scope
             .declare_read_only_var("test".to_string(), Value::Number(42.0))
@@ -664,7 +682,7 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
-        let mut ctx = Context::new();
+        let mut ctx = Context::new().unwrap();
         let mut scope = ScopeInternal::new(&mut ctx);
         scope.declare_global_var("test".to_string(), Value::Number(42.0));
         let value = scope.resolve("test").unwrap();
@@ -673,7 +691,7 @@ mod tests {
 
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
-        let mut ctx = Context::new();
+        let mut ctx = Context::new().unwrap();
         let mut scope = ScopeInternal::new(&mut ctx);
         scope
             .update_or_define("test".to_string(), Value::Number(42.0))

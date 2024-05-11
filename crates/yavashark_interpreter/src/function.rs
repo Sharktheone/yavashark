@@ -19,6 +19,7 @@ type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
+#[allow(clippy::module_name_repetitions)]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
@@ -70,9 +71,9 @@ impl NativeFunction {
         this.into()
     }
 
-    pub fn builder() -> NativeFunctionBuilder {
-        NativeFunctionBuilder(NativeFunction {
-            name: "".to_string(),
+    #[must_use] pub fn builder() -> NativeFunctionBuilder {
+        NativeFunctionBuilder(Self {
+            name: String::new(),
             f: Box::new(|_, _| Ok(Value::Undefined)),
             object: Object::raw_with_proto(Value::Undefined),
             data: None,
@@ -81,47 +82,47 @@ impl NativeFunction {
 }
 
 impl NativeFunctionBuilder {
-    pub fn name(mut self, name: &str) -> Self {
+    #[must_use] pub fn name(mut self, name: &str) -> Self {
         self.0.name = name.to_string();
         self
     }
 
-    pub fn func(mut self, f: NativeFn) -> Self {
+    #[must_use] pub fn func(mut self, f: NativeFn) -> Self {
         self.0.f = f;
         self
     }
 
-    pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Self {
+    #[must_use] pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Self {
         self.0.f = Box::new(f);
         self
     }
 
     /// Note: Overwrites a potential prototype that was previously set
-    pub fn object(mut self, object: Object) -> Self {
+    #[must_use] pub fn object(mut self, object: Object) -> Self {
         self.0.object = object;
         self
     }
 
     /// Note: Overwrites a potential object that was previously set
-    pub fn proto(mut self, proto: Value) -> Self {
+    #[must_use] pub fn proto(mut self, proto: Value) -> Self {
         self.0.object.prototype = proto.into(); //TODO: this doesn't work when you want to also set an object
         self
     }
 
     /// Note: Overrides the prototype of the object
-    pub fn context(mut self, ctx: &mut Context) -> Self {
+    #[must_use] pub fn context(mut self, ctx: &mut Context) -> Self {
         self.0.object.prototype = ctx.func_prototype.clone().into();
         self
     }
 
     // Sets the data that can be accessed by the function
-    pub fn data(mut self, data: Box<dyn Any>) -> Self {
+    #[must_use] pub fn data(mut self, data: Box<dyn Any>) -> Self {
         self.0.data = Some(data);
         self
     }
 
     /// Builds the function handle.
-    pub fn build(self) -> FunctionHandle {
+    #[must_use] pub fn build(self) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(self.0);
         this.into()
     }
@@ -186,6 +187,7 @@ impl Func<Context> for NativeFunction {
 }
 
 #[derive(Debug)]
+#[allow(clippy::module_name_repetitions)]
 pub struct JSFunction {
     pub name: String,
     pub params: Vec<Param>,
@@ -221,7 +223,7 @@ impl Obj<Context> for JSFunction {
     }
 
     fn define_variable(&mut self, name: Value, value: Variable) {
-        self.object.define_variable(name, value)
+        self.object.define_variable(name, value);
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {

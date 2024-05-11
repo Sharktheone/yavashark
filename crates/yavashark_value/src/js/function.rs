@@ -86,10 +86,9 @@ impl<C: Ctx> Function<C> {
     pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
         self.get()?
             .get_property(name)
-            .map(|v| v.copy())
+            .map(super::Value::copy)
             .ok_or(Error::reference_error(format!(
-                "{} does not exist on object",
-                name
+                "{name} does not exist on object"
             )))
     }
 
@@ -106,12 +105,9 @@ impl<C: Ctx> Function<C> {
         Ok(self.get()?.contains_key(name))
     }
 
-    pub fn name(&self) -> String {
-        if let Ok(o) = self.get() {
-            o.name().to_string()
-        } else {
-            "Function".to_string()
-        }
+    #[must_use] pub fn name(&self) -> String {
+        self.get()
+            .map_or_else(|_| "Function".to_string(), |o| o.name())
     }
 
     #[allow(clippy::type_complexity)]
@@ -140,12 +136,12 @@ impl<C: Ctx> Display for Function<C> {
 
 impl<C: Ctx> From<Box<dyn Func<C>>> for Function<C> {
     fn from(f: Box<dyn Func<C>>) -> Self {
-        Function(Rc::new(RefCell::new(f)))
+        Self(Rc::new(RefCell::new(f)))
     }
 }
 
 impl<C: Ctx> From<Rc<RefCell<Box<dyn Func<C>>>>> for Function<C> {
     fn from(f: Rc<RefCell<Box<dyn Func<C>>>>) -> Self {
-        Function(f)
+        Self(f)
     }
 }

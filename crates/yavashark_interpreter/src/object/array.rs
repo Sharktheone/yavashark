@@ -1,4 +1,6 @@
+#![allow(clippy::needless_pass_by_value)]
 use yavashark_macro::{object, properties};
+
 
 use crate::object::Object;
 use crate::Symbol;
@@ -28,6 +30,7 @@ impl Array {
 
 #[derive(Debug)]
 #[object]
+#[allow(clippy::module_name_repetitions)]
 pub struct ArrayIterator {}
 
 impl From<Vec<Value>> for Array {

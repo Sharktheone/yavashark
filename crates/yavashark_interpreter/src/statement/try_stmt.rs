@@ -28,7 +28,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                 //TODO: Error must be an object, then replace it with self.run_pat
                 match param {
                     Pat::Ident(ident) => {
-                        scope.declare_var(ident.sym.to_string(), format!("{:?}", err).into());
+                        scope.declare_var(ident.sym.to_string(), format!("{err:?}").into());
                         //TODO impl Obj for Error
                     }
                     Pat::Object(obj) => {
@@ -122,7 +122,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         }
                                     }
                                 }
-                                _ => {
+                                ObjectPatProp::Rest(_) => {
                                     todo!()
                                 }
                             }

@@ -1,3 +1,4 @@
+#![allow(clippy::needless_pass_by_value)]
 use crate::{Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value) -> ValueResult {

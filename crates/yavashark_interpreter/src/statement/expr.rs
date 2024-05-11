@@ -123,8 +123,7 @@ impl Context {
                 stmt.span
             ))),
             _ => Err(ControlFlow::error(format!(
-                "{:?}: TS and JSX are not supported.",
-                span
+                "{span:?}: TS and JSX are not supported."
             ))),
         }
     }

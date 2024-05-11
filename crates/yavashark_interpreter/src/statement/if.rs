@@ -26,11 +26,11 @@ mod tests {
     #[test]
     fn run_if_true() {
         test_eval!(
-            r#"
+            r"
             if (true) {
                 mock.values(1);
             }
-            "#,
+            ",
             0,
             vec![vec![Value::Number(1.0)]],
             Value::Undefined
@@ -40,11 +40,11 @@ mod tests {
     #[test]
     fn run_if_false() {
         test_eval!(
-            r#"
+            r"
             if (false) {
                 mock.values(1);
             }
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Undefined
@@ -54,13 +54,13 @@ mod tests {
     #[test]
     fn run_if_else() {
         test_eval!(
-            r#"
+            r"
             if (false) {
                 mock.values(1);
             } else {
                 mock.values(2);
             };
-            "#,
+            ",
             0,
             vec![vec![Value::Number(2.0)]],
             Value::Undefined
@@ -70,13 +70,13 @@ mod tests {
     #[test]
     fn run_if_else_if() {
         test_eval!(
-            r#"
+            r"
             if (false) {
                 mock.values(1);
             } else if (true) {
                 mock.values(2);
             };
-            "#,
+            ",
             0,
             vec![vec![Value::Number(2.0)]],
             Value::Undefined
@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn run_if_else_if_else() {
         test_eval!(
-            r#"
+            r"
             if (false) {
                 mock.values(1);
             } else if (false) {
@@ -94,7 +94,7 @@ mod tests {
             } else {
                 mock.values(3);
             };
-            "#,
+            ",
             0,
             vec![vec![Value::Number(3.0)]],
             Value::Undefined
@@ -104,11 +104,11 @@ mod tests {
     #[test]
     fn run_if_truthy_number() {
         test_eval!(
-            r#"
+            r"
             if (1) {
                 mock.values(1);
             }
-            "#,
+            ",
             0,
             vec![vec![Value::Number(1.0)]],
             Value::Undefined
@@ -118,11 +118,11 @@ mod tests {
     #[test]
     fn run_if_falsy_number() {
         test_eval!(
-            r#"
+            r"
             if (0) {
                 mock.values(1);
             }
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Undefined

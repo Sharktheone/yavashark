@@ -28,12 +28,12 @@ mod tests {
     #[test]
     fn run_return() {
         test_eval!(
-            r#"
+            r"
             function foo(){
                 return 1;
             }
             foo();
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)
@@ -43,12 +43,12 @@ mod tests {
     #[test]
     fn run_return_undefined() {
         test_eval!(
-            r#"
+            r"
             function foo(){
                 return;
             }
             foo();
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Undefined
@@ -58,12 +58,12 @@ mod tests {
     #[test]
     fn run_return_no_return() {
         test_eval!(
-            r#"
+            r"
             function foo(){
                 1;
             }
             foo();
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Undefined
@@ -73,12 +73,12 @@ mod tests {
     #[test]
     fn run_return_no_return_null() {
         test_eval!(
-            r#"
+            r"
             function foo(){
                 null;
             }
             foo();
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Undefined
@@ -88,14 +88,14 @@ mod tests {
     #[test]
     fn run_return_no_return_undefined() {
         test_eval!(
-            r#"
+            r"
             function foo(){
                 mock.send();
                 return 1;
                 mock.send();
             }
             foo();
-            "#,
+            ",
             1,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)

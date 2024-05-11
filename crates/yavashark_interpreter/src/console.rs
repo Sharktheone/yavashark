@@ -20,7 +20,7 @@ pub fn get_console(ctx: &mut Context) -> Value {
 
                 str.pop();
 
-                println!("{}", str);
+                println!("{str}");
 
                 Ok(Value::Undefined)
             },

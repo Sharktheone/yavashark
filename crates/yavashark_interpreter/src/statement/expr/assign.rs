@@ -12,7 +12,7 @@ impl Context {
 
         Ok(self
             .assign_target(&stmt.left, value, scope)
-            .map(|_| Value::Undefined)?)
+            .map(|()| Value::Undefined)?)
     }
 
     pub fn with_target(

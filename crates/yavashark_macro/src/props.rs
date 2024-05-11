@@ -39,7 +39,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
 
-    let mut value = crate_path.clone();
+    let mut value = crate_path;
     value
         .segments
         .push(PathSegment::from(Ident::new("Value", item.span())));
@@ -215,7 +215,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let fn_name = prop
             .2
             .as_ref()
-            .map(|i| i.to_token_stream())
+            .map(quote::ToTokens::to_token_stream)
             .unwrap_or(quote! {
                 stringify!(#name)
             });

@@ -1,3 +1,4 @@
+#![allow(clippy::needless_pass_by_value)]
 use std::any::Any;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -8,6 +9,7 @@ use yavashark_value::{Func, Obj};
 use crate::context::Context;
 use crate::object::Prototype;
 use crate::{NativeFunction, Value, ValueResult, Variable};
+
 
 #[derive(Debug)]
 // #[object(prototype, direct(apply, bind, call, length, name), constructor)]
@@ -134,7 +136,7 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.properties.get(name).map(|v| v.copy())
+        self.properties.get(name).map(yavashark_value::variable::Variable::copy)
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -172,12 +174,12 @@ impl Obj<Context> for FunctionPrototype {
     fn contains_key(&self, name: &Value) -> bool {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return true,
-                "bind" => return true,
-                "call" => return true,
-                "constructor" => return true,
-                "length" => return true,
-                "name" => return true,
+                "apply"
+                | "bind"
+                | "call"
+                | "constructor"
+                | "length"
+                | "name" => return true,
                 _ => {}
             }
         }
@@ -201,11 +203,11 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn keys(&self) -> Vec<Value> {
-        self.properties.keys().map(|v| v.copy()).collect()
+        self.properties.keys().map(yavashark_value::Value::copy).collect()
     }
 
     fn values(&self) -> Vec<Value> {
-        self.properties.values().map(|v| v.copy()).collect()
+        self.properties.values().map(yavashark_value::variable::Variable::copy).collect()
     }
 }
 

@@ -33,7 +33,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("Context", input.span())));
 
-    let mut value = crate_path.clone();
+    let mut value = crate_path;
     value
         .segments
         .push(PathSegment::from(Ident::new("Value", input.span())));

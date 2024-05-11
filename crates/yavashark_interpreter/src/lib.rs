@@ -1,7 +1,8 @@
-#![allow(unused)]
+#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
 use std::cell::RefCell;
 use std::rc::Rc;
+use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
 use crate::context::Context;
@@ -26,7 +27,7 @@ type ObjectHandle = yavashark_value::Object<Context>;
 type Variable = yavashark_value::variable::Variable<Context>;
 type Symbol = yavashark_value::Symbol<Context>;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ControlFlow {
     Continue(Option<String>),
     Break(Option<String>),
@@ -36,28 +37,28 @@ pub enum ControlFlow {
 
 impl ControlFlow {
     fn error(e: String) -> Self {
-        ControlFlow::Error(Error::new_error(e))
+        Self::Error(Error::new_error(e))
     }
 
     fn error_reference(e: String) -> Self {
-        ControlFlow::Error(Error::reference_error(e))
+        Self::Error(Error::reference_error(e))
     }
     fn error_syntax(e: &str) -> Self {
-        ControlFlow::Error(Error::syn(e))
+        Self::Error(Error::syn(e))
     }
     fn error_type(e: String) -> Self {
-        ControlFlow::Error(Error::ty_error(e))
+        Self::Error(Error::ty_error(e))
     }
 
-    fn get_error(self) -> std::result::Result<Error, ControlFlow> {
+    fn get_error(self) -> std::result::Result<Error, Self> {
         match self {
-            ControlFlow::Error(e) => Ok(e),
+            Self::Error(e) => Ok(e),
             (e) => Err(e),
         }
     }
 
     fn throw(val: Value) -> Self {
-        ControlFlow::Error(Error::throw(val))
+        Self::Error(Error::throw(val))
     }
 }
 
@@ -71,7 +72,7 @@ type RuntimeResult = std::result::Result<Value, ControlFlow>;
 
 impl From<Error> for ControlFlow {
     fn from(e: Error) -> Self {
-        ControlFlow::Error(e)
+        Self::Error(e)
     }
 }
 
@@ -79,7 +80,7 @@ impl From<ControlFlow> for Error {
     fn from(e: ControlFlow) -> Self {
         match e {
             ControlFlow::Error(e) => e,
-            _ => Error::new("Incorrect ControlFlow"),
+            _ => Self::new("Incorrect ControlFlow"),
         }
     }
 }
@@ -89,12 +90,12 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    pub fn new(script: Vec<Stmt>) -> Self {
+    #[must_use] pub fn new(script: Vec<Stmt>) -> Self {
         Self { script }
     }
 
-    pub fn run(&self) -> ValueResult {
-        let mut context = &mut Context::new();
+    pub fn run(&self) -> anyhow::Result<Value> {
+        let mut context = &mut Context::new()?;
         let mut scope = scope::Scope::global(context);
 
         context
@@ -104,11 +105,13 @@ impl Interpreter {
                 ControlFlow::Return(v) => Ok(v),
                 _ => Ok(Value::Undefined),
             })
+            .map_err(|e| anyhow!("{e:?}"))
     }
 
     #[cfg(test)]
+        #[allow(clippy::missing_panics_doc)]
     pub fn run_test(&self) -> (ValueResult, Rc<RefCell<tests::State>>) {
-        let mut context = &mut Context::new();
+        let mut context = &mut Context::new().unwrap();
         let mut scope = scope::Scope::global(context);
 
         let (mock, state) = tests::mock_object(context);
@@ -132,7 +135,7 @@ impl Interpreter {
 mod temp_test {
     use swc_common::input::StringInput;
     use swc_common::BytePos;
-    use swc_ecma_parser::{Parser, Syntax};
+    use swc_ecma_parser::{EsConfig, Parser, Syntax};
 
     use super::*;
 
@@ -262,7 +265,7 @@ mod temp_test {
 
         let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 
-        let c = Default::default();
+        let c = EsConfig::default();
 
         let mut p = Parser::new(Syntax::Es(c), input, None);
         let script = p.parse_script().unwrap();
@@ -270,6 +273,6 @@ mod temp_test {
         let interpreter = Interpreter::new(script.body);
 
         let result = interpreter.run().unwrap();
-        println!("{:?}", result);
+        println!("{result:?}");
     }
 }

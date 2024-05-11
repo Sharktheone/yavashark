@@ -17,7 +17,7 @@ mod ops;
 mod symbol;
 pub mod variable;
 
-#[derive(Debug, PartialEq, Hash, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {
     String(&'static str),
     Owned(String),
@@ -26,8 +26,8 @@ pub enum ConstString {
 impl Display for ConstString {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            ConstString::String(s) => write!(f, "{}", s)?,
-            ConstString::Owned(s) => write!(f, "{}", s)?,
+            Self::String(s) => write!(f, "{s}")?,
+            Self::Owned(s) => write!(f, "{s}")?,
         }
 
         Ok(())
@@ -71,85 +71,85 @@ impl<C: Ctx> Hash for Value<C> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         //Hash the type and the value to minimize collisions
         match self {
-            Value::Null => Type::Null.hash(state),
-            Value::Undefined => Type::Undefined.hash(state),
-            Value::Number(n) => (Type::Number, n.to_bits()).hash(state),
-            Value::String(s) => (Type::String, s).hash(state),
-            Value::Boolean(b) => (Type::Boolean, b).hash(state),
-            Value::Object(o) => (Type::Object, o).hash(state),
-            Value::Function(f) => (Type::Function, f).hash(state),
-            Value::Symbol(s) => (Type::Symbol, s).hash(state),
+            Self::Null => Type::Null.hash(state),
+            Self::Undefined => Type::Undefined.hash(state),
+            Self::Number(n) => (Type::Number, n.to_bits()).hash(state),
+            Self::String(s) => (Type::String, s).hash(state),
+            Self::Boolean(b) => (Type::Boolean, b).hash(state),
+            Self::Object(o) => (Type::Object, o).hash(state),
+            Self::Function(f) => (Type::Function, f).hash(state),
+            Self::Symbol(s) => (Type::Symbol, s).hash(state),
         }
     }
 }
 
 impl<C: Ctx> Value<C> {
-    pub fn copy(&self) -> Self {
+    #[must_use] pub fn copy(&self) -> Self {
         match self {
-            Value::Null => Value::Null,
-            Value::Undefined => Value::Undefined,
-            Value::Number(n) => Value::Number(*n),
-            Value::String(s) => Value::String(s.clone()),
-            Value::Boolean(b) => Value::Boolean(*b),
-            Value::Object(o) => Value::Object(Object::clone(o)),
-            Value::Function(f) => Value::Function(Function::clone(f)),
-            Value::Symbol(s) => Value::Symbol(s.clone()),
+            Self::Null => Self::Null,
+            Self::Undefined => Self::Undefined,
+            Self::Number(n) => Self::Number(*n),
+            Self::String(s) => Self::String(s.clone()),
+            Self::Boolean(b) => Self::Boolean(*b),
+            Self::Object(o) => Self::Object(Object::clone(o)),
+            Self::Function(f) => Self::Function(Function::clone(f)),
+            Self::Symbol(s) => Self::Symbol(s.clone()),
         }
     }
 
-    pub const fn symbol(name: &'static str) -> Self {
-        Value::Symbol(ConstString::String(name))
+    #[must_use] pub const fn symbol(name: &'static str) -> Self {
+        Self::Symbol(ConstString::String(name))
     }
 
-    pub fn string(s: &str) -> Self {
-        Value::String(s.to_string())
+    #[must_use] pub fn string(s: &str) -> Self {
+        Self::String(s.to_string())
     }
 
-    pub fn is_nan(&self) -> bool {
+    #[must_use] pub fn is_nan(&self) -> bool {
         match self {
-            Value::Number(n) => n.is_nan(),
+            Self::Number(n) => n.is_nan(),
             _ => false,
         }
     }
 
-    pub fn is_falsey(&self) -> bool {
+    #[must_use] pub fn is_falsey(&self) -> bool {
         match self {
-            Value::Null | Value::Undefined => true,
-            Value::Number(n) => n == &0.0,
-            Value::String(s) => s.is_empty(),
-            Value::Boolean(b) => !b,
-            Value::Object(_) => false,
-            Value::Function(_) => false,
-            Value::Symbol(_) => false,
+            Self::Null | Self::Undefined => true,
+            Self::Number(n) => *n == 0.0,
+            Self::String(s) => s.is_empty(),
+            Self::Boolean(b) => !b,
+            Self::Object(_)
+            | Self::Function(_)
+            | Self::Symbol(_) => false,
         }
     }
 
-    pub fn is_truthy(&self) -> bool {
+    #[must_use] pub fn is_truthy(&self) -> bool {
         match self {
-            Value::Null | Value::Undefined => false,
-            Value::Number(n) => *n != 0.0,
-            Value::String(s) => !s.is_empty(),
-            Value::Boolean(b) => *b,
-            Value::Object(_) => true,
-            Value::Function(_) => true,
-            Value::Symbol(_) => true,
+            Self::Null | Self::Undefined => false,
+            Self::Number(n) => *n != 0.0,
+            Self::String(s) => !s.is_empty(),
+            Self::Boolean(b) => *b,
+            Self::Object(_)
+            | Self::Function(_)
+            | Self::Symbol(_) => true,
         }
     }
 
-    pub fn is_nullish(&self) -> bool {
-        matches!(self, Value::Null | Value::Undefined)
+    #[must_use] pub const fn is_nullish(&self) -> bool {
+        matches!(self, Self::Null | Self::Undefined)
     }
 
-    pub fn type_of(&self) -> &'static str {
+    #[must_use] pub const fn type_of(&self) -> &'static str {
         match self {
-            Value::Null => "null",
-            Value::Undefined => "undefined",
-            Value::Number(_) => "number",
-            Value::String(_) => "string",
-            Value::Boolean(_) => "boolean",
-            Value::Object(_) => "object",
-            Value::Function(_) => "function",
-            Value::Symbol(_) => "symbol",
+            Self::Null => "null",
+            Self::Undefined => "undefined",
+            Self::Number(_) => "number",
+            Self::String(_) => "string",
+            Self::Boolean(_) => "boolean",
+            Self::Object(_) => "object",
+            Self::Function(_) => "function",
+            Self::Symbol(_) => "symbol",
         }
     }
 }
@@ -157,19 +157,20 @@ impl<C: Ctx> Value<C> {
 impl<C: Ctx> Display for Value<C> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
-            Value::Null => write!(f, "null"),
-            Value::Undefined => write!(f, "undefined"),
-            Value::Number(n) => write!(f, "{}", n),
-            Value::String(s) => write!(f, "{}", s),
-            Value::Boolean(b) => write!(f, "{}", b),
-            Value::Object(o) => write!(f, "{}", o),
-            Value::Function(func) => write!(f, "{}", func),
-            Value::Symbol(s) => write!(f, "Symbol({})", s),
+            Self::Null => write!(f, "null"),
+            Self::Undefined => write!(f, "undefined"),
+            Self::Number(n) => write!(f, "{n}"),
+            Self::String(s) => write!(f, "{s}"),
+            Self::Boolean(b) => write!(f, "{b}"),
+            Self::Object(o) => write!(f, "{o}"),
+            Self::Function(func) => write!(f, "{func}"),
+            Self::Symbol(s) => write!(f, "Symbol({s})"),
         }
     }
 }
 
 impl<C: Ctx> Value<C> {
+    #[allow(clippy::iter_not_returning_iterator)]
     pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
         let iter = self
             .get_property(&Symbol::ITERATOR)
@@ -177,7 +178,7 @@ impl<C: Ctx> Value<C> {
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
         match iter {
-            Value::Function(f) => Ok(CtxIter { next: f, ctx }),
+            Self::Function(f) => Ok(CtxIter { next: f, ctx }),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
@@ -189,43 +190,43 @@ impl<C: Ctx> Value<C> {
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
         match iter {
-            Value::Function(f) => Ok(Iter { next: f }),
+            Self::Function(f) => Ok(Iter { next: f }),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
 
-    pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
+    pub fn get_property(&self, name: &Self) -> Result<Self, Error<C>> {
         match self {
-            Value::Object(o) => o.get_property(name),
-            Value::Function(f) => f.get_property(name),
+            Self::Object(o) => o.get_property(name),
+            Self::Function(f) => f.get_property(name),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
     pub fn update_or_define_property(
         &self,
-        name: Value<C>,
-        value: Value<C>,
+        name: Self,
+        value: Self,
     ) -> Result<(), Error<C>> {
         match self {
-            Value::Object(o) => o.update_or_define_property(name, value),
-            Value::Function(f) => f.update_or_define_property(name, value),
+            Self::Object(o) => o.update_or_define_property(name, value),
+            Self::Function(f) => f.update_or_define_property(name, value),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+    pub fn define_property(&self, name: Self, value: Self) -> Result<(), Error<C>> {
         match self {
-            Value::Object(o) => o.define_property(name, value),
-            Value::Function(f) => f.define_property(name, value),
+            Self::Object(o) => o.define_property(name, value),
+            Self::Function(f) => f.define_property(name, value),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
+    pub fn contains_key(&self, name: &Self) -> Result<bool, Error<C>> {
         match self {
-            Value::Object(o) => o.contains_key(name),
-            Value::Function(f) => f.contains_key(name),
+            Self::Object(o) => o.contains_key(name),
+            Self::Function(f) => f.contains_key(name),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -233,37 +234,37 @@ impl<C: Ctx> Value<C> {
     pub fn call(
         &self,
         ctx: &mut C,
-        args: Vec<Value<C>>,
-        this: Value<C>,
-    ) -> Result<Value<C>, Error<C>> {
+        args: Vec<Self>,
+        this: Self,
+    ) -> Result<Self, Error<C>> {
         match self {
-            Value::Function(f) => f.call(ctx, args, this),
+            Self::Function(f) => f.call(ctx, args, this),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
 
     #[allow(clippy::type_complexity)]
     ///(name, value)
-    pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
+    pub fn properties(&self) -> Result<Vec<(Self, Self)>, Error<C>> {
         match self {
-            Value::Object(o) => o.properties(),
-            Value::Function(f) => f.properties(),
+            Self::Object(o) => o.properties(),
+            Self::Function(f) => f.properties(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
+    pub fn keys(&self) -> Result<Vec<Self>, Error<C>> {
         match self {
-            Value::Object(o) => o.keys(),
-            Value::Function(f) => f.keys(),
+            Self::Object(o) => o.keys(),
+            Self::Function(f) => f.keys(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
+    pub fn values(&self) -> Result<Vec<Self>, Error<C>> {
         match self {
-            Value::Object(o) => o.values(),
-            Value::Function(f) => f.values(),
+            Self::Object(o) => o.values(),
+            Self::Function(f) => f.values(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }

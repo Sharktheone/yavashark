@@ -1,9 +1,10 @@
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-use crate::Value;
-use crate::{ControlFlow, Error};
 use swc_ecma_ast::DoWhileStmt;
+
+use crate::context::Context;
+use crate::ControlFlow;
+use crate::RuntimeResult;
+use crate::scope::Scope;
+use crate::Value;
 
 impl Context {
     pub fn run_do_while(&mut self, stmt: &DoWhileStmt, scope: &mut Scope) -> RuntimeResult {
@@ -18,19 +19,11 @@ impl Context {
             result = match self.run_statement(&stmt.body, scope) {
                 Ok(v) => v,
                 Err(c) => match c {
-                    crate::ControlFlow::Break(l) => {
-                        if last_loop.as_ref() == l.as_ref() {
-                            break;
-                        } else {
-                            return Err(ControlFlow::Break(l));
-                        }
+                    ControlFlow::Break(l) if last_loop.as_ref() == l.as_ref() => {
+                        break;
                     }
-                    crate::ControlFlow::Continue(l) => {
-                        if last_loop.as_ref() == l.as_ref() {
-                            continue;
-                        } else {
-                            return Err(ControlFlow::Continue(l));
-                        }
+                    ControlFlow::Continue(l) if last_loop.as_ref() == l.as_ref() => {
+                        continue;
                     }
                     _ => return Err(c),
                 },
@@ -55,13 +48,13 @@ mod tests {
     #[test]
     fn run_do_while() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             do {
                 i++;
             } while (i < 3);
             i;
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)
@@ -71,13 +64,13 @@ mod tests {
     #[test]
     fn run_do_while_false() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             do {
                 i++;
             } while (i < 0);
             i;
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)
@@ -87,7 +80,7 @@ mod tests {
     #[test]
     fn run_do_while_break() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             do {
                 i++;
@@ -96,7 +89,7 @@ mod tests {
                 }
             } while (i < 3);
             i;
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(2.0)
@@ -106,7 +99,7 @@ mod tests {
     #[test]
     fn run_do_while_continue() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             do {
                 i++;
@@ -115,7 +108,7 @@ mod tests {
                 }
             } while (i < 3);
             i;
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)
@@ -125,7 +118,7 @@ mod tests {
     #[test]
     fn run_do_while_break_and_continue() {
         test_eval!(
-            r#"
+            r"
             let i = 0;
             do {
                 i++;
@@ -137,7 +130,7 @@ mod tests {
                 }
             } while (i < 5);
             i;
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)
