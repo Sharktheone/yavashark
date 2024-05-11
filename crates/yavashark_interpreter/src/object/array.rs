@@ -23,8 +23,18 @@ impl Array {
     }
 
     #[constructor]
-    fn construct(&self, args: Vec<Value>) -> ValueResult {
-        todo!()
+    #[allow(clippy::unnecessary_wraps)]
+    fn construct(&mut self, args: Vec<Value>) -> ValueResult {
+        
+        let values = args.into_iter().enumerate()
+            .map(|(i, v)| {
+                (i, Variable::new(v))
+            })
+            .collect::<Vec<_>>();
+        self.object.array = values;
+        
+        
+        Ok(Value::Undefined)
     }
 }
 
