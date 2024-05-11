@@ -13,3 +13,8 @@ edition = "2021"
 default = []
 js = []
 ts = []
+
+
+[lints]
+workspace = true
+
