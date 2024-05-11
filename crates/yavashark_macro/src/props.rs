@@ -34,11 +34,20 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("Variable", item.span())));
 
-    let mut object = crate_path.clone();
-    object
+    let mut object_handle = crate_path.clone();
+    object_handle
         .segments
         .push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
 
+    
+    let mut object = crate_path.clone();
+    object
+        .segments
+        .push(PathSegment::from(Ident::new("object", item.span())));
+    object
+        .segments
+        .push(PathSegment::from(Ident::new("Object", item.span())));
+    
     let mut value = crate_path;
     value
         .segments
@@ -256,14 +265,14 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         let prop = quote! {
-            let function = #native_function::new(stringify!(#name), |args, this| {
+            let function = #native_function::with_proto(stringify!(#name), |args, this| {
                 let deez = #any_cast
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with the a this value", #fn_name)))?;
 
                 deez.#name(args)
-            }, ctx).into();
+            }, func_proto.copy()).into();
 
-            self.define_variable(
+            obj.define_variable(
                 #fn_name.into(),
                 #variable::new_with_attributes(
                     function,
@@ -294,12 +303,12 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
         
         let prop = quote! {
-            let function: #value = #native_function::new("constructor", |args, mut this| {
+            let function: #value = #native_function::with_proto("constructor", |args, mut this| {
                 let deez = #any_cast 
                     .ok_or(Error::ty("Function constructor was not called with the a this value"))?;
 
                 deez.#constructor(args)
-            }, ctx).into();
+            }, func_proto).into();
 
             function.define_property("prototype".into(), obj.clone().into());
 
@@ -318,11 +327,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let new_fn = quote! {
-        fn initialize_proto(mut self, ctx: &mut #context) -> Result<#object, #error> {
+        pub(crate) fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#object_handle, #error> {
             use yavashark_value::{AsAny, Obj};
             #props
 
-            let obj: #object = self.into_object();
+            let obj = obj.into_object();
 
             #construct
 
