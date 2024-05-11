@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use common::*;
+use common::{define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter, object_constructor, property_is_enumerable, to_locale_string, to_string, value_of};
 use yavashark_value::Obj;
 
 use crate::context::Context;
