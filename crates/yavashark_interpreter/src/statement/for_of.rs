@@ -12,19 +12,6 @@ impl Context {
     pub fn run_for_of(&mut self, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
         let obj = self.run_expr(&stmt.right, stmt.span, scope)?;
 
-        match obj {
-            Value::Object(obj) => self.run_for_of_obj(&**obj.get()?, stmt, scope),
-            Value::Function(func) => self.run_for_of_obj(func.get()?.as_object(), stmt, scope),
-            _ => Err(Error::ty_error(format!("{obj:?} is not an object")).into()),
-        }
-    }
-
-    pub fn run_for_of_obj(
-        &mut self,
-        obj: &dyn Obj<Self>,
-        stmt: &ForOfStmt,
-        scope: &mut Scope,
-    ) -> RuntimeResult {
         let scope = &mut Scope::with_parent(scope);
         let label = scope.last_label();
         scope.state_set_loop();
@@ -51,7 +38,9 @@ impl Context {
             .sym
             .to_string();
 
-        for key in obj.values() {
+        for key in obj.iter(self)? {
+            let key = key?;
+            
             scope.declare_var(decl.clone(), key);
 
             let result = self.run_statement(&stmt.body, scope);
