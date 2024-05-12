@@ -1,1 +1,3 @@
-pub trait Ctx: Eq + Clone {}
+use std::fmt::Debug;
+
+pub trait Ctx: Eq + Clone + Debug {}

@@ -13,6 +13,10 @@ edition = "2021"
 default = []
 js = []
 ts = []
+anyhow = []
+
+[target.'cfg(feature ="anyhow")'.dependencies]
+anyhow = "1.0.83"
 
 
 [lints]
