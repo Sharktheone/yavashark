@@ -6,6 +6,7 @@ use crate::{Error, Res, Value, Variable};
 use crate::console::get_console;
 use crate::context::Context;
 use crate::error::get_error;
+use crate::object::array::Array;
 
 pub struct MutValue {
     pub(crate) name: String,
@@ -208,6 +209,8 @@ impl ScopeInternal {
         );
 
         variables.insert("Error".to_string(), Variable::new_read_only(get_error(ctx)));
+        
+        variables.insert("Array".to_string(), ctx.proto.array_prototype.get_property(&"constructor".into()).expect("unreachable").into());
 
         Self {
             parent: None,
