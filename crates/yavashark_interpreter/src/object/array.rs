@@ -12,6 +12,12 @@ pub struct Array {}
 
 #[properties]
 impl Array {
+    
+    #[new]
+    fn new() -> Self {
+        todo!()
+    }
+    
     #[prop]
     fn length(&self, args: Vec<Value>) -> ValueResult {
         todo!()
@@ -25,7 +31,6 @@ impl Array {
     #[constructor]
     #[allow(clippy::unnecessary_wraps)]
     fn construct(&mut self, args: Vec<Value>) -> ValueResult {
-        
         let values = args.into_iter().enumerate()
             .map(|(i, v)| {
                 (i, Variable::new(v))

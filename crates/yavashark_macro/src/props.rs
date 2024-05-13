@@ -11,7 +11,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut call = None;
     let mut constructor = None;
-
+    let mut new = None;
+    
+    
     let crate_path = Path::from(Ident::new("crate", item.span()));
 
     let mut context = crate_path.clone();
@@ -54,7 +56,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .push(PathSegment::from(Ident::new("Value", item.span())));
 
     struct Property {
-        name: syn::Ident,
+        name: Ident,
         writable: bool,
         enumerable: bool,
         configurable: bool,
@@ -80,6 +82,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
             if attr.path().is_ident("constructor") {
                 constructor = Some(func.sig.ident.clone());
+                continue;
+            }
+            
+            if attr.path().is_ident("new") {
+                new = Some(func.sig.ident.clone());
                 continue;
             }
 
@@ -292,20 +299,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     if let Some((constructor, mutability)) = constructor {
         
-        let any_cast = if mutability {
-            quote! {
-                this.as_any_mut().downcast_mut::<Self>()
-            }
-        } else {
-            quote! {
-                this.as_any().downcast_ref::<Self>()
-            }
-        };
-        
         let prop = quote! {
             let function: #value = #native_function::with_proto("constructor", |args, mut this| {
-                let deez = #any_cast 
-                    .ok_or(Error::ty("Function constructor was not called with the a this value"))?;
+                Self::new
 
                 deez.#constructor(args)
             }, func_proto).into();
