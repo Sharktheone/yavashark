@@ -220,12 +220,12 @@ mod temp_test {
         }
 
 
-        function array() {}
+        let array = new Array(4, 5, 6, 7)
 
-        array[0] = 1
-        array[1] = 2
-        array[2] = 3
-        array[3] = 4
+        // array[0] = 1
+        // array[1] = 2
+        // array[2] = 3
+        // array[3] = 4
 
         console.log(array[0], array[1], array[2], array[3])
 
@@ -259,6 +259,8 @@ mod temp_test {
         
         console.log("arrow", arr.arrow(1, 2))
         
+        
+        console.log(Array)
 
         z
         "#;
