@@ -294,6 +294,7 @@ impl<C: Ctx> Value<C> {
     }
 }
 
+#[derive(Debug)]
 pub struct Iter<C: Ctx> {
     next: Function<C>,
 }

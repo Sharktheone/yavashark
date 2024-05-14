@@ -1,7 +1,10 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use std::any::Any;
+use std::cell::RefCell;
+use std::rc::Rc;
 use yavashark_macro::{object, properties};
+use yavashark_value::Iter;
 
 use crate::{Context, Error, Value, ValueResult, Variable};
 use crate::object::Object;
@@ -50,7 +53,43 @@ impl Array {
 #[derive(Debug)]
 #[object]
 #[allow(clippy::module_name_repetitions)]
-pub struct ArrayIterator {}
+pub struct ArrayIterator {
+    inner: Rc<RefCell<Array>>,
+    next: usize,
+    done: bool
+}
+
+
+
+#[properties]
+impl ArrayIterator {
+    #[prop]
+    pub fn next(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
+        
+        if self.done {
+            let obj = Object::new(ctx);
+            obj.define_property("value".into(), Value::Undefined);
+            obj.define_property("done".into(), Value::Boolean(true));
+            return Ok(obj.into());
+        }
+        
+        let value = self.inner.get_array_or_done(self.next).map(|v| (v.0.copy(), v.1));
+        self.next += 1;
+        
+        let value = if let Some(value) = value {
+            value
+        } else {
+            self.done = true;
+            Value::Undefined
+        };
+        
+        let obj = Object::new(ctx);
+        obj.define_property("value".into(), value);
+        obj.define_property("done".into(), Value::Boolean(self.done));
+        
+        Ok(obj.into())
+    }
+}
 
 impl From<Vec<Value>> for Array {
     fn from(v: Vec<Value>) -> Self {
