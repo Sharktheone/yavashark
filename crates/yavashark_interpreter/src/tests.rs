@@ -47,7 +47,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
         "send".into(),
         NativeFunction::new(
             "send",
-            move |args, _| {
+            move |args, _, _| {
                 let mut state = send_state.borrow_mut();
                 state.send_called += 1;
 
@@ -63,7 +63,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
         "values".into(),
         NativeFunction::new(
             "values",
-            move |args, _| {
+            move |args, _, _| {
                 let mut state = values_state.borrow_mut();
                 state.got_values.push(args);
 

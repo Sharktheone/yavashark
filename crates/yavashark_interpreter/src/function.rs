@@ -14,7 +14,7 @@ use crate::scope::Scope;
 
 mod prototype;
 
-type NativeFn = Box<dyn FnMut(Vec<Value>, Value) -> ValueResult>;
+type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
@@ -42,7 +42,7 @@ impl NativeFunction {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         name: &str,
-        f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
         ctx: &mut Context,
     ) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(Self {
@@ -57,7 +57,7 @@ impl NativeFunction {
 
     pub fn with_proto(
         name: &str,
-        f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
         proto: Value,
     ) -> FunctionHandle {
         let this: Box<dyn Func<Context>> = Box::new(Self {
@@ -74,7 +74,7 @@ impl NativeFunction {
     pub fn builder() -> NativeFunctionBuilder {
         NativeFunctionBuilder(Self {
             name: String::new(),
-            f: Box::new(|_, _| Ok(Value::Undefined)),
+            f: Box::new(|_, _, _| Ok(Value::Undefined)),
             object: Object::raw_with_proto(Value::Undefined),
             data: None,
         })
@@ -95,7 +95,7 @@ impl NativeFunctionBuilder {
     }
 
     #[must_use]
-    pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value) -> ValueResult + 'static) -> Self {
+    pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static) -> Self {
         self.0.f = Box::new(f);
         self
     }
@@ -189,8 +189,8 @@ impl Obj<Context> for NativeFunction {
 }
 
 impl Func<Context> for NativeFunction {
-    fn call(&mut self, _ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
-        (self.f)(args, this)
+    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
+        (self.f)(args, this, ctx)
     }
 }
 

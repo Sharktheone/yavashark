@@ -277,6 +277,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with the a this value", #fn_name)))?;
 
                 deez.#name(args)
+            let function = #native_function::with_proto(stringify!(#name), |args, this, _| {
             }, func_proto.copy()).into();
 
             obj.define_variable(
@@ -304,6 +305,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 Self::new
 
                 deez.#constructor(args)
+            let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
             }, func_proto).into();
 
             function.define_property("prototype".into(), obj.clone().into());

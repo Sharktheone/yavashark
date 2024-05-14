@@ -10,7 +10,7 @@ pub fn get_console(ctx: &mut Context) -> Value {
         "log".into(),
         NativeFunction::new(
             "log",
-            |args, _| {
+            |args, _, _| {
                 let mut str = String::new();
 
                 for arg in args {

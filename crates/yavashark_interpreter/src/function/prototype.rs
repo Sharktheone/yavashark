@@ -50,19 +50,19 @@ impl FunctionPrototype {
     }
 }
 
-fn apply(args: Vec<Value>, this: Value) -> ValueResult {
+fn apply(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
-fn bind(args: Vec<Value>, this: Value) -> ValueResult {
+fn bind(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
-fn call(args: Vec<Value>, this: Value) -> ValueResult {
+fn call(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
-fn constructor(args: Vec<Value>, this: Value) -> ValueResult {
+fn constructor(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
