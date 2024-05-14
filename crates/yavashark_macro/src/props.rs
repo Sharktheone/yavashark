@@ -85,10 +85,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 continue;
             }
             
-            if attr.path().is_ident("new") {
-                new = Some(func.sig.ident.clone());
-                continue;
-            }
 
             if attr.path().is_ident("attributes") {
                 let attr_parser = syn::meta::parser(|meta| {
@@ -232,6 +228,12 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 remove.push(idx);
                 properties.push((func.sig.ident.clone(), None, rename, self_mut));
             }
+            if attr.path().is_ident("new") {
+                new = Some(func.sig.ident.clone());
+
+                remove.push(idx);
+                continue;
+            }
         }
 
         for idx in remove.into_iter().rev() {
@@ -299,13 +301,19 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut construct = TokenStream::new();
 
     if let Some((constructor, mutability)) = constructor {
+        let new = new.expect("Object with constructor must have a method annotated with #[new]");
         
         let prop = quote! {
-            let function: #value = #native_function::with_proto("constructor", |args, mut this| {
-                Self::new
-
-                deez.#constructor(args)
             let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
+                let mut new = Self::#new(ctx)?;
+                new.#constructor(args)?;
+                
+                let boxed: Box<dyn Obj<Context>> = Box::new(new);
+                
+                this.exchange_object(boxed);
+                
+                Ok(Value::Undefined)
+                
             }, func_proto).into();
 
             function.define_property("prototype".into(), obj.clone().into());
