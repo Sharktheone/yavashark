@@ -1,23 +1,27 @@
 #![allow(clippy::needless_pass_by_value)]
+
+use std::any::Any;
 use yavashark_macro::{object, properties};
 
-
+use crate::{Context, Error, Value, ValueResult, Variable};
 use crate::object::Object;
 use crate::Symbol;
-use crate::{Context, Error, NativeFunction, ObjectHandle, Value, ValueResult, Variable};
 
 #[derive(Debug)]
-#[object(direct(iter(Symbol::ITERATOR)))]
+#[object]
 pub struct Array {}
+
 
 #[properties]
 impl Array {
-    
     #[new]
-    fn new() -> Self {
-        todo!()
+    #[allow(clippy::unnecessary_wraps)]
+    fn new(ctx: &mut Context) -> Result<Self, Error> {
+        Ok(Self {
+            object: Object::raw_with_proto(ctx.proto.array_prototype.clone().into())
+        })
     }
-    
+
     #[prop]
     fn length(&self, args: Vec<Value>) -> ValueResult {
         todo!()
@@ -37,8 +41,8 @@ impl Array {
             })
             .collect::<Vec<_>>();
         self.object.array = values;
-        
-        
+
+
         Ok(Value::Undefined)
     }
 }
