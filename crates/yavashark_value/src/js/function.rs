@@ -115,6 +115,7 @@ impl<C: Ctx> Function<C> {
             .map_or_else(|_| "Function".to_string(), |o| o.name())
     }
 
+
     #[allow(clippy::type_complexity)]
     pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
         Ok(self.get()?.properties())
@@ -126,6 +127,10 @@ impl<C: Ctx> Function<C> {
 
     pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.values())
+    }
+
+    pub fn exchange(&self, other: Box<dyn Func<C>>) {
+        *self.0.borrow_mut() = other;
     }
 }
 

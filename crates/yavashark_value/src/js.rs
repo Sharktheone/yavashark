@@ -84,7 +84,8 @@ impl<C: Ctx> Hash for Value<C> {
 }
 
 impl<C: Ctx> Value<C> {
-    #[must_use] pub fn copy(&self) -> Self {
+    #[must_use]
+    pub fn copy(&self) -> Self {
         match self {
             Self::Null => Self::Null,
             Self::Undefined => Self::Undefined,
@@ -97,22 +98,26 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub const fn symbol(name: &'static str) -> Self {
+    #[must_use]
+    pub const fn symbol(name: &'static str) -> Self {
         Self::Symbol(ConstString::String(name))
     }
 
-    #[must_use] pub fn string(s: &str) -> Self {
+    #[must_use]
+    pub fn string(s: &str) -> Self {
         Self::String(s.to_string())
     }
 
-    #[must_use] pub fn is_nan(&self) -> bool {
+    #[must_use]
+    pub fn is_nan(&self) -> bool {
         match self {
             Self::Number(n) => n.is_nan(),
             _ => false,
         }
     }
 
-    #[must_use] pub fn is_falsey(&self) -> bool {
+    #[must_use]
+    pub fn is_falsey(&self) -> bool {
         match self {
             Self::Null | Self::Undefined => true,
             Self::Number(n) => *n == 0.0,
@@ -124,7 +129,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub fn is_truthy(&self) -> bool {
+    #[must_use]
+    pub fn is_truthy(&self) -> bool {
         match self {
             Self::Null | Self::Undefined => false,
             Self::Number(n) => *n != 0.0,
@@ -136,11 +142,13 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub const fn is_nullish(&self) -> bool {
+    #[must_use]
+    pub const fn is_nullish(&self) -> bool {
         matches!(self, Self::Null | Self::Undefined)
     }
 
-    #[must_use] pub const fn type_of(&self) -> &'static str {
+    #[must_use]
+    pub const fn type_of(&self) -> &'static str {
         match self {
             Self::Null => "null",
             Self::Undefined => "undefined",
@@ -270,6 +278,18 @@ impl<C: Ctx> Value<C> {
             Self::Object(o) => o.values(),
             Self::Function(f) => f.values(),
             _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+
+    pub fn exchange_object(&self, other: Box<dyn Obj<C>>) {
+        if let Self::Object(o) = self {
+            o.exchange(other);
+        }
+    }
+
+    pub fn exchange_function(&self, other: Box<dyn Func<C>>) {
+        if let Self::Function(f) = self {
+            f.exchange(other);
         }
     }
 }

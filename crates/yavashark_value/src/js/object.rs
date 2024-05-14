@@ -158,6 +158,11 @@ impl<C: Ctx> Object<C> {
     pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.values())
     }
+
+
+    pub fn exchange(&self, other: Box<dyn Obj<C>>) {
+        *self.0.borrow_mut() = other;
+    }
 }
 
 impl<C: Ctx> Display for Object<C> {
