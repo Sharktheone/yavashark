@@ -197,8 +197,12 @@ impl<C: Ctx> Value<C> {
 
     pub fn get_property(&self, name: &Self) -> Result<Self, Error<C>> {
         match self {
-            Self::Object(o) => o.get_property(name),
-            Self::Function(f) => f.get_property(name),
+            Self::Object(o) => o.resolve_property(name).ok_or(Error::reference_error(format!(
+                "{name} does not exist on object"
+            ))),
+            Self::Function(f) => f.resolve_property(name).ok_or(Error::reference_error(format!(
+                "{name} does not exist on object"
+            ))),
             _ => Err(Error::ty("Value is not an object")),
         }
     }

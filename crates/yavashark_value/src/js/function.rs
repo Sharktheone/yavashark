@@ -83,6 +83,11 @@ impl<C: Ctx> Function<C> {
         Ok(())
     }
 
+    #[must_use]
+    pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
+        self.get().ok()?.resolve_property(name)
+    }
+
     pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
         self.get()?
             .get_property(name)
