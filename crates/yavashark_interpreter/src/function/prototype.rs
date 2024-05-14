@@ -232,6 +232,11 @@ impl Obj<Context> for FunctionPrototype {
         values.push(self.name.value.copy());
         values
     }
+
+
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
+        self.object.get_array_or_done(index)
+    }
 }
 
 impl Func<Context> for FunctionPrototype {

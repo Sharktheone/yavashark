@@ -197,6 +197,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #values
                 values
             }
+            fn get_array_or_done(&self, index: usize) -> (bool, Option<#value>) {
+                self.object.get_array_or_done(index)
+            }
         }
     };
 

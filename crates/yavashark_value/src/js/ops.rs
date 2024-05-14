@@ -755,6 +755,10 @@ mod tests {
         fn values(&self) -> Vec<crate::Value<()>> {
             vec![]
         }
+
+        fn get_array_or_done(&self, _index: usize) -> (bool, Option<crate::Value<()>>) {
+            (false, None)
+        }
     }
 
     impl Func<()> for Object {

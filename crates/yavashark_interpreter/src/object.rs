@@ -2,17 +2,17 @@ use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
-use crate::Variable;
 pub use prototype::*;
 use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::Value;
+use crate::Variable;
 
 pub mod array;
 mod prototype;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Object {
     pub properties: HashMap<Value, Variable>,
     pub array: Vec<(usize, Variable)>,
@@ -65,7 +65,7 @@ impl Object {
         if self.array.is_empty() {
             return (0, false);
         }
-        
+
         if self.array.len() > 100 {
             return self
                 .array
@@ -238,7 +238,7 @@ impl Obj<Context> for Object {
         self.array
             .iter()
             .map(|(i, _)| Value::Number(*i as f64))
-            .chain(self.properties.keys().map(yavashark_value::Value::copy))
+            .chain(self.properties.keys().map(Value::copy))
             .collect()
     }
 
@@ -246,16 +246,27 @@ impl Obj<Context> for Object {
         self.array
             .iter()
             .map(|(_, v)| v.copy())
-            .chain(self.properties.values().map(yavashark_value::variable::Variable::copy))
+            .chain(self.properties.values().map(Variable::copy))
             .collect()
+    }
+
+
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
+        if let Some(value) = self.resolve_array(index) {
+            return (false, Some(value));
+        }
+
+        self.array.last().map(|(_, v)| (true, Some(Value::Undefined)))
+            .unwrap_or((true, None))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::context::Context;
     use crate::Value;
+
+    use super::*;
 
     #[test]
     fn object_creation_with_proto() {

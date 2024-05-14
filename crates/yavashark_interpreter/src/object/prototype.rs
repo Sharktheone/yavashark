@@ -274,6 +274,10 @@ impl Obj<Context> for Prototype {
         values.push(self.value_of.value.copy());
         values
     }
+
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
+        self.object.get_array_or_done(index)
+    }
 }
 
 impl Proto for Prototype {

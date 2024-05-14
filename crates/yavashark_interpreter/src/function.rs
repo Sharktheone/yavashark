@@ -186,6 +186,10 @@ impl Obj<Context> for NativeFunction {
     fn values(&self) -> Vec<Value> {
         self.object.values()
     }
+    
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
+        self.object.get_array_or_done(index)
+    }
 }
 
 impl Func<Context> for NativeFunction {
@@ -272,6 +276,10 @@ impl Obj<Context> for JSFunction {
 
     fn values(&self) -> Vec<Value> {
         self.object.values()
+    }
+    
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
+        self.object.get_array_or_done(index)
     }
 }
 

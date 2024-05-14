@@ -4,9 +4,9 @@ use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::rc::Rc;
 
+use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
-use crate::Error;
 
 use super::Value;
 
@@ -59,8 +59,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn values(&self) -> Vec<Value<C>>;
 
     fn into_object(self) -> Object<C>
-    where
-        Self: Sized + 'static,
+        where
+            Self: Sized + 'static,
     {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
 
@@ -68,11 +68,13 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 
     fn into_value(self) -> Value<C>
-    where
-        Self: Sized + 'static,
+        where
+            Self: Sized + 'static,
     {
         Value::Object(self.into_object())
     }
+
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<C>>);
 }
 
 #[derive(Debug, Clone)]
@@ -99,7 +101,8 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    #[must_use] pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
+    #[must_use]
+    pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
         self.get().ok()?.resolve_property(name)
     }
 
@@ -141,7 +144,8 @@ impl<C: Ctx> Object<C> {
         Ok(self.get()?.contains_key(name))
     }
 
-    #[must_use] pub fn name(&self) -> String {
+    #[must_use]
+    pub fn name(&self) -> String {
         self.get()
             .map_or_else(|_| "Object".to_string(), |o| o.name())
     }
@@ -182,7 +186,8 @@ impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
 }
 
 impl<C: Ctx> Object<C> {
-    #[must_use] pub fn new(obj: Box<dyn Obj<C>>) -> Self {
+    #[must_use]
+    pub fn new(obj: Box<dyn Obj<C>>) -> Self {
         Self(Rc::new(RefCell::new(obj)))
     }
 }
