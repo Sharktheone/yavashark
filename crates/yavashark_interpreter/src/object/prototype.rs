@@ -8,6 +8,7 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::{NativeFunction, Value, Variable};
+use crate::object::Object;
 
 mod common;
 
@@ -17,8 +18,7 @@ pub trait Proto: Obj<Context> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Prototype {
-    properties: HashMap<Value, Variable>,
-    parent: Option<Rc<RefCell<Prototype>>>,
+    object: Object,
 
     //common properties
     defined_getter: Variable,
@@ -43,8 +43,7 @@ impl Default for Prototype {
 impl Prototype {
     pub fn new() -> Self {
         Self {
-            properties: HashMap::new(),
-            parent: None,
+            object: Object::raw_with_proto(Value::Undefined),
             defined_getter: Value::Undefined.into(),
             defined_setter: Value::Undefined.into(),
             lookup_getter: Value::Undefined.into(),
@@ -146,15 +145,15 @@ impl Obj<Context> for Prototype {
             }
         }
 
-        self.properties.insert(name, value.into());
+        self.object.define_property(name, value);
     }
 
     fn define_variable(&mut self, name: Value, value: Variable) {
-        todo!()
+        self.object.define_variable(name, value)
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.properties.get(name).map(yavashark_value::variable::Variable::copy)
+        self.object.resolve_property(name)
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -175,7 +174,7 @@ impl Obj<Context> for Prototype {
             }
         }
 
-        Some(&self.properties.get(name)?.value)
+        self.object.get_property(name)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
@@ -196,7 +195,7 @@ impl Obj<Context> for Prototype {
             }
         }
 
-        Some(&mut self.properties.get_mut(name)?.value) //TODO: Check if &mut is allowed (is_writable)
+        self.object.get_property_mut(name)
     }
 
     fn contains_key(&self, name: &Value) -> bool {
@@ -217,7 +216,7 @@ impl Obj<Context> for Prototype {
             }
         }
 
-        self.properties.contains_key(name)
+        self.object.contains_key(name)
     }
 
     fn name(&self) -> String {
@@ -229,18 +228,51 @@ impl Obj<Context> for Prototype {
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {
-        self.properties
-            .iter()
-            .map(|(k, v)| (k.copy(), v.copy()))
-            .collect()
+        let mut props = self.object.properties();
+        props.push((Value::String("__define_getter__".to_string()), self.defined_getter.value.copy()));
+        props.push((Value::String("__define_setter__".to_string()), self.defined_setter.value.copy()));
+        props.push((Value::String("__lookup_getter__".to_string()), self.lookup_getter.value.copy()));
+        props.push((Value::String("__lookup_setter__".to_string()), self.lookup_setter.value.copy()));
+        props.push((Value::String("constructor".to_string()), self.constructor.value.copy()));
+        props.push((Value::String("hasOwnProperty".to_string()), self.has_own_property.value.copy()));
+        props.push((Value::String("isPrototypeOf".to_string()), self.is_prototype_of.value.copy()));
+        props.push((Value::String("propertyIsEnumerable".to_string()), self.property_is_enumerable.value.copy()));
+        props.push((Value::String("toLocaleString".to_string()), self.to_locale_string.value.copy()));
+        props.push((Value::String("toString".to_string()), self.to_string.value.copy()));
+        props.push((Value::String("valueOf".to_string()), self.value_of.value.copy()));
+        props
     }
 
     fn keys(&self) -> Vec<Value> {
-        self.properties.keys().map(yavashark_value::Value::copy).collect()
+        let mut keys = self.object.keys();
+        keys.push(Value::String("__define_getter__".to_string()));
+        keys.push(Value::String("__define_setter__".to_string()));
+        keys.push(Value::String("__lookup_getter__".to_string()));
+        keys.push(Value::String("__lookup_setter__".to_string()));
+        keys.push(Value::String("constructor".to_string()));
+        keys.push(Value::String("hasOwnProperty".to_string()));
+        keys.push(Value::String("isPrototypeOf".to_string()));
+        keys.push(Value::String("propertyIsEnumerable".to_string()));
+        keys.push(Value::String("toLocaleString".to_string()));
+        keys.push(Value::String("toString".to_string()));
+        keys.push(Value::String("valueOf".to_string()));
+        keys
     }
 
     fn values(&self) -> Vec<Value> {
-        self.properties.values().map(yavashark_value::variable::Variable::copy).collect()
+        let mut values = self.object.values();
+        values.push(self.defined_getter.value.copy());
+        values.push(self.defined_setter.value.copy());
+        values.push(self.lookup_getter.value.copy());
+        values.push(self.lookup_setter.value.copy());
+        values.push(self.constructor.value.copy());
+        values.push(self.has_own_property.value.copy());
+        values.push(self.is_prototype_of.value.copy());
+        values.push(self.property_is_enumerable.value.copy());
+        values.push(self.to_locale_string.value.copy());
+        values.push(self.to_string.value.copy());
+        values.push(self.value_of.value.copy());
+        values
     }
 }
 
