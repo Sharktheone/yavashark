@@ -1,21 +1,15 @@
 #![allow(clippy::needless_pass_by_value)]
-use std::any::Any;
-use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
 
 use yavashark_value::{Func, Obj};
 
-use crate::context::Context;
-use crate::object::Prototype;
 use crate::{NativeFunction, Value, ValueResult, Variable};
-
+use crate::context::Context;
+use crate::object::Object;
 
 #[derive(Debug)]
 // #[object(prototype, direct(apply, bind, call, length, name), constructor)]
 pub struct FunctionPrototype {
-    pub properties: HashMap<Value, Variable>,
-    pub parent: Rc<RefCell<Prototype>>,
+    pub object: Object,
     pub apply: Variable,
     pub bind: Variable,
     pub call: Variable,
@@ -32,8 +26,7 @@ impl FunctionPrototype {
     // #[name("Function")]
     pub fn new(obj: &Value) -> Self {
         let mut this = Self {
-            properties: HashMap::new(),
-            parent: Rc::new(RefCell::new(Prototype::new())),
+            object: Object::raw_with_proto(obj.copy()),
             apply: Value::Undefined.into(),
             bind: Value::Undefined.into(),
             call: Value::Undefined.into(),
@@ -98,7 +91,7 @@ impl Obj<Context> for FunctionPrototype {
             }
         }
 
-        self.properties.insert(name, value.into());
+        self.object.define_property(name, value);
     }
 
     fn define_variable(&mut self, name: Value, value: Variable) {
@@ -132,11 +125,23 @@ impl Obj<Context> for FunctionPrototype {
             }
         }
 
-        self.properties.insert(name, value);
+        self.object.define_variable(name, value);
     }
 
     fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.properties.get(name).map(yavashark_value::variable::Variable::copy)
+        if let Value::String(name) = name {
+            match name.as_str() {
+                "apply" => return Some(self.apply.value.copy()),
+                "bind" => return Some(self.bind.value.copy()),
+                "call" => return Some(self.call.value.copy()),
+                "constructor" => return Some(self.constructor.value.copy()),
+                "length" => return Some(self.length.value.copy()),
+                "name" => return Some(self.name.value.copy()),
+                _ => {}
+            }
+        }
+
+        self.object.resolve_property(name)
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -152,7 +157,7 @@ impl Obj<Context> for FunctionPrototype {
             }
         }
 
-        Some(&self.properties.get(name)?.value)
+        self.object.get_property(name)
     }
 
     fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
@@ -168,7 +173,7 @@ impl Obj<Context> for FunctionPrototype {
             }
         }
 
-        Some(&mut self.properties.get_mut(name)?.value)
+        self.object.get_property_mut(name)
     }
 
     fn contains_key(&self, name: &Value) -> bool {
@@ -184,7 +189,7 @@ impl Obj<Context> for FunctionPrototype {
             }
         }
 
-        self.properties.contains_key(name)
+        self.object.contains_key(name)
     }
 
     fn name(&self) -> String {
@@ -192,22 +197,40 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn to_string(&self) -> String {
-        "function() { [Native code] }".to_string()
+        "Function Prototype".to_string()
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {
-        self.properties
-            .iter()
-            .map(|(k, v)| (k.copy(), v.copy()))
-            .collect()
+        let mut props = self.object.properties();
+        props.push((Value::String("apply".to_string()), self.apply.value.copy()));
+        props.push((Value::String("bind".to_string()), self.bind.value.copy()));
+        props.push((Value::String("call".to_string()), self.call.value.copy()));
+        props.push((Value::String("constructor".to_string()), self.constructor.value.copy()));
+        props.push((Value::String("length".to_string()), self.length.value.copy()));
+        props.push((Value::String("name".to_string()), self.name.value.copy()));
+        props
     }
 
     fn keys(&self) -> Vec<Value> {
-        self.properties.keys().map(yavashark_value::Value::copy).collect()
+        let mut keys = self.object.keys();
+        keys.push(Value::String("apply".to_string()));
+        keys.push(Value::String("bind".to_string()));
+        keys.push(Value::String("call".to_string()));
+        keys.push(Value::String("constructor".to_string()));
+        keys.push(Value::String("length".to_string()));
+        keys.push(Value::String("name".to_string()));
+        keys
     }
 
     fn values(&self) -> Vec<Value> {
-        self.properties.values().map(yavashark_value::variable::Variable::copy).collect()
+        let mut values = self.object.values();
+        values.push(self.apply.value.copy());
+        values.push(self.bind.value.copy());
+        values.push(self.call.value.copy());
+        values.push(self.constructor.value.copy());
+        values.push(self.length.value.copy());
+        values.push(self.name.value.copy());
+        values
     }
 }
 
