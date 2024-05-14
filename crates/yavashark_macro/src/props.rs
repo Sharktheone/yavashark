@@ -265,21 +265,26 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let any_cast = if prop.3 {
             quote! {
-                this.as_any_mut().downcast_mut::<Self>()
+                let x = x.get_mut()?;
+                (**x).as_any_mut().downcast_mut::<Self>()
             }
         } else {
-            quote! {
-                this.as_any().downcast_ref::<Self>()
-            }
+            quote! {{
+                let x = x.get()?;
+                let deez = (**x).as_any().downcast_ref::<Self>()
+                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
+                
+                deez.#name(args)
+            }}
         };
 
         let prop = quote! {
-            let function = #native_function::with_proto(stringify!(#name), |args, this| {
-                let deez = #any_cast
-                    .ok_or(Error::ty_error(format!("Function {:?} was not called with the a this value", #fn_name)))?;
-
-                deez.#name(args)
             let function = #native_function::with_proto(stringify!(#name), |args, this, _| {
+                match this {
+                    #value::Object(x) => #any_cast,
+                    #value::Function(x) => #any_cast,
+                    _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name))),
+                }
             }, func_proto.copy()).into();
 
             obj.define_variable(
