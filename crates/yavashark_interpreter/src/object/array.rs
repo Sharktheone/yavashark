@@ -51,7 +51,9 @@ impl Array {
             done: false,
         };
 
-        todo!()
+        let iter: Box<dyn Obj<Context>> = Box::new(iter);
+        
+        Ok(iter.into())
     }
 
     #[constructor]
