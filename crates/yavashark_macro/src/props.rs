@@ -5,6 +5,15 @@ use quote::{quote, ToTokens};
 use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 use syn::spanned::Spanned;
 
+struct Item {
+    name: Ident,
+    attributes: Option<Attributes>,
+    rename: Option<Path>,
+    is_mut: bool,
+    has_ctx: bool,
+    has_this: bool,
+}
+
 #[allow(unused)]
 pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
@@ -12,8 +21,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut call = None;
     let mut constructor = None;
     let mut new = None;
-    
-    
+
+
     let crate_path = Path::from(Ident::new("crate", item.span()));
 
     let mut context = crate_path.clone();
@@ -41,7 +50,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
 
-    
+
     let mut object = crate_path.clone();
     object
         .segments
@@ -49,7 +58,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     object
         .segments
         .push(PathSegment::from(Ident::new("Object", item.span())));
-    
+
     let mut value = crate_path;
     value
         .segments
@@ -84,7 +93,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 constructor = Some(func.sig.ident.clone());
                 continue;
             }
-            
+
 
             if attr.path().is_ident("attributes") {
                 let attr_parser = syn::meta::parser(|meta| {
@@ -138,7 +147,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let mut constructor = None;
-    let mut properties: Vec<(Ident, Option<Attributes>, Option<Path>, bool)> = Vec::new();
+    let mut properties: Vec<Item> = Vec::new();
 
     for func in &mut item.items {
         let ImplItem::Fn(func) = func else {
@@ -150,13 +159,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         'func_attrs: for (idx, attr) in func.attrs.iter().enumerate() {
             if attr.path().is_ident("constructor") {
                 let mut self_mut = false;
-                
+
                 if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
                     if self_arg.mutability.is_some() {
                         self_mut = true;
                     }
                 }
-                
+
                 constructor = Some((func.sig.ident.clone(), self_mut));
                 remove.push(idx);
                 continue;
@@ -188,8 +197,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 });
 
                 for prop in &mut properties {
-                    if prop.0 == func.sig.ident {
-                        prop.1 = Some(attrs);
+                    if prop.name == func.sig.ident {
+                        prop.attributes = Some(attrs);
                         continue 'func_attrs;
                     }
                 }
@@ -203,11 +212,18 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }
 
                 remove.push(idx);
-                properties.push((func.sig.ident.clone(), Some(attrs), None, self_mut));
+                properties.push(Item {
+                    name: func.sig.ident.clone(),
+                    attributes: Some(attrs),
+                    rename: None,
+                    is_mut: false,
+                    has_ctx: false,
+                    has_this: false,
+                });
             }
             if attr.path().is_ident("prop") {
                 for prop in &mut properties {
-                    if prop.0 == func.sig.ident {
+                    if prop.name == func.sig.ident {
                         return syn::Error::new(attr.span(), "Duplicate prop attribute")
                             .to_compile_error()
                             .into();
@@ -225,8 +241,65 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
+                let mut has_ctx = false;
+                let mut has_this = false;
+
+
+                let mut assert_last_or_this = false;
+                let mut assert_last = false;
+
+                func.sig.inputs.iter().for_each(|arg| {
+                    if let FnArg::Typed(arg) = arg {
+                        
+                        match &*arg.ty {
+                            syn::Type::Reference(r) => {
+                                if let syn::Type::Path(p) = &*r.elem {
+                                    if p.path.is_ident("Context") {
+                                        if assert_last {
+                                            panic!("this must be the last argument");
+                                        }
+                                        has_ctx = true;
+                                        assert_last_or_this = true;
+                                        return;
+                                    }
+
+                                    if assert_last || assert_last_or_this {
+                                        panic!("this or context must be the last argument");
+                                    }
+                                }
+                            }
+                            
+                            syn::Type::Path(p) => {
+                                if p.path.is_ident("Value") {
+                                    has_this = true;
+                                    assert_last = true;
+                                    return;
+                                }
+
+                                if assert_last {
+                                    panic!("this or context must be the last argument");
+                                }
+                            }
+                            
+                            
+                        
+                            _ => {}
+                        }
+                        
+                    }
+                });
+
+
                 remove.push(idx);
-                properties.push((func.sig.ident.clone(), None, rename, self_mut));
+
+                properties.push(Item {
+                    name: func.sig.ident.clone(),
+                    attributes: None,
+                    rename: None,
+                    is_mut: self_mut,
+                    has_ctx,
+                    has_this,
+                });
             }
             if attr.path().is_ident("new") {
                 new = Some(func.sig.ident.clone());
@@ -244,8 +317,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut props = TokenStream::new();
 
     for prop in properties {
-        let name = &prop.0;
-        let attrs = prop.1.as_ref().unwrap_or(&Attributes {
+        let name = &prop.name;
+        let attrs = prop.attributes.as_ref().unwrap_or(&Attributes {
             writable: true,
             enumerable: false,
             configurable: false,
@@ -255,32 +328,53 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let enumerable = attrs.enumerable;
         let configurable = attrs.configurable;
 
+        let ctx = if prop.has_ctx {
+            quote! {, ctx }
+        } else {
+            TokenStream::new()
+        };
+
+        let this = if prop.has_this {
+            quote! {, this }
+        } else {
+            TokenStream::new()
+        };
+
+        let copy = if prop.has_this {
+            quote! { .copy() }
+        } else {
+            TokenStream::new()
+        };
+
+
         let fn_name = prop
-            .2
+            .rename
             .as_ref()
-            .map(quote::ToTokens::to_token_stream)
+            .map(ToTokens::to_token_stream)
             .unwrap_or(quote! {
                 stringify!(#name)
             });
 
-        let any_cast = if prop.3 {
-            quote! {
-                let x = x.get_mut()?;
-                (**x).as_any_mut().downcast_mut::<Self>()
-            }
+        let any_cast = if prop.is_mut {
+            quote! {{
+                let mut x = x.get_mut()?;
+                let mut deez = (**x).as_any_mut().downcast_mut::<Self>()
+                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
+                deez.#name(args, ctx)
+            }}
         } else {
             quote! {{
                 let x = x.get()?;
                 let deez = (**x).as_any().downcast_ref::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
                 
-                deez.#name(args)
+                deez.#name(args #ctx #this)
             }}
         };
 
         let prop = quote! {
-            let function = #native_function::with_proto(stringify!(#name), |args, this, _| {
-                match this {
+            let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
+                match this #copy {
                     #value::Object(x) => #any_cast,
                     #value::Function(x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name))),
@@ -307,7 +401,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     if let Some((constructor, mutability)) = constructor {
         let new = new.expect("Object with constructor must have a method annotated with #[new]");
-        
+
         let prop = quote! {
             let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
                 let mut new = Self::#new(ctx)?;
