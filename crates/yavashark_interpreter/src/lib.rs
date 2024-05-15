@@ -142,82 +142,82 @@ mod temp_test {
     #[test]
     fn math() {
         let src = r#"
-
-        let x = 1 + 2
-
-        let y = x + true
-
-        let k = x + y
-
-        try {
-            console.log(k)
-            k = k + 2
-            console.log(k)
-        } catch (e) {
-            console.log("i don't care")
-        }
-
-        let z = 69;
-        function hello(a, b) {
-            return a + b
-        }
-
-        if (k > 0) {
-            z = 1337
-        } else {
-            z = 42
-        }
-
-        console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-        console.log("3+4 is", hello(3, 4))
-
-
-        let yyy = 1 + 2
-
-        switch (yyy) {
-            case 1:
-                console.log("one")
-                break
-            case 2:
-                console.log("two")
-                break
-            case 3:
-                console.log("three")
-            case 4:
-                console.log("four")
-            case 5:
-                console.log("five")
-            default:
-                console.log("default")
-        }
-
-        for (let i = 0; i < 10; i++) {
-            console.log(i)
-        }
-
-        console.log(this)
-
-
-        function Hello() {
-            this.x = 1
-            this.y = 2
-        }
-
-
-        console.log(new Hello())
-
-
-        try {
-            throw 1
-        } catch ({message}) {
-            console.log("error:", message)
-        }
-
-        let a = 1
-        while (a < 10) {
-            console.log("infinite loop")
-            a++;
-        }
+        // 
+        // let x = 1 + 2
+        // 
+        // let y = x + true
+        // 
+        // let k = x + y
+        // 
+        // try {
+        //     console.log(k)
+        //     k = k + 2
+        //     console.log(k)
+        // } catch (e) {
+        //     console.log("i don't care")
+        // }
+        // 
+        // let z = 69;
+        // function hello(a, b) {
+        //     return a + b
+        // }
+        // 
+        // if (k > 0) {
+        //     z = 1337
+        // } else {
+        //     z = 42
+        // }
+        // 
+        // console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+        // console.log("3+4 is", hello(3, 4))
+        // 
+        // 
+        // let yyy = 1 + 2
+        // 
+        // switch (yyy) {
+        //     case 1:
+        //         console.log("one")
+        //         break
+        //     case 2:
+        //         console.log("two")
+        //         break
+        //     case 3:
+        //         console.log("three")
+        //     case 4:
+        //         console.log("four")
+        //     case 5:
+        //         console.log("five")
+        //     default:
+        //         console.log("default")
+        // }
+        // 
+        // for (let i = 0; i < 10; i++) {
+        //     console.log(i)
+        // }
+        // 
+        // console.log(this)
+        // 
+        // 
+        // function Hello() {
+        //     this.x = 1
+        //     this.y = 2
+        // }
+        // 
+        // 
+        // console.log(new Hello())
+        // 
+        // 
+        // try {
+        //     throw 1
+        // } catch ({message}) {
+        //     console.log("error:", message)
+        // }
+        // 
+        // let a = 1
+        // while (a < 10) {
+        //     console.log("infinite loop")
+        //     a++;
+        // }
 
 
         let array = new Array(4, 5, 6, 7)
@@ -227,11 +227,11 @@ mod temp_test {
         // array[2] = 3
         // array[3] = 4
 
-        console.log(array[0], array[1], array[2], array[3])
+        // console.log(array[0], array[1], array[2], array[3])
 
-        for (let i in array) {
-            console.log("in", i)
-        }
+        // for (let i in array) {
+        //     console.log("in", i)
+        // }
 
         for (let i of array) {
             console.log("of", i)

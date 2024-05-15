@@ -11,8 +11,8 @@ use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 use crate::object::Object;
 use crate::Symbol;
 
-#[derive(Debug)]
 #[object]
+#[derive(Debug)]
 pub struct Array {}
 
 
@@ -41,12 +41,12 @@ impl Array {
                 todo!("Function iterator")
             }
 
-            _ => return Err(Error::ty_error(format!("Expected object, found {:?}", this)))
+            _ => return Err(Error::ty_error(format!("Expected object, found {this:?}")))
         };
 
         let iter = ArrayIterator {
-            object: Object::raw(ctx),
-            inner: obj.into(),
+            object: Object::raw_with_proto(ctx.proto.array_iter_prototype.clone().into()),
+            inner: obj,
             next: 0,
             done: false,
         };
@@ -70,9 +70,9 @@ impl Array {
     }
 }
 
-#[derive(Debug)]
 #[object]
 #[allow(clippy::module_name_repetitions)]
+#[derive(Debug)]
 pub struct ArrayIterator {
     inner: ObjectHandle,
     next: usize,
@@ -82,7 +82,7 @@ pub struct ArrayIterator {
 
 #[properties]
 impl ArrayIterator {
-    #[prop(requires(ctx))]
+    #[prop]
     pub fn next(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
         if self.done {
             let obj = Object::new(ctx);
