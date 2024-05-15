@@ -17,4 +17,3 @@ anyhow = "1.0.83"
 
 [lints]
 workspace = true
-

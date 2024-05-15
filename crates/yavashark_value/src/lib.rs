@@ -1,4 +1,5 @@
 mod error;
+
 pub use error::*;
 
 #[cfg(all(feature = "ts", feature = "js"))]
