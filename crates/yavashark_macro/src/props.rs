@@ -5,6 +5,7 @@ use quote::{quote, ToTokens};
 use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 use syn::spanned::Spanned;
 
+#[derive(Debug)]
 struct Item {
     name: Ident,
     attributes: Option<Attributes>,
@@ -295,7 +296,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 properties.push(Item {
                     name: func.sig.ident.clone(),
                     attributes: None,
-                    rename: None,
+                    rename,
                     is_mut: self_mut,
                     has_ctx,
                     has_this,

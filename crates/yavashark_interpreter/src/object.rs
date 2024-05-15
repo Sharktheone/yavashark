@@ -174,7 +174,7 @@ impl Obj<Context> for Object {
 
         self.properties
             .get(name)
-            .map(yavashark_value::variable::Variable::copy)
+            .map(Variable::copy)
             .or_else(|| match &self.prototype.value {
                 Value::Object(o) => o.get_property(name).ok(),
                 Value::Function(f) => f.get_property(name).ok(),
