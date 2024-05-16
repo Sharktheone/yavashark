@@ -349,8 +349,6 @@ impl<C: Ctx> Iter<C> {
         let done = next.get_property(&Value::string("done"))?;
         
         
-        dbg!(&done);
-        
         if done.is_truthy() {
             return Ok(None);
         }
