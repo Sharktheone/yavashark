@@ -38,7 +38,10 @@ impl Context {
             .sym
             .to_string();
 
-        while let Some(key) =  obj.iter_no_ctx(self)?.next(self)? { 
+        
+        let iter = obj.iter_no_ctx(self)?;
+        
+        while let Some(key) =  iter.next(self)? { 
             
             scope.declare_var(decl.clone(), key);
 
