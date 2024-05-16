@@ -20,7 +20,7 @@ impl Array {
     #[new]
     fn new(ctx: &mut Context) -> Result<Self, Error> {
         Ok(Self {
-            object: Object::raw_with_proto(ctx.proto.array_prototype.clone().into()),
+            object: Object::raw_with_proto(ctx.proto.array.clone().into()),
         })
     }
 
@@ -42,7 +42,7 @@ impl Array {
         };
 
         let iter = ArrayIterator {
-            object: Object::raw_with_proto(ctx.proto.array_iter_prototype.clone().into()),
+            object: Object::raw_with_proto(ctx.proto.array_iter.clone().into()),
             inner: obj,
             next: 0,
             done: false,

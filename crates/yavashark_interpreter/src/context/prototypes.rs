@@ -7,11 +7,11 @@ use std::cell::RefMut;
 use yavashark_value::Obj;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct Prototypes {
-    pub(crate) obj_prototype: ObjectHandle,
-    pub(crate) func_prototype: ObjectHandle,
-    pub(crate) array_prototype: ObjectHandle,
-    pub(crate) array_iter_prototype: ObjectHandle,
+pub struct Prototypes {
+    pub(crate) obj: ObjectHandle,
+    pub(crate) func: ObjectHandle,
+    pub(crate) array: ObjectHandle,
+    pub(crate) array_iter: ObjectHandle,
 }
 
 impl Prototypes {
@@ -50,10 +50,10 @@ impl Prototypes {
         .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         Ok(Self {
-            obj_prototype,
-            func_prototype,
-            array_prototype,
-            array_iter_prototype,
+            obj: obj_prototype,
+            func: func_prototype,
+            array: array_prototype,
+            array_iter: array_iter_prototype,
         })
     }
 }

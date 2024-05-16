@@ -208,12 +208,13 @@ impl ScopeInternal {
 
         variables.insert("Error".to_string(), Variable::new_read_only(get_error(ctx)));
 
+        #[allow(clippy::expect_used)]
         variables.insert(
             "Array".to_string(),
             ctx.proto
-                .array_prototype
+                .array
                 .get_property(&"constructor".into())
-                .expect("unreachable")
+                .expect("Failed to get Array constructor")
                 .into(),
         );
 

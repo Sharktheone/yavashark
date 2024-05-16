@@ -46,7 +46,7 @@ impl Context {
         let this = scope.this.copy();
 
         let arrow = ArrowFunction {
-            object: Object::raw_with_proto(self.proto.func_prototype.clone().into()),
+            object: Object::raw_with_proto(self.proto.func.clone().into()),
             expr: stmt.clone(),
             this,
             scope: scope.clone(),

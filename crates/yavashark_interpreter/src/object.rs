@@ -22,7 +22,7 @@ pub struct Object {
 impl Object {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(context: &mut Context) -> crate::ObjectHandle {
-        let prototype = context.proto.obj_prototype.clone().into();
+        let prototype = context.proto.obj.clone().into();
 
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
@@ -44,7 +44,7 @@ impl Object {
     }
 
     pub fn raw(context: &mut Context) -> Self {
-        let prototype = context.proto.obj_prototype.clone().into();
+        let prototype = context.proto.obj.clone().into();
 
         Self {
             properties: HashMap::new(),

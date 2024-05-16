@@ -32,7 +32,7 @@ impl NativeFunction {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name,
             f,
-            object: Object::raw_with_proto(ctx.proto.func_prototype.clone().into()),
+            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
         });
 
@@ -48,7 +48,7 @@ impl NativeFunction {
         let this: Box<dyn Func<Context>> = Box::new(Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(ctx.proto.func_prototype.clone().into()),
+            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
         });
 
@@ -120,7 +120,7 @@ impl NativeFunctionBuilder {
     /// Note: Overrides the prototype of the object
     #[must_use]
     pub fn context(mut self, ctx: &mut Context) -> Self {
-        self.0.object.prototype = ctx.proto.func_prototype.clone().into();
+        self.0.object.prototype = ctx.proto.func.clone().into();
         self
     }
 
@@ -225,7 +225,7 @@ impl JSFunction {
             params,
             block,
             scope,
-            object: Object::raw_with_proto(ctx.proto.func_prototype.clone().into()),
+            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
         });
 
         this.into()
