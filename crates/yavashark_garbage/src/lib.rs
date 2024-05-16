@@ -19,5 +19,5 @@ struct GcRef {
 
 
 
-//Wrapper around a raw ptr that may be null (just to make it more explicit)
+///Wrapper around a raw ptr that may be null (just to make it more explicit)
 struct MaybeNull<T> (NonNull<T>);
