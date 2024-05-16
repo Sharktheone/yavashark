@@ -696,6 +696,10 @@ name = "yavashark"
 version = "0.1.0"
 
 [[package]]
+name = "yavashark_garbage"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_interpreter"
 version = "0.1.0"
 dependencies = [

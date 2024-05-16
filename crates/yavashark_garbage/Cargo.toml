@@ -1,0 +1,10 @@
+[package]
+name = "yavashark_garbage"
+version = "0.1.0"
+edition = "2021"
+description = "A garbage collector for the YavaShark JS/TS engine... Maybe it should collect js completely?"
+
+[dependencies]
+
+[lints]
+workspace = true
