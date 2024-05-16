@@ -253,11 +253,17 @@ impl Obj<Context> for Object {
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         if let Some(value) = self.resolve_array(index) {
-            return (false, Some(value));
+            let done = if let Some((i, _)) = self.array.last() {
+                index > *i
+            } else {
+                false
+            };
+
+            return (done, Some(value));
         }
 
-        self.array.last().map(|(_, v)| (true, Some(Value::Undefined)))
-            .unwrap_or((true, None))
+
+        (true, None)
     }
 }
 

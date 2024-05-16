@@ -94,7 +94,9 @@ impl ArrayIterator {
         let inner = self.inner.get()?;
 
         let (done, value) = inner.get_array_or_done(self.next);
-
+        
+        self.next += 1;
+        
         if done {
             self.done = true;
             let obj = Object::new(ctx);
@@ -103,7 +105,6 @@ impl ArrayIterator {
             return Ok(obj.into());
         }
 
-        self.next += 1;
 
         let value = if let Some(value) = value {
             value
