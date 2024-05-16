@@ -7,10 +7,10 @@ pub use prototype::*;
 use yavashark_value::Func;
 use yavashark_value::Obj;
 
-use crate::{ControlFlow, Error, FunctionHandle, Value, ValueResult, Variable};
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
+use crate::{ControlFlow, Error, FunctionHandle, Value, ValueResult, Variable};
 
 mod prototype;
 
@@ -95,7 +95,10 @@ impl NativeFunctionBuilder {
     }
 
     #[must_use]
-    pub fn boxed_func(mut self, f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static) -> Self {
+    pub fn boxed_func(
+        mut self,
+        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+    ) -> Self {
         self.0.f = Box::new(f);
         self
     }
@@ -186,7 +189,7 @@ impl Obj<Context> for NativeFunction {
     fn values(&self) -> Vec<Value> {
         self.object.values()
     }
-    
+
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         self.object.get_array_or_done(index)
     }
@@ -277,7 +280,7 @@ impl Obj<Context> for JSFunction {
     fn values(&self) -> Vec<Value> {
         self.object.values()
     }
-    
+
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         self.object.get_array_or_done(index)
     }

@@ -123,9 +123,7 @@ impl<C: Ctx> Value<C> {
             Self::Number(n) => *n == 0.0,
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
-            Self::Object(_)
-            | Self::Function(_)
-            | Self::Symbol(_) => false,
+            Self::Object(_) | Self::Function(_) | Self::Symbol(_) => false,
         }
     }
 
@@ -136,9 +134,7 @@ impl<C: Ctx> Value<C> {
             Self::Number(n) => *n != 0.0,
             Self::String(s) => !s.is_empty(),
             Self::Boolean(b) => *b,
-            Self::Object(_)
-            | Self::Function(_)
-            | Self::Symbol(_) => true,
+            Self::Object(_) | Self::Function(_) | Self::Symbol(_) => true,
         }
     }
 
@@ -185,7 +181,10 @@ impl<C: Ctx> Value<C> {
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
-        Ok(CtxIter { next_obj: iter, ctx })
+        Ok(CtxIter {
+            next_obj: iter,
+            ctx,
+        })
     }
 
     pub fn iter_no_ctx(&self, ctx: &mut C) -> Result<Iter<C>, Error<C>> {
@@ -194,35 +193,26 @@ impl<C: Ctx> Value<C> {
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
-        Ok(Iter {
-            next_obj: iter,
-        })
+        Ok(Iter { next_obj: iter })
     }
 
     pub fn get_property(&self, name: &Self) -> Result<Self, Error<C>> {
-        
         match self {
-            Self::Object(o) => {
-                
-                o.resolve_property(name).ok_or(Error::reference_error(format!(
+            Self::Object(o) => o
+                .resolve_property(name)
+                .ok_or(Error::reference_error(format!(
                     "{name} does not exist on object"
-                )))
-            },
-            Self::Function(f) => {
-                
-                f.resolve_property(name).ok_or(Error::reference_error(format!(
+                ))),
+            Self::Function(f) => f
+                .resolve_property(name)
+                .ok_or(Error::reference_error(format!(
                     "{name} does not exist on object"
-                )))
-            },
+                ))),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn update_or_define_property(
-        &self,
-        name: Self,
-        value: Self,
-    ) -> Result<(), Error<C>> {
+    pub fn update_or_define_property(&self, name: Self, value: Self) -> Result<(), Error<C>> {
         match self {
             Self::Object(o) => o.update_or_define_property(name, value),
             Self::Function(f) => f.update_or_define_property(name, value),
@@ -246,26 +236,16 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn call(
-        &self,
-        ctx: &mut C,
-        args: Vec<Self>,
-        this: Self,
-    ) -> Result<Self, Error<C>> {
+    pub fn call(&self, ctx: &mut C, args: Vec<Self>, this: Self) -> Result<Self, Error<C>> {
         match self {
             Self::Function(f) => f.call(ctx, args, this),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
-    
-    pub fn call_method(
-        &self,
-        name: &Self,
-        ctx: &mut C,
-        args: Vec<Self>,
-    ) -> Result<Self, Error<C>> {
+
+    pub fn call_method(&self, name: &Self, ctx: &mut C, args: Vec<Self>) -> Result<Self, Error<C>> {
         let method = self.get_property(name)?;
-        
+
         method.call(ctx, args, self.copy())
     }
 
@@ -322,7 +302,9 @@ impl<C: Ctx> Iterator for CtxIter<'_, C> {
     type Item = Result<Value<C>, Error<C>>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let next = self.next_obj.call_method(&"next".into(), self.ctx, Vec::new());
+        let next = self
+            .next_obj
+            .call_method(&"next".into(), self.ctx, Vec::new());
         let next = match next {
             Ok(next) => next,
             Err(e) => return Some(Err(e)),
@@ -347,8 +329,7 @@ impl<C: Ctx> Iter<C> {
     pub fn next(&self, ctx: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         let next = self.next_obj.call_method(&"next".into(), ctx, Vec::new())?;
         let done = next.get_property(&Value::string("done"))?;
-        
-        
+
         if done.is_truthy() {
             return Ok(None);
         }

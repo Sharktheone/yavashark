@@ -1,9 +1,9 @@
 use swc_ecma_ast::DoWhileStmt;
 
 use crate::context::Context;
+use crate::scope::Scope;
 use crate::ControlFlow;
 use crate::RuntimeResult;
-use crate::scope::Scope;
 use crate::Value;
 
 impl Context {

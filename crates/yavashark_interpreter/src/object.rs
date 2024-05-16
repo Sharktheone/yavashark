@@ -69,7 +69,8 @@ impl Object {
         if self.array.len() > 100 {
             return self
                 .array
-                .binary_search_by(|(i, _)| i.cmp(&index)).map_or_else(|i| (i, false), |i| (i, true));
+                .binary_search_by(|(i, _)| i.cmp(&index))
+                .map_or_else(|i| (i, false), |i| (i, true));
         }
 
         for (i, (j, _)) in self.array.iter().enumerate() {
@@ -250,7 +251,6 @@ impl Obj<Context> for Object {
             .collect()
     }
 
-
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         if let Some(value) = self.resolve_array(index) {
             let done = if let Some((i, _)) = self.array.last() {
@@ -261,7 +261,6 @@ impl Obj<Context> for Object {
 
             return (done, Some(value));
         }
-
 
         (true, None)
     }

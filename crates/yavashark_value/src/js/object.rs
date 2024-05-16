@@ -4,9 +4,9 @@ use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::rc::Rc;
 
-use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
+use crate::Error;
 
 use super::Value;
 
@@ -59,8 +59,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn values(&self) -> Vec<Value<C>>;
 
     fn into_object(self) -> Object<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
 
@@ -68,8 +68,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 
     fn into_value(self) -> Value<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         Value::Object(self.into_object())
     }
@@ -162,7 +162,6 @@ impl<C: Ctx> Object<C> {
     pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
         Ok(self.get()?.values())
     }
-
 
     pub fn exchange(&self, other: Box<dyn Obj<C>>) {
         *self.0.borrow_mut() = other;

@@ -22,7 +22,8 @@ impl ToNumber for bool {
 }
 
 impl<C: Ctx> Value<C> {
-    #[must_use] pub fn to_number_or_null(&self) -> f64 {
+    #[must_use]
+    pub fn to_number_or_null(&self) -> f64 {
         match self {
             Self::Number(n) => *n,
             Self::Boolean(b) => b.num(),
@@ -31,7 +32,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub fn to_number(&self) -> f64 {
+    #[must_use]
+    pub fn to_number(&self) -> f64 {
         match self {
             Self::Number(n) => *n,
             Self::Boolean(b) => b.num(),
@@ -47,7 +49,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub fn to_int_or_null(&self) -> i64 {
+    #[must_use]
+    pub fn to_int_or_null(&self) -> i64 {
         match self {
             Self::Number(n) => *n as i64,
             Self::Boolean(b) => i64::from(*b),
@@ -84,9 +87,7 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Number(a), Self::Number(b)) => Self::Number(a + b),
             (Self::Number(a), Self::String(b)) => Self::String(a.to_string() + &b),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a + b.num()),
-            (Self::Number(a), Self::Object(_)) => {
-                Self::String(a.to_string() + "[object Object]")
-            }
+            (Self::Number(a), Self::Object(_)) => Self::String(a.to_string() + "[object Object]"),
 
             (Self::String(a), Self::Null) => Self::String(a + "null"),
             (Self::String(a), Self::Undefined) => Self::String(a + "undefined"),
@@ -117,32 +118,27 @@ impl<C: Ctx> Sub for Value<C> {
         match (self, rhs) {
             (Self::Null, Self::Null) => Self::Number(0.0),
             (Self::Null, Self::Number(b)) => Self::Number(-b),
-            (Self::Null, Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(-b))
-            }
+            (Self::Null, Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(-b)),
             (Self::Null, Self::Boolean(b)) => Self::Number(-b.num()),
 
             (Self::Number(a), Self::Null) => Self::Number(a),
             (Self::Number(a), Self::Number(b)) => Self::Number(a - b),
-            (Self::Number(a), Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a - b))
-            }
+            (Self::Number(a), Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a - b)),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a - b.num()),
 
-            (Self::String(a), Self::Null) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a))
-            }
-            (Self::String(a), Self::Number(b)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b))
-            }
-            (Self::String(a), Self::Boolean(b)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b.num()))
-            }
+            (Self::String(a), Self::Null) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a)),
+            (Self::String(a), Self::Number(b)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b)),
+            (Self::String(a), Self::Boolean(b)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b.num())),
 
             (Self::String(a), Self::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
@@ -156,10 +152,9 @@ impl<C: Ctx> Sub for Value<C> {
 
             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() - b),
-            (Self::Boolean(a), Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() - b))
-            }
+            (Self::Boolean(a), Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() - b)),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() - b.num()),
             (Self::Boolean(_), Self::Object(_)) => Self::Number(f64::NAN),
 
@@ -190,10 +185,9 @@ impl<C: Ctx> Mul for Value<C> {
             (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(f64::NAN),
             (Self::Null, _) | (_, Self::Null) => Self::Number(0.0),
             (Self::Number(a), Self::Number(b)) => Self::Number(a * b),
-            (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a * b))
-            }
+            (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a * b)),
             (Self::Number(a), Self::Boolean(b)) | (Self::Boolean(b), Self::Number(a)) => {
                 Self::Number(a * b.num())
             }
@@ -204,10 +198,9 @@ impl<C: Ctx> Mul for Value<C> {
                     Self::Number(f64::NAN)
                 }
             }
-            (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a * b.num()))
-            }
+            (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a * b.num())),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() * b.num()),
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
@@ -224,10 +217,9 @@ impl<C: Ctx> Div for Value<C> {
         match (self, rhs) {
             (Self::Null, Self::Null | Self::Undefined) => Self::Number(f64::NAN),
             (Self::Null, Self::Number(_)) => Self::Number(0.0),
-            (Self::Null, Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 / b))
-            }
+            (Self::Null, Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 / b)),
             (Self::Null, Self::Boolean(b)) => Self::Number(0.0 / b.num()),
             (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
             (Self::Number(a), Self::Null) => {
@@ -238,10 +230,9 @@ impl<C: Ctx> Div for Value<C> {
                 }
             }
             (Self::Number(a), Self::Number(b)) => Self::Number(a / b),
-            (Self::Number(a), Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a / b))
-            }
+            (Self::Number(a), Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a / b)),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a / b.num()),
             (Self::String(a), Self::Null) => {
                 if a == "0" || a == "0.0" || a.parse::<f64>().is_err() {
@@ -251,10 +242,9 @@ impl<C: Ctx> Div for Value<C> {
                 }
             }
 
-            (Self::String(a), Self::Number(b)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b))
-            }
+            (Self::String(a), Self::Number(b)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b)),
 
             (Self::String(a), Self::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
@@ -263,10 +253,9 @@ impl<C: Ctx> Div for Value<C> {
                     Self::Number(f64::NAN)
                 }
             }
-            (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b.num()))
-            }
+            (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b.num())),
             (Self::Boolean(true), Self::Null) => Self::Number(f64::INFINITY),
             (Self::Boolean(false), Self::Null) => Self::Number(f64::NAN),
             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() / b),
@@ -288,22 +277,19 @@ impl<C: Ctx> Rem for Value<C> {
             (_, Self::Null) => Self::Number(f64::NAN),
             (Self::Null, Self::Object(_)) => Self::Number(f64::NAN),
             (Self::Null, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Null, Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 % b))
-            }
+            (Self::Null, Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 % b)),
             (Self::Null, _) => Self::Number(0.0),
             (_, Self::Undefined) | (Self::Undefined, _) => Self::Number(f64::NAN),
             (Self::Number(a), Self::Number(b)) => Self::Number(a % b),
-            (Self::Number(a), Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a % b))
-            }
+            (Self::Number(a), Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a % b)),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a % b.num()),
-            (Self::String(a), Self::Number(b)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b))
-            }
+            (Self::String(a), Self::Number(b)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b)),
             (Self::String(a), Self::String(b)) => {
                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
                     Self::Number(a % b)
@@ -311,16 +297,14 @@ impl<C: Ctx> Rem for Value<C> {
                     Self::Number(f64::NAN)
                 }
             }
-            (Self::String(a), Self::Boolean(b)) => {
-                a.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b.num()))
-            }
+            (Self::String(a), Self::Boolean(b)) => a
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b.num())),
 
             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() % b),
-            (Self::Boolean(a), Self::String(b)) => {
-                b.parse::<f64>()
-                    .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() % b))
-            }
+            (Self::Boolean(a), Self::String(b)) => b
+                .parse::<f64>()
+                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() % b)),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() % b.num()),
             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
             (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(f64::NAN),
@@ -415,7 +399,9 @@ impl<C: Ctx> Shl for Value<C> {
 
                 Self::Number(((a as i64) << b as i64) as f64)
             }
-            (Self::Number(a), Self::Boolean(b)) => Self::Number(((a as i64) << i64::from(b)) as f64),
+            (Self::Number(a), Self::Boolean(b)) => {
+                Self::Number(((a as i64) << i64::from(b)) as f64)
+            }
             (Self::Number(a), Self::Object(_)) => Self::Number(a as i64 as f64),
 
             (Self::String(a), Self::Null) => {
@@ -512,7 +498,9 @@ impl<C: Ctx> Shr for Value<C> {
 
                 Self::Number(((a as i64) >> b as i64) as f64)
             }
-            (Self::Number(a), Self::Boolean(b)) => Self::Number(((a as i64) >> i64::from(b)) as f64),
+            (Self::Number(a), Self::Boolean(b)) => {
+                Self::Number(((a as i64) >> i64::from(b)) as f64)
+            }
             (Self::Number(a), Self::Object(_)) => Self::Number(a as i64 as f64),
 
             (Self::String(a), Self::Null) => {
@@ -616,7 +604,8 @@ impl<C: Ctx> BitXor for Value<C> {
 }
 
 impl<C: Ctx> Value<C> {
-    #[must_use] pub fn log_or(&self, rhs: Self) -> Self {
+    #[must_use]
+    pub fn log_or(&self, rhs: Self) -> Self {
         if self.is_truthy() {
             self.copy()
         } else {
@@ -624,7 +613,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub fn log_and(&self, rhs: Self) -> Self {
+    #[must_use]
+    pub fn log_and(&self, rhs: Self) -> Self {
         if self.is_truthy() {
             rhs
         } else {
@@ -632,14 +622,15 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use] pub fn pow(&self, rhs: &Self) -> Self {
+    #[must_use]
+    pub fn pow(&self, rhs: &Self) -> Self {
         Self::Number(self.to_number().powf(rhs.to_number()))
     }
 
-    #[must_use] pub fn normal_eq(&self, rhs: &Self) -> bool {
+    #[must_use]
+    pub fn normal_eq(&self, rhs: &Self) -> bool {
         match (self, rhs) {
-            (Self::Null, Self::Null)
-            | (Self::Undefined, Self::Undefined) => true,
+            (Self::Null, Self::Null) | (Self::Undefined, Self::Undefined) => true,
             (Self::Number(a), Self::Number(b)) => a == b,
             (Self::String(a), Self::String(b)) => a == b,
             (Self::Boolean(a), Self::Boolean(b)) => a == b,

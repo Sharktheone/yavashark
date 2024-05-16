@@ -21,9 +21,9 @@ impl Context {
             BinaryOp::GtEq => Value::Boolean(left >= right),
             BinaryOp::LShift => left << right,
             BinaryOp::RShift => left >> right,
-            BinaryOp::ZeroFillRShift => Value::Number(
-                f64::from(left.to_int_or_null() as u32 >> (right.to_int_or_null() as u32 % 32)),
-            ),
+            BinaryOp::ZeroFillRShift => Value::Number(f64::from(
+                left.to_int_or_null() as u32 >> (right.to_int_or_null() as u32 % 32),
+            )),
             BinaryOp::Add => left + right,
             BinaryOp::Sub => left - right,
             BinaryOp::Mul => left * right,

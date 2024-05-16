@@ -1,8 +1,8 @@
 mod prototypes;
 
+use anyhow::anyhow;
 use std::any::{type_name, type_name_of_val, Any, TypeId};
 use std::cell::RefMut;
-use anyhow::anyhow;
 
 use swc_ecma_ast::Stmt;
 
@@ -20,7 +20,6 @@ pub struct Context {
 
 impl Context {
     pub fn new() -> Result<Self, anyhow::Error> {
-
         Ok(Self {
             proto: prototypes::Prototypes::new()?,
         })

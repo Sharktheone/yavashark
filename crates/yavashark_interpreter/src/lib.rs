@@ -1,8 +1,8 @@
 #![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
+use anyhow::anyhow;
 use std::cell::RefCell;
 use std::rc::Rc;
-use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
 use crate::context::Context;
@@ -90,7 +90,8 @@ pub struct Interpreter {
 }
 
 impl Interpreter {
-    #[must_use] pub fn new(script: Vec<Stmt>) -> Self {
+    #[must_use]
+    pub fn new(script: Vec<Stmt>) -> Self {
         Self { script }
     }
 
@@ -109,7 +110,7 @@ impl Interpreter {
     }
 
     #[cfg(test)]
-        #[allow(clippy::missing_panics_doc)]
+    #[allow(clippy::missing_panics_doc)]
     pub fn run_test(&self) -> (ValueResult, Rc<RefCell<tests::State>>) {
         let mut context = &mut Context::new().unwrap();
         let mut scope = scope::Scope::global(context);
@@ -142,13 +143,13 @@ mod temp_test {
     #[test]
     fn math() {
         let src = r#"
-        
+
         let x = 1 + 2
-        
+
         let y = x + true
-        
+
         let k = x + y
-        
+
         try {
             console.log(k)
             k = k + 2
@@ -156,24 +157,24 @@ mod temp_test {
         } catch (e) {
             console.log("i don't care")
         }
-        
+
         let z = 69;
         function hello(a, b) {
             return a + b
         }
-        
+
         if (k > 0) {
             z = 1337
         } else {
             z = 42
         }
-        
+
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         console.log("3+4 is", hello(3, 4))
-        
-        
+
+
         let yyy = 1 + 2
-        
+
         switch (yyy) {
             case 1:
                 console.log("one")
@@ -190,41 +191,41 @@ mod temp_test {
             default:
                 console.log("default")
         }
-        
+
         for (let i = 0; i < 10; i++) {
             console.log(i)
         }
-        
+
         console.log(this)
-        
-        
+
+
         function Hello() {
             this.x = 1
             this.y = 2
         }
-        
-        
+
+
         console.log(new Hello())
-        
-        
+
+
         try {
             throw 1
         } catch ({message}) {
             console.log("error:", message)
         }
-        
+
         let a = 1
         while (a < 10) {
             console.log("infinite loop")
             a++;
         }
-        
-        
+
+
         let array = new Array(4, 5, 6, 7)
-        
-        
+
+
         console.log(array[0], array[1], array[2], array[3])
-        
+
         for (let i in array) {
             console.log("in", i)
         }

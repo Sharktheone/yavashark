@@ -2,11 +2,11 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::{Error, Res, Value, Variable};
 use crate::console::get_console;
 use crate::context::Context;
 use crate::error::get_error;
 use crate::object::array::Array;
+use crate::{Error, Res, Value, Variable};
 
 pub struct MutValue {
     pub(crate) name: String,
@@ -28,9 +28,7 @@ impl ScopeState {
     const BREAKABLE: u8 = 0b1000;
     const RETURNABLE: u8 = 0b10000;
     const CONTINUABLE: u8 = 0b10_0000;
-    const STATE_NONE: Self = Self {
-        state: Self::NONE,
-    };
+    const STATE_NONE: Self = Self { state: Self::NONE };
     const STATE_GLOBAL: Self = Self {
         state: Self::GLOBAL,
     };
@@ -209,8 +207,15 @@ impl ScopeInternal {
         );
 
         variables.insert("Error".to_string(), Variable::new_read_only(get_error(ctx)));
-        
-        variables.insert("Array".to_string(), ctx.proto.array_prototype.get_property(&"constructor".into()).expect("unreachable").into());
+
+        variables.insert(
+            "Array".to_string(),
+            ctx.proto
+                .array_prototype
+                .get_property(&"constructor".into())
+                .expect("unreachable")
+                .into(),
+        );
 
         Self {
             parent: None,
@@ -278,8 +283,7 @@ impl ScopeInternal {
         if self.state.is_global() || self.state.is_function() {
             self.variables.insert(name, Variable::new(value));
         } else if let Some(p) = self.parent.as_ref() {
-            p.borrow_mut()
-                .declare_global_var(name, value.copy());
+            p.borrow_mut().declare_global_var(name, value.copy());
         } else {
             self.variables.insert(name, Variable::new(value));
         }
@@ -301,7 +305,8 @@ impl ScopeInternal {
         return if self.variables.contains_key(name) {
             true
         } else {
-            self.parent.as_ref()
+            self.parent
+                .as_ref()
                 .map_or(false, |p| p.borrow().has_value(name))
         };
     }
@@ -419,12 +424,18 @@ impl ScopeInternal {
     }
 
     pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
-        self.variables.get(name)
-            .map_or_else(|| self.parent.as_ref()
-                .map_or_else(|| Err(Error::new("Variable not found")), |p| p.borrow().with(name, f)), |v| {
+        self.variables.get(name).map_or_else(
+            || {
+                self.parent.as_ref().map_or_else(
+                    || Err(Error::new("Variable not found")),
+                    |p| p.borrow().with(name, f),
+                )
+            },
+            |v| {
                 f(&v.value);
                 Ok(())
-            })
+            },
+        )
     }
 }
 

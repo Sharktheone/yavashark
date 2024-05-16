@@ -7,84 +7,96 @@ pub struct Error<C: Ctx> {
 }
 
 impl<C: Ctx> Error<C> {
-    #[must_use] pub fn new(error: &str) -> Self {
+    #[must_use]
+    pub fn new(error: &str) -> Self {
         Self {
             kind: ErrorKind::Runtime(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn new_error(error: String) -> Self {
+    #[must_use]
+    pub fn new_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Runtime(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn reference(error: &str) -> Self {
+    #[must_use]
+    pub fn reference(error: &str) -> Self {
         Self {
             kind: ErrorKind::Reference(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn reference_error(error: String) -> Self {
+    #[must_use]
+    pub fn reference_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Reference(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn syn(error: &str) -> Self {
+    #[must_use]
+    pub fn syn(error: &str) -> Self {
         Self {
             kind: ErrorKind::Syntax(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn syn_error(error: String) -> Self {
+    #[must_use]
+    pub fn syn_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Syntax(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn unknown(error: Option<String>) -> Self {
+    #[must_use]
+    pub fn unknown(error: Option<String>) -> Self {
         Self {
             kind: ErrorKind::Error(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn unknown_error(error: String) -> Self {
+    #[must_use]
+    pub fn unknown_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Error(Some(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn ty(error: &str) -> Self {
+    #[must_use]
+    pub fn ty(error: &str) -> Self {
         Self {
             kind: ErrorKind::Type(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn ty_error(error: String) -> Self {
+    #[must_use]
+    pub fn ty_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Type(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub fn throw(val: Value<C>) -> Self {
+    #[must_use]
+    pub fn throw(val: Value<C>) -> Self {
         Self {
             kind: ErrorKind::Throw(val),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
-    #[must_use] pub const fn name(&self) -> &str {
+    #[must_use]
+    pub const fn name(&self) -> &str {
         match &self.kind {
             ErrorKind::Type(_) => "TypeError",
             ErrorKind::Reference(_) => "ReferenceError",
@@ -97,7 +109,8 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    #[must_use] pub fn message(&self) -> String {
+    #[must_use]
+    pub fn message(&self) -> String {
         match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -110,26 +123,27 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    #[must_use] pub const fn stack(&self) -> &StackTrace {
+    #[must_use]
+    pub const fn stack(&self) -> &StackTrace {
         &self.stacktrace
     }
 
-    #[must_use] pub fn file_name(&self) -> &str {
+    #[must_use]
+    pub fn file_name(&self) -> &str {
         self.stacktrace
             .frames
             .first()
             .map_or("", |f| f.file.as_str())
     }
 
-    #[must_use] pub fn line_number(&self) -> u32 {
+    #[must_use]
+    pub fn line_number(&self) -> u32 {
         self.stacktrace.frames.first().map_or(0, |f| f.line)
     }
 
-    #[must_use] pub fn column_number(&self) -> u32 {
-        self.stacktrace
-            .frames
-            .first()
-            .map_or(0, |f| f.column)
+    #[must_use]
+    pub fn column_number(&self) -> u32 {
+        self.stacktrace.frames.first().map_or(0, |f| f.column)
     }
 }
 
@@ -160,13 +174,12 @@ pub struct StackFrame {
 
 #[cfg(feature = "anyhow")]
 mod anyhow_impl {
-    
-    //TODO: Maybe we can integrate the JS stacktrace into the native Rust stacktrace?
-    
-    use super::*; 
-    
-    use std::fmt::Display;
 
+    //TODO: Maybe we can integrate the JS stacktrace into the native Rust stacktrace?
+
+    use super::*;
+
+    use std::fmt::Display;
 
     #[derive(Debug)]
     struct SyncError {
@@ -174,24 +187,17 @@ mod anyhow_impl {
         stack: StackTrace,
     }
 
-
     impl SyncError {
         fn new(message: String, stack: StackTrace) -> Self {
-                
-            Self {
-                message,
-                stack,
-            }
+            Self { message, stack }
         }
     }
 
-
-    
     impl Display for SyncError {
         fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
             write!(f, "{}", self.message)
         }
     }
-    
+
     impl std::error::Error for SyncError {}
 }

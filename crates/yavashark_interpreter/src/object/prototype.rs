@@ -3,12 +3,15 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use common::{define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter, object_constructor, property_is_enumerable, to_locale_string, to_string, value_of};
+use common::{
+    define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
+    object_constructor, property_is_enumerable, to_locale_string, to_string, value_of,
+};
 use yavashark_value::Obj;
 
 use crate::context::Context;
-use crate::{NativeFunction, Value, Variable};
 use crate::object::Object;
+use crate::{NativeFunction, Value, Variable};
 
 mod common;
 
@@ -229,17 +232,50 @@ impl Obj<Context> for Prototype {
 
     fn properties(&self) -> Vec<(Value, Value)> {
         let mut props = self.object.properties();
-        props.push((Value::String("__define_getter__".to_string()), self.defined_getter.value.copy()));
-        props.push((Value::String("__define_setter__".to_string()), self.defined_setter.value.copy()));
-        props.push((Value::String("__lookup_getter__".to_string()), self.lookup_getter.value.copy()));
-        props.push((Value::String("__lookup_setter__".to_string()), self.lookup_setter.value.copy()));
-        props.push((Value::String("constructor".to_string()), self.constructor.value.copy()));
-        props.push((Value::String("hasOwnProperty".to_string()), self.has_own_property.value.copy()));
-        props.push((Value::String("isPrototypeOf".to_string()), self.is_prototype_of.value.copy()));
-        props.push((Value::String("propertyIsEnumerable".to_string()), self.property_is_enumerable.value.copy()));
-        props.push((Value::String("toLocaleString".to_string()), self.to_locale_string.value.copy()));
-        props.push((Value::String("toString".to_string()), self.to_string.value.copy()));
-        props.push((Value::String("valueOf".to_string()), self.value_of.value.copy()));
+        props.push((
+            Value::String("__define_getter__".to_string()),
+            self.defined_getter.value.copy(),
+        ));
+        props.push((
+            Value::String("__define_setter__".to_string()),
+            self.defined_setter.value.copy(),
+        ));
+        props.push((
+            Value::String("__lookup_getter__".to_string()),
+            self.lookup_getter.value.copy(),
+        ));
+        props.push((
+            Value::String("__lookup_setter__".to_string()),
+            self.lookup_setter.value.copy(),
+        ));
+        props.push((
+            Value::String("constructor".to_string()),
+            self.constructor.value.copy(),
+        ));
+        props.push((
+            Value::String("hasOwnProperty".to_string()),
+            self.has_own_property.value.copy(),
+        ));
+        props.push((
+            Value::String("isPrototypeOf".to_string()),
+            self.is_prototype_of.value.copy(),
+        ));
+        props.push((
+            Value::String("propertyIsEnumerable".to_string()),
+            self.property_is_enumerable.value.copy(),
+        ));
+        props.push((
+            Value::String("toLocaleString".to_string()),
+            self.to_locale_string.value.copy(),
+        ));
+        props.push((
+            Value::String("toString".to_string()),
+            self.to_string.value.copy(),
+        ));
+        props.push((
+            Value::String("valueOf".to_string()),
+            self.value_of.value.copy(),
+        ));
         props
     }
 

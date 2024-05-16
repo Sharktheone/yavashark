@@ -2,11 +2,11 @@ use swc_ecma_ast::{ForHead, ForInStmt};
 
 use yavashark_value::Obj;
 
-use crate::{ControlFlow, Error};
 use crate::context::Context;
-use crate::RuntimeResult;
 use crate::scope::Scope;
+use crate::RuntimeResult;
 use crate::Value;
+use crate::{ControlFlow, Error};
 
 impl Context {
     pub fn run_for_in(&mut self, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {

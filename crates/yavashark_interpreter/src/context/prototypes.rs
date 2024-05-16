@@ -1,10 +1,10 @@
-use std::cell::RefMut;
-use anyhow::anyhow;
-use yavashark_value::Obj;
-use crate::object::{Object, Prototype, array::Array};
-use crate::{FunctionPrototype, ObjectHandle};
 use crate::context::Context;
 use crate::object::array::ArrayIterator;
+use crate::object::{array::Array, Object, Prototype};
+use crate::{FunctionPrototype, ObjectHandle};
+use anyhow::anyhow;
+use std::cell::RefMut;
+use yavashark_value::Obj;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct Prototypes {
@@ -13,7 +13,6 @@ pub(crate) struct Prototypes {
     pub(crate) array_prototype: ObjectHandle,
     pub(crate) array_iter_prototype: ObjectHandle,
 }
-
 
 impl Prototypes {
     pub(crate) fn new() -> Result<Self, anyhow::Error> {
@@ -24,10 +23,11 @@ impl Prototypes {
         let func_prototype: Box<dyn Obj<Context>> =
             Box::new(FunctionPrototype::new(&obj_prototype.clone().into()));
         let func_prototype = ObjectHandle::new(func_prototype);
-        
-        
+
         {
-            let mut obj: RefMut<Box<dyn Obj<Context>>> = obj_prototype.get_mut().map_err(|e| anyhow!(format!("{e:?}")))?;
+            let mut obj: RefMut<Box<dyn Obj<Context>>> = obj_prototype
+                .get_mut()
+                .map_err(|e| anyhow!(format!("{e:?}")))?;
             let obj = obj.as_any_mut();
 
             let proto = obj
@@ -36,15 +36,19 @@ impl Prototypes {
 
             proto.initialize(func_prototype.clone().into());
         }
-        
-        
-        let array_prototype = Array::initialize_proto(Object::raw_with_proto(obj_prototype.clone().into()), func_prototype.clone().into())
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
 
+        let array_prototype = Array::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
-        let array_iter_prototype = ArrayIterator::initialize_proto(Object::raw_with_proto(obj_prototype.clone().into()), func_prototype.clone().into())
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
-        
+        let array_iter_prototype = ArrayIterator::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
+
         Ok(Self {
             obj_prototype,
             func_prototype,
@@ -52,6 +56,4 @@ impl Prototypes {
             array_iter_prototype,
         })
     }
-    
-    
 }

@@ -2,9 +2,9 @@
 
 use yavashark_value::{Func, Obj};
 
-use crate::{NativeFunction, Value, ValueResult, Variable};
 use crate::context::Context;
 use crate::object::Object;
+use crate::{NativeFunction, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 // #[object(prototype, direct(apply, bind, call, length, name), constructor)]
@@ -179,12 +179,7 @@ impl Obj<Context> for FunctionPrototype {
     fn contains_key(&self, name: &Value) -> bool {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply"
-                | "bind"
-                | "call"
-                | "constructor"
-                | "length"
-                | "name" => return true,
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" => return true,
                 _ => {}
             }
         }
@@ -205,8 +200,14 @@ impl Obj<Context> for FunctionPrototype {
         props.push((Value::String("apply".to_string()), self.apply.value.copy()));
         props.push((Value::String("bind".to_string()), self.bind.value.copy()));
         props.push((Value::String("call".to_string()), self.call.value.copy()));
-        props.push((Value::String("constructor".to_string()), self.constructor.value.copy()));
-        props.push((Value::String("length".to_string()), self.length.value.copy()));
+        props.push((
+            Value::String("constructor".to_string()),
+            self.constructor.value.copy(),
+        ));
+        props.push((
+            Value::String("length".to_string()),
+            self.length.value.copy(),
+        ));
         props.push((Value::String("name".to_string()), self.name.value.copy()));
         props
     }
@@ -232,7 +233,6 @@ impl Obj<Context> for FunctionPrototype {
         values.push(self.name.value.copy());
         values
     }
-
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         self.object.get_array_or_done(index)

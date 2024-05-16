@@ -3,9 +3,9 @@ use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::rc::Rc;
 
-use crate::{Obj, Value};
 use crate::error::Error;
 use crate::js::context::Ctx;
+use crate::{Obj, Value};
 
 pub trait AsObject<C: Ctx> {
     fn as_object(&self) -> &dyn Obj<C>;
@@ -31,8 +31,8 @@ pub trait Func<C: Ctx>: Debug + Obj<C> + AsObject<C> {
     ) -> Result<Value<C>, Error<C>>;
 
     fn into_func_value(self) -> Value<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         let boxed: Box<dyn Func<C>> = Box::new(self);
         Value::Function(Function::from(boxed))
@@ -115,7 +115,6 @@ impl<C: Ctx> Function<C> {
         self.get()
             .map_or_else(|_| "Function".to_string(), |o| o.name())
     }
-
 
     #[allow(clippy::type_complexity)]
     pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {

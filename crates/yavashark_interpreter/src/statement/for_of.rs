@@ -2,11 +2,11 @@ use swc_ecma_ast::{ForHead, ForOfStmt};
 
 use yavashark_value::Obj;
 
-use crate::{ControlFlow, Error};
 use crate::context::Context;
-use crate::RuntimeResult;
 use crate::scope::Scope;
+use crate::RuntimeResult;
 use crate::Value;
+use crate::{ControlFlow, Error};
 
 impl Context {
     pub fn run_for_of(&mut self, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
@@ -38,11 +38,9 @@ impl Context {
             .sym
             .to_string();
 
-        
         let iter = obj.iter_no_ctx(self)?;
-        
-        while let Some(key) =  iter.next(self)? { 
-            
+
+        while let Some(key) = iter.next(self)? {
             scope.declare_var(decl.clone(), key);
 
             let result = self.run_statement(&stmt.body, scope);

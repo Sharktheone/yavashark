@@ -1,9 +1,9 @@
 use swc_ecma_ast::WhileStmt;
 
-use crate::{ControlFlow, RuntimeResult};
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::Value;
+use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_while(&mut self, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
@@ -27,7 +27,7 @@ impl Context {
                     ControlFlow::Break(l) if *l == label => {
                         break Ok(Value::Undefined);
                     }
-                    ControlFlow::Continue(l)  if *l == label => {
+                    ControlFlow::Continue(l) if *l == label => {
                         continue;
                     }
                     _ => return Err(e),

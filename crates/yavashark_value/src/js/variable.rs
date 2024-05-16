@@ -9,21 +9,24 @@ pub struct Variable<C: Ctx> {
 }
 
 impl<C: Ctx> Variable<C> {
-    #[must_use] pub fn new(value: Value<C>) -> Self {
+    #[must_use]
+    pub fn new(value: Value<C>) -> Self {
         Self {
             value,
             properties: Attributes::new(),
         }
     }
 
-    #[must_use] pub fn new_read_only(value: Value<C>) -> Self {
+    #[must_use]
+    pub fn new_read_only(value: Value<C>) -> Self {
         Self {
             value,
             properties: Attributes::new_read_only(),
         }
     }
 
-    #[must_use] pub fn new_with_attributes(
+    #[must_use]
+    pub fn new_with_attributes(
         value: Value<C>,
         writable: bool,
         enumerable: bool,
@@ -44,23 +47,28 @@ impl<C: Ctx> Variable<C> {
         Ok(())
     }
 
-    #[must_use] pub const fn get_value(&self) -> &Value<C> {
+    #[must_use]
+    pub const fn get_value(&self) -> &Value<C> {
         &self.value
     }
 
-    #[must_use] pub fn copy(&self) -> Value<C> {
+    #[must_use]
+    pub fn copy(&self) -> Value<C> {
         self.value.copy()
     }
 
-    #[must_use] pub const fn is_writable(&self) -> bool {
+    #[must_use]
+    pub const fn is_writable(&self) -> bool {
         self.properties.is_writable()
     }
 
-    #[must_use] pub const fn is_enumerable(&self) -> bool {
+    #[must_use]
+    pub const fn is_enumerable(&self) -> bool {
         self.properties.is_enumerable()
     }
 
-    #[must_use] pub const fn is_configurable(&self) -> bool {
+    #[must_use]
+    pub const fn is_configurable(&self) -> bool {
         self.properties.is_configurable()
     }
 
@@ -105,23 +113,28 @@ impl Attributes {
     const ENUMERABLE: u8 = 0b10;
     const CONFIGURABLE: u8 = 0b100;
 
-    #[must_use] pub const fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self(Self::WRITABLE)
     }
 
-    #[must_use] pub const fn new_read_only() -> Self {
+    #[must_use]
+    pub const fn new_read_only() -> Self {
         Self(0)
     }
 
-    #[must_use] pub const fn is_writable(&self) -> bool {
+    #[must_use]
+    pub const fn is_writable(&self) -> bool {
         self.0 & Self::WRITABLE != 0
     }
 
-    #[must_use] pub const fn is_enumerable(&self) -> bool {
+    #[must_use]
+    pub const fn is_enumerable(&self) -> bool {
         self.0 & Self::ENUMERABLE != 0
     }
 
-    #[must_use] pub const fn is_configurable(&self) -> bool {
+    #[must_use]
+    pub const fn is_configurable(&self) -> bool {
         self.0 & Self::CONFIGURABLE != 0
     }
 
@@ -137,7 +150,8 @@ impl Attributes {
         self.0 |= Self::CONFIGURABLE;
     }
 
-    #[must_use] pub fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
+    #[must_use]
+    pub fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
         let mut attributes = Self::new_read_only();
         if writable {
             attributes.make_writable();

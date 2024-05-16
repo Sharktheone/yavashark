@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 use syn::spanned::Spanned;
+use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 
 #[derive(Debug)]
 struct Item {
@@ -22,7 +22,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut call = None;
     let mut constructor = None;
     let mut new = None;
-
 
     let crate_path = Path::from(Ident::new("crate", item.span()));
 
@@ -50,7 +49,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     object_handle
         .segments
         .push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
-
 
     let mut object = crate_path.clone();
     object
@@ -94,7 +92,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 constructor = Some(func.sig.ident.clone());
                 continue;
             }
-
 
             if attr.path().is_ident("attributes") {
                 let attr_parser = syn::meta::parser(|meta| {
@@ -233,7 +230,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let rename = attr.parse_args::<Path>().ok();
 
-
                 let mut self_mut = false;
 
                 if let Some(FnArg::Receiver(self_arg)) = func.sig.inputs.first() {
@@ -245,13 +241,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut has_ctx = false;
                 let mut has_this = false;
 
-
                 let mut assert_last_or_this = false;
                 let mut assert_last = false;
 
                 func.sig.inputs.iter().for_each(|arg| {
                     if let FnArg::Typed(arg) = arg {
-                        
                         match &*arg.ty {
                             syn::Type::Reference(r) => {
                                 if let syn::Type::Path(p) = &*r.elem {
@@ -269,7 +263,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                                     }
                                 }
                             }
-                            
+
                             syn::Type::Path(p) => {
                                 if p.path.is_ident("Value") {
                                     has_this = true;
@@ -281,15 +275,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                                     panic!("this or context must be the last argument");
                                 }
                             }
-                            
-                            
-                        
+
                             _ => {}
                         }
-                        
                     }
                 });
-
 
                 remove.push(idx);
 
@@ -347,7 +337,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             TokenStream::new()
         };
 
-
         let fn_name = prop
             .rename
             .as_ref()
@@ -368,7 +357,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let x = x.get()?;
                 let deez = (**x).as_any().downcast_ref::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
-                
+
                 deez.#name(args #ctx #this)
             }}
         };
@@ -407,13 +396,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
                 let mut new = Self::#new(ctx)?;
                 new.#constructor(args)?;
-                
+
                 let boxed: Box<dyn Obj<Context>> = Box::new(new);
-                
+
                 this.exchange_object(boxed);
-                
+
                 Ok(Value::Undefined)
-                
+
             }, func_proto).into();
 
             function.define_property("prototype".into(), obj.clone().into());
