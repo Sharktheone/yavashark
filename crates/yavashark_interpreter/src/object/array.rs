@@ -11,9 +11,10 @@ use crate::object::Object;
 use crate::Symbol;
 use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
-#[object]
+#[object(direct(length))]
 #[derive(Debug)]
 pub struct Array {}
+
 
 #[properties]
 impl Array {
@@ -21,13 +22,10 @@ impl Array {
     fn new(ctx: &mut Context) -> Result<Self, Error> {
         Ok(Self {
             object: Object::raw_with_proto(ctx.proto.array.clone().into()),
+            length: Value::Number(0.0).into(),
         })
     }
 
-    #[prop]
-    fn length(&self, args: Vec<Value>) -> ValueResult {
-        todo!()
-    }
 
     #[prop(Symbol::ITERATOR)]
     fn iterator(&self, args: Vec<Value>, ctx: &mut Context, this: Value) -> ValueResult {
@@ -61,6 +59,7 @@ impl Array {
             .map(|(i, v)| (i, Variable::new(v)))
             .collect::<Vec<_>>();
         self.object.array = values;
+        self.length.value = Value::Number(self.object.array.len() as f64);
 
         Ok(Value::Undefined)
     }
