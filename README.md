@@ -6,6 +6,9 @@ A new TypeScript and JavaScript engine, currently in development, written in Rus
 
 
 Currently, I'm working on the JS-Tree-Walk-Interpreter. This is more a test to see, how to implement an interpreter in Rust.
+Specifically on the JS Garbage Collector.
+
+
 
 Next up would be an JS-Bytecode-Interpreter, which will be a test for the TS-Bytecode-Interpreter.
 
