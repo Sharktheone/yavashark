@@ -4,6 +4,11 @@ use std::ptr::NonNull;
 use std::sync::atomic::AtomicUsize;
 use std::sync::RwLock;
 
+use spin_lock::SpinLock;
+
+mod spin_lock;
+
+
 pub struct Gc<T: ?Sized> {
     inner: NonNull<GcBox<T>>,
 }
@@ -17,30 +22,14 @@ impl<T: ?Sized> Clone for Gc<T> {
 
 
 impl<T: ?Sized> Gc<T> {
-    pub fn add_ref(&self, other: &Gc<T>) {
-        let mut retries = 500;
-
-        loop {
-            let mut refs = unsafe {
-                let Ok(refs) = (*self.inner.as_ptr()).refs.try_write() else {
-                    // Theoretically we should never get here...  and have the loop looping - TODO: use a cfg attr to remove this code on size opt levels
-                    std::hint::spin_loop();
-                    retries -= 1;
-
-                    if retries == 0 {
-                        //TODO: warn that we have leaked a references
-                        break;
-                    }
-
-                    continue;
-                };
-
-                refs
+    pub fn add_ref(&self, other: &Self) {
+        unsafe {
+            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
+                //TODO: warn that we failed to add a ref
+                return;
             };
 
-            refs.push(other.inner);
-            
-            break;
+            lock.push(other.inner);
         }
     }
 }
@@ -69,6 +58,5 @@ impl<T: ?Sized> Drop for GcBox<T> {
 
 
         //TODO
-        
     }
 }
