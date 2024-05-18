@@ -4,10 +4,12 @@ use std::ptr::NonNull;
 use std::sync::atomic::AtomicUsize;
 use std::sync::RwLock;
 
+use log::warn;
 use rand::random;
+
 use spin_lock::SpinLock;
 
-mod spin_lock;
+pub(crate) mod spin_lock;
 
 
 pub struct Gc<T: ?Sized> {
@@ -56,8 +58,29 @@ struct WeakGc<T: ?Sized> {
 
 impl<T: ?Sized> Drop for GcBox<T> {
     fn drop(&mut self) {
+        self.mark = 0;
+        while self.mark == 0 {
+            self.mark = random();
+        }
 
+        if let Some(ref_by) = self.ref_by.spin_read() {
+            assert!(ref_by.is_empty(), "Cannot drop a GcBox that is still referenced");
+        } else {
+            warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad"); //TODO: should we also panic here?
+        }
 
-        //TODO
+        if let Some(refs) = self.refs.spin_read() {
+            for r in &*refs {
+                unsafe {
+                    let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
+                        warn!("Failed to remove reference from a GcBox - leaking memory");
+                        continue;
+                    };
+                    lock.retain(|x| (*x.as_ptr()).mark != self.mark);
+                }
+            }
+        } else {
+            warn!("Failed to remove all references from a GcBox - leaking memory");
+        }
     }
 }
