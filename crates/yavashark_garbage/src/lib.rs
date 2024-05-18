@@ -4,6 +4,7 @@ use std::ptr::NonNull;
 use std::sync::atomic::AtomicUsize;
 use std::sync::RwLock;
 
+use rand::random;
 use spin_lock::SpinLock;
 
 mod spin_lock;
@@ -25,7 +26,7 @@ impl<T: ?Sized> Gc<T> {
     pub fn add_ref(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
-                //TODO: warn that we failed to add a ref
+                warn!("Failed to add reference to a GcBox");
                 return;
             };
 

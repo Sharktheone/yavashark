@@ -1,4 +1,5 @@
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use log::warn;
 
 pub(crate) trait SpinLock<'a, T> {
     type WriteTarget<W: 'a> where Self: 'a;
@@ -22,7 +23,7 @@ impl<'a, T> SpinLock<'a, T> for RwLock<T> {
                 retries -= 1;
 
                 if retries == 0 {
-                    //TODO: warn that we have leaked a references
+                    warn!("Failed to acquire write lock");
                     break None;
                 }
 
@@ -43,7 +44,7 @@ impl<'a, T> SpinLock<'a, T> for RwLock<T> {
                 retries -= 1;
 
                 if retries == 0 {
-                    //TODO: warn that we have leaked a references
+                    warn!("Failed to acquire read lock");
                     break None;
                 }
 
