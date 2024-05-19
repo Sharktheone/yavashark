@@ -35,6 +35,17 @@ impl<T: ?Sized> Gc<T> {
             lock.push(other.inner);
         }
     }
+
+    pub fn remove_ref(&self, other: &Self) {
+        unsafe {
+            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
+                warn!("Failed to remove reference from a GcBox");
+                return;
+            };
+
+            lock.retain(|x| x != &other.inner);
+        }
+    }
 }
 
 
