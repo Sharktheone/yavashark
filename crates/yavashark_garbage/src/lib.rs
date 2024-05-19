@@ -1,7 +1,7 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 use std::ptr::NonNull;
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
 use log::warn;
@@ -67,6 +67,10 @@ impl<T: ?Sized> Drop for GcBox<T> {
             assert!(ref_by.is_empty(), "Cannot drop a GcBox that is still referenced");
         } else {
             warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad"); //TODO: should we also panic here?
+        }
+        
+        if self.weak.load(Ordering::Relaxed) != 0 {
+            warn!("Dropping a GcBox that still has weak references - this might be bad");
         }
 
         if let Some(refs) = self.refs.spin_read() {
