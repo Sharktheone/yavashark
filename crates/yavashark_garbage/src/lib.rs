@@ -29,6 +29,7 @@ impl<T: ?Sized> Clone for Gc<T> {
 impl<T: ?Sized> Gc<T> {
     pub fn add_ref(&self, other: &Self) {
         unsafe {
+            (*self.inner.as_ptr()).strong.fetch_add(1, Ordering::Relaxed);
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
                 warn!("Failed to add reference to a GcBox");
                 return;
@@ -40,6 +41,7 @@ impl<T: ?Sized> Gc<T> {
 
     pub fn remove_ref(&self, other: &Self) {
         unsafe {
+            (*self.inner.as_ptr()).strong.fetch_sub(1, Ordering::Relaxed);
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
                 warn!("Failed to remove reference from a GcBox");
                 return;
@@ -110,14 +112,14 @@ impl<T: ?Sized> Drop for Gc<T> {
             if (*self.inner.as_ptr()).strong.fetch_sub(1, Ordering::Relaxed) == 0 {
                 //we can drop the GcBox's value
                 let _ = Box::from_raw(self.inner.as_ptr());
-                
+
                 if (*self.inner.as_ptr()).weak.load(Ordering::Relaxed) == 0 {
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
                 }
             }
         }
-        
+
         //TODO: walk the graph and remove all unreachable nodes
     }
 }
