@@ -122,7 +122,32 @@ impl<T: ?Sized> GcBox<T> {
     }
 
     fn you_have_root(&mut self) -> bool {
+        if self.mark & Self::HAS_NO_ROOT != 0 {
+            return false; // We already know that we don't have a root
+        }
+
+
+        if self.mark & Self::HAS_ROOT == 0 {
+            self.mark |= Self::HAS_ROOT;
+            let Some(refs) = self.refs.spin_read() else {
+                warn!("Failed to read references from a GcBox - leaking memory");
+                return true; // we say that we have a root, so we leak memory and don't drop memory that we might still need
+            };
+
+            for r in &*refs {
+                unsafe {
+                    let root = (*r.as_ptr()).you_have_root();
+                    if root {
+                        return true; // We have a root
+                    }
+                }
+            }
+
             return false; // We don't have a root
+        }
+
+        true // We have a root
+    }
 }
 
 
