@@ -72,6 +72,60 @@ struct WeakGc<T: ?Sized> {
 }
 
 
+impl<T: ?Sized> GcBox<T> {
+    const MARKED: u8 = 0b1000_0000;
+    const HAS_ROOT: u8 = 0b0100_0000;
+    const HAS_NO_ROOT: u8 = 0b0010_0000;
+
+    fn walk_graph(&mut self) {
+        self.mark();
+        let Some(read) = self.refs.spin_read() else {
+            warn!("Failed to read references from a GcBox - leaking memory");
+            return;
+        };
+
+        let mut unmark = Vec::new();
+
+
+        for r in &*read {
+            unsafe {
+                if (*r.as_ptr()).mark != Self::MARKED && (*r.as_ptr()).walk_from_dead(&mut unmark) {
+                    unmark.push(*r);
+                }
+            }
+        }
+        
+        for r in unmark {
+            unsafe {
+                (*r.as_ptr()).unmark();
+            }
+        }
+    }
+
+    /// Returns true if the `GcBox` needs to be unmarked later on
+    fn walk_from_dead(&self, unmark: &mut Vec<NonNull<Self>>) -> bool {
+        todo!("Implement walk_from_dead")
+    }
+
+    fn mark(&mut self) {
+        self.mark = Self::MARKED;
+    }
+
+    fn unmark(&mut self) {
+        self.mark = 0;
+    }
+
+    fn nuke(this: *mut Self) {
+        unsafe {
+            let _ = Box::from_raw((*this).value.as_ptr());
+        }
+    }
+
+    fn you_have_root(&mut self) -> bool {
+            return false; // We don't have a root
+}
+
+
 impl<T: ?Sized> Drop for GcBox<T> {
     fn drop(&mut self) {
         self.mark = 0;
