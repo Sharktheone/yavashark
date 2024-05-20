@@ -15,7 +15,6 @@ use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 #[derive(Debug)]
 pub struct Array {}
 
-
 #[properties]
 impl Array {
     #[new]
@@ -25,7 +24,6 @@ impl Array {
             length: Value::Number(0.0).into(),
         })
     }
-
 
     #[prop(Symbol::ITERATOR)]
     fn iterator(&self, args: Vec<Value>, ctx: &mut Context, this: Value) -> ValueResult {

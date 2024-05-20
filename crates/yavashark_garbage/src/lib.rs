@@ -12,12 +12,9 @@ use spin_lock::SpinLock;
 
 pub(crate) mod spin_lock;
 
-
 pub struct Gc<T: ?Sized> {
     inner: NonNull<GcBox<T>>,
-
 }
-
 
 impl<T: ?Sized> Clone for Gc<T> {
     fn clone(&self) -> Self {
@@ -25,12 +22,13 @@ impl<T: ?Sized> Clone for Gc<T> {
     }
 }
 
-
 impl<T: ?Sized> Gc<T> {
     pub fn add_ref(&self, other: &Self) {
         unsafe {
-            (*self.inner.as_ptr()).strong.fetch_add(1, Ordering::Relaxed);
-            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
+            (*self.inner.as_ptr())
+                .strong
+                .fetch_add(1, Ordering::Relaxed);
+            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
                 warn!("Failed to add reference to a GcBox");
                 return;
             };
@@ -41,8 +39,10 @@ impl<T: ?Sized> Gc<T> {
 
     pub fn remove_ref(&self, other: &Self) {
         unsafe {
-            (*self.inner.as_ptr()).strong.fetch_sub(1, Ordering::Relaxed);
-            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write()  else {
+            (*self.inner.as_ptr())
+                .strong
+                .fetch_sub(1, Ordering::Relaxed);
+            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
                 warn!("Failed to remove reference from a GcBox");
                 return;
             };
@@ -52,25 +52,21 @@ impl<T: ?Sized> Gc<T> {
     }
 }
 
-
 type MaybeNull<T> = NonNull<T>;
-
 
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
 struct GcBox<T: ?Sized> {
-    value: MaybeNull<T>, // This value might be null
+    value: MaybeNull<T>,                // This value might be null
     ref_by: RwLock<Vec<NonNull<Self>>>, // All the GcBox that reference this GcBox
-    refs: RwLock<Vec<NonNull<Self>>>, // All the GcBox that this GcBox reference
+    refs: RwLock<Vec<NonNull<Self>>>,   // All the GcBox that this GcBox reference
     weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicUsize, // Number of strong references
     mark: u8, // Mark for garbage collection only accessible by the garbage collector thread
 }
 
-
 struct WeakGc<T: ?Sized> {
     inner: NonNull<GcBox<T>>,
 }
-
 
 impl<T: ?Sized> GcBox<T> {
     const MARKED: u8 = 0b1000_0000;
@@ -86,7 +82,6 @@ impl<T: ?Sized> GcBox<T> {
 
         let mut unmark = Vec::new();
 
-
         for r in &*read {
             unsafe {
                 if (*r.as_ptr()).mark != Self::MARKED && (*r.as_ptr()).walk_from_dead(&mut unmark) {
@@ -94,7 +89,7 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
         }
-        
+
         for r in unmark {
             unsafe {
                 (*r.as_ptr()).unmark();
@@ -126,7 +121,6 @@ impl<T: ?Sized> GcBox<T> {
             return false; // We already know that we don't have a root
         }
 
-
         if self.mark & Self::HAS_ROOT == 0 {
             self.mark |= Self::HAS_ROOT;
             let Some(refs) = self.refs.spin_read() else {
@@ -150,7 +144,6 @@ impl<T: ?Sized> GcBox<T> {
     }
 }
 
-
 impl<T: ?Sized> Drop for GcBox<T> {
     fn drop(&mut self) {
         self.mark = 0;
@@ -159,9 +152,13 @@ impl<T: ?Sized> Drop for GcBox<T> {
         }
 
         if let Some(ref_by) = self.ref_by.spin_read() {
-            assert!(ref_by.is_empty(), "Cannot drop a GcBox that is still referenced");
+            assert!(
+                ref_by.is_empty(),
+                "Cannot drop a GcBox that is still referenced"
+            );
         } else {
-            warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad"); //TODO: should we also panic here?
+            warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad");
+            //TODO: should we also panic here?
         }
 
         if self.weak.load(Ordering::Relaxed) != 0 {
@@ -184,11 +181,14 @@ impl<T: ?Sized> Drop for GcBox<T> {
     }
 }
 
-
 impl<T: ?Sized> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
-            if (*self.inner.as_ptr()).strong.fetch_sub(1, Ordering::Relaxed) == 0 {
+            if (*self.inner.as_ptr())
+                .strong
+                .fetch_sub(1, Ordering::Relaxed)
+                == 0
+            {
                 //we can drop the GcBox's value
                 let _ = Box::from_raw(self.inner.as_ptr());
 

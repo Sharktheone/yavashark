@@ -1,9 +1,13 @@
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use log::warn;
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 pub(crate) trait SpinLock<'a, T> {
-    type WriteTarget<W: 'a> where Self: 'a;
-    type ReadTarget<R: 'a> where Self: 'a;
+    type WriteTarget<W: 'a>
+    where
+        Self: 'a;
+    type ReadTarget<R: 'a>
+    where
+        Self: 'a;
 
     fn spin_write(&'a self) -> Option<Self::WriteTarget<T>>;
     fn spin_read(&'a self) -> Option<Self::ReadTarget<T>>;
