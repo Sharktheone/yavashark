@@ -197,8 +197,8 @@ impl<T: ?Sized> Drop for Gc<T> {
                     let _ = Box::from_raw(self.inner.as_ptr());
                 }
             }
-        }
 
-        //TODO: walk the graph and remove all unreachable nodes
+            (*self.inner.as_ptr()).walk_graph();
+        }
     }
 }
