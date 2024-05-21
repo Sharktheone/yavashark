@@ -64,7 +64,7 @@ struct GcBox<T: ?Sized> {
     mark: u8, // Mark for garbage collection only accessible by the garbage collector thread
 }
 
-struct WeakGc<T: ?Sized> {
+pub struct WeakGc<T: ?Sized> {
     inner: NonNull<GcBox<T>>,
 }
 
@@ -72,8 +72,12 @@ impl<T: ?Sized> GcBox<T> {
     const MARKED: u8 = 0b1000_0000;
     const HAS_ROOT: u8 = 0b0100_0000;
     const HAS_NO_ROOT: u8 = 0b0010_0000;
+    
+    const EXTERNAL_DESTRUCT: u8 = 0b0001_0000;
 
-    fn walk_graph(&mut self) {
+    /// This function will walk / shake the graph and nuke all the GcBox that are not reachable from the root or only reachable from this GcBox
+    /// So ONLY execute this function on a GcBox that is about to be dropped
+    unsafe fn walk_graph(&mut self) {
         self.mark();
         let Some(read) = self.refs.spin_read() else {
             warn!("Failed to read references from a GcBox - leaking memory");
@@ -84,7 +88,7 @@ impl<T: ?Sized> GcBox<T> {
 
         for r in &*read {
             unsafe {
-                if (*r.as_ptr()).mark != Self::MARKED && (*r.as_ptr()).walk_from_dead(&mut unmark) {
+                if (*r.as_ptr()).walk_from_dead(&mut unmark) {
                     unmark.push(*r);
                 }
             }
@@ -97,9 +101,45 @@ impl<T: ?Sized> GcBox<T> {
         }
     }
 
-    /// Returns true if the `GcBox` needs to be unmarked later on
-    fn walk_from_dead(&self, unmark: &mut Vec<NonNull<Self>>) -> bool {
-        todo!("Implement walk_from_dead")
+    /// (unmark, nuke)
+    fn walk_from_dead(&mut self, unmark: &mut Vec<NonNull<Self>>, parent: NonNull<Self>) -> (bool, bool){
+        if self.mark & Self::MARKED != 0 {
+            return (false, false);
+        }
+        
+        let Some(ref_by) = self.ref_by.spin_read() else {
+            warn!("Failed to read references from a GcBox - leaking memory");
+            return (false, false); // We need to unmark this GcBox
+        };
+        
+        if ref_by.len() > 1 {
+            //The parent is the only one that references this GcBox, which is about to be nuked
+            return (false, true) // We don't need to unmark this GcBox, since we're nuking it anyway
+        }
+        
+        for r in &*ref_by {
+            if *r == parent {
+                continue;
+            }
+            
+            unsafe {
+                let (um, n) = (*r.as_ptr()).walk_from_dead(unmark, self); //TODO: we need to get the pointer as a non null
+                if um {
+                    unmark.push(*r);
+                }
+                if n {
+                    return (true, true); // We need to unmark this GcBox
+                }
+            }
+        }
+
+
+
+
+
+
+
+        (true, false) //TODO
     }
 
     fn mark(&mut self) {
@@ -158,6 +198,10 @@ impl<T: ?Sized> GcBox<T> {
 
 impl<T: ?Sized> Drop for GcBox<T> {
     fn drop(&mut self) {
+        if self.mark & Self::EXTERNAL_DESTRUCT != 0 {
+            return;
+        }
+        
         self.mark = 0;
         while self.mark == 0 {
             self.mark = random();
