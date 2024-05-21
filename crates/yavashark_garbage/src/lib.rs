@@ -72,7 +72,7 @@ impl<T: ?Sized> GcBox<T> {
     const MARKED: u8 = 0b1000_0000;
     const HAS_ROOT: u8 = 0b0100_0000;
     const HAS_NO_ROOT: u8 = 0b0010_0000;
-    
+
     const EXTERNAL_DESTRUCT: u8 = 0b0001_0000;
 
     /// This function will walk / shake the graph and nuke all the GcBox that are not reachable from the root or only reachable from this GcBox
@@ -102,26 +102,30 @@ impl<T: ?Sized> GcBox<T> {
     }
 
     /// (unmark, nuke)
-    fn walk_from_dead(&mut self, unmark: &mut Vec<NonNull<Self>>, parent: NonNull<Self>) -> (bool, bool){
+    fn walk_from_dead(
+        &mut self,
+        unmark: &mut Vec<NonNull<Self>>,
+        parent: NonNull<Self>,
+    ) -> (bool, bool) {
         if self.mark & Self::MARKED != 0 {
             return (false, false);
         }
-        
+
         let Some(ref_by) = self.ref_by.spin_read() else {
             warn!("Failed to read references from a GcBox - leaking memory");
             return (false, false); // We need to unmark this GcBox
         };
-        
+
         if ref_by.len() > 1 {
             //The parent is the only one that references this GcBox, which is about to be nuked
-            return (false, true) // We don't need to unmark this GcBox, since we're nuking it anyway
+            return (false, true); // We don't need to unmark this GcBox, since we're nuking it anyway
         }
-        
+
         for r in &*ref_by {
             if *r == parent {
                 continue;
             }
-            
+
             unsafe {
                 let (um, n) = (*r.as_ptr()).walk_from_dead(unmark, self); //TODO: we need to get the pointer as a non null
                 if um {
@@ -132,12 +136,6 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
         }
-
-
-
-
-
-
 
         (true, false) //TODO
     }
@@ -155,7 +153,6 @@ impl<T: ?Sized> GcBox<T> {
             let _ = Box::from_raw((*this).value.as_ptr());
         }
     }
-
 
     fn you_have_root(&mut self) -> bool {
         self.check_root(&mut None).0
@@ -201,7 +198,7 @@ impl<T: ?Sized> Drop for GcBox<T> {
         if self.mark & Self::EXTERNAL_DESTRUCT != 0 {
             return;
         }
-        
+
         self.mark = 0;
         while self.mark == 0 {
             self.mark = random();
