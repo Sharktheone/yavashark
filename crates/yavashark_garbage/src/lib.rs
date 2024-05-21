@@ -116,31 +116,43 @@ impl<T: ?Sized> GcBox<T> {
         }
     }
 
+
     fn you_have_root(&mut self) -> bool {
+        self.check_root(&mut None).0
+    }
+
+    /// Returns (has a root, needs unmark)
+    fn check_root(&mut self, unmark: &mut Option<&mut Vec<NonNull<Self>>>) -> (bool, bool) {
         if self.mark & Self::HAS_NO_ROOT != 0 {
-            return false; // We already know that we don't have a root
+            return (false, false); // We already know that we don't have a root | We don't need to unmark, because we are already unmarked
         }
 
         if self.mark & Self::HAS_ROOT == 0 {
-            self.mark |= Self::HAS_ROOT;
             let Some(refs) = self.refs.spin_read() else {
                 warn!("Failed to read references from a GcBox - leaking memory");
-                return true; // we say that we have a root, so we leak memory and don't drop memory that we might still need
+                return (true, true); // we say that we have a root, so we leak memory and don't drop memory that we might still need
             };
 
             for r in &*refs {
                 unsafe {
-                    let root = (*r.as_ptr()).you_have_root();
+                    let (root, um) = (*r.as_ptr()).check_root(unmark);
+                    if um {
+                        if let Some(unmark) = unmark {
+                            unmark.push(*r);
+                        }
+                    }
                     if root {
-                        return true; // We have a root
+                        self.mark |= Self::HAS_ROOT;
+                        return (true, true); // We have a root
                     }
                 }
             }
 
-            return false; // We don't have a root
+            self.mark |= Self::HAS_NO_ROOT;
+            return (false, true); // We don't have a root
         }
 
-        true // We have a root
+        (true, false) // We have a root | We don't need to unmark because we are already marked
     }
 }
 
