@@ -258,6 +258,27 @@ mod temp_test {
         
         
         console.log(Array)
+        
+        
+        let lit_array = [1,2,3,,4,5,6,7,,,8,9,10]
+        
+        console.log(lit_array)
+        
+        let obj = {
+            x: 11,
+            y: 22,
+            z: 33
+        }
+        
+        console.log(obj)
+        console.log(obj.x, obj.y, obj.z)
+        
+        
+        let x = function() {
+        console.log("hello")
+        }
+        
+        x()
 
         z
         "#;
