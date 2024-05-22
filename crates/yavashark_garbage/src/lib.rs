@@ -1,6 +1,5 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
-use std::ptr;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
@@ -86,12 +85,17 @@ impl<T: ?Sized> GcBox<T> {
         };
 
         let mut unmark = Vec::new();
+        let mut nuke = Vec::new();
 
         for r in &*read {
             unsafe {
                 let (um, n) = (*r.as_ptr()).walk_from_dead(&mut unmark, this);
                 if um && !n {
                     unmark.push(*r);
+                }
+
+                if n {
+                    nuke.push(*r);
                 }
             }
         }
@@ -100,6 +104,11 @@ impl<T: ?Sized> GcBox<T> {
             unsafe {
                 (*r.as_ptr()).unmark();
             }
+        }
+
+
+        for r in nuke {
+            GcBox::nuke(r.as_ptr());
         }
     }
 
@@ -133,7 +142,9 @@ impl<T: ?Sized> GcBox<T> {
                 if um {
                     unmark.push(*r);
                 }
-                if n {
+                if root {
+                    self.mark |= Self::HAS_ROOT;
+
                     return (true, true); // We need to unmark this GcBox
                 }
             }
@@ -152,6 +163,9 @@ impl<T: ?Sized> GcBox<T> {
         unsafe {
             let _ = Box::from_raw((*this).value.as_ptr());
         }
+
+
+        //TODO: we need to also check if we have only 1 reference and if we need to drop references
     }
 
     fn you_have_root(&mut self) -> bool {
