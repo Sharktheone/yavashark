@@ -1,3 +1,6 @@
+mod print;
+
+use crate::console::print::PrettyPrint;
 use crate::context::Context;
 use crate::object::Object;
 use crate::NativeFunction;
@@ -10,11 +13,11 @@ pub fn get_console(ctx: &mut Context) -> Value {
         "log".into(),
         NativeFunction::new(
             "log",
-            |args, _, _| {
+            |args, _, ctx| {
                 let mut str = String::new();
 
                 for arg in args {
-                    str.push_str(&arg.to_string());
+                    str.push_str(&arg.pretty_print(ctx));
                     str.push(' ');
                 }
 

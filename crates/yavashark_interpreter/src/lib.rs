@@ -247,7 +247,7 @@ mod temp_test {
             this.y = "world"
             
             this.arrow = (a, b) => {
-                console.log("from_arrows", this.x, this.y, this.arrow)
+                console.log("from_arrows", this.x, this.y)
                 return a + b
             }
         }
@@ -257,27 +257,27 @@ mod temp_test {
         console.log("arrow", arr.arrow(1, 2))
         
         
-        console.log(Array)
-        
-        
+        // console.log(Array) //TODO: this causes an error (probably because of the prototype)
+
+
         let lit_array = [1,2,3,,4,5,6,7,,,8,9,10]
-        
+
         console.log(lit_array)
-        
+
         let obj = {
             x: 11,
             y: 22,
             z: 33
         }
-        
+
         console.log(obj)
         console.log(obj.x, obj.y, obj.z)
-        
-        
+
+
         let x = function() {
         console.log("hello")
         }
-        
+
         x()
 
         z

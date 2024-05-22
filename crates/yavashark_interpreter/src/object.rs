@@ -17,6 +17,7 @@ pub struct Object {
     pub properties: HashMap<Value, Variable>,
     pub array: Vec<(usize, Variable)>,
     pub prototype: Variable,
+    pub get_set: HashMap<Value, (Variable, Variable)>,
 }
 
 impl Object {
@@ -28,6 +29,7 @@ impl Object {
             properties: HashMap::new(),
             prototype,
             array: Vec::new(),
+            get_set: HashMap::new(),
         });
 
         this.into()
@@ -38,6 +40,7 @@ impl Object {
             properties: HashMap::new(),
             prototype: proto.into(),
             array: Vec::new(),
+            get_set: HashMap::new(),
         });
 
         this.into()
@@ -50,6 +53,7 @@ impl Object {
             properties: HashMap::new(),
             prototype,
             array: Vec::new(),
+            get_set: HashMap::new(),
         }
     }
 
@@ -58,6 +62,7 @@ impl Object {
             properties: HashMap::new(),
             prototype: proto.into(),
             array: Vec::new(),
+            get_set: HashMap::new(),
         }
     }
 

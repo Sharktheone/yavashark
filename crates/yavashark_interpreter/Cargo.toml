@@ -12,7 +12,7 @@ swc_common = "0.33.25"
 yavashark_value = { path = "../yavashark_value", features = ["js"], default-features = false }
 yavashark_macro = { path = "../yavashark_macro" }
 anyhow = "1.0.83"
-
+colored = "2.1.0"
 
 
 [lints]
