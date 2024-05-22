@@ -107,7 +107,7 @@ impl<T: ?Sized> GcBox<T> {
     fn walk_from_dead(
         &mut self,
         unmark: &mut Vec<NonNull<Self>>,
-        parent: NonNull<Self>,
+        parent: *mut Self,
     ) -> (bool, bool) {
         if self.mark & Self::MARKED != 0 {
             return (false, false);
@@ -124,12 +124,12 @@ impl<T: ?Sized> GcBox<T> {
         }
 
         for r in &*ref_by {
-            if *r == parent {
+            if r.as_ptr() == parent {
                 continue;
             }
 
             unsafe {
-                let (um, n) = (*r.as_ptr()).walk_from_dead(unmark, self); //TODO: we need to get the pointer as a non null
+                let (um, root) = (*r.as_ptr()).check_root(&mut Some(unmark));
                 if um {
                     unmark.push(*r);
                 }
@@ -138,12 +138,10 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
         }
+        
+        self.mark |= Self::HAS_NO_ROOT;
 
-        (true, false) //TODO
-    }
-
-    fn mark(&mut self) {
-        self.mark = Self::MARKED;
+        (true, false)
     }
 
     fn unmark(&mut self) {
