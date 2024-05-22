@@ -18,12 +18,21 @@ pub struct Array {}
 #[properties]
 impl Array {
     #[new]
-    fn new(ctx: &mut Context) -> Result<Self, Error> {
+    pub fn new(ctx: &mut Context) -> Result<Self, Error> {
         Ok(Self {
             object: Object::raw_with_proto(ctx.proto.array.clone().into()),
             length: Value::Number(0.0).into(),
         })
     }
+    
+    
+    pub fn push(&mut self, value: Value) {
+        let index = self.object.array.last().map(|(i, _)| *i + 1).unwrap_or(0);
+        
+        self.object.array.push((index, Variable::new(value)));
+        self.length.value = Value::Number(index as f64 + 1.0);
+    }
+    
 
     #[prop(Symbol::ITERATOR)]
     fn iterator(&self, args: Vec<Value>, ctx: &mut Context, this: Value) -> ValueResult {
