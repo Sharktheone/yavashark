@@ -77,9 +77,10 @@ impl<T: ?Sized> GcBox<T> {
 
     /// This function will walk / shake the graph and nuke all the GcBox that are not reachable from the root or only reachable from this GcBox
     /// So ONLY execute this function on a GcBox that is about to be dropped
-    unsafe fn walk_graph(&mut self) {
-        self.mark();
-        let Some(read) = self.refs.spin_read() else {
+    unsafe fn walk_graph(this: *mut Self) {
+        (*this).mark = Self::MARKED;
+
+        let Some(read) = (*this).refs.spin_read() else {
             warn!("Failed to read references from a GcBox - leaking memory");
             return;
         };
@@ -88,7 +89,8 @@ impl<T: ?Sized> GcBox<T> {
 
         for r in &*read {
             unsafe {
-                if (*r.as_ptr()).walk_from_dead(&mut unmark) {
+                let (um, n) = (*r.as_ptr()).walk_from_dead(&mut unmark, this);
+                if um && !n {
                     unmark.push(*r);
                 }
             }
@@ -251,7 +253,7 @@ impl<T: ?Sized> Drop for Gc<T> {
                 }
             }
 
-            (*self.inner.as_ptr()).walk_graph();
+            GcBox::walk_graph(self.inner.as_ptr());
         }
     }
 }
