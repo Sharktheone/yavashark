@@ -4,7 +4,7 @@ use swc_ecma_ast::{ObjectLit, Prop, PropName, PropOrSpread};
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
-use crate::Value;
+use crate::{JSFunction, Value};
 use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
@@ -34,15 +34,7 @@ impl Context {
                             obj.define_property(name.into(), value);
                         }
                         Prop::KeyValue(kv) => {
-                            let key = match &kv.key {
-                                PropName::Ident(ident) => Value::String(ident.sym.to_string()),
-                                PropName::Str(str_) => Value::String(str_.value.to_string()),
-                                PropName::Num(num) => Value::Number(num.value),
-                                PropName::Computed(expr) => {
-                                    self.run_expr(&expr.expr, expr.span, scope)?
-                                }
-                                PropName::BigInt(_) => todo!(),
-                            };
+                            let key = self.run_prop_name(&kv.key, scope)?;
 
                             let value = self.run_expr(&kv.value, prop.span(), scope)?;
 
@@ -55,6 +47,27 @@ impl Context {
 
                             obj.define_property(key.into(), value);
                         }
+                        
+                        Prop::Method(method) => {
+                            let key = self.run_prop_name(&method.key, scope)?;
+                            let mut fn_scope = Scope::with_parent(scope);
+
+                            fn_scope.state_set_function();
+
+                            let function = JSFunction::new(
+                                key.to_string(), // TODO, what should the name be here? (and wrong to_string function)
+                                method.function.params.clone(),
+                                method.function.body.clone(),
+                                fn_scope,
+                                self,
+                            );
+                            
+                            let value = function.into();
+                            
+
+                            obj.define_property(key, value);
+                        }
+                        
                         _ => todo!(),
                     }
                 }
@@ -62,5 +75,15 @@ impl Context {
         }
 
         Ok(Value::Object(obj))
+    }
+    
+    pub fn run_prop_name(&mut self, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
+        Ok(match prop {
+            PropName::Ident(ident) => Value::String(ident.sym.to_string()),
+            PropName::Str(str_) => Value::String(str_.value.to_string()),
+            PropName::Num(num) => Value::Number(num.value),
+            PropName::Computed(expr) => self.run_expr(&expr.expr, expr.span, scope)?,
+            PropName::BigInt(_) => todo!(),
+        })
     }
 }
