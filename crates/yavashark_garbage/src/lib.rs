@@ -331,6 +331,8 @@ impl<T: ?Sized> Drop for Gc<T> {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::RefCell;
+
     use super::*;
 
     #[test]
@@ -359,5 +361,46 @@ mod tests {
         println!("{:?}", *x);
         drop(w);
         println!("{:?}", *x);
+    }
+
+
+    #[test]
+    fn circular() {
+        env_logger::Builder::from_default_env()
+            .filter_level(log::LevelFilter::Debug)
+            .init();
+
+        log::error!("Hello, world!");
+
+        {
+            struct Node {
+                data: i32,
+                other: Option<Gc<RefCell<Node>>>,
+            }
+
+            let x = Gc::new(RefCell::new(Node {
+                data: 5,
+                other: None,
+            }));
+
+            let y = Gc::new(RefCell::new(Node {
+                data: 6,
+                other: Some(x.clone()),
+            }));
+            
+            y.add_ref(&x);
+            x.add_ref_by(&y);
+
+            x.borrow_mut().other = Some(y.clone());
+            x.add_ref(&y);
+            y.add_ref_by(&x);
+
+            println!("{:?}", x.borrow().data);
+            println!("{:?}", x.borrow().other.as_ref().unwrap().borrow().data);
+
+            println!("{:?}", y.borrow().data);
+            println!("{:?}", y.borrow().other.as_ref().unwrap().borrow().data);
+        }
+        println!("Hello, world!");
     }
 }
