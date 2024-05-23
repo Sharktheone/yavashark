@@ -3,18 +3,18 @@ use crate::context::Context;
 use colored::Colorize;
 
 pub trait PrettyPrint {
-    fn pretty_print(&self, ctx: &mut Context) -> String;
+    fn pretty_print(&self) -> String;
 
-    fn pretty_print_nl(&self, ctx: &mut Context) -> String;
+    fn pretty_print_nl(&self) -> String;
 
-    fn pretty_print_key(&self, ctx: &mut Context) -> String;
+    fn pretty_print_key(&self) -> String;
 }
 
 
 
 
 impl PrettyPrint for Object<Context> {
-    fn pretty_print(&self, ctx: &mut Context) -> String {
+    fn pretty_print(&self) -> String {
         let mut str = String::new();
         str.push_str("{ ");
 
@@ -24,9 +24,9 @@ impl PrettyPrint for Object<Context> {
             }
 
             for (key, value) in properties {
-                str.push_str(&key.pretty_print_key(ctx));
+                str.push_str(&key.pretty_print_key());
                 str.push_str(": ");
-                str.push_str(&value.pretty_print(ctx));
+                str.push_str(&value.pretty_print());
                 str.push_str(", ");
             }
             str.pop();
@@ -40,7 +40,7 @@ impl PrettyPrint for Object<Context> {
     }
 
 
-    fn pretty_print_nl(&self, ctx: &mut Context) -> String {
+    fn pretty_print_nl(&self) -> String {
         let mut str = String::new();
         str.push_str("{\n");
 
@@ -51,9 +51,9 @@ impl PrettyPrint for Object<Context> {
 
             for (key, value) in properties {
                 str.push_str("  ");
-                str.push_str(&key.pretty_print_key(ctx));
+                str.push_str(&key.pretty_print_key());
                 str.push_str(": ");
-                str.push_str(&value.pretty_print_nl(ctx));
+                str.push_str(&value.pretty_print_nl());
                 str.push_str(",\n");
             }
             str.pop();
@@ -66,14 +66,14 @@ impl PrettyPrint for Object<Context> {
         str
     }
 
-    fn pretty_print_key(&self, ctx: &mut Context) -> String {
+    fn pretty_print_key(&self) -> String {
         format!("'{self}'").green().to_string()
     }
 }
 
 
 impl PrettyPrint for Function<Context> {
-    fn pretty_print(&self, ctx: &mut Context) -> String {
+    fn pretty_print(&self) -> String {
         let func = format!("[Function: {}]", self.name()).bright_green().to_string();
         
         if let Ok(properties) = self.properties() {
@@ -85,9 +85,9 @@ impl PrettyPrint for Function<Context> {
             str.push_str("{ ");
 
             for (key, value) in properties {
-                str.push_str(&key.pretty_print_key(ctx));
+                str.push_str(&key.pretty_print_key());
                 str.push_str(": ");
-                str.push_str(&value.pretty_print(ctx));
+                str.push_str(&value.pretty_print());
                 str.push_str(", ");
             }
             str.pop();
@@ -100,7 +100,7 @@ impl PrettyPrint for Function<Context> {
         func
     }
 
-    fn pretty_print_nl(&self, ctx: &mut Context) -> String {
+    fn pretty_print_nl(&self) -> String {
         let func = format!("[Function: {}]", self.name()).bright_green().to_string();
         
         if let Ok(properties) = self.properties() {
@@ -113,9 +113,9 @@ impl PrettyPrint for Function<Context> {
 
             for (key, value) in properties {
                 str.push_str("  ");
-                str.push_str(&key.pretty_print_key(ctx));
+                str.push_str(&key.pretty_print_key());
                 str.push_str(": ");
-                str.push_str(&value.pretty_print_nl(ctx));
+                str.push_str(&value.pretty_print_nl());
                 str.push_str(",\n");
             }
             str.pop();
@@ -128,48 +128,48 @@ impl PrettyPrint for Function<Context> {
         func
     }
 
-    fn pretty_print_key(&self, ctx: &mut Context) -> String {
+    fn pretty_print_key(&self) -> String {
         format!("'{self}'").green().to_string()
     }
 }
 
 
 impl PrettyPrint for Value<Context> {
-    fn pretty_print(&self, ctx: &mut Context) -> String {
+    fn pretty_print(&self) -> String {
         match self {
             Self::Undefined => "undefined".bright_black().to_string(),
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
             Self::String(s) => s.to_string().green().to_string(),
-            Self::Object(o) => o.pretty_print(ctx),
-            Self::Function(f) => f.pretty_print(ctx),
+            Self::Object(o) => o.pretty_print(),
+            Self::Function(f) => f.pretty_print(),
             Self::Symbol(s) => s.to_string().cyan().to_string()
         }
     }
 
-    fn pretty_print_nl(&self, ctx: &mut Context) -> String {
+    fn pretty_print_nl(&self) -> String {
         match self {
             Self::Undefined => "undefined".bright_black().to_string(),
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
             Self::String(s) => s.to_string().green().to_string(),
-            Self::Object(o) => o.pretty_print_nl(ctx),
-            Self::Function(f) => f.pretty_print_nl(ctx),
+            Self::Object(o) => o.pretty_print_nl(),
+            Self::Function(f) => f.pretty_print_nl(),
             Self::Symbol(s) => s.to_string().cyan().to_string()
         }
     }
 
-    fn pretty_print_key(&self, ctx: &mut Context) -> String {
+    fn pretty_print_key(&self) -> String {
         match self {
             Self::Undefined => "undefined".bright_black().to_string(),
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
             Self::String(s) => s.to_string().green().to_string(),
-            Self::Object(o) => o.pretty_print_key(ctx),
-            Self::Function(f) => f.pretty_print_key(ctx),
+            Self::Object(o) => o.pretty_print_key(),
+            Self::Function(f) => f.pretty_print_key(),
             Self::Symbol(s) => s.to_string().cyan().to_string()
         }
     }
