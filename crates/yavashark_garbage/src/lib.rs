@@ -289,7 +289,7 @@ impl<T: ?Sized> Drop for Gc<T> {
             if (*self.inner.as_ptr())
                 .strong
                 .fetch_sub(1, Ordering::Relaxed)
-                == 0
+                == 1 // We are the last one (it returns the previous value, so we need to check if it was 1)
             {
                 let ptr = &mut (*self.inner.as_ptr()).value;
 
