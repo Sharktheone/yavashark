@@ -1,6 +1,9 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
-use std::ptr::NonNull;
+use std::mem;
+use std::mem::offset_of;
+use std::ops::Deref;
+use std::ptr::{NonNull, null_mut};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
@@ -17,7 +20,20 @@ pub struct Gc<T: ?Sized> {
 
 impl<T: ?Sized> Clone for Gc<T> {
     fn clone(&self) -> Self {
+        unsafe {
+            (*self.inner.as_ptr()).strong.fetch_add(1, Ordering::Relaxed);
+        }
+
         Self { inner: self.inner }
+    }
+}
+
+
+impl<T: ?Sized> Deref for Gc<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*(*self.inner.as_ptr()).value.as_ptr() }
     }
 }
 
@@ -48,6 +64,28 @@ impl<T: ?Sized> Gc<T> {
 
             lock.retain(|x| x != &other.inner);
         }
+    }
+}
+
+
+impl<T> Gc<T> {
+    pub fn new(value: T) -> Self {
+        let value = Box::new(value);
+        let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) };
+
+        let gc_box = GcBox {
+            value,
+            ref_by: RwLock::new(Vec::new()),
+            refs: RwLock::new(Vec::new()),
+            weak: AtomicUsize::new(0),
+            strong: AtomicUsize::new(1),
+            mark: 0,
+        };
+
+        let gc_box = Box::new(gc_box);
+        let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) };
+
+        Self { inner: gc_box }
     }
 }
 
@@ -149,7 +187,7 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
         }
-        
+
         self.mark |= Self::HAS_NO_ROOT;
 
         (true, false)
@@ -165,7 +203,7 @@ impl<T: ?Sized> GcBox<T> {
         }
 
 
-        //TODO: we need to also check if we have only 1 reference and if we need to drop references
+        //TODO: we need to also check if we have only 1 reference and if we need to drop references - i guess, this should do the destruction of the GcBox?
     }
 
     fn you_have_root(&mut self) -> bool {
@@ -256,8 +294,11 @@ impl<T: ?Sized> Drop for Gc<T> {
                 .fetch_sub(1, Ordering::Relaxed)
                 == 0
             {
+                let ptr = &mut (*self.inner.as_ptr()).value;
+
                 //we can drop the GcBox's value
-                let _ = Box::from_raw(self.inner.as_ptr());
+                let _ = Box::from_raw(ptr.as_ptr()); //TODO: maybe set the ptr to usize::MAX => we need https://github.com/rust-lang/rust/issues/81513
+
 
                 if (*self.inner.as_ptr()).weak.load(Ordering::Relaxed) == 0 {
                     //we can drop the complete GcBox
@@ -267,5 +308,41 @@ impl<T: ?Sized> Drop for Gc<T> {
 
             GcBox::walk_graph(self.inner.as_ptr());
         }
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        env_logger::Builder::from_default_env()
+            .filter_level(log::LevelFilter::Debug)
+            .init();
+
+
+        log::error!("Hello, world!");
+
+
+        let x = Gc::new(5);
+        println!("{:?}", *x);
+        let y = x.clone();
+        println!("{:?}", *x);
+        let z = x.clone();
+        println!("{:?}", *x);
+        let w = x.clone();
+
+        log::error!("Hello, world!");
+
+        println!("{:?}", *x);
+
+        drop(y);
+        println!("{:?}", *x);
+        drop(z);
+        println!("{:?}", *x);
+        drop(w);
+        println!("{:?}", *x);
     }
 }
