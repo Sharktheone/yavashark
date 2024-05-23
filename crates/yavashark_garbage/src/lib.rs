@@ -10,7 +10,6 @@ use rand::random;
 
 use spin_lock::SpinLock;
 
-mod dbg_trace;
 pub(crate) mod spin_lock;
 
 pub struct Gc<T: ?Sized> {
@@ -40,9 +39,6 @@ impl<T: ?Sized> Deref for Gc<T> {
 impl<T: ?Sized> Gc<T> {
     pub fn add_ref(&self, other: &Self) {
         unsafe {
-            (*self.inner.as_ptr())
-                .strong
-                .fetch_add(1, Ordering::Relaxed);
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
                 warn!("Failed to add reference to a GcBox");
                 return;
@@ -54,9 +50,6 @@ impl<T: ?Sized> Gc<T> {
 
     pub fn remove_ref(&self, other: &Self) {
         unsafe {
-            (*self.inner.as_ptr())
-                .strong
-                .fetch_sub(1, Ordering::Relaxed);
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
                 warn!("Failed to remove reference from a GcBox");
                 return;
