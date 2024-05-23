@@ -1,9 +1,9 @@
+use swc_ecma_ast::BlockStmt;
+
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::Error;
 use crate::RuntimeResult;
 use crate::Value;
-use swc_ecma_ast::BlockStmt;
 
 impl Context {
     pub fn run_block(&mut self, stmt: &BlockStmt, scope: &mut Scope) -> RuntimeResult {

@@ -1,7 +1,7 @@
+extern crate proc_macro;
+
 mod obj;
 mod props;
-
-extern crate proc_macro;
 
 #[proc_macro_attribute]
 pub fn object(

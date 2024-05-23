@@ -1,14 +1,14 @@
-mod class;
-mod r#fn;
-mod using;
-mod var;
+use swc_ecma_ast::Decl;
 
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::Error;
-use crate::Value;
-use crate::{ControlFlow, Res, RuntimeResult};
-use swc_ecma_ast::Decl;
+use crate::Res;
+
+mod class;
+mod r#fn;
+mod using;
+mod var;
 
 impl Context {
     pub fn run_decl(&mut self, stmt: &Decl, scope: &mut Scope) -> Res {

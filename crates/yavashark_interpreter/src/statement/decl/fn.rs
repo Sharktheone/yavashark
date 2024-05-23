@@ -1,9 +1,8 @@
 use swc_ecma_ast::FnDecl;
-use yavashark_value::{Func, Function as FunctionWrapper};
 
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::{FunctionHandle, JSFunction, Res, Value};
+use crate::{JSFunction, Res};
 
 impl Context {
     pub fn decl_fn(&mut self, stmt: &FnDecl, scope: &mut Scope) -> Res {

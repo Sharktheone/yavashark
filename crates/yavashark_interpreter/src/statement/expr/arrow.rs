@@ -1,13 +1,13 @@
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
+
 use yavashark_macro::object;
-use yavashark_value::{Error, Func};
+use yavashark_value::Func;
 
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
 use crate::Value;
-use crate::Variable;
-use crate::{ControlFlow, FunctionPrototype, RuntimeResult, ValueResult};
+use crate::{ControlFlow, RuntimeResult, ValueResult};
 
 #[object]
 #[derive(Debug)]

@@ -1,8 +1,8 @@
+use swc_ecma_ast::Lit;
+
 use crate::context::Context;
-use crate::Error;
 use crate::Value;
 use crate::{ControlFlow, RuntimeResult};
-use swc_ecma_ast::Lit;
 
 impl Context {
     pub fn run_lit(&mut self, stmt: &Lit) -> RuntimeResult {
@@ -14,7 +14,7 @@ impl Context {
             Lit::BigInt(_) => todo!(),
             Lit::Regex(_) => todo!(),
             Lit::JSXText(_) => {
-                return Err(ControlFlow::error("JSXText is not supported".to_owned()))
+                return Err(ControlFlow::error("JSXText is not supported".to_owned()));
             }
         })
     }

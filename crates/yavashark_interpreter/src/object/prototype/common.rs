@@ -1,4 +1,5 @@
 #![allow(clippy::needless_pass_by_value)]
+
 use crate::context::Context;
 use crate::{Value, ValueResult};
 

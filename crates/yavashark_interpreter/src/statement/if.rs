@@ -1,9 +1,9 @@
+use swc_ecma_ast::IfStmt;
+
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::Error;
 use crate::RuntimeResult;
 use crate::Value;
-use swc_ecma_ast::IfStmt;
 
 impl Context {
     pub fn run_if(&mut self, stmt: &IfStmt, scope: &mut Scope) -> RuntimeResult {

@@ -1,6 +1,7 @@
+use std::fmt::Debug;
+
 use crate::Value;
 use crate::{Ctx, Error};
-use std::fmt::Debug;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Variable<C: Ctx> {

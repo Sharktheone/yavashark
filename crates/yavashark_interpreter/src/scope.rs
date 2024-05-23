@@ -5,7 +5,6 @@ use std::rc::Rc;
 use crate::console::get_console;
 use crate::context::Context;
 use crate::error::get_error;
-use crate::object::array::Array;
 use crate::{Error, Res, Value, Variable};
 
 pub struct MutValue {

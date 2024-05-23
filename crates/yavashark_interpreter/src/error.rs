@@ -1,8 +1,7 @@
-use crate::{Error, NativeFunction, Value};
 use yavashark_macro::object;
 
 use crate::context::Context;
-use crate::FunctionHandle;
+use crate::{Error, NativeFunction, Value};
 
 pub fn get_error(ctx: &mut Context) -> Value {
     NativeFunction::new(

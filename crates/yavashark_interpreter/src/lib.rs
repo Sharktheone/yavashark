@@ -1,12 +1,14 @@
 #![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
-use anyhow::anyhow;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
-use crate::context::Context;
 pub use function::*;
+
+use crate::context::Context;
 
 mod console;
 pub mod context;

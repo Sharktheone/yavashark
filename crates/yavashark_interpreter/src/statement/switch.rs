@@ -1,10 +1,10 @@
-use crate::Value;
 use swc_ecma_ast::SwitchStmt;
 
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::ControlFlow;
 use crate::RuntimeResult;
+use crate::Value;
 
 impl Context {
     pub fn run_switch(&mut self, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {

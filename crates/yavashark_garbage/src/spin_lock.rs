@@ -1,5 +1,6 @@
-use log::warn;
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+
+use log::warn;
 
 pub(crate) trait SpinLock<'a, T> {
     type WriteTarget<W: 'a>

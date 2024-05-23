@@ -1,6 +1,7 @@
+use slotmap::{DefaultKey, SlotMap};
+
 use crate::block::Block;
 use crate::function::FuncData;
-use slotmap::{DefaultKey, SlotMap};
 
 type NodeID = DefaultKey;
 

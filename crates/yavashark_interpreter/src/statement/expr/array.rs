@@ -1,11 +1,12 @@
+use swc_ecma_ast::ArrayLit;
+
+use yavashark_value::Obj;
+
 use crate::context::Context;
 use crate::object::array::Array;
 use crate::scope::Scope;
-use crate::Error;
 use crate::RuntimeResult;
 use crate::Value;
-use swc_ecma_ast::ArrayLit;
-use yavashark_value::Obj;
 
 impl Context {
     pub fn run_array(&mut self, stmt: &ArrayLit, scope: &mut Scope) -> RuntimeResult {

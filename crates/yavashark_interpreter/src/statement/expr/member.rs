@@ -1,9 +1,10 @@
+use swc_ecma_ast::{MemberExpr, MemberProp};
+
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::ControlFlow;
 use crate::RuntimeResult;
-use crate::{Error, Value};
-use swc_ecma_ast::{MemberExpr, MemberProp};
+use crate::Value;
 
 impl Context {
     pub fn run_member(&mut self, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -15,7 +16,7 @@ impl Context {
             MemberProp::PrivateName(_) => {
                 return Err(ControlFlow::error(
                     "Unsupported member expression property".to_owned(),
-                ))
+                ));
             }
         };
 

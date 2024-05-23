@@ -177,9 +177,9 @@ mod anyhow_impl {
 
     //TODO: Maybe we can integrate the JS stacktrace into the native Rust stacktrace?
 
-    use super::*;
-
     use std::fmt::Display;
+
+    use super::*;
 
     #[derive(Debug)]
     struct SyncError {

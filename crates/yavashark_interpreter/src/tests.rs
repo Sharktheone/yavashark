@@ -1,8 +1,9 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use crate::context::Context;
 use crate::object::Object;
 use crate::{NativeFunction, Value};
-use std::cell::RefCell;
-use std::rc::Rc;
 
 #[macro_export]
 macro_rules! test_eval {

@@ -1,9 +1,10 @@
+use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
+
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::Error;
+use crate::Res;
 use crate::Value;
-use crate::{Res, RuntimeResult};
-use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
 
 impl Context {
     pub fn decl_var(&mut self, stmt: &VarDecl, scope: &mut Scope) -> Res {

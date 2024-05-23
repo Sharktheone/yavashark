@@ -1,17 +1,14 @@
-mod prototypes;
-
-use anyhow::anyhow;
-use std::any::{type_name, type_name_of_val, Any, TypeId};
-use std::cell::RefMut;
+use std::any::Any;
 
 use swc_ecma_ast::Stmt;
 
 use yavashark_value::{Ctx, Obj};
 
-use crate::object::Prototype;
 use crate::scope::Scope;
+use crate::RuntimeResult;
 use crate::Value;
-use crate::{FunctionPrototype, ObjectHandle, RuntimeResult};
+
+mod prototypes;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Context {

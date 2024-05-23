@@ -1,8 +1,6 @@
 use swc_common::Span;
 use swc_ecma_ast::{Expr, ExprStmt};
 
-use crate::Error;
-use crate::Value;
 pub use arrow::*;
 pub use assign::*;
 pub use bin::*;

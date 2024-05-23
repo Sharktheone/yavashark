@@ -1,9 +1,8 @@
+use swc_ecma_ast::ContinueStmt;
+
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::Error;
-use crate::Value;
 use crate::{ControlFlow, RuntimeResult};
-use swc_ecma_ast::ContinueStmt;
 
 impl Context {
     pub fn run_continue(&mut self, stmt: &ContinueStmt, scope: &mut Scope) -> RuntimeResult {

@@ -1,10 +1,13 @@
+use std::cell::RefMut;
+
+use anyhow::anyhow;
+
+use yavashark_value::Obj;
+
 use crate::context::Context;
 use crate::object::array::ArrayIterator;
 use crate::object::{array::Array, Object, Prototype};
 use crate::{FunctionPrototype, ObjectHandle};
-use anyhow::anyhow;
-use std::cell::RefMut;
-use yavashark_value::Obj;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {

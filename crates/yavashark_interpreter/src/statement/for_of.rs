@@ -1,12 +1,10 @@
 use swc_ecma_ast::{ForHead, ForOfStmt};
 
-use yavashark_value::Obj;
-
 use crate::context::Context;
 use crate::scope::Scope;
+use crate::ControlFlow;
 use crate::RuntimeResult;
 use crate::Value;
-use crate::{ControlFlow, Error};
 
 impl Context {
     pub fn run_for_of(&mut self, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {

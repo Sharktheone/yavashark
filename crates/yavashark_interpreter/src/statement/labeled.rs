@@ -1,8 +1,5 @@
 use swc_ecma_ast::LabeledStmt;
 
-use crate::Error;
-use crate::Value;
-
 use crate::context::Context;
 use crate::scope::Scope;
 use crate::RuntimeResult;

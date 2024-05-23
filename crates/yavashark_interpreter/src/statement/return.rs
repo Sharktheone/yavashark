@@ -1,9 +1,9 @@
+use swc_ecma_ast::ReturnStmt;
+
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::Error;
 use crate::Value;
 use crate::{ControlFlow, RuntimeResult};
-use swc_ecma_ast::ReturnStmt;
 
 impl Context {
     pub fn run_return(&mut self, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {

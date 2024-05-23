@@ -1,10 +1,10 @@
-mod print;
-
 use crate::console::print::PrettyPrint;
 use crate::context::Context;
 use crate::object::Object;
 use crate::NativeFunction;
 use crate::Value;
+
+mod print;
 
 pub fn get_console(ctx: &mut Context) -> Value {
     let mut console = Object::new(ctx);

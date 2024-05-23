@@ -1,11 +1,7 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use std::any::Any;
-use std::cell::RefCell;
-use std::rc::Rc;
-
 use yavashark_macro::{object, properties};
-use yavashark_value::{Iter, Obj};
+use yavashark_value::Obj;
 
 use crate::object::Object;
 use crate::Symbol;
