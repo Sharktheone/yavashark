@@ -1,9 +1,7 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
-use std::mem;
-use std::mem::offset_of;
 use std::ops::Deref;
-use std::ptr::{NonNull, null_mut};
+use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
@@ -12,6 +10,7 @@ use rand::random;
 
 use spin_lock::SpinLock;
 
+mod dbg_trace;
 pub(crate) mod spin_lock;
 
 pub struct Gc<T: ?Sized> {
@@ -21,13 +20,14 @@ pub struct Gc<T: ?Sized> {
 impl<T: ?Sized> Clone for Gc<T> {
     fn clone(&self) -> Self {
         unsafe {
-            (*self.inner.as_ptr()).strong.fetch_add(1, Ordering::Relaxed);
+            (*self.inner.as_ptr())
+                .strong
+                .fetch_add(1, Ordering::Relaxed);
         }
 
         Self { inner: self.inner }
     }
 }
-
 
 impl<T: ?Sized> Deref for Gc<T> {
     type Target = T;
@@ -66,7 +66,6 @@ impl<T: ?Sized> Gc<T> {
         }
     }
 }
-
 
 impl<T> Gc<T> {
     pub fn new(value: T) -> Self {
@@ -144,7 +143,6 @@ impl<T: ?Sized> GcBox<T> {
             }
         }
 
-
         for r in nuke {
             GcBox::nuke(r.as_ptr());
         }
@@ -201,7 +199,6 @@ impl<T: ?Sized> GcBox<T> {
         unsafe {
             let _ = Box::from_raw((*this).value.as_ptr());
         }
-
 
         //TODO: we need to also check if we have only 1 reference and if we need to drop references - i guess, this should do the destruction of the GcBox?
     }
@@ -299,7 +296,6 @@ impl<T: ?Sized> Drop for Gc<T> {
                 //we can drop the GcBox's value
                 let _ = Box::from_raw(ptr.as_ptr()); //TODO: maybe set the ptr to usize::MAX => we need https://github.com/rust-lang/rust/issues/81513
 
-
                 if (*self.inner.as_ptr()).weak.load(Ordering::Relaxed) == 0 {
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
@@ -311,7 +307,6 @@ impl<T: ?Sized> Drop for Gc<T> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -322,9 +317,7 @@ mod tests {
             .filter_level(log::LevelFilter::Debug)
             .init();
 
-
         log::error!("Hello, world!");
-
 
         let x = Gc::new(5);
         println!("{:?}", *x);

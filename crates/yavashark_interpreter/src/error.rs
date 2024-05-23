@@ -1,5 +1,5 @@
-use yavashark_macro::object;
 use crate::{Error, NativeFunction, Value};
+use yavashark_macro::object;
 
 use crate::context::Context;
 use crate::FunctionHandle;
@@ -17,13 +17,8 @@ pub fn get_error(ctx: &mut Context) -> Value {
     .into()
 }
 
-
-
 #[object]
 #[derive(Debug)]
 struct ErrorObj {
     error: Error,
 }
-
-
-

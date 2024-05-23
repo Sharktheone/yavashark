@@ -4,8 +4,8 @@ use swc_ecma_ast::{ObjectLit, Prop, PropName, PropOrSpread};
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
-use crate::{JSFunction, Value};
 use crate::{ControlFlow, RuntimeResult};
+use crate::{JSFunction, Value};
 
 impl Context {
     pub fn run_object(&mut self, stmt: &ObjectLit, scope: &mut Scope) -> RuntimeResult {
@@ -47,7 +47,7 @@ impl Context {
 
                             obj.define_property(key.into(), value);
                         }
-                        
+
                         Prop::Method(method) => {
                             let key = self.run_prop_name(&method.key, scope)?;
                             let mut fn_scope = Scope::with_parent(scope);
@@ -61,13 +61,12 @@ impl Context {
                                 fn_scope,
                                 self,
                             );
-                            
+
                             let value = function.into();
-                            
 
                             obj.define_property(key, value);
                         }
-                        
+
                         _ => todo!(),
                     }
                 }
@@ -76,7 +75,7 @@ impl Context {
 
         Ok(Value::Object(obj))
     }
-    
+
     pub fn run_prop_name(&mut self, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(ident.sym.to_string()),

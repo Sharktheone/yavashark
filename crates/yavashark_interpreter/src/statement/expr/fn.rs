@@ -1,8 +1,8 @@
 use crate::context::Context;
 use crate::scope::Scope;
-use crate::{Error, JSFunction};
 use crate::RuntimeResult;
 use crate::Value;
+use crate::{Error, JSFunction};
 use swc_ecma_ast::FnExpr;
 
 impl Context {
@@ -11,8 +11,11 @@ impl Context {
 
         fn_scope.state_set_function();
 
-        let name = stmt.ident.as_ref().map_or("anonymous".to_string(), |i| i.sym.to_string());
-        
+        let name = stmt
+            .ident
+            .as_ref()
+            .map_or("anonymous".to_string(), |i| i.sym.to_string());
+
         let function = JSFunction::new(
             name,
             stmt.function.params.clone(),

@@ -1,6 +1,6 @@
-use yavashark_value::{Function, Obj, Object, Value};
 use crate::context::Context;
 use colored::Colorize;
+use yavashark_value::{Function, Obj, Object, Value};
 
 pub trait PrettyPrint {
     fn pretty_print(&self) -> String;
@@ -9,9 +9,6 @@ pub trait PrettyPrint {
 
     fn pretty_print_key(&self) -> String;
 }
-
-
-
 
 impl PrettyPrint for Object<Context> {
     fn pretty_print(&self) -> String {
@@ -38,7 +35,6 @@ impl PrettyPrint for Object<Context> {
         str.push_str(" }");
         str
     }
-
 
     fn pretty_print_nl(&self) -> String {
         let mut str = String::new();
@@ -71,11 +67,12 @@ impl PrettyPrint for Object<Context> {
     }
 }
 
-
 impl PrettyPrint for Function<Context> {
     fn pretty_print(&self) -> String {
-        let func = format!("[Function: {}]", self.name()).bright_green().to_string();
-        
+        let func = format!("[Function: {}]", self.name())
+            .bright_green()
+            .to_string();
+
         if let Ok(properties) = self.properties() {
             if properties.is_empty() {
                 return func;
@@ -96,13 +93,15 @@ impl PrettyPrint for Function<Context> {
 
             return format!("{func} {str}");
         }
-        
+
         func
     }
 
     fn pretty_print_nl(&self) -> String {
-        let func = format!("[Function: {}]", self.name()).bright_green().to_string();
-        
+        let func = format!("[Function: {}]", self.name())
+            .bright_green()
+            .to_string();
+
         if let Ok(properties) = self.properties() {
             if properties.is_empty() {
                 return func;
@@ -124,7 +123,7 @@ impl PrettyPrint for Function<Context> {
 
             return format!("{func} {str}");
         }
-        
+
         func
     }
 
@@ -132,7 +131,6 @@ impl PrettyPrint for Function<Context> {
         format!("'{self}'").green().to_string()
     }
 }
-
 
 impl PrettyPrint for Value<Context> {
     fn pretty_print(&self) -> String {
@@ -144,7 +142,7 @@ impl PrettyPrint for Value<Context> {
             Self::String(s) => s.to_string().green().to_string(),
             Self::Object(o) => o.pretty_print(),
             Self::Function(f) => f.pretty_print(),
-            Self::Symbol(s) => s.to_string().cyan().to_string()
+            Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
     }
 
@@ -157,7 +155,7 @@ impl PrettyPrint for Value<Context> {
             Self::String(s) => s.to_string().green().to_string(),
             Self::Object(o) => o.pretty_print_nl(),
             Self::Function(f) => f.pretty_print_nl(),
-            Self::Symbol(s) => s.to_string().cyan().to_string()
+            Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
     }
 
@@ -170,7 +168,7 @@ impl PrettyPrint for Value<Context> {
             Self::String(s) => s.to_string().green().to_string(),
             Self::Object(o) => o.pretty_print_key(),
             Self::Function(f) => f.pretty_print_key(),
-            Self::Symbol(s) => s.to_string().cyan().to_string()
+            Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
     }
 }
