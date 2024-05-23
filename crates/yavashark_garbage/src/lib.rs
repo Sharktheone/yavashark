@@ -49,7 +49,6 @@ impl<T: ?Sized> Gc<T> {
         }
     }
 
-
     fn add_ref_by(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
@@ -116,7 +115,6 @@ struct GcBox<T: ?Sized> {
     strong: AtomicUsize, // Number of strong references
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Flags(u8);
@@ -187,7 +185,6 @@ impl Flags {
     }
 }
 
-
 #[derive(Debug, PartialEq, Eq)]
 enum RootStatus {
     None,
@@ -195,7 +192,6 @@ enum RootStatus {
     HasNoRoot,
     RootPending,
 }
-
 
 pub struct WeakGc<T: ?Sized> {
     inner: NonNull<GcBox<T>>,
@@ -227,12 +223,11 @@ impl<T: ?Sized> GcBox<T> {
                     return;
                 }
             }
-            
+
             let this = this_ptr.as_ptr();
-            
+
             //TODO: we externally need to destruct the GcBoxes that are marked as dead
             //externally because we don't know what other GcBoxes it might reference, that are also dead and so might already be nuked
-
         }
     }
 
@@ -244,7 +239,6 @@ impl<T: ?Sized> GcBox<T> {
                 warn!("Failed to read references from a GcBox - maybe leaking memory");
                 return;
             };
-
 
             let look_later_run = look_later.is_none();
             let later_vec = &mut Vec::new();
@@ -258,7 +252,7 @@ impl<T: ?Sized> GcBox<T> {
                 //check if we have more than 1 reference that is pending
                 let mut pending = 0;
                 let Some(r_read) = (*r.as_ptr()).refs.spin_read() else {
-                    continue
+                    continue;
                 };
 
                 for rr in &*r_read {
@@ -272,7 +266,6 @@ impl<T: ?Sized> GcBox<T> {
                     }
                 }
 
-
                 (*r.as_ptr()).flags.set_has_no_root();
                 Self::mark_dead(*r, Some(look_later));
             }
@@ -282,7 +275,7 @@ impl<T: ?Sized> GcBox<T> {
 
                 'refs: for r in look_later {
                     let Some(r_read) = (*r.as_ptr()).refs.spin_read() else {
-                        continue
+                        continue;
                     };
 
                     let mut pending = 0;
@@ -295,15 +288,11 @@ impl<T: ?Sized> GcBox<T> {
                             continue 'refs;
                         }
                     }
-
-
                 }
-
             }
         }
     }
 
-    
     /*
     /// (unmark, nuke)
     fn walk_from_dead(
@@ -347,7 +336,7 @@ impl<T: ?Sized> GcBox<T> {
 
         (true, false)
     }
-    
+
      */
 
     fn unmark(&mut self) {
@@ -361,8 +350,6 @@ impl<T: ?Sized> GcBox<T> {
 
         //TODO: we need to also check if we have only 1 reference and if we need to drop references - i guess, this should do the destruction of the GcBox?
     }
-   
-
 
     fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
         let this = this_ptr.as_ptr();
@@ -446,7 +433,8 @@ impl<T: ?Sized> Drop for Gc<T> {
             if (*self.inner.as_ptr())
                 .strong
                 .fetch_sub(1, Ordering::Relaxed)
-                == 1 // We are the last one (it returns the previous value, so we need to check if it was 1)
+                == 1
+            // We are the last one (it returns the previous value, so we need to check if it was 1)
             {
                 let ptr = &mut (*self.inner.as_ptr()).value;
 
@@ -458,11 +446,13 @@ impl<T: ?Sized> Drop for Gc<T> {
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
                 }
-                
+
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
             }
 
-            if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed)) == (*self.inner.as_ptr()).ref_by.spin_read().map(|x| x.len()) {
+            if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
+                == (*self.inner.as_ptr()).ref_by.spin_read().map(|x| x.len())
+            {
                 //All strong refs are references by other GcBoxes
                 GcBox::shake_tree(self.inner);
             }
@@ -503,7 +493,6 @@ mod tests {
         drop(w);
         println!("{:?}", *x);
     }
-
 
     #[test]
     fn circular() {
