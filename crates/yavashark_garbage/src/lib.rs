@@ -47,10 +47,39 @@ impl<T: ?Sized> Gc<T> {
             lock.push(other.inner);
         }
     }
+    
+    
+    fn add_ref_by(&self, other: &Self) {
+        unsafe {
+            (*self.inner.as_ptr())
+                .strong
+                .fetch_add(1, Ordering::Relaxed);
+            let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
+                warn!("Failed to add reference to a GcBox");
+                return;
+            };
+
+            lock.push(other.inner);
+        }
+    }
 
     pub fn remove_ref(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
+                warn!("Failed to remove reference from a GcBox");
+                return;
+            };
+
+            lock.retain(|x| x != &other.inner);
+        }
+    }
+    
+    fn remove_ref_by(&self, other: &Self) {
+        unsafe {
+            (*self.inner.as_ptr())
+                .strong
+                .fetch_sub(1, Ordering::Relaxed);
+            let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
                 warn!("Failed to remove reference from a GcBox");
                 return;
             };
