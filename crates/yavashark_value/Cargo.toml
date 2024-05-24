@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = { version = "1.0.40", optional = true }
 
 
 
@@ -13,10 +14,8 @@ edition = "2021"
 default = []
 js = []
 ts = []
-anyhow = []
+anyhow = ["dep:anyhow"]
 
-[target.'cfg(feature ="anyhow")'.dependencies]
-anyhow = "1.0.83"
 
 
 [lints]
