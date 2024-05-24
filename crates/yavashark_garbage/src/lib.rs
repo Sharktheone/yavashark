@@ -129,7 +129,7 @@ impl Flags {
 
     /// This `GcBox` is root pending because we still walk the tree to find out if it is a root (used to prevent infinite loops on circular references)
     const ROOT_PENDING: u8 = 0b0000_0110;
-    
+
     /// This `GcBox` is a root
     const IS_ROOT: u8 = 0b0000_1000;
 
@@ -254,7 +254,14 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
 
-            let (drop, unmark): (Vec<_>, Vec<_>) = unmark.into_iter().partition(|x| (*x.as_ptr()).flags.is_has_no_root());
+            let (drop, unmark): (Vec<_>, Vec<_>) = unmark.into_iter().partition(|x| {
+                if (*x.as_ptr()).flags.is_has_no_root() {
+                    (*x.as_ptr()).flags.set_externally_dropped();
+                    true
+                } else {
+                    false
+                }
+            });
 
             for u in unmark {
                 (*u.as_ptr()).unmark();
@@ -379,7 +386,9 @@ impl<T: ?Sized> GcBox<T> {
         self.flags.unmark();
     }
 
-    fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
+
+    /// The caller is responsible for making sure that the this_ptr already has the `EXTERNALLY_DROPPED` flag set
+    unsafe fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
         unsafe {
             let this = this_ptr.as_ptr();
             if let Some(refs) = (*this).refs.spin_read() {
@@ -400,7 +409,7 @@ impl<T: ?Sized> GcBox<T> {
             }
 
 
-            (*this).flags.set_externally_dropped();
+            // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
             let _ = Box::from_raw(this);
         }
     }
@@ -509,16 +518,21 @@ impl<T: ?Sized> Drop for GcBox<T> {
 impl<T: ?Sized> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
+            if (*self.inner.as_ptr()).flags.is_externally_dropped() {
+                return;
+            }
+
+
             if (*self.inner.as_ptr())
                 .strong
                 .fetch_sub(1, Ordering::Relaxed)
                 == 1
             // We are the last one (it returns the previous value, so we need to check if it was 1)
             {
-                let ptr = &mut (*self.inner.as_ptr()).value;
+                let ptr = (*self.inner.as_ptr()).value.as_ptr();
 
                 //we can drop the GcBox's value, but we might need to keep the GcBox, since there might be weak references
-                let _ = Box::from_raw(ptr.as_ptr());
+                let _ = Box::from_raw(ptr);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
 
                 if (*self.inner.as_ptr()).weak.load(Ordering::Relaxed) == 0 {
@@ -586,6 +600,13 @@ mod tests {
             struct Node {
                 data: i32,
                 other: Option<Gc<RefCell<Node>>>,
+            }
+            
+            
+            impl Drop for Node {
+                fn drop(&mut self) {
+                    log::error!("Dropping Node with data: {:?}", self.data);
+                }
             }
 
             let _root = Gc::new(());
