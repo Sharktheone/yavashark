@@ -121,10 +121,17 @@ struct Flags(u8);
 #[allow(dead_code)]
 impl Flags {
     const MARKED: u8 = 0b0000_0001;
-    const NONE_ROOT: u8 = 0b0000_0000;
+    
+    /// This `GcBox` has a root
     const HAS_ROOT: u8 = 0b0000_0010;
+    
+    /// This `GcBox` has no root
     const HAS_NO_ROOT: u8 = 0b0000_0100;
+
+    /// This `GcBox` is root pending because we still walk the tree to find out if it is a root (used to prevent infinite loops on circular references)
     const ROOT_PENDING: u8 = 0b0000_0110;
+    
+    /// This `GcBox` is a root
     const IS_ROOT: u8 = 0b0000_1000;
 
     const fn new() -> Self {
@@ -134,12 +141,6 @@ impl Flags {
     fn set_marked(&mut self) {
         self.0 |= Self::MARKED;
     }
-
-    fn set_none_root(&mut self) {
-        self.0 &= !Self::HAS_ROOT;
-        self.0 &= !Self::HAS_NO_ROOT;
-    }
-
     fn set_has_root(&mut self) {
         self.0 |= Self::HAS_ROOT;
     }
@@ -164,9 +165,6 @@ impl Flags {
         self.0 & Self::MARKED != 0
     }
 
-    const fn is_none_root(self) -> bool {
-        self.0 & Self::HAS_ROOT == 0 && self.0 & Self::HAS_NO_ROOT == 0
-    }
 
     const fn is_has_root(self) -> bool {
         self.0 & Self::HAS_ROOT != 0 && self.0 & Self::HAS_NO_ROOT == 0
@@ -195,6 +193,12 @@ impl Flags {
 
     fn reset(&mut self) {
         self.0 = 0;
+    }
+    
+    
+    /// Unsets any root flags and marked flags, but not `IS_ROOT` or `VALUE_DROPPED`
+    fn unmark(&mut self) {
+        self.0 &= !(Self::MARKED | Self::HAS_ROOT | Self::HAS_NO_ROOT | Self::ROOT_PENDING);
     }
 }
 
@@ -354,7 +358,7 @@ impl<T: ?Sized> GcBox<T> {
      */
 
     fn unmark(&mut self) {
-        self.flags.reset();
+        self.flags.unmark();
     }
 
     fn nuke(this: *mut Self) {
