@@ -125,6 +125,7 @@ impl Flags {
     const HAS_ROOT: u8 = 0b0000_0010;
     const HAS_NO_ROOT: u8 = 0b0000_0100;
     const ROOT_PENDING: u8 = 0b0000_0110;
+    const IS_ROOT: u8 = 0b0000_1000;
 
     fn new() -> Self {
         Self(0)
@@ -149,6 +150,14 @@ impl Flags {
 
     fn set_root_pending(&mut self) {
         self.0 |= Self::ROOT_PENDING;
+    }
+
+    fn set_root(&mut self) {
+        self.0 |= Self::IS_ROOT;
+    }
+
+    fn unset_root(&mut self) {
+        self.0 &= !Self::IS_ROOT;
     }
 
     const fn is_marked(&self) -> bool {
@@ -365,6 +374,9 @@ impl<T: ?Sized> GcBox<T> {
             
             
             let flags = &mut (*this).flags;
+            if flags.is_root() {
+                return RootStatus::HasRoot;
+            }
 
             if flags.is_has_no_root() {
                 return RootStatus::HasNoRoot;
