@@ -133,7 +133,6 @@ impl Flags {
     /// This `GcBox` is a root
     const IS_ROOT: u8 = 0b0000_1000;
 
-
     /// This `GcBox` is externally dropped, this means that only the value will be dropped if it is not already dropped, but don't remove any references etc.
     const EXTERNALLY_DROPPED: u8 = 0b0001_0000;
 
@@ -179,7 +178,6 @@ impl Flags {
         self.0 & Self::MARKED != 0
     }
 
-
     const fn is_has_root(self) -> bool {
         self.0 & Self::HAS_ROOT != 0 && self.0 & Self::HAS_NO_ROOT == 0
     }
@@ -207,7 +205,6 @@ impl Flags {
     fn reset(&mut self) {
         self.0 = 0;
     }
-
 
     /// Unsets any root flags and marked flags, but not `IS_ROOT` or `VALUE_DROPPED`
     fn unmark(&mut self) {
@@ -335,7 +332,6 @@ impl<T: ?Sized> GcBox<T> {
         }
     }
 
-
     /*
     /// (unmark, nuke)
     fn walk_from_dead(
@@ -386,7 +382,6 @@ impl<T: ?Sized> GcBox<T> {
         self.flags.unmark();
     }
 
-
     /// The caller is responsible for making sure that the this_ptr already has the `EXTERNALLY_DROPPED` flag set
     unsafe fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
         unsafe {
@@ -408,12 +403,10 @@ impl<T: ?Sized> GcBox<T> {
                 warn!("Failed to remove all references from a GcBox - leaking memory");
             }
 
-
             // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
             let _ = Box::from_raw(this);
         }
     }
-
 
     fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
         let this = this_ptr.as_ptr();
@@ -426,7 +419,6 @@ impl<T: ?Sized> GcBox<T> {
                 warn!("Failed to read references from a GcBox - leaking memory");
                 return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
             }
-
 
             let flags = &mut (*this).flags;
             if flags.is_root() {
@@ -504,7 +496,6 @@ impl<T: ?Sized> Drop for GcBox<T> {
             }
         }
 
-
         if !self.flags.is_value_dropped() {
             let ptr = &mut self.value;
             unsafe {
@@ -521,7 +512,6 @@ impl<T: ?Sized> Drop for Gc<T> {
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
                 return;
             }
-
 
             if (*self.inner.as_ptr())
                 .strong
@@ -541,7 +531,7 @@ impl<T: ?Sized> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
@@ -601,8 +591,7 @@ mod tests {
                 data: i32,
                 other: Option<Gc<RefCell<Node>>>,
             }
-            
-            
+
             impl Drop for Node {
                 fn drop(&mut self) {
                     log::error!("Dropping Node with data: {:?}", self.data);
@@ -620,7 +609,6 @@ mod tests {
                 data: 6,
                 other: Some(x.clone()),
             }));
-
 
             y.add_ref(&x);
             x.add_ref_by(&y);
