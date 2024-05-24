@@ -354,6 +354,16 @@ impl<T: ?Sized> GcBox<T> {
     fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
         let this = this_ptr.as_ptr();
         unsafe {
+            if let Some(ref_by) = (*this).ref_by.spin_read().map(|x| x.len()) {
+                if (*this).strong.load(Ordering::Relaxed) > ref_by {
+                    return RootStatus::HasRoot;
+                }
+            } else {
+                warn!("Failed to read references from a GcBox - leaking memory");
+                return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
+            }
+            
+            
             let flags = &mut (*this).flags;
 
             if flags.is_has_no_root() {
