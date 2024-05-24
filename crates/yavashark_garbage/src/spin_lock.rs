@@ -2,7 +2,7 @@ use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use log::warn;
 
-pub(crate) trait SpinLock<'a, T> {
+pub trait SpinLock<'a, T> {
     type WriteTarget<W: 'a>
     where
         Self: 'a;

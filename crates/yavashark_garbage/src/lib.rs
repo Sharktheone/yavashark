@@ -5,7 +5,6 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
-use bitflags::bitflags;
 use log::warn;
 use rand::random;
 
@@ -49,7 +48,7 @@ impl<T: ?Sized> Gc<T> {
         }
     }
 
-    fn add_ref_by(&self, other: &Self) {
+    pub fn add_ref_by(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
                 warn!("Failed to add reference to a GcBox");
@@ -71,7 +70,7 @@ impl<T: ?Sized> Gc<T> {
         }
     }
 
-    fn remove_ref_by(&self, other: &Self) {
+    pub fn remove_ref_by(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
                 warn!("Failed to remove reference from a GcBox");
@@ -119,6 +118,7 @@ struct GcBox<T: ?Sized> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Flags(u8);
 
+#[allow(dead_code)]
 impl Flags {
     const MARKED: u8 = 0b0000_0001;
     const NONE_ROOT: u8 = 0b0000_0000;
@@ -127,7 +127,7 @@ impl Flags {
     const ROOT_PENDING: u8 = 0b0000_0110;
     const IS_ROOT: u8 = 0b0000_1000;
 
-    fn new() -> Self {
+    const fn new() -> Self {
         Self(0)
     }
 
@@ -160,24 +160,28 @@ impl Flags {
         self.0 &= !Self::IS_ROOT;
     }
 
-    const fn is_marked(&self) -> bool {
+    const fn is_marked(self) -> bool {
         self.0 & Self::MARKED != 0
     }
 
-    const fn is_none_root(&self) -> bool {
+    const fn is_none_root(self) -> bool {
         self.0 & Self::HAS_ROOT == 0 && self.0 & Self::HAS_NO_ROOT == 0
     }
 
-    const fn is_has_root(&self) -> bool {
+    const fn is_has_root(self) -> bool {
         self.0 & Self::HAS_ROOT != 0 && self.0 & Self::HAS_NO_ROOT == 0
     }
 
-    const fn is_has_no_root(&self) -> bool {
+    const fn is_has_no_root(self) -> bool {
         self.0 & Self::HAS_NO_ROOT != 0 && self.0 & Self::HAS_ROOT == 0
     }
 
-    const fn is_root_pending(&self) -> bool {
+    const fn is_root_pending(self) -> bool {
         self.0 & Self::ROOT_PENDING != 0
+    }
+
+    const fn is_root(self) -> bool {
+        self.0 & Self::IS_ROOT != 0
     }
 
     ///Sets the unused bits to a random value (highest 4)
@@ -234,7 +238,7 @@ impl<T: ?Sized> GcBox<T> {
             }
 
             let this = this_ptr.as_ptr();
-
+            println!("deallocating {:?} from {this:?}", unmark.iter().filter(|x| (*x.as_ptr()).flags.is_has_no_root()));
             //TODO: we externally need to destruct the GcBoxes that are marked as dead
             //externally because we don't know what other GcBoxes it might reference, that are also dead and so might already be nuked
         }
@@ -302,6 +306,7 @@ impl<T: ?Sized> GcBox<T> {
         }
     }
 
+
     /*
     /// (unmark, nuke)
     fn walk_from_dead(
@@ -360,6 +365,7 @@ impl<T: ?Sized> GcBox<T> {
         //TODO: we need to also check if we have only 1 reference and if we need to drop references - i guess, this should do the destruction of the GcBox?
     }
 
+
     fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
         let this = this_ptr.as_ptr();
         unsafe {
@@ -410,7 +416,7 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
 
-            return status;
+            status
         }
     }
 }
@@ -440,7 +446,7 @@ impl<T: ?Sized> Drop for GcBox<T> {
                         warn!("Failed to remove reference from a GcBox - leaking memory");
                         continue;
                     };
-                    lock.retain(|x| (*x.as_ptr()).flags != self.flags);
+                    lock.retain(|x| (*x.as_ptr()).flags != self.flags); //TODO: can we just compare the pointers? (e.g cast &mut self to *mut self)
                 }
             }
         } else {
@@ -530,6 +536,9 @@ mod tests {
                 other: Option<Gc<RefCell<Node>>>,
             }
 
+
+            let _root = Gc::new(());
+
             let x = Gc::new(RefCell::new(Node {
                 data: 5,
                 other: None,
@@ -539,6 +548,7 @@ mod tests {
                 data: 6,
                 other: Some(x.clone()),
             }));
+
 
             y.add_ref(&x);
             x.add_ref_by(&y);
