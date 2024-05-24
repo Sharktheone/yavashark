@@ -6,7 +6,6 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
 use log::warn;
-use rand::random;
 
 use spin_lock::SpinLock;
 
@@ -85,7 +84,7 @@ impl<T: ?Sized> Gc<T> {
 impl<T> Gc<T> {
     pub fn new(value: T) -> Self {
         let value = Box::new(value);
-        let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) };
+        let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
 
         let gc_box = GcBox {
             value,
@@ -97,7 +96,7 @@ impl<T> Gc<T> {
         };
 
         let gc_box = Box::new(gc_box);
-        let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) };
+        let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
 
         Self { inner: gc_box }
     }
@@ -121,10 +120,10 @@ struct Flags(u8);
 #[allow(dead_code)]
 impl Flags {
     const MARKED: u8 = 0b0000_0001;
-    
+
     /// This `GcBox` has a root
     const HAS_ROOT: u8 = 0b0000_0010;
-    
+
     /// This `GcBox` has no root
     const HAS_NO_ROOT: u8 = 0b0000_0100;
 
@@ -133,6 +132,13 @@ impl Flags {
     
     /// This `GcBox` is a root
     const IS_ROOT: u8 = 0b0000_1000;
+
+
+    /// This `GcBox` is externally dropped, this means that only the value will be dropped if it is not already dropped, but don't remove any references etc.
+    const EXTERNALLY_DROPPED: u8 = 0b0001_0000;
+
+    /// The value of this `GcBox` is dropped
+    const VALUE_DROPPED: u8 = 0b0010_0000;
 
     const fn new() -> Self {
         Self(0)
@@ -161,6 +167,14 @@ impl Flags {
         self.0 &= !Self::IS_ROOT;
     }
 
+    fn set_externally_dropped(&mut self) {
+        self.0 |= Self::EXTERNALLY_DROPPED;
+    }
+
+    fn set_value_dropped(&mut self) {
+        self.0 |= Self::VALUE_DROPPED;
+    }
+
     const fn is_marked(self) -> bool {
         self.0 & Self::MARKED != 0
     }
@@ -182,20 +196,19 @@ impl Flags {
         self.0 & Self::IS_ROOT != 0
     }
 
-    ///Sets the unused bits to a random value (highest 4)
-    fn random(&mut self) {
-        self.0 = (self.0 & 0b0000_1111) | (random::<u8>() << 4);
+    const fn is_externally_dropped(self) -> bool {
+        self.0 & Self::EXTERNALLY_DROPPED != 0
     }
 
-    fn reset_random(&mut self) {
-        self.0 &= 0b0000_1111;
+    const fn is_value_dropped(self) -> bool {
+        self.0 & Self::VALUE_DROPPED != 0
     }
 
     fn reset(&mut self) {
         self.0 = 0;
     }
-    
-    
+
+
     /// Unsets any root flags and marked flags, but not `IS_ROOT` or `VALUE_DROPPED`
     fn unmark(&mut self) {
         self.0 &= !(Self::MARKED | Self::HAS_ROOT | Self::HAS_NO_ROOT | Self::ROOT_PENDING);
@@ -241,10 +254,15 @@ impl<T: ?Sized> GcBox<T> {
                 }
             }
 
-            let this = this_ptr.as_ptr();
-            println!("deallocating {:?} from {this:?}", unmark.iter().filter(|x| (*x.as_ptr()).flags.is_has_no_root()));
-            //TODO: we externally need to destruct the GcBoxes that are marked as dead
-            //externally because we don't know what other GcBoxes it might reference, that are also dead and so might already be nuked
+            let (drop, unmark): (Vec<_>, Vec<_>) = unmark.into_iter().partition(|x| (*x.as_ptr()).flags.is_has_no_root());
+
+            for u in unmark {
+                (*u.as_ptr()).unmark();
+            }
+
+            for d in &drop {
+                Self::nuke(*d, &drop);
+            }
         }
     }
 
@@ -361,12 +379,30 @@ impl<T: ?Sized> GcBox<T> {
         self.flags.unmark();
     }
 
-    fn nuke(this: *mut Self) {
+    fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
         unsafe {
-            let _ = Box::from_raw((*this).value.as_ptr());
-        }
+            let this = this_ptr.as_ptr();
+            if let Some(refs) = (*this).refs.spin_read() {
+                for r in &*refs {
+                    if dangerous.contains(r) {
+                        continue;
+                    }
 
-        //TODO: we need to also check if we have only 1 reference and if we need to drop references - i guess, this should do the destruction of the GcBox?
+                    let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
+                        warn!("Failed to remove reference from a GcBox - leaking memory");
+                        continue;
+                    };
+
+                    lock.retain(|x| *x != this_ptr);
+                }
+            } else {
+                warn!("Failed to remove all references from a GcBox - leaking memory");
+            }
+
+
+            (*this).flags.set_externally_dropped();
+            let _ = Box::from_raw(this);
+        }
     }
 
 
@@ -381,8 +417,8 @@ impl<T: ?Sized> GcBox<T> {
                 warn!("Failed to read references from a GcBox - leaking memory");
                 return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
             }
-            
-            
+
+
             let flags = &mut (*this).flags;
             if flags.is_root() {
                 return RootStatus::HasRoot;
@@ -427,34 +463,45 @@ impl<T: ?Sized> GcBox<T> {
 
 impl<T: ?Sized> Drop for GcBox<T> {
     fn drop(&mut self) {
-        self.flags.random();
-
-        if let Some(ref_by) = self.ref_by.spin_read() {
-            assert!(
-                ref_by.is_empty(),
-                "Cannot drop a GcBox that is still referenced"
-            );
-        } else {
-            warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad");
-            //TODO: should we also panic here?
-        }
-
-        if self.weak.load(Ordering::Relaxed) != 0 {
-            warn!("Dropping a GcBox that still has weak references - this might be bad");
-        }
-
-        if let Some(refs) = self.refs.spin_read() {
-            for r in &*refs {
-                unsafe {
-                    let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
-                        warn!("Failed to remove reference from a GcBox - leaking memory");
-                        continue;
-                    };
-                    lock.retain(|x| (*x.as_ptr()).flags != self.flags); //TODO: can we just compare the pointers? (e.g cast &mut self to *mut self)
-                }
+        if !self.flags.is_externally_dropped() {
+            // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
+            if let Some(ref_by) = self.ref_by.spin_read() {
+                assert!(
+                    ref_by.is_empty(),
+                    "Cannot drop a GcBox that is still referenced"
+                );
+            } else {
+                warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad");
+                //TODO: should we also panic here?
             }
-        } else {
-            warn!("Failed to remove all references from a GcBox - leaking memory");
+
+            if self.weak.load(Ordering::Relaxed) != 0 {
+                warn!("Dropping a GcBox that still has weak references - this might be bad");
+            }
+
+            let self_raw = self as *mut Self;
+            if let Some(refs) = self.refs.spin_read() {
+                for r in &*refs {
+                    unsafe {
+                        let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
+                            warn!("Failed to remove reference from a GcBox - leaking memory");
+                            continue;
+                        };
+                        lock.retain(|x| x.as_ptr() != self_raw);
+                    }
+                }
+            } else {
+                warn!("Failed to remove all references from a GcBox - leaking memory");
+            }
+        }
+
+
+        if !self.flags.is_value_dropped() {
+            let ptr = &mut self.value;
+            unsafe {
+                let _ = Box::from_raw(ptr.as_ptr());
+            }
+            //we don't need to set the value dropped flag, since we are about to drop the complete GcBox
         }
     }
 }
@@ -471,8 +518,8 @@ impl<T: ?Sized> Drop for Gc<T> {
                 let ptr = &mut (*self.inner.as_ptr()).value;
 
                 //we can drop the GcBox's value, but we might need to keep the GcBox, since there might be weak references
-                let _ = Box::from_raw(ptr.as_ptr()); //TODO: maybe set the ptr to usize::MAX => we need https://github.com/rust-lang/rust/issues/81513
-                println!("Dropped the value");
+                let _ = Box::from_raw(ptr.as_ptr());
+                (*self.inner.as_ptr()).flags.set_value_dropped();
 
                 if (*self.inner.as_ptr()).weak.load(Ordering::Relaxed) == 0 {
                     //we can drop the complete GcBox
@@ -480,6 +527,7 @@ impl<T: ?Sized> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
+                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
@@ -539,7 +587,6 @@ mod tests {
                 data: i32,
                 other: Option<Gc<RefCell<Node>>>,
             }
-
 
             let _root = Gc::new(());
 
