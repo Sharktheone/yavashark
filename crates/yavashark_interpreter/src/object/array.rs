@@ -22,7 +22,7 @@ impl Array {
     }
 
     pub fn push(&mut self, value: Value) {
-        let index = self.object.array.last().map(|(i, _)| *i + 1).unwrap_or(0);
+        let index = self.object.array.last().map_or(0, |(i, _)| *i + 1);
 
         self.object.array.push((index, Variable::new(value)));
         self.length.value = Value::Number(index as f64 + 1.0);

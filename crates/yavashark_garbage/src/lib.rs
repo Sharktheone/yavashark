@@ -221,6 +221,7 @@ enum RootStatus {
 }
 
 pub struct WeakGc<T: ?Sized> {
+    #[allow(dead_code)]
     inner: NonNull<GcBox<T>>,
 }
 
@@ -382,7 +383,7 @@ impl<T: ?Sized> GcBox<T> {
         self.flags.unmark();
     }
 
-    /// The caller is responsible for making sure that the this_ptr already has the `EXTERNALLY_DROPPED` flag set
+    /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
     unsafe fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
         unsafe {
             let this = this_ptr.as_ptr();
