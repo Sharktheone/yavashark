@@ -680,4 +680,56 @@ mod tests {
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
+
+
+    #[test]
+    fn with_root() {
+        setup!();
+        let root = setup!(root);
+        {
+            let x = Gc::new(RefCell::new(Node::new(5)));
+            let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
+
+            y.add_ref(&x);
+            x.add_ref_by(&y);
+
+            x.borrow_mut().other = Some(y.clone());
+            x.add_ref(&y);
+            y.add_ref_by(&x);
+
+            root.add_ref(&x);
+            root.borrow_mut().other = Some(x);
+        }
+
+        assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
+        {
+            let x = root.borrow_mut().other.take().unwrap();
+
+            root.remove_ref(&x);
+        }
+
+        assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
+    }
+
+
+    #[test]
+    fn deep_tree() {
+        setup!();
+        let root = setup!(root);
+        {
+            let mut x = root.clone();
+            for i in 0..3 {
+                let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
+
+                x.borrow_mut().other = Some(x_new.clone());
+                x.add_ref(&x_new);
+
+                x = x_new;
+            }
+        }
+
+        dbg!(root.borrow().other.as_ref().is_some());
+
+        assert_eq!(unsafe { NODES_LEFT }, 4); //root, x, y
+    }
 }
