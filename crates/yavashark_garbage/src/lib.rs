@@ -575,6 +575,59 @@ mod tests {
 
     use super::*;
 
+    macro_rules! setup {
+        () => {
+            env_logger::Builder::from_default_env()
+                .filter_level(log::LevelFilter::Trace)
+                .init();
+
+
+
+            static mut NODES_LEFT: u32 = 0;
+
+            struct Node {
+                data: i32,
+                other: Option<Gc<RefCell<Node>>>,
+            }
+
+            impl Node {
+                fn new(data: i32) -> Self {
+                    unsafe {
+                        NODES_LEFT += 1;
+                    }
+
+                    Self {
+                        data,
+                        other: None,
+                    }
+                }
+
+                fn with_other(data: i32, other: Gc<RefCell<Node>>) -> Self {
+                    unsafe {
+                        NODES_LEFT += 1;
+                    }
+
+                    Self {
+                        data,
+                        other: Some(other),
+                    }
+                }
+            }
+
+            impl Drop for Node {
+                fn drop(&mut self) {
+                    unsafe {
+                        NODES_LEFT -= 1;
+                    }
+                }
+            }
+        };
+        (root) => {
+            Gc::root(RefCell::new(Node::new(9999)))
+        };
+    }
+
+
     #[test]
     fn it_works() {
         env_logger::Builder::from_default_env()
@@ -605,35 +658,11 @@ mod tests {
 
     #[test]
     fn circular() {
-        env_logger::Builder::from_default_env()
-            .filter_level(log::LevelFilter::Debug)
-            .init();
-
-        log::error!("Hello, world!");
-
+        setup!();
         {
-            struct Node {
-                data: i32,
-                other: Option<Gc<RefCell<Node>>>,
-            }
+            let x = Gc::new(RefCell::new(Node::new(5)));
 
-            impl Drop for Node {
-                fn drop(&mut self) {
-                    log::error!("Dropping Node with data: {:?}", self.data);
-                }
-            }
-
-            let _root = Gc::new(());
-
-            let x = Gc::new(RefCell::new(Node {
-                data: 5,
-                other: None,
-            }));
-
-            let y = Gc::new(RefCell::new(Node {
-                data: 6,
-                other: Some(x.clone()),
-            }));
+            let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
             y.add_ref(&x);
             x.add_ref_by(&y);
@@ -648,6 +677,7 @@ mod tests {
             println!("{:?}", y.borrow().data);
             println!("{:?}", y.borrow().other.as_ref().unwrap().borrow().data);
         }
-        println!("Hello, world!");
+
+        assert_eq!(unsafe { NODES_LEFT }, 0);
     }
 }
