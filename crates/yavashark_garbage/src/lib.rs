@@ -100,6 +100,26 @@ impl<T> Gc<T> {
 
         Self { inner: gc_box }
     }
+
+
+    pub fn root(value: T) -> Self {
+        let value = Box::new(value);
+        let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
+
+        let gc_box = GcBox {
+            value,
+            ref_by: RwLock::new(Vec::new()),
+            refs: RwLock::new(Vec::new()),
+            weak: AtomicUsize::new(0),
+            strong: AtomicUsize::new(1),
+            flags: Flags::root(),
+        };
+
+        let gc_box = Box::new(gc_box);
+        let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
+
+        Self { inner: gc_box }
+    }
 }
 
 type MaybeNull<T> = NonNull<T>;
@@ -141,6 +161,10 @@ impl Flags {
 
     const fn new() -> Self {
         Self(0)
+    }
+
+    const fn root() -> Self {
+        Self(Self::IS_ROOT)
     }
 
     fn set_marked(&mut self) {
