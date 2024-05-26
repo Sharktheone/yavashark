@@ -12,10 +12,17 @@ use spin_lock::SpinLock;
 pub(crate) mod spin_lock;
 
 pub struct Gc<T: ?Sized> {
+pub trait Collectable {}
+
+impl<T: ?Sized> Collectable for T {}
+
+pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
 impl<T: ?Sized> Clone for Gc<T> {
+
+impl<T: Collectable> Clone for Gc<T> {
     fn clone(&self) -> Self {
         unsafe {
             (*self.inner.as_ptr())
@@ -27,7 +34,7 @@ impl<T: ?Sized> Clone for Gc<T> {
     }
 }
 
-impl<T: ?Sized> Deref for Gc<T> {
+impl<T: Collectable> Deref for Gc<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -35,7 +42,7 @@ impl<T: ?Sized> Deref for Gc<T> {
     }
 }
 
-impl<T: ?Sized> Gc<T> {
+impl<T: Collectable> Gc<T> {
     pub fn add_ref(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
@@ -81,7 +88,7 @@ impl<T: ?Sized> Gc<T> {
     }
 }
 
-impl<T> Gc<T> {
+impl<T: Collectable> Gc<T> {
     pub fn new(value: T) -> Self {
         let value = Box::new(value);
         let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
@@ -125,7 +132,7 @@ impl<T> Gc<T> {
 type MaybeNull<T> = NonNull<T>;
 
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
-struct GcBox<T: ?Sized> {
+struct GcBox<T: Collectable> {
     value: MaybeNull<T>,                // This value might be null
     ref_by: RwLock<Vec<NonNull<Self>>>, // All the GcBox that reference this GcBox
     refs: RwLock<Vec<NonNull<Self>>>,   // All the GcBox that this GcBox reference
@@ -244,12 +251,12 @@ enum RootStatus {
     RootPending,
 }
 
-pub struct WeakGc<T: ?Sized> {
+pub struct WeakGc<T: Collectable> {
     #[allow(dead_code)]
     inner: NonNull<GcBox<T>>,
 }
 
-impl<T: ?Sized> GcBox<T> {
+impl<T: Collectable> GcBox<T> {
     fn shake_tree(this_ptr: NonNull<Self>) {
         let mut unmark = Vec::new();
         unsafe {
@@ -487,7 +494,7 @@ impl<T: ?Sized> GcBox<T> {
     }
 }
 
-impl<T: ?Sized> Drop for GcBox<T> {
+impl<T: Collectable> Drop for GcBox<T> {
     fn drop(&mut self) {
         if !self.flags.is_externally_dropped() {
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
@@ -531,7 +538,8 @@ impl<T: ?Sized> Drop for GcBox<T> {
     }
 }
 
-impl<T: ?Sized> Drop for Gc<T> {
+
+impl<T: Collectable> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
@@ -570,6 +578,7 @@ impl<T: ?Sized> Drop for Gc<T> {
 }
 
 #[cfg(test)]
+#[allow(clippy::items_after_statements, dead_code)]
 mod tests {
     use std::cell::RefCell;
 
