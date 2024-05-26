@@ -89,6 +89,14 @@ impl Tracer {
             ref_item.refs.retain(|&x| x != id);
         }
     }
+    
+    pub fn add_ref_by(&self, id: TraceID, ref_id: TraceID) {
+        todo!()
+    }
+    
+    pub fn remove_ref_by(&self, id: TraceID, ref_id: TraceID) {
+        todo!()
+    }
 }
 
 
