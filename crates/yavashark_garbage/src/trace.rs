@@ -5,6 +5,7 @@ use std::thread;
 use eframe::Frame;
 use egui::{CentralPanel, Context};
 use egui::mutex::Mutex;
+use lazy_static::lazy_static;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TraceID(u64);
@@ -25,7 +26,7 @@ pub struct Trace {
 }
 
 
-struct Tracer(Arc<Mutex<Trace>>);
+pub struct Tracer(Arc<Mutex<Trace>>);
 
 impl Tracer {
     pub fn new() -> Self {
@@ -74,6 +75,16 @@ impl Tracer {
         let ref_item = trace.items.get_mut(&ref_id).unwrap();
         ref_item.ref_by.push(id);
     }
+    
+    
+    pub fn remove_ref(&self, id: TraceID, ref_id: TraceID) {
+        let mut trace = self.0.lock();
+        let item = trace.items.get_mut(&id).unwrap();
+        item.refs.retain(|&x| x != ref_id);
+
+        let ref_item = trace.items.get_mut(&ref_id).unwrap();
+        ref_item.ref_by.retain(|&x| x != id);
+    }
 
     pub fn remove(&self, id: TraceID) {
         let mut trace = self.0.lock();
@@ -100,7 +111,11 @@ impl Tracer {
 }
 
 
-// static mut TRACE: Tracer = Tracer::new();
+
+lazy_static!(
+    pub static ref TRACER: Tracer = Tracer::new();
+);
+
 
 struct App {
     tracer: Arc<Mutex<Trace>>,

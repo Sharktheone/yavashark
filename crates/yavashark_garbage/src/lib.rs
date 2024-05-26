@@ -10,6 +10,8 @@ use log::{debug, error, info, trace, warn};
 
 use spin_lock::SpinLock;
 
+use crate::trace::{TraceID, TRACER};
+
 pub(crate) mod spin_lock;
 
 #[cfg(feature = "trace")]
@@ -55,6 +57,10 @@ impl<T: Collectable> Gc<T> {
 
             lock.push(other.inner);
         }
+
+        #[cfg(feature = "trace")] {
+            TRACER.add_ref(self.trace(), other.trace());
+        }
     }
 
     pub fn add_ref_by(&self, other: &Self) {
@@ -65,6 +71,10 @@ impl<T: Collectable> Gc<T> {
             };
 
             lock.push(other.inner);
+        }
+        #[cfg(feature = "trace")]
+        {
+            TRACER.add_ref_by(self.trace(), other.trace());
         }
     }
 
@@ -77,6 +87,12 @@ impl<T: Collectable> Gc<T> {
 
             lock.retain(|x| x != &other.inner);
         }
+
+
+        #[cfg(feature = "trace")]
+        {
+            TRACER.remove_ref(self.trace(), other.trace());
+        }
     }
 
     pub fn remove_ref_by(&self, other: &Self) {
@@ -88,6 +104,18 @@ impl<T: Collectable> Gc<T> {
 
             lock.retain(|x| x != &other.inner);
         }
+
+
+        #[cfg(feature = "trace")]
+        {
+            TRACER.remove_ref_by(self.trace(), other.trace());
+        }
+    }
+
+
+    #[cfg(feature = "trace")]
+    fn trace(&self) -> TraceID {
+        unsafe { (*self.inner.as_ptr()).trace }
     }
 }
 
@@ -103,6 +131,7 @@ impl<T: Collectable> Gc<T> {
             weak: AtomicUsize::new(0),
             strong: AtomicUsize::new(1),
             flags: Flags::new(),
+            #[cfg(feature = "trace")] trace: TRACER.add(),
         };
 
         let gc_box = Box::new(gc_box);
@@ -123,6 +152,7 @@ impl<T: Collectable> Gc<T> {
             weak: AtomicUsize::new(0),
             strong: AtomicUsize::new(1),
             flags: Flags::root(),
+            #[cfg(feature = "trace")] trace: TRACER.add(),
         };
 
         let gc_box = Box::new(gc_box);
@@ -142,7 +172,7 @@ struct GcBox<T: Collectable> {
     weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicUsize, // Number of strong references
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
-    // #[cfg(feature = "trace")]
+    #[cfg(feature = "trace")] trace: TraceID,
 }
 
 
@@ -755,7 +785,6 @@ mod tests {
             root.other = Some(x);
 
             info!("left: {}", unsafe { NODES_LEFT });
-
         }
 
         dbg!(root.borrow().other.as_ref().is_some());
