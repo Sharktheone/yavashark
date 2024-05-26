@@ -1,14 +1,13 @@
-use std::any::Any;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
-use eframe::Frame;
-use egui::Context;
 
+use eframe::Frame;
+use egui::{CentralPanel, Context};
 use egui::mutex::Mutex;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub(crate) struct TraceID(u64);
+pub struct TraceID(u64);
 
 pub struct TraceItem {
     id: TraceID,
@@ -21,7 +20,8 @@ pub struct Trace {
     items: HashMap<TraceID, TraceItem>,
     next: TraceID,
     svg_content: Option<String>,
-    
+    dot_content: Option<String>,
+
 }
 
 
@@ -33,21 +33,20 @@ impl Tracer {
             items: HashMap::new(),
             next: TraceID(0),
             svg_content: None,
+            dot_content: None,
         }));
 
         let tracer2 = tracer.clone();
 
         let handle = thread::spawn(|| {
             let x = eframe::run_native("GC Trace",
-                               Default::default(),
-                               Box::new(move |cc| {
-                                   egui_extras::install_image_loaders(&cc.egui_ctx);
+                                       Default::default(),
+                                       Box::new(move |cc| {
+                                           egui_extras::install_image_loaders(&cc.egui_ctx);
 
-                                   Box::new(App::new(tracer2))
-                               }),
+                                           Box::new(App::new(tracer2))
+                                       }),
             );
-            
-            
         });
 
 
@@ -105,11 +104,22 @@ impl App {
             tracer,
         }
     }
+
+
+    pub fn layout(&mut self) -> Vec<u8> {
+        todo!()
+    }
 }
 
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, frame: &mut Frame) {
-        
+        CentralPanel::default().show(ctx, |ui| {
+            ui.heading("Garbage Collector Trace");
+
+            let img = egui::Image::from_bytes("bytes://graph.svg", self.layout());
+
+            ui.add(img);
+        });
     }
 }
