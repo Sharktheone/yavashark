@@ -719,7 +719,6 @@ mod tests {
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
     }
 
-
     #[test]
     fn deep_tree() {
         setup!();
@@ -729,14 +728,28 @@ mod tests {
             for i in 0..3 {
                 let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
 
-                x.borrow_mut().other = Some(x_new.clone());
-                x.add_ref(&x_new);
+                x.add_ref_by(&x_new);
+                x_new.add_ref(&x);
 
                 x = x_new;
             }
+
+
+            x.add_ref_by(&root);
+            root.add_ref(&x);
+
+            let mut root = root.borrow_mut();
+            root.other = Some(x);
+
+            info!("left: {}", unsafe { NODES_LEFT });
+
         }
 
         dbg!(root.borrow().other.as_ref().is_some());
+
+        let left = unsafe { NODES_LEFT };
+
+        info!("{:?}", left);
 
         assert_eq!(unsafe { NODES_LEFT }, 4); //root, x, y
     }
