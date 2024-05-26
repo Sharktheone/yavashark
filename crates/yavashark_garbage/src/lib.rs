@@ -1,17 +1,21 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+use std::fmt::Debug;
 use std::ops::Deref;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
-use log::warn;
+use log::{debug, error, info, trace, warn};
 
 use spin_lock::SpinLock;
 
 pub(crate) mod spin_lock;
 
-pub struct Gc<T: ?Sized> {
+#[cfg(feature = "trace")]
+mod trace;
+
+
 pub trait Collectable {}
 
 impl<T: ?Sized> Collectable for T {}
@@ -138,7 +142,9 @@ struct GcBox<T: Collectable> {
     weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicUsize, // Number of strong references
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
+    // #[cfg(feature = "trace")]
 }
+
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Flags(u8);
@@ -496,7 +502,9 @@ impl<T: Collectable> GcBox<T> {
 impl<T: Collectable> Drop for GcBox<T> {
     fn drop(&mut self) {
         if !self.flags.is_externally_dropped() {
+            error!("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
+            // info!("READ_BY: {:p}", &self.ref_by);
             if let Some(ref_by) = self.ref_by.spin_read() {
                 assert!(
                     ref_by.is_empty(),
@@ -515,6 +523,7 @@ impl<T: Collectable> Drop for GcBox<T> {
             if let Some(refs) = self.refs.spin_read() {
                 for r in &*refs {
                     unsafe {
+                        // debug!("READ: {:p}", &(*r.as_ptr()).ref_by);
                         let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
                             warn!("Failed to remove reference from a GcBox - leaking memory");
                             continue;
@@ -563,7 +572,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
@@ -624,6 +633,7 @@ mod tests {
 
             impl Drop for Node {
                 fn drop(&mut self) {
+                    info!("Dropping Node with data: {}", self.data);
                     unsafe {
                         NODES_LEFT -= 1;
                     }
@@ -634,6 +644,9 @@ mod tests {
             Gc::root(RefCell::new(Node::new(9999)))
         };
     }
+
+
+
 
 
     #[test]
