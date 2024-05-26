@@ -20,7 +20,6 @@ pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
-impl<T: ?Sized> Clone for Gc<T> {
 
 impl<T: Collectable> Clone for Gc<T> {
     fn clone(&self) -> Self {
