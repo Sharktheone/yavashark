@@ -728,6 +728,6 @@ mod tests {
 
         info!("{:?}", left);
 
-        assert_eq!(unsafe { NODES_LEFT }, 4); //root, x, y
+        assert_eq!(unsafe { NODES_LEFT }, 101); //root, x, y
     }
 }

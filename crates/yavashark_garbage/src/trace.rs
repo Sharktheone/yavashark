@@ -8,7 +8,6 @@ use eframe::{Frame, NativeOptions, UserEvent};
 use egui::{Area, CentralPanel, Context, Id, ScrollArea, Vec2};
 use egui::emath::TSTransform;
 use egui::mutex::Mutex;
-use egui_plot::Plot;
 use layout::backends::svg::SVGWriter;
 use layout::core::base::Orientation;
 use layout::core::geometry::Point;
