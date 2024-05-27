@@ -6,6 +6,12 @@ use std::thread;
 use eframe::Frame;
 use egui::{CentralPanel, Context};
 use egui::mutex::Mutex;
+use layout::backends::svg::SVGWriter;
+use layout::core::base::Orientation;
+use layout::core::geometry::Point;
+use layout::core::style::StyleAttr;
+use layout::std_shapes::shapes::{Arrow, Element, ShapeKind};
+use layout::topo::layout::VisualGraph;
 use lazy_static::lazy_static;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -22,8 +28,13 @@ pub struct Trace {
     items: HashMap<TraceID, TraceItem>,
     next: TraceID,
     svg_content: Option<String>,
-    dot_content: Option<String>,
+}
 
+
+impl Trace {
+    fn delete_cache(&mut self) {
+        self.svg_content = None;
+    }
 }
 
 
@@ -35,7 +46,6 @@ impl Tracer {
             items: HashMap::new(),
             next: TraceID(0),
             svg_content: None,
-            dot_content: None,
         }));
 
         let tracer2 = tracer.clone();
@@ -64,6 +74,8 @@ impl Tracer {
             ref_by: Vec::new(),
             refs: Vec::new(),
         });
+        
+        trace.delete_cache();
 
         id
     }
@@ -75,6 +87,8 @@ impl Tracer {
 
         let ref_item = trace.items.get_mut(&ref_id).unwrap();
         ref_item.ref_by.push(id);
+        
+        trace.delete_cache();
     }
     
     
@@ -85,6 +99,8 @@ impl Tracer {
 
         let ref_item = trace.items.get_mut(&ref_id).unwrap();
         ref_item.ref_by.retain(|&x| x != id);
+        
+        trace.delete_cache();
     }
 
     pub fn remove(&self, id: TraceID) {
@@ -100,6 +116,8 @@ impl Tracer {
             let ref_item = trace.items.get_mut(&ref_id).unwrap();
             ref_item.refs.retain(|&x| x != id);
         }
+        
+        trace.delete_cache();
     }
 }
 
@@ -123,7 +141,47 @@ impl App {
 
 
     pub fn layout(&mut self) -> Vec<u8> {
-        todo!()
+        let mut trace = self.tracer.lock();
+        if let Some(ref svg_content) = trace.svg_content {
+            return svg_content.as_bytes().to_vec();
+        }
+
+        let mut  graph = VisualGraph::new(Orientation::TopToBottom);
+        
+        let mut nodes = HashMap::new();
+        
+        for (id, item) in &trace.items {
+            
+            
+            
+            let element = Element::create(
+                ShapeKind::Circle("GcBox".to_string()),
+                StyleAttr::simple(),
+                Orientation::TopToBottom,
+                Point::new(10.0, 10.0),
+            );
+            
+            let handle = graph.add_node(element);
+            nodes.insert(*id, (handle, item));
+        }
+        
+        for (handle, item) in nodes.values() {
+            for ref_id in &item.refs {
+                if let Some((ref_handle, _)) = nodes.get(ref_id) {
+                    graph.add_edge(Arrow::default(), *handle, *ref_handle);
+                }
+            }
+        }
+
+        let mut svg = SVGWriter::new();
+        graph.do_it(false, false, false, &mut svg);
+        
+        let content = svg.finalize();
+        
+        trace.svg_content = Some(content.clone());
+        drop(trace);
+        
+        content.as_bytes().to_vec()
     }
 }
 
