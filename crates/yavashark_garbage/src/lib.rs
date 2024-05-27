@@ -6,10 +6,11 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
-use log::{debug, error, info, trace, warn};
+use log::{error, warn, info};
 
 use spin_lock::SpinLock;
 
+#[cfg(feature = "trace")]
 use crate::trace::{TraceID, TRACER};
 
 pub(crate) mod spin_lock;
@@ -58,12 +59,14 @@ impl<T: Collectable> Gc<T> {
             lock.push(other.inner);
         }
 
+        other.add_ref_by(self);
+
         #[cfg(feature = "trace")] {
             TRACER.add_ref(self.trace(), other.trace());
         }
     }
 
-    pub fn add_ref_by(&self, other: &Self) {
+    fn add_ref_by(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
                 warn!("Failed to add reference to a GcBox");
@@ -88,6 +91,8 @@ impl<T: Collectable> Gc<T> {
             lock.retain(|x| x != &other.inner);
         }
 
+        other.remove_ref_by(self);
+
 
         #[cfg(feature = "trace")]
         {
@@ -95,7 +100,7 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
-    pub fn remove_ref_by(&self, other: &Self) {
+    fn remove_ref_by(&self, other: &Self) {
         unsafe {
             let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
                 warn!("Failed to remove reference from a GcBox");
@@ -742,12 +747,10 @@ mod tests {
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
             y.add_ref(&x);
-            x.add_ref_by(&y);
 
             x.borrow_mut().other = Some(y.clone());
             x.add_ref(&y);
-            y.add_ref_by(&x);
-
+            
             root.add_ref(&x);
             root.borrow_mut().other = Some(x);
         }
