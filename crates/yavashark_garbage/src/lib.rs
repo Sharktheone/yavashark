@@ -568,6 +568,7 @@ impl<T: Collectable> Drop for Gc<T> {
 mod tests {
     use std::cell::RefCell;
     use std::sync::Once;
+    use std::thread;
     use log::info;
 
     use super::*;
@@ -575,7 +576,7 @@ mod tests {
     macro_rules! setup {
         () => {
             setup_logger();
-            
+
             static mut NODES_LEFT: u32 = 0;
 
             struct Node {
@@ -686,7 +687,7 @@ mod tests {
 
             x.borrow_mut().other = Some(y.clone());
             x.add_ref(&y);
-            
+
             root.add_ref(&x);
             root.borrow_mut().other = Some(x);
         }
@@ -694,7 +695,7 @@ mod tests {
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
             let x = root.borrow_mut().other.take().unwrap();
-            
+
             root.remove_ref(&x);
         }
 
@@ -707,7 +708,7 @@ mod tests {
         let root = setup!(root);
         {
             let mut x = root.clone();
-            for i in 0..3 {
+            for i in 0..100 {
                 let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
                 x_new.add_ref(&x);
 
@@ -722,8 +723,6 @@ mod tests {
 
             info!("left: {}", unsafe { NODES_LEFT });
         }
-
-        dbg!(root.borrow().other.as_ref().is_some());
 
         let left = unsafe { NODES_LEFT };
 
