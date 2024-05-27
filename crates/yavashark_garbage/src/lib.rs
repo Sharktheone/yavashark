@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::RwLock;
 
-use log::{error, warn, info};
+use log::warn;
 
 use spin_lock::SpinLock;
 
@@ -75,10 +75,6 @@ impl<T: Collectable> Gc<T> {
 
             lock.push(other.inner);
         }
-        #[cfg(feature = "trace")]
-        {
-            TRACER.add_ref_by(self.trace(), other.trace());
-        }
     }
 
     pub fn remove_ref(&self, other: &Self) {
@@ -108,12 +104,6 @@ impl<T: Collectable> Gc<T> {
             };
 
             lock.retain(|x| x != &other.inner);
-        }
-
-
-        #[cfg(feature = "trace")]
-        {
-            TRACER.remove_ref_by(self.trace(), other.trace());
         }
     }
 
@@ -404,51 +394,6 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
-    /*
-    /// (unmark, nuke)
-    fn walk_from_dead(
-        &mut self,
-        unmark: &mut Vec<NonNull<Self>>,
-        parent: *mut Self,
-    ) -> (bool, bool) {
-        if self.flags.is_marked() {
-            return (false, false);
-        }
-
-        let Some(ref_by) = self.ref_by.spin_read() else {
-            warn!("Failed to read references from a GcBox - leaking memory");
-            return (false, false); // We need to unmark this GcBox
-        };
-
-        if ref_by.len() > 1 {
-            //The parent is the only one that references this GcBox, which is about to be nuked
-            return (false, true); // We don't need to unmark this GcBox, since we're nuking it anyway
-        }
-
-        for r in &*ref_by {
-            if r.as_ptr() == parent {
-                continue;
-            }
-
-            unsafe {
-                let (um, root) = (*r.as_ptr()).check_root(&mut Some(unmark));
-                if um {
-                    unmark.push(*r);
-                }
-                if root {
-                    self.flags.set_has_root();
-
-                    return (true, true); // We need to unmark this GcBox
-                }
-            }
-        }
-
-        self.flags.set_has_no_root();
-
-        (true, false)
-    }
-
-     */
 
     fn unmark(&mut self) {
         self.flags.unmark();
@@ -537,7 +482,6 @@ impl<T: Collectable> GcBox<T> {
 impl<T: Collectable> Drop for GcBox<T> {
     fn drop(&mut self) {
         if !self.flags.is_externally_dropped() {
-            error!("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
             // info!("READ_BY: {:p}", &self.ref_by);
             if let Some(ref_by) = self.ref_by.spin_read() {
@@ -558,7 +502,6 @@ impl<T: Collectable> Drop for GcBox<T> {
             if let Some(refs) = self.refs.spin_read() {
                 for r in &*refs {
                     unsafe {
-                        // debug!("READ: {:p}", &(*r.as_ptr()).ref_by);
                         let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
                             warn!("Failed to remove reference from a GcBox - leaking memory");
                             continue;
@@ -722,17 +665,9 @@ mod tests {
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
             y.add_ref(&x);
-            x.add_ref_by(&y);
 
             x.borrow_mut().other = Some(y.clone());
             x.add_ref(&y);
-            y.add_ref_by(&x);
-
-            println!("{:?}", x.borrow().data);
-            println!("{:?}", x.borrow().other.as_ref().unwrap().borrow().data);
-
-            println!("{:?}", y.borrow().data);
-            println!("{:?}", y.borrow().other.as_ref().unwrap().borrow().data);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
@@ -759,7 +694,7 @@ mod tests {
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
             let x = root.borrow_mut().other.take().unwrap();
-
+            
             root.remove_ref(&x);
         }
 
@@ -774,15 +709,12 @@ mod tests {
             let mut x = root.clone();
             for i in 0..3 {
                 let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
-
-                x.add_ref_by(&x_new);
                 x_new.add_ref(&x);
 
                 x = x_new;
             }
 
 
-            x.add_ref_by(&root);
             root.add_ref(&x);
 
             let mut root = root.borrow_mut();

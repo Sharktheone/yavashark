@@ -1,3 +1,4 @@
+#![allow(clippy::unwrap_used)]
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
@@ -99,14 +100,6 @@ impl Tracer {
             let ref_item = trace.items.get_mut(&ref_id).unwrap();
             ref_item.refs.retain(|&x| x != id);
         }
-    }
-    
-    pub fn add_ref_by(&self, id: TraceID, ref_id: TraceID) {
-        todo!()
-    }
-    
-    pub fn remove_ref_by(&self, id: TraceID, ref_id: TraceID) {
-        todo!()
     }
 }
 
