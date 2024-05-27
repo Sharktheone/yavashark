@@ -504,7 +504,7 @@ impl<T: Collectable> GcBox<T> {
                 return RootStatus::RootPending;
             }
 
-            let Some(refs) = (*this).refs.spin_read() else {
+            let Some(refs) = (*this).ref_by.spin_read() else {
                 return RootStatus::None;
             };
 
