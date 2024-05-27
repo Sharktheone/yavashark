@@ -624,17 +624,15 @@ impl<T: Collectable> Drop for Gc<T> {
 #[allow(clippy::items_after_statements, dead_code)]
 mod tests {
     use std::cell::RefCell;
+    use std::sync::Once;
+    use log::info;
 
     use super::*;
 
     macro_rules! setup {
         () => {
-            env_logger::Builder::from_default_env()
-                .filter_level(log::LevelFilter::Trace)
-                .init();
-
-
-
+            setup_logger();
+            
             static mut NODES_LEFT: u32 = 0;
 
             struct Node {
@@ -682,15 +680,20 @@ mod tests {
 
 
 
+    static LOGGER: Once = Once::new();
+
+    fn setup_logger() {
+        LOGGER.call_once(|| {
+            env_logger::Builder::from_default_env()
+                .filter_level(log::LevelFilter::Trace)
+                .init();
+        });
+    }
 
 
     #[test]
     fn it_works() {
-        env_logger::Builder::from_default_env()
-            .filter_level(log::LevelFilter::Debug)
-            .init();
-
-        log::error!("Hello, world!");
+        setup_logger();
 
         let x = Gc::new(5);
         println!("{:?}", *x);
@@ -699,8 +702,6 @@ mod tests {
         let z = x.clone();
         println!("{:?}", *x);
         let w = x.clone();
-
-        log::error!("Hello, world!");
 
         println!("{:?}", *x);
 
