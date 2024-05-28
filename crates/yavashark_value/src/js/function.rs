@@ -1,7 +1,7 @@
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
-use std::rc::Rc;
+use yavashark_garbage::Gc;
 
 use crate::error::Error;
 use crate::js::context::Ctx;
@@ -39,20 +39,26 @@ pub trait Func<C: Ctx>: Debug + Obj<C> + AsObject<C> {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Function<C>(Rc<RefCell<Box<dyn Func<C>>>>);
+#[derive(Clone)]
+pub struct Function<C>(pub Gc<RefCell<Box<dyn Func<C>>>>);
+
+impl<C: Ctx> Debug for Function<C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", *self)
+    }
+}
 
 impl<C: Ctx> Eq for Function<C> {}
 
 impl<C: Ctx> Hash for Function<C> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        Rc::as_ptr(&self.0).hash(state); //TODO only the ptr is hashed, not the content
+        self.0.as_ptr().hash(state);
     }
 }
 
 impl<C: Ctx> PartialEq for Function<C> {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.0, &other.0)
+        self.0.as_ptr() == other.0.as_ptr()
     }
 }
 
@@ -146,12 +152,12 @@ impl<C: Ctx> Display for Function<C> {
 
 impl<C: Ctx> From<Box<dyn Func<C>>> for Function<C> {
     fn from(f: Box<dyn Func<C>>) -> Self {
-        Self(Rc::new(RefCell::new(f)))
+        Self(Gc::new(RefCell::new(f)))
     }
 }
 
-impl<C: Ctx> From<Rc<RefCell<Box<dyn Func<C>>>>> for Function<C> {
-    fn from(f: Rc<RefCell<Box<dyn Func<C>>>>) -> Self {
+impl<C: Ctx> From<Gc<RefCell<Box<dyn Func<C>>>>> for Function<C> {
+    fn from(f: Gc<RefCell<Box<dyn Func<C>>>>) -> Self {
         Self(f)
     }
 }

@@ -7,7 +7,6 @@ use crate::object::Object;
 use crate::{NativeFunction, Value, ValueResult, Variable};
 
 #[derive(Debug)]
-// #[object(prototype, direct(apply, bind, call, length, name), constructor)]
 pub struct FunctionPrototype {
     pub object: Object,
     pub apply: Variable,
@@ -18,12 +17,7 @@ pub struct FunctionPrototype {
     pub name: Variable,
 }
 
-// #[properties]
 impl FunctionPrototype {
-    // #[call]
-    // #[constructor]
-    // #[attributes(writable = false, enumerable = false, configurable = false)]
-    // #[name("Function")]
     pub fn new(obj: &Value) -> Self {
         let mut this = Self {
             object: Object::raw_with_proto(obj.copy()),

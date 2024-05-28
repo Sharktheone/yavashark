@@ -2,7 +2,7 @@ use std::any::Any;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
-use std::rc::Rc;
+use yavashark_garbage::Gc;
 
 use crate::js::context::Ctx;
 use crate::variable::Variable;
@@ -77,12 +77,20 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<C>>);
 }
 
-#[derive(Debug, Clone)]
-pub struct Object<C: Ctx>(Rc<RefCell<Box<dyn Obj<C>>>>);
+#[derive(Clone)]
+pub struct Object<C: Ctx>(pub Gc<RefCell<Box<dyn Obj<C>>>>);
+
+
+
+impl<C: Ctx> Debug for Object<C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", *self)
+    }
+}
 
 impl<C: Ctx> Hash for Object<C> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        Rc::as_ptr(&self.0).hash(state); //TODO only the ptr is hashed, not the content
+        self.0.as_ptr().hash(state);
     }
 }
 
@@ -90,7 +98,7 @@ impl<C: Ctx> Eq for Object<C> {}
 
 impl<C: Ctx> PartialEq for Object<C> {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.0, &other.0)
+        self.0.as_ptr() == other.0.as_ptr()
     }
 }
 
@@ -180,13 +188,13 @@ impl<C: Ctx> Display for Object<C> {
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Rc::new(RefCell::new(obj)))
+        Self(Gc::new(RefCell::new(obj)))
     }
 }
 
 impl<C: Ctx> Object<C> {
     #[must_use]
     pub fn new(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Rc::new(RefCell::new(obj)))
+        Self(Gc::new(RefCell::new(obj)))
     }
 }

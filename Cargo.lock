@@ -4293,6 +4293,7 @@ dependencies = [
  "swc_common",
  "swc_ecma_ast",
  "swc_ecma_parser",
+ "yavashark_garbage",
  "yavashark_macro",
  "yavashark_value",
 ]
@@ -4336,6 +4337,7 @@ name = "yavashark_value"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "yavashark_garbage",
 ]
 
 [[package]]
