@@ -4,6 +4,7 @@ use std::fmt::Debug;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 
 pub use prototype::*;
+use yavashark_macro::object;
 use yavashark_value::Func;
 use yavashark_value::Obj;
 
@@ -18,11 +19,10 @@ type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
-#[allow(clippy::module_name_repetitions)]
+#[object]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
-    pub object: Object,
     pub data: Option<Box<dyn Any>>,
     // pub prototype: ConstructorPrototype,
 }
@@ -145,55 +145,6 @@ impl Debug for NativeFunction {
     }
 }
 
-impl Obj<Context> for NativeFunction {
-    fn define_property(&mut self, name: Value, value: Value) {
-        self.object.define_property(name, value);
-    }
-
-    fn define_variable(&mut self, name: Value, value: Variable) {
-        self.object.define_variable(name, value);
-    }
-
-    fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.object.resolve_property(name)
-    }
-
-    fn get_property(&self, name: &Value) -> Option<&Value> {
-        self.object.get_property(name)
-    }
-
-    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        self.object.get_property_mut(name)
-    }
-
-    fn contains_key(&self, name: &yavashark_value::Value<Context>) -> bool {
-        self.object.contains_key(name)
-    }
-
-    fn name(&self) -> String {
-        self.name.to_string()
-    }
-
-    fn to_string(&self) -> String {
-        format!("[Function: {}() {{ [Native code] }}]", self.name)
-    }
-
-    fn properties(&self) -> Vec<(Value, Value)> {
-        self.object.properties()
-    }
-
-    fn keys(&self) -> Vec<Value> {
-        self.object.keys()
-    }
-
-    fn values(&self) -> Vec<Value> {
-        self.object.values()
-    }
-
-    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
-        self.object.get_array_or_done(index)
-    }
-}
 
 impl Func<Context> for NativeFunction {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
@@ -201,14 +152,14 @@ impl Func<Context> for NativeFunction {
     }
 }
 
-#[derive(Debug)]
 #[allow(clippy::module_name_repetitions)]
+#[object]
+#[derive(Debug)]
 pub struct JSFunction {
     pub name: String,
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
     pub scope: Scope,
-    pub object: Object,
 }
 
 impl JSFunction {
@@ -229,60 +180,6 @@ impl JSFunction {
         });
 
         this.into()
-    }
-}
-
-impl Obj<Context> for JSFunction {
-    fn define_property(&mut self, name: Value, value: Value) {
-        self.object.define_property(name, value);
-    }
-
-    fn define_variable(&mut self, name: Value, value: Variable) {
-        self.object.define_variable(name, value);
-    }
-
-    fn resolve_property(&self, name: &Value) -> Option<Value> {
-        self.object.resolve_property(name).map(|v| v.copy())
-    }
-
-    fn get_property(&self, name: &Value) -> Option<&Value> {
-        self.object.get_property(name)
-    }
-
-    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        self.object.get_property_mut(name)
-    }
-
-    fn contains_key(&self, name: &yavashark_value::Value<Context>) -> bool {
-        self.object.contains_key(name)
-    }
-
-    fn name(&self) -> String {
-        self.name.clone()
-    }
-
-    fn to_string(&self) -> String {
-        format!("[Function: {}() {{ [JS code] }}]", self.name)
-    }
-
-    fn properties(&self) -> Vec<(Value, Value)> {
-        self.object
-            .properties()
-            .iter()
-            .map(|(k, v)| (k.copy(), v.copy()))
-            .collect()
-    }
-
-    fn keys(&self) -> Vec<Value> {
-        self.object.keys()
-    }
-
-    fn values(&self) -> Vec<Value> {
-        self.object.values()
-    }
-
-    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
-        self.object.get_array_or_done(index)
     }
 }
 
