@@ -5,9 +5,9 @@ use std::sync::Arc;
 use std::thread;
 
 use eframe::{Frame, NativeOptions, UserEvent};
-use egui::{Area, CentralPanel, Context, Id, ScrollArea, Vec2};
 use egui::emath::TSTransform;
 use egui::mutex::Mutex;
+use egui::{Area, CentralPanel, Context, Id, ScrollArea, Vec2};
 use layout::backends::svg::SVGWriter;
 use layout::core::base::Orientation;
 use layout::core::geometry::Point;
@@ -27,10 +27,8 @@ pub struct TraceItem {
     refs: Vec<TraceID>,
 }
 
-
 const ZOOM_SPEED: f32 = 1.0;
 const SCROLL_SPEED: f32 = 1.0;
-
 
 pub struct Trace {
     items: HashMap<TraceID, TraceItem>,
@@ -38,13 +36,11 @@ pub struct Trace {
     svg_content: Option<String>,
 }
 
-
 impl Trace {
     fn delete_cache(&mut self) {
         self.svg_content = None;
     }
 }
-
 
 pub struct Tracer(Arc<Mutex<Trace>>);
 
@@ -66,19 +62,19 @@ impl Tracer {
                 ..Default::default()
             };
 
-            let res = eframe::run_native("GC Trace",
-                                         options,
-                                         Box::new(move |cc| {
-                                             egui_extras::install_image_loaders(&cc.egui_ctx);
-                                             Box::new(App::new(tracer2))
-                                         }),
+            let res = eframe::run_native(
+                "GC Trace",
+                options,
+                Box::new(move |cc| {
+                    egui_extras::install_image_loaders(&cc.egui_ctx);
+                    Box::new(App::new(tracer2))
+                }),
             );
 
             if res.is_err() {
                 error!("Failed to run the GC Trace app");
             }
         });
-
 
         Self(tracer)
     }
@@ -87,11 +83,14 @@ impl Tracer {
         let mut trace = self.0.lock();
         let id = trace.next;
         trace.next.0 += 1;
-        trace.items.insert(id, TraceItem {
+        trace.items.insert(
             id,
-            ref_by: Vec::new(),
-            refs: Vec::new(),
-        });
+            TraceItem {
+                id,
+                ref_by: Vec::new(),
+                refs: Vec::new(),
+            },
+        );
 
         trace.delete_cache();
 
@@ -108,7 +107,6 @@ impl Tracer {
 
         trace.delete_cache();
     }
-
 
     pub fn remove_ref(&self, id: TraceID, ref_id: TraceID) {
         let mut trace = self.0.lock();
@@ -139,12 +137,9 @@ impl Tracer {
     }
 }
 
-
-
-lazy_static!(
+lazy_static! {
     pub static ref TRACER: Tracer = Tracer::new();
-);
-
+};
 
 struct App {
     tracer: Arc<Mutex<Trace>>,
@@ -160,7 +155,6 @@ impl App {
             drag_value: 0.0,
         }
     }
-
 
     pub fn layout(&mut self) -> Vec<u8> {
         let mut trace = self.tracer.lock();
@@ -204,14 +198,13 @@ impl App {
     }
 }
 
-
 impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         CentralPanel::default().show(ctx, |ui| {
             ui.heading("Garbage Collector Trace");
 
-
-            let img = egui::Image::from_bytes("bytes://graph.svg", self.layout()).fit_to_original_size(1.0);
+            let img = egui::Image::from_bytes("bytes://graph.svg", self.layout())
+                .fit_to_original_size(1.0);
 
             let (id, rect) = ui.allocate_space(ui.available_size());
             let response = ui.interact(rect, id, egui::Sense::click_and_drag());
@@ -246,14 +239,13 @@ impl eframe::App for App {
                 }
             }
 
-            
-            
-
             let id = Area::new(Id::new("graph"))
                 .show(ctx, |ui| {
                     ui.set_clip_rect(self.transform.inverse() * rect);
                     ui.add(img);
-                }).response.layer_id;
+                })
+                .response
+                .layer_id;
 
             ui.ctx().set_transform_layer(id, transform);
         });

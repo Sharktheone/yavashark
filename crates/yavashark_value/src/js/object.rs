@@ -80,8 +80,6 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 #[derive(Clone)]
 pub struct Object<C: Ctx>(pub Gc<RefCell<Box<dyn Obj<C>>>>);
 
-
-
 impl<C: Ctx> Debug for Object<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", *self)

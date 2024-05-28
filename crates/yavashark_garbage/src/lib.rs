@@ -18,7 +18,6 @@ pub(crate) mod spin_lock;
 #[cfg(feature = "trace")]
 mod trace;
 
-
 pub trait Collectable {}
 
 impl<T: ?Sized> Collectable for T {}
@@ -26,7 +25,6 @@ impl<T: ?Sized> Collectable for T {}
 pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
-
 
 impl<T: Collectable> Clone for Gc<T> {
     fn clone(&self) -> Self {
@@ -61,7 +59,8 @@ impl<T: Collectable> Gc<T> {
 
         other.add_ref_by(self);
 
-        #[cfg(feature = "trace")] {
+        #[cfg(feature = "trace")]
+        {
             TRACER.add_ref(self.trace(), other.trace());
         }
     }
@@ -89,7 +88,6 @@ impl<T: Collectable> Gc<T> {
 
         other.remove_ref_by(self);
 
-
         #[cfg(feature = "trace")]
         {
             TRACER.remove_ref(self.trace(), other.trace());
@@ -106,7 +104,6 @@ impl<T: Collectable> Gc<T> {
             lock.retain(|x| x != &other.inner);
         }
     }
-
 
     #[cfg(feature = "trace")]
     fn trace(&self) -> TraceID {
@@ -126,7 +123,8 @@ impl<T: Collectable> Gc<T> {
             weak: AtomicUsize::new(0),
             strong: AtomicUsize::new(1),
             flags: Flags::new(),
-            #[cfg(feature = "trace")] trace: TRACER.add(),
+            #[cfg(feature = "trace")]
+            trace: TRACER.add(),
         };
 
         let gc_box = Box::new(gc_box);
@@ -134,7 +132,6 @@ impl<T: Collectable> Gc<T> {
 
         Self { inner: gc_box }
     }
-
 
     pub fn root(value: T) -> Self {
         let value = Box::new(value);
@@ -147,7 +144,8 @@ impl<T: Collectable> Gc<T> {
             weak: AtomicUsize::new(0),
             strong: AtomicUsize::new(1),
             flags: Flags::root(),
-            #[cfg(feature = "trace")] trace: TRACER.add(),
+            #[cfg(feature = "trace")]
+            trace: TRACER.add(),
         };
 
         let gc_box = Box::new(gc_box);
@@ -167,9 +165,9 @@ struct GcBox<T: Collectable> {
     weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicUsize, // Number of strong references
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
-    #[cfg(feature = "trace")] trace: TraceID,
+    #[cfg(feature = "trace")]
+    trace: TraceID,
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Flags(u8);
@@ -394,7 +392,6 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
-
     fn unmark(&mut self) {
         self.flags.unmark();
     }
@@ -524,7 +521,6 @@ impl<T: Collectable> Drop for GcBox<T> {
     }
 }
 
-
 impl<T: Collectable> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
@@ -550,7 +546,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
@@ -566,10 +562,10 @@ impl<T: Collectable> Drop for Gc<T> {
 #[cfg(test)]
 #[allow(clippy::items_after_statements, dead_code)]
 mod tests {
+    use log::info;
     use std::cell::RefCell;
     use std::sync::Once;
     use std::thread;
-    use log::info;
 
     use super::*;
 
@@ -590,10 +586,7 @@ mod tests {
                         NODES_LEFT += 1;
                     }
 
-                    Self {
-                        data,
-                        other: None,
-                    }
+                    Self { data, other: None }
                 }
 
                 fn with_other(data: i32, other: Gc<RefCell<Node>>) -> Self {
@@ -622,8 +615,6 @@ mod tests {
         };
     }
 
-
-
     static LOGGER: Once = Once::new();
 
     fn setup_logger() {
@@ -633,7 +624,6 @@ mod tests {
                 .init();
         });
     }
-
 
     #[test]
     fn it_works() {
@@ -674,7 +664,6 @@ mod tests {
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
 
-
     #[test]
     fn with_root() {
         setup!();
@@ -714,7 +703,6 @@ mod tests {
 
                 x = x_new;
             }
-
 
             root.add_ref(&x);
 

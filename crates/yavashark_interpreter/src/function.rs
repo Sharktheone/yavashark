@@ -145,7 +145,6 @@ impl Debug for NativeFunction {
     }
 }
 
-
 impl Func<Context> for NativeFunction {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         (self.f)(args, this, ctx)
