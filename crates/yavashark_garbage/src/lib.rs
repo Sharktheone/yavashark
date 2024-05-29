@@ -323,8 +323,8 @@ impl<T: Collectable> GcBox<T> {
             for u in unmark {
                 (*u.as_ptr()).unmark();
             }
-            
-            
+
+
             for d in &drop {
                 Self::nuke_value(*d);
             }
@@ -400,8 +400,8 @@ impl<T: Collectable> GcBox<T> {
     fn unmark(&mut self) {
         self.flags.unmark();
     }
-    
-    
+
+
     unsafe fn nuke_value(this_ptr: NonNull<Self>) {
         unsafe {
             let value = (*this_ptr.as_ptr()).value;
@@ -433,7 +433,6 @@ impl<T: Collectable> GcBox<T> {
 
             // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
             let _ = Box::from_raw(this);
-            dbg!("drip", this);
         }
     }
 
@@ -449,7 +448,7 @@ impl<T: Collectable> GcBox<T> {
                 return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
             }
 
-            let flags = &mut (*this).flags;
+            let flags = &(*this).flags;
             if flags.is_root() {
                 return RootStatus::HasRoot;
             }
@@ -471,17 +470,17 @@ impl<T: Collectable> GcBox<T> {
             };
 
             unmark.push(this_ptr);
-            flags.set_has_no_root();
+            (*this).flags.set_has_no_root();
             let mut status = RootStatus::HasNoRoot;
 
             for r in &*refs {
                 let root = Self::you_have_root(*r, unmark);
                 if root == RootStatus::HasRoot {
-                    flags.set_has_root();
+                    (*this).flags.set_has_root();
                     return RootStatus::HasRoot;
                 }
                 if root == RootStatus::RootPending {
-                    flags.set_root_pending();
+                    (*this).flags.set_root_pending();
                     status = RootStatus::RootPending;
                 }
             }
@@ -539,7 +538,6 @@ impl<T: Collectable> Drop for GcBox<T> {
 impl<T: Collectable> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
-            dbg!("drp", self.inner.as_ptr());
             let _ptr = self.inner.as_ptr();
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
                 return;
@@ -563,7 +561,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
@@ -579,9 +577,10 @@ impl<T: Collectable> Drop for Gc<T> {
 #[cfg(test)]
 #[allow(clippy::items_after_statements, dead_code)]
 mod tests {
-    use log::info;
     use std::cell::RefCell;
     use std::sync::Once;
+
+    use log::info;
 
     use super::*;
 
@@ -710,28 +709,35 @@ mod tests {
     #[test]
     fn deep_tree() {
         setup!();
-        let root = setup!(root);
         {
-            let mut x = root.clone();
-            for i in 0..100 {
-                let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
-                x_new.add_ref(&x);
+            let root = setup!(root);
+            {
+                let mut x = root.clone();
+                for i in 0..100 {
+                    let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
+                    x_new.add_ref(&x);
 
-                x = x_new;
+                    x = x_new;
+                }
+
+                root.add_ref(&x);
+
+                let mut root = root.borrow_mut();
+                root.other = Some(x);
+
+                info!("left: {}", unsafe { NODES_LEFT });
             }
 
-            root.add_ref(&x);
+            let left = unsafe { NODES_LEFT };
 
-            let mut root = root.borrow_mut();
-            root.other = Some(x);
+            info!("{:?}", left);
 
-            info!("left: {}", unsafe { NODES_LEFT });
+            assert_eq!(unsafe { NODES_LEFT }, 101); //root, x, y
+
+
+            unsafe { (*root.inner.as_ptr()).flags.unset_root(); }
         }
-
-        let left = unsafe { NODES_LEFT };
-
-        info!("{:?}", left);
-
-        assert_eq!(unsafe { NODES_LEFT }, 101); //root, x, y
+        
+        assert_eq!(unsafe { NODES_LEFT }, 0);
     }
 }
