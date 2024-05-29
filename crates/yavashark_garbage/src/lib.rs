@@ -323,6 +323,11 @@ impl<T: Collectable> GcBox<T> {
             for u in unmark {
                 (*u.as_ptr()).unmark();
             }
+            
+            
+            for d in &drop {
+                Self::nuke_value(*d);
+            }
 
             for d in &drop {
                 Self::nuke(*d, &drop);
@@ -395,6 +400,15 @@ impl<T: Collectable> GcBox<T> {
     fn unmark(&mut self) {
         self.flags.unmark();
     }
+    
+    
+    unsafe fn nuke_value(this_ptr: NonNull<Self>) {
+        unsafe {
+            let value = (*this_ptr.as_ptr()).value;
+            let _ = Box::from_raw(value.as_ptr());
+            (*this_ptr.as_ptr()).flags.set_value_dropped();
+        }
+    }
 
     /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
     unsafe fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
@@ -419,6 +433,7 @@ impl<T: Collectable> GcBox<T> {
 
             // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
             let _ = Box::from_raw(this);
+            dbg!("drip", this);
         }
     }
 
@@ -524,6 +539,8 @@ impl<T: Collectable> Drop for GcBox<T> {
 impl<T: Collectable> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
+            dbg!("drp", self.inner.as_ptr());
+            let _ptr = self.inner.as_ptr();
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
                 return;
             }
@@ -617,11 +634,11 @@ mod tests {
     static LOGGER: Once = Once::new();
 
     fn setup_logger() {
-        LOGGER.call_once(|| {
-            env_logger::Builder::from_default_env()
-                .filter_level(log::LevelFilter::Trace)
-                .init();
-        });
+        // LOGGER.call_once(|| {
+        //     env_logger::Builder::from_default_env()
+        //         .filter_level(log::LevelFilter::Trace)
+        //         .init();
+        // });
     }
 
     #[test]
