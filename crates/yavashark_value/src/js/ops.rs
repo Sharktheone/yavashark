@@ -160,7 +160,6 @@ impl<C: Ctx> Sub for Value<C> {
 
             (Self::Object(_), _) | (_, Self::Object(_)) => Self::Number(f64::NAN),
             (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(f64::NAN),
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
@@ -182,7 +181,6 @@ impl<C: Ctx> Mul for Value<C> {
             }
             (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
-            (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(f64::NAN),
             (Self::Null, _) | (_, Self::Null) => Self::Number(0.0),
             (Self::Number(a), Self::Number(b)) => Self::Number(a * b),
             (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => b
@@ -261,7 +259,6 @@ impl<C: Ctx> Div for Value<C> {
             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() / b),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() / b.num()),
             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
-            (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(f64::NAN),
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
@@ -307,7 +304,6 @@ impl<C: Ctx> Rem for Value<C> {
                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() % b)),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() % b.num()),
             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
-            (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(f64::NAN),
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
@@ -373,7 +369,6 @@ impl<C: Ctx> PartialOrd for Value<C> {
 
             (Self::Object(_), _) => None,
             (_, Self::Object(_)) => None,
-            (Self::Function(_), _) | (_, Self::Function(_)) => None,
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
@@ -472,7 +467,6 @@ impl<C: Ctx> Shl for Value<C> {
             }
             (Self::Boolean(a), Self::Object(_)) => Self::Number(a.num()),
             (Self::Object(_), _) => Self::Number(0.0),
-            (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(0.0),
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
@@ -571,7 +565,6 @@ impl<C: Ctx> Shr for Value<C> {
             }
             (Self::Boolean(a), Self::Object(_)) => Self::Number(a.num()),
             (Self::Object(_), _) => Self::Number(0.0),
-            (Self::Function(_), _) | (_, Self::Function(_)) => Self::Number(0.0),
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
@@ -635,7 +628,6 @@ impl<C: Ctx> Value<C> {
             (Self::String(a), Self::String(b)) => a == b,
             (Self::Boolean(a), Self::Boolean(b)) => a == b,
             (Self::Object(a), Self::Object(b)) => a == b,
-            (Self::Function(a), Self::Function(b)) => a == b,
             (Self::Symbol(a), Self::Symbol(b)) => a == b,
 
             (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => {
@@ -650,15 +642,7 @@ impl<C: Ctx> Value<C> {
                 a.to_string() == b.to_string()
             }
 
-            (Self::Number(a), Self::Function(b)) | (Self::Function(b), Self::Number(a)) => {
-                a.to_string() == b.to_string()
-            }
-
             (Self::String(a), Self::Object(b)) | (Self::Object(b), Self::String(a)) => {
-                *a == b.to_string()
-            }
-
-            (Self::String(a), Self::Function(b)) | (Self::Function(b), Self::String(a)) => {
                 *a == b.to_string()
             }
 
@@ -668,14 +652,6 @@ impl<C: Ctx> Value<C> {
 
             (Self::Boolean(a), Self::Object(b)) | (Self::Object(b), Self::Boolean(a)) => {
                 a.num().to_string() == b.to_string()
-            }
-
-            (Self::Boolean(a), Self::Function(b)) | (Self::Function(b), Self::Boolean(a)) => {
-                a.num().to_string() == b.to_string()
-            }
-
-            (Self::Object(_a), Self::Function(_b)) | (Self::Function(_b), Self::Object(_a)) => {
-                todo!()
             }
 
             _ => false,
@@ -698,7 +674,7 @@ impl<C: Ctx> SubAssign for Value<C> {
 #[cfg(test)]
 mod tests {
     use crate::variable::Variable;
-    use crate::{Func, Obj};
+    use crate::Obj;
 
     use super::*;
 
@@ -752,16 +728,10 @@ mod tests {
         }
     }
 
-    impl Func<()> for Object {
-        fn call(&mut self, _ctx: &mut (), _args: Vec<Value>, _this: Value) -> Result<Value, Error> {
-            Ok(Value::Undefined)
-        }
-    }
-
     impl From<Object> for crate::Object<()> {
         fn from(obj: Object) -> Self {
             let boxed: Box<dyn Obj<()>> = Box::new(obj);
-            Self::new(boxed)
+            Self::from_boxed(boxed)
         }
     }
 

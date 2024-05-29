@@ -4,10 +4,10 @@ use anyhow::anyhow;
 
 use yavashark_value::Obj;
 
-use crate::context::Context;
-use crate::object::array::ArrayIterator;
-use crate::object::{array::Array, Object, Prototype};
 use crate::{FunctionPrototype, ObjectHandle};
+use crate::context::Context;
+use crate::object::{array::Array, Object, Prototype};
+use crate::object::array::ArrayIterator;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {
@@ -19,18 +19,20 @@ pub struct Prototypes {
 
 impl Prototypes {
     pub(crate) fn new() -> Result<Self, anyhow::Error> {
-        let obj_prototype: Box<dyn Obj<Context>> = Box::new(Prototype::new());
+        let obj_prototype = ObjectHandle::new(Prototype::new());
 
-        let obj_prototype = ObjectHandle::new(obj_prototype);
-
-        let func_prototype: Box<dyn Obj<Context>> =
-            Box::new(FunctionPrototype::new(&obj_prototype.clone().into()));
-        let func_prototype = ObjectHandle::new(func_prototype);
+        let func_prototype = ObjectHandle::new(FunctionPrototype::new(&obj_prototype.clone().into()));
 
         {
-            let mut obj: RefMut<Box<dyn Obj<Context>>> = obj_prototype
-                .get_mut()
-                .map_err(|e| anyhow!(format!("{e:?}")))?;
+
+            // Safety:
+            // Since we're not changing any properties of the object, we can safely get a mutable reference
+            let mut obj: RefMut<Box<dyn Obj<Context>>> = unsafe {
+                obj_prototype
+                    .get_mut()
+                    .map_err(|e| anyhow!(format!("{e:?}")))?
+            };
+
             let obj = obj.as_any_mut();
 
             let proto = obj
@@ -44,13 +46,13 @@ impl Prototypes {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
+            .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
+            .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         Ok(Self {
             obj: obj_prototype,

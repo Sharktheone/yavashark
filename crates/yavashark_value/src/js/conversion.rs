@@ -1,7 +1,5 @@
-use std::cell::RefCell;
-use std::rc::Rc;
 
-use crate::{Ctx, Func, Function, Object, Value};
+use crate::{Ctx, Object, Value};
 
 impl<C: Ctx> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -108,23 +106,5 @@ impl<C: Ctx> From<f32> for Value<C> {
 impl<O: Into<Object<C>>, C: Ctx> From<O> for Value<C> {
     fn from(o: O) -> Self {
         Self::Object(o.into())
-    }
-}
-
-impl<C: Ctx> From<Function<C>> for Value<C> {
-    fn from(f: Function<C>) -> Self {
-        Self::Function(f)
-    }
-}
-
-impl<C: Ctx> From<Rc<RefCell<Box<dyn Func<C>>>>> for Value<C> {
-    fn from(f: Rc<RefCell<Box<dyn Func<C>>>>) -> Self {
-        Self::Function(Function::from(f))
-    }
-}
-
-impl<C: Ctx> From<Box<dyn Func<C>>> for Value<C> {
-    fn from(f: Box<dyn Func<C>>) -> Self {
-        Self::Function(Function::from(f))
     }
 }

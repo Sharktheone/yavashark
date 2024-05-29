@@ -11,7 +11,7 @@ use yavashark_value::Obj;
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
-use crate::{ControlFlow, Error, FunctionHandle, Value, ValueResult, Variable};
+use crate::{ControlFlow, Error, ObjectHandle, Value, ValueResult, Variable};
 
 mod prototype;
 
@@ -28,15 +28,15 @@ pub struct NativeFunction {
 }
 
 impl NativeFunction {
-    pub fn new_boxed(name: String, f: NativeFn, ctx: &mut Context) -> FunctionHandle {
-        let this: Box<dyn Func<Context>> = Box::new(Self {
+    pub fn new_boxed(name: String, f: NativeFn, ctx: &mut Context) -> ObjectHandle {
+        let this = Self {
             name,
             f,
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
-        });
+        };
 
-        this.into()
+        ObjectHandle::new(this)
     }
 
     #[allow(clippy::new_ret_no_self)]
@@ -44,30 +44,30 @@ impl NativeFunction {
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
         ctx: &mut Context,
-    ) -> FunctionHandle {
-        let this: Box<dyn Func<Context>> = Box::new(Self {
+    ) -> ObjectHandle {
+        let this = Self {
             name: name.to_string(),
             f: Box::new(f),
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
-        });
-
-        this.into()
+        };
+        
+        ObjectHandle::new(this)
     }
 
     pub fn with_proto(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
         proto: Value,
-    ) -> FunctionHandle {
-        let this: Box<dyn Func<Context>> = Box::new(Self {
+    ) -> ObjectHandle {
+        let this = Self {
             name: name.to_string(),
             f: Box::new(f),
             object: Object::raw_with_proto(proto),
             data: None,
-        });
+        };
 
-        this.into()
+        ObjectHandle::new(this)
     }
 
     #[must_use]
@@ -133,9 +133,8 @@ impl NativeFunctionBuilder {
 
     /// Builds the function handle.
     #[must_use]
-    pub fn build(self) -> FunctionHandle {
-        let this: Box<dyn Func<Context>> = Box::new(self.0);
-        this.into()
+    pub fn build(self) -> ObjectHandle {
+        ObjectHandle::new(self.0)
     }
 }
 
@@ -169,16 +168,16 @@ impl JSFunction {
         block: Option<BlockStmt>,
         scope: Scope,
         ctx: &mut Context,
-    ) -> FunctionHandle {
-        let this: Box<dyn Func<Context>> = Box::new(Self {
+    ) -> ObjectHandle {
+        let this = Self {
             name,
             params,
             block,
             scope,
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
-        });
+        };
 
-        this.into()
+        ObjectHandle::new(this)
     }
 }
 

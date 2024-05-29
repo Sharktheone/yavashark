@@ -172,6 +172,13 @@ impl<C: Ctx> Object<C> {
     pub fn exchange(&self, other: Box<dyn Obj<C>>) {
         *self.0.borrow_mut() = other;
     }
+    pub fn call(&self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
+        // # Safety:
+        // Since we are not changing the object, we can safely get a mutable reference
+        let mut inner = unsafe { self.get_mut()? };
+
+        inner.call(ctx, args, this)
+    }
 }
 
 impl<C: Ctx> Display for Object<C> {
@@ -192,7 +199,12 @@ impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
 
 impl<C: Ctx> Object<C> {
     #[must_use]
-    pub fn new(obj: Box<dyn Obj<C>>) -> Self {
+    pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
         Self(Gc::new(RefCell::new(obj)))
+    }
+
+
+    pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
+        Self(Gc::new(RefCell::new(Box::new(obj))))
     }
 }

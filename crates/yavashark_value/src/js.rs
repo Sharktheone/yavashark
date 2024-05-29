@@ -43,7 +43,6 @@ pub enum Value<C: Ctx> {
     Boolean(bool),
     //TODO: This can create cyclic references: we need a GC like thing for that
     Object(Object<C>),
-    Function(Function<C>),
     Symbol(ConstString),
 }
 
@@ -77,7 +76,6 @@ impl<C: Ctx> Hash for Value<C> {
             Self::String(s) => (Type::String, s).hash(state),
             Self::Boolean(b) => (Type::Boolean, b).hash(state),
             Self::Object(o) => (Type::Object, o).hash(state),
-            Self::Function(f) => (Type::Function, f).hash(state),
             Self::Symbol(s) => (Type::Symbol, s).hash(state),
         }
     }
@@ -93,7 +91,6 @@ impl<C: Ctx> Value<C> {
             Self::String(s) => Self::String(s.clone()),
             Self::Boolean(b) => Self::Boolean(*b),
             Self::Object(o) => Self::Object(Object::clone(o)),
-            Self::Function(f) => Self::Function(Function::clone(f)),
             Self::Symbol(s) => Self::Symbol(s.clone()),
         }
     }
@@ -123,7 +120,7 @@ impl<C: Ctx> Value<C> {
             Self::Number(n) => *n == 0.0,
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
-            Self::Object(_) | Self::Function(_) | Self::Symbol(_) => false,
+            Self::Object(_) | Self::Symbol(_) => false,
         }
     }
 
@@ -134,7 +131,7 @@ impl<C: Ctx> Value<C> {
             Self::Number(n) => *n != 0.0,
             Self::String(s) => !s.is_empty(),
             Self::Boolean(b) => *b,
-            Self::Object(_) | Self::Function(_) | Self::Symbol(_) => true,
+            Self::Object(_) | Self::Symbol(_) => true,
         }
     }
 
@@ -152,7 +149,6 @@ impl<C: Ctx> Value<C> {
             Self::String(_) => "string",
             Self::Boolean(_) => "boolean",
             Self::Object(_) => "object",
-            Self::Function(_) => "function",
             Self::Symbol(_) => "symbol",
         }
     }
@@ -167,7 +163,6 @@ impl<C: Ctx> Display for Value<C> {
             Self::String(s) => write!(f, "{s}"),
             Self::Boolean(b) => write!(f, "{b}"),
             Self::Object(o) => write!(f, "{o}"),
-            Self::Function(func) => write!(f, "{func}"),
             Self::Symbol(s) => write!(f, "Symbol({s})"),
         }
     }
@@ -203,19 +198,13 @@ impl<C: Ctx> Value<C> {
                 .ok_or(Error::reference_error(format!(
                     "{name} does not exist on object"
                 ))),
-            Self::Function(f) => f
-                .resolve_property(name)
-                .ok_or(Error::reference_error(format!(
-                    "{name} does not exist on object"
-                ))),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn update_or_define_property(&self, name: Self, value: Self) -> Result<(), Error<C>> {
+    pub fn update_or_define_property(&self, name: &Self, value: Self) -> Result<(), Error<C>> {
         match self {
             Self::Object(o) => o.update_or_define_property(name, value),
-            Self::Function(f) => f.update_or_define_property(name, value),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -223,7 +212,6 @@ impl<C: Ctx> Value<C> {
     pub fn define_property(&self, name: Self, value: Self) -> Result<(), Error<C>> {
         match self {
             Self::Object(o) => o.define_property(name, value),
-            Self::Function(f) => f.define_property(name, value),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -231,14 +219,13 @@ impl<C: Ctx> Value<C> {
     pub fn contains_key(&self, name: &Self) -> Result<bool, Error<C>> {
         match self {
             Self::Object(o) => o.contains_key(name),
-            Self::Function(f) => f.contains_key(name),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
     pub fn call(&self, ctx: &mut C, args: Vec<Self>, this: Self) -> Result<Self, Error<C>> {
         match self {
-            Self::Function(f) => f.call(ctx, args, this),
+            Self::Object(o) => o.call(ctx, args, this),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
@@ -254,7 +241,6 @@ impl<C: Ctx> Value<C> {
     pub fn properties(&self) -> Result<Vec<(Self, Self)>, Error<C>> {
         match self {
             Self::Object(o) => o.properties(),
-            Self::Function(f) => f.properties(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -262,7 +248,6 @@ impl<C: Ctx> Value<C> {
     pub fn keys(&self) -> Result<Vec<Self>, Error<C>> {
         match self {
             Self::Object(o) => o.keys(),
-            Self::Function(f) => f.keys(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -270,20 +255,13 @@ impl<C: Ctx> Value<C> {
     pub fn values(&self) -> Result<Vec<Self>, Error<C>> {
         match self {
             Self::Object(o) => o.values(),
-            Self::Function(f) => f.values(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn exchange_object(&self, other: Box<dyn Obj<C>>) {
+    pub fn exchange(&self, other: Box<dyn Obj<C>>) {
         if let Self::Object(o) = self {
             o.exchange(other);
-        }
-    }
-
-    pub fn exchange_function(&self, other: Box<dyn Func<C>>) {
-        if let Self::Function(f) = self {
-            f.exchange(other);
         }
     }
 }

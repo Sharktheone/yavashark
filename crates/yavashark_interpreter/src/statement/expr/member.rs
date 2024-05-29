@@ -29,14 +29,6 @@ impl Context {
                     |v| Ok(v.copy()),
                 )
             }
-            Value::Function(f) => {
-                let f = f.get()?;
-
-                f.get_property(&name).map_or_else(
-                    || Err(ControlFlow::error(format!("Property {name} not found"))),
-                    |v| Ok(v.copy()),
-                )
-            }
             _ => Err(ControlFlow::error(
                 "Member expression object is not an object".to_owned(),
             )),

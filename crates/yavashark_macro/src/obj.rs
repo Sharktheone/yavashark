@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::spanned::Spanned;
 use syn::{FieldMutability, Fields, Path, PathSegment};
+use syn::spanned::Spanned;
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -33,10 +33,18 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("Context", input.span())));
 
-    let mut value = crate_path;
+    let mut value = crate_path.clone();
     value
         .segments
         .push(PathSegment::from(Ident::new("Value", input.span())));
+
+    let mut value_result = crate_path;
+    value_result
+        .segments
+        .push(PathSegment::from(Ident::new("ValueResult", input.span())));
+
+
+    let mut function = false;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -60,6 +68,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
         if meta.path.is_ident("object") {
             obj_path = meta.path;
+            return Ok(());
+        }
+
+        if meta.path.is_ident("function") {
+            function = true;
             return Ok(());
         }
 
@@ -137,6 +150,17 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let keys = match_list(&direct, List::Keys, &value);
     let values = match_list(&direct, List::Values, &value);
 
+
+    let function = if function {
+        quote! {
+            fn call(&mut self, ctx: &mut #context, args: Vec< #value>, this: #value) -> #value_result {
+                yavashark_value::Func::call(self, ctx, args, this)
+            }
+        }
+    } else {
+        quote! {}
+    };
+
     let expanded = quote! {
         #input
 
@@ -200,6 +224,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn get_array_or_done(&self, index: usize) -> (bool, Option<#value>) {
                 self.object.get_array_or_done(index)
             }
+        
+            #function
         }
     };
 

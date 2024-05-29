@@ -1,6 +1,6 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use yavashark_value::{Func, Obj};
+use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::object::Object;
@@ -230,11 +230,5 @@ impl Obj<Context> for FunctionPrototype {
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         self.object.get_array_or_done(index)
-    }
-}
-
-impl Func<Context> for FunctionPrototype {
-    fn call(&mut self, _ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
-        todo!()
     }
 }

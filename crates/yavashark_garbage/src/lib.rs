@@ -565,7 +565,6 @@ mod tests {
     use log::info;
     use std::cell::RefCell;
     use std::sync::Once;
-    use std::thread;
 
     use super::*;
 

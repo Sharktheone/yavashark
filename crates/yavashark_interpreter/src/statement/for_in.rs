@@ -14,7 +14,6 @@ impl Context {
 
         match obj {
             Value::Object(obj) => self.run_for_in_obj(&**obj.get()?, stmt, scope),
-            Value::Function(func) => self.run_for_in_obj(func.get()?.as_object(), stmt, scope),
             _ => Err(Error::ty_error(format!("{obj:?} is not an object")).into()),
         }
     }

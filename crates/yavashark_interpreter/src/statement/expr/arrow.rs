@@ -1,15 +1,15 @@
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 use yavashark_macro::object;
-use yavashark_value::Func;
+use yavashark_value::{Func, Obj};
 
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
-use crate::Value;
+use crate::{ObjectHandle, Value};
 use crate::{ControlFlow, RuntimeResult, ValueResult};
 
-#[object]
+#[object(function)]
 #[derive(Debug)]
 #[allow(clippy::module_name_repetitions)]
 pub struct ArrowFunction {
@@ -36,7 +36,7 @@ impl Func<Context> for ArrowFunction {
             Ok(val) => Ok(Value::Undefined),
             Err(ControlFlow::Return(val)) => Ok(val),
             Err(ControlFlow::Error(e)) => Err(e),
-            _ => Ok(res?), //will always be Err
+            _ => Ok(res?), //res will always be Err, so this will never actually return Ok()
         }
     }
 }
@@ -51,7 +51,7 @@ impl Context {
             this,
             scope: scope.clone(),
         };
-
-        Ok(arrow.into_func_value())
+        
+        Ok(ObjectHandle::new(arrow).into())
     }
 }

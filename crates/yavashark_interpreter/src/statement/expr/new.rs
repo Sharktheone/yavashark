@@ -10,7 +10,7 @@ impl Context {
     pub fn run_new(&mut self, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
         let callee = self.run_expr(&stmt.callee, stmt.span, scope)?;
 
-        if let Value::Function(f) = callee {
+        if let Value::Object(f) = callee {
             let mut call_args = Vec::with_capacity(0);
 
             if let Some(args) = &stmt.args {

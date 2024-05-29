@@ -25,6 +25,6 @@ impl Context {
             self,
         );
 
-        Ok(Value::Function(function))
+        Ok(function.into())
     }
 }

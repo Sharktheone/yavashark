@@ -14,7 +14,7 @@ impl Context {
 
         let callee = self.run_expr(callee_expr, stmt.span, scope)?;
 
-        if let Value::Function(f) = callee {
+        if let Value::Object(f) = callee {
             let args = stmt
                 .args
                 .iter()

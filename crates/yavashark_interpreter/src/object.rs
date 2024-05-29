@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub use prototype::*;
-use yavashark_value::Obj;
+use yavashark_value::{Error, Obj};
 
 use crate::context::Context;
-use crate::Value;
+use crate::{Value, ValueResult};
 use crate::Variable;
 
 pub mod array;
@@ -183,7 +183,6 @@ impl Obj<Context> for Object {
             .map(Variable::copy)
             .or_else(|| match &self.prototype.value {
                 Value::Object(o) => o.get_property(name).ok(),
-                Value::Function(f) => f.get_property(name).ok(),
                 _ => None,
             })
     }

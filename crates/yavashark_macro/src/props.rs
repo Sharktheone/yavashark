@@ -366,7 +366,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
                 match this #copy {
                     #value::Object(x) => #any_cast,
-                    #value::Function(x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name))),
                 }
             }, func_proto.copy()).into();
@@ -399,7 +398,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let boxed: Box<dyn Obj<Context>> = Box::new(new);
 
-                this.exchange_object(boxed);
+                this.exchange(boxed);
 
                 Ok(Value::Undefined)
 
