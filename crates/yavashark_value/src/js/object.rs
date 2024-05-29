@@ -232,6 +232,8 @@ impl<C: Ctx> Object<C> {
     }
 
 
+    /// # Safety
+    /// The caller must guarantee that the value is attached to the object
     pub unsafe fn gc_attach_value(&self, value: &Value<C>) {
         if let Value::Object(obj) = value {
             self.0.add_ref(&obj.0);

@@ -19,7 +19,7 @@ type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
-#[object]
+#[object(function)]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
@@ -151,7 +151,7 @@ impl Func<Context> for NativeFunction {
 }
 
 #[allow(clippy::module_name_repetitions)]
-#[object]
+#[object(function)]
 #[derive(Debug)]
 pub struct JSFunction {
     pub name: String,
