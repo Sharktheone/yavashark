@@ -347,7 +347,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let any_cast = if prop.is_mut {
             quote! {{
-                let mut x = x.get_mut()?;
+                let mut x = unsafe { x.get_mut()? }; //TODO: this is highly unsafe if the function edits the object's properties - https://github.com/users/Sharktheone/projects/4/views/1?pane=issue&itemId=65071868
                 let mut deez = (**x).as_any_mut().downcast_mut::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
                 deez.#name(args, ctx)

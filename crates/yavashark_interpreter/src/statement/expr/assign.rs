@@ -83,7 +83,6 @@ impl Context {
     ) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
-            let mut obj = obj.get_mut()?;
 
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
@@ -91,9 +90,15 @@ impl Context {
                 MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
             };
 
-            let value = obj
+            let mut inner = unsafe { obj.get_mut()? };
+            let value = inner
                 .get_property_mut(&name)
                 .ok_or(Error::ty("Property not found"))?;
+            
+            unsafe {
+                obj.gc_attach_value(value);
+            }
+            
             f(value);
         } else { 
             return Err(Error::ty("Invalid left-hand side in assignment"));

@@ -2,11 +2,12 @@ use std::any::Any;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
+
 use yavashark_garbage::Gc;
 
+use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
-use crate::Error;
 
 use super::Value;
 
@@ -36,11 +37,14 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
 
-    fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) {
+    fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) -> Option<Value<C>> {
         if let Some(prop) = self.get_property_mut(&name) {
+            let old = prop.clone();
             *prop = value;
+            Some(old)
         } else {
             self.define_property(name, value);
+            None
         }
     }
 
@@ -59,26 +63,35 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn values(&self) -> Vec<Value<C>>;
 
     fn into_object(self) -> Object<C>
-    where
-        Self: Sized + 'static,
+        where
+            Self: Sized + 'static,
     {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
 
-        Object::new(boxed)
+        Object::from_boxed(boxed)
     }
 
     fn into_value(self) -> Value<C>
-    where
-        Self: Sized + 'static,
+        where
+            Self: Sized + 'static,
     {
         Value::Object(self.into_object())
     }
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<C>>);
+
+    #[allow(unused_variables)]
+    fn call(&mut self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
+        Err(Error::ty_error(format!("{} is not a function", self.name())))
+    }
+
+    fn is_function(&self) -> bool {
+        false
+    }
 }
 
 #[derive(Clone)]
-pub struct Object<C: Ctx>(pub Gc<RefCell<Box<dyn Obj<C>>>>);
+pub struct Object<C: Ctx>(Gc<RefCell<Box<dyn Obj<C>>>>);
 
 impl<C: Ctx> Debug for Object<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -112,19 +125,36 @@ impl<C: Ctx> Object<C> {
         self.get().ok()?.resolve_property(name)
     }
 
-    pub fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
+
+    /// # Safety
+    /// The caller must update gc references if properties are changed
+    pub unsafe fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
         self.0
             .try_borrow_mut()
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
-        self.get_mut()?.define_property(name, value);
+        // # Safety:
+        // We attach the values below
+        let mut inner = unsafe { self.get_mut()? };
+
+        unsafe { self.gc_attach_value(&value); }
+        unsafe { self.gc_attach_value(&name); }
+
+        inner.define_property(name, value);
+
         Ok(())
     }
 
     pub fn define_variable(&self, name: Value<C>, value: Variable<C>) -> Result<(), Error<C>> {
-        self.get_mut()?.define_variable(name, value);
+        let mut inner = unsafe { self.get_mut()? };
+
+        unsafe { self.gc_attach_value(&name); }
+        unsafe { self.gc_attach_value(&value.value); }
+
+        inner.define_variable(name, value);
+
         Ok(())
     }
 
@@ -139,10 +169,24 @@ impl<C: Ctx> Object<C> {
 
     pub fn update_or_define_property(
         &self,
-        name: Value<C>,
+        name: &Value<C>,
         value: Value<C>,
     ) -> Result<(), Error<C>> {
-        self.get_mut()?.update_or_define_property(name, value);
+        let mut inner = unsafe { self.get_mut()? };
+
+        unsafe { self.gc_attach_value(&value); }
+
+        let old = inner.update_or_define_property(name.copy(), value);
+
+        if let Some(old) = old {
+            unsafe { self.gc_detach_value(&old); }
+            return Ok(());
+        }
+
+        // we only attach the name if it was not already defined
+        unsafe { self.gc_attach_value(&name); }
+
+
         Ok(())
     }
 
@@ -172,12 +216,34 @@ impl<C: Ctx> Object<C> {
     pub fn exchange(&self, other: Box<dyn Obj<C>>) {
         *self.0.borrow_mut() = other;
     }
+
+
     pub fn call(&self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
         // # Safety:
         // Since we are not changing the object, we can safely get a mutable reference
         let mut inner = unsafe { self.get_mut()? };
 
         inner.call(ctx, args, this)
+    }
+
+    #[must_use]
+    pub fn is_function(&self) -> bool {
+        self.get().map_or(false, |o| o.is_function())
+    }
+
+
+    pub unsafe fn gc_attach_value(&self, value: &Value<C>) {
+        if let Value::Object(obj) = value {
+            self.0.add_ref(&obj.0);
+        }
+    }
+
+    /// # Safety
+    /// The caller must guarantee that the value is not used anymore on the object
+    pub unsafe fn gc_detach_value(&self, value: &Value<C>) {
+        if let Value::Object(obj) = value {
+            self.0.remove_ref(&obj.0);
+        }
     }
 }
 

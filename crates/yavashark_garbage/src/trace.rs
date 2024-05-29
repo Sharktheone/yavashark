@@ -4,10 +4,10 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
 
-use eframe::{Frame, NativeOptions, UserEvent};
+use eframe::{Frame, NativeOptions};
 use egui::emath::TSTransform;
 use egui::mutex::Mutex;
-use egui::{Area, CentralPanel, Context, Id, ScrollArea, Vec2};
+use egui::{Area, CentralPanel, Context, Id};
 use layout::backends::svg::SVGWriter;
 use layout::core::base::Orientation;
 use layout::core::geometry::Point;
@@ -15,7 +15,7 @@ use layout::core::style::StyleAttr;
 use layout::std_shapes::shapes::{Arrow, Element, ShapeKind};
 use layout::topo::layout::VisualGraph;
 use lazy_static::lazy_static;
-use log::{error, info};
+use log::error;
 use winit::platform::wayland::EventLoopBuilderExtWayland;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -139,7 +139,7 @@ impl Tracer {
 
 lazy_static! {
     pub static ref TRACER: Tracer = Tracer::new();
-};
+}
 
 struct App {
     tracer: Arc<Mutex<Trace>>,
