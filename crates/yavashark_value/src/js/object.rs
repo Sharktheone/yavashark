@@ -2,6 +2,9 @@ use std::any::Any;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
+use std::ops::{Deref, DerefMut};
+#[cfg(feature = "dbg_object_gc")]
+use std::sync::atomic::AtomicIsize;
 
 use yavashark_garbage::Gc;
 
@@ -90,8 +93,72 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 }
 
+
+#[cfg(feature = "dbg_object_gc")]
+pub struct ObjectCount(AtomicIsize);
+
+#[cfg(feature = "dbg_object_gc")]
+impl ObjectCount {
+    const fn new() -> Self {
+        Self(AtomicIsize::new(0))
+    }
+    
+    fn increment(&self) {
+        self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+    
+    fn decrement(&self) {
+        self.0.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
+    }
+    
+    pub fn get(&self) -> isize {
+        self.0.load(std::sync::atomic::Ordering::SeqCst)
+    }
+    
+}
+
+#[cfg(feature = "dbg_object_gc")]
+pub static OBJECT_COUNT: ObjectCount = ObjectCount::new();
+#[cfg(feature = "dbg_object_gc")]
+pub static OBJECT_ALLOC: ObjectCount = ObjectCount::new();
+
+pub struct BoxedObj<C: Ctx>(Box<dyn Obj<C>>);
+
+impl<C: Ctx> Deref for BoxedObj<C> {
+    type Target = dyn Obj<C>;
+
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
+impl<C: Ctx> DerefMut for BoxedObj<C> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut *self.0
+    }
+}
+
+impl<C: Ctx> BoxedObj<C> {
+    fn new(obj: Box<dyn Obj<C>>) -> Self {
+        #[cfg(feature = "dbg_object_gc")]
+        {
+            OBJECT_COUNT.increment();
+            OBJECT_ALLOC.increment();
+        }
+        Self(obj)
+    }
+}
+
 #[derive(Clone)]
-pub struct Object<C: Ctx>(Gc<RefCell<Box<dyn Obj<C>>>>);
+pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>, ());
+
+
+#[cfg(feature = "dbg_object_gc")]
+impl<C: Ctx> Drop for BoxedObj<C> {
+    fn drop(&mut self) {
+        OBJECT_COUNT.decrement();
+    }
+}
 
 impl<C: Ctx> Debug for Object<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -114,7 +181,7 @@ impl<C: Ctx> PartialEq for Object<C> {
 }
 
 impl<C: Ctx> Object<C> {
-    pub fn get(&self) -> Result<Ref<Box<dyn Obj<C>>>, Error<C>> {
+    pub fn get(&self) -> Result<Ref<BoxedObj<C>>, Error<C>> {
         self.0
             .try_borrow()
             .map_err(|_| Error::new("failed to borrow object"))
@@ -128,7 +195,7 @@ impl<C: Ctx> Object<C> {
 
     /// # Safety
     /// The caller must update gc references if properties are changed
-    pub unsafe fn get_mut(&self) -> Result<RefMut<Box<dyn Obj<C>>>, Error<C>> {
+    pub unsafe fn get_mut(&self) -> Result<RefMut<BoxedObj<C>>, Error<C>> {
         self.0
             .try_borrow_mut()
             .map_err(|_| Error::new("failed to borrow object"))
@@ -214,7 +281,7 @@ impl<C: Ctx> Object<C> {
     }
 
     pub fn exchange(&self, other: Box<dyn Obj<C>>) {
-        *self.0.borrow_mut() = other;
+        *self.0.borrow_mut() = BoxedObj::new(other);
     }
 
 
@@ -275,18 +342,18 @@ impl<C: Ctx> Display for Object<C> {
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new(RefCell::new(obj)))
+        Self(Gc::new(RefCell::new(BoxedObj::new(obj))), ())
     }
 }
 
 impl<C: Ctx> Object<C> {
     #[must_use]
     pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new(RefCell::new(obj)))
+        Self(Gc::new(RefCell::new(BoxedObj::new(obj))), ())
     }
 
 
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
-        Self(Gc::new(RefCell::new(Box::new(obj))))
+        Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))), ())
     }
 }
