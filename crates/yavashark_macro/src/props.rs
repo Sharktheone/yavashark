@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
 use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
+use syn::spanned::Spanned;
 
 #[derive(Debug)]
 struct Item {
@@ -369,6 +369,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name))),
                 }
             }, func_proto.copy()).into();
+            
+            unsafe {
+                func_proto.gc_attach_value(&function);
+            }
 
             obj.define_variable(
                 #fn_name.into(),
@@ -402,7 +406,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 Ok(Value::Undefined)
 
-            }, func_proto).into();
+            }, func_proto.copy()).into();
+            
+            unsafe {
+                func_proto.gc_attach_value(&function);
+            }
 
             function.define_property("prototype".into(), obj.clone().into());
 
