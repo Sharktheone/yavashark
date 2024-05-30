@@ -295,5 +295,7 @@ mod temp_test {
 
         let result = interpreter.run().unwrap();
         println!("{result:?}");
+        
+        println!("LEAKED OBJECTS: {}/{}", yavashark_value::OBJECT_COUNT.get(), yavashark_value::OBJECT_ALLOC.get());
     }
 }
