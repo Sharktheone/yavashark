@@ -333,8 +333,27 @@ impl<C: Ctx> Object<C> {
     pub unsafe fn gc_detach(&self, other: &Self) {
         self.0.remove_ref(&other.0);
     }
+    
+    
     pub fn shake(&self) {
         self.0.shake();
+    }
+    
+    
+    pub fn clear_values(&self) -> Result<(), Error<C>> {
+        let mut inner = unsafe { self.get_mut()? };
+        
+        for (name, value) in inner.properties() {
+            unsafe { 
+                self.gc_detach_value(&value);
+                self.gc_detach_value(&name);
+            
+            }
+        }
+        
+        inner.clear_values();
+        Ok(())
+        
     }
 }
 
