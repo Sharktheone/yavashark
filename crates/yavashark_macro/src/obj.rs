@@ -156,6 +156,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn call(&mut self, ctx: &mut #context, args: Vec< #value>, this: #value) -> #value_result {
                 yavashark_value::Func::call(self, ctx, args, this)
             }
+            
+            fn is_function(&self) -> bool {
+                true
+            }
         }
     } else {
         quote! {}
