@@ -551,6 +551,24 @@ impl<T: Collectable> Drop for Gc<T> {
             {
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
 
+
+                //Drop all references 
+                if let Some(mut refs) = (*self.inner.as_ptr()).refs.spin_write() {
+                    for r in &*refs {
+                        let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
+                            warn!("Failed to remove reference from a GcBox - leaking memory");
+                            continue;
+                        };
+                        lock.retain(|x| *x != self.inner);
+                    }
+                    
+                    refs.clear();
+                } else {
+                    warn!("Failed to remove all references from a GcBox - leaking memory");
+                    //TODO: should we return here - probably, since we might panic if we continue
+                }
+
+
                 //we can drop the GcBox's value, but we might need to keep the GcBox, since there might be weak references
                 let _ = Box::from_raw(ptr);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
@@ -737,7 +755,7 @@ mod tests {
 
             unsafe { (*root.inner.as_ptr()).flags.unset_root(); }
         }
-        
+
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
 }
