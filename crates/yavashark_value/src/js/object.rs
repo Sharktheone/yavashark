@@ -247,6 +247,20 @@ impl<C: Ctx> Object<C> {
             self.0.remove_ref(&obj.0);
         }
     }
+
+
+    /// # Safety
+    /// The caller must guarantee that the value is attached to the object
+    pub unsafe fn gc_attach(&self, other: &Self) {
+        self.0.add_ref(&other.0);
+    }
+
+    
+    /// # Safety
+    /// The caller must guarantee that the value is not used anymore on the object
+    pub unsafe fn gc_detach(&self, other: &Self) {
+        self.0.remove_ref(&other.0);
+    }
 }
 
 impl<C: Ctx> Display for Object<C> {
