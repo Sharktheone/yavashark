@@ -104,6 +104,11 @@ impl<T: Collectable> Gc<T> {
             lock.retain(|x| x != &other.inner);
         }
     }
+    
+    pub fn shake(&self) {
+        GcBox::shake_tree(self.inner);
+    }
+
 
     #[cfg(feature = "trace")]
     fn trace(&self) -> TraceID {
@@ -538,7 +543,6 @@ impl<T: Collectable> Drop for GcBox<T> {
 impl<T: Collectable> Drop for Gc<T> {
     fn drop(&mut self) {
         unsafe {
-            let _ptr = self.inner.as_ptr();
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
                 return;
             }
@@ -561,7 +565,7 @@ impl<T: Collectable> Drop for Gc<T> {
                         };
                         lock.retain(|x| *x != self.inner);
                     }
-                    
+
                     refs.clear();
                 } else {
                     warn!("Failed to remove all references from a GcBox - leaking memory");

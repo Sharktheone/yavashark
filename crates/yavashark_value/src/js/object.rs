@@ -328,6 +328,9 @@ impl<C: Ctx> Object<C> {
     pub unsafe fn gc_detach(&self, other: &Self) {
         self.0.remove_ref(&other.0);
     }
+    pub fn shake(&self) {
+        self.0.shake();
+    }
 }
 
 impl<C: Ctx> Display for Object<C> {
