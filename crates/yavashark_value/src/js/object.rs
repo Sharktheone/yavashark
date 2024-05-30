@@ -50,6 +50,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
             None
         }
     }
+    
+    fn delete_property(&mut self, name: &Value<C>) -> Option<Value<C>>;
 
     fn contains_key(&self, name: &Value<C>) -> bool {
         self.get_property(name).is_some()
@@ -83,6 +85,9 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<C>>);
 
+    
+    fn clear_values(&mut self);
+    
     #[allow(unused_variables)]
     fn call(&mut self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
         Err(Error::ty_error(format!("{} is not a function", self.name())))

@@ -139,17 +139,19 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let struct_name = &input.ident;
 
-    let properties_define = match_prop(&direct, Act::Set);
-    let properties_variable_define = match_prop(&direct, Act::SetVar);
-    let properties_resolve = match_prop(&direct, Act::None);
-    let properties_get = match_prop(&direct, Act::Ref);
-    let properties_get_mut = match_prop(&direct, Act::RefMut);
-    let properties_contains = match_prop(&direct, Act::Contains);
+    let properties_define = match_prop(&direct, Act::Set, &value);
+    let properties_variable_define = match_prop(&direct, Act::SetVar, &value);
+    let properties_resolve = match_prop(&direct, Act::None, &value);
+    let properties_get = match_prop(&direct, Act::Ref, &value);
+    let properties_get_mut = match_prop(&direct, Act::RefMut, &value);
+    let properties_contains = match_prop(&direct, Act::Contains, &value);
+    let properties_delete = match_prop(&direct, Act::Delete, &value);
+
 
     let properties = match_list(&direct, List::Properties, &value);
     let keys = match_list(&direct, List::Keys, &value);
     let values = match_list(&direct, List::Values, &value);
-
+    let clear = match_list(&direct, List::Clear, &value);
 
     let function = if function {
         quote! {
@@ -194,6 +196,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #properties_get_mut
                 self.object.get_property_mut(name)
             }
+            
+            fn delete_property(&mut self, name: &#value) -> Option<#value> {
+                #properties_delete
+                self.object.delete_property(name)
+            }
 
             fn contains_key(&self, name: &#value) -> bool {
                 #properties_contains
@@ -228,6 +235,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn get_array_or_done(&self, index: usize) -> (bool, Option<#value>) {
                 self.object.get_array_or_done(index)
             }
+            
+            fn clear_values(&mut self) {
+                #clear
+                self.object.clear_values();
+            }
         
             #function
         }
@@ -236,6 +248,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     TokenStream1::from(expanded)
 }
 
+#[derive(Debug, Eq, PartialEq)]
 enum Act {
     Ref,
     RefMut,
@@ -243,9 +256,10 @@ enum Act {
     Set,
     SetVar,
     Contains,
+    Delete,
 }
 
-fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
+fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act, value_path: &Path) -> TokenStream {
     let mut match_properties_define = TokenStream::new();
     let mut match_non_string = TokenStream::new();
 
@@ -257,12 +271,19 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act) -> TokenStream {
             Act::Set => quote! {self.#field = value.into()},
             Act::SetVar => quote! {self.#field = value},
             Act::Contains => quote! {true},
+            Act::Delete => quote! {
+                {
+                    let old = self.#field.value.copy();
+                    self.#field.value = #value_path::Undefined;
+                    Some(old)
+                }
+            },
         };
         if let Some(rename) = rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
                     #rename => {
-                        self.#field = value.into();
+                        #act;
                         return;
                     }
                 }
@@ -316,6 +337,7 @@ enum List {
     Properties,
     Keys,
     Values,
+    Clear,
 }
 
 fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> TokenStream {
@@ -336,6 +358,7 @@ fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> 
             }
             List::Keys => quote! {keys.push(#name);},
             List::Values => quote! {values.push(self.#field.copy());},
+            List::Clear => quote! {self.#field.value = #value::Undefined;},
         };
 
         add.extend(act);

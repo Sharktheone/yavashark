@@ -123,6 +123,17 @@ impl Object {
 
         None
     }
+    
+    
+    pub fn delete_array(&mut self, index: usize) -> Option<Value> {
+        let (i, found) = self.array_position(index);
+
+        if found {
+            return Some(self.array.remove(i).1.value);
+        }
+
+        None
+    }
 
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);
@@ -211,6 +222,18 @@ impl Obj<Context> for Object {
         Some(&mut self.properties.get_mut(name)?.value)
     }
 
+    fn delete_property(&mut self, name: &Value) -> Option<Value> {
+        if name == &Value::String("__proto__".to_string()) {
+            return Some(self.prototype.value.clone());
+        }
+
+        if let Value::Number(n) = name {
+            return self.delete_array(*n as usize);
+        }
+
+        self.properties.remove(name).map(|e| e.value)
+    }
+
     fn contains_key(&self, name: &Value) -> bool {
         if name == &Value::String("__proto__".to_string()) {
             return true;
@@ -267,6 +290,11 @@ impl Obj<Context> for Object {
         }
 
         (true, None)
+    }
+
+    fn clear_values(&mut self) {
+        self.properties.clear();
+        self.array.clear();
     }
 }
 

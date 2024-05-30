@@ -703,6 +703,10 @@ mod tests {
             None
         }
 
+        fn delete_property(&mut self, name: &crate::Value<()>) -> Option<crate::Value<()>> {
+            None
+        }
+
         fn name(&self) -> String {
             "Object".to_string()
         }
@@ -725,6 +729,9 @@ mod tests {
 
         fn get_array_or_done(&self, _index: usize) -> (bool, Option<crate::Value<()>>) {
             (false, None)
+        }
+
+        fn clear_values(&mut self) {
         }
     }
 

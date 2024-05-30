@@ -81,6 +81,21 @@ impl Prototype {
         self.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
         self.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
     }
+    
+    const DIRECT_PROPERTIES: &'static [&'static str] = &[
+        "__define_getter__",
+        "__define_setter__",
+        "__lookup_getter__",
+        "__lookup_setter__",
+        "constructor",
+        "hasOwnProperty",
+        "isPrototypeOf",
+        "propertyIsEnumerable",
+        "toLocaleString",
+        "toString",
+        "valueOf",
+    ];
+
 }
 
 impl Obj<Context> for Prototype {
@@ -198,6 +213,15 @@ impl Obj<Context> for Prototype {
         self.object.get_property_mut(name)
     }
 
+    fn delete_property(&mut self, name: &Value) -> Option<Value> {
+        if let Value::String(name) = name {
+            if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
+                return None;
+            }
+        }
+        self.object.delete_property(name)
+    }
+
     fn contains_key(&self, name: &Value) -> bool {
         if let Value::String(name) = name {
             match name.as_str() {
@@ -310,6 +334,10 @@ impl Obj<Context> for Prototype {
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         self.object.get_array_or_done(index)
+    }
+
+    fn clear_values(&mut self) {
+        self.object.clear_values();
     }
 }
 

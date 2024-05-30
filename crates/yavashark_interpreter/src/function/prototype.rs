@@ -170,6 +170,46 @@ impl Obj<Context> for FunctionPrototype {
         self.object.get_property_mut(name)
     }
 
+    fn delete_property(&mut self, name: &Value) -> Option<Value> {
+        if let Value::String(name) = name {
+            match name.as_str() {
+                "apply" => {
+                    let old = self.apply.value.copy();
+                    self.apply = Value::Undefined.into();
+                    return Some(old);
+                }
+                "bind" => {
+                    let old = self.bind.value.copy();
+                    self.bind = Value::Undefined.into();
+                    return Some(old);
+                }
+                "call" => {
+                    let old = self.call.value.copy();
+                    self.call = Value::Undefined.into();
+                    return Some(old);
+                }
+                "constructor" => {
+                    let old = self.constructor.value.copy();
+                    self.constructor = Value::Undefined.into();
+                    return Some(old);
+                }
+                "length" => {
+                    let old = self.length.value.copy();
+                    self.length = Value::Undefined.into();
+                    return Some(old);
+                }
+                "name" => {
+                    let old = self.name.value.copy();
+                    self.name = Value::Undefined.into();
+                    return Some(old);
+                }
+                _ => {}
+            }
+        }
+
+        self.object.delete_property(name)
+    }
+
     fn contains_key(&self, name: &Value) -> bool {
         if let Value::String(name) = name {
             match name.as_str() {
@@ -230,5 +270,15 @@ impl Obj<Context> for FunctionPrototype {
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
         self.object.get_array_or_done(index)
+    }
+
+    fn clear_values(&mut self) {
+        self.object.clear_values();
+        self.apply = Value::Undefined.into();
+        self.bind = Value::Undefined.into();
+        self.call = Value::Undefined.into();
+        self.constructor = Value::Undefined.into();
+        self.length = Value::Number(0.0).into();
+        self.name = Value::String("Function".to_string()).into();
     }
 }
