@@ -1,10 +1,11 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+use std::cell::Ref;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::ptr::NonNull;
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::RwLock;
 
 use log::warn;
 
@@ -29,9 +30,7 @@ pub struct Gc<T: Collectable> {
 impl<T: Collectable> Clone for Gc<T> {
     fn clone(&self) -> Self {
         unsafe {
-            (*self.inner.as_ptr())
-                .strong
-                .fetch_add(1, Ordering::Relaxed);
+            (*self.inner.as_ptr()).refs.inc_strong();
         }
 
         Self { inner: self.inner }
@@ -49,12 +48,7 @@ impl<T: Collectable> Deref for Gc<T> {
 impl<T: Collectable> Gc<T> {
     pub fn add_ref(&self, other: &Self) {
         unsafe {
-            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
-                warn!("Failed to add reference to a GcBox");
-                return;
-            };
-
-            lock.push(other.inner);
+            (*self.inner.as_ptr()).refs.add_ref(other.inner);
         }
 
         other.add_ref_by(self);
@@ -67,23 +61,13 @@ impl<T: Collectable> Gc<T> {
 
     fn add_ref_by(&self, other: &Self) {
         unsafe {
-            let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
-                warn!("Failed to add reference to a GcBox");
-                return;
-            };
-
-            lock.push(other.inner);
+            (*self.inner.as_ptr()).refs.add_ref_by(other.inner);
         }
     }
 
     pub fn remove_ref(&self, other: &Self) {
         unsafe {
-            let Some(mut lock) = (*self.inner.as_ptr()).refs.spin_write() else {
-                warn!("Failed to remove reference from a GcBox");
-                return;
-            };
-
-            lock.retain(|x| x != &other.inner);
+            (*self.inner.as_ptr()).refs.remove_ref(other.inner);
         }
 
         other.remove_ref_by(self);
@@ -96,15 +80,10 @@ impl<T: Collectable> Gc<T> {
 
     fn remove_ref_by(&self, other: &Self) {
         unsafe {
-            let Some(mut lock) = (*self.inner.as_ptr()).ref_by.spin_write() else {
-                warn!("Failed to remove reference from a GcBox");
-                return;
-            };
-
-            lock.retain(|x| x != &other.inner);
+            (*self.inner.as_ptr()).refs.remove_ref_by(other.inner);
         }
     }
-    
+
     pub fn shake(&self) {
         GcBox::shake_tree(self.inner);
     }
@@ -123,10 +102,7 @@ impl<T: Collectable> Gc<T> {
 
         let gc_box = GcBox {
             value,
-            ref_by: RwLock::new(Vec::new()),
-            refs: RwLock::new(Vec::new()),
-            weak: AtomicUsize::new(0),
-            strong: AtomicUsize::new(1),
+            refs: Refs::new(),
             flags: Flags::new(),
             #[cfg(feature = "trace")]
             trace: TRACER.add(),
@@ -144,10 +120,7 @@ impl<T: Collectable> Gc<T> {
 
         let gc_box = GcBox {
             value,
-            ref_by: RwLock::new(Vec::new()),
-            refs: RwLock::new(Vec::new()),
-            weak: AtomicUsize::new(0),
-            strong: AtomicUsize::new(1),
+            refs: Refs::new(),
             flags: Flags::root(),
             #[cfg(feature = "trace")]
             trace: TRACER.add(),
@@ -162,13 +135,104 @@ impl<T: Collectable> Gc<T> {
 
 type MaybeNull<T> = NonNull<T>;
 
+
+struct Refs<T: Collectable> {
+    ref_by: RwLock<Vec<NonNull<GcBox<T>>>>,
+    ref_to: RwLock<Vec<NonNull<GcBox<T>>>>,
+    weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
+    strong: AtomicUsize, // Number of strong references
+}
+
+
+impl<T: Collectable> Refs<T> {
+    fn new() -> Self {
+        Self {
+            ref_by: RwLock::new(Vec::new()),
+            ref_to: RwLock::new(Vec::new()),
+            weak: AtomicUsize::new(0),
+            strong: AtomicUsize::new(1),
+        }
+    }
+
+    fn add_ref(&mut self, other: NonNull<GcBox<T>>) {
+        if let Some(mut lock) = self.ref_to.spin_write() {
+            lock.push(other);
+        } else {
+            warn!("Failed to add reference to a GcBox - this might be bad");
+        }
+    }
+
+    fn remove_ref(&mut self, other: NonNull<GcBox<T>>) {
+        if let Some(mut lock) = self.ref_to.spin_write() {
+            lock.retain(|x| *x != other);
+        } else {
+            warn!("Failed to remove reference from a GcBox - this might be bad");
+        }
+    }
+
+    fn add_ref_by(&mut self, other: NonNull<GcBox<T>>) {
+        if let Some(mut lock) = self.ref_by.spin_write() {
+            lock.push(other);
+        } else {
+            warn!("Failed to add reference to a GcBox - this might be bad");
+        }
+
+
+    }
+
+    fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
+        if let Some(mut lock) = self.ref_by.spin_write() {
+            lock.retain(|x| *x != other);
+        } else {
+            warn!("Failed to remove reference from a GcBox - this might be bad");
+        }
+
+    }
+
+    fn remove_ref_by_ptr(&mut self, other: *mut GcBox<T>) {
+        if let Some(mut lock) = self.ref_by.spin_write() {
+            lock.retain(|x| x.as_ptr() != other);
+        } else {
+            warn!("Failed to remove reference from a GcBox - this might be bad");
+        }
+
+    }
+
+    fn inc_strong(&mut self) -> usize {
+        self.strong.fetch_add(1, Ordering::Relaxed)
+    }
+
+    fn dec_strong(&mut self) -> usize {
+        self.strong.fetch_sub(1, Ordering::Relaxed)
+    }
+
+    fn weak(&self) -> usize {
+        self.weak.load(Ordering::Relaxed)
+    }
+
+    fn strong(&self) -> usize {
+        self.strong.load(Ordering::Relaxed)
+    }
+
+
+    fn read_refs(&self) -> Option<RwLockReadGuard<Vec<NonNull<GcBox<T>>>>> {
+        self.ref_to.spin_read()
+    }
+
+    fn read_ref_by(&self) -> Option<RwLockReadGuard<Vec<NonNull<GcBox<T>>>>> {
+        self.ref_by.spin_read()
+    }
+
+
+    fn write_refs(&self) -> Option<RwLockWriteGuard<Vec<NonNull<GcBox<T>>>>> {
+        self.ref_to.spin_write()
+    }
+}
+
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
 struct GcBox<T: Collectable> {
     value: MaybeNull<T>,                // This value might be null
-    ref_by: RwLock<Vec<NonNull<Self>>>, // All the GcBox that reference this GcBox
-    refs: RwLock<Vec<NonNull<Self>>>,   // All the GcBox that this GcBox reference
-    weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
-    strong: AtomicUsize, // Number of strong references
+    refs: Refs<T>,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
     #[cfg(feature = "trace")]
     trace: TraceID,
@@ -344,7 +408,7 @@ impl<T: Collectable> GcBox<T> {
         let this = this_ptr.as_ptr();
 
         unsafe {
-            let Some(read) = (*this).refs.spin_read() else {
+            let Some(read) = (*this).refs.read_refs() else {
                 warn!("Failed to read references from a GcBox - maybe leaking memory");
                 return;
             };
@@ -360,7 +424,7 @@ impl<T: Collectable> GcBox<T> {
 
                 //check if we have more than 1 reference that is pending
                 let mut pending = 0;
-                let Some(r_read) = (*r.as_ptr()).refs.spin_read() else {
+                let Some(r_read) = (*r.as_ptr()).refs.read_refs() else {
                     continue;
                 };
 
@@ -383,7 +447,7 @@ impl<T: Collectable> GcBox<T> {
                 //TODO: we might need to run look_later again (only if a reference that blocks one in look_later is also in look_later) => max 3 times (maybe also depend on the number of references?)
 
                 'refs: for r in look_later {
-                    let Some(r_read) = (*r.as_ptr()).refs.spin_read() else {
+                    let Some(r_read) = (*r.as_ptr()).refs.read_refs() else {
                         continue;
                     };
 
@@ -419,18 +483,13 @@ impl<T: Collectable> GcBox<T> {
     unsafe fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
         unsafe {
             let this = this_ptr.as_ptr();
-            if let Some(refs) = (*this).refs.spin_read() {
+            if let Some(refs) = (*this).refs.read_refs() {
                 for r in &*refs {
                     if dangerous.contains(r) {
                         continue;
                     }
 
-                    let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
-                        warn!("Failed to remove reference from a GcBox - leaking memory");
-                        continue;
-                    };
-
-                    lock.retain(|x| *x != this_ptr);
+                    (*r.as_ptr()).refs.remove_ref_by(this_ptr);
                 }
             } else {
                 warn!("Failed to remove all references from a GcBox - leaking memory");
@@ -444,8 +503,8 @@ impl<T: Collectable> GcBox<T> {
     fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
         let this = this_ptr.as_ptr();
         unsafe {
-            if let Some(ref_by) = (*this).ref_by.spin_read().map(|x| x.len()) {
-                if (*this).strong.load(Ordering::Relaxed) > ref_by {
+            if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len()) {
+                if (*this).refs.strong() > ref_by {
                     return RootStatus::HasRoot;
                 }
             } else {
@@ -470,7 +529,7 @@ impl<T: Collectable> GcBox<T> {
                 return RootStatus::RootPending;
             }
 
-            let Some(refs) = (*this).ref_by.spin_read() else {
+            let Some(refs) = (*this).refs.read_ref_by() else {
                 return RootStatus::None;
             };
 
@@ -499,8 +558,26 @@ impl<T: Collectable> Drop for GcBox<T> {
     fn drop(&mut self) {
         if !self.flags.is_externally_dropped() {
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
-            // info!("READ_BY: {:p}", &self.ref_by);
-            if let Some(ref_by) = self.ref_by.spin_read() {
+            if let Some(ref_by) = self.refs.read_ref_by() {
+                //TODO: try drop or some thing here
+                #[cfg(debug_assertions)]
+                if !ref_by.is_empty() {
+                    for r in &*ref_by {
+                        println!("{:p}", r.as_ptr());
+
+
+                        let r_refs = unsafe { (*r.as_ptr()).refs.read_refs() };
+
+                        if let Some(r_refs) = r_refs {
+                            for rr in &*r_refs {
+                                println!("  {:p}", rr.as_ptr());
+                            }
+                        } else {
+                            println!("  Failed to read refs");
+                        }
+                    }
+                }
+
                 assert!(
                     ref_by.is_empty(),
                     "Cannot drop a GcBox that is still referenced"
@@ -510,19 +587,15 @@ impl<T: Collectable> Drop for GcBox<T> {
                 //TODO: should we also panic here?
             }
 
-            if self.weak.load(Ordering::Relaxed) != 0 {
+            if self.refs.weak() != 0 {
                 warn!("Dropping a GcBox that still has weak references - this might be bad");
             }
 
             let self_raw = self as *mut Self;
-            if let Some(refs) = self.refs.spin_read() {
+            if let Some(refs) = self.refs.read_refs() {
                 for r in &*refs {
                     unsafe {
-                        let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
-                            warn!("Failed to remove reference from a GcBox - leaking memory");
-                            continue;
-                        };
-                        lock.retain(|x| x.as_ptr() != self_raw);
+                        (*r.as_ptr()).refs.remove_ref_by_ptr(self_raw);
                     }
                 }
             } else {
@@ -547,23 +620,15 @@ impl<T: Collectable> Drop for Gc<T> {
                 return;
             }
 
-            if (*self.inner.as_ptr())
-                .strong
-                .fetch_sub(1, Ordering::Relaxed)
-                == 1
-            // We are the last one (it returns the previous value, so we need to check if it was 1)
-            {
+            if (*self.inner.as_ptr()).refs.dec_strong() == 1 {
+                // We are the last one (it returns the previous value, so we need to check if it was 1)
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
 
 
                 //Drop all references 
-                if let Some(mut refs) = (*self.inner.as_ptr()).refs.spin_write() {
+                if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
-                        let Some(mut lock) = (*r.as_ptr()).ref_by.spin_write() else {
-                            warn!("Failed to remove reference from a GcBox - leaking memory");
-                            continue;
-                        };
-                        lock.retain(|x| *x != self.inner);
+                        (*r.as_ptr()).refs.remove_ref_by(self.inner);
                     }
 
                     refs.clear();
@@ -577,7 +642,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 let _ = Box::from_raw(ptr);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
 
-                if (*self.inner.as_ptr()).weak.load(Ordering::Relaxed) == 0 {
+                if (*self.inner.as_ptr()).refs.weak() == 0 {
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
                 }
@@ -586,8 +651,8 @@ impl<T: Collectable> Drop for Gc<T> {
                 //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
-            if Some((*self.inner.as_ptr()).strong.load(Ordering::Relaxed))
-                == (*self.inner.as_ptr()).ref_by.spin_read().map(|x| x.len())
+            if Some((*self.inner.as_ptr()).refs.strong())
+                == (*self.inner.as_ptr()).refs.read_ref_by().map(|x| x.len())
             {
                 //All strong refs are references by other GcBoxes
                 GcBox::shake_tree(self.inner);
