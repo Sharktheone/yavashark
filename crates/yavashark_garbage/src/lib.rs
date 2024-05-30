@@ -651,11 +651,14 @@ mod tests {
     static LOGGER: Once = Once::new();
 
     fn setup_logger() {
-        // LOGGER.call_once(|| {
-        //     env_logger::Builder::from_default_env()
-        //         .filter_level(log::LevelFilter::Trace)
-        //         .init();
-        // });
+        #[cfg(not(miri))]
+        {
+            LOGGER.call_once(|| {
+                env_logger::Builder::from_default_env()
+                    .filter_level(log::LevelFilter::Trace)
+                    .init();
+            });
+        }
     }
 
     #[test]
