@@ -27,7 +27,7 @@ impl Prototypes {
         {
             // Safety:
             // Since we're not changing any properties of the object, we can safely get a mutable reference
-            let mut obj: RefMut<Box<dyn Obj<Context>>> = unsafe {
+            let mut obj = unsafe {
                 obj_prototype
                     .get_mut()
                     .map_err(|e| anyhow!(format!("{e:?}")))?
