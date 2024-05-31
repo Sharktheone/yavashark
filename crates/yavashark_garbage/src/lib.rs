@@ -149,6 +149,14 @@ impl<T: Collectable> Gc<T> {
         let gc_box = Box::new(gc_box);
         let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
 
+        
+        
+        for r in &ref_to {
+            unsafe {
+                (*gc_box.as_ptr()).refs.add_ref_by(r.inner);
+            }
+        }
+        
         unsafe {
             (*gc_box.as_ptr()).refs = Refs::with_refs_to(ref_to.into_iter().map(|x| x.inner).collect());
         }
