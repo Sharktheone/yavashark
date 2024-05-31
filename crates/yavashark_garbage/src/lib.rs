@@ -1,11 +1,10 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 use std::fmt::Debug;
-use std::mem::MaybeUninit;
 use std::ops::Deref;
 use std::ptr::NonNull;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use log::warn;
 
@@ -20,7 +19,6 @@ pub(crate) mod spin_lock;
 mod trace;
 
 pub trait Collectable: Sized {
-
     /// # Safety
     fn get_refs(&self) -> Vec<Gc<Self>>;
 
@@ -49,7 +47,6 @@ impl<T: Collectable> Clone for Gc<T> {
         Self { inner: self.inner }
     }
 }
-
 
 
 pub struct GcGuard<'a, T: Collectable> {
@@ -83,18 +80,17 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
 
             for r in &removed {
                 write.retain(|x| *x != r.inner);
-                
-                r.remove_ref(&Gc { inner: self.gc });
+
+                (*r.inner.as_ptr()).refs.remove_ref_by(self.gc);
             }
 
             for a in &added {
                 write.push(a.inner);
-                
-                a.add_ref(&Gc { inner: self.gc });
+
+                (*a.inner.as_ptr()).refs.add_ref_by(self.gc);
             }
         }
     }
-
 }
 
 impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
@@ -106,54 +102,18 @@ impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
 }
 
 impl<T: Collectable> Gc<T> {
-
     #[must_use]
-    #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
+    #[allow(
+        clippy::missing_const_for_fn
+    )] //Bug in clippy... we can't dereference a mut ptr in a const fn
     pub fn get(&self) -> GcGuard<T> {
-        let value_ptr = unsafe {(*self.inner.as_ptr()).value.as_ref()};
+        let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         GcGuard {
             value_ptr,
             gc: self.inner,
         }
     }
 
-    fn add_ref(&self, other: &Self) {
-        unsafe {
-            (*self.inner.as_ptr()).refs.add_ref(other.inner);
-        }
-
-        other.add_ref_by(self);
-
-        #[cfg(feature = "trace")]
-        {
-            TRACER.add_ref(self.trace(), other.trace());
-        }
-    }
-
-    fn add_ref_by(&self, other: &Self) {
-        unsafe {
-            (*self.inner.as_ptr()).refs.add_ref_by(other.inner);
-        }
-    }
-
-    fn remove_ref(&self, other: &Self) {
-        unsafe {
-            (*self.inner.as_ptr()).refs.remove_ref(other.inner);
-        }
-
-        other.remove_ref_by(self);
-
-        #[cfg(feature = "trace")]
-        {
-            TRACER.remove_ref(self.trace(), other.trace());
-        }
-    }
-
-    fn remove_ref_by(&self, other: &Self) {
-        unsafe {
-            (*self.inner.as_ptr()).refs.remove_ref_by(other.inner);
-        }
-    }
 
     #[cfg(feature = "trace")]
     fn trace(&self) -> TraceID {
@@ -183,8 +143,7 @@ impl<T: Collectable> Gc<T> {
         unsafe {
             (*gc_box.as_ptr()).refs = Refs::with_refs_to(ref_to.into_iter().map(|x| x.inner).collect());
         }
-        
-        
+
 
         Self { inner: gc_box }
     }
@@ -226,7 +185,7 @@ impl<T: Collectable> Refs<T> {
             strong: AtomicUsize::new(1),
         }
     }
-    
+
     fn with_refs_to(refs: Vec<NonNull<GcBox<T>>>) -> Self {
         Self {
             ref_by: RwLock::new(Vec::new()),
@@ -719,7 +678,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).refs.strong())
@@ -886,7 +845,6 @@ mod tests {
 
 
             x.get().borrow_mut().other = Some(y.clone());
-            x.add_ref(&y);
 
 
             root.get().borrow_mut().other = Some(x);
@@ -895,7 +853,6 @@ mod tests {
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
             let x = root.get().borrow_mut().other.take().unwrap();
-
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
