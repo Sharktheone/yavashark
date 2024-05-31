@@ -18,9 +18,18 @@ pub(crate) mod spin_lock;
 #[cfg(feature = "trace")]
 mod trace;
 
-pub trait Collectable {}
+pub unsafe trait Collectable {
+    
+    /// # Safety
+    /// This function must not access any fields of the object (gc internal fields => okay, everything else => no), since it might be called from a different thread
+    unsafe fn get_refs<T: Collectable>(&self) -> Vec<Gc<T>>;
 
-impl<T: ?Sized> Collectable for T {}
+
+    /// (removed, added)
+    /// # Safety
+    /// This function must not access any fields of the object (gc internal fields => okay, everything else => no), since it might be called from a different thread
+    unsafe fn get_refs_diff<T: Collectable>(&self, old: &[Gc<T>]) -> (Vec<Gc<T>>, Vec<Gc<T>>);
+}
 
 pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
@@ -36,16 +45,44 @@ impl<T: Collectable> Clone for Gc<T> {
     }
 }
 
-impl<T: Collectable> Deref for Gc<T> {
+
+
+pub struct GcGuard<'a, T: Collectable> {
+    value_ptr: &'a T,
+    gc: NonNull<GcBox<T>>,
+}
+
+
+/// Here the magic of gc references happens noe!
+impl<T: Collectable> Drop for GcGuard<'_, T> {
+    fn drop(&mut self) {
+        //we now need to update the references => look what is still there and what is not
+        //TODO
+    }
+    
+}
+
+impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
     type Target = T;
 
-    fn deref(&self) -> &Self::Target {
-        unsafe { &*(*self.inner.as_ptr()).value.as_ptr() }
+    fn deref(&self) -> &'a Self::Target {
+        self.value_ptr
     }
 }
 
 impl<T: Collectable> Gc<T> {
-    pub fn add_ref(&self, other: &Self) {
+    
+    #[must_use]
+    #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
+    pub fn get(&self) -> GcGuard<T> {
+        let value_ptr = unsafe {(*self.inner.as_ptr()).value.as_ref()};
+        GcGuard {
+            value_ptr,
+            gc: self.inner,
+        }
+    }
+    
+    fn add_ref(&self, other: &Self) {
         unsafe {
             (*self.inner.as_ptr()).refs.add_ref(other.inner);
         }
@@ -64,7 +101,7 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
-    pub fn remove_ref(&self, other: &Self) {
+    fn remove_ref(&self, other: &Self) {
         unsafe {
             (*self.inner.as_ptr()).refs.remove_ref(other.inner);
         }
@@ -81,10 +118,6 @@ impl<T: Collectable> Gc<T> {
         unsafe {
             (*self.inner.as_ptr()).refs.remove_ref_by(other.inner);
         }
-    }
-
-    pub fn shake(&self) {
-        GcBox::shake_tree(self.inner);
     }
 
     #[cfg(feature = "trace")]
