@@ -1,6 +1,7 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 use std::fmt::Debug;
+use std::mem::MaybeUninit;
 use std::ops::Deref;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -32,6 +33,13 @@ pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
+
+impl<T: Collectable> PartialEq for Gc<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
 impl<T: Collectable> Clone for Gc<T> {
     fn clone(&self) -> Self {
         unsafe {
@@ -59,30 +67,34 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
                 warn!("Failed to read references from a GcBox - this might be bad");
                 return;
             };
-            
+
             let refs = refs.iter().map(|x| Gc { inner: *x }).collect::<Vec<_>>();
-            
+
             let (removed, added) = self.value_ptr.get_refs_diff(&refs);
-            
+
             if removed.is_empty() && added.is_empty() {
                 return;
             }
-            
+
             let Some(mut write) = (*self.gc.as_ptr()).refs.write_refs() else {
                 warn!("Failed to write references to a GcBox - this might be bad");
                 return;
             };
-            
+
             for r in &removed {
                 write.retain(|x| *x != r.inner);
+                
+                r.remove_ref(&Gc { inner: self.gc });
             }
-            
+
             for a in &added {
                 write.push(a.inner);
+                
+                a.add_ref(&Gc { inner: self.gc });
             }
         }
     }
-    
+
 }
 
 impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
@@ -94,7 +106,7 @@ impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
 }
 
 impl<T: Collectable> Gc<T> {
-    
+
     #[must_use]
     #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
     pub fn get(&self) -> GcGuard<T> {
@@ -104,7 +116,7 @@ impl<T: Collectable> Gc<T> {
             gc: self.inner,
         }
     }
-    
+
     fn add_ref(&self, other: &Self) {
         unsafe {
             (*self.inner.as_ptr()).refs.add_ref(other.inner);
@@ -151,8 +163,11 @@ impl<T: Collectable> Gc<T> {
 
 impl<T: Collectable> Gc<T> {
     pub fn new(value: T) -> Self {
+        let ref_to = value.get_refs();
+
         let value = Box::new(value);
         let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
+
 
         let gc_box = GcBox {
             value,
@@ -164,6 +179,12 @@ impl<T: Collectable> Gc<T> {
 
         let gc_box = Box::new(gc_box);
         let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
+
+        unsafe {
+            (*gc_box.as_ptr()).refs = Refs::with_refs_to(ref_to.into_iter().map(|x| x.inner).collect());
+        }
+        
+        
 
         Self { inner: gc_box }
     }
@@ -201,6 +222,15 @@ impl<T: Collectable> Refs<T> {
         Self {
             ref_by: RwLock::new(Vec::new()),
             ref_to: RwLock::new(Vec::new()),
+            weak: AtomicUsize::new(0),
+            strong: AtomicUsize::new(1),
+        }
+    }
+    
+    fn with_refs_to(refs: Vec<NonNull<GcBox<T>>>) -> Self {
+        Self {
+            ref_by: RwLock::new(Vec::new()),
+            ref_to: RwLock::new(refs),
             weak: AtomicUsize::new(0),
             strong: AtomicUsize::new(1),
         }
@@ -752,6 +782,33 @@ mod tests {
                     }
                 }
             }
+
+            impl Collectable for RefCell<Node> {
+                fn get_refs(&self) -> Vec<Gc<Self>> {
+                    let this = self.borrow();
+                    if let Some(other) = &this.other {
+                        vec![other.clone()]
+                    } else {
+                        Vec::new()
+                    }
+                }
+
+                fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
+                    let this = self.borrow();
+
+                    if let Some(other) = &this.other {
+                        if old.contains(other) {
+                            (Vec::new(), Vec::new())
+                        } else {
+                            (vec![other.clone()], Vec::new())
+                        }
+                    } else {
+                        (Vec::new(), Vec::new())
+                    }
+                }
+            }
+
+
         };
         (root) => {
             Gc::root(RefCell::new(Node::new(9999)))
@@ -775,36 +832,45 @@ mod tests {
     fn it_works() {
         setup_logger();
 
+
+        impl Collectable for i32 {
+            fn get_refs(&self) -> Vec<Gc<i32>> {
+                Vec::new()
+            }
+
+            fn get_refs_diff(&self, _old: &[Gc<i32>]) -> (Vec<Gc<i32>>, Vec<Gc<i32>>) {
+                (Vec::new(), Vec::new())
+            }
+        }
+
         let x = Gc::new(5);
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
         let y = x.clone();
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
         let z = x.clone();
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
         let w = x.clone();
 
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
 
         drop(y);
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
         drop(z);
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
         drop(w);
-        println!("{:?}", *x);
+        println!("{:?}", *x.get());
     }
 
     #[test]
     fn circular() {
         setup!();
+
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
 
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-            y.add_ref(&x);
-
-            x.borrow_mut().other = Some(y.clone());
-            x.add_ref(&y);
+            x.get().borrow_mut().other = Some(y);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
@@ -818,20 +884,18 @@ mod tests {
             let x = Gc::new(RefCell::new(Node::new(5)));
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-            y.add_ref(&x);
 
-            x.borrow_mut().other = Some(y.clone());
+            x.get().borrow_mut().other = Some(y.clone());
             x.add_ref(&y);
 
-            root.add_ref(&x);
-            root.borrow_mut().other = Some(x);
+
+            root.get().borrow_mut().other = Some(x);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
-            let x = root.borrow_mut().other.take().unwrap();
+            let x = root.get().borrow_mut().other.take().unwrap();
 
-            root.remove_ref(&x);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
@@ -846,13 +910,12 @@ mod tests {
                 let mut x = root.clone();
                 for i in 0..100 {
                     let x_new = Gc::new(RefCell::new(Node::with_other(i, x.clone())));
-                    x_new.add_ref(&x);
 
                     x = x_new;
                 }
 
-                root.add_ref(&x);
 
+                let root = root.get();
                 let mut root = root.borrow_mut();
                 root.other = Some(x);
 
