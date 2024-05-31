@@ -731,8 +731,7 @@ mod tests {
             (false, None)
         }
 
-        fn clear_values(&mut self) {
-        }
+        fn clear_values(&mut self) {}
     }
 
     impl From<Object> for crate::Object<()> {

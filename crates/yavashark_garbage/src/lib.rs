@@ -1,11 +1,10 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
-use std::cell::Ref;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::ptr::NonNull;
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use log::warn;
 
@@ -88,7 +87,6 @@ impl<T: Collectable> Gc<T> {
         GcBox::shake_tree(self.inner);
     }
 
-
     #[cfg(feature = "trace")]
     fn trace(&self) -> TraceID {
         unsafe { (*self.inner.as_ptr()).trace }
@@ -135,14 +133,12 @@ impl<T: Collectable> Gc<T> {
 
 type MaybeNull<T> = NonNull<T>;
 
-
 struct Refs<T: Collectable> {
     ref_by: RwLock<Vec<NonNull<GcBox<T>>>>,
     ref_to: RwLock<Vec<NonNull<GcBox<T>>>>,
     weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicUsize, // Number of strong references
 }
-
 
 impl<T: Collectable> Refs<T> {
     fn new() -> Self {
@@ -176,8 +172,6 @@ impl<T: Collectable> Refs<T> {
         } else {
             warn!("Failed to add reference to a GcBox - this might be bad");
         }
-
-
     }
 
     fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
@@ -186,7 +180,6 @@ impl<T: Collectable> Refs<T> {
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
-
     }
 
     fn remove_ref_by_ptr(&mut self, other: *mut GcBox<T>) {
@@ -195,7 +188,6 @@ impl<T: Collectable> Refs<T> {
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
-
     }
 
     fn inc_strong(&mut self) -> usize {
@@ -214,7 +206,6 @@ impl<T: Collectable> Refs<T> {
         self.strong.load(Ordering::Relaxed)
     }
 
-
     fn read_refs(&self) -> Option<RwLockReadGuard<Vec<NonNull<GcBox<T>>>>> {
         self.ref_to.spin_read()
     }
@@ -223,7 +214,6 @@ impl<T: Collectable> Refs<T> {
         self.ref_by.spin_read()
     }
 
-
     fn write_refs(&self) -> Option<RwLockWriteGuard<Vec<NonNull<GcBox<T>>>>> {
         self.ref_to.spin_write()
     }
@@ -231,7 +221,7 @@ impl<T: Collectable> Refs<T> {
 
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
 struct GcBox<T: Collectable> {
-    value: MaybeNull<T>,                // This value might be null
+    value: MaybeNull<T>, // This value might be null
     refs: Refs<T>,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
     #[cfg(feature = "trace")]
@@ -393,7 +383,6 @@ impl<T: Collectable> GcBox<T> {
                 (*u.as_ptr()).unmark();
             }
 
-
             for d in &drop {
                 Self::nuke_value(*d);
             }
@@ -469,7 +458,6 @@ impl<T: Collectable> GcBox<T> {
     fn unmark(&mut self) {
         self.flags.unmark();
     }
-
 
     unsafe fn nuke_value(this_ptr: NonNull<Self>) {
         unsafe {
@@ -565,7 +553,6 @@ impl<T: Collectable> Drop for GcBox<T> {
                     for r in &*ref_by {
                         println!("{:p}", r.as_ptr());
 
-
                         let r_refs = unsafe { (*r.as_ptr()).refs.read_refs() };
 
                         if let Some(r_refs) = r_refs {
@@ -624,8 +611,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 // We are the last one (it returns the previous value, so we need to check if it was 1)
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
 
-
-                //Drop all references 
+                //Drop all references
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
                         (*r.as_ptr()).refs.remove_ref_by(self.inner);
@@ -637,7 +623,6 @@ impl<T: Collectable> Drop for Gc<T> {
                     //TODO: should we return here - probably, since we might panic if we continue
                 }
 
-
                 //we can drop the GcBox's value, but we might need to keep the GcBox, since there might be weak references
                 let _ = Box::from_raw(ptr);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
@@ -648,7 +633,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 }
 
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             if Some((*self.inner.as_ptr()).refs.strong())
@@ -824,8 +809,9 @@ mod tests {
 
             assert_eq!(unsafe { NODES_LEFT }, 101); //root, x, y
 
-
-            unsafe { (*root.inner.as_ptr()).flags.unset_root(); }
+            unsafe {
+                (*root.inner.as_ptr()).flags.unset_root();
+            }
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 0);

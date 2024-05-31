@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use syn::{FieldMutability, Fields, Path, PathSegment};
 use syn::spanned::Spanned;
+use syn::{FieldMutability, Fields, Path, PathSegment};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -42,7 +42,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     value_result
         .segments
         .push(PathSegment::from(Ident::new("ValueResult", input.span())));
-
 
     let mut function = false;
 
@@ -147,7 +146,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_contains = match_prop(&direct, Act::Contains, &value);
     let properties_delete = match_prop(&direct, Act::Delete, &value);
 
-
     let properties = match_list(&direct, List::Properties, &value);
     let keys = match_list(&direct, List::Keys, &value);
     let values = match_list(&direct, List::Values, &value);
@@ -158,7 +156,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn call(&mut self, ctx: &mut #context, args: Vec< #value>, this: #value) -> #value_result {
                 yavashark_value::Func::call(self, ctx, args, this)
             }
-            
+
             fn is_function(&self) -> bool {
                 true
             }
@@ -196,7 +194,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #properties_get_mut
                 self.object.get_property_mut(name)
             }
-            
+
             fn delete_property(&mut self, name: &#value) -> Option<#value> {
                 #properties_delete
                 self.object.delete_property(name)
@@ -235,12 +233,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn get_array_or_done(&self, index: usize) -> (bool, Option<#value>) {
                 self.object.get_array_or_done(index)
             }
-            
+
             fn clear_values(&mut self) {
                 #clear
                 self.object.clear_values();
             }
-        
+
             #function
         }
     };

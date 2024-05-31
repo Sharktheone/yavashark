@@ -8,9 +8,9 @@ use std::sync::atomic::AtomicIsize;
 
 use yavashark_garbage::Gc;
 
-use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
+use crate::Error;
 
 use super::Value;
 
@@ -50,7 +50,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
             None
         }
     }
-    
+
     fn delete_property(&mut self, name: &Value<C>) -> Option<Value<C>>;
 
     fn contains_key(&self, name: &Value<C>) -> bool {
@@ -68,8 +68,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn values(&self) -> Vec<Value<C>>;
 
     fn into_object(self) -> Object<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
 
@@ -77,27 +77,33 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 
     fn into_value(self) -> Value<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         Value::Object(self.into_object())
     }
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<C>>);
 
-    
     fn clear_values(&mut self);
-    
+
     #[allow(unused_variables)]
-    fn call(&mut self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
-        Err(Error::ty_error(format!("{} is not a function", self.name())))
+    fn call(
+        &mut self,
+        ctx: &mut C,
+        args: Vec<Value<C>>,
+        this: Value<C>,
+    ) -> Result<Value<C>, Error<C>> {
+        Err(Error::ty_error(format!(
+            "{} is not a function",
+            self.name()
+        )))
     }
 
     fn is_function(&self) -> bool {
         false
     }
 }
-
 
 #[cfg(feature = "dbg_object_gc")]
 pub struct ObjectCount(AtomicIsize);
@@ -107,19 +113,18 @@ impl ObjectCount {
     const fn new() -> Self {
         Self(AtomicIsize::new(0))
     }
-    
+
     fn increment(&self) {
         self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
     }
-    
+
     fn decrement(&self) {
         self.0.fetch_sub(1, std::sync::atomic::Ordering::SeqCst);
     }
-    
+
     pub fn get(&self) -> isize {
         self.0.load(std::sync::atomic::Ordering::SeqCst)
     }
-    
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -156,7 +161,6 @@ impl<C: Ctx> BoxedObj<C> {
 
 #[derive(Clone)]
 pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>, ());
-
 
 #[cfg(feature = "dbg_object_gc")]
 impl<C: Ctx> Drop for BoxedObj<C> {
@@ -197,7 +201,6 @@ impl<C: Ctx> Object<C> {
         self.get().ok()?.resolve_property(name)
     }
 
-
     /// # Safety
     /// The caller must update gc references if properties are changed
     pub unsafe fn get_mut(&self) -> Result<RefMut<BoxedObj<C>>, Error<C>> {
@@ -211,8 +214,12 @@ impl<C: Ctx> Object<C> {
         // We attach the values below
         let mut inner = unsafe { self.get_mut()? };
 
-        unsafe { self.gc_attach_value(&value); }
-        unsafe { self.gc_attach_value(&name); }
+        unsafe {
+            self.gc_attach_value(&value);
+        }
+        unsafe {
+            self.gc_attach_value(&name);
+        }
 
         inner.define_property(name, value);
 
@@ -222,8 +229,12 @@ impl<C: Ctx> Object<C> {
     pub fn define_variable(&self, name: Value<C>, value: Variable<C>) -> Result<(), Error<C>> {
         let mut inner = unsafe { self.get_mut()? };
 
-        unsafe { self.gc_attach_value(&name); }
-        unsafe { self.gc_attach_value(&value.value); }
+        unsafe {
+            self.gc_attach_value(&name);
+        }
+        unsafe {
+            self.gc_attach_value(&value.value);
+        }
 
         inner.define_variable(name, value);
 
@@ -246,18 +257,23 @@ impl<C: Ctx> Object<C> {
     ) -> Result<(), Error<C>> {
         let mut inner = unsafe { self.get_mut()? };
 
-        unsafe { self.gc_attach_value(&value); }
+        unsafe {
+            self.gc_attach_value(&value);
+        }
 
         let old = inner.update_or_define_property(name.copy(), value);
 
         if let Some(old) = old {
-            unsafe { self.gc_detach_value(&old); }
+            unsafe {
+                self.gc_detach_value(&old);
+            }
             return Ok(());
         }
 
         // we only attach the name if it was not already defined
-        unsafe { self.gc_attach_value(&name); }
-
+        unsafe {
+            self.gc_attach_value(name);
+        }
 
         Ok(())
     }
@@ -289,8 +305,12 @@ impl<C: Ctx> Object<C> {
         *self.0.borrow_mut() = BoxedObj::new(other);
     }
 
-
-    pub fn call(&self, ctx: &mut C, args: Vec<Value<C>>, this: Value<C>) -> Result<Value<C>, Error<C>> {
+    pub fn call(
+        &self,
+        ctx: &mut C,
+        args: Vec<Value<C>>,
+        this: Value<C>,
+    ) -> Result<Value<C>, Error<C>> {
         // # Safety:
         // Since we are not changing the object, we can safely get a mutable reference
         let mut inner = unsafe { self.get_mut()? };
@@ -302,7 +322,6 @@ impl<C: Ctx> Object<C> {
     pub fn is_function(&self) -> bool {
         self.get().map_or(false, |o| o.is_function())
     }
-
 
     /// # Safety
     /// The caller must guarantee that the value is attached to the object
@@ -320,40 +339,34 @@ impl<C: Ctx> Object<C> {
         }
     }
 
-
     /// # Safety
     /// The caller must guarantee that the value is attached to the object
     pub unsafe fn gc_attach(&self, other: &Self) {
         self.0.add_ref(&other.0);
     }
 
-    
     /// # Safety
     /// The caller must guarantee that the value is not used anymore on the object
     pub unsafe fn gc_detach(&self, other: &Self) {
         self.0.remove_ref(&other.0);
     }
-    
-    
+
     pub fn shake(&self) {
         self.0.shake();
     }
-    
-    
+
     pub fn clear_values(&self) -> Result<(), Error<C>> {
         let mut inner = unsafe { self.get_mut()? };
-        
+
         for (name, value) in inner.properties() {
-            unsafe { 
+            unsafe {
                 self.gc_detach_value(&value);
                 self.gc_detach_value(&name);
-            
             }
         }
-        
+
         inner.clear_values();
         Ok(())
-        
     }
 }
 
@@ -378,7 +391,6 @@ impl<C: Ctx> Object<C> {
     pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
         Self(Gc::new(RefCell::new(BoxedObj::new(obj))), ())
     }
-
 
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
         Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))), ())

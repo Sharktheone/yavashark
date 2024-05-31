@@ -1,7 +1,7 @@
-use std::fmt::Debug;
 use crate::{Ctx, Error, Obj, Value};
+use std::fmt::Debug;
 
-pub trait Func<C: Ctx>: Debug + Obj<C>  {
+pub trait Func<C: Ctx>: Debug + Obj<C> {
     fn call(
         &mut self,
         ctx: &mut C,

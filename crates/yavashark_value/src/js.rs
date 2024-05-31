@@ -264,8 +264,7 @@ impl<C: Ctx> Value<C> {
             o.exchange(other);
         }
     }
-    
-    
+
     /// # Safety
     /// The caller must guarantee that this value references the other
     pub unsafe fn gc_attach_value(&self, other: &Self) {
@@ -273,8 +272,7 @@ impl<C: Ctx> Value<C> {
             o.gc_attach_value(other);
         }
     }
-    
-    
+
     /// # Safety
     /// The caller must guarantee that the value no longer references the other
     pub unsafe fn gc_detach_value(&self, other: &Self) {
@@ -282,8 +280,7 @@ impl<C: Ctx> Value<C> {
             o.gc_detach_value(other);
         }
     }
-    
-    
+
     /// # Safety
     /// The caller must guarantee that this value references the other
     pub unsafe fn gc_attach(&self, other: &Object<C>) {
@@ -291,7 +288,7 @@ impl<C: Ctx> Value<C> {
             o.gc_attach(other);
         }
     }
-    
+
     /// # Safety
     /// The caller must guarantee that the value no longer references the other
     pub unsafe fn gc_detach(&self, other: &Object<C>) {
