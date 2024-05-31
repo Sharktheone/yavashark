@@ -57,7 +57,33 @@ pub struct GcGuard<'a, T: Collectable> {
 impl<T: Collectable> Drop for GcGuard<'_, T> {
     fn drop(&mut self) {
         //we now need to update the references => look what is still there and what is not
-        //TODO
+        unsafe {
+            let Some(refs) = (*self.gc.as_ptr()).refs.read_refs() else {
+                warn!("Failed to read references from a GcBox - this might be bad");
+                return;
+            };
+            
+            let refs = refs.iter().map(|x| Gc { inner: *x }).collect::<Vec<_>>();
+            
+            let (removed, added) = self.value_ptr.get_refs_diff(&refs);
+            
+            if removed.is_empty() && added.is_empty() {
+                return;
+            }
+            
+            let Some(mut write) = (*self.gc.as_ptr()).refs.write_refs() else {
+                warn!("Failed to write references to a GcBox - this might be bad");
+                return;
+            };
+            
+            for r in &removed {
+                write.retain(|x| *x != r.inner);
+            }
+            
+            for a in &added {
+                write.push(a.inner);
+            }
+        }
     }
     
 }
