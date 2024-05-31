@@ -46,7 +46,7 @@ impl PrettyPrint for Object<Context> {
         } else {
             String::new()
         };
-        
+
         str.push_str("{\n");
 
         if let Ok(properties) = self.properties() {

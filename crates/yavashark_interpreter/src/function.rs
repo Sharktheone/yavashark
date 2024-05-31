@@ -51,7 +51,7 @@ impl NativeFunction {
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
         };
-        
+
         ObjectHandle::new(this)
     }
 

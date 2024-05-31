@@ -6,8 +6,8 @@ use yavashark_value::{Func, Obj};
 use crate::context::Context;
 use crate::object::Object;
 use crate::scope::Scope;
-use crate::{ObjectHandle, Value};
 use crate::{ControlFlow, RuntimeResult, ValueResult};
+use crate::{ObjectHandle, Value};
 
 #[object(function)]
 #[derive(Debug)]
@@ -51,7 +51,7 @@ impl Context {
             this,
             scope: scope.clone(),
         };
-        
+
         Ok(ObjectHandle::new(arrow).into())
     }
 }

@@ -31,7 +31,7 @@ impl Array {
     #[prop(Symbol::ITERATOR)]
     fn iterator(&self, args: Vec<Value>, ctx: &mut Context, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
-            return Err(Error::ty_error(format!("Expected object, found {this:?}")))
+            return Err(Error::ty_error(format!("Expected object, found {this:?}")));
         };
 
         let iter = ArrayIterator {

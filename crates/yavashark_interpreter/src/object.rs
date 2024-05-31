@@ -6,8 +6,8 @@ pub use prototype::*;
 use yavashark_value::{Error, Obj};
 
 use crate::context::Context;
-use crate::{Value, ValueResult};
 use crate::Variable;
+use crate::{Value, ValueResult};
 
 pub mod array;
 mod prototype;
@@ -123,8 +123,7 @@ impl Object {
 
         None
     }
-    
-    
+
     pub fn delete_array(&mut self, index: usize) -> Option<Value> {
         let (i, found) = self.array_position(index);
 

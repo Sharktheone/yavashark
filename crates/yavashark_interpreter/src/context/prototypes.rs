@@ -4,10 +4,10 @@ use anyhow::anyhow;
 
 use yavashark_value::Obj;
 
-use crate::{FunctionPrototype, ObjectHandle};
 use crate::context::Context;
-use crate::object::{array::Array, Object, Prototype};
 use crate::object::array::ArrayIterator;
+use crate::object::{array::Array, Object, Prototype};
+use crate::{FunctionPrototype, ObjectHandle};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {
@@ -21,10 +21,10 @@ impl Prototypes {
     pub(crate) fn new() -> Result<Self, anyhow::Error> {
         let obj_prototype = ObjectHandle::new(Prototype::new());
 
-        let func_prototype = ObjectHandle::new(FunctionPrototype::new(&obj_prototype.clone().into()));
+        let func_prototype =
+            ObjectHandle::new(FunctionPrototype::new(&obj_prototype.clone().into()));
 
         {
-
             // Safety:
             // Since we're not changing any properties of the object, we can safely get a mutable reference
             let mut obj: RefMut<Box<dyn Obj<Context>>> = unsafe {
@@ -46,13 +46,13 @@ impl Prototypes {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         Ok(Self {
             obj: obj_prototype,

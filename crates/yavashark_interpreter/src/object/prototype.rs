@@ -81,7 +81,7 @@ impl Prototype {
         self.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
         self.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
     }
-    
+
     const DIRECT_PROPERTIES: &'static [&'static str] = &[
         "__define_getter__",
         "__define_setter__",
@@ -95,7 +95,6 @@ impl Prototype {
         "toString",
         "valueOf",
     ];
-
 }
 
 impl Obj<Context> for Prototype {

@@ -61,7 +61,6 @@ impl Context {
     pub fn assign_member(&mut self, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
-
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
@@ -83,7 +82,6 @@ impl Context {
     ) -> Res {
         let obj = self.run_expr(&m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
-
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
@@ -94,13 +92,13 @@ impl Context {
             let value = inner
                 .get_property_mut(&name)
                 .ok_or(Error::ty("Property not found"))?;
-            
+
             unsafe {
                 obj.gc_attach_value(value);
             }
-            
+
             f(value);
-        } else { 
+        } else {
             return Err(Error::ty("Invalid left-hand side in assignment"));
         }
 
