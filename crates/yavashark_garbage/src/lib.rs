@@ -18,17 +18,14 @@ pub(crate) mod spin_lock;
 #[cfg(feature = "trace")]
 mod trace;
 
-pub unsafe trait Collectable {
-    
+pub trait Collectable: Sized {
+
     /// # Safety
-    /// This function must not access any fields of the object (gc internal fields => okay, everything else => no), since it might be called from a different thread
-    unsafe fn get_refs<T: Collectable>(&self) -> Vec<Gc<T>>;
+    fn get_refs(&self) -> Vec<Gc<Self>>;
 
 
     /// (removed, added)
-    /// # Safety
-    /// This function must not access any fields of the object (gc internal fields => okay, everything else => no), since it might be called from a different thread
-    unsafe fn get_refs_diff<T: Collectable>(&self, old: &[Gc<T>]) -> (Vec<Gc<T>>, Vec<Gc<T>>);
+    fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>);
 }
 
 pub struct Gc<T: Collectable> {
