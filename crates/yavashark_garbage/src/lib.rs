@@ -60,15 +60,17 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
     fn drop(&mut self) {
         //we now need to update the references => look what is still there and what is not
         unsafe {
-            let Some(refs) = (*self.gc.as_ptr()).refs.read_refs() else {
+            let Some(refs_lock) = (*self.gc.as_ptr()).refs.read_refs() else {
                 warn!("Failed to read references from a GcBox - this might be bad");
                 return;
             };
 
-            let refs = refs.iter().map(|x| Gc { inner: *x }).collect::<Vec<_>>();
-
+            let refs = refs_lock.iter().map(|x| Gc { inner: *x }).collect::<Vec<_>>();
+            drop(refs_lock);
+            
             let (removed, added) = self.value_ptr.get_refs_diff(&refs);
 
+            
             if removed.is_empty() && added.is_empty() {
                 return;
             }
@@ -81,12 +83,19 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
             for r in &removed {
                 write.retain(|x| *x != r.inner);
 
-                (*r.inner.as_ptr()).refs.remove_ref_by(self.gc);
             }
 
             for a in &added {
                 write.push(a.inner);
-
+            }
+            
+            drop(write);
+            
+            for r in &removed {
+                (*r.inner.as_ptr()).refs.remove_ref_by(self.gc);
+            }
+            
+            for a in &added {
                 (*a.inner.as_ptr()).refs.add_ref_by(self.gc);
             }
         }
@@ -194,23 +203,8 @@ impl<T: Collectable> Refs<T> {
             strong: AtomicUsize::new(1),
         }
     }
-
-    fn add_ref(&mut self, other: NonNull<GcBox<T>>) {
-        if let Some(mut lock) = self.ref_to.spin_write() {
-            lock.push(other);
-        } else {
-            warn!("Failed to add reference to a GcBox - this might be bad");
-        }
-    }
-
-    fn remove_ref(&mut self, other: NonNull<GcBox<T>>) {
-        if let Some(mut lock) = self.ref_to.spin_write() {
-            lock.retain(|x| *x != other);
-        } else {
-            warn!("Failed to remove reference from a GcBox - this might be bad");
-        }
-    }
-
+    
+    
     fn add_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.push(other);
@@ -591,6 +585,8 @@ impl<T: Collectable> Drop for GcBox<T> {
     fn drop(&mut self) {
         if !self.flags.is_externally_dropped() {
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
+            
+            #[cfg(debug_assertions)]
             if let Some(ref_by) = self.refs.read_ref_by() {
                 //TODO: try drop or some thing here
                 #[cfg(debug_assertions)]
@@ -612,7 +608,7 @@ impl<T: Collectable> Drop for GcBox<T> {
 
                 assert!(
                     ref_by.is_empty(),
-                    "Cannot drop a GcBox that is still referenced"
+                    "Cannot drop a GcBox that is still referenced - wrong use of gc or memory leak"
                 );
             } else {
                 warn!("Failed to proof that all references to a GcBox have been dropped - this might be bad");
@@ -651,7 +647,8 @@ impl<T: Collectable> Drop for Gc<T> {
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
                 return;
             }
-
+            
+            
             if (*self.inner.as_ptr()).refs.dec_strong() == 1 {
                 // We are the last one (it returns the previous value, so we need to check if it was 1)
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
@@ -752,6 +749,8 @@ mod tests {
                     }
                 }
 
+                
+                /// (removed, added)
                 fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
                     let this = self.borrow();
 
@@ -759,7 +758,7 @@ mod tests {
                         if old.contains(other) {
                             (Vec::new(), Vec::new())
                         } else {
-                            (vec![other.clone()], Vec::new())
+                            (Vec::new(), vec![other.clone()])
                         }
                     } else {
                         (Vec::new(), Vec::new())
@@ -852,7 +851,7 @@ mod tests {
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
-            let x = root.get().borrow_mut().other.take().unwrap();
+            let _x = root.get().borrow_mut().other.take().unwrap();
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
