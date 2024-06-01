@@ -834,9 +834,18 @@ mod tests {
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
 
-            let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
-
-            x.get().borrow_mut().other = Some(y);
+            let y = Gc::new(RefCell::new(Node::new(6)));
+            // let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
+            
+            x.get().borrow_mut().other = Some(y.clone());
+            
+            
+            
+            y.get().borrow_mut().other = Some(x.clone());
+            
+            
+            let _x = x;
+            let _y = y;
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
