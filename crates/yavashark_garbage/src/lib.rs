@@ -18,8 +18,9 @@ pub(crate) mod spin_lock;
 #[cfg(feature = "trace")]
 mod trace;
 
-pub trait Collectable: Sized {
-    /// # Safety
+/// # Safety
+/// The implementer must guarantee that all references are valid and all references are returned by `get_refs` 
+pub unsafe trait Collectable: Sized {
     fn get_refs(&self) -> Vec<Gc<Self>>;
 
 
@@ -747,7 +748,7 @@ mod tests {
                 }
             }
 
-            impl Collectable for RefCell<Node> {
+            unsafe impl Collectable for RefCell<Node> {
                 fn get_refs(&self) -> Vec<Gc<Self>> {
                     let this = self.borrow();
                     if let Some(other) = &this.other {
@@ -799,7 +800,7 @@ mod tests {
         setup_logger();
 
 
-        impl Collectable for i32 {
+        unsafe impl Collectable for i32 {
             fn get_refs(&self) -> Vec<Gc<i32>> {
                 Vec::new()
             }
