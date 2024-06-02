@@ -66,12 +66,12 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
                 return;
             };
 
-            let refs = refs_lock.iter().map(|x| Gc { inner: *x }).collect::<Vec<_>>();
+            let refs = refs_lock.iter().map(|x| (*x).into()).collect::<Vec<_>>();
             drop(refs_lock);
-            
+
             let (removed, added) = self.value_ptr.get_refs_diff(&refs);
 
-            
+
             if removed.is_empty() && added.is_empty() {
                 return;
             }
@@ -83,19 +83,18 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
 
             for r in &removed {
                 write.retain(|x| *x != r.inner);
-
             }
 
             for a in &added {
                 write.push(a.inner);
             }
-            
+
             drop(write);
-            
+
             for r in &removed {
                 (*r.inner.as_ptr()).refs.remove_ref_by(self.gc);
             }
-            
+
             for a in &added {
                 (*a.inner.as_ptr()).refs.add_ref_by(self.gc);
             }
@@ -131,6 +130,14 @@ impl<T: Collectable> Gc<T> {
     }
 }
 
+
+impl<T: Collectable> From<NonNull<GcBox<T>>> for Gc<T> {
+    fn from(inner: NonNull<GcBox<T>>) -> Self {
+        (unsafe { (*inner.as_ptr()).refs.inc_strong() });
+        Self { inner }
+    }
+}
+
 impl<T: Collectable> Gc<T> {
     pub fn new(value: T) -> Self {
         let ref_to = value.get_refs();
@@ -150,14 +157,13 @@ impl<T: Collectable> Gc<T> {
         let gc_box = Box::new(gc_box);
         let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
 
-        
-        
+
         for r in &ref_to {
             unsafe {
                 (*gc_box.as_ptr()).refs.add_ref_by(r.inner);
             }
         }
-        
+
         unsafe {
             (*gc_box.as_ptr()).refs = Refs::with_refs_to(ref_to.into_iter().map(|x| x.inner).collect());
         }
@@ -594,7 +600,7 @@ impl<T: Collectable> Drop for GcBox<T> {
     fn drop(&mut self) {
         if !self.flags.is_externally_dropped() {
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
-            
+
             #[cfg(debug_assertions)]
             if let Some(ref_by) = self.refs.read_ref_by() {
                 //TODO: try drop or some thing here
@@ -656,8 +662,8 @@ impl<T: Collectable> Drop for Gc<T> {
             if (*self.inner.as_ptr()).flags.is_externally_dropped() {
                 return;
             }
-            
-            
+
+
             if (*self.inner.as_ptr()).refs.dec_strong() == 1 {
                 // We are the last one (it returns the previous value, so we need to check if it was 1)
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
