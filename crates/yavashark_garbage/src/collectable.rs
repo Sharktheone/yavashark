@@ -1,14 +1,14 @@
-use super::{Collectable, Gc};
+use super::{Collectable, Gc, GcTypeLess};
 
 
 macro_rules! collect {
     ($ty:ty) => {
         unsafe impl Collectable for $ty {
-            fn get_refs(&self) -> Vec<Gc<Self>> {
+            fn get_refs(&self) -> Vec<GcTypeLess> {
                 Vec::new()
             }
 
-            fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
+            fn get_refs_diff(&self, old: &[GcTypeLess]) -> (Vec<GcTypeLess>, Vec<GcTypeLess>) {
                 (old.to_vec(), Vec::new())
             }
         }
