@@ -1,12 +1,13 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+use std::alloc::Layout;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::ptr::NonNull;
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU32, Ordering};
 
 use log::warn;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use spin_lock::SpinLock;
 
@@ -192,12 +193,12 @@ impl<T: Collectable> Gc<T> {
 
 
     #[must_use]
-    pub fn strong(&self) -> usize {
+    pub fn strong(&self) -> u32 {
         unsafe { (*self.inner.as_ptr()).refs.strong() }
     }
 
     #[must_use]
-    pub fn weak(&self) -> usize {
+    pub fn weak(&self) -> u32 {
         unsafe { (*self.inner.as_ptr()).refs.weak() }
     }
 }
@@ -207,8 +208,8 @@ type MaybeNull<T> = NonNull<T>;
 struct Refs<T: Collectable> {
     ref_by: RwLock<Vec<NonNull<GcBox<T>>>>,
     ref_to: RwLock<Vec<NonNull<GcBox<T>>>>,
-    weak: AtomicUsize, // Number of weak references by for example the Garbage Collector or WeakRef in JS
-    strong: AtomicUsize, // Number of strong references
+    weak: AtomicU32, // Number of weak references by for example the Garbage Collector or WeakRef in JS
+    strong: AtomicU32, // Number of strong references
 }
 
 impl<T: Collectable> Refs<T> {
@@ -216,8 +217,8 @@ impl<T: Collectable> Refs<T> {
         Self {
             ref_by: RwLock::new(Vec::new()),
             ref_to: RwLock::new(Vec::new()),
-            weak: AtomicUsize::new(0),
-            strong: AtomicUsize::new(1),
+            weak: AtomicU32::new(0),
+            strong: AtomicU32::new(1),
         }
     }
 
@@ -245,19 +246,19 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
-    fn inc_strong(&mut self) -> usize {
+    fn inc_strong(&mut self) -> u32 {
         self.strong.fetch_add(1, Ordering::Relaxed)
     }
 
-    fn dec_strong(&mut self) -> usize {
+    fn dec_strong(&mut self) -> u32 {
         self.strong.fetch_sub(1, Ordering::Relaxed)
     }
 
-    fn weak(&self) -> usize {
+    fn weak(&self) -> u32 {
         self.weak.load(Ordering::Relaxed)
     }
 
-    fn strong(&self) -> usize {
+    fn strong(&self) -> u32 {
         self.strong.load(Ordering::Relaxed)
     }
 
@@ -546,7 +547,7 @@ impl<T: Collectable> GcBox<T> {
     fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
         let this = this_ptr.as_ptr();
         unsafe {
-            if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len()) {
+            if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len() as u32) {
                 if (*this).refs.strong() > ref_by {
                     return RootStatus::HasRoot;
                 }
@@ -695,7 +696,7 @@ impl<T: Collectable> Drop for Gc<T> {
             }
 
             if Some((*self.inner.as_ptr()).refs.strong())
-                == (*self.inner.as_ptr()).refs.read_ref_by().map(|x| x.len())
+                == (*self.inner.as_ptr()).refs.read_ref_by().map(|x| x.len() as u32)
             {
                 //All strong refs are references by other GcBoxes
                 GcBox::shake_tree(self.inner);

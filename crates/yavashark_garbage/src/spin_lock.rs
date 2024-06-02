@@ -1,4 +1,4 @@
-use std::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use log::warn;
 
@@ -22,7 +22,7 @@ impl<'a, T> SpinLock<'a, T> for RwLock<T> {
         let mut retries = 500;
 
         loop {
-            let Ok(write) = self.try_write() else {
+            let Some(write) = self.try_write() else {
                 // Theoretically we should never get here...  and have the loop looping - TODO: use a cfg attr to remove this code on size opt levels
                 std::hint::spin_loop();
                 retries -= 1;
@@ -43,7 +43,7 @@ impl<'a, T> SpinLock<'a, T> for RwLock<T> {
         let mut retries = 500;
 
         loop {
-            let Ok(read) = self.try_read() else {
+            let Some(read) = self.try_read() else {
                 // Theoretically we should never get here...  and have the loop looping - TODO: use a cfg attr to remove this code on size opt levels
                 std::hint::spin_loop();
                 retries -= 1;

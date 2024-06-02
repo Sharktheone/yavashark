@@ -4280,6 +4280,7 @@ dependencies = [
  "layout-rs",
  "lazy_static",
  "log",
+ "parking_lot",
  "rand 0.9.0-alpha.1",
  "winit",
 ]
