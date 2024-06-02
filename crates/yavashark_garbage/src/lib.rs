@@ -783,7 +783,7 @@ mod tests {
                             (old.to_vec(), vec![other.clone()])
                         }
                     } else {
-                        (Vec::new(), Vec::new())
+                        (old.to_vec(), Vec::new())
                     }
                 }
             }
@@ -878,7 +878,7 @@ mod tests {
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
-            let _x = root.get().borrow_mut().other.take().unwrap();
+            let _x = root.get().borrow_mut().other.take();
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
