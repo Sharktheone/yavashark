@@ -771,10 +771,16 @@ mod tests {
                     let this = self.borrow();
 
                     if let Some(other) = &this.other {
-                        if old.contains(other) {
-                            (Vec::new(), Vec::new())
-                        } else {
+                        if old.is_empty() {
                             (Vec::new(), vec![other.clone()])
+                        } else if old.len() == 1 {
+                            if old[0] == *other {
+                                (Vec::new(), Vec::new())
+                            } else {
+                                (old.to_vec(), vec![other.clone()])
+                            }
+                        } else {
+                            (old.to_vec(), vec![other.clone()])
                         }
                     } else {
                         (Vec::new(), Vec::new())
@@ -842,19 +848,15 @@ mod tests {
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
 
-            let y = Gc::new(RefCell::new(Node::new(6)));
-            // let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
-            
+            let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
+
             x.get().borrow_mut().other = Some(y.clone());
-            
-            
-            
-            y.get().borrow_mut().other = Some(x.clone());
-            
-            
+
+
             let _x = x;
             let _y = y;
         }
+
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
