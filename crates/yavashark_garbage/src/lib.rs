@@ -189,6 +189,17 @@ impl<T: Collectable> Gc<T> {
 
         Self { inner: gc_box }
     }
+
+
+    #[must_use]
+    pub fn strong(&self) -> usize {
+        unsafe { (*self.inner.as_ptr()).refs.strong() }
+    }
+
+    #[must_use]
+    pub fn weak(&self) -> usize {
+        unsafe { (*self.inner.as_ptr()).refs.weak() }
+    }
 }
 
 type MaybeNull<T> = NonNull<T>;
