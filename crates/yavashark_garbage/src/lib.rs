@@ -158,14 +158,14 @@ impl<T: Collectable> Gc<T> {
         let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
 
 
-        for r in &ref_to {
-            unsafe {
-                (*gc_box.as_ptr()).refs.add_ref_by(r.inner);
-            }
-        }
-
         unsafe {
-            (*gc_box.as_ptr()).refs = Refs::with_refs_to(ref_to.into_iter().map(|x| x.inner).collect());
+            let ref_to = ref_to.into_iter().map(|x| {
+                (*x.inner.as_ptr()).refs.add_ref_by(gc_box);
+                x.inner
+            }).collect();
+
+
+            (*gc_box.as_ptr()).refs.ref_to = RwLock::new(ref_to);
         }
 
 
@@ -221,16 +221,6 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
-    fn with_refs_to(refs: Vec<NonNull<GcBox<T>>>) -> Self {
-        Self {
-            ref_by: RwLock::new(Vec::new()),
-            ref_to: RwLock::new(refs),
-            weak: AtomicUsize::new(0),
-            strong: AtomicUsize::new(1),
-        }
-    }
-    
-    
     fn add_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.push(other);
