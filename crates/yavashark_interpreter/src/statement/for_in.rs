@@ -13,7 +13,7 @@ impl Context {
         let obj = self.run_expr(&stmt.right, stmt.span, scope)?;
 
         match obj {
-            Value::Object(obj) => self.run_for_in_obj(&**obj.get()?, stmt, scope),
+            Value::Object(obj) => self.run_for_in_obj(&***obj.get()?, stmt, scope),
             _ => Err(Error::ty_error(format!("{obj:?} is not an object")).into()),
         }
     }
