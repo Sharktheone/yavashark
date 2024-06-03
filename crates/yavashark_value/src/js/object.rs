@@ -152,11 +152,44 @@ impl<C: Ctx> DerefMut for BoxedObj<C> {
 
 unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
     fn get_refs(&self) -> Vec<Gc<RefCell<Self>>> {
-        todo!()
+        let properties = self.0.properties();
+        
+        let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
+        
+        self.0.properties().into_iter().for_each(|(n, v)| {
+            if let Value::Object(o) = n {
+                refs.push(o.0);
+            }
+            
+            if let Value::Object(o) = v {
+                refs.push(o.0)
+            }
+        });
+        
+        refs
     }
 
     fn get_refs_diff(&self, old: &[Gc<RefCell<Self>>]) -> (Vec<Gc<RefCell<Self>>>, Vec<Gc<RefCell<Self>>>) {
-        todo!()
+        let properties = self.0.properties();
+
+        let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
+
+        self.0.properties().into_iter().for_each(|(n, v)| {
+            if let Value::Object(o) = n {
+                if !old.contains(&o.0) {
+                    refs.push(o.0);
+                }
+                
+            }
+
+            if let Value::Object(o) = v {
+                if !old.contains(&o.0) {
+                    refs.push(o.0)
+                }
+            }
+        });
+
+        (old.iter().filter(|r| !refs.contains(*r)).cloned().collect(), refs)
     }
 }
 
