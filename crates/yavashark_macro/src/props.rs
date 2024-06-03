@@ -347,16 +347,16 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let any_cast = if prop.is_mut {
             quote! {{
-                let mut x = unsafe { x.get_mut()? }; //TODO: this is highly unsafe if the function edits the object's properties - https://github.com/users/Sharktheone/projects/4/views/1?pane=issue&itemId=65071868
-                let mut deez = (**x).as_any_mut().downcast_mut::<Self>()
+                let mut x = x.get_mut()?; 
+                let mut deez = (***x).as_any_mut().downcast_mut::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
                 deez.#name(args, ctx)
             }}
         } else {
             quote! {{
                 let x = x.get()?;
-                let deez = (**x).as_any().downcast_ref::<Self>()
-                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
+                let deez = (***x).as_any().downcast_ref::<Self>()
+                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this)))?;
 
                 deez.#name(args #ctx #this)
             }}
@@ -366,13 +366,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
                 match this #copy {
                     #value::Object(x) => #any_cast,
-                    _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name))),
+                    _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this))),
                 }
             }, func_proto.copy()).into();
-
-            unsafe {
-                func_proto.gc_attach_value(&function);
-            }
 
             obj.define_variable(
                 #fn_name.into(),
@@ -407,10 +403,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 Ok(Value::Undefined)
 
             }, func_proto.copy()).into();
-
-            unsafe {
-                func_proto.gc_attach_value(&function);
-            }
 
             function.define_property("prototype".into(), obj.clone().into());
 
