@@ -1,7 +1,11 @@
-use std::cell::RefCell;
-use super::{Collectable, Gc};
-use std::sync::{RwLock as StdRwLock, Mutex as StdMutex};
+use std::cell::{BorrowError, BorrowMutError, Ref, RefCell, RefMut};
+use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
+use std::sync::{Mutex as StdMutex, RwLock as StdRwLock};
+
 use parking_lot::{Mutex, RwLock};
+
+use super::{Collectable, Gc, GcBox};
 
 macro_rules! collect {
     ($ty:ty) => {
@@ -72,3 +76,81 @@ cell!(StdRwLock, read);
 cell!(RwLock, try_read);
 cell!(StdMutex, lock);
 cell!(Mutex, try_lock);
+
+
+
+pub struct GcRefCellGuard<'a, T: CellCollectable<RefCell<T>>> {
+    value: Ref<'a, T>,
+    gc: NonNull<GcBox<RefCell<T>>>,
+}
+
+impl<T: CellCollectable<RefCell<T>>> Drop for GcRefCellGuard<'_, T> {
+    fn drop(&mut self) {
+        unsafe {
+            GcBox::update_refs(self.gc);
+        }
+    }
+}
+
+impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
+    type Target = Ref<'a, T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+
+pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>> {
+    value: RefMut<'a, T>,
+    gc: NonNull<GcBox<RefCell<T>>>,
+}
+
+impl<T: CellCollectable<RefCell<T>>> Drop for GcMutRefCellGuard<'_, T> {
+    fn drop(&mut self) {
+        unsafe {
+            GcBox::update_refs(self.gc);
+        }
+    }
+}
+
+
+impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcMutRefCellGuard<'a, T> {
+    type Target = RefMut<'a, T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
+}
+
+impl<'a, T: CellCollectable<RefCell<T>>> DerefMut for GcMutRefCellGuard<'a, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
+    }
+}
+
+
+impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
+    pub fn borrow(&self) -> Result<GcRefCellGuard<T>, BorrowError> {
+        unsafe {
+            let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
+
+            Ok(GcRefCellGuard {
+                value,
+                gc: self.inner,
+            })
+        }
+    }
+    
+    pub fn borrow_mut(&self) -> Result<GcMutRefCellGuard<T>, BorrowMutError> {
+        unsafe {
+            let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow_mut()?;
+
+            Ok(GcMutRefCellGuard {
+                value,
+                gc: self.inner,
+            })
+        }
+    }
+}
+

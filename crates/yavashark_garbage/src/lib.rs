@@ -18,7 +18,7 @@ pub(crate) mod spin_lock;
 
 #[cfg(feature = "trace")]
 mod trace;
-mod collectable;
+pub mod collectable;
 
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs` 
@@ -58,48 +58,12 @@ pub struct GcGuard<'a, T: Collectable> {
 }
 
 
-/// Here the magic of gc references happens noe!
+/// Here the magic of gc references happens!
 impl<T: Collectable> Drop for GcGuard<'_, T> {
     fn drop(&mut self) {
         //we now need to update the references => look what is still there and what is not
         unsafe {
-            let Some(refs_lock) = (*self.gc.as_ptr()).refs.read_refs() else {
-                warn!("Failed to read references from a GcBox - this might be bad");
-                return;
-            };
-
-            let refs = refs_lock.iter().map(|x| (*x).into()).collect::<Vec<_>>();
-            drop(refs_lock);
-
-            let (removed, added) = self.value_ptr.get_refs_diff(&refs);
-
-
-            if removed.is_empty() && added.is_empty() {
-                return;
-            }
-
-            let Some(mut write) = (*self.gc.as_ptr()).refs.write_refs() else {
-                warn!("Failed to write references to a GcBox - this might be bad");
-                return;
-            };
-
-            for r in &removed {
-                write.retain(|x| *x != r.inner);
-            }
-
-            for a in &added {
-                write.push(a.inner);
-            }
-
-            drop(write);
-
-            for r in &removed {
-                (*r.inner.as_ptr()).refs.remove_ref_by(self.gc);
-            }
-
-            for a in &added {
-                (*a.inner.as_ptr()).refs.add_ref_by(self.gc);
-            }
+            GcBox::update_refs(self.gc);
         }
     }
 }
@@ -117,7 +81,7 @@ impl<T: Collectable> Gc<T> {
     #[allow(
         clippy::missing_const_for_fn
     )] //Bug in clippy... we can't dereference a mut ptr in a const fn
-    pub fn get(&self) -> GcGuard<T> {
+    pub fn get<'a>(&'a self) -> GcGuard<'a, T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         GcGuard {
             value_ptr,
@@ -597,6 +561,49 @@ impl<T: Collectable> GcBox<T> {
             status
         }
     }
+
+
+    unsafe fn update_refs(this_ptr: NonNull<Self>) {
+        let Some(refs_lock) = (*this_ptr.as_ptr()).refs.read_refs() else {
+            warn!("Failed to read references from a GcBox - this might be bad");
+            return;
+        };
+
+        let refs = refs_lock.iter().map(|x| (*x).into()).collect::<Vec<_>>();
+        drop(refs_lock);
+
+        let value = (*this_ptr.as_ptr()).value.as_ref();
+        
+        let (removed, added) = value.get_refs_diff(&refs);
+
+
+        if removed.is_empty() && added.is_empty() {
+            return;
+        }
+
+        let Some(mut write) = (*this_ptr.as_ptr()).refs.write_refs() else {
+            warn!("Failed to write references to a GcBox - this might be bad");
+            return;
+        };
+
+        for r in &removed {
+            write.retain(|x| *x != r.inner);
+        }
+
+        for a in &added {
+            write.push(a.inner);
+        }
+
+        drop(write);
+
+        for r in &removed {
+            (*r.inner.as_ptr()).refs.remove_ref_by(this_ptr);
+        }
+
+        for a in &added {
+            (*a.inner.as_ptr()).refs.add_ref_by(this_ptr);
+        }
+    }
 }
 
 impl<T: Collectable> Drop for GcBox<T> {
@@ -814,16 +821,6 @@ mod tests {
     fn it_works() {
         setup_logger();
 
-
-        unsafe impl Collectable for i32 {
-            fn get_refs(&self) -> Vec<Gc<i32>> {
-                Vec::new()
-            }
-
-            fn get_refs_diff(&self, _old: &[Gc<i32>]) -> (Vec<Gc<i32>>, Vec<Gc<i32>>) {
-                (Vec::new(), Vec::new())
-            }
-        }
 
         let x = Gc::new(5);
         println!("{:?}", *x.get());
