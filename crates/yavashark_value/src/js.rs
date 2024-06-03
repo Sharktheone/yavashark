@@ -259,42 +259,12 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn exchange(&self, other: Box<dyn Obj<C>>) {
+    pub fn exchange(&self, other: Box<dyn Obj<C>>) -> Result<(), Error<C>> {
         if let Self::Object(o) = self {
-            o.exchange(other);
+            o.exchange(other)?;
         }
-    }
-
-    /// # Safety
-    /// The caller must guarantee that this value references the other
-    pub unsafe fn gc_attach_value(&self, other: &Self) {
-        if let Self::Object(o) = self {
-            o.gc_attach_value(other);
-        }
-    }
-
-    /// # Safety
-    /// The caller must guarantee that the value no longer references the other
-    pub unsafe fn gc_detach_value(&self, other: &Self) {
-        if let Self::Object(o) = self {
-            o.gc_detach_value(other);
-        }
-    }
-
-    /// # Safety
-    /// The caller must guarantee that this value references the other
-    pub unsafe fn gc_attach(&self, other: &Object<C>) {
-        if let Self::Object(o) = self {
-            o.gc_attach(other);
-        }
-    }
-
-    /// # Safety
-    /// The caller must guarantee that the value no longer references the other
-    pub unsafe fn gc_detach(&self, other: &Object<C>) {
-        if let Self::Object(o) = self {
-            o.gc_detach(other);
-        }
+        
+        Ok(())
     }
 }
 

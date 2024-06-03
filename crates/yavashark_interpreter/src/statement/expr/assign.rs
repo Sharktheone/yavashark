@@ -1,10 +1,10 @@
 use swc_ecma_ast::{AssignExpr, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget};
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::Error;
-use crate::Value;
 use crate::{Res, RuntimeResult};
+use crate::context::Context;
+use crate::Error;
+use crate::scope::Scope;
+use crate::Value;
 
 impl Context {
     pub fn run_assign(&mut self, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
@@ -88,14 +88,10 @@ impl Context {
                 MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
             };
 
-            let mut inner = unsafe { obj.get_mut()? };
+            let mut inner = obj.get_mut()?;
             let value = inner
                 .get_property_mut(&name)
                 .ok_or(Error::ty("Property not found"))?;
-
-            unsafe {
-                obj.gc_attach_value(value);
-            }
 
             f(value);
         } else {
