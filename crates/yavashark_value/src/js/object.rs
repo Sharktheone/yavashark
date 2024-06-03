@@ -5,6 +5,7 @@ use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
+use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 
 use yavashark_garbage::Gc;
 
@@ -148,6 +149,17 @@ impl<C: Ctx> DerefMut for BoxedObj<C> {
     }
 }
 
+
+unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
+    fn get_refs(&self) -> Vec<Gc<RefCell<Self>>> {
+        todo!()
+    }
+
+    fn get_refs_diff(&self, old: &[Gc<RefCell<Self>>]) -> (Vec<Gc<RefCell<Self>>>, Vec<Gc<RefCell<Self>>>) {
+        todo!()
+    }
+}
+
 impl<C: Ctx> BoxedObj<C> {
     fn new(obj: Box<dyn Obj<C>>) -> Self {
         #[cfg(feature = "dbg_object_gc")]
@@ -185,14 +197,13 @@ impl<C: Ctx> Eq for Object<C> {}
 
 impl<C: Ctx> PartialEq for Object<C> {
     fn eq(&self, other: &Self) -> bool {
-        self.0.as_ptr() == other.0.as_ptr()
+        self.0 == other.0
     }
 }
 
 impl<C: Ctx> Object<C> {
-    pub fn get(&self) -> Result<Ref<BoxedObj<C>>, Error<C>> {
-        self.0
-            .try_borrow()
+    pub fn get(&self) -> Result<GcRefCellGuard<BoxedObj<C>>, Error<C>> {
+        self.0.borrow()
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
@@ -201,25 +212,15 @@ impl<C: Ctx> Object<C> {
         self.get().ok()?.resolve_property(name)
     }
 
-    /// # Safety
-    /// The caller must update gc references if properties are changed
-    pub unsafe fn get_mut(&self) -> Result<RefMut<BoxedObj<C>>, Error<C>> {
-        self.0
-            .try_borrow_mut()
+    pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
+        self.0.borrow_mut()
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         // # Safety:
         // We attach the values below
-        let mut inner = unsafe { self.get_mut()? };
-
-        unsafe {
-            self.gc_attach_value(&value);
-        }
-        unsafe {
-            self.gc_attach_value(&name);
-        }
+        let mut inner = self.get_mut()?;
 
         inner.define_property(name, value);
 
@@ -227,14 +228,7 @@ impl<C: Ctx> Object<C> {
     }
 
     pub fn define_variable(&self, name: Value<C>, value: Variable<C>) -> Result<(), Error<C>> {
-        let mut inner = unsafe { self.get_mut()? };
-
-        unsafe {
-            self.gc_attach_value(&name);
-        }
-        unsafe {
-            self.gc_attach_value(&value.value);
-        }
+        let mut inner = self.get_mut()?;
 
         inner.define_variable(name, value);
 
@@ -255,25 +249,9 @@ impl<C: Ctx> Object<C> {
         name: &Value<C>,
         value: Value<C>,
     ) -> Result<(), Error<C>> {
-        let mut inner = unsafe { self.get_mut()? };
+        let mut inner = self.get_mut()?;
 
-        unsafe {
-            self.gc_attach_value(&value);
-        }
-
-        let old = inner.update_or_define_property(name.copy(), value);
-
-        if let Some(old) = old {
-            unsafe {
-                self.gc_detach_value(&old);
-            }
-            return Ok(());
-        }
-
-        // we only attach the name if it was not already defined
-        unsafe {
-            self.gc_attach_value(name);
-        }
+        inner.update_or_define_property(name.copy(), value);
 
         Ok(())
     }
@@ -301,8 +279,10 @@ impl<C: Ctx> Object<C> {
         Ok(self.get()?.values())
     }
 
-    pub fn exchange(&self, other: Box<dyn Obj<C>>) {
-        *self.0.borrow_mut() = BoxedObj::new(other);
+    pub fn exchange(&self, other: Box<dyn Obj<C>>) -> Result<(), Error<C>> {
+        **self.0.borrow_mut().map_err(|_| Error::new("Failed to borrow object"))? = BoxedObj::new(other);
+        
+        Ok(())
     }
 
     pub fn call(
@@ -313,7 +293,7 @@ impl<C: Ctx> Object<C> {
     ) -> Result<Value<C>, Error<C>> {
         // # Safety:
         // Since we are not changing the object, we can safely get a mutable reference
-        let mut inner = unsafe { self.get_mut()? };
+        let mut inner = self.get_mut()?;
 
         inner.call(ctx, args, this)
     }
@@ -323,47 +303,8 @@ impl<C: Ctx> Object<C> {
         self.get().map_or(false, |o| o.is_function())
     }
 
-    /// # Safety
-    /// The caller must guarantee that the value is attached to the object
-    pub unsafe fn gc_attach_value(&self, value: &Value<C>) {
-        if let Value::Object(obj) = value {
-            self.0.add_ref(&obj.0);
-        }
-    }
-
-    /// # Safety
-    /// The caller must guarantee that the value is not used anymore on the object
-    pub unsafe fn gc_detach_value(&self, value: &Value<C>) {
-        if let Value::Object(obj) = value {
-            self.0.remove_ref(&obj.0);
-        }
-    }
-
-    /// # Safety
-    /// The caller must guarantee that the value is attached to the object
-    pub unsafe fn gc_attach(&self, other: &Self) {
-        self.0.add_ref(&other.0);
-    }
-
-    /// # Safety
-    /// The caller must guarantee that the value is not used anymore on the object
-    pub unsafe fn gc_detach(&self, other: &Self) {
-        self.0.remove_ref(&other.0);
-    }
-
-    pub fn shake(&self) {
-        self.0.shake();
-    }
-
     pub fn clear_values(&self) -> Result<(), Error<C>> {
-        let mut inner = unsafe { self.get_mut()? };
-
-        for (name, value) in inner.properties() {
-            unsafe {
-                self.gc_detach_value(&value);
-                self.gc_detach_value(&name);
-            }
-        }
+        let mut inner = self.get_mut()?;
 
         inner.clear_values();
         Ok(())

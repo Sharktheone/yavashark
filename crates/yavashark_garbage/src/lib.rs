@@ -89,6 +89,13 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
+    #[must_use]
+    pub fn as_ptr(&self) -> *mut T {
+        unsafe {
+            (*self.inner.as_ptr()).value.as_ptr()
+        }
+    }
+
 
     #[cfg(feature = "trace")]
     fn trace(&self) -> TraceID {
@@ -573,7 +580,7 @@ impl<T: Collectable> GcBox<T> {
         drop(refs_lock);
 
         let value = (*this_ptr.as_ptr()).value.as_ref();
-        
+
         let (removed, added) = value.get_refs_diff(&refs);
 
 
