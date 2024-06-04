@@ -754,7 +754,7 @@ mod tests {
 
             struct Node {
                 data: i32,
-                other: Option<Gc<RefCell<Node>>>,
+                other: Vec<Gc<RefCell<Node>>>,
             }
 
             impl Node {
@@ -763,7 +763,11 @@ mod tests {
                         NODES_LEFT += 1;
                     }
 
-                    Self { data, other: None }
+                    Self { data, other: Vec::new() }
+                }
+
+                fn add(data: i32) -> Gc<RefCell<Node>> {
+                    Gc::new(RefCell::new(Self::new(data)))
                 }
 
                 fn with_other(data: i32, other: Gc<RefCell<Node>>) -> Self {
@@ -773,8 +777,25 @@ mod tests {
 
                     Self {
                         data,
-                        other: Some(other),
+                        other: vec![other],
                     }
+                }
+
+                fn add_with_other(data: i32, other: &Gc<RefCell<Node>>) -> Gc<RefCell<Node>> {
+                    Gc::new(RefCell::new(Self::with_other(data, other.clone())))
+                }
+
+                fn add_vec(data: i32, others: Vec<&Gc<RefCell<Node>>>) -> Gc<RefCell<Node>> {
+                    unsafe {
+                        NODES_LEFT += 1;
+                    }
+
+                    let other = others.iter().map(|e| (*e).clone()).collect();
+
+                    Gc::new(RefCell::new(Self {
+                        data,
+                        other,
+                    }))
                 }
             }
 
@@ -790,11 +811,7 @@ mod tests {
             unsafe impl Collectable for RefCell<Node> {
                 fn get_refs(&self) -> Vec<Gc<Self>> {
                     let this = self.borrow();
-                    if let Some(other) = &this.other {
-                        vec![other.clone()]
-                    } else {
-                        Vec::new()
-                    }
+                    this.other.clone()
                 }
 
                 
@@ -802,21 +819,10 @@ mod tests {
                 fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
                     let this = self.borrow();
 
-                    if let Some(other) = &this.other {
-                        if old.is_empty() {
-                            (Vec::new(), vec![other.clone()])
-                        } else if old.len() == 1 {
-                            if old[0] == *other {
-                                (Vec::new(), Vec::new())
-                            } else {
-                                (old.to_vec(), vec![other.clone()])
-                            }
-                        } else {
-                            (old.to_vec(), vec![other.clone()])
-                        }
-                    } else {
-                        (old.to_vec(), Vec::new())
-                    }
+                    let add = this.other.iter().filter(|x| !old.contains(*x)).cloned().collect();
+                    let removed = old.iter().filter(|x| !this.other.contains(*x)).cloned().collect();
+
+                    (removed, add)
                 }
             }
 
@@ -866,14 +872,12 @@ mod tests {
     #[test]
     fn circular() {
         setup!();
-
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
 
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-            x.get().borrow_mut().other = Some(y.clone());
-
+            x.get().borrow_mut().other.push(y.clone());
 
             let _x = x;
             let _y = y;
@@ -892,15 +896,15 @@ mod tests {
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
 
-            x.get().borrow_mut().other = Some(y.clone());
+            x.get().borrow_mut().other.push(y.clone());
 
 
-            root.get().borrow_mut().other = Some(x);
+            root.get().borrow_mut().other.push(x);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
-            let _x = root.get().borrow_mut().other.take();
+            root.get().borrow_mut().other.clear();
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
@@ -922,7 +926,7 @@ mod tests {
 
                 let root = root.get();
                 let mut root = root.borrow_mut();
-                root.other = Some(x);
+                root.other.push(x);
 
                 info!("left: {}", unsafe { NODES_LEFT });
             }
@@ -940,4 +944,57 @@ mod tests {
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
+
+    #[test]
+    fn complex() {
+        setup!();
+
+        {
+            let proto = Node::add(0);
+
+            let func_proto = Node::add_with_other(1, &proto);
+            
+            
+            let m1 = Node::add_with_other(8, &func_proto);
+            let m2 = Node::add_with_other(8, &func_proto);
+            let m3 = Node::add_with_other(8, &func_proto);
+            let m4 = Node::add_with_other(8, &func_proto);
+
+
+            
+            let pr = proto.get();
+            let mut pr = pr.borrow_mut();
+            pr.other.push(m1);
+            pr.other.push(m2);
+            pr.other.push(m3);
+            pr.other.push(m4);
+
+            {
+                let obj_1 = Node::add_with_other(10, &proto);
+                let obj_2 = Node::add_with_other(10, &proto);
+                let obj_3 = Node::add_with_other(10, &proto);
+                let obj_4 = Node::add_with_other(10, &proto);
+                let obj_5 = Node::add_with_other(10, &proto);
+                let obj_6 = Node::add_with_other(10, &proto);
+                let obj_7 = Node::add_with_other(10, &proto);
+                let obj_8 = Node::add_with_other(10, &proto);
+                let obj_9 = Node::add_with_other(10, &proto);
+                let obj_10 = Node::add_with_other(10, &proto);
+                let obj_11 = Node::add_with_other(10, &proto);
+                let obj_12 = Node::add_with_other(10, &proto);
+
+                let obj_ref_4_5 = Node::add_vec(18, vec![&obj_4, &obj_5, &func_proto]);
+
+                
+                
+                let _a = Node::add_vec(99, vec![&obj_1, &obj_2, &obj_3, &obj_4, &obj_5, &obj_6, &obj_7, &obj_8, &obj_9, &obj_10, &obj_11, &obj_12, &obj_ref_4_5]);
+            }
+        }
+        
+        
+        assert_eq!(unsafe { NODES_LEFT }, 0);
+    }
+
+
+
 }
