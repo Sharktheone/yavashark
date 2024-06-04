@@ -338,6 +338,10 @@ impl Obj<Context> for Prototype {
     fn clear_values(&mut self) {
         self.object.clear_values();
     }
+
+    fn prototype(&self) -> yavashark_value::Value<Context> {
+        Value::Undefined
+    }
 }
 
 impl Proto for Prototype {

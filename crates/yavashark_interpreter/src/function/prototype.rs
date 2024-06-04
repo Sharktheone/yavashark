@@ -281,4 +281,9 @@ impl Obj<Context> for FunctionPrototype {
         self.length = Value::Number(0.0).into();
         self.name = Value::String("Function".to_string()).into();
     }
+
+
+    fn prototype(&self) -> Value {
+        self.object.prototype()
+    }
 }

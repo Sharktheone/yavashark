@@ -104,6 +104,10 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn is_function(&self) -> bool {
         false
     }
+    
+    fn prototype(&self) -> Value<C> {
+        self.resolve_property(&"__proto__".into()).unwrap_or(Value::Undefined)
+    }
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -162,9 +166,14 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
             }
             
             if let Value::Object(o) = v {
-                refs.push(o.0)
+                refs.push(o.0);
             }
         });
+        
+        
+        if let Value::Object(o) = self.0.prototype() {
+            refs.push(o.0);
+        }
         
         refs
     }
@@ -184,10 +193,14 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
 
             if let Value::Object(o) = v {
                 if !old.contains(&o.0) {
-                    refs.push(o.0)
+                    refs.push(o.0);
                 }
             }
         });
+
+        if let Value::Object(o) = self.0.prototype() {
+            refs.push(o.0);
+        }
 
         (old.iter().filter(|r| !refs.contains(*r)).cloned().collect(), refs)
     }

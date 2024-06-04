@@ -295,6 +295,10 @@ impl Obj<Context> for Object {
         self.properties.clear();
         self.array.clear();
     }
+
+    fn prototype(&self) -> Value {
+        self.prototype.value.copy()
+    }
 }
 
 #[cfg(test)]
