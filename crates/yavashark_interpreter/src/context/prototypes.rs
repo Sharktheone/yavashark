@@ -25,13 +25,10 @@ impl Prototypes {
             ObjectHandle::new(FunctionPrototype::new(&obj_prototype.clone().into()));
 
         {
-            // Safety:
-            // Since we're not changing any properties of the object, we can safely get a mutable reference
-            let mut obj = unsafe {
+            let mut obj =
                 obj_prototype
                     .get_mut()
-                    .map_err(|e| anyhow!(format!("{e:?}")))?
-            };
+                    .map_err(|e| anyhow!(format!("{e:?}")))?;
 
             let obj = obj.as_any_mut();
 
