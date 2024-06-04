@@ -81,7 +81,7 @@ impl<T: Collectable> Gc<T> {
     #[allow(
         clippy::missing_const_for_fn
     )] //Bug in clippy... we can't dereference a mut ptr in a const fn
-    pub fn get<'a>(&'a self) -> GcGuard<'a, T> {
+    pub fn get(&self) -> GcGuard<T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         GcGuard {
             value_ptr,
@@ -99,7 +99,7 @@ impl<T: Collectable> Gc<T> {
 
     #[cfg(feature = "trace")]
     fn trace(&self) -> TraceID {
-        unsafe { (*self.inner.as_ptr()).trace }
+        unsafe { (*self.inner.as_ptr()).refs.trace }
     }
 }
 
@@ -123,8 +123,6 @@ impl<T: Collectable> Gc<T> {
             value,
             refs: Refs::new(),
             flags: Flags::new(),
-            #[cfg(feature = "trace")]
-            trace: TRACER.add(),
         };
 
         let gc_box = Box::new(gc_box);
@@ -139,6 +137,14 @@ impl<T: Collectable> Gc<T> {
 
 
             (*gc_box.as_ptr()).refs.ref_to = RwLock::new(ref_to);
+
+
+            #[cfg(feature = "trace")]
+            for r in &*(*gc_box.as_ptr()).refs.ref_to.read_recursive() {
+                let id = (*gc_box.as_ptr()).refs.trace;
+
+                TRACER.add_ref(id, (*r.as_ptr()).refs.trace);
+            }
         }
 
 
@@ -153,8 +159,6 @@ impl<T: Collectable> Gc<T> {
             value,
             refs: Refs::new(),
             flags: Flags::root(),
-            #[cfg(feature = "trace")]
-            trace: TRACER.add(),
         };
 
         let gc_box = Box::new(gc_box);
@@ -182,6 +186,8 @@ struct Refs<T: Collectable> {
     ref_to: RwLock<Vec<NonNull<GcBox<T>>>>,
     weak: AtomicU32, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicU32, // Number of strong references
+    #[cfg(feature = "trace")]
+    trace: TraceID,
 }
 
 impl<T: Collectable> Refs<T> {
@@ -191,6 +197,8 @@ impl<T: Collectable> Refs<T> {
             ref_to: RwLock::new(Vec::new()),
             weak: AtomicU32::new(0),
             strong: AtomicU32::new(1),
+            #[cfg(feature = "trace")]
+            trace: TRACER.add(),
         }
     }
 
@@ -252,8 +260,6 @@ struct GcBox<T: Collectable> {
     value: MaybeNull<T>, // This value might be null
     refs: Refs<T>,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
-    #[cfg(feature = "trace")]
-    trace: TraceID,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -595,10 +601,20 @@ impl<T: Collectable> GcBox<T> {
 
         for r in &removed {
             write.retain(|x| *x != r.inner);
+            #[cfg(feature = "trace")]
+            {
+                let this_id = (*this_ptr.as_ptr()).refs.trace;
+                TRACER.remove_ref(this_id, (*r.inner.as_ptr()).refs.trace);
+            }
         }
 
         for a in &added {
             write.push(a.inner);
+            #[cfg(feature = "trace")]
+            {
+                let this_id = (*this_ptr.as_ptr()).refs.trace;
+                TRACER.add_ref(this_id, (*a.inner.as_ptr()).refs.trace);
+            }
         }
 
         drop(write);
