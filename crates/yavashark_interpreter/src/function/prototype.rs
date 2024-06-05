@@ -2,9 +2,9 @@
 
 use yavashark_value::Obj;
 
+use crate::{NativeFunction, Value, ValueResult, Variable};
 use crate::context::Context;
 use crate::object::Object;
-use crate::{NativeFunction, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -18,8 +18,9 @@ pub struct FunctionPrototype {
 }
 
 impl FunctionPrototype {
+    #[must_use]
     pub fn new(obj: &Value) -> Self {
-        let mut this = Self {
+        Self {
             object: Object::raw_with_proto(obj.copy()),
             apply: Value::Undefined.into(),
             bind: Value::Undefined.into(),
@@ -27,13 +28,15 @@ impl FunctionPrototype {
             constructor: Value::Undefined.into(),
             length: Value::Number(0.0).into(),
             name: Value::String("Function".to_string()).into(),
-        };
-        this.apply = NativeFunction::with_proto("apply", apply, obj.copy()).into();
-        this.bind = NativeFunction::with_proto("bind", bind, obj.copy()).into();
-        this.call = NativeFunction::with_proto("call", call, obj.copy()).into();
-        this.constructor = NativeFunction::with_proto("Function", constructor, obj.copy()).into();
+        }
+    }
 
-        this
+
+    pub fn initialize(&mut self, func: Value) {
+        self.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
+        self.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
+        self.call = NativeFunction::with_proto("call", call, func.copy()).into();
+        self.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
     }
 }
 
