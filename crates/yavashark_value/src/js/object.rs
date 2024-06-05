@@ -1,5 +1,5 @@
 use std::any::Any;
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::RefCell;
 use std::fmt::{Debug, Display};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
@@ -197,9 +197,11 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
                 }
             }
         });
-
+        
         if let Value::Object(o) = self.0.prototype() {
-            refs.push(o.0);
+            if !old.contains(&o.0) {
+                refs.push(o.0);
+            }
         }
 
         (old.iter().filter(|r| !refs.contains(*r)).cloned().collect(), refs)
@@ -216,6 +218,9 @@ impl<C: Ctx> BoxedObj<C> {
         Self(obj)
     }
 }
+
+
+
 
 #[derive(Clone)]
 pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>, ());
