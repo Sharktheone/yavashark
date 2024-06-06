@@ -686,6 +686,13 @@ impl<T: Collectable> Drop for GcBox<T> {
             }
             //we don't need to set the value dropped flag, since we are about to drop the complete GcBox
         }
+
+
+        #[cfg(feature = "trace")]
+        {
+            TRACER.remove(self.refs.trace);
+        }
+
     }
 }
 

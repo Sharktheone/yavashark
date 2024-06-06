@@ -18,7 +18,6 @@ pub struct FunctionPrototype {
 }
 
 impl FunctionPrototype {
-    
     #[must_use]
     pub fn new(obj: &Value) -> Self {
         Self {
@@ -33,11 +32,11 @@ impl FunctionPrototype {
     }
 
 
-    pub fn initialize(&mut self, this: Value) {
-        self.apply = NativeFunction::with_proto("apply", apply, this.copy()).into();
-        self.bind = NativeFunction::with_proto("bind", bind, this.copy()).into();
-        self.call = NativeFunction::with_proto("call", call, this.copy()).into();
-        self.constructor = NativeFunction::with_proto("Function", constructor, this).into();
+    pub fn initialize(&mut self, func: Value) {
+        self.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
+        self.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
+        self.call = NativeFunction::with_proto("call", call, func.copy()).into();
+        self.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
     }
 }
 

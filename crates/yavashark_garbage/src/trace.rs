@@ -15,7 +15,7 @@ use layout::core::style::StyleAttr;
 use layout::std_shapes::shapes::{Arrow, Element, ShapeKind};
 use layout::topo::layout::VisualGraph;
 use lazy_static::lazy_static;
-use log::error;
+use log::{error, warn};
 use winit::platform::wayland::EventLoopBuilderExtWayland;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -100,9 +100,17 @@ impl Tracer {
     pub fn add_ref(&self, id: TraceID, ref_id: TraceID) {
         let mut trace = self.0.lock();
         let item = trace.items.get_mut(&id).unwrap();
+        if item.refs.contains(&ref_id) {
+            warn!("Ref already exists");
+            return;
+        }
         item.refs.push(ref_id);
 
         let ref_item = trace.items.get_mut(&ref_id).unwrap();
+        if ref_item.ref_by.contains(&id) {
+            warn!("Ref already exists");
+            return;
+        }
         ref_item.ref_by.push(id);
 
         trace.delete_cache();
