@@ -179,12 +179,12 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
     }
 
     fn get_refs_diff(&self, old: &[GcRef<RefCell<Self>>]) -> (Vec<GcRef<RefCell<Self>>>, Vec<GcRef<RefCell<Self>>>) {
-        let mut properties = self.0.properties();
+        let properties = self.0.properties();
 
         let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
 
 
-        properties.iter().for_each(|(n, v)| {
+        for (n, v) in properties {
             if let Value::Object(o) = n {
                 refs.push(o.0.get_ref());
             }
@@ -192,7 +192,7 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
             if let Value::Object(o) = v {
                 refs.push(o.0.get_ref());
             }
-        });
+        }
 
         if let Value::Object(o) = self.0.prototype() {
             refs.push(o.0.get_ref());
@@ -202,7 +202,7 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
         let remove = old.iter().filter(|x| !refs.contains(x)).cloned().collect();
         let add = refs.into_iter().filter(|x| !old.contains(x)).collect();
 
-        (add, remove)
+        (remove, add)
     }
 }
 

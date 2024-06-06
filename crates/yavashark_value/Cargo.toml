@@ -16,7 +16,8 @@ default = []
 js = []
 ts = []
 anyhow = ["dep:anyhow"]
-dbg_object_gc = ["yavashark_garbage/trace"]
+dbg_object_gc = []
+obj_trace = ["yavashark_garbage/trace"]
 
 
 [lints]

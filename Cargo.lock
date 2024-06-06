@@ -4291,6 +4291,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "colored",
+ "env_logger",
+ "log",
  "swc_common",
  "swc_ecma_ast",
  "swc_ecma_parser",

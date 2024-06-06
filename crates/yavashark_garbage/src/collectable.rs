@@ -65,7 +65,7 @@ macro_rules! cell {
             }
 
             fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
-                self.$lock().map(|x| 
+                self.$lock().map(|x|
                 x.get_refs_diff(old)
                 ).unwrap_or_else(|_| {
                     warn!("get_refs_diff called on a poisoned lock");
@@ -81,7 +81,7 @@ macro_rules! cell {
             }
 
             fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
-                self.$lock().map(|x| 
+                self.$lock().map(|x|
                 x.get_refs_diff(old)
                 ).unwrap_or_else(|| {
                     warn!("get_refs_diff called on a poisoned lock");
