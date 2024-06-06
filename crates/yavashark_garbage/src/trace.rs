@@ -5,9 +5,9 @@ use std::sync::Arc;
 use std::thread;
 
 use eframe::{Frame, NativeOptions};
+use egui::{Area, CentralPanel, Context, Id};
 use egui::emath::TSTransform;
 use egui::mutex::Mutex;
-use egui::{Area, CentralPanel, Context, Id};
 use layout::backends::svg::SVGWriter;
 use layout::core::base::Orientation;
 use layout::core::geometry::Point;
@@ -170,6 +170,10 @@ impl App {
             return svg_content.as_bytes().to_vec();
         }
 
+        if trace.items.is_empty() {
+            return Vec::new();
+        }
+
         let mut graph = VisualGraph::new(Orientation::TopToBottom);
 
         let mut nodes = HashMap::new();
@@ -186,6 +190,7 @@ impl App {
             nodes.insert(*id, (handle, item));
         }
 
+
         for (handle, item) in nodes.values() {
             for ref_id in &item.refs {
                 if let Some((ref_handle, _)) = nodes.get(ref_id) {
@@ -195,6 +200,7 @@ impl App {
         }
 
         let mut svg = SVGWriter::new();
+
         graph.do_it(false, false, false, &mut svg);
 
         let content = svg.finalize();
