@@ -183,18 +183,4 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 }
 
 
-impl<T: CellCollectable<RefCell<T>>> GcRefCellGuard<'_, T> {
 
-    /// Just for testing.. do not commit
-    pub fn strong(&self) -> u32 {
-        unsafe {
-            (*self.gc.as_ptr()).refs.strong()
-        }
-    }
-
-    pub fn ref_bys(&self) -> Vec<NonNull<GcBox<RefCell<T>>>>{
-        unsafe {
-            (*self.gc.as_ptr()).refs.read_ref_by().unwrap().clone()
-        }
-    }
-}
