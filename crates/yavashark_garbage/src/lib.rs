@@ -460,13 +460,18 @@ impl<T: Collectable> GcBox<T> {
             for u in unmark {
                 (*u.as_ptr()).unmark();
             }
+            
+            
+            for d in &drop {
+                Self::nuke_refs(*d);
+            }
 
             for d in &drop {
                 Self::nuke_value(*d);
             }
 
             for d in &drop {
-                Self::nuke(*d, &drop);
+                Self::nuke(*d);
             }
         }
     }
@@ -546,23 +551,25 @@ impl<T: Collectable> GcBox<T> {
     }
 
     /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
-    unsafe fn nuke(this_ptr: NonNull<Self>, dangerous: &[NonNull<Self>]) {
+    unsafe fn nuke(this_ptr: NonNull<Self>) {
+        unsafe {
+            let this = this_ptr.as_ptr();
+            // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
+            let _ = Box::from_raw(this);
+        }
+    }
+    
+    
+    unsafe fn nuke_refs(this_ptr: NonNull<Self>){
         unsafe {
             let this = this_ptr.as_ptr();
             if let Some(refs) = (*this).refs.read_refs() {
                 for r in &*refs {
-                    if dangerous.contains(r) {
-                        continue;
-                    }
-
                     (*r.as_ptr()).refs.remove_ref_by(this_ptr);
                 }
             } else {
                 warn!("Failed to remove all references from a GcBox - leaking memory");
             }
-
-            // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
-            let _ = Box::from_raw(this);
         }
     }
 
