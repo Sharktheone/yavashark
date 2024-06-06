@@ -5,13 +5,13 @@ use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
-use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 
 use yavashark_garbage::{Gc, GcRef};
+use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 
+use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
-use crate::Error;
 
 use super::Value;
 
@@ -69,8 +69,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn values(&self) -> Vec<Value<C>>;
 
     fn into_object(self) -> Object<C>
-    where
-        Self: Sized + 'static,
+        where
+            Self: Sized + 'static,
     {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
 
@@ -78,8 +78,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 
     fn into_value(self) -> Value<C>
-    where
-        Self: Sized + 'static,
+        where
+            Self: Sized + 'static,
     {
         Value::Object(self.into_object())
     }
@@ -104,9 +104,9 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn is_function(&self) -> bool {
         false
     }
-    
-    fn prototype(&self) -> Value<C> {
-        self.resolve_property(&"__proto__".into()).unwrap_or(Value::Undefined)
+
+    fn prototype(&self) -> &Value<C> {
+        self.get_property(&"__proto__".into()).unwrap_or(&Value::Undefined)
     }
 }
 
@@ -157,54 +157,52 @@ impl<C: Ctx> DerefMut for BoxedObj<C> {
 unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
     fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
         let properties = self.0.properties();
-        
+
         let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
-        
+
         self.0.properties().into_iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
                 refs.push(o.0.get_ref());
             }
-            
+
             if let Value::Object(o) = v {
                 refs.push(o.0.get_ref());
             }
         });
-        
-        
+
+
         if let Value::Object(o) = self.0.prototype() {
             refs.push(o.0.get_ref());
         }
-        
+
         refs
     }
 
     fn get_refs_diff(&self, old: &[GcRef<RefCell<Self>>]) -> (Vec<GcRef<RefCell<Self>>>, Vec<GcRef<RefCell<Self>>>) {
-        let properties = self.0.properties();
+        let mut properties = self.0.properties();
 
         let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
 
-        self.0.properties().into_iter().for_each(|(n, v)| {
+
+        properties.iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
-                if !old.contains(&o.0.get_ref()) {
-                    refs.push(o.0.get_ref());
-                }
-                
+                refs.push(o.0.get_ref());
             }
 
             if let Value::Object(o) = v {
-                if !old.contains(&o.0.get_ref()) {
-                    refs.push(o.0.get_ref());
-                }
-            }
-        });
-        
-        if let Value::Object(o) = self.0.prototype() {
-            if !old.contains(&o.0.get_ref()) {
                 refs.push(o.0.get_ref());
             }
-        }
+        });
 
-        (old.iter().filter(|r| !refs.contains(*r)).cloned().collect(), refs)
+        if let Value::Object(o) = self.0.prototype() {
+            refs.push(o.0.get_ref());
+        }
+       
+
+        let remove = old.iter().filter(|x| !refs.contains(x)).cloned().collect();
+        let add = refs.into_iter().filter(|x| !old.contains(x)).collect();
+
+        (add, remove)
     }
 }
 
@@ -220,10 +218,8 @@ impl<C: Ctx> BoxedObj<C> {
 }
 
 
-
-
 #[derive(Clone)]
-pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>, ());
+pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>);
 
 #[cfg(feature = "dbg_object_gc")]
 impl<C: Ctx> Drop for BoxedObj<C> {
@@ -332,7 +328,7 @@ impl<C: Ctx> Object<C> {
 
     pub fn exchange(&self, other: Box<dyn Obj<C>>) -> Result<(), Error<C>> {
         **self.0.borrow_mut().map_err(|_| Error::new("Failed to borrow object"))? = BoxedObj::new(other);
-        
+
         Ok(())
     }
 
@@ -374,17 +370,17 @@ impl<C: Ctx> Display for Object<C> {
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new(RefCell::new(BoxedObj::new(obj))), ())
+        Self(Gc::new(RefCell::new(BoxedObj::new(obj))))
     }
 }
 
 impl<C: Ctx> Object<C> {
     #[must_use]
     pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new(RefCell::new(BoxedObj::new(obj))), ())
+        Self(Gc::new(RefCell::new(BoxedObj::new(obj))))
     }
 
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
-        Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))), ())
+        Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))))
     }
 }

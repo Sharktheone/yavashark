@@ -339,8 +339,8 @@ impl Obj<Context> for Prototype {
         self.object.clear_values();
     }
 
-    fn prototype(&self) -> yavashark_value::Value<Context> {
-        Value::Undefined
+    fn prototype(&self) -> &yavashark_value::Value<Context> {
+        &Value::Undefined
     }
 }
 

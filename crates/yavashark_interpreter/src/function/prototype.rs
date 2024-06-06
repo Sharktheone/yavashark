@@ -19,9 +19,9 @@ pub struct FunctionPrototype {
 
 impl FunctionPrototype {
     #[must_use]
-    pub fn new(obj: &Value) -> Self {
+    pub fn new(obj: Value) -> Self {
         Self {
-            object: Object::raw_with_proto(obj.copy()),
+            object: Object::raw_with_proto(obj),
             apply: Value::Undefined.into(),
             bind: Value::Undefined.into(),
             call: Value::Undefined.into(),
@@ -286,7 +286,7 @@ impl Obj<Context> for FunctionPrototype {
     }
 
 
-    fn prototype(&self) -> Value {
+    fn prototype(&self) -> &Value {
         self.object.prototype()
     }
 }

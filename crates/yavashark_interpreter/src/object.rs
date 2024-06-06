@@ -296,8 +296,8 @@ impl Obj<Context> for Object {
         self.array.clear();
     }
 
-    fn prototype(&self) -> Value {
-        self.prototype.value.copy()
+    fn prototype(&self) -> &Value {
+        &self.prototype.value
     }
 }
 

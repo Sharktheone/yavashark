@@ -239,7 +239,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.clear_values();
             }
             
-            fn prototype(&self) -> #value {
+            fn prototype(&self) -> &#value {
                 self.object.prototype()
             }
 

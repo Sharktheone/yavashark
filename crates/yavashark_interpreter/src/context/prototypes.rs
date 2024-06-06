@@ -1,6 +1,7 @@
 use std::cell::RefMut;
 
 use anyhow::anyhow;
+use yavashark_garbage::collectable::CellCollectable;
 
 use yavashark_value::Obj;
 
@@ -22,7 +23,7 @@ impl Prototypes {
         let obj_prototype = ObjectHandle::new(Prototype::new());
 
         let func_prototype =
-            ObjectHandle::new(FunctionPrototype::new(&obj_prototype.clone().into()));
+            ObjectHandle::new(FunctionPrototype::new(obj_prototype.clone().into()));
 
         {
             let mut obj =
