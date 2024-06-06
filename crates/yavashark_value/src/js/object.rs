@@ -7,7 +7,7 @@ use std::ops::{Deref, DerefMut};
 use std::sync::atomic::AtomicIsize;
 use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 
-use yavashark_garbage::Gc;
+use yavashark_garbage::{Gc, GcRef};
 
 use crate::js::context::Ctx;
 use crate::variable::Variable;
@@ -155,52 +155,52 @@ impl<C: Ctx> DerefMut for BoxedObj<C> {
 
 
 unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
-    fn get_refs(&self) -> Vec<Gc<RefCell<Self>>> {
+    fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
         let properties = self.0.properties();
         
         let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
         
         self.0.properties().into_iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
-                refs.push(o.0);
+                refs.push(o.0.get_ref());
             }
             
             if let Value::Object(o) = v {
-                refs.push(o.0);
+                refs.push(o.0.get_ref());
             }
         });
         
         
         if let Value::Object(o) = self.0.prototype() {
-            refs.push(o.0);
+            refs.push(o.0.get_ref());
         }
         
         refs
     }
 
-    fn get_refs_diff(&self, old: &[Gc<RefCell<Self>>]) -> (Vec<Gc<RefCell<Self>>>, Vec<Gc<RefCell<Self>>>) {
+    fn get_refs_diff(&self, old: &[GcRef<RefCell<Self>>]) -> (Vec<GcRef<RefCell<Self>>>, Vec<GcRef<RefCell<Self>>>) {
         let properties = self.0.properties();
 
         let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
 
         self.0.properties().into_iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
-                if !old.contains(&o.0) {
-                    refs.push(o.0);
+                if !old.contains(&o.0.get_ref()) {
+                    refs.push(o.0.get_ref());
                 }
                 
             }
 
             if let Value::Object(o) = v {
-                if !old.contains(&o.0) {
-                    refs.push(o.0);
+                if !old.contains(&o.0.get_ref()) {
+                    refs.push(o.0.get_ref());
                 }
             }
         });
         
         if let Value::Object(o) = self.0.prototype() {
-            if !old.contains(&o.0) {
-                refs.push(o.0);
+            if !old.contains(&o.0.get_ref()) {
+                refs.push(o.0.get_ref());
             }
         }
 

@@ -1,5 +1,4 @@
 use std::cell::{BorrowError, BorrowMutError, Ref, RefCell, RefMut};
-use std::mem::MaybeUninit;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::sync::{Mutex as StdMutex, RwLock as StdRwLock};
@@ -7,16 +6,16 @@ use std::sync::{Mutex as StdMutex, RwLock as StdRwLock};
 use log::warn;
 use parking_lot::{Mutex, RwLock};
 
-use super::{Collectable, Gc, GcBox};
+use super::{Collectable, Gc, GcBox, GcRef};
 
 macro_rules! collect {
     ($ty:ty) => {
         unsafe impl Collectable for $ty {
-            fn get_refs(&self) -> Vec<Gc<Self>> {
+            fn get_refs(&self) -> Vec<GcRef<Self>> {
                 Vec::new()
             }
 
-            fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
+            fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
                 (old.to_vec(), Vec::new())
             }
         }
@@ -49,11 +48,11 @@ collect!(String);
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait CellCollectable<T: Collectable> {
-    fn get_refs(&self) -> Vec<Gc<T>>;
+    fn get_refs(&self) -> Vec<GcRef<T>>;
 
 
     /// (removed, added)
-    fn get_refs_diff(&self, old: &[Gc<T>]) -> (Vec<Gc<T>>, Vec<Gc<T>>);
+    fn get_refs_diff(&self, old: &[GcRef<T>]) -> (Vec<GcRef<T>>, Vec<GcRef<T>>);
 }
 
 
@@ -61,11 +60,11 @@ pub unsafe trait CellCollectable<T: Collectable> {
 macro_rules! cell {
     ($ty:ident,$lock:ident) => {
         unsafe impl<T: CellCollectable<Self>> Collectable for $ty<T> {
-            fn get_refs(&self) -> Vec<Gc<Self>> {
+            fn get_refs(&self) -> Vec<GcRef<Self>> {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
             }
 
-            fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
+            fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
                 self.$lock().map(|x| 
                 x.get_refs_diff(old)
                 ).unwrap_or_else(|_| {
@@ -77,11 +76,11 @@ macro_rules! cell {
     };
     ($ty:ident,$lock:ident, o) => {
         unsafe impl<T: CellCollectable<Self>> Collectable for $ty<T> {
-            fn get_refs(&self) -> Vec<Gc<Self>> {
+            fn get_refs(&self) -> Vec<GcRef<Self>> {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
             }
 
-            fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
+            fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
                 self.$lock().map(|x| 
                 x.get_refs_diff(old)
                 ).unwrap_or_else(|| {
@@ -180,5 +179,22 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
+
 }
 
+
+impl<T: CellCollectable<RefCell<T>>> GcRefCellGuard<'_, T> {
+
+    /// Just for testing.. do not commit
+    pub fn strong(&self) -> u32 {
+        unsafe {
+            (*self.gc.as_ptr()).refs.strong()
+        }
+    }
+
+    pub fn ref_bys(&self) -> Vec<NonNull<GcBox<RefCell<T>>>>{
+        unsafe {
+            (*self.gc.as_ptr()).refs.read_ref_by().unwrap().clone()
+        }
+    }
+}

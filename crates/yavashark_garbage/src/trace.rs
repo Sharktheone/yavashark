@@ -22,13 +22,13 @@ use winit::platform::wayland::EventLoopBuilderExtWayland;
 pub struct TraceID(u64);
 
 pub struct TraceItem {
-    id: TraceID,
+    // id: TraceID,
     ref_by: Vec<TraceID>,
     refs: Vec<TraceID>,
 }
 
-const ZOOM_SPEED: f32 = 1.0;
-const SCROLL_SPEED: f32 = 1.0;
+// const ZOOM_SPEED: f32 = 1.0;
+// const SCROLL_SPEED: f32 = 1.0;
 
 pub struct Trace {
     items: HashMap<TraceID, TraceItem>,
@@ -86,7 +86,7 @@ impl Tracer {
         trace.items.insert(
             id,
             TraceItem {
-                id,
+                // id,
                 ref_by: Vec::new(),
                 refs: Vec::new(),
             },
@@ -152,7 +152,7 @@ lazy_static! {
 struct App {
     tracer: Arc<Mutex<Trace>>,
     transform: TSTransform,
-    drag_value: f32,
+    // drag_value: f32,
 }
 
 impl App {
@@ -160,7 +160,7 @@ impl App {
         Self {
             tracer,
             transform: TSTransform::default(),
-            drag_value: 0.0,
+            // drag_value: 0.0,
         }
     }
 

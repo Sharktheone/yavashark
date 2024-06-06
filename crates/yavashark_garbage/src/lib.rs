@@ -1,6 +1,5 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
-use std::alloc::Layout;
 use std::fmt::Debug;
 use std::ops::Deref;
 use std::ptr::NonNull;
@@ -23,11 +22,11 @@ pub mod collectable;
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs` 
 pub unsafe trait Collectable: Sized {
-    fn get_refs(&self) -> Vec<Gc<Self>>;
+    fn get_refs(&self) -> Vec<GcRef<Self>>;
 
 
     /// (removed, added)
-    fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>);
+    fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>);
 }
 
 pub struct Gc<T: Collectable> {
@@ -51,6 +50,44 @@ impl<T: Collectable> Clone for Gc<T> {
     }
 }
 
+
+#[derive(Eq)]
+pub struct GcRef<T: Collectable> {
+    inner: NonNull<GcBox<T>>,
+}
+
+impl<T: Collectable> PartialEq for GcRef<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner.as_ptr() == other.inner.as_ptr()
+    }
+}
+
+
+impl<T: Collectable> PartialEq<Gc<T>> for GcRef<T> {
+    fn eq(&self, other: &Gc<T>) -> bool {
+        self.inner.as_ptr() == other.inner.as_ptr()
+    }
+}
+
+impl<T: Collectable> PartialEq<GcRef<T>> for Gc<T> {
+    fn eq(&self, other: &GcRef<T>) -> bool {
+        self.inner.as_ptr() == other.inner.as_ptr()
+    }
+}
+
+impl<T: Collectable> Clone for GcRef<T> {
+    fn clone(&self) -> Self {
+        Self { inner: self.inner }
+    }
+}
+
+
+impl<T: Collectable> From<NonNull<GcBox<T>>> for GcRef<T> {
+    fn from(inner: NonNull<GcBox<T>>) -> Self {
+        Self { inner }
+    }
+
+}
 
 pub struct GcGuard<'a, T: Collectable> {
     value_ptr: &'a T,
@@ -96,11 +133,18 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
-
-    #[cfg(feature = "trace")]
-    fn trace(&self) -> TraceID {
-        unsafe { (*self.inner.as_ptr()).refs.trace }
+    ///Just a reference without incrementing the reference count.
+    #[must_use]
+    pub fn get_ref(&self) -> GcRef<T> {
+        GcRef {
+            inner: self.inner,
+        }
     }
+
+    // #[cfg(feature = "trace")]
+    // fn trace(&self) -> TraceID {
+    //     unsafe { (*self.inner.as_ptr()).refs.trace }
+    // }
 }
 
 
@@ -256,7 +300,7 @@ impl<T: Collectable> Refs<T> {
 }
 
 //On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
-struct GcBox<T: Collectable> {
+pub struct GcBox<T: Collectable> {
     value: MaybeNull<T>, // This value might be null
     refs: Refs<T>,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
@@ -692,7 +736,6 @@ impl<T: Collectable> Drop for GcBox<T> {
         {
             TRACER.remove(self.refs.trace);
         }
-
     }
 }
 
@@ -816,18 +859,18 @@ mod tests {
             }
 
             unsafe impl Collectable for RefCell<Node> {
-                fn get_refs(&self) -> Vec<Gc<Self>> {
+                fn get_refs(&self) -> Vec<GcRef<Self>> {
                     let this = self.borrow();
-                    this.other.clone()
+                    this.other.iter().map(|x| x.get_ref()).collect()
                 }
 
                 
                 /// (removed, added)
-                fn get_refs_diff(&self, old: &[Gc<Self>]) -> (Vec<Gc<Self>>, Vec<Gc<Self>>) {
+                fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
                     let this = self.borrow();
 
-                    let add = this.other.iter().filter(|x| !old.contains(*x)).cloned().collect();
-                    let removed = old.iter().filter(|x| !this.other.contains(*x)).cloned().collect();
+                    let add = this.other.iter().map(|x| x.get_ref()).filter(|x| !old.contains(&x)).collect();
+                    let removed = old.iter().filter(|x| !this.other.iter().any(|y| y == *x)).cloned().collect();
 
                     (removed, add)
                 }
@@ -883,7 +926,8 @@ mod tests {
             let x = Gc::new(RefCell::new(Node::new(5)));
 
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
-
+            
+            
             x.get().borrow_mut().other.push(y.clone());
 
             let _x = x;
@@ -960,15 +1004,14 @@ mod tests {
             let proto = Node::add(0);
 
             let func_proto = Node::add_with_other(1, &proto);
-            
-            
+
+
             let m1 = Node::add_with_other(8, &func_proto);
             let m2 = Node::add_with_other(8, &func_proto);
             let m3 = Node::add_with_other(8, &func_proto);
             let m4 = Node::add_with_other(8, &func_proto);
 
 
-            
             let pr = proto.get();
             let mut pr = pr.borrow_mut();
             pr.other.push(m1);
@@ -992,16 +1035,12 @@ mod tests {
 
                 let obj_ref_4_5 = Node::add_vec(18, vec![&obj_4, &obj_5, &func_proto]);
 
-                
-                
+
                 let _a = Node::add_vec(99, vec![&obj_1, &obj_2, &obj_3, &obj_4, &obj_5, &obj_6, &obj_7, &obj_8, &obj_9, &obj_10, &obj_11, &obj_12, &obj_ref_4_5]);
             }
         }
-        
-        
+
+
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
-
-
-
 }
