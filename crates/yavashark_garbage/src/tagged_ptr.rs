@@ -34,7 +34,7 @@ impl<T> TaggedPtr<T> {
     /// # Panics
     /// - Panics if the pointer is not aligned enough
     /// - Panics if the pointer is null
-    pub(crate) fn new(ptr: NonNull<T>, tag: bool) -> Self {
+    pub fn new(ptr: NonNull<T>, tag: bool) -> Self {
         assert!(Self::IS_ALIGNED_ENOUGH);
         let ptr = ptr.as_ptr() as usize;
 
@@ -59,6 +59,17 @@ impl<T> TaggedPtr<T> {
     pub(crate) fn ptr(&self) -> NonNull<T> {
         let ptr = self.ptr.as_ptr() as usize & !Self::MASK;
         unsafe { NonNull::new_unchecked(ptr as *mut _) }
+    }
+    
+    pub fn as_ptr(&self) -> *mut T {
+        self.ptr().as_ptr()
+    }
+}
+
+
+impl<T> From<NonNull<T>> for TaggedPtr<T> {
+    fn from(value: NonNull<T>) -> Self {
+        Self::new(value, false)
     }
 }
 
