@@ -14,7 +14,7 @@ impl Context {
                     "{ident} is not defined"
                 )))
             },
-            |value| Ok(value.copy()),
+            Ok,
         )
     }
 }
