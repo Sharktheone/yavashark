@@ -18,6 +18,7 @@ pub(crate) mod spin_lock;
 #[cfg(feature = "trace")]
 mod trace;
 pub mod collectable;
+pub(crate) mod tagged_ptr;
 
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs` 
