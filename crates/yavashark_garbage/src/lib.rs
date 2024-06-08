@@ -1,6 +1,9 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
+use core::mem;
+use std::any::{Any, type_name, TypeId};
 use std::fmt::Debug;
+use std::marker::PhantomData;
 use std::ops::Deref;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -106,6 +109,25 @@ impl<T: Collectable> Clone for GcRef<T> {
 
 impl<T: Collectable> Copy for GcRef<T> {}
 
+
+//https://github.com/rust-lang/rust/issues/41875#issuecomment-317292888
+pub fn non_static_type_id<T: ?Sized>() -> TypeId {
+    trait NonStaticAny {
+        fn get_type_id(&self) -> TypeId where Self: 'static;
+    }
+
+    impl<T: ?Sized> NonStaticAny for PhantomData<T> {
+        fn get_type_id(&self) -> TypeId where Self: 'static {
+            TypeId::of::<T>()
+        }
+    }
+
+    let phantom_data = PhantomData::<T>;
+    NonStaticAny::get_type_id(unsafe {
+        mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(&phantom_data)
+    })
+}
+
 impl<T: Collectable> GcRef<T> {
     fn add_ref_by(&self, r: impl Into<Self>) {
         let r = r.into();
@@ -129,7 +151,23 @@ impl<T: Collectable> GcRef<T> {
 
 
     fn cast<U: Collectable>(self) -> GcRef<U> {
-        if self.ptr.tag() {
+        let name_u = type_name::<U>();
+        let name_t = type_name::<T>();
+
+        dbg!(name_u, name_t);
+
+
+        let id_u = non_static_type_id::<U>();
+        let id_t = non_static_type_id::<T>();
+
+        dbg!(id_u, id_t);
+
+
+        if non_static_type_id::<U>() == non_static_type_id::<T>() {
+            GcRef {
+                ptr: self.ptr.ptr().cast().into()
+            }
+        } else if self.ptr.tag() {
             GcRef {
                 ptr: self.ptr.cast()
             }
@@ -146,9 +184,9 @@ impl<T: Collectable> GcRef<T> {
             }
         }
     }
-    
+
     fn box_ptr(&self) -> NonNull<GcBox<()>> {
-        if self.ptr.tag()  {
+        if self.ptr.tag() {
             let this: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
 
             unsafe {
@@ -687,6 +725,10 @@ impl<T: Collectable> GcBox<T> {
 
         unsafe {
             let value = (*this_ptr.as_ptr()).value;
+
+            println!("Nuking: {}", type_name::<T>());
+
+
             let _ = Box::from_raw(value.as_ptr());
             (*this_ptr.as_ptr()).flags.set_value_dropped();
         }
@@ -716,55 +758,59 @@ impl<T: Collectable> GcBox<T> {
     }
 
     fn you_have_root(this_ptr: GcRef<T>, unmark: &mut Vec<GcRef<T>>) -> RootStatus {
-        let this = this_ptr.box_ptr().as_ptr();
-        unsafe {
-            if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len() as u32) {
-                if (*this).refs.strong() > ref_by {
+        if this_ptr.ptr.tag() {
+            todo!()
+        } else {
+            let this = this_ptr.ptr.as_ptr();
+            unsafe {
+                if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len() as u32) {
+                    if (*this).refs.strong() > ref_by {
+                        return RootStatus::HasRoot;
+                    }
+                } else {
+                    warn!("Failed to read references from a GcBox - leaking memory");
+                    return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
+                }
+
+                let flags = &(*this).flags;
+                if flags.is_root() {
                     return RootStatus::HasRoot;
                 }
-            } else {
-                warn!("Failed to read references from a GcBox - leaking memory");
-                return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
-            }
 
-            let flags = &(*this).flags;
-            if flags.is_root() {
-                return RootStatus::HasRoot;
-            }
+                if flags.is_has_no_root() {
+                    return RootStatus::HasNoRoot;
+                }
 
-            if flags.is_has_no_root() {
-                return RootStatus::HasNoRoot;
-            }
-
-            if flags.is_has_root() {
-                return RootStatus::HasRoot;
-            }
-
-            if flags.is_root_pending() {
-                return RootStatus::RootPending;
-            }
-
-            let Some(refs) = (*this).refs.read_ref_by() else {
-                return RootStatus::None;
-            };
-
-            unmark.push(this_ptr);
-            (*this).flags.set_has_no_root();
-            let mut status = RootStatus::HasNoRoot;
-
-            for r in &*refs {
-                let root = Self::you_have_root(r.cast(), unmark);
-                if root == RootStatus::HasRoot {
-                    (*this).flags.set_has_root();
+                if flags.is_has_root() {
                     return RootStatus::HasRoot;
                 }
-                if root == RootStatus::RootPending {
-                    (*this).flags.set_root_pending();
-                    status = RootStatus::RootPending;
-                }
-            }
 
-            status
+                if flags.is_root_pending() {
+                    return RootStatus::RootPending;
+                }
+
+                let Some(refs) = (*this).refs.read_ref_by() else {
+                    return RootStatus::None;
+                };
+
+                unmark.push(this_ptr);
+                (*this).flags.set_has_no_root();
+                let mut status = RootStatus::HasNoRoot;
+
+                for r in &*refs {
+                    let root = Self::you_have_root(*r, unmark);
+                    if root == RootStatus::HasRoot {
+                        (*this).flags.set_has_root();
+                        return RootStatus::HasRoot;
+                    }
+                    if root == RootStatus::RootPending {
+                        (*this).flags.set_root_pending();
+                        status = RootStatus::RootPending;
+                    }
+                }
+
+                status
+            }
         }
     }
 
@@ -781,7 +827,8 @@ impl<T: Collectable> GcBox<T> {
         };
 
 
-        let old_refs = &*refs_lock;
+        let old_refs = refs_lock.clone();
+        drop(refs_lock);
 
         let removed = old_refs.iter().filter(|r| !all_refs.contains(r)).collect::<Vec<_>>();
         let added = all_refs.into_iter().filter(|r| !old_refs.contains(r)).collect::<Vec<_>>();
@@ -821,7 +868,11 @@ impl<T: Collectable> GcBox<T> {
         }
 
         for a in &added {
-            (*a.box_ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr).cast());
+            if a.ptr.tag() {
+                (*a.box_ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr).cast());
+            } else {
+                (*a.ptr.ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr));
+            }
         }
     }
 }

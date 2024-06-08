@@ -69,7 +69,7 @@ impl<T> TaggedPtr<T> {
     
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
-        unsafe { TaggedPtr { ptr: self.ptr.cast(), _marker: std::marker::PhantomData } }
+        TaggedPtr { ptr: self.ptr.cast(), _marker: std::marker::PhantomData }
     }
 }
 
