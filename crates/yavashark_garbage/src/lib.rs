@@ -10,6 +10,7 @@ use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use spin_lock::SpinLock;
 
+use crate::tagged_ptr::TaggedPtr;
 #[cfg(feature = "trace")]
 use crate::trace::{TraceID, TRACER};
 
@@ -25,9 +26,14 @@ pub(crate) mod tagged_ptr;
 pub unsafe trait Collectable: Sized {
     fn get_refs(&self) -> Vec<GcRef<Self>>;
 
+    /// Execute the destructor and free the value
+    /// # Safety
+    /// this actually needs to be non-null
+    unsafe fn deallocate(this: NonNull<[(); 0]>) {
+        let this: NonNull<Self> = this.cast();
 
-    /// (removed, added)
-    fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>);
+        let _ = Box::from_raw(this.as_ptr());
+    }
 }
 
 pub struct Gc<T: Collectable> {
@@ -52,42 +58,140 @@ impl<T: Collectable> Clone for Gc<T> {
 }
 
 
-#[derive(Eq)]
-pub struct GcRef<T: Collectable> {
-    inner: NonNull<GcBox<T>>,
-}
-
-impl<T: Collectable> PartialEq for GcRef<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.inner.as_ptr() == other.inner.as_ptr()
+impl<T: Collectable + Debug> Debug for Gc<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Gc")
+            .field("data", unsafe { (*self.inner.as_ptr()).value.as_ref() })
+            .field("strong", &unsafe { (*self.inner.as_ptr()).refs.strong() })
+            .field("weak", &unsafe { (*self.inner.as_ptr()).refs.weak() })
+            .finish()
     }
 }
 
 
+///Function to completely deallocate the value, including freeing the memory!
+type DeallocFn = unsafe fn(NonNull<[(); 0]>);
+
+
+pub struct UntypedGcRef {
+    gc_box: NonNull<GcBox<()>>,
+    dealloc_value: DeallocFn,
+}
+
+impl UntypedGcRef {
+    fn new<T: Collectable>(ptr: NonNull<GcBox<T>>) -> Self {
+        Self {
+            gc_box: ptr.cast(),
+            dealloc_value: T::deallocate,
+        }
+    }
+}
+
+
+pub struct GcRef<T: Collectable> {
+    /// # Safety
+    /// this pointer might not be a pointer to a GcBox, but also ca be a pointer to a UntypedGcRef
+    ptr: TaggedPtr<GcBox<T>>,
+}
+
+
+impl<T: Collectable> Clone for GcRef<T> {
+    fn clone(&self) -> Self {
+        Self {
+            ptr: self.ptr
+        }
+    }
+}
+
+
+impl<T: Collectable> Copy for GcRef<T> {}
+
+impl<T: Collectable> GcRef<T> {
+    fn add_ref_by(&self, r: impl Into<Self>) {
+        let r = r.into();
+
+
+        let ptr = self.ptr.ptr();
+
+        if self.ptr.tag() {
+            let ptr: NonNull<UntypedGcRef> = ptr.cast();
+
+
+            unsafe {
+                (*(*ptr.as_ptr()).gc_box.as_ptr()).refs.add_ref_by(r.cast())
+            }
+        } else {
+            unsafe {
+                (*ptr.as_ptr()).refs.add_ref_by(r)
+            }
+        }
+    }
+
+
+    fn cast<U: Collectable>(self) -> GcRef<U> {
+        if self.ptr.tag() {
+            GcRef {
+                ptr: self.ptr.cast()
+            }
+        } else {
+            let untyped = Box::new(UntypedGcRef::new(self.ptr.ptr()));
+
+            // Unsafe because Box::into_raw guarantees the returned ptr is non-null
+            let untyped = unsafe { NonNull::new_unchecked(Box::into_raw(untyped)) };
+
+            let ptr = TaggedPtr::new(untyped, true).cast();
+
+            GcRef {
+                ptr
+            }
+        }
+    }
+    
+    fn box_ptr(&self) -> NonNull<GcBox<()>> {
+        if self.ptr.tag()  {
+            let this: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
+
+            unsafe {
+                (*this.as_ptr()).gc_box
+            }
+        } else {
+            self.ptr.ptr().cast()
+        }
+    }
+
+
+    #[cfg(feature = "trace")]
+    fn trace_id(&self) -> TraceID {
+        todo!()
+    }
+}
+
+
+impl<T: Collectable> PartialEq for GcRef<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.ptr.as_ptr() == other.ptr.as_ptr()
+    }
+}
+
+impl<T: Collectable> Eq for GcRef<T> {}
+
+
 impl<T: Collectable> PartialEq<Gc<T>> for GcRef<T> {
     fn eq(&self, other: &Gc<T>) -> bool {
-        self.inner.as_ptr() == other.inner.as_ptr()
+        self.ptr.as_ptr() == other.inner.as_ptr()
     }
 }
 
 impl<T: Collectable> PartialEq<GcRef<T>> for Gc<T> {
     fn eq(&self, other: &GcRef<T>) -> bool {
-        self.inner.as_ptr() == other.inner.as_ptr()
+        self.inner.as_ptr() == other.ptr.as_ptr()
     }
 }
-
-impl<T: Collectable> Clone for GcRef<T> {
-    fn clone(&self) -> Self {
-        Self { inner: self.inner }
-    }
-}
-
 
 impl<T: Collectable> From<NonNull<GcBox<T>>> for GcRef<T> {
     fn from(inner: NonNull<GcBox<T>>) -> Self {
-        Self { inner }
+        Self { ptr: inner.into() }
     }
-
 }
 
 pub struct GcGuard<'a, T: Collectable> {
@@ -137,11 +241,24 @@ impl<T: Collectable> Gc<T> {
     ///Just a reference without incrementing the reference count.
     #[must_use]
     pub fn get_ref(&self) -> GcRef<T> {
-        GcRef {
-            inner: self.inner,
-        }
+        self.inner.into()
     }
 
+    pub fn get_untyped_ref<O: Collectable>(&self) -> GcRef<O> {
+        unsafe {
+            let untyped = Box::new(UntypedGcRef::new(self.inner));
+
+            //Unsafe because Box::into_raw is guaranteed to return a non-null pointer
+            let untyped = NonNull::new_unchecked(Box::into_raw(untyped));
+
+            // Safety: we set the tag bit, which means actually isn't a GcBox<O> but a UntypedGcRef
+            let ptr = TaggedPtr::new(untyped, true).cast();
+
+            GcRef {
+                ptr,
+            }
+        }
+    }
     // #[cfg(feature = "trace")]
     // fn trace(&self) -> TraceID {
     //     unsafe { (*self.inner.as_ptr()).refs.trace }
@@ -175,10 +292,9 @@ impl<T: Collectable> Gc<T> {
 
 
         unsafe {
-            let ref_to = ref_to.into_iter().map(|x| {
-                (*x.inner.as_ptr()).refs.add_ref_by(gc_box);
-                x.inner
-            }).collect();
+            for x in &ref_to {
+                x.add_ref_by(gc_box);
+            }
 
 
             (*gc_box.as_ptr()).refs.ref_to = RwLock::new(ref_to);
@@ -188,7 +304,7 @@ impl<T: Collectable> Gc<T> {
             for r in &*(*gc_box.as_ptr()).refs.ref_to.read_recursive() {
                 let id = (*gc_box.as_ptr()).refs.trace;
 
-                TRACER.add_ref(id, (*r.as_ptr()).refs.trace);
+                TRACER.add_ref(id, r.trace_id());
             }
         }
 
@@ -222,13 +338,19 @@ impl<T: Collectable> Gc<T> {
     pub fn weak(&self) -> u32 {
         unsafe { (*self.inner.as_ptr()).refs.weak() }
     }
+
+
+    pub unsafe fn inner(&self) -> NonNull<GcBox<T>> {
+        self.inner
+    }
 }
 
 type MaybeNull<T> = NonNull<T>;
 
+
 struct Refs<T: Collectable> {
-    ref_by: RwLock<Vec<NonNull<GcBox<T>>>>,
-    ref_to: RwLock<Vec<NonNull<GcBox<T>>>>,
+    ref_by: RwLock<Vec<GcRef<T>>>,
+    ref_to: RwLock<Vec<GcRef<T>>>,
     weak: AtomicU32, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicU32, // Number of strong references
     #[cfg(feature = "trace")]
@@ -247,9 +369,9 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
-    fn add_ref_by(&mut self, other: NonNull<GcBox<T>>) {
+    fn add_ref_by(&mut self, other: impl Into<GcRef<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
-            lock.push(other);
+            lock.push(other.into());
         } else {
             warn!("Failed to add reference to a GcBox - this might be bad");
         }
@@ -257,7 +379,7 @@ impl<T: Collectable> Refs<T> {
 
     fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
-            lock.retain(|x| *x != other);
+            lock.retain(|x| x.ptr.ptr() != other);
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
@@ -265,7 +387,7 @@ impl<T: Collectable> Refs<T> {
 
     fn remove_ref_by_ptr(&mut self, other: *mut GcBox<T>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
-            lock.retain(|x| x.as_ptr() != other);
+            lock.retain(|x| x.ptr.as_ptr() != other);
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
@@ -287,15 +409,15 @@ impl<T: Collectable> Refs<T> {
         self.strong.load(Ordering::Relaxed)
     }
 
-    fn read_refs(&self) -> Option<RwLockReadGuard<Vec<NonNull<GcBox<T>>>>> {
+    fn read_refs(&self) -> Option<RwLockReadGuard<Vec<GcRef<T>>>> {
         self.ref_to.spin_read()
     }
 
-    fn read_ref_by(&self) -> Option<RwLockReadGuard<Vec<NonNull<GcBox<T>>>>> {
+    fn read_ref_by(&self) -> Option<RwLockReadGuard<Vec<GcRef<T>>>> {
         self.ref_by.spin_read()
     }
 
-    fn write_refs(&self) -> Option<RwLockWriteGuard<Vec<NonNull<GcBox<T>>>>> {
+    fn write_refs(&self) -> Option<RwLockWriteGuard<Vec<GcRef<T>>>> {
         self.ref_to.spin_write()
     }
 }
@@ -424,14 +546,16 @@ pub struct WeakGc<T: Collectable> {
 
 impl<T: Collectable> GcBox<T> {
     fn shake_tree(this_ptr: NonNull<Self>) {
+        let this_ref = GcRef::from(this_ptr);
+
         let mut unmark = Vec::new();
         unsafe {
-            let status = Self::you_have_root(this_ptr, &mut unmark);
+            let status = Self::you_have_root(this_ref, &mut unmark);
 
             match status {
                 RootStatus::HasRoot => {
                     for r in unmark {
-                        (*r.as_ptr()).unmark();
+                        (*r.box_ptr().as_ptr()).unmark();
                     }
 
                     return;
@@ -440,7 +564,7 @@ impl<T: Collectable> GcBox<T> {
                 RootStatus::HasNoRoot => {}
                 RootStatus::RootPending => {
                     (*this_ptr.as_ptr()).flags.set_has_no_root();
-                    Self::mark_dead(this_ptr, None);
+                    Self::mark_dead(this_ptr.cast(), None);
                 }
 
                 RootStatus::None => {
@@ -450,8 +574,8 @@ impl<T: Collectable> GcBox<T> {
             }
 
             let (drop, unmark): (Vec<_>, Vec<_>) = unmark.into_iter().partition(|x| {
-                if (*x.as_ptr()).flags.is_has_no_root() {
-                    (*x.as_ptr()).flags.set_externally_dropped();
+                if (*x.box_ptr().as_ptr()).flags.is_has_no_root() {
+                    (*x.box_ptr().as_ptr()).flags.set_externally_dropped();
                     true
                 } else {
                     false
@@ -459,25 +583,25 @@ impl<T: Collectable> GcBox<T> {
             });
 
             for u in unmark {
-                (*u.as_ptr()).unmark();
+                (*u.box_ptr().as_ptr()).unmark();
             }
-            
-            
+
+
             for d in &drop {
-                Self::nuke_refs(*d);
+                Self::nuke_refs(d.box_ptr());
             }
 
             for d in &drop {
-                Self::nuke_value(*d);
+                Self::nuke_value(d.ptr);
             }
 
             for d in &drop {
-                Self::nuke(*d);
+                Self::nuke(d.box_ptr());
             }
         }
     }
 
-    fn mark_dead(this_ptr: NonNull<Self>, look_later: Option<&mut Vec<NonNull<Self>>>) {
+    fn mark_dead(this_ptr: NonNull<GcBox<()>>, look_later: Option<&mut Vec<NonNull<GcBox<()>>>>) {
         let this = this_ptr.as_ptr();
 
         unsafe {
@@ -491,29 +615,29 @@ impl<T: Collectable> GcBox<T> {
             let look_later = look_later.unwrap_or(later_vec);
 
             'refs: for r in &*read {
-                if !(*r.as_ptr()).flags.is_root_pending() {
+                if !(*r.box_ptr().as_ptr()).flags.is_root_pending() {
                     continue;
                 }
 
                 //check if we have more than 1 reference that is pending
                 let mut pending = 0;
-                let Some(r_read) = (*r.as_ptr()).refs.read_refs() else {
+                let Some(r_read) = (*r.box_ptr().as_ptr()).refs.read_refs() else {
                     continue;
                 };
 
                 for rr in &*r_read {
-                    if (*rr.as_ptr()).flags.is_root_pending() {
+                    if (*rr.box_ptr().as_ptr()).flags.is_root_pending() {
                         pending += 1;
                     }
 
                     if pending > 1 {
-                        look_later.push(*r);
+                        look_later.push(r.box_ptr());
                         continue 'refs;
                     }
                 }
 
-                (*r.as_ptr()).flags.set_has_no_root();
-                Self::mark_dead(*r, Some(look_later));
+                (*r.box_ptr().as_ptr()).flags.set_has_no_root();
+                Self::mark_dead(r.box_ptr(), Some(look_later));
             }
 
             if look_later_run {
@@ -526,7 +650,7 @@ impl<T: Collectable> GcBox<T> {
 
                     let mut pending = 0;
                     for rr in &*r_read {
-                        if (*rr.as_ptr()).flags.is_root_pending() {
+                        if (*rr.box_ptr().as_ptr()).flags.is_root_pending() {
                             pending += 1;
                         }
 
@@ -543,7 +667,24 @@ impl<T: Collectable> GcBox<T> {
         self.flags.unmark();
     }
 
-    unsafe fn nuke_value(this_ptr: NonNull<Self>) {
+    unsafe fn nuke_value(this_ptr: TaggedPtr<Self>) {
+        if this_ptr.tag() {
+            //The ptr doesn't point to a self ref, but instead to a GcTreeRef
+            let this: NonNull<UntypedGcRef> = this_ptr.ptr().cast();
+            let this = this.as_ptr();
+
+
+            unsafe {
+                let value = (*(*this).gc_box.as_ptr()).value.cast();
+
+
+                ((*this).dealloc_value)(value);
+            }
+
+            (*this_ptr.as_ptr()).flags.set_value_dropped();
+            return;
+        }
+
         unsafe {
             let value = (*this_ptr.as_ptr()).value;
             let _ = Box::from_raw(value.as_ptr());
@@ -552,21 +693,21 @@ impl<T: Collectable> GcBox<T> {
     }
 
     /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
-    unsafe fn nuke(this_ptr: NonNull<Self>) {
+    unsafe fn nuke(this_ptr: NonNull<GcBox<()>>) {
         unsafe {
             let this = this_ptr.as_ptr();
             // (*this).flags.set_externally_dropped(); // We don't need to set this flag, since we already set it in shake_tree
             let _ = Box::from_raw(this);
         }
     }
-    
-    
-    unsafe fn nuke_refs(this_ptr: NonNull<Self>){
+
+
+    unsafe fn nuke_refs(this_ptr: NonNull<GcBox<()>>) {
         unsafe {
             let this = this_ptr.as_ptr();
             if let Some(refs) = (*this).refs.read_refs() {
                 for r in &*refs {
-                    (*r.as_ptr()).refs.remove_ref_by(this_ptr);
+                    (*r.box_ptr().as_ptr()).refs.remove_ref_by(this_ptr);
                 }
             } else {
                 warn!("Failed to remove all references from a GcBox - leaking memory");
@@ -574,8 +715,8 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
-    fn you_have_root(this_ptr: NonNull<Self>, unmark: &mut Vec<NonNull<Self>>) -> RootStatus {
-        let this = this_ptr.as_ptr();
+    fn you_have_root(this_ptr: GcRef<T>, unmark: &mut Vec<GcRef<T>>) -> RootStatus {
+        let this = this_ptr.box_ptr().as_ptr();
         unsafe {
             if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len() as u32) {
                 if (*this).refs.strong() > ref_by {
@@ -612,7 +753,7 @@ impl<T: Collectable> GcBox<T> {
             let mut status = RootStatus::HasNoRoot;
 
             for r in &*refs {
-                let root = Self::you_have_root(*r, unmark);
+                let root = Self::you_have_root(r.cast(), unmark);
                 if root == RootStatus::HasRoot {
                     (*this).flags.set_has_root();
                     return RootStatus::HasRoot;
@@ -629,17 +770,21 @@ impl<T: Collectable> GcBox<T> {
 
 
     unsafe fn update_refs(this_ptr: NonNull<Self>) {
+        let value = (*this_ptr.as_ptr()).value.as_ref();
+
+        let all_refs = value.get_refs();
+
+        // TODO: from here on we could switch threads to a other thread, so we don't block the main thread anymore
         let Some(refs_lock) = (*this_ptr.as_ptr()).refs.read_refs() else {
             warn!("Failed to read references from a GcBox - this might be bad");
             return;
         };
 
-        let refs = refs_lock.iter().map(|x| (*x).into()).collect::<Vec<_>>();
-        drop(refs_lock);
 
-        let value = (*this_ptr.as_ptr()).value.as_ref();
+        let old_refs = &*refs_lock;
 
-        let (removed, added) = value.get_refs_diff(&refs);
+        let removed = old_refs.iter().filter(|r| !all_refs.contains(r)).collect::<Vec<_>>();
+        let added = all_refs.into_iter().filter(|r| !old_refs.contains(r)).collect::<Vec<_>>();
 
 
         if removed.is_empty() && added.is_empty() {
@@ -652,31 +797,31 @@ impl<T: Collectable> GcBox<T> {
         };
 
         for r in &removed {
-            write.retain(|x| *x != r.inner);
+            write.retain(|x| x.box_ptr() != r.box_ptr());
             #[cfg(feature = "trace")]
             {
                 let this_id = (*this_ptr.as_ptr()).refs.trace;
-                TRACER.remove_ref(this_id, (*r.inner.as_ptr()).refs.trace);
+                TRACER.remove_ref(this_id, r.trace_id());
             }
         }
 
         for a in &added {
-            write.push(a.inner);
+            write.push(*a);
             #[cfg(feature = "trace")]
             {
                 let this_id = (*this_ptr.as_ptr()).refs.trace;
-                TRACER.add_ref(this_id, (*a.inner.as_ptr()).refs.trace);
+                TRACER.add_ref(this_id, a.trace_id());
             }
         }
 
         drop(write);
 
         for r in &removed {
-            (*r.inner.as_ptr()).refs.remove_ref_by(this_ptr);
+            (*r.box_ptr().as_ptr()).refs.remove_ref_by(this_ptr.cast());
         }
 
         for a in &added {
-            (*a.inner.as_ptr()).refs.add_ref_by(this_ptr);
+            (*a.box_ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr).cast());
         }
     }
 }
@@ -692,13 +837,13 @@ impl<T: Collectable> Drop for GcBox<T> {
                 #[cfg(debug_assertions)]
                 if !ref_by.is_empty() {
                     for r in &*ref_by {
-                        println!("{:p}", r.as_ptr());
+                        println!("{:p}", r.box_ptr().as_ptr());
 
-                        let r_refs = unsafe { (*r.as_ptr()).refs.read_refs() };
+                        let r_refs = unsafe { (*r.box_ptr().as_ptr()).refs.read_refs() };
 
                         if let Some(r_refs) = r_refs {
                             for rr in &*r_refs {
-                                println!("  {:p}", rr.as_ptr());
+                                println!("  {:p}", rr.box_ptr().as_ptr());
                             }
                         } else {
                             println!("  Failed to read refs");
@@ -723,7 +868,7 @@ impl<T: Collectable> Drop for GcBox<T> {
             if let Some(refs) = self.refs.read_refs() {
                 for r in &*refs {
                     unsafe {
-                        (*r.as_ptr()).refs.remove_ref_by_ptr(self_raw);
+                        (*r.box_ptr().as_ptr()).refs.remove_ref_by_ptr(self_raw.cast());
                     }
                 }
             } else {
@@ -762,7 +907,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 //Drop all references
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
-                        (*r.as_ptr()).refs.remove_ref_by(self.inner);
+                        (*r.box_ptr().as_ptr()).refs.remove_ref_by(self.inner.cast());
                     }
 
                     refs.clear();
@@ -871,17 +1016,6 @@ mod tests {
                     let this = self.borrow();
                     this.other.iter().map(|x| x.get_ref()).collect()
                 }
-
-                
-                /// (removed, added)
-                fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
-                    let this = self.borrow();
-
-                    let add = this.other.iter().map(|x| x.get_ref()).filter(|x| !old.contains(&x)).collect();
-                    let removed = old.iter().filter(|x| !this.other.iter().any(|y| y == *x)).cloned().collect();
-
-                    (removed, add)
-                }
             }
 
 
@@ -934,8 +1068,8 @@ mod tests {
             let x = Gc::new(RefCell::new(Node::new(5)));
 
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
-            
-            
+
+
             x.get().borrow_mut().other.push(y.clone());
 
             let _x = x;

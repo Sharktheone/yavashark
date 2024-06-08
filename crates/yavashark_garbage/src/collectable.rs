@@ -3,7 +3,6 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::sync::{Mutex as StdMutex, RwLock as StdRwLock};
 
-use log::warn;
 use parking_lot::{Mutex, RwLock};
 
 use super::{Collectable, Gc, GcBox, GcRef};
@@ -13,10 +12,6 @@ macro_rules! collect {
         unsafe impl Collectable for $ty {
             fn get_refs(&self) -> Vec<GcRef<Self>> {
                 Vec::new()
-            }
-
-            fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
-                (old.to_vec(), Vec::new())
             }
         }
     };
@@ -44,7 +39,8 @@ collect!(usize);
 collect!(String);
 
 
-
+///This trait optimizes the usage of Cells like RefCells and others in the Gc
+///they do not need to use a typeless gc, but instead can just return also RefCell-References
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait CellCollectable<T: Collectable> {
@@ -63,31 +59,6 @@ macro_rules! cell {
             fn get_refs(&self) -> Vec<GcRef<Self>> {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
             }
-
-            fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
-                self.$lock().map(|x|
-                x.get_refs_diff(old)
-                ).unwrap_or_else(|_| {
-                    warn!("get_refs_diff called on a poisoned lock");
-                    (Vec::new(), Vec::new())
-                })
-            }
-        }
-    };
-    ($ty:ident,$lock:ident, o) => {
-        unsafe impl<T: CellCollectable<Self>> Collectable for $ty<T> {
-            fn get_refs(&self) -> Vec<GcRef<Self>> {
-                self.$lock().map(|x| x.get_refs()).unwrap_or_default()
-            }
-
-            fn get_refs_diff(&self, old: &[GcRef<Self>]) -> (Vec<GcRef<Self>>, Vec<GcRef<Self>>) {
-                self.$lock().map(|x|
-                x.get_refs_diff(old)
-                ).unwrap_or_else(|| {
-                    warn!("get_refs_diff called on a poisoned lock");
-                    (Vec::new(), Vec::new())
-                })
-            }
         }
     };
 }
@@ -95,9 +66,9 @@ macro_rules! cell {
 
 cell!(RefCell, try_borrow);
 cell!(StdRwLock, read);
-cell!(RwLock, try_read, o);
+cell!(RwLock, try_read);
 cell!(StdMutex, lock);
-cell!(Mutex, try_lock, o);
+cell!(Mutex, try_lock);
 
 
 
