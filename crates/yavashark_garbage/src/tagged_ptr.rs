@@ -6,6 +6,8 @@ pub struct TaggedPtr<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
+
+
 impl<T> Clone for TaggedPtr<T> {
     fn clone(&self) -> Self { *self }
 }
@@ -63,6 +65,11 @@ impl<T> TaggedPtr<T> {
     
     pub fn as_ptr(&self) -> *mut T {
         self.ptr().as_ptr()
+    }
+    
+    pub const fn cast<U>(self) -> TaggedPtr<U> {
+        // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
+        unsafe { TaggedPtr { ptr: self.ptr.cast(), _marker: std::marker::PhantomData } }
     }
 }
 
