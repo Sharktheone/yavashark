@@ -2,7 +2,7 @@
 
 use core::mem;
 use std::any::{Any, type_name, TypeId};
-use std::fmt::Debug;
+use std::fmt::{Debug, Formatter, write};
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::ptr::NonNull;
@@ -91,42 +91,32 @@ impl UntypedGcRef {
 }
 
 
+
 pub struct GcRef<T: Collectable> {
     /// # Safety
     /// this pointer might not be a pointer to a GcBox, but also ca be a pointer to a UntypedGcRef
     ptr: TaggedPtr<GcBox<T>>,
 }
 
+impl<T: Collectable> Debug for GcRef<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GcRef")
+            .field("ptr_value", &self.ptr.ptr())
+            .field("ptr_tag", &self.ptr.tag())
+            .finish()
+    }
+    
+}
+
 
 impl<T: Collectable> Clone for GcRef<T> {
-    fn clone(&self) -> Self {
-        Self {
-            ptr: self.ptr
-        }
-    }
+    fn clone(&self) -> Self { *self }
 }
 
 
 impl<T: Collectable> Copy for GcRef<T> {}
 
 
-//https://github.com/rust-lang/rust/issues/41875#issuecomment-317292888
-pub fn non_static_type_id<T: ?Sized>() -> TypeId {
-    trait NonStaticAny {
-        fn get_type_id(&self) -> TypeId where Self: 'static;
-    }
-
-    impl<T: ?Sized> NonStaticAny for PhantomData<T> {
-        fn get_type_id(&self) -> TypeId where Self: 'static {
-            TypeId::of::<T>()
-        }
-    }
-
-    let phantom_data = PhantomData::<T>;
-    NonStaticAny::get_type_id(unsafe {
-        mem::transmute::<&dyn NonStaticAny, &(dyn NonStaticAny + 'static)>(&phantom_data)
-    })
-}
 
 impl<T: Collectable> GcRef<T> {
     fn add_ref_by(&self, r: impl Into<Self>) {
@@ -140,34 +130,18 @@ impl<T: Collectable> GcRef<T> {
 
 
             unsafe {
-                (*(*ptr.as_ptr()).gc_box.as_ptr()).refs.add_ref_by(r.cast())
+                (*(*ptr.as_ptr()).gc_box.as_ptr()).refs.add_ref_by(r.cast());
             }
         } else {
             unsafe {
-                (*ptr.as_ptr()).refs.add_ref_by(r)
+                (*ptr.as_ptr()).refs.add_ref_by(r);
             }
         }
     }
 
 
     fn cast<U: Collectable>(self) -> GcRef<U> {
-        let name_u = type_name::<U>();
-        let name_t = type_name::<T>();
-
-        dbg!(name_u, name_t);
-
-
-        let id_u = non_static_type_id::<U>();
-        let id_t = non_static_type_id::<T>();
-
-        dbg!(id_u, id_t);
-
-
-        if non_static_type_id::<U>() == non_static_type_id::<T>() {
-            GcRef {
-                ptr: self.ptr.ptr().cast().into()
-            }
-        } else if self.ptr.tag() {
+        if self.ptr.tag() {
             GcRef {
                 ptr: self.ptr.cast()
             }
@@ -726,7 +700,6 @@ impl<T: Collectable> GcBox<T> {
         unsafe {
             let value = (*this_ptr.as_ptr()).value;
 
-            println!("Nuking: {}", type_name::<T>());
 
 
             let _ = Box::from_raw(value.as_ptr());
@@ -865,6 +838,12 @@ impl<T: Collectable> GcBox<T> {
 
         for r in &removed {
             (*r.box_ptr().as_ptr()).refs.remove_ref_by(this_ptr.cast());
+            
+            if r.ptr.tag() {
+                todo!()
+            } else {
+                Self::collect(r.ptr.ptr());
+            }
         }
 
         for a in &added {
@@ -873,6 +852,30 @@ impl<T: Collectable> GcBox<T> {
             } else {
                 (*a.ptr.ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr));
             }
+        }
+        
+        
+    }
+    
+    unsafe fn collect(this: NonNull<Self>) {
+        let strong = (*this.as_ptr()).refs.strong();
+        let refs = (*this.as_ptr()).refs.ref_by.read().clone();
+
+        dbg!(strong);
+        dbg!(&refs);
+        dbg!(refs.len());
+
+        if Some((*this.as_ptr()).refs.strong())
+            == (*this.as_ptr()).refs.read_ref_by().map(|x| x.len() as u32)
+        {
+            //All strong refs are references by other GcBoxes
+            Self::shake_tree(this);
+        }
+
+        #[cfg(debug_assertions)]
+        if (*this.as_ptr()).refs.strong()
+            < (*this.as_ptr()).refs.read_ref_by().map_or(0, |x| x.len() as u32) {
+            warn!("Less strong refs than ref_bys - wrong use of gc or memory leak");
         }
     }
 }
@@ -980,12 +983,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
-            if Some((*self.inner.as_ptr()).refs.strong())
-                == (*self.inner.as_ptr()).refs.read_ref_by().map(|x| x.len() as u32)
-            {
-                //All strong refs are references by other GcBoxes
-                GcBox::shake_tree(self.inner);
-            }
+            GcBox::collect(self.inner);
         }
     }
 }
@@ -1144,6 +1142,8 @@ mod tests {
 
 
             root.get().borrow_mut().other.push(x);
+            
+            dbg!(1);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
