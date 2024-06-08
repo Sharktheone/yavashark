@@ -91,7 +91,6 @@ impl UntypedGcRef {
 }
 
 
-
 pub struct GcRef<T: Collectable> {
     /// # Safety
     /// this pointer might not be a pointer to a GcBox, but also ca be a pointer to a UntypedGcRef
@@ -105,7 +104,6 @@ impl<T: Collectable> Debug for GcRef<T> {
             .field("ptr_tag", &self.ptr.tag())
             .finish()
     }
-    
 }
 
 
@@ -115,7 +113,6 @@ impl<T: Collectable> Clone for GcRef<T> {
 
 
 impl<T: Collectable> Copy for GcRef<T> {}
-
 
 
 impl<T: Collectable> GcRef<T> {
@@ -557,9 +554,7 @@ pub struct WeakGc<T: Collectable> {
 }
 
 impl<T: Collectable> GcBox<T> {
-    fn shake_tree(this_ptr: NonNull<Self>) {
-        let this_ref = GcRef::from(this_ptr);
-
+    fn shake_tree(this_ref: GcRef<T>) {
         let mut unmark = Vec::new();
         unsafe {
             let status = Self::you_have_root(this_ref, &mut unmark);
@@ -575,8 +570,8 @@ impl<T: Collectable> GcBox<T> {
 
                 RootStatus::HasNoRoot => {}
                 RootStatus::RootPending => {
-                    (*this_ptr.as_ptr()).flags.set_has_no_root();
-                    Self::mark_dead(this_ptr.cast(), None);
+                    (*this_ref.box_ptr().as_ptr()).flags.set_has_no_root();
+                    Self::mark_dead(this_ref.box_ptr(), None);
                 }
 
                 RootStatus::None => {
@@ -701,7 +696,6 @@ impl<T: Collectable> GcBox<T> {
             let value = (*this_ptr.as_ptr()).value;
 
 
-
             let _ = Box::from_raw(value.as_ptr());
             (*this_ptr.as_ptr()).flags.set_value_dropped();
         }
@@ -731,46 +725,62 @@ impl<T: Collectable> GcBox<T> {
     }
 
     fn you_have_root(this_ptr: GcRef<T>, unmark: &mut Vec<GcRef<T>>) -> RootStatus {
-        if this_ptr.ptr.tag() {
-            todo!()
-        } else {
-            let this = this_ptr.ptr.as_ptr();
-            unsafe {
-                if let Some(ref_by) = (*this).refs.read_ref_by().map(|x| x.len() as u32) {
-                    if (*this).refs.strong() > ref_by {
+        let this = this_ptr.box_ptr().as_ptr();
+        unsafe {
+            let Some(refs) = (*this).refs.read_ref_by() else {
+                warn!("Failed to read references from a GcBox - leaking memory");
+                return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
+            };
+
+
+            if (*this).refs.strong() > refs.len() as u32 {
+                return RootStatus::HasRoot;
+            }
+
+            let flags = &(*this).flags;
+            if flags.is_root() {
+                return RootStatus::HasRoot;
+            }
+
+            if flags.is_has_no_root() {
+                return RootStatus::HasNoRoot;
+            }
+
+            if flags.is_has_root() {
+                return RootStatus::HasRoot;
+            }
+
+            if flags.is_root_pending() {
+                return RootStatus::RootPending;
+            }
+
+            unmark.push(this_ptr);
+            (*this).flags.set_has_no_root();
+            let mut status = RootStatus::HasNoRoot;
+
+            
+            if this_ptr.ptr.tag() {
+                for r in &*refs {
+                    let root = Self::you_have_root(r.cast(), unmark);
+                    if root == RootStatus::HasRoot {
+                        (*this).flags.set_has_root();
                         return RootStatus::HasRoot;
                     }
-                } else {
-                    warn!("Failed to read references from a GcBox - leaking memory");
-                    return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
+                    if root == RootStatus::RootPending {
+                        (*this).flags.set_root_pending();
+                        status = RootStatus::RootPending;
+                    }
                 }
-
-                let flags = &(*this).flags;
-                if flags.is_root() {
-                    return RootStatus::HasRoot;
-                }
-
-                if flags.is_has_no_root() {
-                    return RootStatus::HasNoRoot;
-                }
-
-                if flags.is_has_root() {
-                    return RootStatus::HasRoot;
-                }
-
-                if flags.is_root_pending() {
-                    return RootStatus::RootPending;
-                }
-
-                let Some(refs) = (*this).refs.read_ref_by() else {
-                    return RootStatus::None;
-                };
-
-                unmark.push(this_ptr);
-                (*this).flags.set_has_no_root();
-                let mut status = RootStatus::HasNoRoot;
-
-                for r in &*refs {
+            } else {
+                
+                let refs = &*refs;
+                
+                // Safety
+                // We know that the this_ptr has T as the type since we don't have the tag set, so this is safe
+                let refs: &Vec<GcRef<T>> = &*std::ptr::from_ref(refs).cast();
+                
+                
+                for r in refs {
                     let root = Self::you_have_root(*r, unmark);
                     if root == RootStatus::HasRoot {
                         (*this).flags.set_has_root();
@@ -781,9 +791,9 @@ impl<T: Collectable> GcBox<T> {
                         status = RootStatus::RootPending;
                     }
                 }
-
-                status
             }
+
+            status
         }
     }
 
@@ -836,13 +846,13 @@ impl<T: Collectable> GcBox<T> {
 
         drop(write);
 
-        for r in &removed {
+        for r in removed {
             (*r.box_ptr().as_ptr()).refs.remove_ref_by(this_ptr.cast());
-            
+
             if r.ptr.tag() {
                 todo!()
             } else {
-                Self::collect(r.ptr.ptr());
+                Self::collect(*r);
             }
         }
 
@@ -853,28 +863,28 @@ impl<T: Collectable> GcBox<T> {
                 (*a.ptr.ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr));
             }
         }
-        
-        
     }
-    
-    unsafe fn collect(this: NonNull<Self>) {
-        let strong = (*this.as_ptr()).refs.strong();
-        let refs = (*this.as_ptr()).refs.ref_by.read().clone();
+
+    unsafe fn collect(this: GcRef<T>) {
+        let this_ptr = this.box_ptr().as_ptr();
+
+        let strong = (*this_ptr).refs.strong();
+        let refs = (*this_ptr).refs.ref_by.read().clone();
 
         dbg!(strong);
         dbg!(&refs);
         dbg!(refs.len());
 
-        if Some((*this.as_ptr()).refs.strong())
-            == (*this.as_ptr()).refs.read_ref_by().map(|x| x.len() as u32)
+        if Some((*this_ptr).refs.strong())
+            == (*this_ptr).refs.read_ref_by().map(|x| x.len() as u32)
         {
             //All strong refs are references by other GcBoxes
             Self::shake_tree(this);
         }
 
         #[cfg(debug_assertions)]
-        if (*this.as_ptr()).refs.strong()
-            < (*this.as_ptr()).refs.read_ref_by().map_or(0, |x| x.len() as u32) {
+        if (*this_ptr).refs.strong()
+            < (*this_ptr).refs.read_ref_by().map_or(0, |x| x.len() as u32) {
             warn!("Less strong refs than ref_bys - wrong use of gc or memory leak");
         }
     }
@@ -983,7 +993,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
-            GcBox::collect(self.inner);
+            GcBox::collect(self.inner.into());
         }
     }
 }
@@ -1142,7 +1152,7 @@ mod tests {
 
 
             root.get().borrow_mut().other.push(x);
-            
+
             dbg!(1);
         }
 
