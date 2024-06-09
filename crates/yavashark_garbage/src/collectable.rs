@@ -45,10 +45,6 @@ collect!(String);
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait CellCollectable<T: Collectable> {
     fn get_refs(&self) -> Vec<GcRef<T>>;
-
-
-    /// (removed, added)
-    fn get_refs_diff(&self, old: &[GcRef<T>]) -> (Vec<GcRef<T>>, Vec<GcRef<T>>);
 }
 
 

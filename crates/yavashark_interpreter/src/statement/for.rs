@@ -7,9 +7,9 @@ use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_for(&mut self, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
-        let scope = &mut Scope::with_parent(scope);
-        let label = scope.last_label();
-        scope.state_set_loop();
+        let scope = &mut Scope::with_parent(scope)?;
+        let label = scope.last_label()?;
+        scope.state_set_loop()?;
 
         if let Some(init) = &stmt.init {
             match init {

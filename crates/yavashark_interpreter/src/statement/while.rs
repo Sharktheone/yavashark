@@ -7,11 +7,11 @@ use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_while(&mut self, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
-        let label = scope.last_label();
+        let label = scope.last_label()?;
 
         loop {
-            let scope = &mut Scope::with_parent(scope);
-            scope.state_set_loop();
+            let scope = &mut Scope::with_parent(scope)?;
+            scope.state_set_loop()?;
 
             let cond = self.run_expr(&stmt.test, stmt.span, scope)?;
 

@@ -177,33 +177,6 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
 
         refs
     }
-
-    fn get_refs_diff(&self, old: &[GcRef<RefCell<Self>>]) -> (Vec<GcRef<RefCell<Self>>>, Vec<GcRef<RefCell<Self>>>) {
-        let properties = self.0.properties();
-
-        let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
-
-
-        for (n, v) in properties {
-            if let Value::Object(o) = n {
-                refs.push(o.0.get_ref());
-            }
-
-            if let Value::Object(o) = v {
-                refs.push(o.0.get_ref());
-            }
-        }
-
-        if let Value::Object(o) = self.0.prototype() {
-            refs.push(o.0.get_ref());
-        }
-       
-
-        let remove = old.iter().filter(|x| !refs.contains(x)).cloned().collect();
-        let add = refs.into_iter().filter(|x| !old.contains(x)).collect();
-
-        (remove, add)
-    }
 }
 
 impl<C: Ctx> BoxedObj<C> {

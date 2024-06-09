@@ -10,9 +10,9 @@ impl Context {
     pub fn run_for_of(&mut self, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
         let obj = self.run_expr(&stmt.right, stmt.span, scope)?;
 
-        let scope = &mut Scope::with_parent(scope);
-        let label = scope.last_label();
-        scope.state_set_loop();
+        let scope = &mut Scope::with_parent(scope)?;
+        let label = scope.last_label()?;
+        scope.state_set_loop()?;
 
         let ForHead::VarDecl(v) = &stmt.left else {
             todo!("ForInStmt left is not VarDecl");

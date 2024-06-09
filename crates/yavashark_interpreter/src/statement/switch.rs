@@ -9,8 +9,8 @@ use crate::Value;
 impl Context {
     pub fn run_switch(&mut self, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
         let discriminant = self.run_expr(&stmt.discriminant, stmt.span, scope)?;
-        let scope = &mut Scope::with_parent(scope);
-        scope.state_set_breakable();
+        let scope = &mut Scope::with_parent(scope)?;
+        scope.state_set_breakable()?;
 
         for case in &stmt.cases {
             if let Some(test) = &case.test {

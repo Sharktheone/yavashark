@@ -7,7 +7,7 @@ use crate::{ControlFlow, RuntimeResult};
 
 impl Context {
     pub fn run_return(&mut self, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
-        if !scope.state_is_returnable() {
+        if !scope.state_is_returnable()? {
             return Err(ControlFlow::error_syntax("Illegal return statement"));
         }
 

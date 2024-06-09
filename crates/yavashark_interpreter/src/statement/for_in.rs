@@ -24,9 +24,9 @@ impl Context {
         stmt: &ForInStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {
-        let scope = &mut Scope::with_parent(scope);
-        let label = scope.last_label();
-        scope.state_set_loop();
+        let scope = &mut Scope::with_parent(scope)?;
+        let label = scope.last_label()?;
+        scope.state_set_loop()?;
 
         let ForHead::VarDecl(v) = &stmt.left else {
             todo!("ForInStmt left is not VarDecl");

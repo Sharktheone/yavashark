@@ -1,4 +1,7 @@
-#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
+#![allow(
+    unused,
+    clippy::needless_pass_by_ref_mut
+)] //pass by ref mut is just temporary until all functions are implemented
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -65,7 +68,7 @@ impl ControlFlow {
 
 type ValueResult = std::result::Result<Value, Error>;
 
-type Result<T> = std::result::Result<T, Error>;
+type Result<T, E = Error> = std::result::Result<T, E>;
 
 type Res = Result<()>;
 
@@ -135,15 +138,18 @@ impl Interpreter {
 
 #[cfg(test)]
 mod temp_test {
-    use swc_common::input::StringInput;
+    use std::thread;
+    use env_logger::Logger;
     use swc_common::BytePos;
+    use swc_common::input::StringInput;
     use swc_ecma_parser::{EsConfig, Parser, Syntax};
 
     use super::*;
 
     #[test]
     fn math() {
-        let src = r#"
+        {
+            let src = r#"
 
         let x = 1 + 2
 
@@ -283,18 +289,36 @@ mod temp_test {
 
         z
         "#;
+            
+            
+            env_logger::Builder::from_default_env()
+                .filter_level(log::LevelFilter::Warn)
+                .init();
+            
+            let src = r#"
+            function hello() {
+                console.log("hello")
+            }
+            // hello()
+            "#;
 
-        let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+            let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 
-        let c = EsConfig::default();
+            let c = EsConfig::default();
 
-        let mut p = Parser::new(Syntax::Es(c), input, None);
-        let script = p.parse_script().unwrap();
+            let mut p = Parser::new(Syntax::Es(c), input, None);
+            let script = p.parse_script().unwrap();
 
-        let interpreter = Interpreter::new(script.body);
+            let interpreter = Interpreter::new(script.body);
 
-        let result = interpreter.run().unwrap();
-        println!("{result:?}");
+            let result = interpreter.run().unwrap();
+            println!("{result:?}");
+
+
+            thread::sleep(std::time::Duration::from_secs(20));
+            
+        }
+
 
         println!(
             "LEAKED OBJECTS: {}/{}",

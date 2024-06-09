@@ -6,9 +6,9 @@ use crate::{JSFunction, Res};
 
 impl Context {
     pub fn decl_fn(&mut self, stmt: &FnDecl, scope: &mut Scope) -> Res {
-        let mut fn_scope = Scope::with_parent(scope);
+        let mut fn_scope = Scope::with_parent(scope)?;
 
-        fn_scope.state_set_function();
+        fn_scope.state_set_function()?;
 
         let name = stmt.ident.sym.to_string();
         let function = JSFunction::new(

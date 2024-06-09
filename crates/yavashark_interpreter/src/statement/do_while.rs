@@ -10,10 +10,10 @@ impl Context {
     pub fn run_do_while(&mut self, stmt: &DoWhileStmt, scope: &mut Scope) -> RuntimeResult {
         let mut result = Value::Undefined;
 
-        let last_loop = scope.last_label();
+        let last_loop = scope.last_label()?;
 
         loop {
-            let scope = &mut Scope::with_parent(scope);
+            let scope = &mut Scope::with_parent(scope)?;
             scope.state_set_loop();
 
             result = match self.run_statement(&stmt.body, scope) {

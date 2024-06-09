@@ -27,7 +27,7 @@ impl Context {
                     match &**prop {
                         Prop::Shorthand(ident) => {
                             let name = ident.sym.to_string();
-                            let value = scope.resolve(&name).ok_or(
+                            let value = scope.resolve(&name)?.ok_or(
                                 ControlFlow::error_reference(format!("{name} is not defined")),
                             )?;
 
@@ -50,7 +50,7 @@ impl Context {
 
                         Prop::Method(method) => {
                             let key = self.run_prop_name(&method.key, scope)?;
-                            let mut fn_scope = Scope::with_parent(scope);
+                            let mut fn_scope = Scope::with_parent(scope)?;
 
                             fn_scope.state_set_function();
 

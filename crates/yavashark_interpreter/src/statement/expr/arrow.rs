@@ -20,8 +20,8 @@ pub struct ArrowFunction {
 
 impl Func<Context> for ArrowFunction {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, _this: Value) -> ValueResult {
-        let scope = &mut self.scope.child();
-        scope.state_set_function();
+        let scope = &mut self.scope.child()?;
+        scope.state_set_function()?;
 
         for (pat, value) in self.expr.params.iter().zip(args.iter()) {
             ctx.run_pat(pat, scope, value.copy())?;
