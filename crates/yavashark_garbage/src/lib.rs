@@ -599,12 +599,6 @@ impl<T: Collectable> GcBox<T> {
             }
 
 
-            let refs = &*(*this_ref.box_ptr().as_ptr()).refs.read_ref_by().unwrap();
-
-            dbg!(refs);
-            dbg!(refs.len());
-
-
             for d in &drop {
                 Self::nuke_value(d.ptr);
             }
@@ -910,7 +904,7 @@ impl<T: Collectable> Drop for GcBox<T> {
                     }
                 }
 
-                assert!(
+                debug_assert!(
                     ref_by.is_empty(),
                     "Cannot drop a GcBox that is still referenced - wrong use of gc or memory leak"
                 );
@@ -974,6 +968,15 @@ impl<T: Collectable> Drop for Gc<T> {
                     warn!("Failed to remove all references from a GcBox - leaking memory");
                     //TODO: should we return here - probably, since we might panic if we continue
                 }
+                
+                
+                // if let Some(refs) = (*self.inner.as_ptr()).refs.read_ref_by() {
+                //     let can_drop = true;
+                //     
+                //     for r in &*refs {
+                //         (*r.box_ptr().as_ptr()).refs.
+                //     }
+                // }
 
                 //we can drop the GcBox's value, but we might need to keep the GcBox, since there might be weak references
                 let _ = Box::from_raw(ptr);
@@ -1000,6 +1003,7 @@ mod tests {
     use std::sync::Once;
 
     use log::info;
+    use crate::collectable::CellCollectable;
 
     use super::*;
 
@@ -1015,10 +1019,9 @@ mod tests {
             }
 
 
-            unsafe impl Collectable for RefCell<Node> {
-                fn get_refs(&self) -> Vec<GcRef<Self>> {
-                    let this = self.borrow();
-                    this.other.iter().map(|x| x.get_ref()).collect()
+            unsafe impl CellCollectable<RefCell<Node>> for Node {
+                fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
+                    self.other.iter().map(|x| x.get_ref()).collect()
                 }
             }
             
@@ -1073,8 +1076,7 @@ mod tests {
                 }
             } 
 
-            
-            impl Node {
+           impl Node {
                 fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self{
                     Self {data, other, other_type: Vec::new()}
                 }
@@ -1105,29 +1107,18 @@ mod tests {
                     )))
                 }
             }
-
-            unsafe impl Collectable for RefCell<Node> {
-                fn get_refs(&self) -> Vec<GcRef<Self>> {
-                    let this = self.borrow();
-                    let mut refs: Vec<_> = this.other.iter().map(|x| x.get_ref()).collect();
+            
+            unsafe impl CellCollectable<RefCell<Node>> for Node {
+                fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
+                    let mut refs: Vec<_> = self.other.iter().map(|x| x.get_ref()).collect();
                     
-                    for r in &this.other_type {
+                    for r in &self.other_type {
                         refs.push(r.get_untyped_ref())
                     }
                     
                     
                     refs
                 }
-                unsafe fn deallocate(this: NonNull<[(); 0]>) {
-        
-                    let this: NonNull<Self> = this.cast();
-                    
-                    let data = (*this.as_ptr()).borrow().data;
-                    
-                    info!("Deallocating node with data: {data}");
-
-                    let _ = Box::from_raw(this.as_ptr());
-                    }
             }
             
             setup!(funcs);
@@ -1249,6 +1240,8 @@ mod tests {
     #[test]
     fn with_root() {
         setup!();
+        
+        
         let root = setup!(root);
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
@@ -1265,7 +1258,7 @@ mod tests {
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
         {
-            root.get().borrow_mut().other.clear();
+            root.borrow_mut().unwrap().other.clear();
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
