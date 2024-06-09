@@ -1,9 +1,6 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
-use core::mem;
-use std::any::{Any, type_name, TypeId};
-use std::fmt::{Debug, Formatter, write};
-use std::marker::PhantomData;
+use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -542,6 +539,7 @@ impl Flags {
 
 #[derive(Debug, PartialEq, Eq)]
 enum RootStatus {
+    #[allow(dead_code)]
     None,
     HasRoot,
     HasNoRoot,
@@ -875,13 +873,6 @@ impl<T: Collectable> GcBox<T> {
 
     unsafe fn collect(this: GcRef<T>) {
         let this_ptr = this.box_ptr().as_ptr();
-
-        let strong = (*this_ptr).refs.strong();
-        let refs = (*this_ptr).refs.ref_by.read().clone();
-
-        dbg!(strong);
-        dbg!(&refs);
-        dbg!(refs.len());
 
         if Some((*this_ptr).refs.strong())
             == (*this_ptr).refs.read_ref_by().map(|x| x.len() as u32)
