@@ -167,8 +167,10 @@ impl<T: Collectable> GcRef<T> {
 
 
     #[cfg(feature = "trace")]
-    fn trace_id(&self) -> TraceID {
-        todo!()
+    fn trace_id(self) -> TraceID {
+        unsafe {
+            (*self.box_ptr().as_ptr()).refs.trace
+        }
     }
 }
 
@@ -595,15 +597,13 @@ impl<T: Collectable> GcBox<T> {
             for d in &drop {
                 Self::nuke_refs(d.box_ptr());
             }
-            
-            
+
+
             let refs = &*(*this_ref.box_ptr().as_ptr()).refs.read_ref_by().unwrap();
-            
+
             dbg!(refs);
             dbg!(refs.len());
-            
-            
-            
+
 
             for d in &drop {
                 Self::nuke_value(d.ptr);
@@ -855,11 +855,7 @@ impl<T: Collectable> GcBox<T> {
         for r in removed {
             (*r.box_ptr().as_ptr()).refs.remove_ref_by(this_ptr.cast());
 
-            if r.ptr.tag() {
-                todo!()
-            } else {
-                Self::collect(*r);
-            }
+            Self::collect(*r);
         }
 
         for a in &added {
@@ -970,7 +966,6 @@ impl<T: Collectable> Drop for Gc<T> {
                 //Drop all references
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
-                        
                         (*r.box_ptr().as_ptr()).refs.remove_ref_by(self.inner.cast());
                     }
 
@@ -1372,8 +1367,8 @@ mod tests {
             let y4 = Other::new(1337);
 
             let _x = Node::add_vec_type(42, vec![], vec![&y, &y2, &y3, &y4]);
-            
-            
+
+
             dbg!(_x);
         }
 

@@ -147,7 +147,19 @@ pub(crate) struct ScopeInternal {
 
 unsafe impl CellCollectable<RefCell<ScopeInternal>> for ScopeInternal {
     fn get_refs(&self) -> Vec<GcRef<RefCell<ScopeInternal>>> {
-        todo!()
+        let mut refs = Vec::with_capacity(self.variables.len());
+        
+        for (_, v) in &self.variables {
+            if let Value::Object(o) = &v.value {
+                refs.push(o.gc_get_untyped_ref())
+            }
+        }
+        
+        if let Some(parent) = &self.parent {
+            refs.push(parent.get_ref())
+        }
+        
+        refs
     }
 }
 

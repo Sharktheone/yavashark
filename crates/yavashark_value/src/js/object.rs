@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::{Gc, GcRef};
+use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 
 use crate::Error;
@@ -328,6 +328,11 @@ impl<C: Ctx> Object<C> {
 
         inner.clear_values();
         Ok(())
+    }
+    
+    
+    pub fn gc_get_untyped_ref<U: Collectable>(&self) -> GcRef<U> {
+        self.0.get_untyped_ref()
     }
 }
 
