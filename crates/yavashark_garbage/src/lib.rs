@@ -388,7 +388,7 @@ impl<T: Collectable> Refs<T> {
 
     fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
-            lock.retain(|x| x.ptr.ptr() != other);
+            lock.retain(|x| x.box_ptr() != other.cast());
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
@@ -396,7 +396,7 @@ impl<T: Collectable> Refs<T> {
 
     fn remove_ref_by_ptr(&mut self, other: *mut GcBox<T>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
-            lock.retain(|x| x.ptr.as_ptr() != other);
+            lock.retain(|x| x.box_ptr().as_ptr() != other.cast());
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
@@ -597,6 +597,15 @@ impl<T: Collectable> GcBox<T> {
             for d in &drop {
                 Self::nuke_refs(d.box_ptr());
             }
+            
+            
+            let refs = &*(*this_ref.box_ptr().as_ptr()).refs.read_ref_by().unwrap();
+            
+            dbg!(refs);
+            dbg!(refs.len());
+            
+            
+            
 
             for d in &drop {
                 Self::nuke_value(d.ptr);
@@ -758,7 +767,7 @@ impl<T: Collectable> GcBox<T> {
             (*this).flags.set_has_no_root();
             let mut status = RootStatus::HasNoRoot;
 
-            
+
             if this_ptr.ptr.tag() {
                 for r in &*refs {
                     let root = Self::you_have_root(r.cast(), unmark);
@@ -772,14 +781,13 @@ impl<T: Collectable> GcBox<T> {
                     }
                 }
             } else {
-                
                 let refs = &*refs;
-                
+
                 // Safety
                 // We know that the this_ptr has T as the type since we don't have the tag set, so this is safe
                 let refs: &Vec<GcRef<T>> = &*std::ptr::from_ref(refs).cast();
-                
-                
+
+
                 for r in refs {
                     let root = Self::you_have_root(*r, unmark);
                     if root == RootStatus::HasRoot {
@@ -971,6 +979,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 //Drop all references
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
+                        
                         (*r.box_ptr().as_ptr()).refs.remove_ref_by(self.inner.cast());
                     }
 
@@ -1013,19 +1022,139 @@ mod tests {
             setup_logger();
 
             static mut NODES_LEFT: u32 = 0;
-
+            
             struct Node {
                 data: i32,
                 other: Vec<Gc<RefCell<Node>>>,
             }
 
+
+            unsafe impl Collectable for RefCell<Node> {
+                fn get_refs(&self) -> Vec<GcRef<Self>> {
+                    let this = self.borrow();
+                    this.other.iter().map(|x| x.get_ref()).collect()
+                }
+            }
+            
+            impl Node {
+                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self{
+                    Self {data, other}
+                }
+            }
+            
+            setup!(funcs);
+        };
+        
+        (untyped) => {
+            setup_logger();
+
+            static mut NODES_LEFT: u32 = 0;
+            
+            #[derive(Debug)]
+            struct Node {
+                data: i32,
+                other: Vec<Gc<RefCell<Node>>>,
+                other_type: Vec<Gc<Other>>,
+            }
+            
+            #[derive(Debug)]
+            struct Other {
+                data: i32,
+            }
+            
+            
+            unsafe impl Collectable for Other {
+                fn get_refs(&self) -> Vec<GcRef<Self>> {
+                    Vec::new()
+                }
+            }
+            
+            impl Other {
+                fn new(data: i32) -> Gc<Self> {
+                    unsafe {
+                        NODES_LEFT += 1;
+                    }
+                    
+                    Gc::new(Self { data })
+                }
+            }
+            
+           impl Drop for Other {
+                fn drop(&mut self) {
+                    unsafe {
+                        NODES_LEFT -= 1;
+                    }
+                }
+            } 
+
+            
+            impl Node {
+                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self{
+                    Self {data, other, other_type: Vec::new()}
+                }
+                
+                fn create_all(data: i32, other: Vec<Gc<RefCell<Node>>>, other_type: Vec<Gc<Other>>) -> Self{
+                    Self {data, other, other_type }
+                }
+                
+                fn with_other_type(data: i32, other: Vec<Gc<RefCell<Node>>>, other_type: Vec<Gc<Other>>) -> Self{ 
+                    unsafe {
+                        NODES_LEFT += 1;
+                    }
+                    Self::create_all(data, other, other_type)
+                }
+                
+                fn add_vec_type(data: i32, others: Vec<&Gc<RefCell<Node>>>, other_type: Vec<&Gc<Other>>) -> Gc<RefCell<Node>> {
+                    unsafe {
+                        NODES_LEFT += 1;
+                    }
+
+                    let other = others.iter().map(|e| (*e).clone()).collect();
+                    let other_type = other_type.iter().map(|e| (*e).clone()).collect();
+
+                    Gc::new(RefCell::new(Self::create_all(
+                        data,
+                        other,
+                        other_type,
+                    )))
+                }
+            }
+
+            unsafe impl Collectable for RefCell<Node> {
+                fn get_refs(&self) -> Vec<GcRef<Self>> {
+                    let this = self.borrow();
+                    let mut refs: Vec<_> = this.other.iter().map(|x| x.get_ref()).collect();
+                    
+                    for r in &this.other_type {
+                        refs.push(r.get_untyped_ref())
+                    }
+                    
+                    
+                    refs
+                }
+                unsafe fn deallocate(this: NonNull<[(); 0]>) {
+        
+                    let this: NonNull<Self> = this.cast();
+                    
+                    let data = (*this.as_ptr()).borrow().data;
+                    
+                    info!("Deallocating node with data: {data}");
+
+                    let _ = Box::from_raw(this.as_ptr());
+                    }
+            }
+            
+            setup!(funcs);
+        };
+        
+        (funcs) => {
             impl Node {
                 fn new(data: i32) -> Self {
                     unsafe {
                         NODES_LEFT += 1;
                     }
 
-                    Self { data, other: Vec::new() }
+                    Self::create(data, Vec::new())
                 }
 
                 fn add(data: i32) -> Gc<RefCell<Node>> {
@@ -1037,10 +1166,10 @@ mod tests {
                         NODES_LEFT += 1;
                     }
 
-                    Self {
+                    Self::create(
                         data,
-                        other: vec![other],
-                    }
+                        vec![other],
+                    )
                 }
 
                 fn add_with_other(data: i32, other: &Gc<RefCell<Node>>) -> Gc<RefCell<Node>> {
@@ -1054,10 +1183,10 @@ mod tests {
 
                     let other = others.iter().map(|e| (*e).clone()).collect();
 
-                    Gc::new(RefCell::new(Self {
+                    Gc::new(RefCell::new(Self::create(
                         data,
                         other,
-                    }))
+                    )))
                 }
             }
 
@@ -1069,16 +1198,8 @@ mod tests {
                     }
                 }
             }
-
-            unsafe impl Collectable for RefCell<Node> {
-                fn get_refs(&self) -> Vec<GcRef<Self>> {
-                    let this = self.borrow();
-                    this.other.iter().map(|x| x.get_ref()).collect()
-                }
-            }
-
-
         };
+        
         (root) => {
             Gc::root(RefCell::new(Node::new(9999)))
         };
@@ -1243,6 +1364,27 @@ mod tests {
             }
         }
 
+
+        assert_eq!(unsafe { NODES_LEFT }, 0);
+    }
+
+
+    #[test]
+    fn untyped_circular() {
+        setup!(untyped);
+
+
+        {
+            let y = Other::new(1337);
+            let y2 = Other::new(1337);
+            let y3 = Other::new(1337);
+            let y4 = Other::new(1337);
+
+            let _x = Node::add_vec_type(42, vec![], vec![&y, &y2, &y3, &y4]);
+            
+            
+            dbg!(_x);
+        }
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
