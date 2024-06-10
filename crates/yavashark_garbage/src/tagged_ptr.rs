@@ -46,7 +46,10 @@ impl<T> TaggedPtr<T> {
         let ptr = ptr | usize::from(tag);
 
         #[allow(clippy::expect_used)]
+        #[cfg(not(miri))]
         let ptr = NonNull::new(ptr as *mut _).expect("Pointer is null");
+        #[cfg(miri)]
+        let ptr = NonNull::new(std::ptr::with_exposed_provenance::<T>(ptr) as *mut _).expect("Pointer is null");
 
 
         Self {
@@ -63,11 +66,11 @@ impl<T> TaggedPtr<T> {
         let ptr = self.ptr.as_ptr() as usize & !Self::MASK;
         unsafe { NonNull::new_unchecked(ptr as *mut _) }
     }
-    
+
     pub fn as_ptr(&self) -> *mut T {
         self.ptr().as_ptr()
     }
-    
+
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
         TaggedPtr { ptr: self.ptr.cast(), _marker: std::marker::PhantomData }
