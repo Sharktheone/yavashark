@@ -635,10 +635,10 @@ impl<T: Collectable> GcBox<T> {
                 Self::nuke_refs(d.box_ptr());
             }
 
-
+            
             for d in &drop {
                 if (*d.box_ptr().as_ptr()).flags.is_value_dropped() {
-                    break;
+                    continue;
                 }
 
                 Self::nuke_value(d.ptr);
@@ -812,7 +812,8 @@ impl<T: Collectable> GcBox<T> {
             if this_ptr.ptr.tag() {
                 for r in &*refs {
                     //TODO: maybe we could improve this to avoid unnecessary clones here, since we 
-                    //kow that this_ptr hasn't T as the real type
+                    //we know that this_ptr hasn't T as the real type
+                    //TODO: This is highly problematic, since we don't know the type and so, can't safely cast it
                     let root = Self::you_have_root(&r.clone().cast(), unmark);
                     if root == RootStatus::HasRoot {
                         (*this).flags.set_has_root();
@@ -832,7 +833,7 @@ impl<T: Collectable> GcBox<T> {
 
 
                 for r in refs {
-                    let root = Self::you_have_root(&r.clone().cast(), unmark);
+                    let root = Self::you_have_root(r, unmark);
                     if root == RootStatus::HasRoot {
                         (*this).flags.set_has_root();
                         return RootStatus::HasRoot;
