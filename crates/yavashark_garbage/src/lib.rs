@@ -6,7 +6,7 @@ use std::ops::Deref;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use log::warn;
+use log::{debug, warn};
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use spin_lock::SpinLock;
@@ -550,6 +550,10 @@ impl Flags {
         self.0 & Self::HAS_NO_ROOT != 0 && self.0 & Self::HAS_ROOT == 0
     }
 
+    const fn has_root(self) -> bool {
+        self.is_has_root() || self.is_root()
+    }
+
     const fn is_root_pending(self) -> bool {
         self.0 & Self::ROOT_PENDING != 0
     }
@@ -617,6 +621,9 @@ impl<T: Collectable> GcBox<T> {
                 }
             }
 
+            let mut dropping = Vec::new();
+            Self::get_all_drops(this_ref, &mut dropping, &mut unmark);
+
             let (drop, unmark): (Vec<_>, Vec<_>) = unmark.into_iter().partition(|x| {
                 if (*x.box_ptr().as_ptr()).flags.is_has_no_root() {
                     (*x.box_ptr().as_ptr()).flags.set_externally_dropped();
@@ -625,6 +632,10 @@ impl<T: Collectable> GcBox<T> {
                     false
                 }
             });
+            warn!("DROPS: {:?}", drop.len());
+            warn!("UNMARKS: {:?}", unmark.len());
+            warn!("DROPPING: {:?}", dropping.len());
+
 
             for u in unmark {
                 (*u.box_ptr().as_ptr()).unmark();
@@ -638,13 +649,15 @@ impl<T: Collectable> GcBox<T> {
 
             for d in &drop {
                 if (*d.box_ptr().as_ptr()).flags.is_value_dropped() {
-                    break;
+                    warn!("ALREADY DROPPED");
+                    continue;
                 }
 
                 Self::nuke_value(d.ptr);
             }
 
             for d in &drop {
+                warn!("NUKING BOX; NO VALUE");
                 Self::nuke(d.box_ptr());
             }
         }
@@ -735,6 +748,7 @@ impl<T: Collectable> GcBox<T> {
             }
 
             (*(*this).gc_box.as_ptr()).flags.set_value_dropped();
+            warn!("DEALLOCED");
             return;
         }
 
@@ -748,10 +762,13 @@ impl<T: Collectable> GcBox<T> {
             {
                 TRACER.remove((*this_ptr.as_ptr()).refs.trace);
             }
+
+            warn!("DEALLOCED");
         }
     }
 
     /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
+    /// This also does NOT drop the value, since we can't rely on type information for that to be done.
     unsafe fn nuke(this_ptr: NonNull<GcBox<()>>) {
         unsafe {
             let this = this_ptr.as_ptr();
@@ -848,6 +865,65 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+
+    fn get_all_drops(this_ptr: &GcRef<T>, drop: &mut Vec<GcRef<T>>, unmark: &mut Vec<GcRef<T>>) {
+        
+        unsafe {
+
+            let flags = (*this_ptr.box_ptr().as_ptr()).flags;
+            if flags.is_marked() {
+                warn!("ALREADY MARKED - {this_ptr:?}");
+                return;
+            }
+
+            (*this_ptr.box_ptr().as_ptr()).flags.set_marked();
+            warn!("MARKED - {this_ptr:?}");
+            
+            if flags.has_root() {
+                warn!("HAS ROOT - NOT DROPPING & SEARCHING PARENTS");
+                return;
+            }
+
+            if flags.is_root_pending() {
+                Self::you_have_root(this_ptr, unmark);
+            }
+
+            let flags = (*this_ptr.box_ptr().as_ptr()).flags;
+
+            if flags.has_root() {
+                warn!("HAS ROOT - NOT DROPPING & SEARCHING PARENTS");
+                return;
+            }
+
+            //TODO: do we need to drop also when we have a root pending? - I think so, but if it segfaults we need to check this
+            drop.push(this_ptr.clone());
+            
+
+            if this_ptr.ptr.tag() {
+                let this = this_ptr.box_ptr().as_ptr();
+
+                let Some(refs) = (*this).refs.read_ref_by() else {
+                    warn!("Failed to read references from a GcBox - leaking memory");
+                    return;
+                };
+
+                for r in &*refs {
+                    Self::get_all_drops(&r.clone().cast(), drop, unmark);
+                }
+            } else {
+                let this = this_ptr.ptr.ptr().as_ptr();
+
+                let Some(refs) = (*this).refs.read_ref_by() else {
+                    warn!("Failed to read references from a GcBox - leaking memory");
+                    return;
+                };
+
+                for r in &*refs {
+                    Self::get_all_drops(r, drop, unmark);
+                }
+            }
+        }
+    }
 
     unsafe fn update_refs(this_ptr: NonNull<Self>) {
         let value = (*this_ptr.as_ptr()).value.as_ref();
