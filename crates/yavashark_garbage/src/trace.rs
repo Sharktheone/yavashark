@@ -118,11 +118,14 @@ impl Tracer {
 
     pub fn remove_ref(&self, id: TraceID, ref_id: TraceID) {
         let mut trace = self.0.lock();
-        let item = trace.items.get_mut(&id).unwrap();
-        item.refs.retain(|&x| x != ref_id);
 
-        let ref_item = trace.items.get_mut(&ref_id).unwrap();
-        ref_item.ref_by.retain(|&x| x != id);
+        if let Some(item) = trace.items.get_mut(&id) {
+            item.refs.retain(|&x| x != ref_id);
+        }
+
+        if let Some(ref_item) = trace.items.get_mut(&ref_id) {
+            ref_item.ref_by.retain(|&x| x != id);
+        }
 
         trace.delete_cache();
     }
