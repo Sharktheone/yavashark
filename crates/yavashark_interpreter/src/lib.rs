@@ -296,10 +296,17 @@ mod temp_test {
                 .init();
             
             let src = r#"
-            function hello() {
-                console.log("hello")
-            }
+            // function hello() {
+            //     console.log("hello")
+            // }
             // hello()
+            
+            let obj = { a: 1, b: 2 }
+            let obj = { a: 1, b: 2 }
+            // let obj = { a: 1, b: 2 }
+            // let obj = { a: 1, b: 2 }
+            // let obj = { a: 1, b: 2 }
+            
             "#;
 
             let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
@@ -315,10 +322,11 @@ mod temp_test {
             println!("{result:?}");
 
 
-            thread::sleep(std::time::Duration::from_secs(20));
-            
         }
-
+        
+        
+        // #[cfg(not(miri))]
+        // std::thread::sleep(std::time::Duration::from_secs(20));
 
         println!(
             "LEAKED OBJECTS: {}/{}",
