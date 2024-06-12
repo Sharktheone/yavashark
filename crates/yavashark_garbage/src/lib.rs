@@ -191,8 +191,31 @@ impl<T: Collectable> GcRef<T> {
             }
         }
     }
+    
+    
+    fn cast_with_dealloc<U: Collectable>(self, dealloc: DeallocFn) -> GcRef<U> {
+        if self.ptr.tag() {
+            GcRef {
+                ptr: self.ptr.cast()
+            }
+        } else {
+            let untyped = Box::new(UntypedGcRef {
+                gc_box: self.ptr.ptr().cast(),
+                dealloc_value: dealloc,
+            });
 
-    fn box_ptr(&self) -> NonNull<GcBox<()>> {
+            // Unsafe because Box::into_raw guarantees the returned ptr is non-null
+            let untyped = unsafe { NonNull::new_unchecked(Box::into_raw(untyped)) };
+
+            let ptr = TaggedPtr::new(untyped, true).cast();
+
+            GcRef {
+                ptr
+            }
+        }
+    }
+
+   fn box_ptr(&self) -> NonNull<GcBox<()>> {
         if self.ptr.tag() {
             let this: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
 
@@ -203,6 +226,9 @@ impl<T: Collectable> GcRef<T> {
             self.ptr.ptr().cast()
         }
     }
+    
+    
+    
 
 
     #[cfg(feature = "trace")]
@@ -813,8 +839,10 @@ impl<T: Collectable> GcBox<T> {
                 for r in &*refs {
                     //TODO: maybe we could improve this to avoid unnecessary clones here, since we 
                     //we know that this_ptr hasn't T as the real type
-                    //TODO: This is highly problematic, since we don't know the type and so, can't safely cast it
-                    let root = Self::you_have_root(&r.clone().cast(), unmark);
+                    let ptr: NonNull<UntypedGcRef> = this_ptr.ptr.ptr().cast();
+                    let dealloc = (*ptr.as_ptr()).dealloc_value;
+                    
+                    let root = Self::you_have_root(&r.clone().cast_with_dealloc(dealloc), unmark);
                     if root == RootStatus::HasRoot {
                         (*this).flags.set_has_root();
                         return RootStatus::HasRoot;
