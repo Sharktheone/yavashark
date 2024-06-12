@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
+use log::warn;
 
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::CellCollectable;
@@ -144,18 +145,18 @@ pub(crate) struct ScopeInternal {
     pub state: ScopeState,
 }
 
-unsafe impl CellCollectable<RefCell<ScopeInternal>> for ScopeInternal {
-    fn get_refs(&self) -> Vec<GcRef<RefCell<ScopeInternal>>> {
+unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
+    fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
         let mut refs = Vec::with_capacity(self.variables.len());
 
-        for (_, v) in &self.variables {
+        for v in self.variables.values() {
             if let Value::Object(o) = &v.value {
-                refs.push(o.gc_get_untyped_ref())
+                refs.push(o.gc_get_untyped_ref());
             }
         }
 
         if let Some(parent) = &self.parent {
-            refs.push(parent.get_ref())
+            refs.push(parent.get_ref());
         }
 
         refs

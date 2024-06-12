@@ -295,20 +295,6 @@ mod temp_test {
                 .filter_level(log::LevelFilter::Warn)
                 .init();
             
-            let src = r#"
-            // function hello() {
-            //     console.log("hello")
-            // }
-            // hello()
-            
-            let obj = { a: 1, b: 2 }
-            let obj = { a: 1, b: 2 }
-            // let obj = { a: 1, b: 2 }
-            // let obj = { a: 1, b: 2 }
-            // let obj = { a: 1, b: 2 }
-            
-            "#;
-
             let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 
             let c = EsConfig::default();
@@ -323,8 +309,8 @@ mod temp_test {
 
 
         }
-        
-        
+
+
         // #[cfg(not(miri))]
         // std::thread::sleep(std::time::Duration::from_secs(20));
 

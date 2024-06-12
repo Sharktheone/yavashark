@@ -26,6 +26,7 @@ impl<T> Copy for TaggedPtr<T> {}
 
 
 impl<T> TaggedPtr<T> {
+    #[cfg(not(miri))]
     const IS_ALIGNED_ENOUGH: bool = {
         let alignment = if std::mem::align_of::<T>() > 2 {
             0
@@ -41,6 +42,7 @@ impl<T> TaggedPtr<T> {
 
 
     /// Mask, so we only keep the lowest bit
+    #[cfg(not(miri))]
     const MASK: usize = 0b1;
 
     /// # Panics
