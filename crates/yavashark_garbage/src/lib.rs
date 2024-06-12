@@ -173,10 +173,21 @@ impl<T: Collectable> GcRef<T> {
     }
 
 
-    fn cast<U: Collectable>(self) -> GcRef<U> {
+    fn cast<U: Collectable>(&self) -> GcRef<U> {
         if self.ptr.tag() {
+            let untyped: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
+
+            let clone = unsafe { (*untyped.as_ptr()).clone() };
+
+            let untyped = Box::new(clone);
+
+            // Unsafe because Box::into_raw guarantees the returned ptr is non-null
+            let untyped = unsafe { NonNull::new_unchecked(Box::into_raw(untyped)) };
+
+            let ptr = TaggedPtr::new(untyped, true).cast();
+
             GcRef {
-                ptr: self.ptr.cast()
+                ptr,
             }
         } else {
             let untyped = Box::new(UntypedGcRef::new(self.ptr.ptr()));
@@ -191,12 +202,23 @@ impl<T: Collectable> GcRef<T> {
             }
         }
     }
-    
-    
-    fn cast_with_dealloc<U: Collectable>(self, dealloc: DeallocFn) -> GcRef<U> {
+
+
+    fn cast_with_dealloc<U: Collectable>(&self, dealloc: DeallocFn) -> GcRef<U> {
         if self.ptr.tag() {
+            let untyped: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
+
+            let clone = unsafe { (*untyped.as_ptr()).clone() };
+
+            let untyped = Box::new(clone);
+
+            // Unsafe because Box::into_raw guarantees the returned ptr is non-null
+            let untyped = unsafe { NonNull::new_unchecked(Box::into_raw(untyped)) };
+
+            let ptr = TaggedPtr::new(untyped, true).cast();
+
             GcRef {
-                ptr: self.ptr.cast()
+                ptr,
             }
         } else {
             let untyped = Box::new(UntypedGcRef {
@@ -215,7 +237,7 @@ impl<T: Collectable> GcRef<T> {
         }
     }
 
-   fn box_ptr(&self) -> NonNull<GcBox<()>> {
+    fn box_ptr(&self) -> NonNull<GcBox<()>> {
         if self.ptr.tag() {
             let this: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
 
@@ -226,9 +248,6 @@ impl<T: Collectable> GcRef<T> {
             self.ptr.ptr().cast()
         }
     }
-    
-    
-    
 
 
     #[cfg(feature = "trace")]
@@ -661,7 +680,7 @@ impl<T: Collectable> GcBox<T> {
                 Self::nuke_refs(d.box_ptr());
             }
 
-            
+
             for d in &drop {
                 if (*d.box_ptr().as_ptr()).flags.is_value_dropped() {
                     continue;
@@ -841,7 +860,7 @@ impl<T: Collectable> GcBox<T> {
                     //we know that this_ptr hasn't T as the real type
                     let ptr: NonNull<UntypedGcRef> = this_ptr.ptr.ptr().cast();
                     let dealloc = (*ptr.as_ptr()).dealloc_value;
-                    
+
                     let root = Self::you_have_root(&r.clone().cast_with_dealloc(dealloc), unmark);
                     if root == RootStatus::HasRoot {
                         (*this).flags.set_has_root();
@@ -1001,8 +1020,8 @@ impl<T: Collectable> Drop for GcBox<T> {
                 //TODO: should we also panic here?
             }
 
-            if self.refs.weak() != 0 {
-                warn!("Dropping a GcBox that still has weak references - this might be bad");
+            if self.refs.weak() != 0 || self.refs.strong() != 0 {
+                warn!("Dropping a GcBox that still has references - this might be bad");
             }
 
             let self_raw = self as *mut Self;
@@ -1039,7 +1058,10 @@ impl<T: Collectable> Drop for Gc<T> {
             }
 
 
-            if (*self.inner.as_ptr()).refs.dec_strong() == 1 {
+            let old_strong = (*self.inner.as_ptr()).refs.dec_strong();
+
+
+            if old_strong == 1 {
                 // We are the last one (it returns the previous value, so we need to check if it was 1)
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
 
