@@ -108,6 +108,13 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn prototype(&self) -> &Value<C> {
         self.get_property(&"__proto__".into()).unwrap_or(&Value::Undefined)
     }
+
+    /// # Safety
+    /// This function should only return references that are actually in the object!
+    /// Else it will leak memory and cause undefined behavior, same for references that are in the object but not known to the gc!
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
+        Vec::new()
+    }
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -173,6 +180,12 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
 
         if let Value::Object(o) = self.0.prototype() {
             refs.push(o.0.get_ref());
+        }
+
+
+        unsafe {
+            // Safety: unsafe is only for the implementer, not for us - we are safe
+            refs.append(&mut self.0.custom_gc_refs());
         }
 
         refs
@@ -329,10 +342,16 @@ impl<C: Ctx> Object<C> {
         inner.clear_values();
         Ok(())
     }
-    
-    
+
+
+    #[must_use]
     pub fn gc_get_untyped_ref<U: Collectable>(&self) -> GcRef<U> {
         self.0.get_untyped_ref()
+    }
+
+    #[must_use]
+    pub fn custom_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
+        self.get().map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
     }
 }
 

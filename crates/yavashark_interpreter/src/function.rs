@@ -157,6 +157,7 @@ pub struct JSFunction {
     pub name: String,
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
+    #[gc(untyped)]
     pub scope: Scope,
 }
 

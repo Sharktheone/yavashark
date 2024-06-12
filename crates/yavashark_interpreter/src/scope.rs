@@ -1,16 +1,15 @@
-use std::cell::{RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
 use std::rc::Rc;
-use std::thread::scope;
-use log::warn;
-use yavashark_garbage::collectable::CellCollectable;
-use yavashark_garbage::{Gc, GcRef};
 
+use yavashark_garbage::{Collectable, Gc, GcRef};
+use yavashark_garbage::collectable::CellCollectable;
+
+use crate::{Error, Res, Result, Value, Variable};
 use crate::console::get_console;
 use crate::context::Context;
 use crate::error::get_error;
-use crate::{Error, Res, Value, Variable, Result};
 
 pub struct MutValue {
     pub(crate) name: String,
@@ -148,21 +147,20 @@ pub(crate) struct ScopeInternal {
 unsafe impl CellCollectable<RefCell<ScopeInternal>> for ScopeInternal {
     fn get_refs(&self) -> Vec<GcRef<RefCell<ScopeInternal>>> {
         let mut refs = Vec::with_capacity(self.variables.len());
-        
+
         for (_, v) in &self.variables {
             if let Value::Object(o) = &v.value {
                 refs.push(o.gc_get_untyped_ref())
             }
         }
-        
+
         if let Some(parent) = &self.parent {
             refs.push(parent.get_ref())
         }
-        
+
         refs
     }
 }
-
 
 
 impl ScopeInternal {
@@ -313,7 +311,7 @@ impl ScopeInternal {
         } else {
             self.variables.insert(name, Variable::new(value));
         }
-        
+
         Ok(())
     }
 
@@ -502,7 +500,7 @@ impl Scope {
 
     pub fn declare_var(&mut self, name: String, value: Value) -> Res {
         self.scope.borrow_mut()?.declare_var(name, value);
-        
+
         Ok(())
     }
 
@@ -523,7 +521,7 @@ impl Scope {
         let Ok(scope) = self.scope.borrow() else {
             return Ok(false);
         };
-        
+
         if scope.has_label(label) {
             Ok(true)
         } else {
@@ -629,8 +627,13 @@ impl Scope {
         self.scope.borrow()?.with(name, f)
     }
 
-    pub fn child(&self) -> Result<Self>{
+    pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)
+    }
+
+    #[must_use]
+    pub fn gc_untyped_ref<U: Collectable>(&self) -> GcRef<U> {
+        self.scope.get_untyped_ref()
     }
 }
 
