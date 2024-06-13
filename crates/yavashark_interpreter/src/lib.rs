@@ -148,7 +148,7 @@ mod temp_test {
 
     #[test]
     fn math() {
-        {
+        { 
             let src = r#"
 
         let x = 1 + 2
@@ -169,19 +169,19 @@ mod temp_test {
         function hello(a, b) {
             return a + b
         }
-
+        // 
         if (k > 0) {
             z = 1337
         } else {
             z = 42
         }
-
+        
         console.log(3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
         console.log("3+4 is", hello(3, 4))
-
-
+        
+        
         let yyy = 1 + 2
-
+        
         switch (yyy) {
             case 1:
                 console.log("one")
@@ -198,45 +198,45 @@ mod temp_test {
             default:
                 console.log("default")
         }
-
+        
         for (let i = 0; i < 10; i++) {
             console.log(i)
         }
-
+        
         console.log(this)
-
-
+        
+        
         function Hello() {
             this.x = 1
             this.y = 2
         }
-
-
+        
+        
         console.log(new Hello())
-
-
+        
+        
         try {
             throw 1
         } catch ({message}) {
             console.log("error:", message)
         }
-
+        
         let a = 1
         while (a < 10) {
             console.log("infinite loop")
             a++;
         }
-
-
+        
+        
         let array = new Array(4, 5, 6, 7)
-
-
+        
+        
         console.log(array[0], array[1], array[2], array[3])
-
+        
         for (let i in array) {
             console.log("in", i)
         }
-
+        
         for (let i of array) {
             console.log("of", i)
         }
@@ -259,36 +259,57 @@ mod temp_test {
             }
         }
         
-        let arr = new Arrows()
+        // let arr = new Arrows() //TODO: this causes a memleak
         
-        console.log("arrow", arr.arrow(1, 2))
+        // console.log("arrow", arr.arrow(1, 2))
         
         
         // console.log(Array) //TODO: this causes an error (probably because of the prototype)
-
-
+        
+        
         let lit_array = [1,2,3,,4,5,6,7,,,8,9,10]
-
+        
         console.log(lit_array)
-
+        
         let obj = {
             x: 11,
             y: 22,
             z: 33
         }
-
+        
         console.log(obj)
         console.log(obj.x, obj.y, obj.z)
-
-
+        
+        
         let x = function() {
         console.log("hello")
         }
-
+        
         x()
 
         z
         "#;
+            
+            
+            let src = r#"
+        function Arrows() {
+            this.x = "hello"
+            this.y = "world"
+            
+            this.arrow = (a, b) => {
+                console.log("from_arrows", this.x, this.y)
+                return a + b
+            }
+            
+            this.obj = {
+                x: 1,
+                y: 2,
+                z: 3
+            }
+        }
+        
+        let arr = new Arrows()
+            "#;
             
             
             env_logger::Builder::from_default_env()

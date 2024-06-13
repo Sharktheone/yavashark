@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
@@ -6,6 +7,7 @@ pub use context::*;
 pub use function::*;
 pub use object::*;
 pub use symbol::*;
+use yavashark_garbage::{Collectable, GcRef};
 
 use crate::Error;
 
@@ -152,6 +154,14 @@ impl<C: Ctx> Value<C> {
             Self::Symbol(_) => "symbol",
         }
     }
+    
+    #[must_use]
+    pub fn gc_ref(&self) -> Option<GcRef<RefCell<BoxedObj<C>>>> {
+        match self {
+            Self::Object(o) => Some(o.gc_get_ref()),
+            _ => None,
+        }
+    }
 }
 
 impl<C: Ctx> Display for Value<C> {
@@ -164,6 +174,16 @@ impl<C: Ctx> Display for Value<C> {
             Self::Boolean(b) => write!(f, "{b}"),
             Self::Object(o) => write!(f, "{o}"),
             Self::Symbol(s) => write!(f, "Symbol({s})"),
+        }
+    }
+}
+
+
+impl<C: Ctx> CustomGcRefUntyped for Value<C> {
+    fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
+        match self {
+            Self::Object(o) => Some(o.gc_get_untyped_ref()),
+            _ => None,
         }
     }
 }
@@ -263,7 +283,7 @@ impl<C: Ctx> Value<C> {
         if let Self::Object(o) = self {
             o.exchange(other)?;
         }
-        
+
         Ok(())
     }
 }
@@ -315,4 +335,14 @@ impl<C: Ctx> Iter<C> {
         }
         next.get_property(&Value::string("value")).map(Some)
     }
+}
+
+
+pub trait CustomGcRef: Collectable + CustomGcRefUntyped {
+    fn gc_ref(&self) -> Option<GcRef<Self>> where Self: Collectable;
+
+}
+
+pub trait CustomGcRefUntyped {
+    fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>>;
 }

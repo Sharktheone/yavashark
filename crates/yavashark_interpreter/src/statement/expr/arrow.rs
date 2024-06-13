@@ -14,7 +14,9 @@ use crate::{ObjectHandle, Value};
 #[allow(clippy::module_name_repetitions)]
 pub struct ArrowFunction {
     expr: ArrowExpr,
+    #[gc]
     this: Value,
+    #[gc(untyped)]
     scope: Scope,
 }
 

@@ -343,6 +343,10 @@ impl<C: Ctx> Object<C> {
         Ok(())
     }
 
+    #[must_use]
+    pub fn gc_get_ref(&self) -> GcRef<RefCell<BoxedObj<C>>> {
+        self.0.get_ref()
+    }
 
     #[must_use]
     pub fn gc_get_untyped_ref<U: Collectable>(&self) -> GcRef<U> {

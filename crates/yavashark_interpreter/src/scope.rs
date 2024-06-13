@@ -6,6 +6,7 @@ use log::warn;
 
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::CellCollectable;
+use yavashark_value::{CustomGcRef, CustomGcRefUntyped};
 
 use crate::{Error, Res, Result, Value, Variable};
 use crate::console::get_console;
@@ -631,10 +632,12 @@ impl Scope {
     pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)
     }
+}
 
-    #[must_use]
-    pub fn gc_untyped_ref<U: Collectable>(&self) -> GcRef<U> {
-        self.scope.get_untyped_ref()
+
+impl CustomGcRefUntyped for Scope {
+    fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
+        Some(self.scope.get_untyped_ref())
     }
 }
 
