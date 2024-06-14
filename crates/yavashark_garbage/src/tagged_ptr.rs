@@ -1,21 +1,21 @@
 use std::ptr::NonNull;
 
-#[cfg(not(miri))]
+#[cfg(all(not(miri), not(debug_assertions)))]
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct TaggedPtr<T> {
+    #[cfg(not(deb))]
     ptr: NonNull<[(); 0]>,
     _marker: std::marker::PhantomData<T>,
 }
 
-#[cfg(miri)]
+#[cfg(any(miri, debug_assertions))]
 #[derive(Debug)]
 pub struct TaggedPtr<T> {
-    ptr: NonNull<[(); 0]>,
+    ptr: NonNull<T>,
     tag: bool,
     _marker: std::marker::PhantomData<T>,
 }
-
 
 
 impl<T> Clone for TaggedPtr<T> {
@@ -48,7 +48,7 @@ impl<T> TaggedPtr<T> {
     /// # Panics
     /// - Panics if the pointer is not aligned enough
     /// - Panics if the pointer is null
-    #[cfg(not(miri))]
+    #[cfg(all(not(miri), not(debug_assertions)))]
     pub fn new(ptr: NonNull<T>, tag: bool) -> Self {
         assert!(Self::IS_ALIGNED_ENOUGH);
         let ptr = ptr.as_ptr() as usize;
@@ -58,7 +58,7 @@ impl<T> TaggedPtr<T> {
         let ptr = ptr | usize::from(tag);
 
         #[allow(clippy::expect_used)]
-        let ptr = NonNull::new(ptr as *mut _).expect("Pointer is null");
+            let ptr = NonNull::new(ptr as *mut _).expect("Pointer is null");
 
 
         Self {
@@ -66,8 +66,8 @@ impl<T> TaggedPtr<T> {
             _marker: std::marker::PhantomData,
         }
     }
-    
-    #[cfg(miri)]
+
+    #[cfg(any(miri, debug_assertions))]
     pub fn new(ptr: NonNull<T>, tag: bool) -> Self {
         Self {
             ptr: ptr.cast(),
@@ -76,26 +76,24 @@ impl<T> TaggedPtr<T> {
         }
     }
 
-    #[cfg(not(miri))]
+    #[cfg(all(not(miri), not(debug_assertions)))]
     pub(crate) fn tag(&self) -> bool {
         self.ptr.as_ptr() as usize & Self::MASK != 0
     }
-    
-    #[cfg(miri)]
+
+    #[cfg(any(miri, debug_assertions))]
     pub(crate) fn tag(&self) -> bool {
         self.tag
     }
-    
-    
-    
 
-    #[cfg(not(miri))]
+
+    #[cfg(all(not(miri), not(debug_assertions)))]
     pub(crate) fn ptr(&self) -> NonNull<T> {
         let ptr = self.ptr.as_ptr() as usize & !Self::MASK;
         unsafe { NonNull::new_unchecked(ptr as *mut _) }
     }
-    
-    #[cfg(miri)]
+
+    #[cfg(any(miri, debug_assertions))]
     pub(crate) fn ptr(&self) -> NonNull<T> {
         self.ptr.cast()
     }
@@ -104,16 +102,16 @@ impl<T> TaggedPtr<T> {
         self.ptr().as_ptr()
     }
 
-    #[cfg(not(miri))]
+    #[cfg(all(not(miri), not(debug_assertions)))]
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
         TaggedPtr { ptr: self.ptr, _marker: std::marker::PhantomData }
     }
-    
-    #[cfg(miri)]
+
+    #[cfg(any(miri, debug_assertions))]
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
-        TaggedPtr { ptr: self.ptr, tag: self.tag, _marker: std::marker::PhantomData }
+        TaggedPtr { ptr: self.ptr.cast(), tag: self.tag, _marker: std::marker::PhantomData }
     }
 }
 
@@ -123,8 +121,6 @@ impl<T> From<NonNull<T>> for TaggedPtr<T> {
         Self::new(value, false)
     }
 }
-
-
 
 
 #[cfg(test)]
@@ -138,7 +134,7 @@ mod tests {
 
         assert!(tagged.tag());
         assert_eq!(tagged.ptr(), ptr);
-        assert_eq!(unsafe { *tagged.ptr().as_ptr()}, 1337);
+        assert_eq!(unsafe { *tagged.ptr().as_ptr() }, 1337);
     }
 
     #[test]
@@ -148,6 +144,6 @@ mod tests {
 
         assert!(!tagged.tag());
         assert_eq!(tagged.ptr(), ptr);
-        assert_eq!(unsafe {*tagged.ptr().as_ptr()},1337);
+        assert_eq!(unsafe { *tagged.ptr().as_ptr() }, 1337);
     }
 }
