@@ -13,13 +13,15 @@ use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use spin_lock::SpinLock;
 
 use crate::tagged_ptr::TaggedPtr;
-#[cfg(feature = "trace")]
+#[cfg(feature = "easy_debug")]
 use crate::trace::{TraceID, TRACER};
 
 pub(crate) mod spin_lock;
 
-#[cfg(feature = "trace")]
+#[cfg(feature = "easy_debug")]
 mod trace;
+#[cfg(feature = "trace")]
+mod trace_gui;
 pub mod collectable;
 pub(crate) mod tagged_ptr;
 
@@ -256,7 +258,7 @@ impl<T: Collectable> GcRef<T> {
     }
 
 
-    #[cfg(feature = "trace")]
+    #[cfg(feature = "easy_debug")]
     fn trace_id(&self) -> TraceID {
         unsafe {
             (*self.box_ptr().as_ptr()).refs.trace
@@ -358,10 +360,6 @@ impl<T: Collectable> Gc<T> {
             }
         }
     }
-    // #[cfg(feature = "trace")]
-    // fn trace(&self) -> TraceID {
-    //     unsafe { (*self.inner.as_ptr()).refs.trace }
-    // }
 }
 
 
@@ -406,7 +404,7 @@ impl<T: Collectable> Gc<T> {
             (*gc_box.as_ptr()).refs.ref_to = RwLock::new(ref_to);
 
 
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             for r in &*(*gc_box.as_ptr()).refs.ref_to.read_recursive() {
                 let id = (*gc_box.as_ptr()).refs.trace;
 
@@ -461,7 +459,7 @@ struct Refs<T: Collectable> {
     ref_to: RwLock<Vec<GcRef<T>>>,
     weak: AtomicU32, // Number of weak references by for example the Garbage Collector or WeakRef in JS
     strong: AtomicU32, // Number of strong references
-    #[cfg(feature = "trace")]
+    #[cfg(feature = "easy_debug")]
     trace: TraceID,
 }
 
@@ -472,7 +470,7 @@ impl<T: Collectable> Refs<T> {
             ref_to: RwLock::new(Vec::new()),
             weak: AtomicU32::new(0),
             strong: AtomicU32::new(1),
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             trace: TRACER.add(),
         }
     }
@@ -532,7 +530,7 @@ impl<T: Collectable> Refs<T> {
     }
 }
 
-//On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector 
+//On low-ram devices we might want to use a smaller pointer size or just use a mark-and-sweep garbage collector
 struct GcBox<T: Collectable> {
     value: MaybeNull<T>, // This value might be null
     refs: Refs<T>,
@@ -795,7 +793,7 @@ impl<T: Collectable> GcBox<T> {
 
 
             unsafe {
-                #[cfg(feature = "trace")]
+                #[cfg(feature = "easy_debug")]
                 {
                     TRACER.remove((*(*this).gc_box.as_ptr()).refs.trace);
                 }
@@ -815,7 +813,7 @@ impl<T: Collectable> GcBox<T> {
 
             let _ = Box::from_raw(value.as_ptr());
             (*this_ptr.as_ptr()).flags.set_value_dropped();
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             {
                 TRACER.remove((*this_ptr.as_ptr()).refs.trace);
             }
@@ -962,7 +960,7 @@ impl<T: Collectable> GcBox<T> {
             Self::collect(r);
 
 
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             {
                 let this_id = (*this_ptr.as_ptr()).refs.trace;
                 TRACER.remove_ref(this_id, r.trace_id());
@@ -971,7 +969,7 @@ impl<T: Collectable> GcBox<T> {
 
         for a in &added {
             write.push(a.clone());
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             {
                 let this_id = (*this_ptr.as_ptr()).refs.trace;
                 TRACER.add_ref(this_id, a.trace_id());
@@ -1066,7 +1064,7 @@ impl<T: Collectable> Drop for GcBox<T> {
             let ptr = &mut self.value;
             unsafe {
                 let _ = Box::from_raw(ptr.as_ptr());
-                #[cfg(feature = "trace")]
+                #[cfg(feature = "easy_debug")]
                 {
                     TRACER.remove(self.refs.trace);
                 }
