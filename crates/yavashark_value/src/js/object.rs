@@ -196,7 +196,7 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
     }
     
     
-    #[cfg(feature = "obj_trace")]
+    #[cfg(any(feature = "obj_dbg", feature = "obj_trace"))]
     fn trace_name(&self) -> &'static str {
         self.0.class_name()
     }

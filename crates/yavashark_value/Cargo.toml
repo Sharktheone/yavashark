@@ -17,7 +17,8 @@ js = []
 ts = []
 anyhow = ["dep:anyhow"]
 dbg_object_gc = []
-obj_trace = ["yavashark_garbage/trace"]
+obj_trace = ["yavashark_garbage/trace", "yavashark_garbage/easy_debug"]
+obj_dbg = ["yavashark_garbage/easy_debug"]
 
 
 [lints]

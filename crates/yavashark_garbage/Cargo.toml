@@ -27,3 +27,4 @@ env_logger = "0.11.3"
 
 [features]
 trace = ["dep:lazy_static", "dep:egui", "dep:eframe", "dep:egui_extras", "dep:layout-rs", "dep:winit"]
+easy_debug = []

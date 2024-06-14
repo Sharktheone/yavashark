@@ -9,7 +9,7 @@ edition = "2021"
 swc_ecma_parser = "0.143.16"
 swc_ecma_ast = "0.112.8"
 swc_common = "0.33.25"
-yavashark_value = { path = "../yavashark_value", features = ["js", "dbg_object_gc"], default-features = false }
+yavashark_value = { path = "../yavashark_value", features = ["js", "dbg_object_gc", "obj_dbg"], default-features = false }
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_garbage = { path = "../yavashark_garbage" }
 anyhow = "1.0.83"

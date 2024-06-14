@@ -12,7 +12,7 @@ pub struct TaggedPtr<T> {
 #[cfg(any(miri, feature = "easy_debug"))]
 #[derive(Debug)]
 pub struct TaggedPtr<T> {
-    ptr: NonNull<T>,
+    ptr: NonNull<[T; 1]>, //Somehow when we just have T, lldb can't show the value of ptr, so it at least shows the pointer even though we can't read it.
     tag: bool,
     _marker: std::marker::PhantomData<T>,
 }
