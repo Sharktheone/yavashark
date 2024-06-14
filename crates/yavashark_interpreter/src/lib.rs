@@ -259,12 +259,12 @@ mod temp_test {
             }
         }
         
-        // let arr = new Arrows() //TODO: this causes a memleak
+        let arr = new Arrows()
         
-        // console.log("arrow", arr.arrow(1, 2))
+        console.log("arrow", arr.arrow(1, 2))
         
         
-        // console.log(Array) //TODO: this causes an error (probably because of the prototype)
+        // console.log(Array) //TODO: this causes an stack overflow (probably because of the prototype)
         
         
         let lit_array = [1,2,3,,4,5,6,7,,,8,9,10]
@@ -289,27 +289,6 @@ mod temp_test {
 
         z
         "#;
-            
-            
-            let src = r#"
-        function Arrows() {
-            this.x = "hello"
-            this.y = "world"
-            
-            this.arrow = (a, b) => {
-                console.log("from_arrows", this.x, this.y)
-                return a + b
-            }
-            
-            this.obj = {
-                x: 1,
-                y: 2,
-                z: 3
-            }
-        }
-        
-        let arr = new Arrows()
-            "#;
             
             
             env_logger::Builder::from_default_env()

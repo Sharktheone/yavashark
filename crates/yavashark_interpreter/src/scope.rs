@@ -134,7 +134,6 @@ impl ScopeState {
 #[derive(Debug, Clone)]
 pub struct Scope {
     scope: Gc<RefCell<ScopeInternal>>,
-    pub this: Value,
 }
 
 
@@ -144,6 +143,7 @@ pub(crate) struct ScopeInternal {
     variables: HashMap<String, Variable>,
     pub available_labels: Vec<String>,
     pub state: ScopeState,
+    pub this: Value,
 }
 
 unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
@@ -158,6 +158,10 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
 
         if let Some(parent) = &self.parent {
             refs.push(parent.get_ref());
+        }
+        
+        if let Some(this) = self.this.gc_untyped_ref() {
+            refs.push(this);
         }
 
         refs
@@ -199,6 +203,7 @@ impl ScopeInternal {
             variables,
             available_labels: Vec::new(),
             state: ScopeState::new(),
+            this: Value::Undefined
         }
     }
 
@@ -248,6 +253,7 @@ impl ScopeInternal {
             variables,
             available_labels: Vec::new(),
             state: ScopeState::STATE_GLOBAL,
+            this: Value::string("global"),
         }
     }
 
@@ -281,13 +287,24 @@ impl ScopeInternal {
         let par_scope = parent.borrow()?;
         let mut available_labels = par_scope.available_labels.clone();
         drop(par_scope);
+        
+        let this = parent.borrow()?.this.copy();
 
         Ok(Self {
             parent: Some(parent),
             variables,
             available_labels,
             state,
+            this,
         })
+    }
+    
+    pub fn with_parent_this(parent: Gc<RefCell<Self>>, this: Value) -> Result<Self> {
+        let mut new = Self::with_parent(parent)?;
+        
+        new.this = this;
+        
+        Ok(new)
     }
 
     pub fn declare_var(&mut self, name: String, value: Value) {
@@ -471,14 +488,12 @@ impl Scope {
     pub fn new(ctx: &mut Context) -> Self {
         Self {
             scope: Gc::new(RefCell::new(ScopeInternal::new(ctx))),
-            this: Value::Undefined,
         }
     }
 
     pub fn global(ctx: &mut Context) -> Self {
         Self {
             scope: Gc::new(RefCell::new(ScopeInternal::global(ctx))),
-            this: Value::String("global".to_string()), //TODO: globalThis
         }
     }
 
@@ -487,16 +502,14 @@ impl Scope {
             scope: Gc::new(RefCell::new(ScopeInternal::with_parent(Gc::clone(
                 &parent.scope,
             ))?)),
-            this: parent.this.copy(),
         })
     }
 
     pub fn with_parent_this(parent: &Self, this: Value) -> Result<Self> {
         Ok(Self {
-            scope: Gc::new(RefCell::new(ScopeInternal::with_parent(Gc::clone(
+            scope: Gc::new(RefCell::new(ScopeInternal::with_parent_this(Gc::clone(
                 &parent.scope,
-            ))?)),
-            this,
+            ), this)?)),
         })
     }
 
@@ -632,6 +645,10 @@ impl Scope {
     pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)
     }
+    
+    pub fn this(&self) -> Result<Value> {
+        Ok(self.scope.borrow()?.this.copy())
+    }
 }
 
 
@@ -645,7 +662,6 @@ impl From<ScopeInternal> for Scope {
     fn from(scope: ScopeInternal) -> Self {
         Self {
             scope: Gc::new(RefCell::new(scope)),
-            this: Value::Undefined,
         }
     }
 }
@@ -654,7 +670,6 @@ impl From<Gc<RefCell<ScopeInternal>>> for Scope {
     fn from(scope: Gc<RefCell<ScopeInternal>>) -> Self {
         Self {
             scope,
-            this: Value::Undefined,
         }
     }
 }
