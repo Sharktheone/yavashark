@@ -39,12 +39,18 @@ collect!(usize);
 collect!(String);
 
 
-///This trait optimizes the usage of Cells like RefCells and others in the Gc
+///This trait optimizes the usage of Cells like `RefCell`s and others in the Gc
 ///they do not need to use a typeless gc, but instead can just return also RefCell-References
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait CellCollectable<T: Collectable> {
     fn get_refs(&self) -> Vec<GcRef<T>>;
+    
+    #[cfg(feature = "trace")]
+    #[must_use]
+    fn trace_name(&self) -> &'static str {
+        std::any::type_name::<Self>()
+    }
 }
 
 
@@ -54,6 +60,11 @@ macro_rules! cell {
         unsafe impl<T: CellCollectable<Self>> Collectable for $ty<T> {
             fn get_refs(&self) -> Vec<GcRef<Self>> {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
+            }
+            
+            #[cfg(feature = "trace")]
+            fn trace_name(&self) -> &'static str {
+                self.$lock().map(|x| x.trace_name()).unwrap_or("<unknown>")
             }
         }
     };

@@ -115,6 +115,10 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
         Vec::new()
     }
+    
+    fn class_name(&self) -> &'static str {
+        std::any::type_name::<Self>()
+    }
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -189,6 +193,12 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
         }
 
         refs
+    }
+    
+    
+    #[cfg(feature = "obj_trace")]
+    fn trace_name(&self) -> &'static str {
+        self.0.class_name()
     }
 }
 

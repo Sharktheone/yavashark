@@ -1,6 +1,7 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
+use std::any::type_name;
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 use std::ptr::NonNull;
@@ -34,6 +35,11 @@ pub unsafe trait Collectable: Sized {
         let this: NonNull<Self> = this.cast();
 
         let _ = Box::from_raw(this.as_ptr());
+    }
+
+    #[cfg(feature = "trace")]
+    fn trace_name(&self) -> &'static str {
+        type_name::<Self>()
     }
 }
 
@@ -368,6 +374,9 @@ impl<T: Collectable> From<NonNull<GcBox<T>>> for Gc<T> {
 
 impl<T: Collectable> Gc<T> {
     pub fn new(value: T) -> Self {
+        #[cfg(feature = "trace")]
+            let name = value.trace_name();
+
         let ref_to = value.get_refs();
 
         let value = Box::new(value);
@@ -378,6 +387,10 @@ impl<T: Collectable> Gc<T> {
             value,
             refs: Refs::new(),
             flags: Flags::new(),
+            #[cfg(feature = "trace")]
+            ty_name: type_name::<T>(),
+            #[cfg(feature = "trace")]
+            name: name,
         };
 
         let gc_box = Box::new(gc_box);
@@ -406,6 +419,9 @@ impl<T: Collectable> Gc<T> {
     }
 
     pub fn root(value: T) -> Self {
+        #[cfg(feature = "trace")]
+            let _name = value.trace_name();
+
         let value = Box::new(value);
         let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
 
@@ -413,6 +429,10 @@ impl<T: Collectable> Gc<T> {
             value,
             refs: Refs::new(),
             flags: Flags::root(),
+            #[cfg(feature = "trace")]
+            ty_name: type_name::<T>(),
+            #[cfg(feature = "trace")]
+            name: _name,
         };
 
         let gc_box = Box::new(gc_box);
@@ -517,6 +537,12 @@ struct GcBox<T: Collectable> {
     value: MaybeNull<T>, // This value might be null
     refs: Refs<T>,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
+    #[cfg(feature = "trace")]
+    #[allow(dead_code)]
+    ty_name: &'static str,
+    #[cfg(feature = "trace")]
+    #[allow(dead_code)]
+    name: &'static str,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
