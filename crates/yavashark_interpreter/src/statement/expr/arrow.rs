@@ -47,7 +47,7 @@ impl Func<Context> for ArrowFunction {
 
 impl Context {
     pub fn run_arrow(&mut self, stmt: &ArrowExpr, scope: &mut Scope) -> RuntimeResult {
-        let this = scope.this.copy();
+        let this = scope.this()?.copy();
 
         let arrow = ArrowFunction {
             object: Object::raw_with_proto(self.proto.func.clone().into()),
