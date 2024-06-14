@@ -46,7 +46,7 @@ collect!(String);
 pub unsafe trait CellCollectable<T: Collectable> {
     fn get_refs(&self) -> Vec<GcRef<T>>;
     
-    #[cfg(feature = "trace")]
+    #[cfg(feature = "easy_debug")]
     #[must_use]
     fn trace_name(&self) -> &'static str {
         std::any::type_name::<Self>()
@@ -62,7 +62,7 @@ macro_rules! cell {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
             }
             
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             fn trace_name(&self) -> &'static str {
                 self.$lock().map(|x| x.trace_name()).unwrap_or("<unknown>")
             }

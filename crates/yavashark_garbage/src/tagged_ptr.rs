@@ -1,6 +1,6 @@
 use std::ptr::NonNull;
 
-#[cfg(all(not(miri), not(debug_assertions)))]
+#[cfg(all(not(miri), not(feature = "easy_debug")))]
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct TaggedPtr<T> {
@@ -9,7 +9,7 @@ pub struct TaggedPtr<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
-#[cfg(any(miri, debug_assertions))]
+#[cfg(any(miri, feature = "easy_debug"))]
 #[derive(Debug)]
 pub struct TaggedPtr<T> {
     ptr: NonNull<T>,
@@ -25,8 +25,9 @@ impl<T> Clone for TaggedPtr<T> {
 impl<T> Copy for TaggedPtr<T> {}
 
 
+#[allow(clippy::missing_const_for_fn)]
 impl<T> TaggedPtr<T> {
-    #[cfg(not(miri))]
+    #[cfg(all(not(miri), not(feature = "easy_debug")))]
     const IS_ALIGNED_ENOUGH: bool = {
         let alignment = if std::mem::align_of::<T>() > 2 {
             0
@@ -42,13 +43,13 @@ impl<T> TaggedPtr<T> {
 
 
     /// Mask, so we only keep the lowest bit
-    #[cfg(not(miri))]
+    #[cfg(all(not(miri), not(feature = "easy_debug")))]
     const MASK: usize = 0b1;
 
     /// # Panics
     /// - Panics if the pointer is not aligned enough
     /// - Panics if the pointer is null
-    #[cfg(all(not(miri), not(debug_assertions)))]
+    #[cfg(all(not(miri), not(feature = "easy_debug")))]
     pub fn new(ptr: NonNull<T>, tag: bool) -> Self {
         assert!(Self::IS_ALIGNED_ENOUGH);
         let ptr = ptr.as_ptr() as usize;
@@ -67,7 +68,7 @@ impl<T> TaggedPtr<T> {
         }
     }
 
-    #[cfg(any(miri, debug_assertions))]
+    #[cfg(any(miri, feature = "easy_debug"))]
     pub fn new(ptr: NonNull<T>, tag: bool) -> Self {
         Self {
             ptr: ptr.cast(),
@@ -76,24 +77,24 @@ impl<T> TaggedPtr<T> {
         }
     }
 
-    #[cfg(all(not(miri), not(debug_assertions)))]
+    #[cfg(all(not(miri), not(feature = "easy_debug")))]
     pub(crate) fn tag(&self) -> bool {
         self.ptr.as_ptr() as usize & Self::MASK != 0
     }
 
-    #[cfg(any(miri, debug_assertions))]
+    #[cfg(any(miri, feature = "easy_debug"))]
     pub(crate) fn tag(&self) -> bool {
         self.tag
     }
 
 
-    #[cfg(all(not(miri), not(debug_assertions)))]
+    #[cfg(all(not(miri), not(feature = "easy_debug")))]
     pub(crate) fn ptr(&self) -> NonNull<T> {
         let ptr = self.ptr.as_ptr() as usize & !Self::MASK;
         unsafe { NonNull::new_unchecked(ptr as *mut _) }
     }
 
-    #[cfg(any(miri, debug_assertions))]
+    #[cfg(any(miri, feature = "easy_debug"))]
     pub(crate) fn ptr(&self) -> NonNull<T> {
         self.ptr.cast()
     }
@@ -102,13 +103,13 @@ impl<T> TaggedPtr<T> {
         self.ptr().as_ptr()
     }
 
-    #[cfg(all(not(miri), not(debug_assertions)))]
+    #[cfg(all(not(miri), not(feature = "easy_debug")))]
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
         TaggedPtr { ptr: self.ptr, _marker: std::marker::PhantomData }
     }
 
-    #[cfg(any(miri, debug_assertions))]
+    #[cfg(any(miri, feature = "easy_debug"))]
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
         TaggedPtr { ptr: self.ptr.cast(), tag: self.tag, _marker: std::marker::PhantomData }

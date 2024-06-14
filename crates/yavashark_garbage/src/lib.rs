@@ -37,7 +37,7 @@ pub unsafe trait Collectable: Sized {
         let _ = Box::from_raw(this.as_ptr());
     }
 
-    #[cfg(feature = "trace")]
+    #[cfg(feature = "easy_debug")]
     fn trace_name(&self) -> &'static str {
         type_name::<Self>()
     }
@@ -374,7 +374,7 @@ impl<T: Collectable> From<NonNull<GcBox<T>>> for Gc<T> {
 
 impl<T: Collectable> Gc<T> {
     pub fn new(value: T) -> Self {
-        #[cfg(feature = "trace")]
+        #[cfg(feature = "easy_debug")]
             let name = value.trace_name();
 
         let ref_to = value.get_refs();
@@ -387,9 +387,9 @@ impl<T: Collectable> Gc<T> {
             value,
             refs: Refs::new(),
             flags: Flags::new(),
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             ty_name: type_name::<T>(),
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             name: name,
         };
 
@@ -419,7 +419,7 @@ impl<T: Collectable> Gc<T> {
     }
 
     pub fn root(value: T) -> Self {
-        #[cfg(feature = "trace")]
+        #[cfg(feature = "easy_debug")]
             let _name = value.trace_name();
 
         let value = Box::new(value);
@@ -429,9 +429,9 @@ impl<T: Collectable> Gc<T> {
             value,
             refs: Refs::new(),
             flags: Flags::root(),
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             ty_name: type_name::<T>(),
-            #[cfg(feature = "trace")]
+            #[cfg(feature = "easy_debug")]
             name: _name,
         };
 
@@ -537,10 +537,10 @@ struct GcBox<T: Collectable> {
     value: MaybeNull<T>, // This value might be null
     refs: Refs<T>,
     flags: Flags, // Mark for garbage collection only accessible by the garbage collector thread
-    #[cfg(feature = "trace")]
+    #[cfg(feature = "easy_debug")]
     #[allow(dead_code)]
     ty_name: &'static str,
-    #[cfg(feature = "trace")]
+    #[cfg(feature = "easy_debug")]
     #[allow(dead_code)]
     name: &'static str,
 }

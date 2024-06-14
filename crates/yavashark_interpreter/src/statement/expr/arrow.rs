@@ -1,3 +1,5 @@
+use std::any::type_name;
+use log::warn;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 use yavashark_macro::object;
@@ -53,7 +55,10 @@ impl Context {
             this,
             scope: scope.clone(),
         };
-
-        Ok(ObjectHandle::new(arrow).into())
+        
+        
+        let arrow = ObjectHandle::new(arrow);
+        
+        Ok(arrow.into())
     }
 }
