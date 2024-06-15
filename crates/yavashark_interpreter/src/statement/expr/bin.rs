@@ -1,14 +1,12 @@
 use swc_ecma_ast::{BinExpr, BinaryOp};
+use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-use crate::Value;
-
-impl Context {
-    pub fn run_bin(&mut self, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
-        let left = self.run_expr(&stmt.left, stmt.span, scope)?;
-        let right = self.run_expr(&stmt.right, stmt.span, scope)?;
+impl Interpreter{
+    pub fn run_bin(ctx: &mut Context, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
+        let left = Self::run_expr(ctx, &stmt.left, stmt.span, scope)?;
+        let right = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 
         Ok(match stmt.op {
             BinaryOp::EqEq => Value::Boolean(left.normal_eq(&right)),

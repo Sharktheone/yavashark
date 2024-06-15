@@ -1,13 +1,12 @@
 use swc_ecma_ast::{UnaryExpr, UnaryOp};
+use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-use crate::Value;
 
-impl Context {
-    pub fn run_unary(&mut self, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
-        let value = self.run_expr(&stmt.arg, stmt.span, scope).or_else(|v| {
+impl Interpreter{
+    pub fn run_unary(ctx: &mut Context, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
+        let value = Self::run_expr(ctx, &stmt.arg, stmt.span, scope).or_else(|v| {
             if stmt.op == UnaryOp::TypeOf {
                 Ok(Value::String("undefined".to_string()))
             } else {

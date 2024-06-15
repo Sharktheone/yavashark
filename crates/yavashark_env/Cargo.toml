@@ -1,0 +1,19 @@
+[package]
+name = "yavashark_env"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yavashark_value = { path = "../yavashark_value", features = ["js", "dbg_object_gc", "obj_dbg"], default-features = false }
+yavashark_garbage = { path = "../yavashark_garbage" }
+yavashark_macro = { path = "../yavashark_macro" }
+anyhow = "1.0.86"
+colored = "2.1.0"
+log = "0.4.21"
+
+
+[features]
+tests = []
+
+[lints]
+workspace = true

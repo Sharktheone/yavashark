@@ -1,11 +1,12 @@
 use swc_ecma_ast::YieldExpr;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
+use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::scope::Scope;
 
-impl Context {
-    pub fn run_yield(&mut self, stmt: &YieldExpr, scope: &mut Scope) -> RuntimeResult {
+use crate::Interpreter;
+
+impl Interpreter {
+    pub fn run_yield(ctx: &mut Context, stmt: &YieldExpr, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

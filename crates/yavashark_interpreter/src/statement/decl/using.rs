@@ -1,11 +1,11 @@
 use swc_ecma_ast::UsingDecl;
+use yavashark_env::{Context, Res};
+use yavashark_env::scope::Scope;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::Res;
+use crate::Interpreter;
 
-impl Context {
-    pub fn decl_using(&mut self, stmt: &UsingDecl, scope: &mut Scope) -> Res {
+impl Interpreter {
+    pub fn decl_using(ctx: &mut Context, stmt: &UsingDecl, scope: &mut Scope) -> Res {
         todo!()
     }
 }

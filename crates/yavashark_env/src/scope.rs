@@ -14,8 +14,8 @@ use crate::context::Context;
 use crate::error::get_error;
 
 pub struct MutValue {
-    pub(crate) name: String,
-    pub(crate) scope: Rc<RefCell<ScopeInternal>>,
+    pub name: String,
+    pub scope: Rc<RefCell<ScopeInternal>>,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -138,7 +138,7 @@ pub struct Scope {
 
 
 #[derive(Debug)]
-pub(crate) struct ScopeInternal {
+pub struct ScopeInternal {
     parent: Option<Gc<RefCell<ScopeInternal>>>,
     variables: HashMap<String, Variable>,
     pub available_labels: Vec<String>,

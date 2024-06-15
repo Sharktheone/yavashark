@@ -1,15 +1,11 @@
-use std::any::type_name;
-use log::warn;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
+use yavashark_env::{Context, ControlFlow, Object, ObjectHandle, RuntimeResult, Value, ValueResult};
+use yavashark_env::scope::Scope;
+use yavashark_env::value::Func;
 use yavashark_macro::object;
-use yavashark_value::{Func, Obj};
 
-use crate::context::Context;
-use crate::object::Object;
-use crate::scope::Scope;
-use crate::{ControlFlow, RuntimeResult, ValueResult};
-use crate::{ObjectHandle, Value};
+use crate::Interpreter;
 
 #[object(function)]
 #[derive(Debug)]
@@ -28,12 +24,12 @@ impl Func<Context> for ArrowFunction {
         scope.state_set_function()?;
 
         for (pat, value) in self.expr.params.iter().zip(args.iter()) {
-            ctx.run_pat(pat, scope, value.copy())?;
+            Interpreter::run_pat(ctx, pat, scope, value.copy())?;
         }
 
         let res = match &*self.expr.body {
-            BlockStmtOrExpr::BlockStmt(stmt) => ctx.run_block(stmt, scope),
-            BlockStmtOrExpr::Expr(expr) => ctx.run_expr(expr, self.expr.span, scope),
+            BlockStmtOrExpr::BlockStmt(stmt) => Interpreter::run_block(ctx, stmt, scope),
+            BlockStmtOrExpr::Expr(expr) => Interpreter::run_expr(ctx, expr, self.expr.span, scope),
         };
 
         match res {
@@ -45,20 +41,20 @@ impl Func<Context> for ArrowFunction {
     }
 }
 
-impl Context {
-    pub fn run_arrow(&mut self, stmt: &ArrowExpr, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_arrow(ctx: &mut Context, stmt: &ArrowExpr, scope: &mut Scope) -> RuntimeResult {
         let this = scope.this()?.copy();
 
         let arrow = ArrowFunction {
-            object: Object::raw_with_proto(self.proto.func.clone().into()),
+            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             expr: stmt.clone(),
             this,
             scope: scope.clone(),
         };
-        
-        
+
+
         let arrow = ObjectHandle::new(arrow);
-        
+
         Ok(arrow.into())
     }
 }

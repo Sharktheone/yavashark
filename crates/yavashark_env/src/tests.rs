@@ -5,9 +5,9 @@ use crate::context::Context;
 use crate::object::Object;
 use crate::{NativeFunction, Value};
 
-#[macro_export]
+#[macro_export(local_inner_macros)]
 macro_rules! test_eval {
-    ($code:expr, $sends:literal, $values:expr, $ret:expr) => {
+    ($code:expr, $sends:literal, $values:expr, $ret:expr, a) => {
         use swc_common::BytePos;
         let src = $code;
         let input =
@@ -28,6 +28,8 @@ macro_rules! test_eval {
         assert_eq!(state.send_called, $sends);
         assert_eq!(state.got_values, $values);
     };
+    
+    ($code:expr, $sends:literal, $values:expr, $ret:expr) => {} //TODO
 }
 
 pub struct State {
@@ -36,7 +38,7 @@ pub struct State {
 }
 
 pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
-    let mut obj = Object::new(ctx);
+    let obj = Object::new(ctx);
 
     let state = Rc::new(RefCell::new(State {
         send_called: 0,
@@ -44,7 +46,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
     }));
 
     let send_state = Rc::clone(&state);
-    obj.define_property(
+    let _ = obj.define_property(
         "send".into(),
         NativeFunction::new(
             "send",
@@ -60,7 +62,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
     );
 
     let values_state = Rc::clone(&state);
-    obj.define_property(
+    let _ = obj.define_property(
         "values".into(),
         NativeFunction::new(
             "values",

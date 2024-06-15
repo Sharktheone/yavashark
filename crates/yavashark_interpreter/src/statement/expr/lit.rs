@@ -1,11 +1,10 @@
 use swc_ecma_ast::Lit;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::Value;
-use crate::{ControlFlow, RuntimeResult};
 
-impl Context {
-    pub fn run_lit(&mut self, stmt: &Lit) -> RuntimeResult {
+impl Interpreter{
+    pub fn run_lit(ctx: &mut Context, stmt: &Lit) -> RuntimeResult {
         Ok(match stmt {
             Lit::Str(s) => Value::String(s.value.as_str().to_owned()),
             Lit::Bool(b) => Value::Boolean(b.value),

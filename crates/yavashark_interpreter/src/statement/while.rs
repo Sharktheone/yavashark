@@ -1,25 +1,24 @@
 use swc_ecma_ast::WhileStmt;
+use yavashark_env::{Context, ControlFlow, RuntimeResult};
 
-use crate::context::Context;
 use crate::scope::Scope;
-use crate::Value;
-use crate::{ControlFlow, RuntimeResult};
+use crate::{Interpreter, Value};
 
-impl Context {
-    pub fn run_while(&mut self, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_while(ctx: &mut Context, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
         let label = scope.last_label()?;
 
         loop {
             let scope = &mut Scope::with_parent(scope)?;
             scope.state_set_loop()?;
 
-            let cond = self.run_expr(&stmt.test, stmt.span, scope)?;
+            let cond = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
 
             if !cond.is_truthy() {
                 break Ok(Value::Undefined);
             }
 
-            let result = self.run_statement(&stmt.body, scope);
+            let result = Self::run_statement(ctx, &stmt.body, scope);
 
             match result {
                 Ok(_) => {}
@@ -39,7 +38,7 @@ impl Context {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn while_ten() {

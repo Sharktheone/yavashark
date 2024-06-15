@@ -1,12 +1,11 @@
 use swc_ecma_ast::BreakStmt;
+use yavashark_env::{Context, ControlFlow, RuntimeResult};
+use yavashark_env::scope::Scope;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::ControlFlow;
-use crate::RuntimeResult;
+use crate::Interpreter;
 
-impl Context {
-    pub fn run_break(&mut self, stmt: &BreakStmt, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_break(ctx: &mut Context, stmt: &BreakStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_breakable()? {
             return Err(ControlFlow::error_syntax("Illegal break statement"));
         }

@@ -1,11 +1,11 @@
 use swc_ecma_ast::SeqExpr;
+use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
 
-impl Context {
-    pub fn run_seq(&mut self, stmt: &SeqExpr, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_seq(ctx: &mut Context, stmt: &SeqExpr, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

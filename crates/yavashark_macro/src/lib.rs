@@ -1,5 +1,7 @@
 extern crate proc_macro;
 
+use std::env;
+
 mod obj;
 mod props;
 
@@ -17,4 +19,15 @@ pub fn properties(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     props::properties(attrs, item)
+}
+
+
+
+fn env_path() -> syn::Path {
+    let name = env::var("CARGO_PKG_NAME").unwrap_or("".to_string());
+    if name == "yavashark_env" {
+        syn::parse_str("crate").unwrap()
+    } else {
+        syn::parse_str("yavashark_env").unwrap()
+    }
 }

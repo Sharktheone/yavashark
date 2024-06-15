@@ -1,18 +1,18 @@
 use swc_ecma_ast::IfStmt;
+use yavashark_env::{Context, RuntimeResult, Value};
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-use crate::Value;
+use yavashark_env::scope::Scope;
 
-impl Context {
-    pub fn run_if(&mut self, stmt: &IfStmt, scope: &mut Scope) -> RuntimeResult {
-        let test = self.run_expr(&stmt.test, stmt.span, scope)?;
+use crate::Interpreter;
+
+impl Interpreter {
+    pub fn run_if(ctx: &mut Context, stmt: &IfStmt, scope: &mut Scope) -> RuntimeResult {
+        let test = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
 
         if test.is_truthy() {
-            self.run_statement(&stmt.cons, scope)
+            Self::run_statement(ctx, &stmt.cons, scope)
         } else if let Some(alt) = &stmt.alt {
-            self.run_statement(alt, scope)
+            Self::run_statement(ctx, alt, scope)
         } else {
             Ok(Value::Undefined)
         }
@@ -21,7 +21,7 @@ impl Context {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn run_if_true() {

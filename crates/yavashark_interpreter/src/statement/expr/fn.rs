@@ -1,13 +1,12 @@
 use swc_ecma_ast::FnExpr;
+use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::scope::Scope;
+use crate::function::JSFunction;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::JSFunction;
-use crate::RuntimeResult;
-use crate::Value;
 
-impl Context {
-    pub fn run_fn(&mut self, stmt: &FnExpr, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter{
+    pub fn run_fn(ctx: &mut Context, stmt: &FnExpr, scope: &mut Scope) -> RuntimeResult {
         let mut fn_scope = Scope::with_parent(scope)?;
 
         fn_scope.state_set_function()?;
@@ -22,7 +21,7 @@ impl Context {
             stmt.function.params.clone(),
             stmt.function.body.clone(),
             fn_scope,
-            self,
+            ctx,
         );
 
         Ok(function.into())

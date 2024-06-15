@@ -6,105 +6,23 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+
 use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
-
-pub use function::*;
-
-use crate::context::Context;
-
-mod console;
-pub mod context;
-mod error;
-mod function;
-mod object;
+use yavashark_env::{Context, ControlFlow, scope, Value, ValueResult};
 mod pat;
-pub mod scope;
 pub mod statement;
+mod function;
 
-#[cfg(test)]
-mod tests;
 
-type Value = yavashark_value::Value<Context>;
-type Error = yavashark_value::Error<Context>;
-type ObjectHandle = yavashark_value::Object<Context>;
-type Variable = yavashark_value::variable::Variable<Context>;
-type Symbol = yavashark_value::Symbol<Context>;
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum ControlFlow {
-    Continue(Option<String>),
-    Break(Option<String>),
-    Return(Value),
-    Error(Error),
-}
-
-impl ControlFlow {
-    fn error(e: String) -> Self {
-        Self::Error(Error::new_error(e))
-    }
-
-    fn error_reference(e: String) -> Self {
-        Self::Error(Error::reference_error(e))
-    }
-    fn error_syntax(e: &str) -> Self {
-        Self::Error(Error::syn(e))
-    }
-    fn error_type(e: String) -> Self {
-        Self::Error(Error::ty_error(e))
-    }
-
-    fn get_error(self) -> std::result::Result<Error, Self> {
-        match self {
-            Self::Error(e) => Ok(e),
-            (e) => Err(e),
-        }
-    }
-
-    fn throw(val: Value) -> Self {
-        Self::Error(Error::throw(val))
-    }
-}
-
-type ValueResult = std::result::Result<Value, Error>;
-
-type Result<T, E = Error> = std::result::Result<T, E>;
-
-type Res = Result<()>;
-
-type RuntimeResult = std::result::Result<Value, ControlFlow>;
-
-impl From<Error> for ControlFlow {
-    fn from(e: Error) -> Self {
-        Self::Error(e)
-    }
-}
-
-impl From<ControlFlow> for Error {
-    fn from(e: ControlFlow) -> Self {
-        match e {
-            ControlFlow::Error(e) => e,
-            _ => Self::new("Incorrect ControlFlow"),
-        }
-    }
-}
-
-pub struct Interpreter {
-    script: Vec<Stmt>,
-}
+pub struct Interpreter;
 
 impl Interpreter {
-    #[must_use]
-    pub fn new(script: Vec<Stmt>) -> Self {
-        Self { script }
-    }
-
-    pub fn run(&self) -> anyhow::Result<Value> {
+    pub fn run(script: &Vec<Stmt>) -> anyhow::Result<Value> {
         let mut context = &mut Context::new()?;
         let mut scope = scope::Scope::global(context);
 
-        context
-            .run_statements(&self.script, &mut scope)
+       Self::run_statements(context, &script, &mut scope)
             .or_else(|e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
@@ -115,17 +33,16 @@ impl Interpreter {
 
     #[cfg(test)]
     #[allow(clippy::missing_panics_doc)]
-    pub fn run_test(&self) -> (ValueResult, Rc<RefCell<tests::State>>) {
+    pub fn run_test(script: &Vec<Stmt>) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
         let mut context = &mut Context::new().unwrap();
         let mut scope = scope::Scope::global(context);
 
-        let (mock, state) = tests::mock_object(context);
+        let (mock, state) = yavashark_env::tests::mock_object(context);
 
         scope.declare_global_var("mock".into(), mock);
 
         (
-            context
-                .run_statements(&self.script, &mut scope)
+            Self::run_statements(context, &script, &mut scope)
                 .or_else(|e| match e {
                     ControlFlow::Error(e) => Err(e),
                     ControlFlow::Return(v) => Ok(v),
@@ -302,9 +219,8 @@ mod temp_test {
             let mut p = Parser::new(Syntax::Es(c), input, None);
             let script = p.parse_script().unwrap();
 
-            let interpreter = Interpreter::new(script.body);
-
-            let result = interpreter.run().unwrap();
+            let result = Interpreter::run(&script.body).unwrap();
+            
             println!("{result:?}");
 
 

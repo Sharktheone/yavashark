@@ -1,11 +1,10 @@
 use swc_ecma_ast::CondExpr;
+use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-
-impl Context {
-    pub fn run_cond(&mut self, stmt: &CondExpr, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_cond(ctx: &mut Context, stmt: &CondExpr, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

@@ -1,14 +1,11 @@
 use swc_ecma_ast::{ForHead, ForOfStmt};
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::ControlFlow;
-use crate::RuntimeResult;
-use crate::Value;
-
-impl Context {
-    pub fn run_for_of(&mut self, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
-        let obj = self.run_expr(&stmt.right, stmt.span, scope)?;
+impl  Interpreter {
+    pub fn run_for_of(ctx: &mut Context, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
+        let obj = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 
         let scope = &mut Scope::with_parent(scope)?;
         let label = scope.last_label()?;
@@ -36,12 +33,12 @@ impl Context {
             .sym
             .to_string();
 
-        let iter = obj.iter_no_ctx(self)?;
+        let iter = obj.iter_no_ctx(ctx)?;
 
-        while let Some(key) = iter.next(self)? {
+        while let Some(key) = iter.next(ctx)? {
             scope.declare_var(decl.clone(), key);
 
-            let result = self.run_statement(&stmt.body, scope);
+            let result = Self::run_statement(ctx, &stmt.body, scope);
             match result {
                 Ok(_) => {}
                 Err(ControlFlow::Return(v)) => return Ok(v),

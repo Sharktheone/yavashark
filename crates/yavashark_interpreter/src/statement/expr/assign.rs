@@ -1,22 +1,20 @@
 use swc_ecma_ast::{AssignExpr, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget};
 
-use crate::{Res, RuntimeResult};
-use crate::context::Context;
-use crate::Error;
-use crate::scope::Scope;
-use crate::Value;
+use yavashark_env::{Context, Error, Res, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
 
-impl Context {
-    pub fn run_assign(&mut self, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
-        let value = self.run_expr(&stmt.right, stmt.span, scope)?;
+use crate::Interpreter;
 
-        Ok(self
-            .assign_target(&stmt.left, value, scope)
+impl Interpreter {
+    pub fn run_assign(ctx: &mut Context, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
+        let value = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
+
+        Ok(Self::assign_target(ctx, &stmt.left, value, scope)
             .map(|()| Value::Undefined)?)
     }
 
     pub fn with_target(
-        &mut self,
+        ctx: &mut Context,
         target: &AssignTarget,
         f: &impl Fn(&mut Value),
         scope: &mut Scope,
@@ -28,7 +26,7 @@ impl Context {
                     scope.with_mut(&name, f)?;
                 }
                 SimpleAssignTarget::Member(m) => {
-                    self.with_member(m, f, scope)?;
+                    Self::with_member(ctx, m, f, scope)?;
                 }
 
                 _ => todo!("assign targets"),
@@ -42,14 +40,14 @@ impl Context {
         Ok(())
     }
 
-    pub fn assign_target(&mut self, target: &AssignTarget, value: Value, scope: &mut Scope) -> Res {
+    pub fn assign_target(ctx: &mut Context, target: &AssignTarget, value: Value, scope: &mut Scope) -> Res {
         match target {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
                     let name = i.sym.to_string();
                     scope.update_or_define(name, value)
                 }
-                SimpleAssignTarget::Member(m) => self.assign_member(m, value, scope),
+                SimpleAssignTarget::Member(m) => Self::assign_member(ctx, m, value, scope),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -58,13 +56,13 @@ impl Context {
         }
     }
 
-    pub fn assign_member(&mut self, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
-        let obj = self.run_expr(&m.obj, m.span, scope)?;
+    pub fn assign_member(ctx: &mut Context, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
+        let obj = Self::run_expr(ctx, &m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
-                MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
+                MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
             };
 
             obj.update_or_define_property(&name, value);
@@ -75,17 +73,17 @@ impl Context {
     }
 
     pub fn with_member(
-        &mut self,
+        ctx: &mut Context,
         m: &MemberExpr,
         f: &impl Fn(&mut Value),
         scope: &mut Scope,
     ) -> Res {
-        let obj = self.run_expr(&m.obj, m.span, scope)?;
+        let obj = Self::run_expr(ctx, &m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
-                MemberProp::Computed(c) => self.run_expr(&c.expr, c.span, scope)?,
+                MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
             };
 
             let mut inner = obj.get_mut()?;

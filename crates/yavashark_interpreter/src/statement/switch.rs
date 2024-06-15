@@ -1,27 +1,24 @@
 use swc_ecma_ast::SwitchStmt;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::ControlFlow;
-use crate::RuntimeResult;
-use crate::Value;
+use crate::Interpreter;
 
-impl Context {
-    pub fn run_switch(&mut self, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
-        let discriminant = self.run_expr(&stmt.discriminant, stmt.span, scope)?;
+impl Interpreter {
+    pub fn run_switch(ctx: &mut Context, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
+        let discriminant = Self::run_expr(ctx, &stmt.discriminant, stmt.span, scope)?;
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_breakable()?;
 
         for case in &stmt.cases {
             if let Some(test) = &case.test {
-                let test = self.run_expr(test, case.span, scope)?;
-                if discriminant == test {
-                } else {
+                let test = Self::run_expr(ctx, test, case.span, scope)?;
+                if discriminant == test {} else {
                     continue;
                 }
             }
 
-            if let Err(e) = self.run_statements(&case.cons, scope) {
+            if let Err(e) = Self::run_statements(ctx, &case.cons, scope) {
                 return match &e {
                     ControlFlow::Break(_) => Ok(Value::Undefined),
                     _ => Err(e),
@@ -35,7 +32,7 @@ impl Context {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn run_switch_case() {

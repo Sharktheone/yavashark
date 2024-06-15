@@ -1,11 +1,11 @@
 use swc_ecma_ast::ClassExpr;
+use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
 
-impl Context {
-    pub fn run_class(&mut self, stmt: &ClassExpr, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_class(ctx: &mut Context, stmt: &ClassExpr, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

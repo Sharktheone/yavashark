@@ -1,22 +1,20 @@
 use swc_ecma_ast::Decl;
-
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::Error;
-use crate::Res;
+use yavashark_env::{Context, Error, Res};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
 mod class;
 mod r#fn;
 mod using;
 mod var;
 
-impl Context {
-    pub fn run_decl(&mut self, stmt: &Decl, scope: &mut Scope) -> Res {
+impl Interpreter {
+    pub fn run_decl(ctx: &mut Context, stmt: &Decl, scope: &mut Scope) -> Res {
         match stmt {
-            Decl::Class(c) => self.decl_class(c, scope),
-            Decl::Fn(f) => self.decl_fn(f, scope),
-            Decl::Var(v) => self.decl_var(v, scope),
-            Decl::Using(u) => self.decl_using(u, scope),
+            Decl::Class(c) => Self::decl_class(ctx, c, scope),
+            Decl::Fn(f) => Self::decl_fn(ctx, f, scope),
+            Decl::Var(v) => Self::decl_var(ctx, v, scope),
+            Decl::Using(u) => Self::decl_using(ctx, u, scope),
             _ => Err(Error::new("Unsupported declaration")),
         }
     }

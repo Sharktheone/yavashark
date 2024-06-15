@@ -1,11 +1,11 @@
 use swc_ecma_ast::WithStmt;
+use yavashark_env::{Context, RuntimeResult};
+use crate::Interpreter;
 
-use crate::context::Context;
 use crate::scope::Scope;
-use crate::RuntimeResult;
 
-impl Context {
-    pub fn run_with(&mut self, stmt: &WithStmt, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_with(ctx: &mut Context, stmt: &WithStmt, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

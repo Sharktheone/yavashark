@@ -1,13 +1,11 @@
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
+use yavashark_env::{Context, Error, Res, Value};
+use yavashark_env::scope::Scope;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::Error;
-use crate::Res;
-use crate::Value;
+use crate::Interpreter;
 
-impl Context {
-    pub fn decl_var(&mut self, stmt: &VarDecl, scope: &mut Scope) -> Res {
+impl Interpreter {
+    pub fn decl_var(ctx: &mut Context, stmt: &VarDecl, scope: &mut Scope) -> Res {
         match stmt.kind {
             VarDeclKind::Var => {
                 for decl in &stmt.decls {
@@ -18,7 +16,7 @@ impl Context {
 
                     let init = &decl.init;
                     if let Some(init) = init {
-                        let value = self.run_expr(init, stmt.span, scope)?;
+                        let value = Self::run_expr(ctx, init, stmt.span, scope)?;
                         scope.declare_global_var(id.sym.to_string(), value);
                     } else {
                         scope.declare_global_var(id.sym.to_string(), Value::Undefined);
@@ -36,7 +34,7 @@ impl Context {
 
                     let init = &decl.init;
                     if let Some(init) = init {
-                        let value = self.run_expr(init, stmt.span, scope)?;
+                        let value = Self::run_expr(ctx, init, stmt.span, scope)?;
                         scope.declare_var(id.sym.to_string(), value);
                     } else {
                         scope.declare_var(id.sym.to_string(), Value::Undefined);
@@ -53,7 +51,7 @@ impl Context {
 
                     let init = &decl.init;
                     if let Some(init) = init {
-                        let value = self.run_expr(init, stmt.span, scope)?;
+                        let value = Self::run_expr(ctx, init, stmt.span, scope)?;
                         scope.declare_read_only_var(id.sym.to_string(), value);
                     } else {
                         return Err(Error::new("Const declaration must have an initializer"));

@@ -1,18 +1,18 @@
 use swc_ecma_ast::ReturnStmt;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::Value;
-use crate::{ControlFlow, RuntimeResult};
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
 
-impl Context {
-    pub fn run_return(&mut self, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
+use crate::Interpreter;
+
+impl Interpreter {
+    pub fn run_return(ctx: &mut Context, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_returnable()? {
             return Err(ControlFlow::error_syntax("Illegal return statement"));
         }
 
         let value = if let Some(arg) = &stmt.arg {
-            self.run_expr(arg, stmt.span, scope)?
+            Self::run_expr(ctx, arg, stmt.span, scope)?
         } else {
             Value::Undefined
         };
@@ -23,7 +23,7 @@ impl Context {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn run_return() {

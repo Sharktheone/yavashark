@@ -3,18 +3,30 @@
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
+use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 use crate::object::Object;
 use crate::Symbol;
-use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
 #[object(direct(length))]
 #[derive(Debug)]
 pub struct Array {}
 
+
+
+impl Array {
+    pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {
+        let mut array = Self::new(ctx)?;
+
+        array.object.set_array(elements);
+
+        Ok(array)
+    }
+}
+
 #[properties]
 impl Array {
     #[new]
-    pub fn new(ctx: &mut Context) -> Result<Self, Error> {
+    pub fn new(ctx: &Context) -> Result<Self, Error> {
         Ok(Self {
             object: Object::raw_with_proto(ctx.proto.array.clone().into()),
             length: Value::Number(0.0).into(),
@@ -29,7 +41,7 @@ impl Array {
     }
 
     #[prop(Symbol::ITERATOR)]
-    fn iterator(&self, args: Vec<Value>, ctx: &mut Context, this: Value) -> ValueResult {
+    fn iterator(&self, _args: Vec<Value>, ctx: &Context, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(Error::ty_error(format!("Expected object, found {this:?}")));
         };
@@ -72,11 +84,11 @@ pub struct ArrayIterator {
 #[properties]
 impl ArrayIterator {
     #[prop]
-    pub fn next(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
+    pub fn next(&mut self, _args: Vec<Value>, ctx: &mut Context) -> ValueResult {
         if self.done {
             let obj = Object::new(ctx);
-            obj.define_property("value".into(), Value::Undefined);
-            obj.define_property("done".into(), Value::Boolean(true));
+            obj.define_property("value".into(), Value::Undefined)?;
+            obj.define_property("done".into(), Value::Boolean(true))?;
             return Ok(obj.into());
         }
 
@@ -89,8 +101,8 @@ impl ArrayIterator {
         if done {
             self.done = true;
             let obj = Object::new(ctx);
-            obj.define_property("value".into(), Value::Undefined);
-            obj.define_property("done".into(), Value::Boolean(true));
+            obj.define_property("value".into(), Value::Undefined)?;
+            obj.define_property("done".into(), Value::Boolean(true))?;
             return Ok(obj.into());
         }
 
@@ -102,15 +114,9 @@ impl ArrayIterator {
         };
 
         let obj = Object::new(ctx);
-        obj.define_property("value".into(), value);
-        obj.define_property("done".into(), Value::Boolean(self.done));
+        obj.define_property("value".into(), value)?;
+        obj.define_property("done".into(), Value::Boolean(self.done))?;
 
         Ok(obj.into())
-    }
-}
-
-impl From<Vec<Value>> for Array {
-    fn from(v: Vec<Value>) -> Self {
-        todo!()
     }
 }

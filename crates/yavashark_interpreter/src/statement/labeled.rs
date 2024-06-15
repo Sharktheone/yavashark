@@ -1,12 +1,11 @@
 use swc_ecma_ast::LabeledStmt;
+use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-
-impl Context {
-    pub fn run_labeled(&mut self, stmt: &LabeledStmt, scope: &mut Scope) -> RuntimeResult {
+impl  Interpreter {
+    pub fn run_labeled(ctx: &mut Context, stmt: &LabeledStmt, scope: &mut Scope) -> RuntimeResult {
         scope.declare_label(stmt.label.sym.to_string());
-        self.run_statement(&stmt.body, scope)
+        Self::run_statement(ctx, &stmt.body, scope)
     }
 }

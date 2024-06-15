@@ -4269,6 +4269,18 @@ name = "yavashark"
 version = "0.1.0"
 
 [[package]]
+name = "yavashark_env"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "colored",
+ "log",
+ "yavashark_garbage",
+ "yavashark_macro",
+ "yavashark_value",
+]
+
+[[package]]
 name = "yavashark_garbage"
 version = "0.1.0"
 dependencies = [
@@ -4296,6 +4308,7 @@ dependencies = [
  "swc_common",
  "swc_ecma_ast",
  "swc_ecma_parser",
+ "yavashark_env",
  "yavashark_garbage",
  "yavashark_macro",
  "yavashark_value",

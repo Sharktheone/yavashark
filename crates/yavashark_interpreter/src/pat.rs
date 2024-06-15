@@ -1,22 +1,21 @@
-use swc_common::{Span, DUMMY_SP};
+use swc_common::{DUMMY_SP, Span};
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 
-use yavashark_value::Obj;
+use yavashark_env::{Context, Error, Object, Res, Value, ValueResult};
+use yavashark_env::array::Array;
+use yavashark_env::scope::Scope;
+use yavashark_env::value::Obj;
 
-use crate::context::Context;
-use crate::object::array::Array;
-use crate::object::Object;
-use crate::scope::Scope;
-use crate::{Error, Res, Value, ValueResult};
+use crate::Interpreter;
 
-impl Context {
-    pub fn run_pat(&mut self, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
-        self.run_pat_internal(stmt, scope, value, false, DUMMY_SP)
+impl Interpreter {
+    pub fn run_pat(ctx: &mut Context, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
+        Self::run_pat_internal(ctx, stmt, scope, value, false, DUMMY_SP)
     }
 
     #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
     pub fn run_pat_internal(
-        &mut self,
+        ctx: &mut Context,
         stmt: &Pat,
         scope: &mut Scope,
         value: Value,
@@ -28,7 +27,7 @@ impl Context {
                 scope.declare_var(id.sym.to_string(), value);
             }
             Pat::Array(arr) => {
-                let mut iter = value.iter_no_ctx(self)?;
+                let mut iter = value.iter_no_ctx(ctx)?;
 
                 let mut assert_last = false;
 
@@ -37,31 +36,31 @@ impl Context {
                         return Err(Error::syn("Rest element must be last element"));
                     }
 
-                    let next = iter.next(self)?.unwrap_or(Value::Undefined);
+                    let next = iter.next(ctx)?.unwrap_or(Value::Undefined);
 
                     if matches!(elem, Some(Pat::Rest(_))) {
                         #[allow(clippy::unwrap_used)]
-                        let rest = elem.as_ref().unwrap(); // Safe to unwrap because of the match above
+                            let rest = elem.as_ref().unwrap(); // Safe to unwrap because of the match above
 
                         let mut elems = Vec::new();
 
-                        while let Some(res) = iter.next(self)? {
+                        while let Some(res) = iter.next(ctx)? {
                             elems.push(res);
                         }
 
-                        let elems = Array::from(elems).into_value();
+                        let elems = Array::with_elements(ctx, elems)?.into_value();
 
-                        self.run_pat(rest, scope, elems)?;
+                        Self::run_pat(ctx, rest, scope, elems)?;
                         let assert_last = true;
                     }
 
                     if let Some(elem) = elem {
-                        self.run_pat(elem, scope, next)?;
+                        Self::run_pat(ctx, elem, scope, next)?;
                     }
                 }
             }
             Pat::Rest(rest) => {
-                self.run_pat(&rest.arg, scope, value)?;
+                Self::run_pat(ctx, &rest.arg, scope, value)?;
             }
             Pat::Object(obj) => {
                 let mut rest_not_props = Vec::with_capacity(obj.props.len());
@@ -69,10 +68,10 @@ impl Context {
                 for prop in &obj.props {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
-                            let key = self.prop_name_to_value(&kv.key, scope)?;
+                            let key = Self::prop_name_to_value(ctx, &kv.key, scope)?;
                             let value = value.get_property(&key).unwrap_or(Value::Undefined);
 
-                            self.run_pat(&kv.value, scope, value)?;
+                            Self::run_pat(ctx, &kv.value, scope, value)?;
                             rest_not_props.push(key);
                         }
                         ObjectPatProp::Assign(assign) => {
@@ -83,7 +82,7 @@ impl Context {
 
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
-                                    value = self.run_expr(val_expr, assign.span, scope)?;
+                                    value = Self::run_expr(ctx, val_expr, assign.span, scope)?;
                                 }
                             }
 
@@ -99,24 +98,24 @@ impl Context {
                                 }
                             }
 
-                            let rest_obj = Object::from_values(rest_props, self).into_value();
+                            let rest_obj = Object::from_values(rest_props, ctx).into_value();
 
-                            self.run_pat(&rest.arg, scope, rest_obj)?;
+                            Self::run_pat(ctx, &rest.arg, scope, rest_obj)?;
                         }
                     }
                 }
             }
             Pat::Assign(assign) => {
-                let value = self.run_expr(&assign.right, assign.span, scope)?;
+                let value = Self::run_expr(ctx, &assign.right, assign.span, scope)?;
 
-                self.run_pat(&assign.left, scope, value)?;
+                Self::run_pat(ctx, &assign.left, scope, value)?;
             }
             Pat::Expr(expr) => {
                 if !for_in_of {
                     return Err(Error::syn("Invalid pattern"));
                 }
 
-                self.run_expr(expr, span, scope)?;
+                Self::run_expr(ctx, expr, span, scope)?;
             }
             Pat::Invalid(i) => {
                 return Err(Error::syn("Invalid pattern"));
@@ -126,12 +125,12 @@ impl Context {
         Ok(())
     }
 
-    pub fn prop_name_to_value(&mut self, prop: &PropName, scope: &mut Scope) -> ValueResult {
+    pub fn prop_name_to_value(ctx: &mut Context, prop: &PropName, scope: &mut Scope) -> ValueResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(ident.sym.to_string()),
             PropName::Str(str_) => Value::String(str_.value.to_string()),
             PropName::Num(num) => Value::Number(num.value),
-            PropName::Computed(expr) => self.run_expr(&expr.expr, expr.span, scope)?,
+            PropName::Computed(expr) => Self::run_expr(ctx, &expr.expr, expr.span, scope)?,
             PropName::BigInt(_) => todo!(),
         })
     }

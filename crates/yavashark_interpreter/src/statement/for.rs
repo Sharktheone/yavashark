@@ -1,12 +1,10 @@
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::Value;
-use crate::{ControlFlow, RuntimeResult};
-
-impl Context {
-    pub fn run_for(&mut self, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
+impl  Interpreter {
+    pub fn run_for(ctx: &mut Context, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
         let scope = &mut Scope::with_parent(scope)?;
         let label = scope.last_label()?;
         scope.state_set_loop()?;
@@ -14,30 +12,30 @@ impl Context {
         if let Some(init) = &stmt.init {
             match init {
                 VarDeclOrExpr::VarDecl(v) => {
-                    self.decl_var(v, scope)?;
+                    Self::decl_var(ctx, v, scope)?;
                 }
                 VarDeclOrExpr::Expr(e) => {
-                    self.run_expr(e, stmt.span, scope)?;
+                    Self::run_expr(ctx, e, stmt.span, scope)?;
                 }
             }
         }
 
         loop {
             if let Some(test) = &stmt.test {
-                let value = self.run_expr(test, stmt.span, scope)?;
+                let value = Self::run_expr(ctx, test, stmt.span, scope)?;
                 if value.is_falsey() {
                     break Ok(Value::Undefined);
                 }
             }
 
-            if let Err(e) = self.run_statement(&stmt.body, scope) {
+            if let Err(e) = Self::run_statement(ctx, &stmt.body, scope) {
                 match e {
                     ControlFlow::Break(l) if label.as_ref() == l.as_ref() => {
                         break Ok(Value::Undefined);
                     }
                     ControlFlow::Continue(l) if label.as_ref() == l.as_ref() => {
                         if let Some(update) = &stmt.update {
-                            self.run_expr(update, stmt.span, scope)?;
+                            Self::run_expr(ctx, update, stmt.span, scope)?;
                         }
                         continue;
                     }
@@ -46,7 +44,7 @@ impl Context {
             }
 
             if let Some(update) = &stmt.update {
-                self.run_expr(update, stmt.span, scope)?;
+                Self::run_expr(ctx, update, stmt.span, scope)?;
             }
         }
     }
@@ -54,7 +52,7 @@ impl Context {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn run_for_loop() {

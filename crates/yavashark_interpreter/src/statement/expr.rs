@@ -27,10 +27,9 @@ pub use this::*;
 pub use tpl::*;
 pub use unary::*;
 pub use update::*;
-
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::{ControlFlow, RuntimeResult};
+use yavashark_env::{Context, ControlFlow, RuntimeResult};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
 mod this;
 
@@ -84,38 +83,38 @@ mod call;
 
 mod r#yield;
 
-impl Context {
-    pub fn run_expr_stmt(&mut self, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
-        self.run_expr(&stmt.expr, stmt.span, scope)
+impl  Interpreter {
+    pub fn run_expr_stmt(ctx: &mut Context, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
+        Self::run_expr(ctx, &stmt.expr, stmt.span, scope)
     }
-    pub fn run_expr(&mut self, expr: &Expr, span: Span, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_expr(ctx: &mut Context, expr: &Expr, span: Span, scope: &mut Scope) -> RuntimeResult {
         match expr {
-            Expr::This(stmt) => self.run_this(stmt, scope),
-            Expr::Array(stmt) => self.run_array(stmt, scope),
-            Expr::Object(stmt) => self.run_object(stmt, scope),
-            Expr::Fn(stmt) => self.run_fn(stmt, scope),
-            Expr::Unary(stmt) => self.run_unary(stmt, scope),
-            Expr::Update(stmt) => self.run_update(stmt, scope),
-            Expr::Bin(stmt) => self.run_bin(stmt, scope),
-            Expr::Assign(stmt) => self.run_assign(stmt, scope),
-            Expr::Member(stmt) => self.run_member(stmt, scope),
-            Expr::SuperProp(stmt) => self.run_super_prop(stmt, scope),
-            Expr::Cond(stmt) => self.run_cond(stmt, scope),
-            Expr::Call(stmt) => Ok(self.run_call(stmt, scope)?),
-            Expr::New(stmt) => self.run_new(stmt, scope),
-            Expr::Seq(stmt) => self.run_seq(stmt, scope),
-            Expr::Ident(stmt) => self.run_ident(stmt, scope),
-            Expr::Lit(stmt) => self.run_lit(stmt),
-            Expr::Tpl(stmt) => self.run_tpl(stmt, scope),
-            Expr::TaggedTpl(stmt) => self.run_tagged_tpl(stmt, scope),
-            Expr::Arrow(stmt) => self.run_arrow(stmt, scope),
-            Expr::Class(stmt) => self.run_class(stmt, scope),
-            Expr::Yield(stmt) => self.run_yield(stmt, scope),
-            Expr::MetaProp(stmt) => self.run_meta_prop(stmt, scope),
-            Expr::Await(stmt) => self.run_await(stmt, scope),
-            Expr::Paren(stmt) => self.run_paren(stmt, scope),
-            Expr::PrivateName(stmt) => self.run_private_name(stmt, scope),
-            Expr::OptChain(stmt) => self.run_opt_chain(stmt, scope),
+            Expr::This(stmt) => Self::run_this(ctx, stmt, scope),
+            Expr::Array(stmt) => Self::run_array(ctx, stmt, scope),
+            Expr::Object(stmt) => Self::run_object(ctx, stmt, scope),
+            Expr::Fn(stmt) => Self::run_fn(ctx, stmt, scope),
+            Expr::Unary(stmt) => Self::run_unary(ctx, stmt, scope),
+            Expr::Update(stmt) => Self::run_update(ctx, stmt, scope),
+            Expr::Bin(stmt) => Self::run_bin(ctx, stmt, scope),
+            Expr::Assign(stmt) => Self::run_assign(ctx, stmt, scope),
+            Expr::Member(stmt) => Self::run_member(ctx, stmt, scope),
+            Expr::SuperProp(stmt) => Self::run_super_prop(ctx, stmt, scope),
+            Expr::Cond(stmt) => Self::run_cond(ctx, stmt, scope),
+            Expr::Call(stmt) => Ok(Self::run_call(ctx, stmt, scope)?),
+            Expr::New(stmt) => Self::run_new(ctx, stmt, scope),
+            Expr::Seq(stmt) => Self::run_seq(ctx, stmt, scope),
+            Expr::Ident(stmt) => Self::run_ident(ctx, stmt, scope),
+            Expr::Lit(stmt) => Self::run_lit(ctx, stmt),
+            Expr::Tpl(stmt) => Self::run_tpl(ctx, stmt, scope),
+            Expr::TaggedTpl(stmt) => Self::run_tagged_tpl(ctx, stmt, scope),
+            Expr::Arrow(stmt) => Self::run_arrow(ctx, stmt, scope),
+            Expr::Class(stmt) => Self::run_class(ctx, stmt, scope),
+            Expr::Yield(stmt) => Self::run_yield(ctx, stmt, scope),
+            Expr::MetaProp(stmt) => Self::run_meta_prop(ctx, stmt, scope),
+            Expr::Await(stmt) => Self::run_await(ctx, stmt, scope),
+            Expr::Paren(stmt) => Self::run_paren(ctx, stmt, scope),
+            Expr::PrivateName(stmt) => Self::run_private_name(ctx, stmt, scope),
+            Expr::OptChain(stmt) => Self::run_opt_chain(ctx, stmt, scope),
             Expr::Invalid(stmt) => Err(ControlFlow::error(format!(
                 "{:?}: Invalid expression.",
                 stmt.span

@@ -4,7 +4,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::{FieldMutability, Fields, Path, PathSegment};
 use syn::spanned::Spanned;
-
+use crate::env_path;
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -14,12 +14,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let span = input.span();
 
-    let crate_path = Path::from(Ident::new("crate", input.span()));
+    let crate_path = env_path();
 
     let mut obj_path = crate_path.clone();
-    obj_path
-        .segments
-        .push(PathSegment::from(Ident::new("object", input.span())));
     obj_path
         .segments
         .push(PathSegment::from(Ident::new("Object", input.span())));

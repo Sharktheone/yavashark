@@ -1,19 +1,13 @@
-use std::cell::RefMut;
-
 use anyhow::anyhow;
-use yavashark_garbage::collectable::CellCollectable;
 
-use yavashark_value::Obj;
-
-use crate::context::Context;
-use crate::object::array::ArrayIterator;
+use crate::{FunctionPrototype, ObjectHandle};
 use crate::object::{array::Array, Object, Prototype};
-use crate::{FunctionPrototype, ObjectHandle, Value};
+use crate::object::array::ArrayIterator;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {
-    pub(crate) obj: ObjectHandle,
-    pub(crate) func: ObjectHandle,
+    pub obj: ObjectHandle,
+    pub func: ObjectHandle,
     pub(crate) array: ObjectHandle,
     pub(crate) array_iter: ObjectHandle,
 }
@@ -41,7 +35,7 @@ impl Prototypes {
         }
 
         {
-            let mut func = 
+            let mut func =
                 func_prototype
                     .get_mut()
                     .map_err(|e| anyhow!(format!("{e:?}")))?;
@@ -59,15 +53,15 @@ impl Prototypes {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
-        
+            .map_err(|e| anyhow!(format!("{e:?}")))?;
+
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
+            .map_err(|e| anyhow!(format!("{e:?}")))?;
 
-        
+
         Ok(Self {
             obj: obj_prototype,
             func: func_prototype,

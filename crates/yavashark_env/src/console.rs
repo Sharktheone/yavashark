@@ -1,15 +1,15 @@
 use crate::console::print::PrettyPrint;
 use crate::context::Context;
-use crate::object::Object;
 use crate::NativeFunction;
+use crate::object::Object;
 use crate::Value;
 
 mod print;
 
 pub fn get_console(ctx: &mut Context) -> Value {
-    let mut console = Object::new(ctx);
+    let console = Object::new(ctx);
 
-    console.define_property(
+    let _ = console.define_property(
         "log".into(),
         NativeFunction::new(
             "log",
@@ -29,8 +29,8 @@ pub fn get_console(ctx: &mut Context) -> Value {
             },
             ctx,
         )
-        .into(),
-    );
+            .into(),
+    ); // This can only fail if we have an existing borrow to the object, which we clearly don't
 
     console.into()
-}
+} 

@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
 use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
+use syn::spanned::Spanned;
 
 #[derive(Debug)]
 struct Item {
@@ -382,8 +382,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         props.extend(prop);
-
-        //TODO
     }
 
     let mut construct = TokenStream::new();
@@ -404,7 +402,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             }, func_proto.copy()).into();
 
-            function.define_property("prototype".into(), obj.clone().into());
+            function.define_property("prototype".into(), obj.clone().into())?;
 
             obj.define_variable(
                 "constructor".into(),

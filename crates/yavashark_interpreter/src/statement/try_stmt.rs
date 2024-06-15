@@ -1,16 +1,14 @@
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
+use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::RuntimeResult;
-use crate::Value;
-
-impl Context {
-    pub fn run_try(&mut self, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
-        let res = catch(self, stmt, scope);
+impl Interpreter {
+    pub fn run_try(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
+        let res = catch(ctx, stmt, scope);
 
         if let Some(finalizer) = &stmt.finalizer {
-            let _ = self.run_block(finalizer, scope)?;
+            let _ = Self::run_block(ctx, finalizer, scope)?;
         }
 
         res
@@ -18,7 +16,7 @@ impl Context {
 }
 
 fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
-    let try_block = ctx.run_block(&stmt.block, scope);
+    let try_block = Interpreter::run_block(ctx, &stmt.block, scope);
 
     if let Err(e) = try_block {
         let err = e.get_error()?;
@@ -72,7 +70,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         }
                                         (name) => {
                                             let value = if let Some(v) = assign.value.as_ref() {
-                                                ctx.run_expr(v, assign.span, scope)?
+                                                Interpreter::run_expr(ctx, v, assign.span, scope)?
                                             } else {
                                                 Value::Undefined
                                             };
@@ -132,7 +130,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                 }
             }
 
-            ctx.run_block(&catch.body, scope)
+            Interpreter::run_block(ctx, &catch.body, scope)
         } else {
             Err(err.into())
         }
@@ -143,7 +141,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn try_stmt() {

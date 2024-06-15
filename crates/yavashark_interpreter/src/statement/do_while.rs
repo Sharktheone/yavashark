@@ -1,13 +1,11 @@
 use swc_ecma_ast::DoWhileStmt;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::ControlFlow;
-use crate::RuntimeResult;
-use crate::Value;
 
-impl Context {
-    pub fn run_do_while(&mut self, stmt: &DoWhileStmt, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_do_while(ctx: &mut Context, stmt: &DoWhileStmt, scope: &mut Scope) -> RuntimeResult {
         let mut result = Value::Undefined;
 
         let last_loop = scope.last_label()?;
@@ -16,7 +14,7 @@ impl Context {
             let scope = &mut Scope::with_parent(scope)?;
             scope.state_set_loop();
 
-            result = match self.run_statement(&stmt.body, scope) {
+            result = match Self::run_statement(ctx, &stmt.body, scope) {
                 Ok(v) => v,
                 Err(c) => match c {
                     ControlFlow::Break(l) if last_loop.as_ref() == l.as_ref() => {
@@ -30,7 +28,7 @@ impl Context {
                 Err(e) => return Err(e),
             };
 
-            let condition = self.run_expr(&stmt.test, stmt.span, scope)?;
+            let condition = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
 
             if condition.is_falsey() {
                 break;
@@ -43,7 +41,7 @@ impl Context {
 
 #[cfg(test)]
 mod tests {
-    use crate::{test_eval, Value};
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn run_do_while() {

@@ -1,18 +1,16 @@
 use swc_ecma_ast::{MemberExpr, MemberProp};
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use crate::Interpreter;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::ControlFlow;
-use crate::RuntimeResult;
-use crate::Value;
 
-impl Context {
-    pub fn run_member(&mut self, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
-        let obj = self.run_expr(&stmt.obj, stmt.span, scope)?;
+impl Interpreter{
+    pub fn run_member(ctx: &mut Context, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
+        let obj = Self::run_expr(ctx, &stmt.obj, stmt.span, scope)?;
 
         let name = match &stmt.prop {
             MemberProp::Ident(i) => Value::String(i.sym.to_string()),
-            MemberProp::Computed(e) => self.run_expr(&e.expr, stmt.span, scope)?,
+            MemberProp::Computed(e) => Self::run_expr(ctx, &e.expr, stmt.span, scope)?,
             MemberProp::PrivateName(_) => {
                 return Err(ControlFlow::error(
                     "Unsupported member expression property".to_owned(),

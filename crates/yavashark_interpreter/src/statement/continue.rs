@@ -1,11 +1,11 @@
 use swc_ecma_ast::ContinueStmt;
+use yavashark_env::{Context, ControlFlow, RuntimeResult};
+use yavashark_env::scope::Scope;
 
-use crate::context::Context;
-use crate::scope::Scope;
-use crate::{ControlFlow, RuntimeResult};
+use crate::Interpreter;
 
-impl Context {
-    pub fn run_continue(&mut self, stmt: &ContinueStmt, scope: &mut Scope) -> RuntimeResult {
+impl Interpreter {
+    pub fn run_continue(ctx: &mut Context, stmt: &ContinueStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_continuable()? {
             return Err(ControlFlow::error_syntax("Illegal continue statement"));
         }
