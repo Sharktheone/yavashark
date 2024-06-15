@@ -31,28 +31,28 @@ pub enum ControlFlow {
 }
 
 impl ControlFlow {
-    pub fn error(e: String) -> Self {
+    #[must_use] pub fn error(e: String) -> Self {
         Self::Error(Error::new_error(e))
     }
 
-    pub fn error_reference(e: String) -> Self {
+    #[must_use] pub fn error_reference(e: String) -> Self {
         Self::Error(Error::reference_error(e))
     }
-    pub fn error_syntax(e: &str) -> Self {
+    #[must_use] pub fn error_syntax(e: &str) -> Self {
         Self::Error(Error::syn(e))
     }
-    pub fn error_type(e: String) -> Self {
+    #[must_use] pub fn error_type(e: String) -> Self {
         Self::Error(Error::ty_error(e))
     }
 
     pub fn get_error(self) -> std::result::Result<Error, Self> {
         match self {
             Self::Error(e) => Ok(e),
-            (e) => Err(e),
+            e => Err(e),
         }
     }
 
-    pub fn throw(val: Value) -> Self {
+    #[must_use] pub fn throw(val: Value) -> Self {
         Self::Error(Error::throw(val))
     }
 }

@@ -6,7 +6,8 @@ use crate::Value;
 
 mod print;
 
-pub fn get_console(ctx: &mut Context) -> Value {
+#[must_use]
+pub fn get_console(ctx: &Context) -> Value {
     let console = Object::new(ctx);
 
     let _ = console.define_property(

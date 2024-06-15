@@ -1,12 +1,10 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::ops::Deref;
 use std::rc::Rc;
-use log::warn;
 
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::CellCollectable;
-use yavashark_value::{CustomGcRef, CustomGcRefUntyped};
+use yavashark_value::CustomGcRefUntyped;
 
 use crate::{Error, Res, Result, Value, Variable};
 use crate::console::get_console;
@@ -24,6 +22,8 @@ pub struct ScopeState {
     state: u8,
 }
 
+
+#[allow(unused)]
 impl ScopeState {
     const NONE: u8 = 0b0;
 
@@ -159,7 +159,7 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
         if let Some(parent) = &self.parent {
             refs.push(parent.get_ref());
         }
-        
+
         if let Some(this) = self.this.gc_untyped_ref() {
             refs.push(this);
         }
@@ -170,7 +170,8 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
 
 
 impl ScopeInternal {
-    pub fn new(ctx: &mut Context) -> Self {
+    #[must_use]
+    pub fn new(ctx: &Context) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -203,11 +204,13 @@ impl ScopeInternal {
             variables,
             available_labels: Vec::new(),
             state: ScopeState::new(),
-            this: Value::Undefined
+            this: Value::Undefined,
         }
     }
 
-    pub fn global(ctx: &mut Context) -> Self {
+    #[must_use]
+    #[allow(clippy::missing_panics_doc)]
+    pub fn global(ctx: &Context) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -244,7 +247,7 @@ impl ScopeInternal {
             ctx.proto
                 .array
                 .get_property(&"constructor".into())
-                .expect("Failed to get Array constructor")
+                .expect("Failed to get Array constructor") //This can only happen when we have a programming error
                 .into(),
         );
 
@@ -285,9 +288,9 @@ impl ScopeInternal {
         let state = parent.borrow()?.state.copy();
 
         let par_scope = parent.borrow()?;
-        let mut available_labels = par_scope.available_labels.clone();
+        let available_labels = par_scope.available_labels.clone();
         drop(par_scope);
-        
+
         let this = parent.borrow()?.this.copy();
 
         Ok(Self {
@@ -298,12 +301,12 @@ impl ScopeInternal {
             this,
         })
     }
-    
+
     pub fn with_parent_this(parent: Gc<RefCell<Self>>, this: Value) -> Result<Self> {
         let mut new = Self::with_parent(parent)?;
-        
+
         new.this = this;
-        
+
         Ok(new)
     }
 
@@ -326,7 +329,7 @@ impl ScopeInternal {
         if self.state.is_global() || self.state.is_function() {
             self.variables.insert(name, Variable::new(value));
         } else if let Some(p) = self.parent.as_ref() {
-            p.borrow_mut()?.declare_global_var(name, value.copy());
+            p.borrow_mut()?.declare_global_var(name, value.copy())?;
         } else {
             self.variables.insert(name, Variable::new(value));
         }
@@ -356,6 +359,7 @@ impl ScopeInternal {
         };
     }
 
+    #[must_use]
     pub fn has_label(&self, label: &str) -> bool {
         self.available_labels.contains(&label.to_string())
     }
@@ -392,30 +396,37 @@ impl ScopeInternal {
         self.state.set_loop();
     }
 
+    #[must_use]
     pub const fn state_is_function(&self) -> bool {
         self.state.is_function()
     }
 
+    #[must_use]
     pub const fn state_is_global(&self) -> bool {
         self.state.is_global()
     }
 
+    #[must_use]
     pub const fn state_is_iteration(&self) -> bool {
         self.state.is_iteration()
     }
 
+    #[must_use]
     pub const fn state_is_breakable(&self) -> bool {
         self.state.is_breakable()
     }
 
+    #[must_use]
     pub const fn state_is_returnable(&self) -> bool {
         self.state.is_returnable()
     }
 
+    #[must_use]
     pub const fn state_is_none(&self) -> bool {
         self.state.is_none()
     }
 
+    #[must_use]
     pub const fn state_is_continuable(&self) -> bool {
         self.state.is_continuable()
     }
@@ -485,13 +496,15 @@ impl ScopeInternal {
 }
 
 impl Scope {
-    pub fn new(ctx: &mut Context) -> Self {
+    #[must_use]
+    pub fn new(ctx: &Context) -> Self {
         Self {
             scope: Gc::new(RefCell::new(ScopeInternal::new(ctx))),
         }
     }
 
-    pub fn global(ctx: &mut Context) -> Self {
+    #[must_use]
+    pub fn global(ctx: &Context) -> Self {
         Self {
             scope: Gc::new(RefCell::new(ScopeInternal::global(ctx))),
         }
@@ -524,7 +537,7 @@ impl Scope {
     }
 
     pub fn declare_global_var(&mut self, name: String, value: Value) -> Res {
-        self.scope.borrow_mut()?.declare_global_var(name, value);
+        self.scope.borrow_mut()?.declare_global_var(name, value)?;
         Ok(())
     }
 
@@ -591,17 +604,14 @@ impl Scope {
         Ok(())
     }
 
-    #[must_use]
     pub fn state_is_function(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_function())
     }
 
-    #[must_use]
     pub fn state_is_global(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_global())
     }
 
-    #[must_use]
     pub fn state_is_iteration(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_iteration())
     }
@@ -627,7 +637,7 @@ impl Scope {
     }
 
     pub fn update(&mut self, name: &str, value: Value) -> Result<bool> {
-        Ok(self.scope.borrow_mut()?.update(name, value)?)
+        self.scope.borrow_mut()?.update(name, value)
     }
 
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
@@ -645,7 +655,7 @@ impl Scope {
     pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)
     }
-    
+
     pub fn this(&self) -> Result<Value> {
         Ok(self.scope.borrow()?.this.copy())
     }

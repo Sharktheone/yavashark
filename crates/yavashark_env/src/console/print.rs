@@ -1,6 +1,6 @@
 use colored::Colorize;
 
-use yavashark_value::{Obj, Object, Value};
+use yavashark_value::{Object, Value};
 
 use crate::context::Context;
 

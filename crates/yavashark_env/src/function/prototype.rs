@@ -40,18 +40,22 @@ impl FunctionPrototype {
     }
 }
 
+#[allow(unused)]
 fn apply(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
+#[allow(unused)]
 fn bind(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
+#[allow(unused)]
 fn call(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }
 
+#[allow(unused)]
 fn constructor(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()
 }

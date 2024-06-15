@@ -12,7 +12,6 @@ use crate::Symbol;
 pub struct Array {}
 
 
-
 impl Array {
     pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {
         let mut array = Self::new(ctx)?;
@@ -41,6 +40,7 @@ impl Array {
     }
 
     #[prop(Symbol::ITERATOR)]
+    #[allow(clippy::unused_self)]
     fn iterator(&self, _args: Vec<Value>, ctx: &Context, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(Error::ty_error(format!("Expected object, found {this:?}")));
@@ -84,7 +84,7 @@ pub struct ArrayIterator {
 #[properties]
 impl ArrayIterator {
     #[prop]
-    pub fn next(&mut self, _args: Vec<Value>, ctx: &mut Context) -> ValueResult {
+    pub fn next(&mut self, _args: Vec<Value>, ctx: &Context) -> ValueResult {
         if self.done {
             let obj = Object::new(ctx);
             obj.define_property("value".into(), Value::Undefined)?;

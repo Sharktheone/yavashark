@@ -206,6 +206,6 @@ mod anyhow_impl {
 
 impl<T: std::error::Error, C: Ctx> From<T> for Error<C> {
     fn from(value: T) -> Self {
-        Error::new_error(value.to_string())
+        Self::new_error(value.to_string())
     }
 }

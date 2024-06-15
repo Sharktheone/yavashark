@@ -339,7 +339,7 @@ impl<C: Ctx> Iter<C> {
 
 
 pub trait CustomGcRef: Collectable + CustomGcRefUntyped {
-    fn gc_ref(&self) -> Option<GcRef<Self>> where Self: Collectable;
+    fn gc_ref(&self) -> Option<GcRef<Self>>;
 
 }
 

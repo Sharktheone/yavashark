@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::thread;
 
 use lazy_static::lazy_static;
-use log::warn;
+use log::{warn};
 use rand::random;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -33,6 +33,7 @@ pub struct Trace {
 }
 
 impl Trace {
+    #[allow(clippy::unused_self)]
     fn delete_cache(&mut self) {
         #[cfg(feature = "trace")]
         {

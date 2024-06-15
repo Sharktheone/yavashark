@@ -22,7 +22,7 @@ impl Interpreter {
         let mut context = &mut Context::new()?;
         let mut scope = scope::Scope::global(context);
 
-       Self::run_statements(context, &script, &mut scope)
+       Self::run_statements(context, script, &mut scope)
             .or_else(|e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
@@ -42,7 +42,7 @@ impl Interpreter {
         scope.declare_global_var("mock".into(), mock);
 
         (
-            Self::run_statements(context, &script, &mut scope)
+            Self::run_statements(context, script, &mut scope)
                 .or_else(|e| match e {
                     ControlFlow::Error(e) => Err(e),
                     ControlFlow::Return(v) => Ok(v),

@@ -388,7 +388,7 @@ impl<T: Collectable> Gc<T> {
             #[cfg(feature = "easy_debug")]
             ty_name: type_name::<T>(),
             #[cfg(feature = "easy_debug")]
-            name: name,
+            name,
         };
 
         let gc_box = Box::new(gc_box);
@@ -418,7 +418,7 @@ impl<T: Collectable> Gc<T> {
 
     pub fn root(value: T) -> Self {
         #[cfg(feature = "easy_debug")]
-            let _name = value.trace_name();
+            let name = value.trace_name();
 
         let value = Box::new(value);
         let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
@@ -430,7 +430,7 @@ impl<T: Collectable> Gc<T> {
             #[cfg(feature = "easy_debug")]
             ty_name: type_name::<T>(),
             #[cfg(feature = "easy_debug")]
-            name: _name,
+            name,
         };
 
         let gc_box = Box::new(gc_box);
@@ -1493,6 +1493,7 @@ mod tests {
             pr.other.push(m3);
             pr.other.push(m4);
 
+            #[allow(clippy::similar_names)]
             {
                 let obj_1 = Node::add_with_other(10, &proto);
                 let obj_2 = Node::add_with_other(10, &proto);

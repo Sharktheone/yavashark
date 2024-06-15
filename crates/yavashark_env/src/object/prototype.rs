@@ -41,7 +41,7 @@ impl Default for Prototype {
 }
 
 impl Prototype {
-    pub fn new() -> Self {
+    #[must_use] pub fn new() -> Self {
         Self {
             object: Object::raw_with_proto(Value::Undefined),
             defined_getter: Value::Undefined.into(),

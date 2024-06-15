@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use crate::{NativeFunction, Value};
 use crate::context::Context;
 use crate::object::Object;
-use crate::{NativeFunction, Value};
 
 #[macro_export(local_inner_macros)]
 macro_rules! test_eval {
@@ -37,7 +37,8 @@ pub struct State {
     pub got_values: Vec<Vec<Value>>,
 }
 
-pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
+#[must_use]
+pub fn mock_object(ctx: &Context) -> (Value, Rc<RefCell<State>>) {
     let obj = Object::new(ctx);
 
     let state = Rc::new(RefCell::new(State {
@@ -50,7 +51,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
         "send".into(),
         NativeFunction::new(
             "send",
-            move |args, _, _| {
+            move |_, _, _| {
                 let mut state = send_state.borrow_mut();
                 state.send_called += 1;
 
@@ -58,7 +59,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
             },
             ctx,
         )
-        .into(),
+            .into(),
     );
 
     let values_state = Rc::clone(&state);
@@ -74,7 +75,7 @@ pub fn mock_object(ctx: &mut Context) -> (Value, Rc<RefCell<State>>) {
             },
             ctx,
         )
-        .into(),
+            .into(),
     );
 
     (obj.into(), state)

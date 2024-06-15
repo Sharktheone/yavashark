@@ -24,7 +24,8 @@ pub struct NativeFunction {
 }
 
 impl NativeFunction {
-    pub fn new_boxed(name: String, f: NativeFn, ctx: &mut Context) -> ObjectHandle {
+    #[must_use]
+    pub fn new_boxed(name: String, f: NativeFn, ctx: &Context) -> ObjectHandle {
         let this = Self {
             name,
             f,
@@ -39,7 +40,7 @@ impl NativeFunction {
     pub fn new(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
-        ctx: &mut Context,
+        ctx: &Context,
     ) -> ObjectHandle {
         let this = Self {
             name: name.to_string(),
@@ -115,7 +116,7 @@ impl NativeFunctionBuilder {
 
     /// Note: Overrides the prototype of the object
     #[must_use]
-    pub fn context(mut self, ctx: &mut Context) -> Self {
+    pub fn context(mut self, ctx: &Context) -> Self {
         self.0.object.prototype = ctx.proto.func.clone().into();
         self
     }

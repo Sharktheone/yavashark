@@ -1,13 +1,12 @@
-use std::any::Any;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub use prototype::*;
-use yavashark_value::{Error, Obj};
+use yavashark_value::Obj;
 
 use crate::context::Context;
+use crate::Value;
 use crate::Variable;
-use crate::{Value, ValueResult};
 
 pub mod array;
 mod prototype;
@@ -22,7 +21,8 @@ pub struct Object {
 
 impl Object {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(context: &mut Context) -> crate::ObjectHandle {
+    #[must_use]
+    pub fn new(context: &Context) -> crate::ObjectHandle {
         let prototype = context.proto.obj.clone().into();
 
         let this: Box<dyn Obj<Context>> = Box::new(Self {
@@ -35,6 +35,7 @@ impl Object {
         this.into()
     }
 
+    #[must_use]
     pub fn with_proto(proto: Value) -> crate::ObjectHandle {
         let this: Box<dyn Obj<Context>> = Box::new(Self {
             properties: HashMap::new(),
@@ -46,7 +47,8 @@ impl Object {
         this.into()
     }
 
-    pub fn raw(context: &mut Context) -> Self {
+    #[must_use]
+    pub fn raw(context: &Context) -> Self {
         let prototype = context.proto.obj.clone().into();
 
         Self {
@@ -57,6 +59,7 @@ impl Object {
         }
     }
 
+    #[must_use]
     pub fn raw_with_proto(proto: Value) -> Self {
         Self {
             properties: HashMap::new(),
@@ -66,6 +69,7 @@ impl Object {
         }
     }
 
+    #[must_use]
     pub fn array_position(&self, index: usize) -> (usize, bool) {
         if self.array.is_empty() {
             return (0, false);
@@ -104,6 +108,7 @@ impl Object {
         self.array.insert(i, (index, value));
     }
 
+    #[must_use]
     pub fn resolve_array(&self, index: usize) -> Option<Value> {
         let (i, found) = self.array_position(index);
 
@@ -114,6 +119,7 @@ impl Object {
         None
     }
 
+    #[must_use]
     pub fn get_array(&self, index: usize) -> Option<&Value> {
         let (i, found) = self.array_position(index);
 
@@ -134,6 +140,14 @@ impl Object {
         None
     }
 
+
+    pub fn set_array(&mut self, elements: Vec<Value>) {
+        self.array.clear();
+        for (i, v) in elements.into_iter().enumerate() {
+            self.array.push((i, Variable::new(v)));
+        }
+    }
+
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);
 
@@ -144,13 +158,15 @@ impl Object {
         None
     }
 
+    #[must_use]
     pub fn contains_array_key(&self, index: usize) -> bool {
         let (_, found) = self.array_position(index);
 
         found
     }
 
-    pub fn from_values(values: Vec<(Value, Value)>, ctx: &mut Context) -> Self {
+    #[must_use]
+    pub fn from_values(values: Vec<(Value, Value)>, ctx: &Context) -> Self {
         let mut object = Self::raw(ctx);
 
         for (key, value) in values {
@@ -310,7 +326,7 @@ mod tests {
 
     #[test]
     fn object_creation_with_proto() {
-        let mut context = Context::new().unwrap();
+        let context = Context::new().unwrap();
         let proto = Value::Number(42.0);
         let object = Object::with_proto(proto);
 
