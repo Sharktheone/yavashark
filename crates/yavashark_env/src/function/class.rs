@@ -5,9 +5,6 @@ use yavashark_value::Func;
 
 use crate::{Context, Error, Object, Value};
 
-
-
-
 #[object]
 #[derive(Debug)]
 pub struct Class {
@@ -17,11 +14,11 @@ pub struct Class {
 
 impl Func<Context> for Class {
     fn call(
-            &mut self,
-            _ctx: &mut Context,
-            _args: Vec<Value>,
-            _this: Value,
-        ) -> Result<Value, Error> {
+        &mut self,
+        _ctx: &mut Context,
+        _args: Vec<Value>,
+        _this: Value,
+    ) -> Result<Value, Error> {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))
@@ -30,11 +27,13 @@ impl Func<Context> for Class {
 
 
 impl Class {
-    #[must_use] pub fn new(ctx: &Context) -> Self {
+    #[must_use]
+    pub fn new(ctx: &Context) -> Self {
         Self::new_with_proto(ctx.proto.func.clone().into())
     }
 
-    #[must_use] pub fn new_with_proto(proto: Value) -> Self {
+    #[must_use]
+    pub fn new_with_proto(proto: Value) -> Self {
         let object = Object::raw_with_proto(proto);
 
         Self {
@@ -47,7 +46,8 @@ impl Class {
         self.private_props.insert(key, value);
     }
 
-    #[must_use] pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
+    #[must_use]
+    pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
         self.private_props.get(key)
     }
 }

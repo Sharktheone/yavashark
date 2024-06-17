@@ -13,6 +13,7 @@ use yavashark_env::{Context, ControlFlow, scope, Value, ValueResult};
 mod pat;
 pub mod statement;
 mod function;
+mod class;
 
 
 pub struct Interpreter;
