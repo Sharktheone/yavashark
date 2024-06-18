@@ -1,7 +1,7 @@
 use swc_ecma_ast::{AssignExpr, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget};
 
-use yavashark_env::{Context, Error, Res, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, Error, Res, RuntimeResult, Value};
 
 use crate::Interpreter;
 
@@ -9,8 +9,7 @@ impl Interpreter {
     pub fn run_assign(ctx: &mut Context, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
         let value = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 
-        Ok(Self::assign_target(ctx, &stmt.left, value, scope)
-            .map(|()| Value::Undefined)?)
+        Ok(Self::assign_target(ctx, &stmt.left, value, scope).map(|()| Value::Undefined)?)
     }
 
     pub fn with_target(
@@ -40,7 +39,12 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn assign_target(ctx: &mut Context, target: &AssignTarget, value: Value, scope: &mut Scope) -> Res {
+    pub fn assign_target(
+        ctx: &mut Context,
+        target: &AssignTarget,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
         match target {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
@@ -56,7 +60,12 @@ impl Interpreter {
         }
     }
 
-    pub fn assign_member(ctx: &mut Context, m: &MemberExpr, value: Value, scope: &mut Scope) -> Res {
+    pub fn assign_member(
+        ctx: &mut Context,
+        m: &MemberExpr,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
         let obj = Self::run_expr(ctx, &m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
             let name = match &m.prop {

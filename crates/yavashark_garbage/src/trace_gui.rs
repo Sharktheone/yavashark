@@ -55,7 +55,6 @@ impl App {
             nodes.insert(*id, (handle, item));
         }
 
-
         for (handle, item) in nodes.values() {
             for ref_id in &item.refs {
                 if let Some((ref_handle, _)) = nodes.get(ref_id) {

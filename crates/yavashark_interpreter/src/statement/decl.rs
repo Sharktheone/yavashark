@@ -1,7 +1,7 @@
-use swc_ecma_ast::Decl;
-use yavashark_env::{Context, Error, Res};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
+use swc_ecma_ast::Decl;
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, Error, Res};
 
 mod class;
 mod r#fn;

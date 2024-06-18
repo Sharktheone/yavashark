@@ -1,9 +1,9 @@
-use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
+use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
-impl  Interpreter {
+impl Interpreter {
     pub fn run_for(ctx: &mut Context, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
         let scope = &mut Scope::with_parent(scope)?;
         let label = scope.last_label()?;

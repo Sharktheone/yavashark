@@ -1,9 +1,8 @@
+use crate::Interpreter;
 use swc_ecma_ast::{ForHead, ForInStmt};
-use yavashark_env::{Context, ControlFlow, Error, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use crate::Interpreter;
-
+use yavashark_env::{Context, ControlFlow, Error, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for_in(ctx: &mut Context, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {

@@ -1,7 +1,7 @@
-use swc_ecma_ast::{Callee, CallExpr};
+use swc_ecma_ast::{CallExpr, Callee};
 
-use yavashark_env::{Context, ControlFlow, Error, Value, ValueResult};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, Error, Value, ValueResult};
 
 use crate::Interpreter;
 

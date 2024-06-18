@@ -21,8 +21,6 @@ pub fn properties(
     props::properties(attrs, item)
 }
 
-
-
 fn env_path() -> syn::Path {
     let name = env::var("CARGO_PKG_NAME").unwrap_or("".to_string());
     if name == "yavashark_env" {

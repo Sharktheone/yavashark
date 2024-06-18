@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::{NativeFunction, Value};
 use crate::context::Context;
 use crate::object::Object;
+use crate::{NativeFunction, Value};
 
 #[macro_export(local_inner_macros)]
 macro_rules! test_eval {
@@ -28,8 +28,8 @@ macro_rules! test_eval {
         assert_eq!(state.send_called, $sends);
         assert_eq!(state.got_values, $values);
     };
-    
-    ($code:expr, $sends:literal, $values:expr, $ret:expr) => {} //TODO
+
+    ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
 }
 
 pub struct State {
@@ -59,7 +59,7 @@ pub fn mock_object(ctx: &Context) -> (Value, Rc<RefCell<State>>) {
             },
             ctx,
         )
-            .into(),
+        .into(),
     );
 
     let values_state = Rc::clone(&state);
@@ -75,7 +75,7 @@ pub fn mock_object(ctx: &Context) -> (Value, Rc<RefCell<State>>) {
             },
             ctx,
         )
-            .into(),
+        .into(),
     );
 
     (obj.into(), state)

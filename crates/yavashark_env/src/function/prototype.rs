@@ -2,9 +2,9 @@
 
 use yavashark_value::Obj;
 
-use crate::{NativeFunction, Value, ValueResult, Variable};
 use crate::context::Context;
 use crate::object::Object;
+use crate::{NativeFunction, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -30,7 +30,6 @@ impl FunctionPrototype {
             name: Value::String("Function".to_string()).into(),
         }
     }
-
 
     pub fn initialize(&mut self, func: Value) {
         self.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
@@ -288,7 +287,6 @@ impl Obj<Context> for FunctionPrototype {
         self.length = Value::Number(0.0).into();
         self.name = Value::String("Function".to_string()).into();
     }
-
 
     fn prototype(&self) -> &Value {
         self.object.prototype()

@@ -1,7 +1,7 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
-use crate::{Value, ValueResult};
 use crate::context::Context;
+use crate::{Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
     todo!()

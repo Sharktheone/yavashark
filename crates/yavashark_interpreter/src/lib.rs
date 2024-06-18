@@ -1,20 +1,15 @@
-#![allow(
-    unused,
-    clippy::needless_pass_by_ref_mut
-)] //pass by ref mut is just temporary until all functions are implemented
+#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
-use yavashark_env::{Context, ControlFlow, scope, Value, ValueResult};
+use yavashark_env::{scope, Context, ControlFlow, Value, ValueResult};
+mod class;
+mod function;
 mod pat;
 pub mod statement;
-mod function;
-mod class;
-
 
 pub struct Interpreter;
 
@@ -23,7 +18,7 @@ impl Interpreter {
         let mut context = &mut Context::new()?;
         let mut scope = scope::Scope::global(context);
 
-       Self::run_statements(context, script, &mut scope)
+        Self::run_statements(context, script, &mut scope)
             .or_else(|e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
@@ -43,12 +38,11 @@ impl Interpreter {
         scope.declare_global_var("mock".into(), mock);
 
         (
-            Self::run_statements(context, script, &mut scope)
-                .or_else(|e| match e {
-                    ControlFlow::Error(e) => Err(e),
-                    ControlFlow::Return(v) => Ok(v),
-                    _ => Ok(Value::Undefined),
-                }),
+            Self::run_statements(context, script, &mut scope).or_else(|e| match e {
+                ControlFlow::Error(e) => Err(e),
+                ControlFlow::Return(v) => Ok(v),
+                _ => Ok(Value::Undefined),
+            }),
             state,
         )
     }
@@ -56,17 +50,17 @@ impl Interpreter {
 
 #[cfg(test)]
 mod temp_test {
-    use std::thread;
     use env_logger::Logger;
-    use swc_common::BytePos;
+    use std::thread;
     use swc_common::input::StringInput;
+    use swc_common::BytePos;
     use swc_ecma_parser::{EsConfig, Parser, Syntax};
 
     use super::*;
 
     #[test]
     fn math() {
-        { 
+        {
             let src = r#"
 
         let x = 1 + 2
@@ -207,12 +201,11 @@ mod temp_test {
 
         z
         "#;
-            
-            
+
             env_logger::Builder::from_default_env()
                 .filter_level(log::LevelFilter::Warn)
                 .init();
-            
+
             let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 
             let c = EsConfig::default();
@@ -221,12 +214,9 @@ mod temp_test {
             let script = p.parse_script().unwrap();
 
             let result = Interpreter::run(&script.body).unwrap();
-            
+
             println!("{result:?}");
-
-
         }
-
 
         // #[cfg(not(miri))]
         // std::thread::sleep(std::time::Duration::from_secs(20));

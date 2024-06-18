@@ -1,10 +1,9 @@
-use swc_ecma_ast::{MemberExpr, MemberProp};
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
+use swc_ecma_ast::{MemberExpr, MemberProp};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
-
-impl Interpreter{
+impl Interpreter {
     pub fn run_member(ctx: &mut Context, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
         let obj = Self::run_expr(ctx, &stmt.obj, stmt.span, scope)?;
 

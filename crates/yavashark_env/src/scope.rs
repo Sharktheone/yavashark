@@ -2,14 +2,14 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::CellCollectable;
+use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
 
-use crate::{Error, Res, Result, Value, Variable};
 use crate::console::get_console;
 use crate::context::Context;
 use crate::error::get_error;
+use crate::{Error, Res, Result, Value, Variable};
 
 pub struct MutValue {
     pub name: String,
@@ -21,7 +21,6 @@ pub struct MutValue {
 pub struct ScopeState {
     state: u8,
 }
-
 
 #[allow(unused)]
 impl ScopeState {
@@ -136,7 +135,6 @@ pub struct Scope {
     scope: Gc<RefCell<ScopeInternal>>,
 }
 
-
 #[derive(Debug)]
 pub struct ScopeInternal {
     parent: Option<Gc<RefCell<ScopeInternal>>>,
@@ -167,7 +165,6 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
         refs
     }
 }
-
 
 impl ScopeInternal {
     #[must_use]
@@ -520,9 +517,10 @@ impl Scope {
 
     pub fn with_parent_this(parent: &Self, this: Value) -> Result<Self> {
         Ok(Self {
-            scope: Gc::new(RefCell::new(ScopeInternal::with_parent_this(Gc::clone(
-                &parent.scope,
-            ), this)?)),
+            scope: Gc::new(RefCell::new(ScopeInternal::with_parent_this(
+                Gc::clone(&parent.scope),
+                this,
+            )?)),
         })
     }
 
@@ -571,7 +569,10 @@ impl Scope {
 
     #[must_use]
     pub fn state(&self) -> ScopeState {
-        self.scope.borrow().map(|x| x.state.clone()).unwrap_or_default()
+        self.scope
+            .borrow()
+            .map(|x| x.state.clone())
+            .unwrap_or_default()
     }
 
     pub fn state_set_global(&mut self) -> Res {
@@ -661,7 +662,6 @@ impl Scope {
     }
 }
 
-
 impl CustomGcRefUntyped for Scope {
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         Some(self.scope.get_untyped_ref())
@@ -678,9 +678,7 @@ impl From<ScopeInternal> for Scope {
 
 impl From<Gc<RefCell<ScopeInternal>>> for Scope {
     fn from(scope: Gc<RefCell<ScopeInternal>>) -> Self {
-        Self {
-            scope,
-        }
+        Self { scope }
     }
 }
 

@@ -1,18 +1,17 @@
 use std::any::Any;
 use std::fmt::Debug;
 
-pub use prototype::*;
 pub use class::*;
+pub use prototype::*;
 use yavashark_macro::object;
 use yavashark_value::Func;
 
-
-use crate::{ObjectHandle, Value, ValueResult};
 use crate::context::Context;
 use crate::object::Object;
+use crate::{ObjectHandle, Value, ValueResult};
 
-mod prototype;
 mod class;
+mod prototype;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
@@ -149,5 +148,3 @@ impl Func<Context> for NativeFunction {
         (self.f)(args, this, ctx)
     }
 }
-
-

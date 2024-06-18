@@ -202,8 +202,6 @@ mod anyhow_impl {
     impl std::error::Error for SyncError {}
 }
 
-
-
 impl<T: std::error::Error, C: Ctx> From<T> for Error<C> {
     fn from(value: T) -> Self {
         Self::new_error(value.to_string())

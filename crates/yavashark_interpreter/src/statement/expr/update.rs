@@ -1,8 +1,7 @@
-use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
-use yavashark_env::{Context, Error, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
-
+use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, Error, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_update(ctx: &mut Context, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {

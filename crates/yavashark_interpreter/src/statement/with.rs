@@ -1,6 +1,6 @@
+use crate::Interpreter;
 use swc_ecma_ast::WithStmt;
 use yavashark_env::{Context, RuntimeResult};
-use crate::Interpreter;
 
 use crate::scope::Scope;
 

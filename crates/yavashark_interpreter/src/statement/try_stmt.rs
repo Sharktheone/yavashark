@@ -1,7 +1,7 @@
-use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
-use yavashark_env::{Context, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
+use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_try(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {

@@ -1,6 +1,6 @@
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
-use yavashark_env::{Context, Error, Res, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, Error, Res, Value};
 
 use crate::Interpreter;
 

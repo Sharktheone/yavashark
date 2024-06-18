@@ -1,6 +1,6 @@
 use swc_ecma_ast::BreakStmt;
-use yavashark_env::{Context, ControlFlow, RuntimeResult};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult};
 
 use crate::Interpreter;
 

@@ -1,10 +1,10 @@
 use proc_macro::TokenStream as TokenStream1;
 
+use crate::env_path;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use syn::{FieldMutability, Fields, Path, PathSegment};
 use syn::spanned::Spanned;
-use crate::env_path;
+use syn::{FieldMutability, Fields, Path, PathSegment};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -98,7 +98,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
     });
 
-
     syn::parse_macro_input!(attrs with attr_parser);
 
     let Fields::Named(fields) = &mut input.fields else {
@@ -107,14 +106,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .into();
     };
 
-
     for f in &mut fields.named {
         let mut err = None;
         f.attrs.retain_mut(|attr| {
             if attr.meta.path().is_ident("gc") {
                 let mut ty = true;
                 let mut func = None;
-
 
                 if !matches!(attr.meta, syn::Meta::Path(_)) {
                     if let Err(e) = attr.parse_nested_meta(|meta| {
@@ -124,7 +121,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         }
 
                         if meta.path.is_ident("func") {
-                            func = Some(meta.path.get_ident().cloned().ok_or(syn::Error::new(meta.path.span(), "Expected ident"))?);
+                            func = Some(
+                                meta.path
+                                    .get_ident()
+                                    .cloned()
+                                    .ok_or(syn::Error::new(meta.path.span(), "Expected ident"))?,
+                            );
                             return Ok(());
                         }
 
@@ -135,15 +137,18 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     };
                 }
 
-
-                let id = match f.ident.as_ref().ok_or(syn::Error::new(attr.meta.span(), "Expected ident")) {
+                let id = match f
+                    .ident
+                    .as_ref()
+                    .ok_or(syn::Error::new(attr.meta.span(), "Expected ident"))
+                {
                     Ok(id) => id,
                     Err(e) => {
                         err = Some(e);
                         return false;
                     }
-                }.clone();
-
+                }
+                .clone();
 
                 gc.push((id, ty, func));
 
@@ -153,12 +158,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             true
         });
 
-
         if let Some(e) = err {
             return e.to_compile_error().into();
         }
     }
-
 
     fields.named.push(syn::Field {
         attrs: Vec::new(),
@@ -219,32 +222,33 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         quote! {}
     };
 
-
     let custom_refs = if gc.is_empty() {
         TokenStream::new()
     } else {
         let len = gc.len();
 
-        let refs = gc.into_iter().map(|gc| {
-            let mut func = if gc.1 {
-                Ident::new("gc_ref", Span::call_site())
-            } else {
-                Ident::new("gc_untyped_ref", Span::call_site())
-            };
+        let refs = gc
+            .into_iter()
+            .map(|gc| {
+                let mut func = if gc.1 {
+                    Ident::new("gc_ref", Span::call_site())
+                } else {
+                    Ident::new("gc_untyped_ref", Span::call_site())
+                };
 
-            if let Some(f) = gc.2 {
-                func = f;
-            }
-
-            let field = gc.0;
-
-            quote! {
-                if let Some(r) = self.#field.#func() {
-                    refs.push(r);
+                if let Some(f) = gc.2 {
+                    func = f;
                 }
-            }
-        }).collect::<TokenStream>();
 
+                let field = gc.0;
+
+                quote! {
+                    if let Some(r) = self.#field.#func() {
+                        refs.push(r);
+                    }
+                }
+            })
+            .collect::<TokenStream>();
 
         quote! {
             unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<std::cell::RefCell<yavashark_value::BoxedObj<#context>>>> {
@@ -257,7 +261,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-
 
     let expanded = quote! {
         #input
@@ -332,7 +335,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #clear
                 self.object.clear_values();
             }
-            
+
             fn prototype(&self) -> &#value {
                 self.object.prototype()
             }
@@ -464,4 +467,3 @@ fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> 
 
     add
 }
-

@@ -1,6 +1,7 @@
 use swc_common::Span;
 use swc_ecma_ast::{Expr, ExprStmt};
 
+use crate::Interpreter;
 pub use arrow::*;
 pub use assign::*;
 pub use bin::*;
@@ -27,9 +28,8 @@ pub use this::*;
 pub use tpl::*;
 pub use unary::*;
 pub use update::*;
-use yavashark_env::{Context, ControlFlow, RuntimeResult};
 use yavashark_env::scope::Scope;
-use crate::Interpreter;
+use yavashark_env::{Context, ControlFlow, RuntimeResult};
 
 mod this;
 
@@ -83,11 +83,16 @@ mod call;
 
 mod r#yield;
 
-impl  Interpreter {
+impl Interpreter {
     pub fn run_expr_stmt(ctx: &mut Context, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
         Self::run_expr(ctx, &stmt.expr, stmt.span, scope)
     }
-    pub fn run_expr(ctx: &mut Context, expr: &Expr, span: Span, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_expr(
+        ctx: &mut Context,
+        expr: &Expr,
+        span: Span,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
         match expr {
             Expr::This(stmt) => Self::run_this(ctx, stmt, scope),
             Expr::Array(stmt) => Self::run_array(ctx, stmt, scope),

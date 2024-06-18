@@ -1,8 +1,7 @@
-use swc_ecma_ast::DoWhileStmt;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
-
+use swc_ecma_ast::DoWhileStmt;
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_do_while(ctx: &mut Context, stmt: &DoWhileStmt, scope: &mut Scope) -> RuntimeResult {

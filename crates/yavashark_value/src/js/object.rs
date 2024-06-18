@@ -6,12 +6,12 @@ use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
+use yavashark_garbage::{Collectable, Gc, GcRef};
 
-use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
+use crate::Error;
 
 use super::Value;
 
@@ -69,8 +69,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn values(&self) -> Vec<Value<C>>;
 
     fn into_object(self) -> Object<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         let boxed: Box<dyn Obj<C>> = Box::new(self);
 
@@ -78,8 +78,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 
     fn into_value(self) -> Value<C>
-        where
-            Self: Sized + 'static,
+    where
+        Self: Sized + 'static,
     {
         Value::Object(self.into_object())
     }
@@ -106,7 +106,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     }
 
     fn prototype(&self) -> &Value<C> {
-        self.get_property(&"__proto__".into()).unwrap_or(&Value::Undefined)
+        self.get_property(&"__proto__".into())
+            .unwrap_or(&Value::Undefined)
     }
 
     /// # Safety
@@ -115,7 +116,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
         Vec::new()
     }
-    
+
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()
     }
@@ -164,12 +165,11 @@ impl<C: Ctx> DerefMut for BoxedObj<C> {
     }
 }
 
-
 unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
     fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
         let properties = self.0.properties();
 
-        let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects 
+        let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects
 
         self.0.properties().into_iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
@@ -181,11 +181,9 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
             }
         });
 
-
         if let Value::Object(o) = self.0.prototype() {
             refs.push(o.0.get_ref());
         }
-
 
         unsafe {
             // Safety: unsafe is only for the implementer, not for us - we are safe
@@ -194,8 +192,7 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
 
         refs
     }
-    
-    
+
     #[cfg(any(feature = "obj_dbg", feature = "obj_trace"))]
     fn trace_name(&self) -> &'static str {
         self.0.class_name()
@@ -212,7 +209,6 @@ impl<C: Ctx> BoxedObj<C> {
         Self(obj)
     }
 }
-
 
 #[derive(Clone)]
 pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>);
@@ -246,7 +242,8 @@ impl<C: Ctx> PartialEq for Object<C> {
 
 impl<C: Ctx> Object<C> {
     pub fn get(&self) -> Result<GcRefCellGuard<BoxedObj<C>>, Error<C>> {
-        self.0.borrow()
+        self.0
+            .borrow()
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
@@ -256,7 +253,8 @@ impl<C: Ctx> Object<C> {
     }
 
     pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
-        self.0.borrow_mut()
+        self.0
+            .borrow_mut()
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
@@ -323,7 +321,10 @@ impl<C: Ctx> Object<C> {
     }
 
     pub fn exchange(&self, other: Box<dyn Obj<C>>) -> Result<(), Error<C>> {
-        **self.0.borrow_mut().map_err(|_| Error::new("Failed to borrow object"))? = BoxedObj::new(other);
+        **self
+            .0
+            .borrow_mut()
+            .map_err(|_| Error::new("Failed to borrow object"))? = BoxedObj::new(other);
 
         Ok(())
     }
@@ -365,7 +366,8 @@ impl<C: Ctx> Object<C> {
 
     #[must_use]
     pub fn custom_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
-        self.get().map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
+        self.get()
+            .map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
     }
 }
 

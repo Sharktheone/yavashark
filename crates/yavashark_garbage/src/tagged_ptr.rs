@@ -17,30 +17,25 @@ pub struct TaggedPtr<T> {
     _marker: std::marker::PhantomData<T>,
 }
 
-
 impl<T> Clone for TaggedPtr<T> {
-    fn clone(&self) -> Self { *self }
+    fn clone(&self) -> Self {
+        *self
+    }
 }
 
 impl<T> Copy for TaggedPtr<T> {}
-
 
 #[allow(clippy::missing_const_for_fn)]
 impl<T> TaggedPtr<T> {
     #[cfg(not(miri))]
     const IS_ALIGNED_ENOUGH: bool = {
-        let alignment = if std::mem::align_of::<T>() > 2 {
-            0
-        } else {
-            1
-        };
+        let alignment = if std::mem::align_of::<T>() > 2 { 0 } else { 1 };
 
         #[allow(clippy::no_effect)]
         [0][alignment];
 
         true
     };
-
 
     /// Mask, so we only keep the lowest bit
     #[cfg(not(miri))]
@@ -59,8 +54,7 @@ impl<T> TaggedPtr<T> {
         let ptr = ptr | usize::from(tag);
 
         #[allow(clippy::expect_used)]
-            let ptr = NonNull::new(ptr as *mut _).expect("Pointer is null");
-
+        let ptr = NonNull::new(ptr as *mut _).expect("Pointer is null");
 
         Self {
             ptr,
@@ -87,7 +81,6 @@ impl<T> TaggedPtr<T> {
         self.tag
     }
 
-
     #[cfg(not(miri))]
     pub(crate) fn ptr(&self) -> NonNull<T> {
         let ptr = self.ptr.as_ptr() as usize & !Self::MASK;
@@ -106,23 +99,28 @@ impl<T> TaggedPtr<T> {
     #[cfg(not(miri))]
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
-        TaggedPtr { ptr: self.ptr, _marker: std::marker::PhantomData }
+        TaggedPtr {
+            ptr: self.ptr,
+            _marker: std::marker::PhantomData,
+        }
     }
 
     #[cfg(miri)]
     pub const fn cast<U>(self) -> TaggedPtr<U> {
         // SAFETY: `self` is a `NonNull` pointer which is necessarily non-null
-        TaggedPtr { ptr: self.ptr.cast(), tag: self.tag, _marker: std::marker::PhantomData }
+        TaggedPtr {
+            ptr: self.ptr.cast(),
+            tag: self.tag,
+            _marker: std::marker::PhantomData,
+        }
     }
 }
-
 
 impl<T> From<NonNull<T>> for TaggedPtr<T> {
     fn from(value: NonNull<T>) -> Self {
         Self::new(value, false)
     }
 }
-
 
 #[cfg(test)]
 mod tests {

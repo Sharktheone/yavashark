@@ -17,7 +17,6 @@ macro_rules! collect {
     };
 }
 
-
 collect!(());
 collect!(bool);
 collect!(char);
@@ -38,14 +37,13 @@ collect!(usize);
 
 collect!(String);
 
-
 ///This trait optimizes the usage of Cells like `RefCell`s and others in the Gc
 ///they do not need to use a typeless gc, but instead can just return also RefCell-References
 /// # Safety
 /// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait CellCollectable<T: Collectable> {
     fn get_refs(&self) -> Vec<GcRef<T>>;
-    
+
     #[cfg(feature = "easy_debug")]
     #[must_use]
     fn trace_name(&self) -> &'static str {
@@ -53,15 +51,13 @@ pub unsafe trait CellCollectable<T: Collectable> {
     }
 }
 
-
-
 macro_rules! cell {
     ($ty:ident,$lock:ident) => {
         unsafe impl<T: CellCollectable<Self>> Collectable for $ty<T> {
             fn get_refs(&self) -> Vec<GcRef<Self>> {
                 self.$lock().map(|x| x.get_refs()).unwrap_or_default()
             }
-            
+
             #[cfg(feature = "easy_debug")]
             fn trace_name(&self) -> &'static str {
                 self.$lock().map(|x| x.trace_name()).unwrap_or("<unknown>")
@@ -70,14 +66,11 @@ macro_rules! cell {
     };
 }
 
-
 cell!(RefCell, try_borrow);
 cell!(StdRwLock, read);
 cell!(RwLock, try_read);
 cell!(StdMutex, lock);
 cell!(Mutex, try_lock);
-
-
 
 pub struct GcRefCellGuard<'a, T: CellCollectable<RefCell<T>>> {
     value: Ref<'a, T>,
@@ -100,7 +93,6 @@ impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     }
 }
 
-
 pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>> {
     /// # Safety
     /// This value should only be set None when the guard is dropped
@@ -117,7 +109,6 @@ impl<T: CellCollectable<RefCell<T>>> Drop for GcMutRefCellGuard<'_, T> {
     }
 }
 
-
 impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcMutRefCellGuard<'a, T> {
     type Target = RefMut<'a, T>;
 
@@ -133,7 +124,6 @@ impl<'a, T: CellCollectable<RefCell<T>>> DerefMut for GcMutRefCellGuard<'a, T> {
         self.value.as_mut().unwrap() // this can only be None if the guard is dropped
     }
 }
-
 
 impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
     pub fn borrow(&self) -> Result<GcRefCellGuard<T>, BorrowError> {
@@ -157,8 +147,4 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
-
 }
-
-
-

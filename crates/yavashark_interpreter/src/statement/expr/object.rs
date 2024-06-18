@@ -1,8 +1,8 @@
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Prop, PropName, PropOrSpread};
 
-use yavashark_env::{Context, ControlFlow, Object, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, Object, RuntimeResult, Value};
 
 use crate::function::JSFunction;
 use crate::Interpreter;

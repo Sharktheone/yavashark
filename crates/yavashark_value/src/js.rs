@@ -154,7 +154,7 @@ impl<C: Ctx> Value<C> {
             Self::Symbol(_) => "symbol",
         }
     }
-    
+
     #[must_use]
     pub fn gc_ref(&self) -> Option<GcRef<RefCell<BoxedObj<C>>>> {
         match self {
@@ -177,7 +177,6 @@ impl<C: Ctx> Display for Value<C> {
         }
     }
 }
-
 
 impl<C: Ctx> CustomGcRefUntyped for Value<C> {
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
@@ -337,10 +336,8 @@ impl<C: Ctx> Iter<C> {
     }
 }
 
-
 pub trait CustomGcRef: Collectable + CustomGcRefUntyped {
     fn gc_ref(&self) -> Option<GcRef<Self>>;
-
 }
 
 pub trait CustomGcRefUntyped {

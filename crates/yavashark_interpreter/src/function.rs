@@ -1,9 +1,11 @@
+use crate::Interpreter;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
-use yavashark_env::{Context, ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable};
 use yavashark_env::scope::Scope;
+use yavashark_env::{
+    Context, ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
+};
 use yavashark_macro::object;
 use yavashark_value::Func;
-use crate::Interpreter;
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function)]

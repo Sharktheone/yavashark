@@ -1,9 +1,9 @@
-use swc_ecma_ast::{BinExpr, BinaryOp};
-use yavashark_env::{Context, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
+use swc_ecma_ast::{BinExpr, BinaryOp};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, RuntimeResult, Value};
 
-impl Interpreter{
+impl Interpreter {
     pub fn run_bin(ctx: &mut Context, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
         let left = Self::run_expr(ctx, &stmt.left, stmt.span, scope)?;
         let right = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;

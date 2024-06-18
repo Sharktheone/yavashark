@@ -1,6 +1,6 @@
 use swc_ecma_ast::Stmt;
 
-use yavashark_env::{Context, RuntimeResult, scope::Scope, Value};
+use yavashark_env::{scope::Scope, Context, RuntimeResult, Value};
 
 use crate::Interpreter;
 
@@ -50,7 +50,11 @@ impl Interpreter {
         }
     }
 
-    pub fn run_statements(ctx: &mut Context, script: &Vec<Stmt>, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_statements(
+        ctx: &mut Context,
+        script: &Vec<Stmt>,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
         let mut last_value = Value::Undefined;
         for stmt in script {
             last_value = Self::run_statement(ctx, stmt, scope)?;

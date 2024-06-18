@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::thread;
 
 use lazy_static::lazy_static;
-use log::{warn};
+use log::warn;
 use rand::random;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -22,8 +22,6 @@ pub struct TraceItem {
 lazy_static! {
     pub static ref TRACER: Tracer = Tracer::new();
 }
-
-
 
 pub struct Trace {
     pub(crate) items: HashMap<TraceID, TraceItem>,
@@ -165,5 +163,3 @@ impl Tracer {
         trace.delete_cache();
     }
 }
-
-

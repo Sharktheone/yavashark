@@ -1,7 +1,7 @@
 use swc_ecma_ast::ReturnStmt;
 
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 use crate::Interpreter;
 

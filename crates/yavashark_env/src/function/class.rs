@@ -11,7 +11,6 @@ pub struct Class {
     private_props: HashMap<String, Value>,
 }
 
-
 impl Func<Context> for Class {
     fn call(
         &mut self,
@@ -24,7 +23,6 @@ impl Func<Context> for Class {
         ))
     }
 }
-
 
 impl Class {
     #[must_use]

@@ -5,16 +5,14 @@ pub use object::*;
 
 mod console;
 mod context;
+mod error;
 mod function;
 mod object;
-mod error;
 pub mod scope;
 #[cfg(feature = "tests")]
 pub mod tests;
 
 pub use yavashark_value as value;
-
-
 
 pub type Value = yavashark_value::Value<Context>;
 pub type Error = yavashark_value::Error<Context>;
@@ -31,17 +29,21 @@ pub enum ControlFlow {
 }
 
 impl ControlFlow {
-    #[must_use] pub fn error(e: String) -> Self {
+    #[must_use]
+    pub fn error(e: String) -> Self {
         Self::Error(Error::new_error(e))
     }
 
-    #[must_use] pub fn error_reference(e: String) -> Self {
+    #[must_use]
+    pub fn error_reference(e: String) -> Self {
         Self::Error(Error::reference_error(e))
     }
-    #[must_use] pub fn error_syntax(e: &str) -> Self {
+    #[must_use]
+    pub fn error_syntax(e: &str) -> Self {
         Self::Error(Error::syn(e))
     }
-    #[must_use] pub fn error_type(e: String) -> Self {
+    #[must_use]
+    pub fn error_type(e: String) -> Self {
         Self::Error(Error::ty_error(e))
     }
 
@@ -52,7 +54,8 @@ impl ControlFlow {
         }
     }
 
-    #[must_use] pub fn throw(val: Value) -> Self {
+    #[must_use]
+    pub fn throw(val: Value) -> Self {
         Self::Error(Error::throw(val))
     }
 }

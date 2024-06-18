@@ -3,14 +3,13 @@
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
-use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 use crate::object::Object;
 use crate::Symbol;
+use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
 #[object(direct(length))]
 #[derive(Debug)]
 pub struct Array {}
-
 
 impl Array {
     pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {

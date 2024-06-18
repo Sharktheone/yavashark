@@ -1,8 +1,8 @@
 use anyhow::anyhow;
 
-use crate::{FunctionPrototype, ObjectHandle};
-use crate::object::{array::Array, Object, Prototype};
 use crate::object::array::ArrayIterator;
+use crate::object::{array::Array, Object, Prototype};
+use crate::{FunctionPrototype, ObjectHandle};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {
@@ -20,10 +20,9 @@ impl Prototypes {
             ObjectHandle::new(FunctionPrototype::new(obj_prototype.clone().into()));
 
         {
-            let mut obj =
-                obj_prototype
-                    .get_mut()
-                    .map_err(|e| anyhow!(format!("{e:?}")))?;
+            let mut obj = obj_prototype
+                .get_mut()
+                .map_err(|e| anyhow!(format!("{e:?}")))?;
 
             let obj = obj.as_any_mut();
 
@@ -35,10 +34,9 @@ impl Prototypes {
         }
 
         {
-            let mut func =
-                func_prototype
-                    .get_mut()
-                    .map_err(|e| anyhow!(format!("{e:?}")))?;
+            let mut func = func_prototype
+                .get_mut()
+                .map_err(|e| anyhow!(format!("{e:?}")))?;
 
             let func = func.as_any_mut();
 
@@ -53,14 +51,13 @@ impl Prototypes {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
-
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         Ok(Self {
             obj: obj_prototype,

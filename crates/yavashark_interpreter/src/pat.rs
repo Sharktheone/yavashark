@@ -1,10 +1,10 @@
-use swc_common::{DUMMY_SP, Span};
+use swc_common::{Span, DUMMY_SP};
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 
-use yavashark_env::{Context, Error, Object, Res, Value, ValueResult};
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
+use yavashark_env::{Context, Error, Object, Res, Value, ValueResult};
 
 use crate::Interpreter;
 
@@ -40,7 +40,7 @@ impl Interpreter {
 
                     if matches!(elem, Some(Pat::Rest(_))) {
                         #[allow(clippy::unwrap_used)]
-                            let rest = elem.as_ref().unwrap(); // Safe to unwrap because of the match above
+                        let rest = elem.as_ref().unwrap(); // Safe to unwrap because of the match above
 
                         let mut elems = Vec::new();
 
@@ -125,7 +125,11 @@ impl Interpreter {
         Ok(())
     }
 
-    pub fn prop_name_to_value(ctx: &mut Context, prop: &PropName, scope: &mut Scope) -> ValueResult {
+    pub fn prop_name_to_value(
+        ctx: &mut Context,
+        prop: &PropName,
+        scope: &mut Scope,
+    ) -> ValueResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(ident.sym.to_string()),
             PropName::Str(str_) => Value::String(str_.value.to_string()),

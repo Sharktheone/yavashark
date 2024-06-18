@@ -1,8 +1,10 @@
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
-use yavashark_env::{Context, ControlFlow, Object, ObjectHandle, RuntimeResult, Value, ValueResult};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Func;
+use yavashark_env::{
+    Context, ControlFlow, Object, ObjectHandle, RuntimeResult, Value, ValueResult,
+};
 use yavashark_macro::object;
 
 use crate::Interpreter;
@@ -51,7 +53,6 @@ impl Interpreter {
             this,
             scope: scope.clone(),
         };
-
 
         let arrow = ObjectHandle::new(arrow);
 

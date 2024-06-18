@@ -1,7 +1,7 @@
 use swc_ecma_ast::YieldExpr;
 
-use yavashark_env::{Context, RuntimeResult};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, RuntimeResult};
 
 use crate::Interpreter;
 

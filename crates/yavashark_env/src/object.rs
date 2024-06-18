@@ -140,7 +140,6 @@ impl Object {
         None
     }
 
-
     pub fn set_array(&mut self, elements: Vec<Value>) {
         self.array.clear();
         for (i, v) in elements.into_iter().enumerate() {

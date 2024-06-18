@@ -1,7 +1,7 @@
 use swc_ecma_ast::BlockStmt;
 
-use yavashark_env::{Context, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, RuntimeResult, Value};
 
 use crate::Interpreter;
 

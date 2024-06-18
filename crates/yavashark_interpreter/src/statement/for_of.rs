@@ -1,9 +1,9 @@
-use swc_ecma_ast::{ForHead, ForOfStmt};
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
 use crate::Interpreter;
+use swc_ecma_ast::{ForHead, ForOfStmt};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
-impl  Interpreter {
+impl Interpreter {
     pub fn run_for_of(ctx: &mut Context, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
         let obj = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 

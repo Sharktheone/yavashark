@@ -1,6 +1,6 @@
 use swc_ecma_ast::SwitchStmt;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 use crate::Interpreter;
 
@@ -13,7 +13,8 @@ impl Interpreter {
         for case in &stmt.cases {
             if let Some(test) = &case.test {
                 let test = Self::run_expr(ctx, test, case.span, scope)?;
-                if discriminant == test {} else {
+                if discriminant == test {
+                } else {
                     continue;
                 }
             }

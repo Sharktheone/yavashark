@@ -18,15 +18,15 @@ use crate::trace::{TraceID, TRACER};
 
 pub(crate) mod spin_lock;
 
+pub mod collectable;
+pub(crate) mod tagged_ptr;
 #[cfg(feature = "easy_debug")]
 mod trace;
 #[cfg(feature = "trace")]
 mod trace_gui;
-pub mod collectable;
-pub(crate) mod tagged_ptr;
 
 /// # Safety
-/// The implementer must guarantee that all references are valid and all references are returned by `get_refs` 
+/// The implementer must guarantee that all references are valid and all references are returned by `get_refs`
 pub unsafe trait Collectable: Sized {
     fn get_refs(&self) -> Vec<GcRef<Self>>;
 
@@ -49,7 +49,6 @@ pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
-
 impl<T: Collectable> PartialEq for Gc<T> {
     fn eq(&self, other: &Self) -> bool {
         self.inner == other.inner
@@ -66,7 +65,6 @@ impl<T: Collectable> Clone for Gc<T> {
     }
 }
 
-
 impl<T: Collectable + Debug> Debug for Gc<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Gc")
@@ -77,16 +75,13 @@ impl<T: Collectable + Debug> Debug for Gc<T> {
     }
 }
 
-
 ///Function to completely deallocate the value, including freeing the memory!
 type DeallocFn = unsafe fn(NonNull<[(); 0]>);
-
 
 pub struct UntypedGcRef {
     gc_box: NonNull<GcBox<()>>,
     dealloc_value: DeallocFn,
 }
-
 
 impl Clone for UntypedGcRef {
     fn clone(&self) -> Self {
@@ -106,13 +101,11 @@ impl UntypedGcRef {
     }
 }
 
-
 pub struct GcRef<T: Collectable> {
     /// # Safety
     /// this pointer might not be a pointer to a `GcBox`, but also ca be a pointer to a `UntypedGcRef`
     ptr: TaggedPtr<GcBox<T>>,
 }
-
 
 impl<T: Collectable> Drop for GcRef<T> {
     fn drop(&mut self) {
@@ -133,7 +126,6 @@ impl<T: Collectable> Debug for GcRef<T> {
     }
 }
 
-
 impl<T: Collectable> Clone for GcRef<T> {
     fn clone(&self) -> Self {
         if self.ptr.tag() {
@@ -141,34 +133,26 @@ impl<T: Collectable> Clone for GcRef<T> {
             unsafe {
                 let new = Box::new((*ptr.as_ptr()).clone());
 
-
                 let untyped = NonNull::new_unchecked(Box::into_raw(new));
 
                 let ptr = TaggedPtr::new(untyped, true).cast();
 
-                Self {
-                    ptr
-                }
+                Self { ptr }
             }
         } else {
-            Self {
-                ptr: self.ptr
-            }
+            Self { ptr: self.ptr }
         }
     }
 }
-
 
 impl<T: Collectable> GcRef<T> {
     fn add_ref_by(&self, r: impl Into<Self>) {
         let r = r.into();
 
-
         let ptr = self.ptr.ptr();
 
         if self.ptr.tag() {
             let ptr: NonNull<UntypedGcRef> = ptr.cast();
-
 
             unsafe {
                 (*(*ptr.as_ptr()).gc_box.as_ptr()).refs.add_ref_by(r.cast());
@@ -179,7 +163,6 @@ impl<T: Collectable> GcRef<T> {
             }
         }
     }
-
 
     fn cast<U: Collectable>(&self) -> GcRef<U> {
         if self.ptr.tag() {
@@ -194,9 +177,7 @@ impl<T: Collectable> GcRef<T> {
 
             let ptr = TaggedPtr::new(untyped, true).cast();
 
-            GcRef {
-                ptr,
-            }
+            GcRef { ptr }
         } else {
             let untyped = Box::new(UntypedGcRef::new(self.ptr.ptr()));
 
@@ -205,12 +186,9 @@ impl<T: Collectable> GcRef<T> {
 
             let ptr = TaggedPtr::new(untyped, true).cast();
 
-            GcRef {
-                ptr
-            }
+            GcRef { ptr }
         }
     }
-
 
     fn cast_with_dealloc<U: Collectable>(&self, dealloc: DeallocFn) -> GcRef<U> {
         if self.ptr.tag() {
@@ -225,9 +203,7 @@ impl<T: Collectable> GcRef<T> {
 
             let ptr = TaggedPtr::new(untyped, true).cast();
 
-            GcRef {
-                ptr,
-            }
+            GcRef { ptr }
         } else {
             let untyped = Box::new(UntypedGcRef {
                 gc_box: self.ptr.ptr().cast(),
@@ -239,9 +215,7 @@ impl<T: Collectable> GcRef<T> {
 
             let ptr = TaggedPtr::new(untyped, true).cast();
 
-            GcRef {
-                ptr
-            }
+            GcRef { ptr }
         }
     }
 
@@ -249,23 +223,17 @@ impl<T: Collectable> GcRef<T> {
         if self.ptr.tag() {
             let this: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
 
-            unsafe {
-                (*this.as_ptr()).gc_box
-            }
+            unsafe { (*this.as_ptr()).gc_box }
         } else {
             self.ptr.ptr().cast()
         }
     }
 
-
     #[cfg(feature = "easy_debug")]
     fn trace_id(&self) -> TraceID {
-        unsafe {
-            (*self.box_ptr().as_ptr()).refs.trace
-        }
+        unsafe { (*self.box_ptr().as_ptr()).refs.trace }
     }
 }
-
 
 impl<T: Collectable> PartialEq for GcRef<T> {
     fn eq(&self, other: &Self) -> bool {
@@ -274,7 +242,6 @@ impl<T: Collectable> PartialEq for GcRef<T> {
 }
 
 impl<T: Collectable> Eq for GcRef<T> {}
-
 
 impl<T: Collectable> PartialEq<Gc<T>> for GcRef<T> {
     fn eq(&self, other: &Gc<T>) -> bool {
@@ -299,7 +266,6 @@ pub struct GcGuard<'a, T: Collectable> {
     gc: NonNull<GcBox<T>>,
 }
 
-
 /// Here the magic of gc references happens!
 impl<T: Collectable> Drop for GcGuard<'_, T> {
     fn drop(&mut self) {
@@ -320,9 +286,7 @@ impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
 
 impl<T: Collectable> Gc<T> {
     #[must_use]
-    #[allow(
-        clippy::missing_const_for_fn
-    )] //Bug in clippy... we can't dereference a mut ptr in a const fn
+    #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
     pub fn get(&self) -> GcGuard<T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         GcGuard {
@@ -333,9 +297,7 @@ impl<T: Collectable> Gc<T> {
 
     #[must_use]
     pub fn as_ptr(&self) -> *mut T {
-        unsafe {
-            (*self.inner.as_ptr()).value.as_ptr()
-        }
+        unsafe { (*self.inner.as_ptr()).value.as_ptr() }
     }
 
     ///Just a reference without incrementing the reference count.
@@ -355,13 +317,10 @@ impl<T: Collectable> Gc<T> {
             // Safety: we set the tag bit, which means actually isn't a GcBox<O> but a UntypedGcRef
             let ptr = TaggedPtr::new(untyped, true).cast();
 
-            GcRef {
-                ptr,
-            }
+            GcRef { ptr }
         }
     }
 }
-
 
 impl<T: Collectable> From<NonNull<GcBox<T>>> for Gc<T> {
     fn from(inner: NonNull<GcBox<T>>) -> Self {
@@ -373,13 +332,12 @@ impl<T: Collectable> From<NonNull<GcBox<T>>> for Gc<T> {
 impl<T: Collectable> Gc<T> {
     pub fn new(value: T) -> Self {
         #[cfg(feature = "easy_debug")]
-            let name = value.trace_name();
+        let name = value.trace_name();
 
         let ref_to = value.get_refs();
 
         let value = Box::new(value);
         let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
-
 
         let gc_box = GcBox {
             value,
@@ -394,15 +352,12 @@ impl<T: Collectable> Gc<T> {
         let gc_box = Box::new(gc_box);
         let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
 
-
         unsafe {
             for x in &ref_to {
                 x.add_ref_by(gc_box);
             }
 
-
             (*gc_box.as_ptr()).refs.ref_to = RwLock::new(ref_to);
-
 
             #[cfg(feature = "easy_debug")]
             for r in &*(*gc_box.as_ptr()).refs.ref_to.read_recursive() {
@@ -412,13 +367,12 @@ impl<T: Collectable> Gc<T> {
             }
         }
 
-
         Self { inner: gc_box }
     }
 
     pub fn root(value: T) -> Self {
         #[cfg(feature = "easy_debug")]
-            let name = value.trace_name();
+        let name = value.trace_name();
 
         let value = Box::new(value);
         let value = unsafe { NonNull::new_unchecked(Box::into_raw(value)) }; //Unsafe, since we know that Box::into_raw will not return null
@@ -439,7 +393,6 @@ impl<T: Collectable> Gc<T> {
         Self { inner: gc_box }
     }
 
-
     #[must_use]
     pub fn strong(&self) -> u32 {
         unsafe { (*self.inner.as_ptr()).refs.strong() }
@@ -452,7 +405,6 @@ impl<T: Collectable> Gc<T> {
 }
 
 type MaybeNull<T> = NonNull<T>;
-
 
 struct Refs<T: Collectable> {
     ref_by: RwLock<Vec<GcRef<T>>>,
@@ -485,9 +437,7 @@ impl<T: Collectable> Refs<T> {
 
     fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
-            lock.retain(|x| {
-                x.box_ptr() != other.cast()
-            });
+            lock.retain(|x| x.box_ptr() != other.cast());
         } else {
             warn!("Failed to remove reference from a GcBox - this might be bad");
         }
@@ -699,11 +649,9 @@ impl<T: Collectable> GcBox<T> {
                 (*u.box_ptr().as_ptr()).unmark();
             }
 
-
             for d in &drop {
                 Self::nuke_refs(d.box_ptr());
             }
-
 
             for d in &drop {
                 if (*d.box_ptr().as_ptr()).flags.is_value_dropped() {
@@ -791,14 +739,12 @@ impl<T: Collectable> GcBox<T> {
             let this: NonNull<UntypedGcRef> = this_ptr.ptr().cast();
             let this = this.as_ptr();
 
-
             unsafe {
                 #[cfg(feature = "easy_debug")]
                 {
                     TRACER.remove((*(*this).gc_box.as_ptr()).refs.trace);
                 }
                 let value = (*(*this).gc_box.as_ptr()).value.cast();
-
 
                 ((*this).dealloc_value)(value);
             }
@@ -809,7 +755,6 @@ impl<T: Collectable> GcBox<T> {
 
         unsafe {
             let value = (*this_ptr.as_ptr()).value;
-
 
             let _ = Box::from_raw(value.as_ptr());
             (*this_ptr.as_ptr()).flags.set_value_dropped();
@@ -828,7 +773,6 @@ impl<T: Collectable> GcBox<T> {
             let _ = Box::from_raw(this);
         }
     }
-
 
     unsafe fn nuke_refs(this_ptr: NonNull<GcBox<()>>) {
         unsafe {
@@ -850,7 +794,6 @@ impl<T: Collectable> GcBox<T> {
                 warn!("Failed to read references from a GcBox - leaking memory");
                 return RootStatus::HasRoot; // We say that we have a root, since we'd rather have a memory leak than a use-after-free
             };
-
 
             if (*this).refs.strong() > refs.len() as u32 {
                 return RootStatus::HasRoot;
@@ -877,10 +820,9 @@ impl<T: Collectable> GcBox<T> {
             (*this).flags.set_has_no_root();
             let mut status = RootStatus::HasNoRoot;
 
-
             if this_ptr.ptr.tag() {
                 for r in &*refs {
-                    //TODO: maybe we could improve this to avoid unnecessary clones here, since we 
+                    //TODO: maybe we could improve this to avoid unnecessary clones here, since we
                     //we know that this_ptr hasn't T as the real type
                     let ptr: NonNull<UntypedGcRef> = this_ptr.ptr.ptr().cast();
                     let dealloc = (*ptr.as_ptr()).dealloc_value;
@@ -902,7 +844,6 @@ impl<T: Collectable> GcBox<T> {
                 // We know that the this_ptr has T as the type since we don't have the tag set, so this is safe
                 let refs: &Vec<GcRef<T>> = &*std::ptr::from_ref(refs).cast();
 
-
                 for r in refs {
                     let root = Self::you_have_root(r, unmark);
                     if root == RootStatus::HasRoot {
@@ -920,7 +861,6 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
-
     unsafe fn update_refs(this_ptr: NonNull<Self>) {
         let value = (*this_ptr.as_ptr()).value.as_ref();
 
@@ -932,13 +872,17 @@ impl<T: Collectable> GcBox<T> {
             return;
         };
 
-
         let old_refs = refs_lock.clone();
         drop(refs_lock);
 
-        let removed = old_refs.iter().filter(|r| !all_refs.contains(r)).collect::<Vec<_>>();
-        let added = all_refs.into_iter().filter(|r| !old_refs.contains(r)).collect::<Vec<_>>();
-
+        let removed = old_refs
+            .iter()
+            .filter(|r| !all_refs.contains(r))
+            .collect::<Vec<_>>();
+        let added = all_refs
+            .into_iter()
+            .filter(|r| !old_refs.contains(r))
+            .collect::<Vec<_>>();
 
         if removed.is_empty() && added.is_empty() {
             return;
@@ -958,7 +902,6 @@ impl<T: Collectable> GcBox<T> {
             (*ptr).refs.remove_ref_by(this_ptr.cast());
 
             Self::collect(r);
-
 
             #[cfg(feature = "easy_debug")]
             {
@@ -980,9 +923,13 @@ impl<T: Collectable> GcBox<T> {
 
         for a in &added {
             if a.ptr.tag() {
-                (*a.box_ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr).cast());
+                (*a.box_ptr().as_ptr())
+                    .refs
+                    .add_ref_by(GcRef::from(this_ptr).cast());
             } else {
-                (*a.ptr.ptr().as_ptr()).refs.add_ref_by(GcRef::from(this_ptr));
+                (*a.ptr.ptr().as_ptr())
+                    .refs
+                    .add_ref_by(GcRef::from(this_ptr));
             }
         }
     }
@@ -995,7 +942,6 @@ impl<T: Collectable> GcBox<T> {
             warn!("Failed to check refs - leaking memory");
             return;
         };
-
 
         if strong == refs {
             //All strong refs are references by other GcBoxes
@@ -1052,7 +998,9 @@ impl<T: Collectable> Drop for GcBox<T> {
             if let Some(refs) = self.refs.read_refs() {
                 for r in &*refs {
                     unsafe {
-                        (*r.box_ptr().as_ptr()).refs.remove_ref_by_ptr(self_raw.cast());
+                        (*r.box_ptr().as_ptr())
+                            .refs
+                            .remove_ref_by_ptr(self_raw.cast());
                     }
                 }
             } else {
@@ -1081,9 +1029,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 return;
             }
 
-
             let old_strong = (*self.inner.as_ptr()).refs.dec_strong();
-
 
             if old_strong == 1 {
                 // We are the last one (it returns the previous value, so we need to check if it was 1)
@@ -1092,7 +1038,9 @@ impl<T: Collectable> Drop for Gc<T> {
                 //Drop all references
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
-                        (*r.box_ptr().as_ptr()).refs.remove_ref_by(self.inner.cast());
+                        (*r.box_ptr().as_ptr())
+                            .refs
+                            .remove_ref_by(self.inner.cast());
                     }
 
                     refs.clear();
@@ -1100,7 +1048,6 @@ impl<T: Collectable> Drop for Gc<T> {
                     warn!("Failed to remove all references from a GcBox - leaking memory");
                     //TODO: should we return here - probably, since we might panic if we continue
                 }
-
 
                 // if let Some(refs) = (*self.inner.as_ptr()).refs.read_ref_by() {
                 //     let can_drop = true;
@@ -1117,10 +1064,8 @@ impl<T: Collectable> Drop for Gc<T> {
                     warn!("Dropping value that was already dropped!");
                 }
 
-
                 let _ = Box::from_raw(ptr);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
-
 
                 let Some(refs) = (*self.inner.as_ptr()).refs.read_ref_by() else {
                     warn!("Failed to read references - leaking memory");
@@ -1135,9 +1080,8 @@ impl<T: Collectable> Drop for Gc<T> {
                     let _ = Box::from_raw(self.inner.as_ptr());
                 }
 
-
                 return; // if strong == 0, it means, we also know that ref_by is empty, so we can skip the rest
-                //it also would be highly unsafe to continue, since we might have already dropped the GcBox
+                        //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
             GcBox::collect(&self.inner.into());
@@ -1168,7 +1112,6 @@ mod tests {
                 other: Vec<Gc<RefCell<Node>>>,
             }
 
-
             unsafe impl CellCollectable<RefCell<Node>> for Node {
                 fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
                     self.other.iter().map(|x| x.get_ref()).collect()
@@ -1176,8 +1119,8 @@ mod tests {
             }
 
             impl Node {
-                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self{
-                    Self {data, other}
+                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self {
+                    Self { data, other }
                 }
             }
 
@@ -1201,7 +1144,6 @@ mod tests {
                 data: i32,
             }
 
-
             unsafe impl Collectable for Other {
                 fn get_refs(&self) -> Vec<GcRef<Self>> {
                     Vec::new()
@@ -1218,7 +1160,7 @@ mod tests {
                 }
             }
 
-           impl Drop for Other {
+            impl Drop for Other {
                 fn drop(&mut self) {
                     unsafe {
                         NODES_LEFT -= 1;
@@ -1226,23 +1168,43 @@ mod tests {
                 }
             }
 
-           impl Node {
-                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self{
-                    Self {data, other, other_type: Vec::new()}
+            impl Node {
+                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self {
+                    Self {
+                        data,
+                        other,
+                        other_type: Vec::new(),
+                    }
                 }
 
-                fn create_all(data: i32, other: Vec<Gc<RefCell<Node>>>, other_type: Vec<Gc<Other>>) -> Self{
-                    Self {data, other, other_type }
+                fn create_all(
+                    data: i32,
+                    other: Vec<Gc<RefCell<Node>>>,
+                    other_type: Vec<Gc<Other>>,
+                ) -> Self {
+                    Self {
+                        data,
+                        other,
+                        other_type,
+                    }
                 }
 
-                fn with_other_type(data: i32, other: Vec<Gc<RefCell<Node>>>, other_type: Vec<Gc<Other>>) -> Self{
+                fn with_other_type(
+                    data: i32,
+                    other: Vec<Gc<RefCell<Node>>>,
+                    other_type: Vec<Gc<Other>>,
+                ) -> Self {
                     unsafe {
                         NODES_LEFT += 1;
                     }
                     Self::create_all(data, other, other_type)
                 }
 
-                fn add_vec_type(data: i32, others: Vec<&Gc<RefCell<Node>>>, other_type: Vec<&Gc<Other>>) -> Gc<RefCell<Node>> {
+                fn add_vec_type(
+                    data: i32,
+                    others: Vec<&Gc<RefCell<Node>>>,
+                    other_type: Vec<&Gc<Other>>,
+                ) -> Gc<RefCell<Node>> {
                     unsafe {
                         NODES_LEFT += 1;
                     }
@@ -1250,11 +1212,7 @@ mod tests {
                     let other = others.iter().map(|e| (*e).clone()).collect();
                     let other_type = other_type.iter().map(|e| (*e).clone()).collect();
 
-                    Gc::new(RefCell::new(Self::create_all(
-                        data,
-                        other,
-                        other_type,
-                    )))
+                    Gc::new(RefCell::new(Self::create_all(data, other, other_type)))
                 }
             }
 
@@ -1265,7 +1223,6 @@ mod tests {
                     for r in &self.other_type {
                         refs.push(r.get_untyped_ref())
                     }
-
 
                     refs
                 }
@@ -1293,10 +1250,7 @@ mod tests {
                         NODES_LEFT += 1;
                     }
 
-                    Self::create(
-                        data,
-                        vec![other],
-                    )
+                    Self::create(data, vec![other])
                 }
 
                 fn add_with_other(data: i32, other: &Gc<RefCell<Node>>) -> Gc<RefCell<Node>> {
@@ -1310,10 +1264,7 @@ mod tests {
 
                     let other = others.iter().map(|e| (*e).clone()).collect();
 
-                    Gc::new(RefCell::new(Self::create(
-                        data,
-                        other,
-                    )))
+                    Gc::new(RefCell::new(Self::create(data, other)))
                 }
             }
 
@@ -1349,7 +1300,6 @@ mod tests {
     fn it_works() {
         setup_logger();
 
-
         let x = Gc::new(5);
         println!("{:?}", *x.get());
         let y = x.clone();
@@ -1376,13 +1326,11 @@ mod tests {
 
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-
             x.get().borrow_mut().other.push(y.clone());
 
             let _x = x;
             let _y = y;
         }
-
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
@@ -1391,15 +1339,12 @@ mod tests {
     fn with_root_circular() {
         setup!();
 
-
         let root = setup!(root);
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-
             x.get().borrow_mut().other.push(y);
-
 
             root.get().borrow_mut().other.push(x);
         }
@@ -1412,17 +1357,14 @@ mod tests {
         assert_eq!(unsafe { NODES_LEFT }, 1); //root (root will never be dropped)
     }
 
-
     #[test]
     fn with_root() {
         setup!();
-
 
         let root = setup!(root);
         {
             let x = Gc::new(RefCell::new(Node::new(5)));
             let y = Gc::new(RefCell::new(Node::with_other(6, x)));
-
 
             root.get().borrow_mut().other.push(y);
         }
@@ -1447,7 +1389,6 @@ mod tests {
 
                     x = x_new;
                 }
-
 
                 let root = root.get();
                 let mut root = root.borrow_mut();
@@ -1479,12 +1420,10 @@ mod tests {
 
             let func_proto = Node::add_with_other(1, &proto);
 
-
             let m1 = Node::add_with_other(8, &func_proto);
             let m2 = Node::add_with_other(8, &func_proto);
             let m3 = Node::add_with_other(8, &func_proto);
             let m4 = Node::add_with_other(8, &func_proto);
-
 
             let pr = proto.get();
             let mut pr = pr.borrow_mut();
@@ -1510,20 +1449,33 @@ mod tests {
 
                 let obj_ref_4_5 = Node::add_vec(18, vec![&obj_4, &obj_5, &func_proto]);
 
-
-                let _a = Node::add_vec(99, vec![&obj_1, &obj_2, &obj_3, &obj_4, &obj_5, &obj_6, &obj_7, &obj_8, &obj_9, &obj_10, &obj_11, &obj_12, &obj_ref_4_5]);
+                let _a = Node::add_vec(
+                    99,
+                    vec![
+                        &obj_1,
+                        &obj_2,
+                        &obj_3,
+                        &obj_4,
+                        &obj_5,
+                        &obj_6,
+                        &obj_7,
+                        &obj_8,
+                        &obj_9,
+                        &obj_10,
+                        &obj_11,
+                        &obj_12,
+                        &obj_ref_4_5,
+                    ],
+                );
             }
         }
-
 
         assert_eq!(unsafe { NODES_LEFT }, 0);
     }
 
-
     #[test]
     fn untyped_circular() {
         setup!(untyped);
-
 
         {
             let y = Other::new(1337);
@@ -1532,7 +1484,6 @@ mod tests {
             let y4 = Other::new(1337);
 
             let x = Node::add_vec_type(42, vec![], vec![&y, &y2, &y3, &y4]);
-
 
             dbg!(x);
         }

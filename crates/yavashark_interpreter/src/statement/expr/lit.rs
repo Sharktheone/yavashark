@@ -1,9 +1,8 @@
+use crate::Interpreter;
 use swc_ecma_ast::Lit;
 use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
-use crate::Interpreter;
 
-
-impl Interpreter{
+impl Interpreter {
     pub fn run_lit(ctx: &mut Context, stmt: &Lit) -> RuntimeResult {
         Ok(match stmt {
             Lit::Str(s) => Value::String(s.value.as_str().to_owned()),
