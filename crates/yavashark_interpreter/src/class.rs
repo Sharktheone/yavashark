@@ -1,13 +1,10 @@
 use swc_common::Span;
-use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, Param, PropName, Stmt};
-use yavashark_env::{scope::Scope, Class as JSClass, Context, Error, Res, Value, ValueResult};
+use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, PropName};
+
+use yavashark_env::{Class as JSClass, Context, Error, Res, scope::Scope, Value};
 use yavashark_value::Obj;
 
 use crate::{function::JSFunction, Interpreter};
-
-
-
-
 
 pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope) -> Res {
     let mut class = if let Some(class) = &stmt.super_class {
@@ -17,8 +14,10 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope) -> Res {
         JSClass::new(ctx)
     };
 
-    for item in &stmt.body {
 
+    let mut statics = Vec::new();
+
+    for item in &stmt.body {
         match item {
             ClassMember::Method(method) => {
                 let (name, func) = create_method(&method.key, method.function.params.clone(), method.function.body.clone(), scope, ctx, stmt.span)?;
@@ -38,11 +37,35 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope) -> Res {
                 class.set_private_prop(method.key.id.to_string(), func);
             }
 
-            _ => {}
+            ClassMember::StaticBlock(s) => {
+                statics.push(s.body.clone());
+            }
+
+            ClassMember::PrivateProp(o) => {
+                let key = format!("#{}", o.key.id);
+                let value = if let Some(value) = &o.value {
+                    Interpreter::run_expr(ctx, value, stmt.span, scope)?
+                } else {
+                    Value::Undefined
+                };
+                
+                class.set_private_prop(key, value);
+            }
+            ClassMember::Empty(_) => {}
+            ClassMember::TsIndexSignature(_) => return Err(Error::syn("TsIndexSignature is not supported")),
+            ClassMember::ClassProp(_) => return Err(Error::syn("ClassProp is not supported")),
+            ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
     }
+    
+    //TODO: handle static properties
+    
+    
+    for static_block in statics {
+        Interpreter::run_block(ctx, &static_block, scope)?; //TODO: what does `this` refer to, and how does scoping look like?
+    }
 
-        Ok(())
+    Ok(())
 }
 
 
@@ -57,7 +80,6 @@ fn create_method(name: &PropName, params: Vec<Param>, body: Option<BlockStmt>, s
         PropName::Str(str) => str.value.to_string().into(),
         PropName::BigInt(_) => unimplemented!(),
     };
-
 
 
     let func = JSFunction::new(name.to_string(), params, body, scope.clone(), ctx);
