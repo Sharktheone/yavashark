@@ -6,7 +6,7 @@ use yavashark_value::Obj;
 
 use crate::{function::JSFunction, Interpreter};
 
-pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope) -> Res {
+pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let mut class = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(ctx, class, stmt.span, scope)?;
         JSClass::new_with_proto(super_class)
@@ -81,10 +81,16 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope) -> Res {
     }
 
     //TODO: handle static properties
+    
+    
+    let this = class.into_value();
 
+    scope.declare_var(name, this.clone());
+    
     for static_block in statics {
-        Interpreter::run_block(ctx, &static_block, scope)?; //TODO: what does `this` refer to, and how does scoping look like?
+        Interpreter::run_block_this(ctx, &static_block, scope, this.copy())?;
     }
+    
 
     Ok(())
 }
