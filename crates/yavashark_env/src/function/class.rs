@@ -8,7 +8,9 @@ use crate::{Context, Error, Object, Value};
 #[object]
 #[derive(Debug)]
 pub struct Class {
-    private_props: HashMap<String, Value>,
+    pub private_props: HashMap<String, Value>,
+    #[gc]
+    pub prototype: Value,
 }
 
 impl Func<Context> for Class {
@@ -37,6 +39,34 @@ impl Class {
         Self {
             object,
             private_props: HashMap::new(),
+            prototype: Value::Undefined,
+        }
+    }
+
+    pub fn set_private_prop(&mut self, key: String, value: Value) {
+        self.private_props.insert(key, value);
+    }
+
+    #[must_use]
+    pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
+        self.private_props.get(key)
+    }
+}
+
+
+#[object]
+#[derive(Debug)]
+pub struct ClassInstance {
+    pub(crate) private_props: HashMap<String, Value>,
+}
+
+
+impl ClassInstance {
+    #[must_use]
+    pub fn new(ctx: &Context) -> Self {
+        Self {
+            private_props: HashMap::new(),
+            object: Object::raw(ctx),
         }
     }
 

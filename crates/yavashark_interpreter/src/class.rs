@@ -1,10 +1,11 @@
 use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, PropName};
 
-use yavashark_env::{scope::Scope, Class as JSClass, Context, Error, Res, Value};
+use yavashark_env::{Class as JSClass, ClassInstance, Context, Error, Object, Res, scope::Scope, Value};
 use yavashark_value::Obj;
+use crate::function::JSFunction;
 
-use crate::{function::JSFunction, Interpreter};
+use crate::Interpreter;
 
 pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let mut class = if let Some(class) = &stmt.super_class {
@@ -13,6 +14,9 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
     } else {
         JSClass::new(ctx)
     };
+
+
+    let mut proto = ClassInstance::new(ctx);
 
     let mut statics = Vec::new();
 
@@ -28,7 +32,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                     stmt.span,
                 )?;
 
-                class.define_property(name, func);
+                define_on_class(name, func, &mut class, &mut proto, method.is_static, false);
             }
             ClassMember::Constructor(constructor) => {
                 let params = Vec::new(); //TODO
@@ -54,7 +58,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                     stmt.span,
                 )?;
 
-                class.set_private_prop(method.key.id.to_string(), func);
+                define_on_class(name, func, &mut class, &mut proto, method.is_static, true);
             }
 
             ClassMember::StaticBlock(s) => {
@@ -69,7 +73,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                     Value::Undefined
                 };
 
-                class.set_private_prop(key, value);
+                define_on_class(key.into(), value, &mut class, &mut proto, false, true);
             }
             ClassMember::Empty(_) => {}
             ClassMember::TsIndexSignature(_) => {
@@ -79,18 +83,18 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
     }
+    
+    
+    class.prototype = proto.into_value();
 
-    //TODO: handle static properties
-    
-    
     let this = class.into_value();
 
     scope.declare_var(name, this.clone());
-    
+
     for static_block in statics {
         Interpreter::run_block_this(ctx, &static_block, scope, this.copy())?;
     }
-    
+
 
     Ok(())
 }
@@ -116,4 +120,42 @@ fn create_method(
 
     let func = JSFunction::new(name.to_string(), params, body, scope.clone(), ctx);
     Ok((name, func.into()))
+}
+
+
+fn define_on_class(
+    name: Value,
+    value: Value,
+    class: &mut JSClass,
+    proto: &mut ClassInstance,
+    is_static: bool,
+    is_private: bool,
+) -> Res {
+    if is_private {
+        if is_static {
+            let Value::String(name) = name else {
+                return Err(Error::new("Private static method name must be a string (how tf did you get here?)"));
+            };
+            
+            class.set_private_prop(name, value);
+            
+        } else {
+            let Value::String(name) = name else {
+                return Err(Error::new("Private method name must be a string (how tf did you get here?)"));
+            };
+            
+            proto.set_private_prop(name, value);
+        }
+        
+    } else if is_static {
+        if name == Value::String("prototype".into()) {
+            return Err(Error::new("Classes may not have a static property named 'prototype'"));
+        }
+
+        class.define_property(name, value);
+    } else {
+        proto.define_property(name, value);
+    }
+
+    Ok(())
 }
