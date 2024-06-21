@@ -11,6 +11,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut proto = false;
     let mut direct = Vec::new();
     let mut constructor = false;
+    let mut custom_construct = false;
 
     let span = input.span();
 
@@ -92,6 +93,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         if meta.path.is_ident("constructor") {
             constructor = true;
+            return Ok(());
+        }
+        
+        if meta.path.is_ident("custom_constructor") {
+            custom_construct = true;
             return Ok(());
         }
 
@@ -261,6 +267,16 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
+    
+    let custom_construct = if custom_construct {
+        quote! {
+            fn get_constructor_value(&self, ctx: &mut #context) -> Option<#value> {
+                yavashark_value::ConstructValue::get_constructor_value(self, ctx)
+            }
+        }
+    } else {
+        TokenStream::new()
+    };
 
     let expanded = quote! {
         #input
@@ -343,6 +359,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #function
 
             #custom_refs
+            
+            #custom_construct
         }
     };
 

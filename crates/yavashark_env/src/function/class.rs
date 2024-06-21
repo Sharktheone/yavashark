@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use yavashark_macro::{object, properties};
-use yavashark_value::Func;
+use yavashark_value::{ConstructValue, Func};
 
-use crate::{Context, Error, Object, Value};
+use crate::{Context, Error, Object, Value, ValueResult};
 
-#[object]
+#[object(function, custom_constructor)]
 #[derive(Debug)]
 pub struct Class {
     pub private_props: HashMap<String, Value>,
@@ -23,6 +23,13 @@ impl Func<Context> for Class {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))
+    }
+}
+
+
+impl ConstructValue<Context> for Class {
+    fn get_constructor_value(&self, ctx: &mut Context) -> Option<yavashark_value::Value<Context>> {
+        todo!()
     }
 }
 
@@ -57,8 +64,8 @@ impl Class {
 
 #[properties]
 impl Class {
-    #[constructor]
-    pub fn construct(&mut self, args: Vec<Value>) -> Result<Value, Error> {
+    #[constructor(raw)]
+    pub fn construct(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
         Ok(Value::Undefined)
     }
 }
