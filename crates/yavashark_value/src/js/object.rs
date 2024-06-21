@@ -120,6 +120,10 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()
     }
+    
+    fn get_constructor_value(&self, ctx: &mut C) -> Option<Value<C>> {
+        None
+    }
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -368,6 +372,12 @@ impl<C: Ctx> Object<C> {
     pub fn custom_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
         self.get()
             .map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
+    }
+    
+    
+    pub fn get_constructor_value(&self, ctx: &mut C) -> Option<Value<C>> {
+        self.get()
+            .map_or(None, |o| o.get_constructor_value(ctx))
     }
 }
 
