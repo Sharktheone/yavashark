@@ -163,8 +163,18 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         self_mut = true;
                     }
                 }
+                
+                let mut raw = false;
+                
+                let _ = attr.parse_nested_meta(|a| {
+                    if a.path.is_ident("raw") {
+                        raw = true;
+                    }
+                    
+                    Ok(())
+                });
 
-                constructor = Some((func.sig.ident.clone(), self_mut));
+                constructor = Some((func.sig.ident.clone(), self_mut, raw));
                 remove.push(idx);
                 continue;
             }
@@ -386,22 +396,37 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut construct = TokenStream::new();
 
-    if let Some((constructor, mutability)) = constructor {
-        let new = new.expect("Object with constructor must have a method annotated with #[new]");
+    if let Some((constructor, mutability, raw)) = constructor {
+        
+        let constructor_fn = if raw {
+            quote! {
+                let function: #value = #native_function::with_proto("constructor", |args, this, ctx| {
+                    Self::#constructor(args, this, ctx)
+                })
+            }
+            
+        } else {
+            let new = new.expect("Object with constructor must have a method annotated with #[new]");
+            
+            quote! {
+                let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
+                    let mut new = Self::#new(ctx)?;
+                    new.#constructor(args)?;
+
+                    let boxed: Box<dyn Obj<Context>> = Box::new(new);
+
+                    this.exchange(boxed);
+
+                    Ok(Value::Undefined)
+
+                }, func_proto.copy()).into();
+            }
+        };
+        
+        
 
         let prop = quote! {
-            let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
-                let mut new = Self::#new(ctx)?
-                new.#constructor(args)?;
-
-                let boxed: Box<dyn Obj<Context>> = Box::new(new);
-
-                this.exchange(boxed);
-
-                Ok(Value::Undefined)
-
-            }, func_proto.copy()).into();
-
+            #constructor_fn
             function.define_property("prototype".into(), obj.clone().into())?;
 
             obj.define_variable(
