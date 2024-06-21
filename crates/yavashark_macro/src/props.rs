@@ -391,7 +391,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let prop = quote! {
             let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
-                let mut new = Self::#new(ctx)?;
+                let mut new = Self::#new(ctx)?
                 new.#constructor(args)?;
 
                 let boxed: Box<dyn Obj<Context>> = Box::new(new);

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use yavashark_macro::object;
+use yavashark_macro::{object, properties};
 use yavashark_value::Func;
 
 use crate::{Context, Error, Object, Value};
@@ -50,6 +50,16 @@ impl Class {
     #[must_use]
     pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
         self.private_props.get(key)
+    }
+}
+
+
+
+#[properties]
+impl Class {
+    #[constructor]
+    pub fn construct(&mut self, args: Vec<Value>) -> Result<Value, Error> {
+        Ok(Value::Undefined)
     }
 }
 
