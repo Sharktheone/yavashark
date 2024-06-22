@@ -66,7 +66,15 @@ impl Class {
 impl Class {
     #[constructor(raw)]
     pub fn construct(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
-        
+        if let Value::Object(o) = this.copy() {
+            let deez = o.get()?;
+            let constructor = deez.constructor();
+            
+            constructor.call(ctx, args, this)
+            
+        } else {
+            Err(Error::ty("Class constructor called with invalid receiver"))
+        }
     }
 }
 
