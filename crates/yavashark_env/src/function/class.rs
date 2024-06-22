@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use yavashark_macro::{object, properties};
-use yavashark_value::{ConstructValue, Func};
+use yavashark_value::{ConstructValue, Func, Obj};
 
 use crate::{Context, Error, Object, Value, ValueResult};
 
@@ -28,8 +28,8 @@ impl Func<Context> for Class {
 
 
 impl ConstructValue<Context> for Class {
-    fn get_constructor_value(&self, ctx: &mut Context) -> Option<yavashark_value::Value<Context>> {
-        todo!()
+    fn get_constructor_value(&self, _ctx: &mut Context) -> Option<yavashark_value::Value<Context>> {
+        Some(Object::raw_with_proto(self.prototype.clone()).into_value())
     }
 }
 
@@ -66,7 +66,7 @@ impl Class {
 impl Class {
     #[constructor(raw)]
     pub fn construct(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
-        Ok(Value::Undefined)
+        
     }
 }
 
