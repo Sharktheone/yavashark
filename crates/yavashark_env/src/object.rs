@@ -311,8 +311,20 @@ impl Obj<Context> for Object {
         self.array.clear();
     }
 
-    fn prototype(&self) -> &Value {
-        &self.prototype.value
+    fn prototype(&self) -> Value {
+        self.prototype.value.copy()
+    }
+
+    fn constructor(&self) -> Value {
+        if let Value::Object(proto) = self.prototype() {
+            let Ok(proto) = proto.get() else {
+                return Value::Undefined;
+            };
+            
+            return proto.constructor();
+        }
+        
+        Value::Undefined
     }
 }
 

@@ -105,9 +105,15 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
         false
     }
 
-    fn prototype(&self) -> &Value<C> {
-        self.get_property(&"__proto__".into())
-            .unwrap_or(&Value::Undefined)
+    fn prototype(&self) -> Value<C> {
+        self.resolve_property(&"__proto__".into())
+            .unwrap_or(Value::Undefined)
+    }
+    
+    
+    fn constructor(&self) -> Value<C> {
+        self.resolve_property(&"constructor".into())
+            .unwrap_or(Value::Undefined)
     }
 
     /// # Safety
