@@ -304,20 +304,20 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
             if attr.path().is_ident("new") {
                 let mut n = (func.sig.ident.clone(), false);
-                
-                
+
+
                 attr.parse_nested_meta(|a| {
                     if a.path.is_ident("this") {
                         n.1 = true;
                         return Ok(());
                     }
-                    
-                    return Err(syn::Error::new(a.input.span(), "Unknown attribute"));
+
+                    Err(syn::Error::new(a.input.span(), "Unknown attribute"))
                 });
-                
+
                 new = Some(n);
-                
-                
+
+
 
                 remove.push(idx);
                 continue;
@@ -422,13 +422,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         } else {
             let (new, req_this) = new.expect("Object with constructor must have a method annotated with #[new]");
 
-            
+
             let req_this = if req_this {
-                quote! { Some(this.copy()) }
+                quote! { this.copy() }
             } else {
-                quote! { None }
+                TokenStream::new()
             };
-            
+
             quote! {
                 let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
                     let mut new = Self::#new(ctx, #req_this)?;

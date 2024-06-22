@@ -288,7 +288,7 @@ impl Obj<Context> for FunctionPrototype {
         self.name = Value::String("Function".to_string()).into();
     }
 
-    fn prototype(&self) -> &Value {
+    fn prototype(&self) -> Value {
         self.object.prototype()
     }
 }
