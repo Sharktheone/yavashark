@@ -126,7 +126,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
         std::any::type_name::<Self>()
     }
 
-    fn get_constructor_value(&self, ctx: &mut C) -> Option<Value<C>> {
+    fn get_constructor_value(&self, _ctx: &mut C) -> Option<Value<C>> {
         None
     }
 }
