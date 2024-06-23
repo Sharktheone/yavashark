@@ -28,7 +28,9 @@ impl Interpreter {
                 }
             }
 
-            let this = f.get_constructor_value(ctx).unwrap_or(Object::new(ctx).into());
+            let this = f
+                .get_constructor_value(ctx)
+                .unwrap_or(Object::new(ctx).into());
 
             let _ = f.call(ctx, call_args, this.copy())?;
 

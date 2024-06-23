@@ -305,7 +305,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             if attr.path().is_ident("new") {
                 let mut n = (func.sig.ident.clone(), false);
 
-
                 attr.parse_nested_meta(|a| {
                     if a.path.is_ident("this") {
                         n.1 = true;
@@ -316,8 +315,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 });
 
                 new = Some(n);
-
-
 
                 remove.push(idx);
                 continue;
@@ -411,17 +408,15 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut construct = TokenStream::new();
 
     if let Some((constructor, mutability, raw)) = constructor {
-
         let constructor_fn = if raw {
             quote! {
                 let function: #value = #native_function::with_proto("constructor", |args, this, ctx| {
                     Self::#constructor(args, this, ctx)
                 }, func_proto.copy()).into();
             }
-
         } else {
-            let (new, req_this) = new.expect("Object with constructor must have a method annotated with #[new]");
-
+            let (new, req_this) =
+                new.expect("Object with constructor must have a method annotated with #[new]");
 
             let req_this = if req_this {
                 quote! { this.copy() }
@@ -443,8 +438,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }, func_proto.copy()).into();
             }
         };
-
-
 
         let prop = quote! {
             #constructor_fn

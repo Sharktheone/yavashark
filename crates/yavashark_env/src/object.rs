@@ -320,10 +320,10 @@ impl Obj<Context> for Object {
             let Ok(proto) = proto.get() else {
                 return Value::Undefined;
             };
-            
+
             return proto.constructor();
         }
-        
+
         Value::Undefined
     }
 }

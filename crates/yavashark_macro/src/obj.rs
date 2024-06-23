@@ -95,7 +95,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             constructor = true;
             return Ok(());
         }
-        
+
         if meta.path.is_ident("custom_constructor") {
             custom_construct = true;
             return Ok(());
@@ -267,7 +267,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-    
+
     let custom_construct = if custom_construct {
         quote! {
             fn get_constructor_value(&self, ctx: &mut #context) -> Option<#value> {
@@ -355,7 +355,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn prototype(&self) -> #value {
                 self.object.prototype()
             }
-            
+
             fn constructor(&self) -> #value {
                 self.object.constructor()
             }
@@ -363,7 +363,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #function
 
             #custom_refs
-            
+
             #custom_construct
         }
     };

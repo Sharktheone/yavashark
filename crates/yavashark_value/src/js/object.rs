@@ -109,8 +109,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
         self.resolve_property(&"__proto__".into())
             .unwrap_or(Value::Undefined)
     }
-    
-    
+
     fn constructor(&self) -> Value<C> {
         self.resolve_property(&"constructor".into())
             .unwrap_or(Value::Undefined)
@@ -126,7 +125,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()
     }
-    
+
     fn get_constructor_value(&self, ctx: &mut C) -> Option<Value<C>> {
         None
     }
@@ -379,11 +378,9 @@ impl<C: Ctx> Object<C> {
         self.get()
             .map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
     }
-    
-    
+
     pub fn get_constructor_value(&self, ctx: &mut C) -> Option<Value<C>> {
-        self.get()
-            .map_or(None, |o| o.get_constructor_value(ctx))
+        self.get().map_or(None, |o| o.get_constructor_value(ctx))
     }
 }
 

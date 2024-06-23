@@ -3,16 +3,17 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 
+pub use constructor::*;
 pub use context::*;
 pub use function::*;
 pub use object::*;
 pub use symbol::*;
 pub use variable::*;
-pub use constructor::*;
 use yavashark_garbage::{Collectable, GcRef};
 
 use crate::Error;
 
+mod constructor;
 mod context;
 mod conversion;
 mod function;
@@ -20,7 +21,6 @@ mod object;
 mod ops;
 mod symbol;
 pub mod variable;
-mod constructor;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {

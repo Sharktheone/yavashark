@@ -26,7 +26,6 @@ impl Func<Context> for Class {
     }
 }
 
-
 impl ConstructValue<Context> for Class {
     fn get_constructor_value(&self, _ctx: &mut Context) -> Option<yavashark_value::Value<Context>> {
         Some(Object::raw_with_proto(self.prototype.clone()).into_value())
@@ -60,8 +59,6 @@ impl Class {
     }
 }
 
-
-
 #[properties]
 impl Class {
     #[constructor(raw)]
@@ -69,22 +66,19 @@ impl Class {
         if let Value::Object(o) = this.copy() {
             let deez = o.get()?;
             let constructor = deez.constructor();
-            
+
             constructor.call(ctx, args, this)
-            
         } else {
             Err(Error::ty("Class constructor called with invalid receiver"))
         }
     }
 }
 
-
 #[object]
 #[derive(Debug)]
 pub struct ClassInstance {
     pub(crate) private_props: HashMap<String, Value>,
 }
-
 
 impl ClassInstance {
     #[must_use]

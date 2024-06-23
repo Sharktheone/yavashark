@@ -1,9 +1,11 @@
 use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, PropName};
 
-use yavashark_env::{Class as JSClass, ClassInstance, Context, Error, Object, Res, scope::Scope, Value};
-use yavashark_value::Obj;
 use crate::function::JSFunction;
+use yavashark_env::{
+    scope::Scope, Class as JSClass, ClassInstance, Context, Error, Object, Res, Value,
+};
+use yavashark_value::Obj;
 
 use crate::Interpreter;
 
@@ -14,7 +16,6 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
     } else {
         JSClass::new(ctx)
     };
-
 
     let mut proto = ClassInstance::new(ctx);
 
@@ -83,8 +84,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
     }
-    
-    
+
     class.prototype = proto.into_value();
 
     let this = class.into_value();
@@ -94,7 +94,6 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
     for static_block in statics {
         Interpreter::run_block_this(ctx, &static_block, scope, this.copy())?;
     }
-
 
     Ok(())
 }
@@ -122,7 +121,6 @@ fn create_method(
     Ok((name, func.into()))
 }
 
-
 fn define_on_class(
     name: Value,
     value: Value,
@@ -134,22 +132,26 @@ fn define_on_class(
     if is_private {
         if is_static {
             let Value::String(name) = name else {
-                return Err(Error::new("Private static method name must be a string (how tf did you get here?)"));
+                return Err(Error::new(
+                    "Private static method name must be a string (how tf did you get here?)",
+                ));
             };
-            
+
             class.set_private_prop(name, value);
-            
         } else {
             let Value::String(name) = name else {
-                return Err(Error::new("Private method name must be a string (how tf did you get here?)"));
+                return Err(Error::new(
+                    "Private method name must be a string (how tf did you get here?)",
+                ));
             };
-            
+
             proto.set_private_prop(name, value);
         }
-        
     } else if is_static {
         if name == Value::String("prototype".into()) {
-            return Err(Error::new("Classes may not have a static property named 'prototype'"));
+            return Err(Error::new(
+                "Classes may not have a static property named 'prototype'",
+            ));
         }
 
         class.define_property(name, value);
