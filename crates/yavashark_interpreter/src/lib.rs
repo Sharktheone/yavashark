@@ -198,6 +198,30 @@ mod temp_test {
         }
         
         x()
+        
+        
+        
+        class Hello {
+            constructor() {
+                this.x = 1
+                this.y = 2
+            }
+            
+            hello() {
+                console.log("hello")
+            }
+            
+            
+            static staticHello() {
+                console.log("static hello")
+            }
+        }
+        
+        Hello.staticHello()
+        
+        // let h = new Hello() //constructor is wrong somehow
+        
+        // h.hello()
 
         z
         "#;
