@@ -382,6 +382,10 @@ impl<C: Ctx> Object<C> {
     pub fn get_constructor_value(&self, ctx: &mut C) -> Option<Value<C>> {
         self.get().map_or(None, |o| o.get_constructor_value(ctx))
     }
+    
+    pub fn get_constructor(&self) -> Value<C> {
+        self.get().map_or(Value::Undefined, |o| o.constructor())
+    }
 }
 
 impl<C: Ctx> Display for Object<C> {

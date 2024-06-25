@@ -1,16 +1,17 @@
 use proc_macro::TokenStream as TokenStream1;
 
-use crate::env_path;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use syn::spanned::Spanned;
 use syn::{FieldMutability, Fields, Path, PathSegment};
+use syn::spanned::Spanned;
+
+use crate::env_path;
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
     let mut proto = false;
     let mut direct = Vec::new();
-    let mut constructor = false;
+    let mut constructor = (false, false);
     let mut custom_construct = false;
 
     let span = input.span();
@@ -92,7 +93,20 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
 
         if meta.path.is_ident("constructor") {
-            constructor = true;
+            let mut uses_trait = false;
+            
+            meta.parse_nested_meta(|meta| {
+                if meta.path.is_ident("trait") {
+                    uses_trait = true;
+                    return Ok(())
+                }
+                
+                Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
+            })?;
+            
+            
+            
+            constructor = (true, uses_trait);
             return Ok(());
         }
 
@@ -100,7 +114,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             custom_construct = true;
             return Ok(());
         }
-
+        
+        
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
     });
 
@@ -154,7 +169,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
                 }
-                .clone();
+                    .clone();
 
                 gc.push((id, ty, func));
 
@@ -181,7 +196,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }),
     });
 
-    if constructor {
+    if constructor.0 && !constructor.1 {
         direct.push((Ident::new("constructor", span).into(), None));
     }
 
@@ -277,6 +292,29 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     } else {
         TokenStream::new()
     };
+    
+    
+    let constructor = if constructor.0 {
+        if constructor.1 {
+            quote! {
+                fn constructor(&self) -> #value {
+                    yavashark_value::Constructor::get_constructor(self)
+                }
+            }
+        } else {
+            quote! {
+                fn constructor(&self) -> #value {
+                    self.constructor.value.copy()
+                }
+            }
+        }
+    } else {
+        quote! {
+            fn constructor(&self) -> #value {
+                self.object.constructor()
+            }
+        }
+    };
 
     let expanded = quote! {
         #input
@@ -356,9 +394,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.prototype()
             }
 
-            fn constructor(&self) -> #value {
-                self.object.constructor()
-            }
+            #constructor
 
             #function
 

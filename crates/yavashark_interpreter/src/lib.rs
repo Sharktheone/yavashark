@@ -219,7 +219,7 @@ mod temp_test {
         
         Hello.staticHello()
         
-        // let h = new Hello() //constructor is wrong somehow
+        let h = new Hello() //constructor is wrong somehow
         
         // h.hello()
 
