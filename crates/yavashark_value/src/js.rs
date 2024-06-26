@@ -46,7 +46,6 @@ pub enum Value<C: Ctx> {
     Number(f64),
     String(String),
     Boolean(bool),
-    //TODO: This can create cyclic references: we need a GC like thing for that
     Object(Object<C>),
     Symbol(ConstString),
 }
