@@ -1,3 +1,4 @@
+use log::info;
 use crate::Interpreter;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::scope::Scope;
@@ -5,10 +6,10 @@ use yavashark_env::{
     Context, ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
 };
 use yavashark_macro::object;
-use yavashark_value::Func;
+use yavashark_value::{Constructor, Func, Obj};
 
 #[allow(clippy::module_name_repetitions)]
-#[object(function)]
+#[object(function, constructor(trait))]
 #[derive(Debug)]
 pub struct JSFunction {
     pub name: String,
@@ -16,6 +17,8 @@ pub struct JSFunction {
     pub block: Option<BlockStmt>,
     #[gc(untyped)]
     pub scope: Scope,
+    #[gc]
+    pub prototype: Value,
 }
 
 impl JSFunction {
@@ -27,15 +30,21 @@ impl JSFunction {
         scope: Scope,
         ctx: &mut Context,
     ) -> ObjectHandle {
+        let prototype = Object::new(ctx);
+        
         let this = Self {
             name,
             params,
             block,
             scope,
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
+            prototype: prototype.clone().into(),
         };
-
-        ObjectHandle::new(this)
+        
+        let handle = ObjectHandle::new(this);
+        prototype.define_property("constructor".into(), handle.clone().into());
+        
+        handle
     }
 }
 
@@ -64,5 +73,11 @@ impl Func<Context> for JSFunction {
             }
         }
         Ok(Value::Undefined)
+    }
+}
+
+impl Constructor<Context> for JSFunction {
+    fn get_constructor(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+        self.prototype.get_property(&"constructor".into()).unwrap_or(Value::Undefined)
     }
 }

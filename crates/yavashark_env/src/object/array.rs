@@ -1,13 +1,13 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use yavashark_macro::{object, properties};
-use yavashark_value::Obj;
+use yavashark_value::{Constructor, Obj};
 
 use crate::object::Object;
 use crate::Symbol;
 use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
-#[object(direct(length))]
+#[object(direct(length), constructor(trait))]
 #[derive(Debug)]
 pub struct Array {}
 
@@ -18,6 +18,13 @@ impl Array {
         array.object.set_array(elements);
 
         Ok(array)
+    }
+}
+
+
+impl Constructor<Context> for Array {
+    fn get_constructor(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+        ctx.proto.array.clone().into()
     }
 }
 
