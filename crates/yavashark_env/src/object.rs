@@ -315,13 +315,13 @@ impl Obj<Context> for Object {
         self.prototype.value.copy()
     }
 
-    fn constructor(&self) -> Value {
+    fn constructor(&self, ctx: &mut Context) -> Value {
         if let Value::Object(proto) = self.prototype() {
             let Ok(proto) = proto.get() else {
                 return Value::Undefined;
             };
 
-            return proto.constructor();
+            return proto.constructor(ctx);
         }
 
         Value::Undefined

@@ -110,7 +110,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
             .unwrap_or(Value::Undefined)
     }
 
-    fn constructor(&self) -> Value<C> {
+    fn constructor(&self, _ctx: &mut C) -> Value<C> {
         self.resolve_property(&"constructor".into())
             .unwrap_or(Value::Undefined)
     }
@@ -383,8 +383,8 @@ impl<C: Ctx> Object<C> {
         self.get().map_or(None, |o| o.get_constructor_value(ctx))
     }
     
-    pub fn get_constructor(&self) -> Value<C> {
-        self.get().map_or(Value::Undefined, |o| o.constructor())
+    pub fn get_constructor(&self, ctx: &mut C) -> Value<C> {
+        self.get().map_or(Value::Undefined, |o| o.constructor(ctx))
     }
 }
 

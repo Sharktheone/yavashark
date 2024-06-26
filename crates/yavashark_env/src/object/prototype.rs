@@ -344,7 +344,7 @@ impl Obj<Context> for Prototype {
         Value::Undefined
     }
 
-    fn constructor(&self) -> yavashark_value::Value<Context> {
+    fn constructor(&self, _ctx: &mut Context) -> yavashark_value::Value<Context> {
         self.constructor.value.copy()
     }
 }

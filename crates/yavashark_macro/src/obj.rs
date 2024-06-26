@@ -297,21 +297,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let constructor = if constructor.0 {
         if constructor.1 {
             quote! {
-                fn constructor(&self) -> #value {
-                    yavashark_value::Constructor::get_constructor(self)
+                fn constructor(&self, ctx: &mut #context) -> #value {
+                    yavashark_value::Constructor::get_constructor(self, ctx)
                 }
             }
         } else {
             quote! {
-                fn constructor(&self) -> #value {
+                fn constructor(&self, _ctx: &mut #context) -> #value {
                     self.constructor.value.copy()
                 }
             }
         }
     } else {
         quote! {
-            fn constructor(&self) -> #value {
-                self.object.constructor()
+            fn constructor(&self, ctx: &mut #context) -> #value {
+                self.object.constructor(ctx)
             }
         }
     };
