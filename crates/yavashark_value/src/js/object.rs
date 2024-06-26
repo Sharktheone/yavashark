@@ -110,7 +110,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
             .unwrap_or(Value::Undefined)
     }
 
-    fn constructor(&self, _ctx: &mut C) -> Value<C> {
+    fn constructor(&self) -> Value<C> {
         self.resolve_property(&"constructor".into())
             .unwrap_or(Value::Undefined)
     }
@@ -128,6 +128,11 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn get_constructor_value(&self, _ctx: &mut C) -> Option<Value<C>> {
         None
+    }
+    
+    
+    fn special_constructor(&self) -> bool {
+        false
     }
 }
 
@@ -383,8 +388,14 @@ impl<C: Ctx> Object<C> {
         self.get().map_or(None, |o| o.get_constructor_value(ctx))
     }
     
-    pub fn get_constructor(&self, ctx: &mut C) -> Value<C> {
-        self.get().map_or(Value::Undefined, |o| o.constructor(ctx))
+    pub fn get_constructor(&self) -> Value<C> {
+        self.get().map_or(Value::Undefined, |o| o.constructor())
+    }
+    
+    
+    /// I hate JavaScript...
+    pub fn special_constructor(&self) -> Result<bool, Error<C>> {
+        self.get().map_or(Err(Error::new("failed to get object")), |o| Ok(o.special_constructor()))
     }
 }
 

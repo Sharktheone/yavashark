@@ -7,7 +7,7 @@ use crate::object::Object;
 use crate::Symbol;
 use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
-#[object(direct(length), constructor(trait))]
+#[object(direct(length), special_constructor)]
 #[derive(Debug)]
 pub struct Array {}
 
@@ -21,12 +21,6 @@ impl Array {
     }
 }
 
-
-impl Constructor<Context> for Array {
-    fn get_constructor(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
-        ctx.proto.array.clone().into()
-    }
-}
 
 #[properties]
 impl Array {

@@ -8,5 +8,5 @@ pub trait ConstructValue<C: Ctx>: Debug + Obj<C> {
 
 
 pub trait Constructor<C: Ctx>: Debug + Obj<C> {
-    fn get_constructor(&self, ctx: &mut C) -> Value<C>;
+    fn get_constructor(&self) -> Value<C>;
 }

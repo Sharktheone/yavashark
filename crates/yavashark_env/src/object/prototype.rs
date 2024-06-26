@@ -340,11 +340,11 @@ impl Obj<Context> for Prototype {
         self.object.clear_values();
     }
 
-    fn prototype(&self) -> yavashark_value::Value<Context> {
+    fn prototype(&self) -> Value {
         Value::Undefined
     }
 
-    fn constructor(&self, _ctx: &mut Context) -> yavashark_value::Value<Context> {
+    fn constructor(&self) -> Value {
         self.constructor.value.copy()
     }
 }

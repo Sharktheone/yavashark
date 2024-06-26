@@ -139,7 +139,6 @@ mod temp_test {
             a++;
         }
         
-        
         let array = new Array(4, 5, 6, 7)
         
         
@@ -177,8 +176,8 @@ mod temp_test {
         
         
         // console.log(Array) //TODO: this causes an stack overflow (probably because of the prototype)
-        
-        
+
+
         let lit_array = [1,2,3,,4,5,6,7,,,8,9,10]
         
         console.log(lit_array)

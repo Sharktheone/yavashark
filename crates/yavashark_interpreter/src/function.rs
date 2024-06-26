@@ -31,7 +31,7 @@ impl JSFunction {
         ctx: &mut Context,
     ) -> ObjectHandle {
         let prototype = Object::new(ctx);
-        
+
         let this = Self {
             name,
             params,
@@ -40,10 +40,10 @@ impl JSFunction {
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             prototype: prototype.clone().into(),
         };
-        
+
         let handle = ObjectHandle::new(this);
         prototype.define_property("constructor".into(), handle.clone().into());
-        
+
         handle
     }
 }
@@ -77,7 +77,7 @@ impl Func<Context> for JSFunction {
 }
 
 impl Constructor<Context> for JSFunction {
-    fn get_constructor(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+    fn get_constructor(&self) -> yavashark_value::Value<Context> {
         self.prototype.get_property(&"constructor".into()).unwrap_or(Value::Undefined)
     }
 }

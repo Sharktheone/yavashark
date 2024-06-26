@@ -27,10 +27,11 @@ impl Func<Context> for Class {
 }
 
 impl ConstructValue<Context> for Class {
-    fn get_constructor_value(&self, _ctx: &mut Context) -> Option<yavashark_value::Value<Context>> {
+    fn get_constructor_value(&self, _ctx: &mut Context) -> Option<Value> {
         Some(Object::raw_with_proto(self.prototype.clone()).into_value())
     }
 }
+
 
 impl Class {
     #[must_use]

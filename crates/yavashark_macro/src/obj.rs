@@ -13,6 +13,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut direct = Vec::new();
     let mut constructor = (false, false);
     let mut custom_construct = false;
+    let mut special_constructor = false;
 
     let span = input.span();
 
@@ -94,18 +95,17 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         if meta.path.is_ident("constructor") {
             let mut uses_trait = false;
-            
+
             meta.parse_nested_meta(|meta| {
                 if meta.path.is_ident("trait") {
                     uses_trait = true;
-                    return Ok(())
+                    return Ok(());
                 }
-                
+
                 Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
             })?;
-            
-            
-            
+
+
             constructor = (true, uses_trait);
             return Ok(());
         }
@@ -116,6 +116,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
         
         
+        if meta.path.is_ident("special_constructor") {
+            special_constructor = true;
+            return Ok(());
+        }
+
+
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
     });
 
@@ -292,30 +298,41 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     } else {
         TokenStream::new()
     };
-    
-    
+
+
     let constructor = if constructor.0 {
         if constructor.1 {
             quote! {
-                fn constructor(&self, ctx: &mut #context) -> #value {
-                    yavashark_value::Constructor::get_constructor(self, ctx)
+                fn constructor(&self) -> #value {
+                    yavashark_value::Constructor::get_constructor(self)
                 }
             }
         } else {
             quote! {
-                fn constructor(&self, _ctx: &mut #context) -> #value {
+                fn constructor(&self) -> #value {
                     self.constructor.value.copy()
                 }
             }
         }
     } else {
         quote! {
-            fn constructor(&self, ctx: &mut #context) -> #value {
-                self.object.constructor(ctx)
+            fn constructor(&self) -> #value {
+                self.object.constructor()
             }
         }
     };
+    
+    let special_constructor = if special_constructor {
+        quote! {
+            fn special_constructor(&self) -> bool {
+                true
+            }
+        }
+    } else {
+        TokenStream::new()
+    };
 
+    
     let expanded = quote! {
         #input
 
@@ -401,6 +418,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #custom_refs
 
             #custom_construct
+            
+            #special_constructor
         }
     };
 
