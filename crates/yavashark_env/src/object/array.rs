@@ -7,7 +7,7 @@ use crate::object::Object;
 use crate::Symbol;
 use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
-#[object(direct(length), special_constructor)]
+#[object(direct(length))]
 #[derive(Debug)]
 pub struct Array {}
 
@@ -58,7 +58,7 @@ impl Array {
         Ok(iter.into())
     }
 
-    #[constructor]
+    #[constructor(special)]
     fn construct(&mut self, args: Vec<Value>) -> ValueResult {
         let values = args
             .into_iter()

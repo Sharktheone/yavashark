@@ -4,7 +4,7 @@ use std::fmt::Debug;
 pub use class::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::Func;
+use yavashark_value::{Constructor, Func, IsSpecialConstructor};
 
 use crate::context::Context;
 use crate::object::Object;
@@ -17,12 +17,20 @@ type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
-#[object(function)]
+#[object(function, special_constructor(maybe))]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
     pub data: Option<Box<dyn Any>>,
+    special_constructor: bool,
     // pub prototype: ConstructorPrototype,
+}
+
+
+impl IsSpecialConstructor<Context> for NativeFunction {
+    fn special_constructor(&self) -> bool {
+        self.special_constructor
+    }
 }
 
 impl NativeFunction {
@@ -33,6 +41,7 @@ impl NativeFunction {
             f,
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
+            special_constructor: false,
         };
 
         ObjectHandle::new(this)
@@ -49,6 +58,7 @@ impl NativeFunction {
             f: Box::new(f),
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
+            special_constructor: false,
         };
 
         ObjectHandle::new(this)
@@ -64,6 +74,23 @@ impl NativeFunction {
             f: Box::new(f),
             object: Object::raw_with_proto(proto),
             data: None,
+            special_constructor: false,
+        };
+
+        ObjectHandle::new(this)
+    }
+    
+    pub fn special_with_proto(
+        name: &str,
+        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        proto: Value,
+    ) -> ObjectHandle {
+        let this = Self {
+            name: name.to_string(),
+            f: Box::new(f),
+            object: Object::raw_with_proto(proto),
+            data: None,
+            special_constructor: true,
         };
 
         ObjectHandle::new(this)
@@ -76,6 +103,7 @@ impl NativeFunction {
             f: Box::new(|_, _, _| Ok(Value::Undefined)),
             object: Object::raw_with_proto(Value::Undefined),
             data: None,
+            special_constructor: false,
         })
     }
 }
@@ -127,6 +155,12 @@ impl NativeFunctionBuilder {
     #[must_use]
     pub fn data(mut self, data: Box<dyn Any>) -> Self {
         self.0.data = Some(data);
+        self
+    }
+    
+    #[must_use]
+    pub const fn special_constructor(mut self, special: bool) -> Self {
+        self.0.special_constructor = special;
         self
     }
 

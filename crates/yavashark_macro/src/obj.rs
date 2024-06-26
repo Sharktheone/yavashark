@@ -13,7 +13,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut direct = Vec::new();
     let mut constructor = (false, false);
     let mut custom_construct = false;
-    let mut special_constructor = false;
+    let mut special_constructor = (false, false);
 
     let span = input.span();
 
@@ -114,10 +114,22 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             custom_construct = true;
             return Ok(());
         }
-        
-        
+
+
         if meta.path.is_ident("special_constructor") {
-            special_constructor = true;
+            
+            let mut maybe = false;
+            
+            meta.parse_nested_meta(|meta| {
+                if meta.path.is_ident("maybe") {
+                    maybe = true;
+                    return Ok(());
+                }
+
+                Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
+            })?;
+            
+            special_constructor = (true, maybe);
             return Ok(());
         }
 
@@ -321,18 +333,31 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-    
-    let special_constructor = if special_constructor {
+
+    let special_constructor = if special_constructor.0 {
+        
+        let special = if special_constructor.1 {
+            quote! {
+                yavashark_value::IsSpecialConstructor::special_constructor(self)
+            }
+        } else {
+            quote! {
+                true
+            }
+        };
+        
+        
+        
         quote! {
             fn special_constructor(&self) -> bool {
-                true
+                #special
             }
         }
     } else {
         TokenStream::new()
     };
 
-    
+
     let expanded = quote! {
         #input
 
@@ -418,7 +443,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #custom_refs
 
             #custom_construct
-            
+
             #special_constructor
         }
     };

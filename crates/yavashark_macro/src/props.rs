@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
 use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
+use syn::spanned::Spanned;
 
 #[derive(Debug)]
 struct Item {
@@ -165,16 +165,21 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }
 
                 let mut raw = false;
+                let mut special = false;
 
                 let _ = attr.parse_nested_meta(|a| {
                     if a.path.is_ident("raw") {
                         raw = true;
                     }
 
+                    if a.path.is_ident("special") {
+                        special = true;
+                    }
+
                     Ok(())
                 });
 
-                constructor = Some((func.sig.ident.clone(), self_mut, raw));
+                constructor = Some((func.sig.ident.clone(), self_mut, raw, special));
                 remove.push(idx);
                 continue;
             }
@@ -407,10 +412,21 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut construct = TokenStream::new();
 
-    if let Some((constructor, mutability, raw)) = constructor {
+    if let Some((constructor, mutability, raw, special)) = constructor {
+        let create = if special {
+            quote! {
+                special_with_proto
+            }
+        } else {
+            quote! {
+                with_proto
+            }
+        };
+
+
         let constructor_fn = if raw {
             quote! {
-                let function: #value = #native_function::with_proto("constructor", |args, this, ctx| {
+                let function: #value = #native_function::#create("constructor", |args, this, ctx| {
                     Self::#constructor(args, this, ctx)
                 }, func_proto.copy()).into();
             }
@@ -425,7 +441,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             };
 
             quote! {
-                let function: #value = #native_function::with_proto("constructor", |args, mut this, ctx| {
+                let function: #value = #native_function::#create("constructor", |args, mut this, ctx| {
                     let mut new = Self::#new(ctx, #req_this)?;
                     new.#constructor(args)?;
 

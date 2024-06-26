@@ -17,8 +17,9 @@ impl Interpreter {
             )));
         };
 
-
         let f = if constructor.special_constructor()? {
+            constructor
+        } else {
             let Value::Object(o) = constructor.get_constructor() else {
                 return Err(ControlFlow::error_type(format!(
                     "{:?} is not a constructor",
@@ -27,8 +28,6 @@ impl Interpreter {
             };
 
             o
-        } else {
-            constructor
         };
 
 
