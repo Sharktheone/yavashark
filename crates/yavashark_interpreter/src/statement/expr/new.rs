@@ -1,7 +1,7 @@
 use swc_ecma_ast::NewExpr;
 
-use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, Object, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
 
 use crate::Interpreter;
 
@@ -9,7 +9,17 @@ impl Interpreter {
     pub fn run_new(ctx: &mut Context, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
         let callee = Self::run_expr(ctx, &stmt.callee, stmt.span, scope)?;
 
-        if let Value::Object(f) = callee {
+
+        let Value::Object(constructor) = callee else {
+            return Err(ControlFlow::error_type(format!(
+                "{:?} is not a constructor",
+                stmt.callee
+            )));
+        
+        };
+        
+
+        if let Value::Object(f) = constructor.get_constructor(ctx) {
             let mut call_args = Vec::with_capacity(0);
 
             if let Some(args) = &stmt.args {
