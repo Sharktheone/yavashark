@@ -200,10 +200,11 @@ mod temp_test {
         
         
         
-        class Hello {
+        class HelloClass {
             constructor() {
                 this.x = 1
                 this.y = 2
+                console.log("Hello from cosntructor!")
             }
             
             hello() {
@@ -216,9 +217,9 @@ mod temp_test {
             }
         }
         
-        Hello.staticHello()
+        HelloClass.staticHello()
         
-        let h = new Hello() //constructor is wrong somehow
+        let h = new HelloClass() //constructor is wrong somehow
         
         // h.hello()
 

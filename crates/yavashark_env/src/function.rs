@@ -4,7 +4,7 @@ use std::fmt::Debug;
 pub use class::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Func, IsSpecialConstructor};
+use yavashark_value::{Func, IsSpecialConstructor};
 
 use crate::context::Context;
 use crate::object::Object;

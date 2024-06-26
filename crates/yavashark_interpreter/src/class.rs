@@ -47,7 +47,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                     stmt.span,
                 )?;
 
-                class.define_property(name, func);
+                proto.define_property(name, func);
             }
             ClassMember::PrivateMethod(method) => {
                 let (name, func) = create_method(
