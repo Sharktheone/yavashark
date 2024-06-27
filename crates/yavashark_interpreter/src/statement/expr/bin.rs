@@ -1,7 +1,10 @@
-use crate::Interpreter;
-use swc_ecma_ast::{BinExpr, BinaryOp};
-use yavashark_env::scope::Scope;
+use swc_ecma_ast::{BinaryOp, BinExpr};
+
 use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::scope::Scope;
+use yavashark_value::Error;
+
+use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_bin(ctx: &mut Context, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
@@ -34,7 +37,38 @@ impl Interpreter {
             BinaryOp::LogicalAnd => left.log_and(right),
             BinaryOp::In => right.contains_key(&left)?.into(),
             BinaryOp::InstanceOf => {
-                todo!()
+                let Value::Object(obj) = right else {
+                    return Ok(Value::Boolean(false));
+                };
+
+                let Value::Object(constructor) = left else {
+                    return Err(Error::ty("Right-hand side of 'instanceof' is not an object").into());
+                };
+
+
+                let Value::Object(constructor) = constructor.get_constructor_value(ctx)
+                    .ok_or(Error::ty("Right-hand side of 'instanceof' is not a constructor"))? else {
+                    return Err(Error::ty("Right-hand side of 'instanceof' has not an object as constructor").into());
+                };
+                
+
+                let constructor_proto = constructor.get()?.prototype();
+
+                let mut proto = Some(obj.get()?.prototype());
+
+                while let Some(mut p) = proto {
+                    if p == constructor_proto {
+                        return Ok(Value::Boolean(true));
+                    }
+
+                    if let Value::Object(o) = p {
+                        proto = Some(o.get()?.prototype());
+                    } else {
+                        break;
+                    }
+                }
+
+                return Ok(Value::Boolean(false));
             }
             BinaryOp::Exp => left.pow(&right),
             BinaryOp::NullishCoalescing => {

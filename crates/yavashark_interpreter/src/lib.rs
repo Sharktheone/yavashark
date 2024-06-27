@@ -220,13 +220,16 @@ mod temp_test {
         HelloClass.staticHello()
         
         let h = new HelloClass() //constructor is wrong somehow
-        
-        
+
+
         console.log(h.__proto__)
 
         h.hello()
 
         console.log(h.x, h.y)
+
+
+        console.log(h instanceof HelloClass)
 
         z
         "#;
