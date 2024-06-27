@@ -21,10 +21,9 @@ impl Interpreter {
             Value::Object(o) => {
                 let o = o.get()?;
 
-                o.get_property(&name).map_or_else(
-                    || Err(ControlFlow::error(format!("Property {name} not found"))),
-                    |v| Ok(v.copy()),
-                )
+                o.resolve_property(&name).ok_or_else(|| {
+                    ControlFlow::error(format!("Property {name:?} not found"))
+                })
             }
             _ => Err(ControlFlow::error(
                 "Member expression object is not an object".to_owned(),
