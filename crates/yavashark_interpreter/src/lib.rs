@@ -138,7 +138,7 @@ mod temp_test {
             console.log("infinite loop")
             a++;
         }
-        
+
         let array = new Array(4, 5, 6, 7)
         
         
@@ -198,8 +198,8 @@ mod temp_test {
         
         x()
         
-        
-        
+
+
         class HelloClass {
             constructor() {
                 this.x = 1
@@ -208,7 +208,7 @@ mod temp_test {
             }
             
             hello() {
-                console.log("hello")
+                console.log("hello from class")
             }
             
             
@@ -221,7 +221,12 @@ mod temp_test {
         
         let h = new HelloClass() //constructor is wrong somehow
         
-        // h.hello()
+        
+        console.log(h.__proto__)
+
+        h.hello()
+
+        console.log(h.x, h.y)
 
         z
         "#;
