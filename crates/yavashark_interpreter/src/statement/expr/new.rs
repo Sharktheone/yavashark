@@ -16,6 +16,12 @@ impl Interpreter {
                 stmt.callee
             )));
         };
+        
+        
+        let this = constructor
+            .get_constructor_value(ctx)
+            .unwrap_or(Object::new(ctx).into());
+
 
         let f = if constructor.special_constructor()? {
             constructor
@@ -48,10 +54,6 @@ impl Interpreter {
                 }
             }
         }
-
-        let this = f
-            .get_constructor_value(ctx)
-            .unwrap_or(Object::new(ctx).into());
 
         let _ = f.call(ctx, call_args, this.copy())?;
 
