@@ -5,6 +5,6 @@ use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
     pub fn run_paren(ctx: &mut Context, stmt: &ParenExpr, scope: &mut Scope) -> RuntimeResult {
-        todo!()
+        Self::run_expr(ctx, &stmt.expr, stmt.span, scope)
     }
 }
