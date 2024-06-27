@@ -26,7 +26,7 @@ impl Interpreter {
                 })
             }
             _ => Err(ControlFlow::error(
-                "Member expression object is not an object".to_owned(),
+                format!("Cannot read property {name:?} of {obj:?}"), //TODO: convert to the non-primitive form of the value and try to access the property there
             )),
         }
     }
