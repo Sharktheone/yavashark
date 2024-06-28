@@ -23,7 +23,15 @@ impl Interpreter {
 
                 Ok(o.resolve_property(&name).unwrap_or(Value::Undefined))
             }
-            _ => Ok(Value::Undefined)
+            Value::Undefined => Err(ControlFlow::error_type(format!(
+                "Cannot read property '{}' of undefined",
+                name
+            ))),
+            Value::Null => Err(ControlFlow::error_type(format!(
+                "Cannot read property '{}' of null",
+                name
+            ))),
+            _ => Ok(Value::Undefined),
         }
     }
 }
