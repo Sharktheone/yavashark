@@ -37,11 +37,11 @@ impl Interpreter {
             BinaryOp::LogicalAnd => left.log_and(right),
             BinaryOp::In => right.contains_key(&left)?.into(),
             BinaryOp::InstanceOf => {
-                let Value::Object(obj) = right else {
+                let Value::Object(obj) = left else {
                     return Ok(Value::Boolean(false));
                 };
 
-                let Value::Object(constructor) = left else {
+                let Value::Object(constructor) = right else {
                     return Err(Error::ty("Right-hand side of 'instanceof' is not an object").into());
                 };
 
@@ -50,7 +50,7 @@ impl Interpreter {
                     .ok_or(Error::ty("Right-hand side of 'instanceof' is not a constructor"))? else {
                     return Err(Error::ty("Right-hand side of 'instanceof' has not an object as constructor").into());
                 };
-                
+
 
                 let constructor_proto = constructor.get()?.prototype();
 
