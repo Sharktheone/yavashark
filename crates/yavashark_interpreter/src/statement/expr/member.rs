@@ -1,5 +1,5 @@
 use crate::Interpreter;
-use swc_ecma_ast::{MemberExpr, MemberProp};
+use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
@@ -21,13 +21,9 @@ impl Interpreter {
             Value::Object(o) => {
                 let o = o.get()?;
 
-                o.resolve_property(&name).ok_or_else(|| {
-                    ControlFlow::error(format!("Property {name:?} not found"))
-                })
+                Ok(o.resolve_property(&name).unwrap_or(Value::Undefined))
             }
-            _ => Err(ControlFlow::error(
-                format!("Cannot read property {name:?} of {obj:?}"), //TODO: convert to the non-primitive form of the value and try to access the property there
-            )),
+            _ => Ok(Value::Undefined)
         }
     }
 }
