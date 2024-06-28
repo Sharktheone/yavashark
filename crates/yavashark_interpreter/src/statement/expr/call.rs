@@ -1,4 +1,5 @@
-use swc_ecma_ast::{CallExpr, Callee};
+use swc_common::Span;
+use swc_ecma_ast::{CallExpr, Callee, ExprOrSpread};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, Error, Value, ValueResult};
@@ -12,19 +13,22 @@ impl Interpreter {
         };
 
         let callee = Self::run_expr(ctx, callee_expr, stmt.span, scope)?;
-
+        
+        Self::run_call_on(ctx, callee, stmt.args.clone(), stmt.span, scope, format!("{:?}", stmt.callee))
+    }
+    
+    
+    pub fn run_call_on(ctx: &mut Context, callee: Value, args: Vec<ExprOrSpread>, span: Span, scope: &mut Scope, name: String) -> ValueResult {
         if let Value::Object(f) = callee {
-            let args = stmt
-                .args
+            let args = args
                 .iter()
-                .map(|arg| Self::run_expr(ctx, &arg.expr, arg.spread.unwrap_or(stmt.span), scope))
+                .map(|arg| Self::run_expr(ctx, &arg.expr, arg.spread.unwrap_or(span), scope))
                 .collect::<Result<Vec<Value>, ControlFlow>>()?;
 
             f.call(ctx, args, scope.this()?.copy()) //In strict mode, this is undefined
         } else {
             Err(Error::ty_error(format!(
-                "{:?} ia not a function",
-                stmt.callee
+                "{name} is not a function",
             )))
         }
     }
