@@ -5,7 +5,7 @@ use yavashark_value::{Constructor, ConstructValue, Func, Obj};
 
 use crate::{Context, Error, Object, Value, ValueResult};
 
-#[object(function, custom_constructor, constructor(trait))]
+#[object(function, constructor(trait))]
 #[derive(Debug)]
 pub struct Class {
     pub private_props: HashMap<String, Value>,

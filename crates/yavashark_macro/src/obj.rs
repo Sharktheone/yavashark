@@ -12,7 +12,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut proto = false;
     let mut direct = Vec::new();
     let mut constructor = (false, false);
-    let mut custom_construct = false;
     let mut special_constructor = (false, false);
 
     let span = input.span();
@@ -109,12 +108,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             constructor = (true, uses_trait);
             return Ok(());
         }
-
-        if meta.path.is_ident("custom_constructor") {
-            custom_construct = true;
-            return Ok(());
-        }
-
 
         if meta.path.is_ident("special_constructor") {
             
@@ -214,10 +207,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }),
     });
 
-    if constructor.0 && !constructor.1 {
-        direct.push((Ident::new("constructor", span).into(), None));
-    }
-
     for (path, _) in &direct {
         fields.named.push(syn::Field {
             attrs: Vec::new(),
@@ -301,7 +290,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     };
 
-    let custom_construct = if custom_construct {
+    let custom_construct = if constructor.0 {
         quote! {
             fn get_constructor_value(&self, ctx: &mut #context) -> Option<#value> {
                 yavashark_value::ConstructValue::get_constructor_value(self, ctx)
