@@ -20,7 +20,7 @@ impl Interpreter {
         
         let this = constructor
             .get_constructor_value(ctx)
-            .unwrap_or(Object::new(ctx).into());
+            .ok_or(ControlFlow::error_type(format!("{:?} is not a constructor", stmt.callee)))?;
 
 
         let f = if constructor.special_constructor()? {
