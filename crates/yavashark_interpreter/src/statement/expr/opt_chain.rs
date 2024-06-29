@@ -26,7 +26,7 @@ impl Interpreter {
                     return Ok(Value::Undefined);
                 }
                 
-                Ok(Self::run_call_on(ctx, callee, call.args.clone(), call.span, scope, format!("{:?}", call.callee))?)
+                Ok(Self::run_call_on(ctx, callee, &call.args, call.span, scope)?)
                 
             }
         }
