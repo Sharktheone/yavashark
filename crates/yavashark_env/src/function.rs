@@ -3,6 +3,7 @@ use std::fmt::Debug;
 
 pub use class::*;
 pub use prototype::*;
+pub use constructor::*;
 use yavashark_macro::object;
 use yavashark_value::{Func};
 

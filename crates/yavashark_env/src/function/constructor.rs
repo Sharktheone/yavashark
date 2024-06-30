@@ -1,17 +1,21 @@
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Error, Func};
-use crate::{Context, Value, ValueResult};
+
+use crate::{Context, Object, ObjectHandle, Value, ValueResult};
+
+type ValueFn = Box<dyn Fn(&mut Context, &Value) -> Value>;
 
 #[object(function, constructor)]
 pub struct NativeConstructor {
     /// The name of the constructor
     pub name: String,
     /// The function that is called when the constructor is called
-    pub f: Box<dyn Fn(&Value) -> Value>,
+    pub f: Box<dyn Fn() -> Value>,
     /// The function that returns the constructor value
-    pub f_value: Box<dyn Fn(&mut Context, &Value) -> Value>,
+    pub f_value: Option<ValueFn>,
     #[gc]
     /// The prototype of the constructor
     pub proto: Value,
@@ -27,10 +31,9 @@ impl Debug for NativeConstructor {
 }
 
 
-
 impl Constructor<Context> for NativeConstructor {
     fn get_constructor(&self) -> Value {
-        (self.f)(&self.proto)
+        (self.f)()
     }
 
     fn special_constructor(&self) -> bool {
@@ -38,7 +41,11 @@ impl Constructor<Context> for NativeConstructor {
     }
 
     fn value(&self, ctx: &mut Context) -> Value {
-        (self.f_value)(ctx, &self.proto)
+        if let Some(f) = &self.f_value {
+            return f(ctx, &self.proto);
+        }
+
+        Object::with_proto(self.proto.clone()).into()
     }
 
     fn proto(&self, _ctx: &mut Context) -> Value {
@@ -50,13 +57,55 @@ impl Constructor<Context> for NativeConstructor {
 impl Func<Context> for NativeConstructor {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, _this: Value) -> ValueResult {
         if self.special {
-            let value = (self.f_value)(ctx, &self.proto);
-            
-            (self.f)(&self.proto).call(ctx, args, value.copy())?;
-            
+            let value = self.value(ctx);
+
+            (self.f)().call(ctx, args, value.copy())?;
+
             Ok(value)
         } else {
             Err(Error::ty_error(format!("Constructor {} requires 'new'", self.name)))
         }
+    }
+}
+
+
+impl NativeConstructor {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, ctx: &Context) -> ObjectHandle {
+        Self::with_proto(name, f, value, ctx.proto.func.clone().into(), ctx.proto.func.clone().into())
+    }
+
+    pub fn with_proto(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, proto: Value, self_proto: Value) -> ObjectHandle {
+        let f_value = value.map(|f| Box::new(f) as ValueFn);
+
+        let this = Self {
+            name,
+            f: Box::new(f),
+            f_value,
+            proto,
+            special: false,
+            object: Object::raw_with_proto(self_proto),
+        };
+
+        ObjectHandle::new(this)
+    }
+
+    pub fn special(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, ctx: &Context) -> ObjectHandle {
+        Self::special_with_proto(name, f, value, ctx.proto.func.clone().into(), ctx.proto.func.clone().into())
+    }
+
+    pub fn special_with_proto(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, proto: Value, self_proto: Value) -> ObjectHandle {
+        let f_value = value.map(|f| Box::new(f) as ValueFn);
+
+        let this = Self {
+            name,
+            f: Box::new(f),
+            f_value,
+            proto,
+            special: true,
+            object: Object::raw_with_proto(self_proto),
+        };
+
+        ObjectHandle::new(this)
     }
 }
