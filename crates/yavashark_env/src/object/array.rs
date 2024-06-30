@@ -13,11 +13,25 @@ pub struct Array {}
 
 impl Array {
     pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {
-        let mut array = Self::new(ctx)?;
+        let mut array = Self::new(ctx.proto.array.clone().into());
 
         array.object.set_array(elements);
 
         Ok(array)
+    }
+    
+    
+    #[must_use]
+    pub fn new(proto: Value) -> Self {
+        Self {
+            object: Object::raw_with_proto(proto),
+            length: Variable::new(Value::Number(0.0)),
+        }
+    }
+    
+    #[must_use]
+    pub fn from_ctx(ctx: &Context) -> Self {
+        Self::new(ctx.proto.array.clone().into())
     }
 }
 
@@ -26,11 +40,10 @@ impl Array {
 #[properties]
 impl Array {
     #[new]
-    pub fn new(ctx: &Context) -> Result<Self, Error> {
-        Ok(Self {
-            object: Object::raw_with_proto(ctx.proto.array.clone().into()),
-            length: Value::Number(0.0).into(),
-        })
+    pub fn create(_: &mut Context, proto: &Value) -> Value {
+        let this = Self::new(proto.copy());
+        
+        ObjectHandle::new(this).into()
     }
 
     pub fn push(&mut self, value: Value) {
