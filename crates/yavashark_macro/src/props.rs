@@ -39,6 +39,12 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     native_function
         .segments
         .push(PathSegment::from(Ident::new("NativeFunction", item.span())));
+    
+    
+    let mut native_constructor = crate_path.clone();
+    native_constructor
+        .segments
+        .push(PathSegment::from(Ident::new("NativeConstructor", item.span())));
 
     let mut variable = crate_path.clone();
     variable
@@ -308,17 +314,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 });
             }
             if attr.path().is_ident("new") {
-                let mut n = (func.sig.ident.clone(), false);
-
-                attr.parse_nested_meta(|a| {
-                    if a.path.is_ident("this") {
-                        n.1 = true;
-                        return Ok(());
-                    }
-
-                    Err(syn::Error::new(a.input.span(), "Unknown attribute"))
-                });
-
+                let mut n = func.sig.ident.clone();
                 new = Some(n);
 
                 remove.push(idx);
@@ -426,39 +422,46 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let constructor_fn = if raw {
             quote! {
-                let function: #value = #native_function::#create("constructor", |args, this, ctx| {
+                let constructor_function: #value = #native_function::#create("constructor", |args, this, ctx| {
                     Self::#constructor(args, this, ctx)
                 }, func_proto.copy()).into();
             }
         } else {
-            let (new, req_this) =
-                new.expect("Object with constructor must have a method annotated with #[new]");
-
-            let req_this = if req_this {
-                quote! { this.copy() }
-            } else {
-                TokenStream::new()
-            };
-
+            
             quote! {
-                let function: #value = #native_function::#create("constructor", |args, mut this, ctx| {
-                    let mut new = Self::#new(ctx, #req_this)?;
-                    new.#constructor(args)?;
-
-                    let boxed: Box<dyn Obj<Context>> = Box::new(new);
-
-                    this.exchange(boxed);
-
+                let constructor_function: #value = #native_function::#create("constructor", |args, mut this, ctx| {
+                    if let #value::Object(x) = this {
+                        let mut x = x.get_mut()?;
+                        let mut deez = (***x).as_any_mut().downcast_mut::<Self>()
+                            .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", "constructor")))?;
+                        deez.#constructor(args)?;
+                    } 
+                    
                     Ok(Value::Undefined)
 
                 }, func_proto.copy()).into();
             }
         };
+        
+        let new = if let Some(new) = new {
+            quote! {
+                    Some(Box::new(Self::#new))
+                }
+        } else {
+            quote! {
+                    None
+                }
+        };
+
+
 
         let prop = quote! {
             #constructor_fn
-            function.define_property("prototype".into(), obj.clone().into())?;
-
+            
+            let function: #value = #native_constructor::#create("constructor".to_string(), move || {
+                    constructor_function.copy()
+            }, #new, obj.clone().into(), func_proto.copy()).into();
+            
             obj.define_variable(
                 "constructor".into(),
                 #variable::new_with_attributes(
@@ -467,7 +470,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     false,
                     false
                 )
-            );
+            )?;
         };
 
         construct.extend(prop);
