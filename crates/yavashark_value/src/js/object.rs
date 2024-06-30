@@ -130,6 +130,10 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
         None
     }
     
+    fn get_constructor_proto(&self, _ctx: &mut C) -> Option<Value<C>> {
+        None
+    }
+    
     
     fn special_constructor(&self) -> bool {
         false
@@ -163,6 +167,7 @@ pub static OBJECT_COUNT: ObjectCount = ObjectCount::new();
 #[cfg(feature = "dbg_object_gc")]
 pub static OBJECT_ALLOC: ObjectCount = ObjectCount::new();
 
+#[repr(transparent)]
 pub struct BoxedObj<C: Ctx>(Box<dyn Obj<C>>);
 
 impl<C: Ctx> Deref for BoxedObj<C> {

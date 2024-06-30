@@ -1,7 +1,7 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use yavashark_macro::{object, properties};
-use yavashark_value::{Constructor, ConstructValue, Obj};
+use yavashark_value::Obj;
 
 use crate::object::Object;
 use crate::Symbol;

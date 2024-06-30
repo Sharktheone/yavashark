@@ -20,7 +20,7 @@ pub trait Constructor<C: Ctx>: Debug + Obj<C> {
         if let Value::Object(o) = self.value(ctx) {
             o.get().map_or(Value::Undefined, |o| o.prototype())
         } else {
-            Value::Undefined
+            Value::Undefined //TODO: return an error here
         }
     }
 }

@@ -11,8 +11,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
     let mut proto = false;
     let mut direct = Vec::new();
-    let mut constructor = (false, false);
-    let mut special_constructor = (false, false);
+    let mut constructor = false;
 
     let span = input.span();
 
@@ -93,39 +92,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
 
         if meta.path.is_ident("constructor") {
-            let mut uses_trait = false;
-
-            meta.parse_nested_meta(|meta| {
-                if meta.path.is_ident("trait") {
-                    uses_trait = true;
-                    return Ok(());
-                }
-
-                Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
-            })?;
-
-
-            constructor = (true, uses_trait);
+            constructor = true;
             return Ok(());
         }
-
-        if meta.path.is_ident("special_constructor") {
-            
-            let mut maybe = false;
-            
-            meta.parse_nested_meta(|meta| {
-                if meta.path.is_ident("maybe") {
-                    maybe = true;
-                    return Ok(());
-                }
-
-                Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
-            })?;
-            
-            special_constructor = (true, maybe);
-            return Ok(());
-        }
-
 
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
     });
@@ -290,29 +259,22 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     };
 
-    let custom_construct = if constructor.0 {
+    let constructor = if constructor {
         quote! {
+            fn constructor(&self) -> #value {
+                yavashark_value::Constructor::get_constructor(self)
+            }
+            
+            fn get_constructor_proto(&self, ctx: &mut #context) -> Option<#value> {
+                Some(yavashark_value::Constructor::proto(self, ctx))
+            }
+            
+            fn special_constructor(&self) -> bool {
+                yavashark_value::Constructor::special_constructor(self)
+            }
+            
             fn get_constructor_value(&self, ctx: &mut #context) -> Option<#value> {
-                yavashark_value::ConstructValue::get_constructor_value(self, ctx)
-            }
-        }
-    } else {
-        TokenStream::new()
-    };
-
-
-    let constructor = if constructor.0 {
-        if constructor.1 {
-            quote! {
-                fn constructor(&self) -> #value {
-                    yavashark_value::Constructor::get_constructor(self)
-                }
-            }
-        } else {
-            quote! {
-                fn constructor(&self) -> #value {
-                    self.constructor.value.copy()
-                }
+                Some(yavashark_value::Constructor::value(self, ctx))
             }
         }
     } else {
@@ -322,30 +284,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-
-    let special_constructor = if special_constructor.0 {
-        
-        let special = if special_constructor.1 {
-            quote! {
-                yavashark_value::IsSpecialConstructor::special_constructor(self)
-            }
-        } else {
-            quote! {
-                true
-            }
-        };
-        
-        
-        
-        quote! {
-            fn special_constructor(&self) -> bool {
-                #special
-            }
-        }
-    } else {
-        TokenStream::new()
-    };
-
 
     let expanded = quote! {
         #input
@@ -430,10 +368,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #function
 
             #custom_refs
-
-            #custom_construct
-
-            #special_constructor
         }
     };
 

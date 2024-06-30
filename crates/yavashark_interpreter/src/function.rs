@@ -6,10 +6,10 @@ use yavashark_env::{
     Context, ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
 };
 use yavashark_macro::object;
-use yavashark_value::{Constructor, ConstructValue, Func, Obj};
+use yavashark_value::{Constructor, Func, Obj};
 
 #[allow(clippy::module_name_repetitions)]
-#[object(function, constructor(trait))]
+#[object(function, constructor)]
 #[derive(Debug)]
 pub struct JSFunction {
     pub name: String,
@@ -22,12 +22,6 @@ pub struct JSFunction {
 }
 
 
-
-impl ConstructValue<Context> for JSFunction {
-    fn get_constructor_value(&self, _ctx: &mut Context) -> Option<Value> {
-        Some(Object::with_proto(self.prototype.clone()).into())
-    }
-}
 
 impl JSFunction {
     #[allow(clippy::new_ret_no_self)]
@@ -87,5 +81,13 @@ impl Func<Context> for JSFunction {
 impl Constructor<Context> for JSFunction {
     fn get_constructor(&self) -> yavashark_value::Value<Context> {
         self.prototype.get_property(&"constructor".into()).unwrap_or(Value::Undefined)
+    }
+    
+    fn value(&self, _ctx: &mut Context) -> Value {
+        Object::with_proto(self.prototype.clone()).into()
+    }
+
+    fn proto(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+        self.prototype.clone()
     }
 }

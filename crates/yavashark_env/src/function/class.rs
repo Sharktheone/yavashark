@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 use yavashark_macro::{object, properties};
-use yavashark_value::{Constructor, ConstructValue, Func, Obj};
+use yavashark_value::{Constructor, Func, Obj};
 
 use crate::{Context, Error, Object, Value, ValueResult};
 
-#[object(function, constructor(trait))]
+#[object(function, constructor)]
 #[derive(Debug)]
 pub struct Class {
     pub private_props: HashMap<String, Value>,
@@ -26,12 +26,6 @@ impl Func<Context> for Class {
     }
 }
 
-impl ConstructValue<Context> for Class {
-    fn get_constructor_value(&self, _ctx: &mut Context) -> Option<Value> {
-        Some(Object::raw_with_proto(self.prototype.clone()).into_value())
-    }
-}
-
 
 impl Constructor<Context> for Class {
     fn get_constructor(&self) -> Value {
@@ -40,6 +34,10 @@ impl Constructor<Context> for Class {
         } else {
             self.object.constructor()
         }
+    }
+    
+    fn value(&self, _ctx: &mut Context) -> Value {
+        Object::raw_with_proto(self.prototype.clone()).into_value()
     }
 }
 
