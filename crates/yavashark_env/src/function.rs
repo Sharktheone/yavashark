@@ -4,7 +4,7 @@ use std::fmt::Debug;
 pub use class::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{Func, IsSpecialConstructor};
+use yavashark_value::{Func};
 
 use crate::context::Context;
 use crate::object::Object;
@@ -12,12 +12,13 @@ use crate::{ObjectHandle, Value, ValueResult};
 
 mod class;
 mod prototype;
+mod constructor;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction);
 
-#[object(function, special_constructor(maybe))]
+#[object(function)]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
@@ -26,12 +27,6 @@ pub struct NativeFunction {
     // pub prototype: ConstructorPrototype,
 }
 
-
-impl IsSpecialConstructor<Context> for NativeFunction {
-    fn special_constructor(&self) -> bool {
-        self.special_constructor
-    }
-}
 
 impl NativeFunction {
     #[must_use]
