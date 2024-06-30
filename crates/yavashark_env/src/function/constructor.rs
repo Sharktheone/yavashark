@@ -55,13 +55,11 @@ impl Constructor<Context> for NativeConstructor {
 
 
 impl Func<Context> for NativeConstructor {
-    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, _this: Value) -> ValueResult {
+    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         if self.special {
-            let value = self.value(ctx);
+            (self.f)().call(ctx, args, this.copy())?;
 
-            (self.f)().call(ctx, args, value.copy())?;
-
-            Ok(value)
+            Ok(Value::Undefined)
         } else {
             Err(Error::ty_error(format!("Constructor {} requires 'new'", self.name)))
         }
