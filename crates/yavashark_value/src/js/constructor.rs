@@ -12,11 +12,15 @@ pub trait Constructor<C: Ctx>: Debug + Obj<C> {
     }
 
     /// Gets the constructor value for this object (what gets fed into the constructor's this-value)
-    fn value(&self, ctx: &mut C) -> Option<Value<C>>;
+    fn value(&self, ctx: &mut C) -> Value<C>;
 
 
     /// Gets the constructor prototype for this object (useful for slightly cheaper `instanceof` checks)
-    fn proto(&self, ctx: &mut C) -> Option<Value<C>> {
-        self.value(ctx).map(|v| v.get_proto(ctx))
+    fn proto(&self, ctx: &mut C) -> Value<C> {
+        if let Value::Object(o) = self.value(ctx) {
+            o.get().map_or(Value::Undefined, |o| o.prototype())
+        } else {
+            Value::Undefined
+        }
     }
 }
