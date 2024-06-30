@@ -38,11 +38,11 @@ impl Constructor<Context> for NativeConstructor {
         self.special
     }
 
-    fn get_constructor_value(&self, ctx: &mut Context) -> Option<Value> {
+    fn value(&self, ctx: &mut Context) -> Option<Value> {
         self.f_value(ctx, &self.proto)
     }
 
-    fn get_constructor_proto(&self, ctx: &mut Context) -> Option<Value> {
+    fn proto(&self, ctx: &mut Context) -> Option<Value> {
         Some(self.proto.clone())
     }
 }
