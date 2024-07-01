@@ -19,8 +19,7 @@ impl Array {
 
         Ok(array)
     }
-    
-    
+
     #[must_use]
     pub fn new(proto: Value) -> Self {
         Self {
@@ -28,21 +27,20 @@ impl Array {
             length: Variable::new(Value::Number(0.0)),
         }
     }
-    
+
     #[must_use]
     pub fn from_ctx(ctx: &Context) -> Self {
         Self::new(ctx.proto.array.clone().into())
     }
 }
 
-
-
 #[properties]
 impl Array {
     #[new]
+    #[must_use]
     pub fn create(_: &mut Context, proto: &Value) -> Value {
         let this = Self::new(proto.copy());
-        
+
         ObjectHandle::new(this).into()
     }
 
@@ -76,8 +74,8 @@ impl Array {
     fn construct(&mut self, args: Vec<Value>) -> ValueResult {
         let values = args
             .into_iter()
+            .map(Variable::new)
             .enumerate()
-            .map(|(i, v)| (i, Variable::new(v)))
             .collect::<Vec<_>>();
         self.object.array = values;
         self.length.value = Value::Number(self.object.array.len() as f64);

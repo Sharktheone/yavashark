@@ -26,7 +26,6 @@ impl Func<Context> for Class {
     }
 }
 
-
 impl Constructor<Context> for Class {
     fn get_constructor(&self) -> Value {
         if let Value::Object(o) = self.prototype.copy() {
@@ -35,12 +34,11 @@ impl Constructor<Context> for Class {
             self.object.constructor()
         }
     }
-    
+
     fn value(&self, _ctx: &mut Context) -> Value {
         Object::raw_with_proto(self.prototype.clone()).into_value()
     }
 }
-
 
 impl Class {
     #[must_use]

@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
-use syn::{FieldMutability, Fields, Path, PathSegment};
 use syn::spanned::Spanned;
+use syn::{FieldMutability, Fields, Path, PathSegment};
 
 use crate::env_path;
 
@@ -149,7 +149,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
                 }
-                    .clone();
+                .clone();
 
                 gc.push((id, ty, func));
 
@@ -264,15 +264,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn constructor(&self) -> #value {
                 yavashark_value::Constructor::get_constructor(self)
             }
-            
+
             fn get_constructor_proto(&self, ctx: &mut #context) -> Option<#value> {
                 Some(yavashark_value::Constructor::proto(self, ctx))
             }
-            
+
             fn special_constructor(&self) -> bool {
                 yavashark_value::Constructor::special_constructor(self)
             }
-            
+
             fn get_constructor_value(&self, ctx: &mut #context) -> Option<#value> {
                 Some(yavashark_value::Constructor::value(self, ctx))
             }

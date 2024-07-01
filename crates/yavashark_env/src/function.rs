@@ -2,18 +2,18 @@ use std::any::Any;
 use std::fmt::Debug;
 
 pub use class::*;
-pub use prototype::*;
 pub use constructor::*;
+pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{Func};
+use yavashark_value::Func;
 
 use crate::context::Context;
 use crate::object::Object;
 use crate::{ObjectHandle, Value, ValueResult};
 
 mod class;
-mod prototype;
 mod constructor;
+mod prototype;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
@@ -27,7 +27,6 @@ pub struct NativeFunction {
     special_constructor: bool,
     // pub prototype: ConstructorPrototype,
 }
-
 
 impl NativeFunction {
     #[must_use]
@@ -75,7 +74,7 @@ impl NativeFunction {
 
         ObjectHandle::new(this)
     }
-    
+
     pub fn special_with_proto(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
@@ -153,7 +152,7 @@ impl NativeFunctionBuilder {
         self.0.data = Some(data);
         self
     }
-    
+
     #[must_use]
     pub const fn special_constructor(mut self, special: bool) -> Self {
         self.0.special_constructor = special;

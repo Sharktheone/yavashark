@@ -1,5 +1,5 @@
-use swc_common::Span;
 use crate::Interpreter;
+use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
@@ -11,9 +11,13 @@ impl Interpreter {
         Self::run_member_on(ctx, value, &stmt.prop, stmt.span, scope)
     }
 
-
-    pub fn run_member_on(ctx: &mut Context, value: Value, prop: &MemberProp, span: Span, scope: &mut Scope) -> RuntimeResult {
-
+    pub fn run_member_on(
+        ctx: &mut Context,
+        value: Value,
+        prop: &MemberProp,
+        span: Span,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
         let name = match &prop {
             MemberProp::Ident(i) => Value::String(i.sym.to_string()),
             MemberProp::Computed(e) => Self::run_expr(ctx, &e.expr, span, scope)?,
@@ -24,7 +28,7 @@ impl Interpreter {
             }
         };
 
-        match  value {
+        match value {
             Value::Object(o) => {
                 let o = o.get()?;
 

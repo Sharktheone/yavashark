@@ -2,8 +2,8 @@ use proc_macro::TokenStream as TokenStream1;
 
 use proc_macro2::{Ident, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 use syn::spanned::Spanned;
+use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
 
 #[derive(Debug)]
 struct Item {
@@ -39,12 +39,14 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     native_function
         .segments
         .push(PathSegment::from(Ident::new("NativeFunction", item.span())));
-    
-    
+
     let mut native_constructor = crate_path.clone();
     native_constructor
         .segments
-        .push(PathSegment::from(Ident::new("NativeConstructor", item.span())));
+        .push(PathSegment::from(Ident::new(
+            "NativeConstructor",
+            item.span(),
+        )));
 
     let mut variable = crate_path.clone();
     variable
@@ -419,7 +421,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         };
 
-
         let constructor_fn = if raw {
             quote! {
                 let constructor_function: #value = #native_function::#create("constructor", |args, this, ctx| {
@@ -427,7 +428,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }, func_proto.copy()).into();
             }
         } else {
-            
             quote! {
                 let constructor_function: #value = #native_function::#create("constructor", |args, mut this, ctx| {
                     if let #value::Object(x) = this {
@@ -435,33 +435,31 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         let mut deez = (***x).as_any_mut().downcast_mut::<Self>()
                             .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", "constructor")))?;
                         deez.#constructor(args)?;
-                    } 
-                    
+                    }
+
                     Ok(Value::Undefined)
 
                 }, func_proto.copy()).into();
             }
         };
-        
+
         let new = if let Some(new) = new {
             quote! {
-                    Some(Box::new(Self::#new))
-                }
+                Some(Box::new(Self::#new))
+            }
         } else {
             quote! {
-                    None
-                }
+                None
+            }
         };
-
-
 
         let prop = quote! {
             #constructor_fn
-            
+
             let function: #value = #native_constructor::#create("constructor".to_string(), move || {
                     constructor_function.copy()
             }, #new, obj.clone().into(), func_proto.copy()).into();
-            
+
             obj.define_variable(
                 "constructor".into(),
                 #variable::new_with_attributes(

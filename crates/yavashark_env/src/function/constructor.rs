@@ -23,13 +23,11 @@ pub struct NativeConstructor {
     pub special: bool,
 }
 
-
 impl Debug for NativeConstructor {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         write!(f, "NativeConstructor({})", self.name)
     }
 }
-
 
 impl Constructor<Context> for NativeConstructor {
     fn get_constructor(&self) -> Value {
@@ -53,7 +51,6 @@ impl Constructor<Context> for NativeConstructor {
     }
 }
 
-
 impl Func<Context> for NativeConstructor {
     fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
         if self.special {
@@ -61,19 +58,38 @@ impl Func<Context> for NativeConstructor {
 
             Ok(Value::Undefined)
         } else {
-            Err(Error::ty_error(format!("Constructor {} requires 'new'", self.name)))
+            Err(Error::ty_error(format!(
+                "Constructor {} requires 'new'",
+                self.name
+            )))
         }
     }
 }
 
-
 impl NativeConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, ctx: &Context) -> ObjectHandle {
-        Self::with_proto(name, f, value, ctx.proto.func.clone().into(), ctx.proto.func.clone().into())
+    pub fn new(
+        name: String,
+        f: impl Fn() -> Value + 'static,
+        value: Option<ValueFn>,
+        ctx: &Context,
+    ) -> ObjectHandle {
+        Self::with_proto(
+            name,
+            f,
+            value,
+            ctx.proto.func.clone().into(),
+            ctx.proto.func.clone().into(),
+        )
     }
 
-    pub fn with_proto(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, proto: Value, self_proto: Value) -> ObjectHandle {
+    pub fn with_proto(
+        name: String,
+        f: impl Fn() -> Value + 'static,
+        value: Option<ValueFn>,
+        proto: Value,
+        self_proto: Value,
+    ) -> ObjectHandle {
         let f_value = value.map(|f| Box::new(f) as ValueFn);
 
         let this = Self {
@@ -88,11 +104,28 @@ impl NativeConstructor {
         ObjectHandle::new(this)
     }
 
-    pub fn special(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, ctx: &Context) -> ObjectHandle {
-        Self::special_with_proto(name, f, value, ctx.proto.func.clone().into(), ctx.proto.func.clone().into())
+    pub fn special(
+        name: String,
+        f: impl Fn() -> Value + 'static,
+        value: Option<ValueFn>,
+        ctx: &Context,
+    ) -> ObjectHandle {
+        Self::special_with_proto(
+            name,
+            f,
+            value,
+            ctx.proto.func.clone().into(),
+            ctx.proto.func.clone().into(),
+        )
     }
 
-    pub fn special_with_proto(name: String, f: impl Fn() -> Value + 'static, value: Option<ValueFn>, proto: Value, self_proto: Value) -> ObjectHandle {
+    pub fn special_with_proto(
+        name: String,
+        f: impl Fn() -> Value + 'static,
+        value: Option<ValueFn>,
+        proto: Value,
+        self_proto: Value,
+    ) -> ObjectHandle {
         let f_value = value.map(|f| Box::new(f) as ValueFn);
 
         let this = Self {

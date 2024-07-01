@@ -319,7 +319,7 @@ impl Obj<Context> for Object {
         if let Some(constructor) = self.get_property(&Value::String("constructor".to_string())) {
             return constructor.copy();
         }
-        
+
         if let Value::Object(proto) = self.prototype() {
             let Ok(proto) = proto.get() else {
                 return Value::Undefined;

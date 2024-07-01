@@ -12,7 +12,7 @@ impl Interpreter {
         match &*stmt.base {
             OptChainBase::Member(member) => {
                 let value = Self::run_expr(ctx, &member.obj, member.span, scope)?;
-                
+
                 if (value == Value::Undefined || value == Value::Null) && stmt.optional {
                     return Ok(Value::Undefined);
                 }
@@ -21,13 +21,14 @@ impl Interpreter {
             }
             OptChainBase::Call(call) => {
                 let callee = Self::run_expr(ctx, &call.callee, call.span, scope)?;
-                
+
                 if (callee == Value::Undefined || callee == Value::Null) && stmt.optional {
                     return Ok(Value::Undefined);
                 }
-                
-                Ok(Self::run_call_on(ctx, callee, &call.args, call.span, scope)?)
-                
+
+                Ok(Self::run_call_on(
+                    ctx, callee, &call.args, call.span, scope,
+                )?)
             }
         }
     }

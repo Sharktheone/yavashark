@@ -13,12 +13,17 @@ impl Interpreter {
         };
 
         let callee = Self::run_expr(ctx, callee_expr, stmt.span, scope)?;
-        
+
         Self::run_call_on(ctx, callee, &stmt.args, stmt.span, scope)
     }
-    
-    
-    pub fn run_call_on(ctx: &mut Context, callee: Value, args: &[ExprOrSpread], span: Span, scope: &mut Scope) -> ValueResult {
+
+    pub fn run_call_on(
+        ctx: &mut Context,
+        callee: Value,
+        args: &[ExprOrSpread],
+        span: Span,
+        scope: &mut Scope,
+    ) -> ValueResult {
         if let Value::Object(f) = callee {
             let args = args
                 .iter()
@@ -27,9 +32,7 @@ impl Interpreter {
 
             f.call(ctx, args, scope.this()?.copy()) //In strict mode, this is undefined
         } else {
-            Err(Error::ty_error(format!(
-                "{callee} is not a function",
-            )))
+            Err(Error::ty_error(format!("{callee} is not a function",)))
         }
     }
 }

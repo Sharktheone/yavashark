@@ -1,7 +1,7 @@
-use swc_ecma_ast::{BinaryOp, BinExpr};
+use swc_ecma_ast::{BinExpr, BinaryOp};
 
-use yavashark_env::{Context, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Context, RuntimeResult, Value};
 use yavashark_value::Error;
 
 use crate::Interpreter;
@@ -42,15 +42,20 @@ impl Interpreter {
                 };
 
                 let Value::Object(constructor) = right else {
-                    return Err(Error::ty("Right-hand side of 'instanceof' is not an object").into());
+                    return Err(
+                        Error::ty("Right-hand side of 'instanceof' is not an object").into(),
+                    );
                 };
 
-
-                let Value::Object(constructor) = constructor.get_constructor_value(ctx)
-                    .ok_or(Error::ty("Right-hand side of 'instanceof' is not a constructor"))? else {
-                    return Err(Error::ty("Right-hand side of 'instanceof' has not an object as constructor").into());
+                let Value::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
+                    Error::ty("Right-hand side of 'instanceof' is not a constructor"),
+                )?
+                else {
+                    return Err(Error::ty(
+                        "Right-hand side of 'instanceof' has not an object as constructor",
+                    )
+                    .into());
                 };
-
 
                 let constructor_proto = constructor.get()?.prototype();
 

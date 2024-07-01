@@ -1,5 +1,5 @@
-use log::info;
 use crate::Interpreter;
+use log::info;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::scope::Scope;
 use yavashark_env::{
@@ -20,8 +20,6 @@ pub struct JSFunction {
     #[gc]
     pub prototype: Value,
 }
-
-
 
 impl JSFunction {
     #[allow(clippy::new_ret_no_self)]
@@ -80,9 +78,11 @@ impl Func<Context> for JSFunction {
 
 impl Constructor<Context> for JSFunction {
     fn get_constructor(&self) -> yavashark_value::Value<Context> {
-        self.prototype.get_property(&"constructor".into()).unwrap_or(Value::Undefined)
+        self.prototype
+            .get_property(&"constructor".into())
+            .unwrap_or(Value::Undefined)
     }
-    
+
     fn value(&self, _ctx: &mut Context) -> Value {
         Object::with_proto(self.prototype.clone()).into()
     }
