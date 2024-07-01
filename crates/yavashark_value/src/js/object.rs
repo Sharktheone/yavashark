@@ -392,6 +392,7 @@ impl<C: Ctx> Object<C> {
         self.get().map_or(None, |o| o.get_constructor_value(ctx))
     }
 
+    #[must_use]
     pub fn get_constructor(&self) -> Value<C> {
         self.get().map_or(Value::Undefined, |o| o.constructor())
     }
