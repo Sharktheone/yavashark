@@ -229,11 +229,27 @@ mod temp_test {
         console.log(h.x, h.y)
 
 
-        console.log(h instanceof HelloClass)
+        // console.log([] instanceof Array)
+        
+        console.log(undefined?.x)
+        
+        console.log(null?.x)
+        
+        console.log(undefined?.x?.y)
+        console.log(null?.x?.y)
+        
+        console.log(undefined?.x.y.z())
+        
 
         z
         "#;
 
+            
+            let src = r#"
+            
+            console.log(undefined?.x.y.z())
+            "#;
+            
             env_logger::Builder::from_default_env()
                 .filter_level(log::LevelFilter::Warn)
                 .init();

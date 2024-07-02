@@ -69,6 +69,7 @@ impl Func<Context> for JSFunction {
                     ControlFlow::Return(v) => Ok(v),
                     ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
                     ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
+                    ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
                 };
             }
         }

@@ -32,6 +32,7 @@ impl ScopeState {
     const BREAKABLE: u8 = 0b1000;
     const RETURNABLE: u8 = 0b10000;
     const CONTINUABLE: u8 = 0b10_0000;
+    const OPT_CHAIN: u8 = 0b100_0000;
     const STATE_NONE: Self = Self { state: Self::NONE };
     const STATE_GLOBAL: Self = Self {
         state: Self::GLOBAL,
@@ -51,6 +52,10 @@ impl ScopeState {
 
     const STATE_CONTINUABLE: Self = Self {
         state: Self::CONTINUABLE,
+    };
+    
+    const STATE_OPT_CHAIN: Self = Self {
+        state: Self::OPT_CHAIN,
     };
 
     #[must_use]
@@ -93,6 +98,11 @@ impl ScopeState {
         self.state |= Self::CONTINUABLE;
         self.state |= Self::BREAKABLE;
     }
+    
+    pub fn set_opt_chain(&mut self) {
+        self.state |= Self::OPT_CHAIN;
+    }
+
 
     #[must_use]
     pub const fn is_function(&self) -> bool {
@@ -127,6 +137,10 @@ impl ScopeState {
     #[must_use]
     pub const fn is_continuable(&self) -> bool {
         self.state & Self::CONTINUABLE != 0
+    }
+    #[must_use]
+    pub const fn is_opt_chain(&self) -> bool {
+        self.state & Self::OPT_CHAIN != 0
     }
 }
 
@@ -392,6 +406,10 @@ impl ScopeInternal {
     pub fn state_set_loop(&mut self) {
         self.state.set_loop();
     }
+    
+    pub fn state_set_opt_chain(&mut self) {
+        self.state.set_opt_chain();
+    }
 
     #[must_use]
     pub const fn state_is_function(&self) -> bool {
@@ -426,6 +444,11 @@ impl ScopeInternal {
     #[must_use]
     pub const fn state_is_continuable(&self) -> bool {
         self.state.is_continuable()
+    }
+    
+    #[must_use]
+    pub const fn state_is_opt_chain(&self) -> bool {
+        self.state.is_opt_chain()
     }
 
     pub fn update(&mut self, name: &str, value: Value) -> Result<bool> {
@@ -604,6 +627,11 @@ impl Scope {
         self.scope.borrow_mut()?.state_set_loop();
         Ok(())
     }
+    
+    pub fn state_set_opt_chain(&mut self) -> Res {
+        self.scope.borrow_mut()?.state_set_opt_chain();
+        Ok(())
+    }
 
     pub fn state_is_function(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_function())
@@ -631,6 +659,10 @@ impl Scope {
 
     pub fn state_is_continuable(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_continuable())
+    }
+    
+    pub fn state_is_opt_chain(&self) -> Result<bool> {
+        Ok(self.scope.borrow()?.state_is_opt_chain())
     }
 
     pub fn has_value(&self, name: &str) -> Result<bool> {
