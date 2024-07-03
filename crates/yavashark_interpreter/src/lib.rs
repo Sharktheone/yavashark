@@ -251,6 +251,22 @@ mod temp_test {
         console.log(0 ? 1 : 2)
         console.log(1 ? 1 : 2)
         
+        
+        
+        let obj = {
+            x: 1,
+            y: 2,
+            z: 3,
+            
+            get hello() {
+                return this.x + this.y + this.z
+            },
+            
+            set hello(value) {
+                this.x = value
+            }
+        }
+        
 
         z
         "#;

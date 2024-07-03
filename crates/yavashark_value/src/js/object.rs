@@ -51,6 +51,9 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
             None
         }
     }
+    
+    fn define_setter(&mut self, name: Value<C>, value: Value<C>);
+    fn define_getter(&mut self, name: Value<C>, value: Value<C>);
 
     fn delete_property(&mut self, name: &Value<C>) -> Option<Value<C>>;
 
@@ -403,6 +406,22 @@ impl<C: Ctx> Object<C> {
             .map_or(Err(Error::new("failed to get object")), |o| {
                 Ok(o.special_constructor())
             })
+    }
+    
+    pub fn define_setter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        let mut inner = self.get_mut()?;
+
+        inner.define_setter(name, value);
+
+        Ok(())
+    }
+    
+    pub fn define_getter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        let mut inner = self.get_mut()?;
+
+        inner.define_getter(name, value);
+
+        Ok(())
     }
 }
 
