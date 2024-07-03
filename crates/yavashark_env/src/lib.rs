@@ -79,10 +79,6 @@ impl From<ControlFlow> for Error {
     fn from(e: ControlFlow) -> Self {
         match e {
             ControlFlow::Error(e) => e,
-            ControlFlow::OptChainShortCircuit => {
-                println!("OptChainShortCircuit");
-                Self::new("OptChainShortCircuit")
-            }
             _ => Self::new("Incorrect ControlFlow"),
         }
     }
