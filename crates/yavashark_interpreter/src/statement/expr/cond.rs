@@ -5,6 +5,12 @@ use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
     pub fn run_cond(ctx: &mut Context, stmt: &CondExpr, scope: &mut Scope) -> RuntimeResult {
-        todo!()
+        let test = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
+        
+        if test.is_truthy() {
+            Self::run_expr(ctx, &stmt.cons, stmt.span, scope)
+        } else {
+            Self::run_expr(ctx, &stmt.alt, stmt.span, scope)
+        }
     }
 }
