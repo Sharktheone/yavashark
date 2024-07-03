@@ -8,7 +8,7 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::object::Object;
-use crate::{NativeFunction, Value, Variable};
+use crate::{NativeFunction, Res, Value, Variable};
 
 mod common;
 
@@ -211,6 +211,14 @@ impl Obj<Context> for Prototype {
         }
 
         self.object.get_property_mut(name)
+    }
+    
+    fn define_getter(&mut self, name: Value, value: Value) -> Res {
+        self.object.define_getter(name, value)
+    }
+    
+    fn define_setter(&mut self, name: Value, value: Value) -> Res {
+        self.object.define_setter(name, value)
     }
 
     fn delete_property(&mut self, name: &Value) -> Option<Value> {

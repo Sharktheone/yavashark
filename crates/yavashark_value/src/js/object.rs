@@ -51,9 +51,9 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
             None
         }
     }
-    
-    fn define_setter(&mut self, name: Value<C>, value: Value<C>);
-    fn define_getter(&mut self, name: Value<C>, value: Value<C>);
+
+    fn define_getter(&mut self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>>;
+    fn define_setter(&mut self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>>;
 
     fn delete_property(&mut self, name: &Value<C>) -> Option<Value<C>>;
 
@@ -411,17 +411,13 @@ impl<C: Ctx> Object<C> {
     pub fn define_setter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         let mut inner = self.get_mut()?;
 
-        inner.define_setter(name, value);
-
-        Ok(())
+        inner.define_setter(name, value)
     }
     
     pub fn define_getter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         let mut inner = self.get_mut()?;
 
-        inner.define_getter(name, value);
-
-        Ok(())
+        inner.define_getter(name, value)
     }
 }
 

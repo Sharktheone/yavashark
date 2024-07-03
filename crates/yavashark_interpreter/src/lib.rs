@@ -259,14 +259,21 @@ mod temp_test {
             z: 3,
             
             get hello() {
+                console.log("executing getter")
                 return this.x + this.y + this.z
             },
             
             set hello(value) {
+                console.log("executing setter")
                 this.x = value
             }
         }
         
+        
+        console.log(obj.hello, "getter")
+        obj.hello = 10
+        
+        console.log(obj.hello)
 
         z
         "#;

@@ -37,10 +37,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("Value", input.span())));
 
-    let mut value_result = crate_path;
+    let mut value_result = crate_path.clone();
     value_result
         .segments
         .push(PathSegment::from(Ident::new("ValueResult", input.span())));
+    
+    let mut error = crate_path.clone();
+    error
+        .segments
+        .push(PathSegment::from(Ident::new("Error", input.span())));
 
     let mut gc = Vec::new();
 
@@ -314,11 +319,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #properties_get_mut
                 self.object.get_property_mut(name)
             }
+            
+            
+            fn define_getter(&mut self, name: #value, value: #value) -> Result<(), #error> {
+                self.object.define_getter(name, value)
+            }
+            
+            fn define_setter(&mut self, name: #value, value: #value) -> Result<(), #error> {
+                self.object.define_setter(name, value)
+            }
 
             fn delete_property(&mut self, name: &#value) -> Option<#value> {
                 #properties_delete
                 self.object.delete_property(name)
             }
+
 
             fn contains_key(&self, name: &#value) -> bool {
                 #properties_contains
@@ -362,7 +377,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn prototype(&self) -> #value {
                 self.object.prototype()
             }
-
             #constructor
 
             #function

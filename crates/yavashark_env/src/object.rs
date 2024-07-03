@@ -5,7 +5,7 @@ pub use prototype::*;
 use yavashark_value::Obj;
 
 use crate::context::Context;
-use crate::Value;
+use crate::{Res, Value};
 use crate::Variable;
 
 pub mod array;
@@ -16,7 +16,7 @@ pub struct Object {
     pub properties: HashMap<Value, Variable>,
     pub array: Vec<(usize, Variable)>,
     pub prototype: Variable,
-    pub get_set: HashMap<Value, (Variable, Variable)>,
+    pub get_set: HashMap<Value, (Variable, Variable)>, // (getter, setter)
 }
 
 impl Object {
@@ -210,6 +210,14 @@ impl Obj<Context> for Object {
                 Value::Object(o) => o.get_property(name).ok(),
                 _ => None,
             })
+            .or_else(|| {
+                if let Some((_get, _)) = self.get_set.get(name) {
+                    // get.value.call(ctx, &[], self).ok()
+                    todo!()
+                } else {
+                    None
+                }
+            })
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -234,6 +242,31 @@ impl Obj<Context> for Object {
         }
 
         Some(&mut self.properties.get_mut(name)?.value)
+    }
+    
+    
+    fn define_getter(&mut self, name: Value, value: Value) -> Res {
+        let val = self.get_set.get_mut(&name);
+        if let Some((get, _)) = val {
+            *get = value.into();
+            return Ok(());
+        }
+        
+        self.get_set.insert(name, (value.into(), Variable::new(Value::Undefined)));
+        
+        Ok(())
+    }
+    
+    fn define_setter(&mut self, name: Value, value: Value) -> Res {
+        let val = self.get_set.get_mut(&name);
+        if let Some((_, set)) = val {
+            *set = value.into();
+            return Ok(());
+        }
+        
+        self.get_set.insert(name, (Variable::new(Value::Undefined), value.into()));
+        
+        Ok(())
     }
 
     fn delete_property(&mut self, name: &Value) -> Option<Value> {
