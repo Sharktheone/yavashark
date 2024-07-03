@@ -25,7 +25,7 @@ impl Interpreter {
 
         let res = run(stmt, scope, ctx);
         
-        if res == Err(ControlFlow::OptChainShortCircuit) {
+        if res == Err(ControlFlow::OptChainShortCircuit) && is_first_optional {
             Ok(Value::Undefined)
         } else {
             res
@@ -44,10 +44,8 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResu
             if (value == Value::Undefined || value == Value::Null) && stmt.optional {
                 return Err(ControlFlow::OptChainShortCircuit);
             }
-
-            let val = Interpreter::run_member_on(ctx, value, &member.prop, member.span, scope);
-
-            val
+            
+            Interpreter::run_member_on(ctx, value, &member.prop, member.span, scope)
         }
         OptChainBase::Call(call) => {
             let callee = Interpreter::run_expr(ctx, &call.callee, call.span, scope)?;

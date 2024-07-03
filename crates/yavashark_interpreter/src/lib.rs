@@ -244,12 +244,6 @@ mod temp_test {
         z
         "#;
 
-            
-            let src = r#"
-            
-            console.log(undefined?.x.y.z())
-            "#;
-            
             env_logger::Builder::from_default_env()
                 .filter_level(log::LevelFilter::Warn)
                 .init();
