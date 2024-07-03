@@ -41,7 +41,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     value_result
         .segments
         .push(PathSegment::from(Ident::new("ValueResult", input.span())));
-    
+
     let mut error = crate_path.clone();
     error
         .segments
@@ -319,12 +319,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #properties_get_mut
                 self.object.get_property_mut(name)
             }
-            
-            
+
+
             fn define_getter(&mut self, name: #value, value: #value) -> Result<(), #error> {
                 self.object.define_getter(name, value)
             }
-            
+
             fn define_setter(&mut self, name: #value, value: #value) -> Result<(), #error> {
                 self.object.define_setter(name, value)
             }

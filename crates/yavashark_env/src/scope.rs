@@ -53,7 +53,7 @@ impl ScopeState {
     const STATE_CONTINUABLE: Self = Self {
         state: Self::CONTINUABLE,
     };
-    
+
     const STATE_OPT_CHAIN: Self = Self {
         state: Self::OPT_CHAIN,
     };
@@ -98,11 +98,10 @@ impl ScopeState {
         self.state |= Self::CONTINUABLE;
         self.state |= Self::BREAKABLE;
     }
-    
+
     pub fn set_opt_chain(&mut self) {
         self.state |= Self::OPT_CHAIN;
     }
-
 
     #[must_use]
     pub const fn is_function(&self) -> bool {
@@ -406,7 +405,7 @@ impl ScopeInternal {
     pub fn state_set_loop(&mut self) {
         self.state.set_loop();
     }
-    
+
     pub fn state_set_opt_chain(&mut self) {
         self.state.set_opt_chain();
     }
@@ -445,7 +444,7 @@ impl ScopeInternal {
     pub const fn state_is_continuable(&self) -> bool {
         self.state.is_continuable()
     }
-    
+
     #[must_use]
     pub const fn state_is_opt_chain(&self) -> bool {
         self.state.is_opt_chain()
@@ -627,7 +626,7 @@ impl Scope {
         self.scope.borrow_mut()?.state_set_loop();
         Ok(())
     }
-    
+
     pub fn state_set_opt_chain(&mut self) -> Res {
         self.scope.borrow_mut()?.state_set_opt_chain();
         Ok(())
@@ -660,7 +659,7 @@ impl Scope {
     pub fn state_is_continuable(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_continuable())
     }
-    
+
     pub fn state_is_opt_chain(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_opt_chain())
     }

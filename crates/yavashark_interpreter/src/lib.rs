@@ -1,7 +1,4 @@
-#![allow(
-    unused,
-    clippy::needless_pass_by_ref_mut
-)] //pass by ref mut is just temporary until all functions are implemented
+#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -9,7 +6,7 @@ use std::rc::Rc;
 use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
-use yavashark_env::{Context, ControlFlow, scope, Value, ValueResult};
+use yavashark_env::{scope, Context, ControlFlow, Value, ValueResult};
 
 mod class;
 mod function;
@@ -55,8 +52,8 @@ impl Interpreter {
 
 #[cfg(test)]
 mod temp_test {
-    use swc_common::BytePos;
     use swc_common::input::StringInput;
+    use swc_common::BytePos;
     use swc_ecma_parser::{EsConfig, Parser, Syntax};
 
     use super::*;

@@ -5,8 +5,8 @@ pub use prototype::*;
 use yavashark_value::Obj;
 
 use crate::context::Context;
-use crate::{Res, Value};
 use crate::Variable;
+use crate::{Res, Value};
 
 pub mod array;
 mod prototype;
@@ -243,29 +243,30 @@ impl Obj<Context> for Object {
 
         Some(&mut self.properties.get_mut(name)?.value)
     }
-    
-    
+
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         let val = self.get_set.get_mut(&name);
         if let Some((get, _)) = val {
             *get = value.into();
             return Ok(());
         }
-        
-        self.get_set.insert(name, (value.into(), Variable::new(Value::Undefined)));
-        
+
+        self.get_set
+            .insert(name, (value.into(), Variable::new(Value::Undefined)));
+
         Ok(())
     }
-    
+
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
         let val = self.get_set.get_mut(&name);
         if let Some((_, set)) = val {
             *set = value.into();
             return Ok(());
         }
-        
-        self.get_set.insert(name, (Variable::new(Value::Undefined), value.into()));
-        
+
+        self.get_set
+            .insert(name, (Variable::new(Value::Undefined), value.into()));
+
         Ok(())
     }
 

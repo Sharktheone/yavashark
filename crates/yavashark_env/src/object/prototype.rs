@@ -212,11 +212,11 @@ impl Obj<Context> for Prototype {
 
         self.object.get_property_mut(name)
     }
-    
+
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         self.object.define_getter(name, value)
     }
-    
+
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
         self.object.define_setter(name, value)
     }

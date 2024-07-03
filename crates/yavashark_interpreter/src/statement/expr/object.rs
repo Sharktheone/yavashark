@@ -68,32 +68,33 @@ impl Interpreter {
                         }
                         Prop::Setter(set) => {
                             let key = Self::run_prop_name(ctx, &set.key, scope)?;
-                            
+
                             let param = Param::from((*set.param).clone());
                             let params = vec![param];
-                            
+
                             let func = JSFunction::new(
                                 key.to_string(),
                                 params,
                                 set.body.clone(),
                                 Scope::with_parent(scope)?,
                                 ctx,
-                            ).into();
-                            
+                            )
+                            .into();
+
                             obj.define_setter(key, func)?;
-                            
                         }
                         Prop::Getter(get) => {
                             let key = Self::run_prop_name(ctx, &get.key, scope)?;
-                            
+
                             let func = JSFunction::new(
                                 key.to_string(),
                                 vec![],
                                 get.body.clone(),
                                 Scope::with_parent(scope)?,
                                 ctx,
-                            ).into();
-                            
+                            )
+                            .into();
+
                             obj.define_getter(key, func)?;
                         }
                     }

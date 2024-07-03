@@ -9,7 +9,6 @@ impl Interpreter {
         stmt: &OptChainExpr,
         scope: &mut Scope,
     ) -> RuntimeResult {
-
         let is_first_optional = !scope.state_is_opt_chain()?;
 
         let mut scope_new = if is_first_optional {
@@ -22,9 +21,8 @@ impl Interpreter {
 
         let scope = scope_new.as_mut().unwrap_or(scope);
 
-
         let res = run(stmt, scope, ctx);
-        
+
         if res == Err(ControlFlow::OptChainShortCircuit) && is_first_optional {
             Ok(Value::Undefined)
         } else {
@@ -32,9 +30,6 @@ impl Interpreter {
         }
     }
 }
-
-
-
 
 fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResult {
     match &*stmt.base {
@@ -44,7 +39,7 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResu
             if (value == Value::Undefined || value == Value::Null) && stmt.optional {
                 return Err(ControlFlow::OptChainShortCircuit);
             }
-            
+
             Interpreter::run_member_on(ctx, value, &member.prop, member.span, scope)
         }
         OptChainBase::Call(call) => {
@@ -53,7 +48,6 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResu
             println!("{:?} is {}", callee, stmt.optional);
 
             if (callee == Value::Undefined || callee == Value::Null) && stmt.optional {
-
                 return Err(ControlFlow::OptChainShortCircuit);
             }
 

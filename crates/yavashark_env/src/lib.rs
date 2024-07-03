@@ -26,7 +26,7 @@ pub enum ControlFlow {
     Break(Option<String>),
     Return(Value),
     Error(Error),
-    OptChainShortCircuit
+    OptChainShortCircuit,
 }
 
 impl ControlFlow {

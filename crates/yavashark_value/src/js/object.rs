@@ -407,13 +407,13 @@ impl<C: Ctx> Object<C> {
                 Ok(o.special_constructor())
             })
     }
-    
+
     pub fn define_setter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         let mut inner = self.get_mut()?;
 
         inner.define_setter(name, value)
     }
-    
+
     pub fn define_getter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
         let mut inner = self.get_mut()?;
 
