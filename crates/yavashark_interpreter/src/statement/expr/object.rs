@@ -69,7 +69,7 @@ impl Interpreter {
                         Prop::Setter(set) => {
                             let key = Self::run_prop_name(ctx, &set.key, scope)?;
                             
-                            let param = Param::from(set.param.clone());
+                            let param = Param::from((*set.param).clone());
                             let params = vec![param];
                             
                             let func = JSFunction::new(
