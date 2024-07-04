@@ -193,7 +193,7 @@ impl<C: Ctx> Value<C> {
     #[allow(clippy::iter_not_returning_iterator)]
     pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
         let iter = self
-            .get_property(&Symbol::ITERATOR)
+            .get_property(&Symbol::ITERATOR, ctx)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
@@ -205,17 +205,28 @@ impl<C: Ctx> Value<C> {
 
     pub fn iter_no_ctx(&self, ctx: &mut C) -> Result<Iter<C>, Error<C>> {
         let iter = self
-            .get_property(&Symbol::ITERATOR)
+            .get_property(&Symbol::ITERATOR, ctx)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
         let iter = iter.call(ctx, Vec::new(), self.copy())?;
 
         Ok(Iter { next_obj: iter })
     }
 
-    pub fn get_property(&self, name: &Self) -> Result<Self, Error<C>> {
+    pub fn get_property(&self, name: &Self, ctx: &mut C) -> Result<Self, Error<C>> {
         match self {
             Self::Object(o) => o
-                .resolve_property(name)
+                .resolve_property(name, ctx)?
+                .ok_or(Error::reference_error(format!(
+                    "{name} does not exist on object"
+                ))),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+    
+    pub fn get_property_no_get_set(&self, name: &Self) -> Result<Self, Error<C>> {
+        match self {
+            Self::Object(o) => o
+                .resolve_property_no_get_set(name)?
                 .ok_or(Error::reference_error(format!(
                     "{name} does not exist on object"
                 ))),
@@ -252,7 +263,7 @@ impl<C: Ctx> Value<C> {
     }
 
     pub fn call_method(&self, name: &Self, ctx: &mut C, args: Vec<Self>) -> Result<Self, Error<C>> {
-        let method = self.get_property(name)?;
+        let method = self.get_property(name, ctx)?;
 
         method.call(ctx, args, self.copy())
     }
@@ -311,7 +322,7 @@ impl<C: Ctx> Iterator for CtxIter<'_, C> {
             Err(e) => return Some(Err(e)),
         };
 
-        let done = next.get_property(&Value::string("done"));
+        let done = next.get_property(&Value::string("done"), self.ctx);
 
         let done = match done {
             Ok(done) => done.is_truthy(),
@@ -322,19 +333,19 @@ impl<C: Ctx> Iterator for CtxIter<'_, C> {
             return None;
         }
 
-        Some(next.get_property(&Value::string("value")))
+        Some(next.get_property(&Value::string("value"), self.ctx))
     }
 }
 
 impl<C: Ctx> Iter<C> {
     pub fn next(&self, ctx: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         let next = self.next_obj.call_method(&"next".into(), ctx, Vec::new())?;
-        let done = next.get_property(&Value::string("done"))?;
+        let done = next.get_property(&Value::string("done"), ctx)?;
 
         if done.is_truthy() {
             return Ok(None);
         }
-        next.get_property(&Value::string("value")).map(Some)
+        next.get_property(&Value::string("value"), ctx).map(Some)
     }
 }
 

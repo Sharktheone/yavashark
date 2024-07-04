@@ -69,7 +69,7 @@ impl Interpreter {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(ctx, &kv.key, scope)?;
-                            let value = value.get_property(&key).unwrap_or(Value::Undefined);
+                            let value = value.get_property(&key, ctx).unwrap_or(Value::Undefined);
 
                             Self::run_pat(ctx, &kv.value, scope, value)?;
                             rest_not_props.push(key);
@@ -77,7 +77,7 @@ impl Interpreter {
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
                             let mut value = value
-                                .get_property(&key.clone().into())
+                                .get_property(&key.clone().into(), ctx)
                                 .unwrap_or(Value::Undefined);
 
                             if let Some(val_expr) = &assign.value {

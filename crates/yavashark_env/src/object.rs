@@ -210,14 +210,6 @@ impl Obj<Context> for Object {
                 Value::Object(o) => o.get_property(name).ok(),
                 _ => None,
             })
-            .or_else(|| {
-                if let Some((_get, _)) = self.get_set.get(name) {
-                    // get.value.call(ctx, &[], self).ok()
-                    todo!()
-                } else {
-                    None
-                }
-            })
     }
 
     fn get_property(&self, name: &Value) -> Option<&Value> {
@@ -268,6 +260,14 @@ impl Obj<Context> for Object {
             .insert(name, (Variable::new(Value::Undefined), value.into()));
 
         Ok(())
+    }
+
+    fn get_getter(&self, name: &Value) -> Option<Value> {
+        self.get_set.get(name).map(|(v, _)| v.value.copy())
+    }
+
+    fn get_setter(&self, name: &Value) -> Option<Value> {
+        self.get_set.get(name).map(|(_, v)| v.value.copy())
     }
 
     fn delete_property(&mut self, name: &Value) -> Option<Value> {

@@ -6,12 +6,12 @@ use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 use yavashark_garbage::{Collectable, Gc, GcRef};
+use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
 
+use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
-use crate::Error;
 
 use super::Value;
 
@@ -54,6 +54,8 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn define_getter(&mut self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>>;
     fn define_setter(&mut self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>>;
+    fn get_getter(&self, name: &Value<C>) -> Option<Value<C>>;
+    fn get_setter(&self, name: &Value<C>) -> Option<Value<C>>;
 
     fn delete_property(&mut self, name: &Value<C>) -> Option<Value<C>>;
 
@@ -268,12 +270,30 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    #[must_use]
-    pub fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>> {
-        self.get().ok()?.resolve_property(name)
+    pub fn resolve_property(&self, name: &Value<C>, ctx: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+        let this = self.get()?;
+
+        let Some(val) = this.resolve_property(name) else {
+            return Ok(if let Some(getter) = this.get_getter(name) {
+                drop(this);
+                let this = Value::Object(self.clone());
+                
+                Some(getter.call(ctx, Vec::new(), this)?)
+            } else {
+                None
+            });
+        };
+
+        Ok(Some(val))
+    }
+    pub fn resolve_property_no_get_set(&self, name: &Value<C>) -> Result<Option<Value<C>>, Error<C>> {
+        let this = self.get()?;
+        
+        Ok(this.resolve_property(name))
     }
 
-    pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
+
+        pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
         self.0
             .borrow_mut()
             .map_err(|_| Error::new("failed to borrow object"))

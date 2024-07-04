@@ -328,6 +328,14 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn define_setter(&mut self, name: #value, value: #value) -> Result<(), #error> {
                 self.object.define_setter(name, value)
             }
+            
+            fn get_getter(&self, name: &#value) -> Option<#value> {
+                self.object.get_getter(name)
+            }
+            
+            fn get_setter(&self, name: &#value) -> Option<#value> {
+                self.object.get_setter(name)
+            }
 
             fn delete_property(&mut self, name: &#value) -> Option<#value> {
                 #properties_delete

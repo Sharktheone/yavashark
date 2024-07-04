@@ -80,7 +80,7 @@ impl Func<Context> for JSFunction {
 impl Constructor<Context> for JSFunction {
     fn get_constructor(&self) -> yavashark_value::Value<Context> {
         self.prototype
-            .get_property(&"constructor".into())
+            .get_property_no_get_set(&"constructor".into())
             .unwrap_or(Value::Undefined)
     }
 

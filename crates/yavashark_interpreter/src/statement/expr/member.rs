@@ -30,9 +30,8 @@ impl Interpreter {
 
         match value {
             Value::Object(o) => {
-                let o = o.get()?;
 
-                Ok(o.resolve_property(&name).unwrap_or(Value::Undefined))
+                Ok(o.resolve_property(&name, ctx)?.unwrap_or(Value::Undefined))
             }
             Value::Undefined => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of undefined",
