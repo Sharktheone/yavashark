@@ -249,6 +249,13 @@ mod temp_test {
         console.log(1 ? 1 : 2)
         
         
+        function returnsSomething() {
+            return 1
+        }
+        
+        console.log(returnsSomething(), "returnsSomething")
+        
+        
         
         let obj = {
             x: 1,
@@ -267,6 +274,7 @@ mod temp_test {
         }
         
         
+        console.log("HEEEEEEEEEELLLO")
         console.log(obj.hello, "getter")
         obj.hello = 10
         

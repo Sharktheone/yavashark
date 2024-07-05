@@ -85,12 +85,17 @@ impl Interpreter {
                         }
                         Prop::Getter(get) => {
                             let key = Self::run_prop_name(ctx, &get.key, scope)?;
+                            
+                            
+                            let mut fn_scope = Scope::with_parent(scope)?;
+                            
+                            fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
                                 key.to_string(),
                                 vec![],
                                 get.body.clone(),
-                                Scope::with_parent(scope)?,
+                                fn_scope,
                                 ctx,
                             )
                             .into();
