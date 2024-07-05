@@ -74,7 +74,7 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
             };
 
-            obj.update_or_define_property(&name, value);
+            obj.update_or_define_property(&name, value, ctx);
             Ok(())
         } else {
             Err(Error::ty("Invalid left-hand side in assignment"))

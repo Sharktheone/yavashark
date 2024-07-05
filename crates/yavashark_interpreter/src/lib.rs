@@ -274,11 +274,10 @@ mod temp_test {
         }
         
         
-        console.log("HEEEEEEEEEELLLO")
         console.log(obj.hello, "getter")
         obj.hello = 10
         
-        console.log(obj.hello)
+        console.log(obj.hello, "yeeeeet")
 
         z
         "#;

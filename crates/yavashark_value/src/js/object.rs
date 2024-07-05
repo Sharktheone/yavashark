@@ -288,7 +288,7 @@ impl<C: Ctx> Object<C> {
     }
     pub fn resolve_property_no_get_set(&self, name: &Value<C>) -> Result<Option<Value<C>>, Error<C>> {
         let this = self.get()?;
-        
+
         Ok(this.resolve_property(name))
     }
 
@@ -330,8 +330,18 @@ impl<C: Ctx> Object<C> {
         &self,
         name: &Value<C>,
         value: Value<C>,
+        ctx: &mut C
     ) -> Result<(), Error<C>> {
         let mut inner = self.get_mut()?;
+        
+        
+        if let Some(prop) = inner.get_setter(name) {
+            drop(inner);
+            let this = Value::Object(self.clone());
+
+            prop.call(ctx, vec![value], this)?;
+            return Ok(());
+        }
 
         inner.update_or_define_property(name.copy(), value);
 
