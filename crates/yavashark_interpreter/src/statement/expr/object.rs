@@ -72,11 +72,17 @@ impl Interpreter {
                             let param = Param::from((*set.param).clone());
                             let params = vec![param];
 
+
+                            let mut fn_scope = Scope::with_parent(scope)?;
+
+                            fn_scope.state_set_function()?;
+
+
                             let func = JSFunction::new(
                                 key.to_string(),
                                 params,
                                 set.body.clone(),
-                                Scope::with_parent(scope)?,
+                                fn_scope,
                                 ctx,
                             )
                             .into();
