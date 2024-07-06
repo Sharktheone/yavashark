@@ -6,12 +6,12 @@ use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
+use yavashark_garbage::{Collectable, Gc, GcRef};
 
-use crate::Error;
 use crate::js::context::Ctx;
 use crate::variable::Variable;
+use crate::Error;
 
 use super::Value;
 
@@ -270,14 +270,18 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    pub fn resolve_property(&self, name: &Value<C>, ctx: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+    pub fn resolve_property(
+        &self,
+        name: &Value<C>,
+        ctx: &mut C,
+    ) -> Result<Option<Value<C>>, Error<C>> {
         let this = self.get()?;
 
         let Some(val) = this.resolve_property(name) else {
             return Ok(if let Some(getter) = this.get_getter(name) {
                 drop(this);
                 let this = Value::Object(self.clone());
-                
+
                 Some(getter.call(ctx, Vec::new(), this)?)
             } else {
                 None
@@ -286,14 +290,16 @@ impl<C: Ctx> Object<C> {
 
         Ok(Some(val))
     }
-    pub fn resolve_property_no_get_set(&self, name: &Value<C>) -> Result<Option<Value<C>>, Error<C>> {
+    pub fn resolve_property_no_get_set(
+        &self,
+        name: &Value<C>,
+    ) -> Result<Option<Value<C>>, Error<C>> {
         let this = self.get()?;
 
         Ok(this.resolve_property(name))
     }
 
-
-        pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
+    pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
         self.0
             .borrow_mut()
             .map_err(|_| Error::new("failed to borrow object"))
@@ -330,11 +336,10 @@ impl<C: Ctx> Object<C> {
         &self,
         name: &Value<C>,
         value: Value<C>,
-        ctx: &mut C
+        ctx: &mut C,
     ) -> Result<(), Error<C>> {
         let mut inner = self.get_mut()?;
-        
-        
+
         if let Some(prop) = inner.get_setter(name) {
             drop(inner);
             let this = Value::Object(self.clone());

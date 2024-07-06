@@ -184,11 +184,10 @@ impl Obj<Context> for FunctionPrototype {
         self.object.define_setter(name, value)
     }
 
-
     fn get_getter(&self, name: &Value) -> Option<Value> {
         self.object.get_getter(name)
     }
-    
+
     fn get_setter(&self, name: &Value) -> Option<Value> {
         self.object.get_setter(name)
     }

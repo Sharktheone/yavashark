@@ -220,12 +220,11 @@ impl Obj<Context> for Prototype {
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
         self.object.define_setter(name, value)
     }
-    
-    
+
     fn get_getter(&self, name: &Value) -> Option<Value> {
         self.object.get_getter(name)
     }
-    
+
     fn get_setter(&self, name: &Value) -> Option<Value> {
         self.object.get_setter(name)
     }

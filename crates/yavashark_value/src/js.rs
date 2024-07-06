@@ -214,15 +214,16 @@ impl<C: Ctx> Value<C> {
 
     pub fn get_property(&self, name: &Self, ctx: &mut C) -> Result<Self, Error<C>> {
         match self {
-            Self::Object(o) => o
-                .resolve_property(name, ctx)?
-                .ok_or(Error::reference_error(format!(
-                    "{name} does not exist on object"
-                ))),
+            Self::Object(o) => {
+                o.resolve_property(name, ctx)?
+                    .ok_or(Error::reference_error(format!(
+                        "{name} does not exist on object"
+                    )))
+            }
             _ => Err(Error::ty("Value is not an object")),
         }
     }
-    
+
     pub fn get_property_no_get_set(&self, name: &Self) -> Result<Self, Error<C>> {
         match self {
             Self::Object(o) => o
@@ -234,7 +235,12 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn update_or_define_property(&self, name: &Self, value: Self, ctx: &mut C) -> Result<(), Error<C>> {
+    pub fn update_or_define_property(
+        &self,
+        name: &Self,
+        value: Self,
+        ctx: &mut C,
+    ) -> Result<(), Error<C>> {
         match self {
             Self::Object(o) => o.update_or_define_property(name, value, ctx),
             _ => Err(Error::ty("Value is not an object")),
