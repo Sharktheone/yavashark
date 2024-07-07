@@ -278,6 +278,11 @@ mod temp_test {
         obj.hello = 10
         
         console.log(obj.hello, "yeeeeet")
+        
+        
+        console.log(`hello ${1 + 2} world`)
+        console.log(`hello ${1 + 2} world ${3 + 4}`)
+        console.log(`hello ${obj.hello} world ${obj}`)
 
         z
         "#;
