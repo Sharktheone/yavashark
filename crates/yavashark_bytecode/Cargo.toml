@@ -1,0 +1,11 @@
+[package]
+name = "yavashark_bytecode"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yavashark_env = { path = "../yavashark_env" }
+yavashark_value = { path = "../yavashark_value" }
+
+[lints]
+workspace = true
