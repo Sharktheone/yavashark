@@ -5,9 +5,9 @@ use crate::context::Context;
 use crate::object::Object;
 use crate::{NativeFunction, Value};
 
-#[macro_export(local_inner_macros)]
+#[macro_export]
 macro_rules! test_eval {
-    ($code:expr, $sends:literal, $values:expr, $ret:expr, a) => {
+    ($code:expr, $sends:literal, $values:expr, $ret:expr) => {
         use swc_common::BytePos;
         let src = $code;
         let input =
@@ -18,8 +18,7 @@ macro_rules! test_eval {
         let mut p = swc_ecma_parser::Parser::new(swc_ecma_parser::Syntax::Es(c), input, None);
         let script = p.parse_script().unwrap();
 
-        let interpreter = $crate::Interpreter::new(script.body);
-        let (result, values) = interpreter.run_test();
+        let (result, values) = crate::Interpreter::run_test(&script.body);
 
         let result = result.unwrap();
 
@@ -29,7 +28,7 @@ macro_rules! test_eval {
         assert_eq!(state.got_values, $values);
     };
 
-    ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
+    // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
 }
 
 pub struct State {
