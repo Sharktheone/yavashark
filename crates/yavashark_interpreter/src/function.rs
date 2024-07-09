@@ -92,3 +92,67 @@ impl Constructor<Context> for JSFunction {
         self.prototype.clone()
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Interpreter;
+    use swc_common::DUMMY_SP;
+    use swc_ecma_ast::{BlockStmt, Param, Pat};
+    use yavashark_env::scope::Scope;
+    use yavashark_env::{Context, test_eval};
+    use yavashark_value::Value;
+
+    #[test]
+    fn test_function() {
+        test_eval!(
+            r"
+            function add(a, b){
+                return a + b;
+            }
+            add(1, 2)
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(3.0)
+        );
+    }
+    
+    
+    #[test]
+    fn test_function_with_scope() {
+        test_eval!(
+            r"
+            let a = 1;
+            function add(b){
+                return a + b;
+            }
+            add(2)
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(3.0)
+        );
+    }
+    
+    #[test]
+    fn test_function_with_scope_and_block() {
+        test_eval!(
+            r"
+            let a = 1;
+            function add(b){
+                {
+                    let a = 2;
+                }
+                return a + b;
+            }
+            add(2)
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(3.0)
+        );
+    }
+}
