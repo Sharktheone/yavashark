@@ -161,3 +161,104 @@ fn define_on_class(
 
     Ok(())
 }
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_decl_class() {
+        use yavashark_env::{test_eval, Value};
+
+        test_eval!(
+            r#"
+            class A {
+                constructor(a){
+                    this.a = a;
+                }
+
+                static b(){
+                    return 2;
+                }
+
+                c(){
+                    return 3;
+                }
+
+                #d(){
+                    return 4;
+                }
+
+                static #e = 5;
+            }
+
+            new A(1);
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Object(_)
+        );
+    }
+    
+    
+    #[test]
+    fn test_decl_class_with_super() {
+        use yavashark_env::{test_eval, Value};
+
+        test_eval!(
+            r#"
+            class A {
+                constructor(a){
+                    this.a = a;
+                }
+
+                static b(){
+                    return 2;
+                }
+
+                c(){
+                    return 3;
+                }
+
+                #d(){
+                    return 4;
+                }
+
+                static #e = 5;
+            }
+
+            class B extends A {
+                constructor(a, b){
+                    super(a);
+                    this.b = b;
+                }
+            }
+
+            new B(1, 2);
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Object
+        );
+    }
+    
+    
+    #[test]
+    fn test_decl_class_with_static_block() {
+        use yavashark_env::{test_eval, Value};
+
+        test_eval!(
+            r#"
+            class A {
+                static {
+                    this.a = 1;
+                }
+            }
+
+            A.a;
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(1.0)
+        );
+    }
+}
