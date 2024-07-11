@@ -103,7 +103,6 @@ mod tests {
     use swc_ecma_ast::{BlockStmt, Param, Pat};
     use yavashark_env::scope::Scope;
     use yavashark_env::{Context, test_eval};
-    use yavashark_value::Value;
 
     #[test]
     fn test_function() {

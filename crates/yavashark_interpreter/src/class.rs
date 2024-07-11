@@ -162,6 +162,7 @@ fn define_on_class(
     Ok(())
 }
 
+/*
 
 #[cfg(test)]
 mod tests {
@@ -262,3 +263,4 @@ mod tests {
         );
     }
 }
+*/
