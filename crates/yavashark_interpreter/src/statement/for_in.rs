@@ -65,3 +65,29 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use yavashark_env::test_eval;
+
+    #[test]
+    fn test_for_in() {
+        test_eval!(
+            "
+            let obj = { a: 1, b: 2, c: 3 };
+            for (let key in obj) {
+                mock.values(key);
+            }
+            ",
+            0,
+            vec![
+                vec![Value::String("a".into())],
+                vec![Value::String("b".into())],
+                vec![Value::String("c".into())],
+            ],
+            Value::Undefined
+        ); //TODO: this test not always passes, since it somehow is in random order
+    }
+}
