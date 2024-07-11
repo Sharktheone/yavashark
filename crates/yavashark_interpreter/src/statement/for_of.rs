@@ -55,3 +55,34 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use yavashark_env::test_eval;
+    use super::*;
+
+    #[test]
+    fn run_for_of() {
+        test_eval!(
+            "
+            let arr = [1, 2, 3];
+            let sum = 0;
+            for (let i of arr) {
+                mock.values(i);
+                sum += i;
+            }
+            console.log(sum)
+            sum
+            ",
+            0,
+            vec![
+                vec![Value::from(1)],
+                vec![Value::from(2)],
+                vec![Value::from(3)],
+            ],
+            Value::Number(6.0)
+        );
+    }
+}
