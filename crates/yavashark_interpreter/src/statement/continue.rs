@@ -27,3 +27,72 @@ impl Interpreter {
         ))
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use yavashark_env::{test_eval, Value};
+
+    #[test]
+    fn run_continue() {
+        test_eval!(
+            r"
+            let i = 0;
+            while (i < 3) {
+                i++;
+                if (i == 2) {
+                    continue;
+                }
+                mock.values(i);
+            }
+            ",
+            0,
+            vec![vec![Value::Number(1.0)], vec![Value::Number(3.0)]],
+            Value::Undefined
+        );
+    }
+
+    #[test]
+    fn run_continue_label() {
+        test_eval!(
+            r"
+            let i = 0;
+            loop1: while (i < 3) {
+                i++;
+                let j = 0;
+                loop2: while (j < 3) {
+                    j++;
+                    if (i == 2) {
+                        continue loop1;
+                    }
+                    mock.values(j);
+                }
+            }
+            ",
+            0,
+            vec![vec![Value::Number(1.0)], vec![Value::Number(2.0)], vec![Value::Number(3.0)], vec![Value::Number(1.0)], vec![Value::Number(2.0)], vec![Value::Number(3.0)]],
+            Value::Undefined
+        );
+    }
+    #[test]
+    fn run_continue_label2() {
+        test_eval!(
+            r"
+            let i = 0;
+            loop1: while (i < 3) {
+                i++;
+                loop2: while (i < 3) {
+                    i++;
+                    if (i == 2) {
+                        continue loop1;
+                    }
+                    mock.values(i);
+                }
+            }
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Undefined
+        );
+    }
+}
