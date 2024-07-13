@@ -4408,6 +4408,10 @@ version = "0.1.0"
 [[package]]
 name = "yavashark_bytecode"
 version = "0.1.0"
+dependencies = [
+ "yavashark_env",
+ "yavashark_value",
+]
 
 [[package]]
 name = "yavashark_env"
