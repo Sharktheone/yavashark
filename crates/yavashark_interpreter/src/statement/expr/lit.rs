@@ -17,3 +17,58 @@ impl Interpreter {
         })
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use yavashark_env::{test_eval, Value};
+
+    #[test]
+    fn run_lit_string() {
+        test_eval!(
+            r#"
+            "hello"
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("hello".to_owned())
+        );
+    }
+
+    #[test]
+    fn run_lit_boolean() {
+        test_eval!(
+            "
+            true
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Boolean(true)
+        );
+    }
+
+    #[test]
+    fn run_lit_null() {
+        test_eval!(
+            "
+            null
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Null
+        );
+    }
+
+    #[test]
+    fn run_lit_number() {
+        test_eval!(
+            "
+            1
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(1.0)
+        );
+    }
+}
