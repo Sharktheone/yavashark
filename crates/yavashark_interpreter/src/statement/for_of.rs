@@ -56,12 +56,10 @@ impl Interpreter {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
-    use yavashark_env::test_eval;
     use super::*;
+    use yavashark_env::test_eval;
 
     #[test]
     fn run_for_of() {

@@ -26,9 +26,7 @@ macro_rules! test_eval {
         let state = values.borrow();
         assert_eq!(state.send_called, $sends);
         assert_eq!(state.got_values, $values);
-    };
-
-    // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
+    }; // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
 }
 
 pub struct State {

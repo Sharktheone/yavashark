@@ -93,8 +93,6 @@ impl Constructor<Context> for JSFunction {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,7 +100,7 @@ mod tests {
     use swc_common::DUMMY_SP;
     use swc_ecma_ast::{BlockStmt, Param, Pat};
     use yavashark_env::scope::Scope;
-    use yavashark_env::{Context, test_eval};
+    use yavashark_env::{test_eval, Context};
 
     #[test]
     fn test_function() {
@@ -118,8 +116,7 @@ mod tests {
             Value::Number(3.0)
         );
     }
-    
-    
+
     #[test]
     fn test_function_with_scope() {
         test_eval!(
@@ -135,7 +132,7 @@ mod tests {
             Value::Number(3.0)
         );
     }
-    
+
     #[test]
     fn test_function_with_scope_and_block() {
         test_eval!(

@@ -199,8 +199,8 @@ mod tests {
             Value::Object(_)
         );
     }
-    
-    
+
+
     #[test]
     fn test_decl_class_with_super() {
         use yavashark_env::{test_eval, Value};
@@ -241,8 +241,8 @@ mod tests {
             Value::Object
         );
     }
-    
-    
+
+
     #[test]
     fn test_decl_class_with_static_block() {
         use yavashark_env::{test_eval, Value};

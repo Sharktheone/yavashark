@@ -28,7 +28,6 @@ impl Interpreter {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use yavashark_env::{test_eval, Value};
@@ -70,7 +69,14 @@ mod tests {
             }
             ",
             0,
-            vec![vec![Value::Number(1.0)], vec![Value::Number(2.0)], vec![Value::Number(3.0)], vec![Value::Number(1.0)], vec![Value::Number(2.0)], vec![Value::Number(3.0)]],
+            vec![
+                vec![Value::Number(1.0)],
+                vec![Value::Number(2.0)],
+                vec![Value::Number(3.0)],
+                vec![Value::Number(1.0)],
+                vec![Value::Number(2.0)],
+                vec![Value::Number(3.0)]
+            ],
             Value::Undefined
         );
     }
