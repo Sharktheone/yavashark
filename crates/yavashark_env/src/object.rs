@@ -4,9 +4,9 @@ use std::fmt::Debug;
 pub use prototype::*;
 use yavashark_value::Obj;
 
+use crate::{Res, Value};
 use crate::context::Context;
 use crate::Variable;
-use crate::{Res, Value};
 
 pub mod array;
 mod prototype;
@@ -307,6 +307,12 @@ impl Obj<Context> for Object {
             .iter()
             .map(|(i, v)| (Value::Number(*i as f64), v.copy()))
             .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.copy())))
+            .chain(self.get_set.iter().flat_map(|(k, (get, set))| {
+                vec![
+                    (k.copy(), get.copy()), // Entry for the getter
+                    (k.copy(), set.copy()), // Entry for the setter
+                ]
+            }))
             .collect()
     }
 
@@ -315,6 +321,7 @@ impl Obj<Context> for Object {
             .iter()
             .map(|(i, _)| Value::Number(*i as f64))
             .chain(self.properties.keys().map(Value::copy))
+            .chain(self.get_set.keys().map(Value::copy))
             .collect()
     }
 
@@ -324,6 +331,7 @@ impl Obj<Context> for Object {
             .map(|(_, v)| v.copy())
             .chain(self.properties.values().map(Variable::copy))
             .collect()
+        //TODO: getter (and setter) values
     }
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
