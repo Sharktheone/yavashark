@@ -3,6 +3,7 @@
 //! 
 //! 
 
+#[repr(u16)]
 enum Instruction {
     Add,
     Sub,
