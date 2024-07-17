@@ -2,6 +2,9 @@
 //! it does not provide any way to execute or compile it.
 //! 
 //! 
+//! 
+
+mod writer;
 
 #[repr(u16)]
 enum Instruction {
