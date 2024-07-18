@@ -36,7 +36,7 @@ So, I thought of a few interpreters and compilers for this project. Probably the
 few, the next aren't that hard to implement.
 
 - [ ] JS-Tree-Walk-Interpreter [In Progress]
-- [ ] JS-Bytecode-Interpreter
+- [ ] JS-Bytecode-Interpreter  [In Progress]
 - [ ] TS-Bytecode-Interpreter
 - [ ] TS-JIT-Compiler (Cranelift)
 - [ ] JS-JIT-Compiler (Cranelift)
