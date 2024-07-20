@@ -1,0 +1,2 @@
+The `yavashark_env` crate provides the Javascript execution enviroment, for example the global object with the core JS APIs. (`Array`, `ArrayBuffer`, ...)
+It can also optionally provide a `console.log` method, even though it is not part of the ECMAScript standard, but a Web API.

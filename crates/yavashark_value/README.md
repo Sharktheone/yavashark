@@ -1,0 +1,1 @@
+The `yavashark_value` crate contains the value representations for the Yavashark engine, it currently has support for Javascript and partially for Typescript values.

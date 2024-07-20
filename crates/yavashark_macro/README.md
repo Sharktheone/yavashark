@@ -1,0 +1,1 @@
+The `yavashark_macro` crate contains proc macros to generate js objects from native rust structs.

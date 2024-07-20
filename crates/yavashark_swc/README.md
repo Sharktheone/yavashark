@@ -1,0 +1,1 @@
+Why is this here? This crate is mainly used for experiments including the swc parser, that's where the name comes from, it probably could be removed.
