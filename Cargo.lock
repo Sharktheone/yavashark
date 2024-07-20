@@ -4414,6 +4414,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_codegen"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_env"
 version = "0.1.0"
 dependencies = [
@@ -4500,6 +4504,10 @@ dependencies = [
  "anyhow",
  "yavashark_garbage",
 ]
+
+[[package]]
+name = "yavashark_vm"
+version = "0.1.0"
 
 [[package]]
 name = "yoke"
