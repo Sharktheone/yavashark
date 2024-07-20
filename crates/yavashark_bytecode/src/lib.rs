@@ -61,6 +61,8 @@ enum Instruction {
     JmpNullUndefRelAcc(i32),
     Str(VarName, ConstIdx),
     StrAcc(ConstIdx),
+    LoadMemberAcc(VarName, VarName),
+    LoadMemberReg(VarName, VarName, Reg),
     For,
     TypeOf(VarName, VarName),
     TypeOfAcc(VarName),
