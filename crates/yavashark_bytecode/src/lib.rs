@@ -7,13 +7,13 @@
 mod writer;
 
 
-type VarName = u32;
-type ConstIdx = u32;
-type Reg = u8;
-type Lbl = u32;
+pub type VarName = u32;
+pub type ConstIdx = u32;
+pub type Reg = u8;
+pub type Lbl = u32;
 
 #[repr(u16)]
-enum Instruction {
+pub enum Instruction {
     Add(VarName, VarName),
     AddAcc(f64),
     AddStatic(VarName, f64),
