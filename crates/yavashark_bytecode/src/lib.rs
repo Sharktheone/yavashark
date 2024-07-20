@@ -41,6 +41,7 @@ enum Instruction {
     PushScope,
     PopScope,
     Call(VarName),
+    CallReg(Reg),
     CallAcc,
     Jmp(Lbl),
     JmpRel(i32),
