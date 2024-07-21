@@ -4,9 +4,9 @@ use std::fmt::Debug;
 pub use prototype::*;
 use yavashark_value::Obj;
 
-use crate::{Res, Value};
 use crate::context::Context;
 use crate::Variable;
+use crate::{Res, Value};
 
 pub mod array;
 mod prototype;

@@ -18,8 +18,6 @@ impl Interpreter {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use yavashark_env::{test_eval, Value};

@@ -1,11 +1,10 @@
 //! This crate contains bytecode definitions
 //! it does not provide any way to execute or compile it.
-//! 
-//! 
-//! 
+//!
+//!
+//!
 
 mod writer;
-
 
 pub type VarName = u32;
 pub type ConstIdx = u32;
@@ -71,5 +70,5 @@ pub enum Instruction {
     Return,
     Break,
     Continue,
-    Throw,  
+    Throw,
 }
