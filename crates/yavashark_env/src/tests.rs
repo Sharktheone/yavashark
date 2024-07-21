@@ -6,6 +6,7 @@ use crate::object::Object;
 use crate::{NativeFunction, Value};
 
 #[macro_export]
+#[allow(clippy::crate_in_macro_def)]
 macro_rules! test_eval {
     ($code:expr, $sends:literal, $values:expr, $ret:expr) => {
         use swc_common::BytePos;

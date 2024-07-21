@@ -4,7 +4,7 @@
 //!
 //!
 
-mod writer;
+pub mod writer;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;
