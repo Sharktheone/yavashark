@@ -13,10 +13,12 @@ pub trait BytecodeWriter: Encode {
 
 
 ///adc2-243d
-const NORMAL_HEADER: [u8; 8] = *b"adc2243d";
+pub const NORMAL_HEADER: [u8; 8] = *b"adc2243d";
 
 
 ///9961-c49c
-const TIGHT_HEADER: [u8; 8] = *b"9961c49c";
+pub const TIGHT_HEADER: [u8; 8] = *b"9961c49c";
 //Who can find out for what these stand for? Open an issue if you do! (It's a hidden message!)
 
+
+//TODO: we might also need a header for the const section and var section in the bytecode. The alternative would be to store the length of it in the beginning
