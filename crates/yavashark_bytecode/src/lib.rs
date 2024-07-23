@@ -4,11 +4,12 @@
 //!
 //!
 
+pub use consts::*;
 pub use instructions::*;
-use yavashark_env::Value;
 
 pub mod writer;
 mod instructions;
+mod consts;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;
@@ -17,6 +18,6 @@ pub type JmpOffset = u32;
 
 pub struct Bytecode {
     pub instructions: Vec<Instruction>,
-    pub consts: Vec<Value>,
+    pub consts: Vec<ConstValue>,
     pub vars: Vec<String>,
 }
