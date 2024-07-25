@@ -25,4 +25,12 @@ impl ByteCodegen {
             Stmt::Expr(expr) => self.compile_expr_stmt(expr),
         }
     }
+    
+    
+    pub fn compile_statements(&mut self, script: &Vec<Stmt>) {
+        for stmt in script {
+            self.compile_statement(stmt);
+        }
+    }
 }
+
