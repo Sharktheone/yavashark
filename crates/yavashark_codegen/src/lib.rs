@@ -1,6 +1,8 @@
+use yavashark_bytecode::Instruction;
 
+mod statement;
 
-
-
-struct ByteCodegen;
+struct ByteCodegen {
+    instructions: Vec<Instruction>
+}
 
