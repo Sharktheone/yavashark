@@ -8,7 +8,7 @@ mod r#continue;
 mod r#if;
 mod switch;
 mod throw;
-mod try;
+mod r#try;
 mod r#while;
 mod do_while;
 mod r#for;
