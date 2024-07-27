@@ -4476,6 +4476,7 @@ dependencies = [
 name = "yavashark_codegen"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "swc_common 0.36.2",
  "swc_ecma_ast 0.117.3",
  "swc_ecma_parser 0.148.1",

@@ -1,7 +1,11 @@
 use swc_common::BytePos;
 use swc_common::input::StringInput;
-use swc_ecma_parser::{EsConfig, EsSyntax, Parser, Syntax};
+use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+
 use yavashark_bytecode::Instruction;
+
+pub type CompileError = anyhow::Error;
+pub type Res = Result<(), CompileError>;
 
 mod statement;
 
