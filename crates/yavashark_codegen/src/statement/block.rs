@@ -4,6 +4,8 @@ use crate::ByteCodegen;
 
 impl ByteCodegen {
     pub fn compile_block(&mut self, stmt: &BlockStmt) {
-        todo!()
+        for stmt in &stmt.stmts {
+            self.compile_statement(stmt);
+        }
     }
 }
