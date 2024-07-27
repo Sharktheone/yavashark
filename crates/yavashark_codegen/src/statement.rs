@@ -18,13 +18,13 @@ mod decl;
 mod expr;
 
 use swc_ecma_ast::Stmt;
-use crate::ByteCodegen;
+use crate::{ByteCodegen, Res};
 
 impl ByteCodegen {
-    pub fn compile_statement(&mut self, stmt: &Stmt) {
+    pub fn compile_statement(&mut self, stmt: &Stmt) -> Res {
         match stmt {
             Stmt::Block(block) => self.compile_block(block),
-            Stmt::Empty(_) => {},
+            Stmt::Empty(_) => Ok(()),
             Stmt::Debugger(d) => self.compile_debugger(d),
             Stmt::With(w) => self.compile_with(w),
             Stmt::Return(r) => self.compile_return(r),
@@ -41,7 +41,7 @@ impl ByteCodegen {
             Stmt::ForIn(f) => self.compile_for_in(f),
             Stmt::ForOf(f) => self.compile_for_of(f),
             Stmt::Decl(d) => self.compile_decl(d),
-            Stmt::Expr(expr) => self.compile_expr(expr),
+            Stmt::Expr(expr) => self.compile_expr_stmt(expr),
         }
     }
 

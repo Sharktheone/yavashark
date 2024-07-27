@@ -1,11 +1,13 @@
 use swc_ecma_ast::BlockStmt;
 
-use crate::ByteCodegen;
+use crate::{ByteCodegen, Res};
 
 impl ByteCodegen {
-    pub fn compile_block(&mut self, stmt: &BlockStmt) {
+    pub fn compile_block(&mut self, stmt: &BlockStmt) -> Res {
         for stmt in &stmt.stmts {
-            self.compile_statement(stmt);
+            self.compile_statement(stmt)?;
         }
+
+        Ok(())
     }
 }
