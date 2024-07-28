@@ -1,14 +1,41 @@
 use anyhow::anyhow;
 use swc_common::Span;
 use swc_ecma_ast::{Expr, ExprStmt};
-use yavashark_env::ControlFlow;
-use crate::{ByteCodegen, CompileError, Res};
+
+use crate::{ByteCodegen, Res};
+
+mod this;
+mod array;
+mod object;
+mod r#fn;
+mod unary;
+mod update;
+mod bin;
+mod assign;
+mod member;
+mod super_prop;
+mod cond;
+mod call;
+mod ident;
+mod seq;
+mod new;
+mod opt_chain;
+mod private_name;
+mod paren;
+mod r#await;
+mod meta_prop;
+mod r#yield;
+mod class;
+mod arrow;
+mod tagged_tpl;
+mod tpl;
+mod lit;
 
 impl ByteCodegen {
     pub fn compile_expr_stmt(&mut self, stmt: &ExprStmt) -> Res {
         self.compile_expr(&stmt.expr, stmt.span)
     }
-    
+
     pub fn compile_expr(&mut self, expr: &Expr, span: Span) -> Res {
         match expr {
             Expr::This(stmt) => self.compile_this(stmt),
@@ -45,7 +72,7 @@ impl ByteCodegen {
                 "{span:?}: TS and JSX are not supported."
             )),
         }?;
-        
+
         Ok(())
     }
 }
