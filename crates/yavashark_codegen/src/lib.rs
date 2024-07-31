@@ -13,9 +13,11 @@ pub type CompileError = anyhow::Error;
 pub type Res = Result<(), CompileError>;
 
 mod statement;
+mod utils;
 
 struct ByteCodegen {
     instructions: Vec<Instruction>,
+    variables: Vec<String>,
 }
 
 
