@@ -35,7 +35,8 @@ fn test_compile() {
     let script = p.parse_script().unwrap();
 
     let mut bc = ByteCodegen {
-        instructions: vec![]
+        instructions: vec![],
+        variables: vec![],
     };
 
     bc.compile_statements(&script.body);
