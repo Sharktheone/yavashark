@@ -1,24 +1,24 @@
 mod block;
-mod debugger;
-mod with;
-mod r#return;
-mod labeled;
 mod r#break;
 mod r#continue;
+mod debugger;
+mod decl;
+mod do_while;
+mod expr;
+mod r#for;
+mod for_in;
+mod for_of;
 mod r#if;
+mod labeled;
+mod r#return;
 mod switch;
 mod throw;
 mod r#try;
 mod r#while;
-mod do_while;
-mod r#for;
-mod for_in;
-mod for_of;
-mod decl;
-mod expr;
+mod with;
 
-use swc_ecma_ast::Stmt;
 use crate::{ByteCodegen, Res};
+use swc_ecma_ast::Stmt;
 
 impl ByteCodegen {
     pub fn compile_statement(&mut self, stmt: &Stmt) -> Res {
@@ -45,11 +45,9 @@ impl ByteCodegen {
         }
     }
 
-
     pub fn compile_statements(&mut self, script: &Vec<Stmt>) {
         for stmt in script {
             self.compile_statement(stmt);
         }
     }
 }
-

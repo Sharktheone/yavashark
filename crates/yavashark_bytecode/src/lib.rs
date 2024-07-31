@@ -7,9 +7,9 @@
 pub use consts::*;
 pub use instructions::*;
 
-pub mod writer;
-mod instructions;
 mod consts;
+mod instructions;
+pub mod writer;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;

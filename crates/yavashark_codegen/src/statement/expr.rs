@@ -4,32 +4,32 @@ use swc_ecma_ast::{Expr, ExprStmt};
 
 use crate::{ByteCodegen, Res};
 
-mod this;
 mod array;
-mod object;
+mod arrow;
+mod assign;
+mod r#await;
+mod bin;
+mod call;
+mod class;
+mod cond;
 mod r#fn;
+mod ident;
+mod lit;
+mod member;
+mod meta_prop;
+mod new;
+mod object;
+mod opt_chain;
+mod paren;
+mod private_name;
+mod seq;
+mod super_prop;
+mod tagged_tpl;
+mod this;
+mod tpl;
 mod unary;
 mod update;
-mod bin;
-mod assign;
-mod member;
-mod super_prop;
-mod cond;
-mod call;
-mod ident;
-mod seq;
-mod new;
-mod opt_chain;
-mod private_name;
-mod paren;
-mod r#await;
-mod meta_prop;
 mod r#yield;
-mod class;
-mod arrow;
-mod tagged_tpl;
-mod tpl;
-mod lit;
 
 impl ByteCodegen {
     pub fn compile_expr_stmt(&mut self, stmt: &ExprStmt) -> Res {
@@ -64,13 +64,8 @@ impl ByteCodegen {
             Expr::Paren(stmt) => self.compile_paren(stmt),
             Expr::PrivateName(stmt) => self.compile_private_name(stmt),
             Expr::OptChain(stmt) => self.compile_opt_chain(stmt),
-            Expr::Invalid(stmt) => Err(anyhow!(
-                "{:?}: Invalid expression.",
-                stmt.span
-            )),
-            _ => Err(anyhow!(
-                "{span:?}: TS and JSX are not supported."
-            )),
+            Expr::Invalid(stmt) => Err(anyhow!("{:?}: Invalid expression.", stmt.span)),
+            _ => Err(anyhow!("{span:?}: TS and JSX are not supported.")),
         }?;
 
         Ok(())

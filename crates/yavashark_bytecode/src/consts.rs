@@ -1,7 +1,3 @@
-
-
-
-
 pub enum ConstValue {
     Null,
     Undefined,

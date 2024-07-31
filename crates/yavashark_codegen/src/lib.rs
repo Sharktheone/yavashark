@@ -1,10 +1,7 @@
-#![allow(
-    unused,
-    clippy::needless_pass_by_ref_mut
-)] //pass by ref mut is just temporary until all functions are implemented
+#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
-use swc_common::BytePos;
 use swc_common::input::StringInput;
+use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 
 use yavashark_bytecode::Instruction;
@@ -19,7 +16,6 @@ struct ByteCodegen {
     instructions: Vec<Instruction>,
     variables: Vec<String>,
 }
-
 
 #[test]
 fn test_compile() {

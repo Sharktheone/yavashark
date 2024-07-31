@@ -1,5 +1,5 @@
-use yavashark_bytecode::VarName;
 use crate::ByteCodegen;
+use yavashark_bytecode::VarName;
 
 impl ByteCodegen {
     pub fn allocate_variable(&mut self, name: String) -> VarName {
