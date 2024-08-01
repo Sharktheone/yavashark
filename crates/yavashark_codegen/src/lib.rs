@@ -21,6 +21,11 @@ struct ByteCodegen {
 fn test_compile() {
     let src = r#"
     console.log("Hello, World!");
+    if (true) {
+        console.log("True");
+    } else {
+        console.log("False");
+    }
  "#;
 
     let input = StringInput::new(src.into(), BytePos(0), BytePos(src.len() as u32));
