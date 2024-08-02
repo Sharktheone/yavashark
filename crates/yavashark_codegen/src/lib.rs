@@ -4,7 +4,7 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 
-use yavashark_bytecode::Instruction;
+use yavashark_bytecode::{ConstValue, Instruction};
 
 pub type CompileError = anyhow::Error;
 pub type Res = Result<(), CompileError>;
@@ -15,6 +15,7 @@ mod utils;
 struct ByteCodegen {
     instructions: Vec<Instruction>,
     variables: Vec<String>,
+    literals: Vec<ConstValue>,
 }
 
 #[test]
@@ -38,6 +39,7 @@ fn test_compile() {
     let mut bc = ByteCodegen {
         instructions: vec![],
         variables: vec![],
+        literals: vec![],
     };
 
     bc.compile_statements(&script.body);
