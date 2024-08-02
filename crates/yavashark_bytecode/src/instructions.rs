@@ -53,6 +53,8 @@ pub enum Instruction {
     JmpNullUndefRelAcc(i32),
     Str(VarName, ConstIdx),
     StrAcc(ConstIdx),
+    Lda(VarName, ConstIdx),
+    LdaAcc(ConstIdx),
     LoadMemberAcc(VarName, VarName),
     LoadMemberReg(VarName, VarName, Reg),
     LoadRegMember(Reg, VarName, Reg),
