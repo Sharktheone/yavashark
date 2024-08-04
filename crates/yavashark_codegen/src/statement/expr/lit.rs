@@ -1,5 +1,5 @@
-use anyhow::anyhow;
 use crate::{ByteCodegen, Res};
+use anyhow::anyhow;
 use swc_ecma_ast::Lit;
 use yavashark_bytecode::ConstValue;
 
@@ -14,13 +14,12 @@ impl ByteCodegen {
             Lit::Regex(_) => todo!("Regex lit"),
             Lit::JSXText(_) => Err(anyhow!("JSXText is not supported"))?,
         };
-        
+
         let lit = self.allocate_literal(val);
-        
-        self.instructions.push(yavashark_bytecode::Instruction::LdaAcc(lit));
-        
+
+        self.instructions
+            .push(yavashark_bytecode::Instruction::LdaAcc(lit));
+
         Ok(())
-        
-        
     }
 }

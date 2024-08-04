@@ -5,10 +5,7 @@ use yavashark_bytecode::Instruction;
 impl ByteCodegen {
     pub fn compile_if(&mut self, stmt: &IfStmt) -> Res {
         let IfStmt {
-            test,
-            cons,
-            alt,
-            ..
+            test, cons, alt, ..
         } = stmt;
 
         self.compile_expr(test, stmt.span)?;
@@ -17,7 +14,6 @@ impl ByteCodegen {
         self.instructions.push(Instruction::JmpIfNotAcc(0));
 
         self.compile_statement(cons)?;
-        
 
         if let Some(alt) = alt {
             self.instructions.push(Instruction::Jmp(0));
