@@ -12,6 +12,8 @@ mod class;
 mod function;
 mod pat;
 pub mod statement;
+#[cfg(test)]
+mod tests;
 
 pub struct Interpreter;
 
