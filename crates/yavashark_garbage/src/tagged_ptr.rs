@@ -4,7 +4,6 @@ use std::ptr::NonNull;
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct TaggedPtr<T> {
-    #[cfg(not(deb))]
     ptr: NonNull<[(); 0]>,
     _marker: std::marker::PhantomData<T>,
 }

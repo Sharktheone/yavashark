@@ -604,6 +604,7 @@ enum RootStatus {
     RootPending,
 }
 
+#[allow(unused)]
 pub struct WeakGc<T: Collectable> {
     #[allow(dead_code)]
     inner: NonNull<GcBox<T>>,
