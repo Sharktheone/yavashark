@@ -30,6 +30,18 @@ macro_rules! test_eval {
     }; // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
 }
 
+#[macro_export]
+macro_rules! expr {
+    ($code:expr, $res:expr) => {
+        $crate::test_eval!(
+            $code,
+            0,
+            Vec::<Vec<Value>>::new(),
+            $res
+        )
+    };
+}
+
 pub struct State {
     pub send_called: u16,
     pub got_values: Vec<Vec<Value>>,
