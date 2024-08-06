@@ -67,6 +67,11 @@ pub enum Instruction {
     TypeOf(VarName, VarName),
     TypeOfAcc(VarName),
     InstanceOf(VarName, VarName),
+    PushConst(ConstIdx), // For stack operations
+    PushReg(Reg),
+    PushAcc,
+    Pop,
+    PopN(Reg),
     Return,
     Break,
     Continue,
