@@ -72,6 +72,8 @@ pub enum Instruction {
     PushAcc,
     Pop,
     PopN(Reg),
+    RegToAcc(Reg),
+    AccToReg(Reg),
     Return,
     Break,
     Continue,
