@@ -8,7 +8,7 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::object::Object;
-use crate::{NativeFunction, Res, Value, Variable};
+use crate::{Error, NativeFunction, Res, Value, Variable};
 
 mod common;
 
@@ -263,8 +263,8 @@ impl Obj<Context> for Prototype {
         "Object".to_string()
     }
 
-    fn to_string(&self) -> String {
-        "[object Object]".to_string()
+    fn to_string(&self) -> Result<String, Error>{
+        Ok("[object Object]".to_string())
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {

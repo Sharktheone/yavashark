@@ -4,7 +4,7 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::object::Object;
-use crate::{NativeFunction, Res, Value, ValueResult, Variable};
+use crate::{Error, NativeFunction, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -244,11 +244,11 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn name(&self) -> String {
-        self.name.value.to_string()
+        self.name.value.to_string().unwrap_or("Function Prototype".to_string())
     }
 
-    fn to_string(&self) -> String {
-        "Function Prototype".to_string()
+    fn to_string(&self) -> Result<String, Error> {
+        Ok("Function Prototype".to_string())
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {

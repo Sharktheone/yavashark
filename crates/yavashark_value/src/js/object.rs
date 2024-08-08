@@ -1,6 +1,6 @@
 use std::any::Any;
 use std::cell::RefCell;
-use std::fmt::{Debug, Display};
+use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
@@ -65,8 +65,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn name(&self) -> String;
 
-    fn to_string(&self) -> String;
-
+    fn to_string(&self) -> Result<String, Error<C>>;
     fn properties(&self) -> Vec<(Value<C>, Value<C>)>;
 
     fn keys(&self) -> Vec<Value<C>>;
@@ -235,6 +234,18 @@ impl<C: Ctx> BoxedObj<C> {
 
 #[derive(Clone)]
 pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>);
+
+
+#[cfg(any(test, debug_assertions, feature = "display_object"))]
+impl<C: Ctx> Display for Object<C> {
+    /// This function shouldn't be used in production code, only for debugging
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.to_string() {
+            Ok(s) => write!(f, "{}", s),
+            Err(e) => write!(f, "Error displaying object: {}", e),
+        }
+    }    
+}
 
 #[cfg(feature = "dbg_object_gc")]
 impl<C: Ctx> Drop for BoxedObj<C> {
@@ -456,15 +467,7 @@ impl<C: Ctx> Object<C> {
     }
 }
 
-impl<C: Ctx> Display for Object<C> {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        if let Ok(o) = self.get() {
-            write!(f, "{}", o.to_string())
-        } else {
-            write!(f, "[object Object]")
-        }
-    }
-}
+
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
@@ -480,5 +483,10 @@ impl<C: Ctx> Object<C> {
 
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
         Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))))
+    }
+    
+    
+    pub fn to_string(&self) -> Result<String, Error<C>> {
+        self.get()?.to_string()
     }
 }

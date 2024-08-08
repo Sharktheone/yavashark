@@ -166,7 +166,9 @@ impl<C: Ctx> Value<C> {
     }
 }
 
+#[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Ctx> Display for Value<C> {
+    /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Self::Null => write!(f, "null"),
@@ -303,6 +305,20 @@ impl<C: Ctx> Value<C> {
         }
 
         Ok(())
+    }
+    
+    
+    
+    pub fn to_string(&self) -> Result<String, Error<C>> {
+        Ok(match self {
+            Self::Object(o) => o.to_string()?,
+            Self::Null => "null".to_string(),
+            Self::Undefined => "undefined".to_string(),
+            Self::Number(n) => n.to_string(),
+            Self::String(s) => s.clone(),
+            Self::Boolean(b) => b.to_string(),
+            Self::Symbol(s) => s.to_string(),
+        })
     }
 }
 

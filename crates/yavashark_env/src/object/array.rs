@@ -1,15 +1,18 @@
 #![allow(clippy::needless_pass_by_value)]
 
+use std::fmt::Display;
+
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
+use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 use crate::object::Object;
 use crate::Symbol;
-use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
-#[object(direct(length))]
+#[object(direct(length), to_string)]
 #[derive(Debug)]
 pub struct Array {}
+
 
 impl Array {
     pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {
@@ -31,6 +34,22 @@ impl Array {
     #[must_use]
     pub fn from_ctx(ctx: &Context) -> Self {
         Self::new(ctx.proto.array.clone().into())
+    }
+
+
+    pub fn to_string(&self) -> Result<String, Error> {
+        let mut buf = String::new();
+
+
+        for (_, value) in self.object.array.iter() {
+            buf.push_str(&value.value.to_string()?);
+            buf.push_str(", ");
+        }
+        
+        buf.truncate(buf.len() - 2);
+        
+        
+        Ok(buf)
     }
 }
 

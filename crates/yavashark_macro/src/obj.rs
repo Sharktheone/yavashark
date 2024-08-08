@@ -50,6 +50,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut gc = Vec::new();
 
     let mut function = false;
+    let mut to_string = false;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -99,6 +100,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         if meta.path.is_ident("constructor") {
             constructor = true;
             return Ok(());
+        }
+
+        if meta.path.is_ident("to_string") {
+            to_string = true;
+            return Ok(())
         }
 
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
@@ -289,6 +295,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
+    
+    
+    let to_string = if to_string {
+        quote! {
+            fn to_string(&self) -> Result<String, #error> {
+                self.to_string()
+            }
+        }
+    } else {
+        quote! {
+            fn to_string(&self) -> Result<String, #error> {
+                self.object.to_string()
+            }
+        }
+    };
 
     let expanded = quote! {
         #input
@@ -351,11 +372,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn name(&self) -> String {
                 self.object.name()
             }
-
-            fn to_string(&self) -> String {
-                self.object.to_string()
-            }
-
+            
+            #to_string
+            
             fn properties(&self) -> Vec<(#value, #value)> {
                 let mut props = self.object.properties();
                 #properties

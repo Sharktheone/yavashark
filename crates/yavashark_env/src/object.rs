@@ -5,7 +5,7 @@ pub use prototype::*;
 use yavashark_value::Obj;
 
 use crate::context::Context;
-use crate::Variable;
+use crate::{Error, Variable};
 use crate::{Res, Value};
 
 pub mod array;
@@ -298,8 +298,8 @@ impl Obj<Context> for Object {
         "Object".to_string()
     }
 
-    fn to_string(&self) -> String {
-        "[object Object]".to_string()
+    fn to_string(&self) -> Result<String, Error> {
+        Ok("[object Object]".to_string())
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {
