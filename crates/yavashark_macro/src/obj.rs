@@ -302,11 +302,19 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
                 self.to_string(ctx)
             }
+            
+            fn to_string_internal(&self) - String {
+                self.to_string_internal()
+            }
         }
     } else {
         quote! {
             fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
                 self.object.to_string(ctx)
+            }
+            
+            fn to_string_internal(&self) -> String {
+                self.object.to_string_internal()
             }
         }
     };

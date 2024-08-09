@@ -267,6 +267,10 @@ impl Obj<Context> for Prototype {
         Ok("[object Object]".to_string())
     }
 
+    fn to_string_internal(&self) -> String {
+        "[object Prototype]".to_string()
+    }
+
     fn properties(&self) -> Vec<(Value, Value)> {
         let mut props = self.object.properties();
         props.push((

@@ -307,6 +307,10 @@ impl Obj<Context> for Object {
         Ok("[object Object]".to_string())
     }
 
+    fn to_string_internal(&self) -> String {
+        "[object <Object>]".to_string()
+    }
+
     fn properties(&self) -> Vec<(Value, Value)> {
         self.array
             .iter()

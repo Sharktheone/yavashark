@@ -251,6 +251,10 @@ impl Obj<Context> for FunctionPrototype {
         Ok("function () { [Native code] } ".to_string())
     }
 
+    fn to_string_internal(&self) -> String {
+        "function () { [Native code <Function Prototype>] } ".to_string()
+    }
+
     fn properties(&self) -> Vec<(Value, Value)> {
         let mut props = self.object.properties();
         props.push((Value::String("apply".to_string()), self.apply.value.copy()));

@@ -65,8 +65,9 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn name(&self) -> String;
 
-    fn to_string(&self) -> Result<String, Error<C>>;
     fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>>;
+    fn to_string_internal(&self) -> String;
+    
     fn properties(&self) -> Vec<(Value<C>, Value<C>)>;
 
     fn keys(&self) -> Vec<Value<C>>;
@@ -487,7 +488,7 @@ impl<C: Ctx> Object<C> {
     }
     
     
-    pub fn to_string(&self) -> Result<String, Error<C>> {
-        self.get()?.to_string()
+    pub fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>> {
+        self.get()?.to_string(ctx)
     }
 }
