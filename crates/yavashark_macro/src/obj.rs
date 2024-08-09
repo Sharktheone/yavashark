@@ -299,14 +299,14 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     
     let to_string = if to_string {
         quote! {
-            fn to_string(&self) -> Result<String, #error> {
-                self.to_string()
+            fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
+                self.to_string(ctx)
             }
         }
     } else {
         quote! {
-            fn to_string(&self) -> Result<String, #error> {
-                self.object.to_string()
+            fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
+                self.object.to_string(ctx)
             }
         }
     };

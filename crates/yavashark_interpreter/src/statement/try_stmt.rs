@@ -37,7 +37,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                                         "message" => {
                                             scope.declare_var(
                                                 "message".to_string(),
-                                                Value::String(err.message()),
+                                                Value::String(err.message(ctx)?),
                                             );
                                         }
                                         "stack" => {
@@ -95,7 +95,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
 
                                     match key.as_str() {
                                         "message" => {
-                                            scope.declare_var(name, err.message().into());
+                                            scope.declare_var(name, err.message(ctx)?.into());
                                         }
                                         "stack" => {
                                             scope.declare_var(

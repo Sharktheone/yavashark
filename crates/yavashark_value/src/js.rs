@@ -309,9 +309,9 @@ impl<C: Ctx> Value<C> {
     
     
     
-    pub fn to_string(&self) -> Result<String, Error<C>> {
+    pub fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>> {
         Ok(match self {
-            Self::Object(o) => o.to_string()?,
+            Self::Object(o) => o.to_string(ctx)?,
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => n.to_string(),

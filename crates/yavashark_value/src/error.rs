@@ -109,18 +109,17 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    #[must_use]
-    pub fn message(&self) -> String {
-        match &self.kind {
+    pub fn message(&self, ctx: &mut C) -> Result<String, Error<C>> {
+        Ok(match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
             | ErrorKind::Range(msg)
             | ErrorKind::Internal(msg)
             | ErrorKind::Runtime(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
-            ErrorKind::Throw(val) => val.to_string(),
+            ErrorKind::Throw(val) => val.to_string(ctx)?,
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
-        }
+        })
     }
 
     #[must_use]

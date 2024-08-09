@@ -66,6 +66,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
     fn name(&self) -> String;
 
     fn to_string(&self) -> Result<String, Error<C>>;
+    fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>>;
     fn properties(&self) -> Vec<(Value<C>, Value<C>)>;
 
     fn keys(&self) -> Vec<Value<C>>;

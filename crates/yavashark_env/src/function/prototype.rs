@@ -247,8 +247,8 @@ impl Obj<Context> for FunctionPrototype {
         self.name.value.to_string().unwrap_or("Function Prototype".to_string())
     }
 
-    fn to_string(&self) -> Result<String, Error> {
-        Ok("Function Prototype".to_string())
+    fn to_string(&self, ctx: &mut Context) -> Result<String, Error> {
+        Ok("function () { [Native code] } ".to_string())
     }
 
     fn properties(&self) -> Vec<(Value, Value)> {

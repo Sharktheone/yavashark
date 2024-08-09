@@ -298,7 +298,12 @@ impl Obj<Context> for Object {
         "Object".to_string()
     }
 
-    fn to_string(&self) -> Result<String, Error> {
+    fn to_string(&self, ctx: &mut Context) -> Result<String, Error> {
+        if let Some(to_string) = self.get_property(&Value::String("toString".to_string())) {
+            // to_string.call(ctx, vec![], Value::Object(self.clone().into()))?;
+        }
+        
+        
         Ok("[object Object]".to_string())
     }
 
