@@ -87,5 +87,7 @@ pub enum Instruction {
     Return,
     Break,
     Continue,
-    Throw,
+    ThrowAcc,
+    ThrowReg,
+    Throw(VarName),
 }
