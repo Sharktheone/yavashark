@@ -244,7 +244,10 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn name(&self) -> String {
-        self.name.value.to_string().unwrap_or("Function Prototype".to_string())
+        self.name
+            .value
+            .to_string()
+            .unwrap_or("Function Prototype".to_string())
     }
 
     fn to_string(&self, ctx: &mut Context) -> Result<String, Error> {

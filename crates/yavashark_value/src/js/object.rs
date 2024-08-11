@@ -67,7 +67,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>>;
     fn to_string_internal(&self) -> String;
-    
+
     fn properties(&self) -> Vec<(Value<C>, Value<C>)>;
 
     fn keys(&self) -> Vec<Value<C>>;
@@ -237,7 +237,6 @@ impl<C: Ctx> BoxedObj<C> {
 #[derive(Clone)]
 pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>);
 
-
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Ctx> Display for Object<C> {
     /// This function shouldn't be used in production code, only for debugging
@@ -246,7 +245,7 @@ impl<C: Ctx> Display for Object<C> {
             Ok(s) => write!(f, "{}", s),
             Err(e) => write!(f, "Error displaying object: {}", e),
         }
-    }    
+    }
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -469,8 +468,6 @@ impl<C: Ctx> Object<C> {
     }
 }
 
-
-
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
         Self(Gc::new(RefCell::new(BoxedObj::new(obj))))
@@ -486,8 +483,7 @@ impl<C: Ctx> Object<C> {
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
         Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))))
     }
-    
-    
+
     pub fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>> {
         self.get()?.to_string(ctx)
     }

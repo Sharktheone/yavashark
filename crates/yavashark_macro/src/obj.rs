@@ -104,7 +104,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         if meta.path.is_ident("to_string") {
             to_string = true;
-            return Ok(())
+            return Ok(());
         }
 
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
@@ -295,14 +295,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-    
-    
+
     let to_string = if to_string {
         quote! {
             fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
                 self.to_string(ctx)
             }
-            
+
             fn to_string_internal(&self) - String {
                 self.to_string_internal()
             }
@@ -312,7 +311,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
                 self.object.to_string(ctx)
             }
-            
+
             fn to_string_internal(&self) -> String {
                 self.object.to_string_internal()
             }
@@ -380,9 +379,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn name(&self) -> String {
                 self.object.name()
             }
-            
+
             #to_string
-            
+
             fn properties(&self) -> Vec<(#value, #value)> {
                 let mut props = self.object.properties();
                 #properties

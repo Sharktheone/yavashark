@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 
-use crate::Ctx;
+use crate::{Ctx, Error};
 
 use super::Value;
 
@@ -62,6 +62,8 @@ impl<C: Ctx> Value<C> {
 }
 
 impl<C: Ctx> Add for Value<C> {
+    // type Output = Result<Value<C>, Error<C>>;
+
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -71,15 +73,15 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Null, Self::Number(b)) => Self::Number(b),
             (Self::Null, Self::String(b)) => Self::String("null".to_string() + &b),
             (Self::Null, Self::Boolean(b)) => Self::Number(b.num()),
-            (Self::Null, Self::Object(_)) => Self::String("null[object Object]".to_owned()),
+            (Self::Null, Self::Object(o)) => Self::String(format!("null{}", o.to_string())),
 
             (Self::Undefined, Self::Null) => Self::Number(f64::NAN),
             (Self::Undefined, Self::Undefined) => Self::Number(f64::NAN),
             (Self::Undefined, Self::Number(_)) => Self::Number(f64::NAN),
             (Self::Undefined, Self::String(b)) => Self::String("undefined".to_string() + &b),
             (Self::Undefined, Self::Boolean(_)) => Self::Number(f64::NAN),
-            (Self::Undefined, Self::Object(_)) => {
-                Self::String("undefined[object Object]".to_owned())
+            (Self::Undefined, Self::Object(o)) => {
+                Self::String(format!("undefined{}", o.to_string()))
             }
 
             (Self::Number(a), Self::Null) => Self::Number(a),
@@ -87,14 +89,14 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Number(a), Self::Number(b)) => Self::Number(a + b),
             (Self::Number(a), Self::String(b)) => Self::String(a.to_string() + &b),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a + b.num()),
-            (Self::Number(a), Self::Object(_)) => Self::String(a.to_string() + "[object Object]"),
+            (Self::Number(a), Self::Object(o)) => Self::String(format!("{}{}", a, o.to_string())),
 
             (Self::String(a), Self::Null) => Self::String(a + "null"),
             (Self::String(a), Self::Undefined) => Self::String(a + "undefined"),
             (Self::String(a), Self::Number(b)) => Self::String(a + &b.to_string()),
             (Self::String(a), Self::String(b)) => Self::String(a + &b),
             (Self::String(a), Self::Boolean(b)) => Self::String(a + &b.to_string()),
-            (Self::String(a), Self::Object(_)) => Self::String(a + "[object Object]"),
+            (Self::String(a), Self::Object(o)) => Self::String(format!("{}{}", a, o.to_string())),
 
             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
             (Self::Boolean(_), Self::Undefined) => Self::Number(f64::NAN),
@@ -711,7 +713,11 @@ mod tests {
             "Object".to_string()
         }
 
-        fn to_string(&self) -> String {
+        fn to_string(&self, _ctx: &mut ()) -> Result<String, Error> {
+            Ok(format!("[object {}]", self.name()))
+        }
+
+        fn to_string_internal(&self) -> String {
             format!("[object {}]", self.name())
         }
 

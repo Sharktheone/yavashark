@@ -302,8 +302,7 @@ impl Obj<Context> for Object {
         if let Some(to_string) = self.get_property(&Value::String("toString".to_string())) {
             // to_string.call(ctx, vec![], Value::Object(self.clone().into()))?;
         }
-        
-        
+
         Ok("[object Object]".to_string())
     }
 

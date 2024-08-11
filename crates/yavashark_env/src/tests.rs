@@ -33,12 +33,7 @@ macro_rules! test_eval {
 #[macro_export]
 macro_rules! expr {
     ($code:expr, $res:expr) => {
-        $crate::test_eval!(
-            $code,
-            0,
-            Vec::<Vec<Value>>::new(),
-            $res
-        )
+        $crate::test_eval!($code, 0, Vec::<Vec<Value>>::new(), $res)
     };
 }
 

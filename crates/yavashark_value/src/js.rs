@@ -306,9 +306,7 @@ impl<C: Ctx> Value<C> {
 
         Ok(())
     }
-    
-    
-    
+
     pub fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>> {
         Ok(match self {
             Self::Object(o) => o.to_string(ctx)?,
