@@ -5,7 +5,7 @@ use yavashark_bytecode::Instruction;
 impl ByteCodegen {
     pub fn compile_bin(&mut self, stmt: &BinExpr) -> Res {
         self.compile_expr(&stmt.right, stmt.span)?;
-        self.instructions.push(Instruction::PushAcc):
+        self.instructions.push(Instruction::PushAcc);
         
         self.compile_expr(&stmt.left, stmt.span)?;
         
