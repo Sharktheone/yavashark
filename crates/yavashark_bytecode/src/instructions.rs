@@ -30,8 +30,19 @@ pub enum Instruction {
     
     LAnd(VarName, VarName),
     LAndAcc(Reg),
-    LXor(VarName, VarName),
-    LXorAcc(Reg),
+    
+    BitXor(VarName, VarName),
+    BitXorAcc(Reg),
+    BitXorReg(Reg, Reg),
+    
+    BitOr(VarName, VarName),
+    BitOrAcc(Reg),
+    BitOrReg(Reg, Reg),
+    
+    BitAnd(VarName, VarName),
+    BitAndAcc(Reg),
+    BitAndReg(Reg, Reg),
+    
     Dec(VarName),
     DecAcc,
     DecReg(Reg),
@@ -42,12 +53,14 @@ pub enum Instruction {
     
     PushScope,
     PopScope,
+    
     Call(VarName),
     CallReg(Reg),
     CallMember(VarName, VarName),
     CallMemberReg(Reg, VarName),
     CallMemberAcc(VarName),
     CallAcc,
+    
     Jmp(JmpOffset),
     JmpRel(i32),
     JmpIf(VarName, JmpOffset),
@@ -65,10 +78,12 @@ pub enum Instruction {
     JmpNullUndef(VarName, JmpOffset),
     JmpNullUndefAcc(JmpOffset),
     JmpNullUndefRelAcc(i32),
+    
     Str(VarName, ConstIdx),
     StrAcc(ConstIdx),
     Lda(VarName, ConstIdx),
     LdaAcc(ConstIdx),
+    
     LoadMemberAcc(VarName, VarName),
     LoadMemberReg(VarName, VarName, Reg),
     LoadRegMember(Reg, VarName, Reg),
@@ -77,6 +92,7 @@ pub enum Instruction {
     LoadAccMemberAcc(VarName),
     LoadEnv(VarName),
     LoadEnvReg(VarName, Reg),
+    
     For,
     TypeOf(VarName, VarName),
     TypeOfAcc(VarName),
