@@ -18,6 +18,8 @@ pub enum Instruction {
     MulAcc(f64),
     MulStatic(VarName, f64),
     MulAccReg(Reg),
+    Mod(VarName, VarName),
+    ModAccReg(Reg),
     LNot(VarName),
     LNotAcc,
     LOr(VarName, VarName),
