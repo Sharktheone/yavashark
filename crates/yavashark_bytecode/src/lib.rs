@@ -14,7 +14,8 @@ pub mod writer;
 pub type VarName = u32;
 pub type ConstIdx = u32;
 pub type Reg = u8;
-pub type JmpOffset = i32;
+pub type JmpOffset = isize;
+pub type JmpAddr = usize;
 
 pub struct Bytecode {
     pub instructions: Vec<Instruction>,

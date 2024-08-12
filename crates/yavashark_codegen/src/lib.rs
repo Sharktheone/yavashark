@@ -16,6 +16,8 @@ struct ByteCodegen {
     instructions: Vec<Instruction>,
     variables: Vec<String>,
     literals: Vec<ConstValue>,
+    labels: Vec<(String, usize)>,
+    label_backpatch: Vec<(String, usize)>,
 }
 
 #[test]
@@ -40,6 +42,8 @@ fn test_compile() {
         instructions: vec![],
         variables: vec![],
         literals: vec![],
+        labels: vec![],
+        label_backpatch: vec![]
     };
 
     bc.compile_statements(&script.body);
