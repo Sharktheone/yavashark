@@ -43,6 +43,66 @@ pub enum Instruction {
     BitAndAcc(Reg),
     BitAndReg(Reg, Reg),
     
+    Eq(VarName, VarName), // ==
+    EqAcc(Reg),
+    EqReg(Reg, Reg),
+    
+    NotEq(VarName, VarName), // !=
+    NotEqAcc(Reg),
+    NotEqReg(Reg, Reg),
+    
+    EqEq(VarName, VarName), // ===
+    EqEqAcc(Reg),
+    EqEqReg(Reg, Reg),
+    
+    NotEqEq(VarName, VarName), // !==
+    NotEqEqAcc(Reg),
+    NotEqEqReg(Reg, Reg),
+    
+    Lt(VarName, VarName),
+    LtAcc(Reg),
+    LtReg(Reg, Reg),
+    
+    LtEq(VarName, VarName),
+    LtEqAcc(Reg),
+    LtEqReg(Reg, Reg),
+    
+    Gt(VarName, VarName),
+    GtAcc(Reg),
+    GtReg(Reg, Reg),
+    
+    GtEq(VarName, VarName),
+    GtEqAcc(Reg),
+    GtEqReg(Reg, Reg),
+    
+    LShift(VarName, VarName),
+    LShiftAcc(Reg),
+    LShiftReg(Reg, Reg),
+    
+    RShift(VarName, VarName),
+    RShiftAcc(Reg),
+    RShiftReg(Reg, Reg),
+    
+    ZeroFillRShift(VarName, VarName),
+    ZeroFillRShiftAcc(Reg),
+    ZeroFillRShiftReg(Reg, Reg),
+    
+    In(VarName, VarName),
+    InAcc(Reg),
+    InReg(Reg, Reg),
+    
+    InstanceOf(VarName, VarName),
+    InstanceOfAcc(Reg),
+    InstanceOfReg(Reg, Reg),
+    
+    Exp(VarName, VarName),
+    ExpAcc(Reg),
+    ExpReg(Reg, Reg),
+    
+    NullishCoalescing(VarName, VarName),
+    NullishCoalescingAcc(Reg),
+    NullishCoalescingReg(Reg, Reg),
+    
     Dec(VarName),
     DecAcc,
     DecReg(Reg),
@@ -96,7 +156,6 @@ pub enum Instruction {
     For,
     TypeOf(VarName, VarName),
     TypeOfAcc(VarName),
-    InstanceOf(VarName, VarName),
     PushConst(ConstIdx), // For stack operations
     PushReg(Reg),
     PushAcc,
