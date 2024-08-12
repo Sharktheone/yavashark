@@ -3,35 +3,43 @@ use crate::{ConstIdx, JmpOffset, Reg, VarName};
 #[repr(u16)]
 pub enum Instruction {
     Add(VarName, VarName),
-    AddAcc(f64),
-    AddStatic(VarName, f64),
     AddAccReg(Reg),
+    AddReg(Reg, Reg),
+    
     Sub(VarName, VarName),
-    SubAcc(f64),
-    SubStatic(VarName, f64),
     SubAccReg(Reg),
+    SubReg(Reg, Reg),
+    
     Div(VarName, VarName),
-    DivAcc(f64),
-    DivStatic(VarName, f64),
     DivAccReg(Reg),
+    DivReg(Reg, Reg),
+    
     Mul(VarName, VarName),
-    MulAcc(f64),
-    MulStatic(VarName, f64),
     MulAccReg(Reg),
+    MulReg(Reg, Reg),
+    
     Mod(VarName, VarName),
     ModAccReg(Reg),
+    ModReg(Reg, Reg),
+    
     LNot(VarName),
     LNotAcc,
+    
     LOr(VarName, VarName),
     LOrAcc(Reg),
+    
     LAnd(VarName, VarName),
     LAndAcc(Reg),
     LXor(VarName, VarName),
     LXorAcc(Reg),
     Dec(VarName),
     DecAcc,
+    DecReg(Reg),
+    
     Inc(VarName),
     IncAcc,
+    IncReg(Reg),
+    
     PushScope,
     PopScope,
     Call(VarName),
