@@ -16,10 +16,10 @@ impl ByteCodegen {
             BinaryOp::Sub => self.instructions.push(Instruction::SubAccReg(0)),
             BinaryOp::Mul => self.instructions.push(Instruction::MulAccReg(0)),
             BinaryOp::Div => self.instructions.push(Instruction::DivAccReg(0)),
-            BinaryOp::Mod => todo!(),
-            BinaryOp::BitOr => self.instructions.push(Instruction::LOrAcc(0)),
-            BinaryOp::BitXor => self.instructions.push(Instruction::LXorAcc(0)),
-            BinaryOp::BitAnd => self.instructions.push(Instruction::LAndAcc(0)),
+            BinaryOp::Mod => self.instructions.push(Instruction::ModAccReg(0)),
+            BinaryOp::BitOr => self.instructions.push(Instruction::BitOrAcc(0)),
+            BinaryOp::BitXor => self.instructions.push(Instruction::BitXorAcc(0)),
+            BinaryOp::BitAnd => self.instructions.push(Instruction::BitAndAcc(0)),
 
             o => todo!("{:?}", o),
         }
