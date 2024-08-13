@@ -11,16 +11,20 @@ impl ByteCodegen {
         self.compile_expr(test, stmt.span)?;
 
         let idx = self.instructions.len();
-        self.instructions.push(Instruction::JmpIfNotAcc(0));
+        self.instructions.push(Instruction::JmpIfNotAccRel(1));
 
         self.compile_statement(cons)?;
 
         if let Some(alt) = alt {
+            let idx2 = self.instructions.len();
             self.instructions.push(Instruction::Jmp(0));
-            self.instructions[idx] = Instruction::JmpIfNotAcc(self.instructions.len() as i32);
+            self.instructions[idx] = Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx as isize);
             self.compile_statement(alt)?;
+            
+            self.instructions[idx2] = Instruction::JmpRel(self.instructions.len() as isize - idx2 as isize);
+            
         } else {
-            self.instructions[idx] = Instruction::JmpIfNotAcc(self.instructions.len() as i32);
+            self.instructions[idx] = Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx as isize);
         }
 
         Ok(())
