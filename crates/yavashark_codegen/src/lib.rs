@@ -2,6 +2,7 @@
 
 use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_ecma_ast::LabeledStmt;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 
 use yavashark_bytecode::{ConstValue, Instruction};
@@ -11,14 +12,18 @@ pub type Res = Result<(), CompileError>;
 
 mod statement;
 mod utils;
+mod labels;
+
+pub use labels::*;
 
 struct ByteCodegen {
     instructions: Vec<Instruction>,
     variables: Vec<String>,
     literals: Vec<ConstValue>,
     labels: Vec<(String, usize)>,
-    label_backpatch: Vec<(String, usize)>,
+    label_backpatch: Vec<(LabelName, usize)>,
 }
+
 
 #[test]
 fn test_compile() {
