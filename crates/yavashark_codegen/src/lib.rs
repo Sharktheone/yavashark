@@ -21,6 +21,7 @@ struct ByteCodegen {
     variables: Vec<String>,
     literals: Vec<ConstValue>,
     labels: Vec<(String, usize)>,
+    loop_label: Option<usize>,
     label_backpatch: Vec<(LabelName, usize)>,
 }
 
@@ -48,6 +49,7 @@ fn test_compile() {
         variables: vec![],
         literals: vec![],
         labels: vec![],
+        loop_label: None,
         label_backpatch: vec![]
     };
 
