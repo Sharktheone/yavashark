@@ -11,6 +11,7 @@ swc_ecma_parser = "0.148.1"
 swc_ecma_ast = "0.117.3"
 swc_common = "0.36.2"
 anyhow = "1.0.86"
+log = "0.4.22"
 
 [lints]
 workspace = true

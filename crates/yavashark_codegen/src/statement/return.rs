@@ -6,11 +6,12 @@ impl ByteCodegen {
         if let Some(arg) = &stmt.arg {
             self.compile_expr(arg, stmt.span)?;
 
-            self.instructions.push(yavashark_bytecode::Instruction::ReturnAcc);
+            self.instructions
+                .push(yavashark_bytecode::Instruction::ReturnAcc);
         } else {
-            self.instructions.push(yavashark_bytecode::Instruction::Return);
+            self.instructions
+                .push(yavashark_bytecode::Instruction::Return);
         }
-
 
         Ok(())
     }

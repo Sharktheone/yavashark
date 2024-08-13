@@ -122,31 +122,28 @@ pub enum Instruction {
     CallAcc,
 
     Jmp(JmpAddr),
-    JmpIf(VarName,JmpAddr),
+    JmpIf(VarName, JmpAddr),
     JmpIfAcc(JmpAddr),
-    JmpIfNot(VarName,JmpAddr),
+    JmpIfNot(VarName, JmpAddr),
     JmpIfNotAcc(JmpAddr),
-    JmpNull(VarName,JmpAddr),
+    JmpNull(VarName, JmpAddr),
     JmpNullAcc(JmpAddr),
-    JmpUndef(VarName,JmpAddr),
+    JmpUndef(VarName, JmpAddr),
     JmpUndefAcc(JmpAddr),
-    JmpNullUndef(VarName,JmpAddr),
+    JmpNullUndef(VarName, JmpAddr),
     JmpNullUndefAcc(JmpAddr),
 
-
     JmpRel(JmpOffset),
-    JmpIfRel(VarName,JmpOffset),
+    JmpIfRel(VarName, JmpOffset),
     JmpIfAccRel(JmpOffset),
-    JmpIfNotRel(VarName,JmpOffset),
+    JmpIfNotRel(VarName, JmpOffset),
     JmpIfNotAccRel(JmpOffset),
-    JmpNullRel(VarName,JmpOffset),
+    JmpNullRel(VarName, JmpOffset),
     JmpNullAccRel(JmpOffset),
-    JmpUndefRel(VarName,JmpOffset),
+    JmpUndefRel(VarName, JmpOffset),
     JmpUndefAccRel(JmpOffset),
-    JmpNullUndefRel(VarName,JmpOffset),
+    JmpNullUndefRel(VarName, JmpOffset),
     JmpNullUndefAccRel(JmpOffset),
-
-
 
     Str(VarName, ConstIdx),
     StrAcc(ConstIdx),
@@ -182,8 +179,7 @@ pub enum Instruction {
     ReturnAcc,
     ReturnReg(Reg),
     ReturnVar(VarName),
-    
-    
+
     ThrowAcc,
     ThrowReg,
     Throw(VarName),
