@@ -1,119 +1,119 @@
-use crate::{ConstIdx, JmpOffset, Reg, VarName};
+use crate::{ConstIdx, JmpAddr, JmpOffset, Reg, VarName};
 
 #[repr(u16)]
 pub enum Instruction {
     Add(VarName, VarName),
     AddAccReg(Reg),
     AddReg(Reg, Reg),
-    
+
     Sub(VarName, VarName),
     SubAccReg(Reg),
     SubReg(Reg, Reg),
-    
+
     Div(VarName, VarName),
     DivAccReg(Reg),
     DivReg(Reg, Reg),
-    
+
     Mul(VarName, VarName),
     MulAccReg(Reg),
     MulReg(Reg, Reg),
-    
+
     Mod(VarName, VarName),
     ModAccReg(Reg),
     ModReg(Reg, Reg),
-    
+
     LNot(VarName),
     LNotAcc,
-    
+
     LOr(VarName, VarName),
     LOrAcc(Reg),
-    
+
     LAnd(VarName, VarName),
     LAndAcc(Reg),
-    
+
     BitXor(VarName, VarName),
     BitXorAcc(Reg),
     BitXorReg(Reg, Reg),
-    
+
     BitOr(VarName, VarName),
     BitOrAcc(Reg),
     BitOrReg(Reg, Reg),
-    
+
     BitAnd(VarName, VarName),
     BitAndAcc(Reg),
     BitAndReg(Reg, Reg),
-    
+
     Eq(VarName, VarName), // ==
     EqAcc(Reg),
     EqReg(Reg, Reg),
-    
+
     NotEq(VarName, VarName), // !=
     NotEqAcc(Reg),
     NotEqReg(Reg, Reg),
-    
+
     EqEq(VarName, VarName), // ===
     EqEqAcc(Reg),
     EqEqReg(Reg, Reg),
-    
+
     NotEqEq(VarName, VarName), // !==
     NotEqEqAcc(Reg),
     NotEqEqReg(Reg, Reg),
-    
+
     Lt(VarName, VarName),
     LtAcc(Reg),
     LtReg(Reg, Reg),
-    
+
     LtEq(VarName, VarName),
     LtEqAcc(Reg),
     LtEqReg(Reg, Reg),
-    
+
     Gt(VarName, VarName),
     GtAcc(Reg),
     GtReg(Reg, Reg),
-    
+
     GtEq(VarName, VarName),
     GtEqAcc(Reg),
     GtEqReg(Reg, Reg),
-    
+
     LShift(VarName, VarName),
     LShiftAcc(Reg),
     LShiftReg(Reg, Reg),
-    
+
     RShift(VarName, VarName),
     RShiftAcc(Reg),
     RShiftReg(Reg, Reg),
-    
+
     ZeroFillRShift(VarName, VarName),
     ZeroFillRShiftAcc(Reg),
     ZeroFillRShiftReg(Reg, Reg),
-    
+
     In(VarName, VarName),
     InAcc(Reg),
     InReg(Reg, Reg),
-    
+
     InstanceOf(VarName, VarName),
     InstanceOfAcc(Reg),
     InstanceOfReg(Reg, Reg),
-    
+
     Exp(VarName, VarName),
     ExpAcc(Reg),
     ExpReg(Reg, Reg),
-    
+
     NullishCoalescing(VarName, VarName),
     NullishCoalescingAcc(Reg),
     NullishCoalescingReg(Reg, Reg),
-    
+
     Dec(VarName),
     DecAcc,
     DecReg(Reg),
-    
+
     Inc(VarName),
     IncAcc,
     IncReg(Reg),
-    
+
     PushScope,
     PopScope,
-    
+
     Call(VarName),
     CallReg(Reg),
     CallMember(VarName, VarName),
@@ -152,7 +152,7 @@ pub enum Instruction {
     StrAcc(ConstIdx),
     Lda(VarName, ConstIdx),
     LdaAcc(ConstIdx),
-    
+
     LoadMemberAcc(VarName, VarName),
     LoadMemberReg(VarName, VarName, Reg),
     LoadRegMember(Reg, VarName, Reg),
@@ -161,7 +161,7 @@ pub enum Instruction {
     LoadAccMemberAcc(VarName),
     LoadEnv(VarName),
     LoadEnvReg(VarName, Reg),
-    
+
     For,
     TypeOf(VarName, VarName),
     TypeOfAcc(VarName),
@@ -179,8 +179,11 @@ pub enum Instruction {
     RegToAcc(Reg),
     AccToReg(Reg),
     Return,
-    Break,
-    Continue,
+    ReturnAcc,
+    ReturnReg(Reg),
+    ReturnVar(VarName),
+    
+    
     ThrowAcc,
     ThrowReg,
     Throw(VarName),
