@@ -224,18 +224,6 @@ impl Obj<Context> for Object {
         Some(&self.properties.get(name)?.value)
     }
 
-    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        if name == &Value::String("__proto__".to_string()) {
-            return Some(&mut self.prototype.value);
-        }
-
-        if let Value::Number(n) = name {
-            return self.get_array_mut(*n as usize);
-        }
-
-        Some(&mut self.properties.get_mut(name)?.value)
-    }
-
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         let val = self.get_set.get_mut(&name);
         if let Some((get, _)) = val {
@@ -298,9 +286,9 @@ impl Obj<Context> for Object {
         "Object".to_string()
     }
 
-    fn to_string(&self, ctx: &mut Context) -> Result<String, Error> {
-        if let Some(to_string) = self.get_property(&Value::String("toString".to_string())) {
-            // to_string.call(ctx, vec![], Value::Object(self.clone().into()))?;
+    fn to_string(&self, _ctx: &mut Context) -> Result<String, Error> {
+        if let Some(_to_string) = self.get_property(&Value::String("toString".to_string())) {
+            // to_string.call(ctx, vec![], Value::Object(obj))?;
         }
 
         Ok("[object Object]".to_string())
@@ -518,17 +506,6 @@ mod tests {
         let value = object.get_property(&Value::String("key".to_string()));
 
         assert_eq!(value, Some(&Value::Number(42.0)));
-    }
-
-    #[test]
-    fn get_property_mut() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
-        object.define_property(Value::String("key".to_string()), Value::Number(42.0));
-
-        let value = object.get_property_mut(&Value::String("key".to_string()));
-
-        assert_eq!(value, Some(&mut Value::Number(42.0)));
     }
 
     #[test]

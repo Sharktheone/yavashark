@@ -237,18 +237,6 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn update_or_define_property(
-        &self,
-        name: &Self,
-        value: Self,
-        ctx: &mut C,
-    ) -> Result<(), Error<C>> {
-        match self {
-            Self::Object(o) => o.update_or_define_property(name, value, ctx),
-            _ => Err(Error::ty("Value is not an object")),
-        }
-    }
-
     pub fn define_property(&self, name: Self, value: Self) -> Result<(), Error<C>> {
         match self {
             Self::Object(o) => o.define_property(name, value),

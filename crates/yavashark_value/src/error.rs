@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::{Ctx, Value};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -122,6 +123,21 @@ impl<C: Ctx> Error<C> {
         })
     }
 
+    
+    pub fn message_internal(&self) -> String {
+        match &self.kind {
+            ErrorKind::Type(msg)
+            | ErrorKind::Reference(msg)
+            | ErrorKind::Range(msg)
+            | ErrorKind::Internal(msg)
+            | ErrorKind::Runtime(msg)
+            | ErrorKind::Syntax(msg) => msg.clone(),
+            ErrorKind::Throw(val) => format!("{}", val),
+            ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+        }
+    }
+
+
     #[must_use]
     pub const fn stack(&self) -> &StackTrace {
         &self.stacktrace
@@ -143,6 +159,14 @@ impl<C: Ctx> Error<C> {
     #[must_use]
     pub fn column_number(&self) -> u32 {
         self.stacktrace.frames.first().map_or(0, |f| f.column)
+    }
+}
+
+
+
+impl<C: Ctx> Display for Error<C> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}: {}", self.name(), self.message_internal())
     }
 }
 

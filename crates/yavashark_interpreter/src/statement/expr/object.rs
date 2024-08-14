@@ -55,7 +55,7 @@ impl Interpreter {
                             fn_scope.state_set_function();
 
                             let function = JSFunction::new(
-                                key.to_string(), // TODO, what should the name be here? (and wrong to_string function)
+                                key.to_string(ctx)?, // TODO, what should the name be here? (and wrong to_string function)
                                 method.function.params.clone(),
                                 method.function.body.clone(),
                                 fn_scope,
@@ -77,7 +77,7 @@ impl Interpreter {
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
-                                key.to_string(),
+                                key.to_string(ctx)?,
                                 params,
                                 set.body.clone(),
                                 fn_scope,
@@ -95,7 +95,7 @@ impl Interpreter {
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
-                                key.to_string(),
+                                key.to_string(ctx)?,
                                 vec![],
                                 get.body.clone(),
                                 fn_scope,

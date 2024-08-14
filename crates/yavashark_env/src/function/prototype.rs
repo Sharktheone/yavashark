@@ -160,23 +160,7 @@ impl Obj<Context> for FunctionPrototype {
         self.object.get_property(name)
     }
 
-    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        if let Value::String(name) = name {
-            match name.as_str() {
-                "apply" => return Some(&mut self.apply.value),
-                "bind" => return Some(&mut self.bind.value),
-                "call" => return Some(&mut self.call.value),
-                "constructor" => return Some(&mut self.constructor.value),
-                "length" => return Some(&mut self.length.value),
-                "name" => return Some(&mut self.name.value),
-                _ => {}
-            }
-        }
-
-        self.object.get_property_mut(name)
-    }
-
-    fn define_getter(&mut self, name: Value, value: Value) -> Res {
+     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         self.object.define_getter(name, value)
     }
 
@@ -244,13 +228,10 @@ impl Obj<Context> for FunctionPrototype {
     }
 
     fn name(&self) -> String {
-        self.name
-            .value
-            .to_string()
-            .unwrap_or("Function Prototype".to_string())
+        "FunctionPrototype".to_string()
     }
 
-    fn to_string(&self, ctx: &mut Context) -> Result<String, Error> {
+    fn to_string(&self, _ctx: &mut Context) -> Result<String, Error> {
         Ok("function () { [Native code] } ".to_string())
     }
 

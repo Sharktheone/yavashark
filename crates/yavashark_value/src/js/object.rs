@@ -39,19 +39,6 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
 
-    fn get_property_mut(&mut self, name: &Value<C>) -> Option<&mut Value<C>>;
-
-    fn update_or_define_property(&mut self, name: Value<C>, value: Value<C>) -> Option<Value<C>> {
-        if let Some(prop) = self.get_property_mut(&name) {
-            let old = prop.clone();
-            *prop = value;
-            Some(old)
-        } else {
-            self.define_property(name, value);
-            None
-        }
-    }
-
     fn define_getter(&mut self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>>;
     fn define_setter(&mut self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>>;
     fn get_getter(&self, name: &Value<C>) -> Option<Value<C>>;
@@ -241,9 +228,9 @@ pub struct Object<C: Ctx>(Gc<RefCell<BoxedObj<C>>>);
 impl<C: Ctx> Display for Object<C> {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self.to_string() {
-            Ok(s) => write!(f, "{}", s),
-            Err(e) => write!(f, "Error displaying object: {}", e),
+        match self.get() {
+            Ok(s) => write!(f, "{}", s.to_string_internal()),
+            Err(e) => write!(f, "Error displaying object: {}", e.to_string()),
         }
     }
 }
@@ -317,7 +304,8 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+    
+    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> { //TODO: maybe this should be called set_property or something
         // # Safety:
         // We attach the values below
         let mut inner = self.get_mut()?;
@@ -344,26 +332,6 @@ impl<C: Ctx> Object<C> {
             )))
     }
 
-    pub fn update_or_define_property(
-        &self,
-        name: &Value<C>,
-        value: Value<C>,
-        ctx: &mut C,
-    ) -> Result<(), Error<C>> {
-        let mut inner = self.get_mut()?;
-
-        if let Some(prop) = inner.get_setter(name) {
-            drop(inner);
-            let this = Value::Object(self.clone());
-
-            prop.call(ctx, vec![value], this)?;
-            return Ok(());
-        }
-
-        inner.update_or_define_property(name.copy(), value);
-
-        Ok(())
-    }
 
     pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
         Ok(self.get()?.contains_key(name))

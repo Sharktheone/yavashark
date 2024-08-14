@@ -117,7 +117,7 @@ fn create_method(
         PropName::BigInt(_) => unimplemented!(),
     };
 
-    let func = JSFunction::new(name.to_string(), params, body, scope.clone(), ctx);
+    let func = JSFunction::new(name.to_string(ctx)?, params, body, scope.clone(), ctx);
     Ok((name, func.into()))
 }
 

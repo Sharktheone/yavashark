@@ -192,27 +192,6 @@ impl Obj<Context> for Prototype {
         self.object.get_property(name)
     }
 
-    fn get_property_mut(&mut self, name: &Value) -> Option<&mut Value> {
-        if let Value::String(name) = name {
-            match name.as_str() {
-                "__define_getter__" => return Some(&mut self.defined_getter.value),
-                "__define_setter__" => return Some(&mut self.defined_setter.value),
-                "__lookup_getter__" => return Some(&mut self.lookup_getter.value),
-                "__lookup_setter__" => return Some(&mut self.lookup_setter.value),
-                "constructor" => return Some(&mut self.constructor.value),
-                "hasOwnProperty" => return Some(&mut self.has_own_property.value),
-                "isPrototypeOf" => return Some(&mut self.is_prototype_of.value),
-                "propertyIsEnumerable" => return Some(&mut self.property_is_enumerable.value),
-                "toLocaleString" => return Some(&mut self.to_locale_string.value),
-                "toString" => return Some(&mut self.to_string.value),
-                "valueOf" => return Some(&mut self.value_of.value),
-                _ => {}
-            }
-        }
-
-        self.object.get_property_mut(name)
-    }
-
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         self.object.define_getter(name, value)
     }

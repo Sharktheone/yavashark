@@ -207,7 +207,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_variable_define = match_prop(&direct, Act::SetVar, &value);
     let properties_resolve = match_prop(&direct, Act::None, &value);
     let properties_get = match_prop(&direct, Act::Ref, &value);
-    let properties_get_mut = match_prop(&direct, Act::RefMut, &value);
     let properties_contains = match_prop(&direct, Act::Contains, &value);
     let properties_delete = match_prop(&direct, Act::Delete, &value);
 
@@ -299,11 +298,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let to_string = if to_string {
         quote! {
             fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
-                self.to_string(ctx)
+                self.override_to_string(ctx)
             }
 
-            fn to_string_internal(&self) - String {
-                self.to_string_internal()
+            fn to_string_internal(&self) -> String {
+                self.override_to_string_internal()
             }
         }
     } else {
@@ -342,12 +341,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #properties_get
                 self.object.get_property(name)
             }
-
-            fn get_property_mut(&mut self, name: &#value) -> Option<&mut #value> {
-                #properties_get_mut
-                self.object.get_property_mut(name)
-            }
-
 
             fn define_getter(&mut self, name: #value, value: #value) -> Result<(), #error> {
                 self.object.define_getter(name, value)
@@ -425,7 +418,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 #[derive(Debug, Eq, PartialEq)]
 enum Act {
     Ref,
-    RefMut,
+    // RefMut,
     None,
     Set,
     SetVar,
@@ -440,7 +433,7 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act, value_path: &Path)
     for (field, rename) in properties {
         let act = match r {
             Act::Ref => quote! {Some(& self.#field.value)},
-            Act::RefMut => quote! {Some(&mut self.#field.value)},
+            // Act::RefMut => quote! {Some(&mut self.#field.value)},
             Act::None => quote! {Some(self.#field.value.copy())},
             Act::Set => quote! {self.#field = value.into()},
             Act::SetVar => quote! {self.#field = value},

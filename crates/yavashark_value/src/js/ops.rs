@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 
-use crate::{Ctx, Error};
+use crate::Ctx;
 
 use super::Value;
 
@@ -73,7 +73,7 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Null, Self::Number(b)) => Self::Number(b),
             (Self::Null, Self::String(b)) => Self::String("null".to_string() + &b),
             (Self::Null, Self::Boolean(b)) => Self::Number(b.num()),
-            (Self::Null, Self::Object(o)) => Self::String(format!("null{}", o.to_string())),
+            (Self::Null, Self::Object(o)) => Self::String(format!("null{}", o)),
 
             (Self::Undefined, Self::Null) => Self::Number(f64::NAN),
             (Self::Undefined, Self::Undefined) => Self::Number(f64::NAN),
@@ -81,7 +81,7 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Undefined, Self::String(b)) => Self::String("undefined".to_string() + &b),
             (Self::Undefined, Self::Boolean(_)) => Self::Number(f64::NAN),
             (Self::Undefined, Self::Object(o)) => {
-                Self::String(format!("undefined{}", o.to_string()))
+                Self::String(format!("undefined{}", o)) //TODO: this is NOT correct, o.fmt is the wrong method! (but okay for now)
             }
 
             (Self::Number(a), Self::Null) => Self::Number(a),
@@ -89,26 +89,26 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Number(a), Self::Number(b)) => Self::Number(a + b),
             (Self::Number(a), Self::String(b)) => Self::String(a.to_string() + &b),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a + b.num()),
-            (Self::Number(a), Self::Object(o)) => Self::String(format!("{}{}", a, o.to_string())),
+            (Self::Number(a), Self::Object(o)) => Self::String(format!("{}{}", a, o)),
 
             (Self::String(a), Self::Null) => Self::String(a + "null"),
             (Self::String(a), Self::Undefined) => Self::String(a + "undefined"),
             (Self::String(a), Self::Number(b)) => Self::String(a + &b.to_string()),
             (Self::String(a), Self::String(b)) => Self::String(a + &b),
             (Self::String(a), Self::Boolean(b)) => Self::String(a + &b.to_string()),
-            (Self::String(a), Self::Object(o)) => Self::String(format!("{}{}", a, o.to_string())),
+            (Self::String(a), Self::Object(o)) => Self::String(format!("{}{}", a, o)),
 
             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
             (Self::Boolean(_), Self::Undefined) => Self::Number(f64::NAN),
             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() + b),
             (Self::Boolean(a), Self::String(b)) => Self::String(a.to_string() + &b),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() + b.num()),
-            (Self::Boolean(a), Self::Object(o)) => Self::String(a.to_string() + &o.to_string()),
+            (Self::Boolean(a), Self::Object(o)) => Self::String(a.to_string() + &format!("{}", o)),
 
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
-            (a, b) => Self::String(a.to_string() + &b.to_string()),
+            (a, b) => Self::String(format!("{}{}", a, b)),
         }
     }
 }
@@ -641,11 +641,11 @@ impl<C: Ctx> Value<C> {
             }
 
             (Self::Number(a), Self::Object(b)) | (Self::Object(b), Self::Number(a)) => {
-                a.to_string() == b.to_string()
+                a.to_string() == format!("{}", b)
             }
 
             (Self::String(a), Self::Object(b)) | (Self::Object(b), Self::String(a)) => {
-                *a == b.to_string()
+                *a == format!("{}", b)
             }
 
             (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => {
@@ -653,7 +653,7 @@ impl<C: Ctx> Value<C> {
             }
 
             (Self::Boolean(a), Self::Object(b)) | (Self::Object(b), Self::Boolean(a)) => {
-                a.num().to_string() == b.to_string()
+                a.num().to_string() == format!("{}", b)
             }
 
             _ => false,

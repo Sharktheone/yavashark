@@ -1,6 +1,5 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use std::fmt::Display;
 
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
@@ -35,17 +34,32 @@ impl Array {
         Self::new(ctx.proto.array.clone().into())
     }
 
-    pub fn to_string(&self) -> Result<String, Error> {
+    pub fn override_to_string(&self, ctx: &mut Context) -> Result<String, Error> {
         let mut buf = String::new();
 
         for (_, value) in self.object.array.iter() {
-            buf.push_str(&value.value.to_string()?);
+            buf.push_str(&value.value.to_string(ctx)?);
             buf.push_str(", ");
         }
 
-        buf.truncate(buf.len() - 2);
+        buf.pop();
+        buf.pop();
 
         Ok(buf)
+    }
+    
+    pub fn override_to_string_internal(&self) -> String{
+        let mut buf = String::new();
+
+        for (_, value) in self.object.array.iter() {
+            buf.push_str(&format!("{}", value.value));
+            buf.push_str(", ");
+        }
+
+        buf.pop();
+        buf.pop();
+
+        buf
     }
 }
 
