@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, Func, Obj};
 
-use crate::{Context, Error, Object, Value, ValueResult};
+use crate::{Context, Error, Object, ObjectProperty, Value, ValueResult};
 
 #[object(function, constructor)]
 #[derive(Debug)]
@@ -27,7 +27,7 @@ impl Func<Context> for Class {
 }
 
 impl Constructor<Context> for Class {
-    fn get_constructor(&self) -> Value {
+    fn get_constructor(&self) -> ObjectProperty {
         if let Value::Object(o) = self.prototype.copy() {
             o.get_constructor()
         } else {
@@ -74,6 +74,8 @@ impl Class {
         if let Value::Object(o) = this.copy() {
             let deez = o.get()?;
             let constructor = deez.constructor();
+            drop(deez);
+            let constructor = constructor.resolve(Value::Object(o), ctx)?;
 
             constructor.call(ctx, args, this)
         } else {

@@ -2,21 +2,21 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub use prototype::*;
-use yavashark_value::Obj;
+use yavashark_value::{Obj};
 
 use crate::context::Context;
-use crate::{Error, Variable};
+use crate::{Error, Variable, ObjectProperty};
 use crate::{Res, Value};
 
 pub mod array;
 mod prototype;
 
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct Object {
-    pub properties: HashMap<Value, Variable>,
-    pub array: Vec<(usize, Variable)>,
-    pub prototype: Variable,
-    pub get_set: HashMap<Value, (Variable, Variable)>, // (getter, setter)
+    pub properties: HashMap<Value, ObjectProperty>,
+    pub array: Vec<(usize, ObjectProperty)>,
+    pub prototype: ObjectProperty,
 }
 
 impl Object {
@@ -29,7 +29,6 @@ impl Object {
             properties: HashMap::new(),
             prototype,
             array: Vec::new(),
-            get_set: HashMap::new(),
         });
 
         this.into()
@@ -41,7 +40,6 @@ impl Object {
             properties: HashMap::new(),
             prototype: proto.into(),
             array: Vec::new(),
-            get_set: HashMap::new(),
         });
 
         this.into()
@@ -55,7 +53,6 @@ impl Object {
             properties: HashMap::new(),
             prototype,
             array: Vec::new(),
-            get_set: HashMap::new(),
         }
     }
 
@@ -65,7 +62,6 @@ impl Object {
             properties: HashMap::new(),
             prototype: proto.into(),
             array: Vec::new(),
-            get_set: HashMap::new(),
         }
     }
 
@@ -100,20 +96,20 @@ impl Object {
 
         if found {
             if let Some(v) = self.array.get_mut(i) {
-                v.1 = value;
+                v.1 = value.into();
                 return;
             };
         }
 
-        self.array.insert(i, (index, value));
+        self.array.insert(i, (index, value.into()));
     }
 
     #[must_use]
-    pub fn resolve_array(&self, index: usize) -> Option<Value> {
+    pub fn resolve_array(&self, index: usize) -> Option<ObjectProperty> {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).map(|v| v.1.copy());
+            return self.array.get(i).map(|v| v.1.clone());
         }
 
         None
@@ -143,7 +139,7 @@ impl Object {
     pub fn set_array(&mut self, elements: Vec<Value>) {
         self.array.clear();
         for (i, v) in elements.into_iter().enumerate() {
-            self.array.push((i, Variable::new(v)));
+            self.array.push((i, ObjectProperty::new(v)));
         }
     }
 
@@ -191,12 +187,12 @@ impl Obj<Context> for Object {
             self.insert_array(*n as usize, value);
             return;
         }
-        self.properties.insert(name, value);
+        self.properties.insert(name, value.into());
     }
 
-    fn resolve_property(&self, name: &Value) -> Option<Value> {
+    fn resolve_property(&self, name: &Value) -> Option<ObjectProperty> {
         if name == &Value::String("__proto__".to_string()) {
-            return Some(self.prototype.copy());
+            return Some(self.prototype.clone());
         }
 
         if let Value::Number(n) = name {
@@ -205,9 +201,9 @@ impl Obj<Context> for Object {
 
         self.properties
             .get(name)
-            .map(Variable::copy)
+            .cloned()
             .or_else(|| match &self.prototype.value {
-                Value::Object(o) => o.get_property(name).ok(),
+                Value::Object(o) => o.resolve_property(name).ok().flatten(),
                 _ => None,
             })
     }
@@ -225,37 +221,37 @@ impl Obj<Context> for Object {
     }
 
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
-        let val = self.get_set.get_mut(&name);
-        if let Some((get, _)) = val {
-            *get = value.into();
+        let val = self.properties.get_mut(&name);
+        if let Some(prop) = val {
+            prop.get = value.into();
             return Ok(());
         }
 
-        self.get_set
-            .insert(name, (value.into(), Variable::new(Value::Undefined)));
+        self.properties
+            .insert(name, ObjectProperty::getter(value.into()));
 
         Ok(())
     }
 
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
-        let val = self.get_set.get_mut(&name);
-        if let Some((_, set)) = val {
-            *set = value.into();
+        let val = self.properties.get_mut(&name);
+        if let Some(prop) = val {
+            prop.set = value.into();
             return Ok(());
         }
 
-        self.get_set
-            .insert(name, (Variable::new(Value::Undefined), value.into()));
+        self.properties
+            .insert(name, ObjectProperty::setter(value.into()));
 
         Ok(())
     }
 
     fn get_getter(&self, name: &Value) -> Option<Value> {
-        self.get_set.get(name).map(|(v, _)| v.value.copy())
+        todo!("I guess, this can't be removed?")
     }
 
     fn get_setter(&self, name: &Value) -> Option<Value> {
-        self.get_set.get(name).map(|(_, v)| v.value.copy())
+        todo!("I guess, this can't be removed?")
     }
 
     fn delete_property(&mut self, name: &Value) -> Option<Value> {
@@ -303,12 +299,6 @@ impl Obj<Context> for Object {
             .iter()
             .map(|(i, v)| (Value::Number(*i as f64), v.copy()))
             .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.copy())))
-            .chain(self.get_set.iter().flat_map(|(k, (get, set))| {
-                vec![
-                    (k.copy(), get.copy()), // Entry for the getter
-                    (k.copy(), set.copy()), // Entry for the setter
-                ]
-            }))
             .collect()
     }
 
@@ -317,7 +307,6 @@ impl Obj<Context> for Object {
             .iter()
             .map(|(i, _)| Value::Number(*i as f64))
             .chain(self.properties.keys().map(Value::copy))
-            .chain(self.get_set.keys().map(Value::copy))
             .collect()
     }
 
@@ -337,8 +326,9 @@ impl Obj<Context> for Object {
             } else {
                 false
             };
+            todo!();
 
-            return (done, Some(value));
+            return (done, Some(value.value)); //TODO: `get_array_or_done` should return `ObjectProperty` instead of `Value`
         }
 
         (true, None)
@@ -349,24 +339,24 @@ impl Obj<Context> for Object {
         self.array.clear();
     }
 
-    fn prototype(&self) -> Value {
-        self.prototype.value.copy()
+    fn prototype(&self) -> ObjectProperty {
+        self.prototype.clone()
     }
 
-    fn constructor(&self) -> Value {
-        if let Some(constructor) = self.get_property(&Value::String("constructor".to_string())) {
-            return constructor.copy();
+    fn constructor(&self) -> ObjectProperty {
+        if let Some(constructor) = self.properties.get(&Value::String("constructor".to_string())) {
+            return constructor.clone();
         }
 
         if let Value::Object(proto) = self.prototype() {
             let Ok(proto) = proto.get() else {
-                return Value::Undefined;
+                return Value::Undefined.into();
             };
 
             return proto.constructor();
         }
 
-        Value::Undefined
+        Value::Undefined.into()
     }
 }
 
@@ -434,7 +424,7 @@ mod tests {
 
         let value = object.resolve_array(0);
 
-        assert_eq!(value, Some(Value::Number(42.0)));
+        assert_eq!(value, Some(Value::Number(42.0).into()));
     }
 
     #[test]
@@ -494,7 +484,7 @@ mod tests {
 
         let value = object.resolve_property(&Value::String("key".to_string()));
 
-        assert_eq!(value, Some(Value::Number(42.0)));
+        assert_eq!(value, Some(Value::Number(42.0).into()));
     }
 
     #[test]

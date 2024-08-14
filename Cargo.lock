@@ -4574,6 +4574,7 @@ dependencies = [
 name = "yavashark_swc"
 version = "0.1.0"
 dependencies = [
+ "rand 0.8.5",
  "swc_common 0.33.26",
  "swc_ecma_ast 0.112.8",
  "swc_ecma_parser 0.143.16",

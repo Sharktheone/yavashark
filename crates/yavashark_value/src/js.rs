@@ -226,7 +226,7 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn get_property_no_get_set(&self, name: &Self) -> Result<Self, Error<C>> {
+    pub fn get_property_no_get_set(&self, name: &Self) -> Result<ObjectProperty<C>, Error<C>> {
         match self {
             Self::Object(o) => o
                 .resolve_property_no_get_set(name)?

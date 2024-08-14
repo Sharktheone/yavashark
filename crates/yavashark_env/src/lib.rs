@@ -20,6 +20,8 @@ pub type ObjectHandle = yavashark_value::Object<Context>;
 pub type Variable = yavashark_value::variable::Variable<Context>;
 pub type Symbol = yavashark_value::Symbol<Context>;
 
+pub type ObjectProperty = yavashark_value::ObjectProperty<Context>;
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum ControlFlow {
     Continue(Option<String>),

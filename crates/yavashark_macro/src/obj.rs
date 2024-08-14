@@ -47,6 +47,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("Error", input.span())));
 
+    let mut op = crate_path.clone();
+    op
+        .segments
+        .push(PathSegment::from(Ident::new("ObjectProperty", input.span())));
+    
+    
+    
     let mut gc = Vec::new();
 
     let mut function = false;
@@ -271,7 +278,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let constructor = if constructor {
         quote! {
-            fn constructor(&self) -> #value {
+            fn constructor(&self) -> #op {
                 yavashark_value::Constructor::get_constructor(self)
             }
 
@@ -289,7 +296,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     } else {
         quote! {
-            fn constructor(&self) -> #value {
+            fn constructor(&self) -> #op {
                 self.object.constructor()
             }
         }
@@ -332,7 +339,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.define_variable(name, value);
             }
 
-            fn resolve_property(&self, name: &#value) -> Option<#value> {
+            fn resolve_property(&self, name: &#value) -> Option<#op> {
                 #properties_resolve
                 self.object.resolve_property(name)
             }
@@ -401,7 +408,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.clear_values();
             }
 
-            fn prototype(&self) -> #value {
+            fn prototype(&self) -> #op {
                 self.object.prototype()
             }
             #constructor

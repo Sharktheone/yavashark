@@ -86,7 +86,7 @@ impl<C: Ctx> Variable<C> {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 pub struct Attributes(u8);
 
 impl Debug for Attributes {

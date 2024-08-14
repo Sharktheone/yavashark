@@ -4,17 +4,17 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::object::Object;
-use crate::{Error, NativeFunction, Res, Value, ValueResult, Variable};
+use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
     pub object: Object,
-    pub apply: Variable,
-    pub bind: Variable,
-    pub call: Variable,
-    pub constructor: Variable,
-    pub length: Variable,
-    pub name: Variable,
+    pub apply: ObjectProperty,
+    pub bind: ObjectProperty,
+    pub call: ObjectProperty,
+    pub constructor: ObjectProperty,
+    pub length: ObjectProperty,
+    pub name: ObjectProperty,
 }
 
 impl FunctionPrototype {
@@ -98,27 +98,27 @@ impl Obj<Context> for FunctionPrototype {
         if let Value::String(name) = &name {
             match name.as_str() {
                 "apply" => {
-                    self.apply = value;
+                    self.apply = value.into();
                     return;
                 }
                 "bind" => {
-                    self.bind = value;
+                    self.bind = value.into();
                     return;
                 }
                 "call" => {
-                    self.call = value;
+                    self.call = value.into();
                     return;
                 }
                 "constructor" => {
-                    self.constructor = value;
+                    self.constructor = value.into();
                     return;
                 }
                 "length" => {
-                    self.length = value;
+                    self.length = value.into();
                     return;
                 }
                 "name" => {
-                    self.name = value;
+                    self.name = value.into();
                     return;
                 }
                 _ => {}
@@ -128,15 +128,15 @@ impl Obj<Context> for FunctionPrototype {
         self.object.define_variable(name, value);
     }
 
-    fn resolve_property(&self, name: &Value) -> Option<Value> {
+    fn resolve_property(&self, name: &Value) -> Option<ObjectProperty> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return Some(self.apply.value.copy()),
-                "bind" => return Some(self.bind.value.copy()),
-                "call" => return Some(self.call.value.copy()),
-                "constructor" => return Some(self.constructor.value.copy()),
-                "length" => return Some(self.length.value.copy()),
-                "name" => return Some(self.name.value.copy()),
+                "apply" => return Some(self.apply.clone()),
+                "bind" => return Some(self.bind.clone()),
+                "call" => return Some(self.call.clone()),
+                "constructor" => return Some(self.constructor.clone()),
+                "length" => return Some(self.length.clone()),
+                "name" => return Some(self.name.clone()),
                 _ => {}
             }
         }
@@ -292,7 +292,7 @@ impl Obj<Context> for FunctionPrototype {
         self.name = Value::String("Function".to_string()).into();
     }
 
-    fn prototype(&self) -> Value {
+    fn prototype(&self) -> ObjectProperty{
         self.object.prototype()
     }
 }

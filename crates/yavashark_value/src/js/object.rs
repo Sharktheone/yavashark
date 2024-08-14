@@ -11,7 +11,7 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 
 use crate::js::context::Ctx;
 use crate::variable::Variable;
-use crate::Error;
+use crate::{Attributes, Error};
 
 use super::Value;
 
@@ -35,7 +35,7 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
 
     fn define_variable(&mut self, name: Value<C>, value: Variable<C>);
 
-    fn resolve_property(&self, name: &Value<C>) -> Option<Value<C>>;
+    fn resolve_property(&self, name: &Value<C>) -> Option<ObjectProperty<C>>;
 
     fn get_property(&self, name: &Value<C>) -> Option<&Value<C>>;
 
@@ -98,14 +98,14 @@ pub trait Obj<C: Ctx>: Debug + AsAny {
         false
     }
 
-    fn prototype(&self) -> Value<C> {
+    fn prototype(&self) -> ObjectProperty<C> {
         self.resolve_property(&"__proto__".into())
-            .unwrap_or(Value::Undefined)
+            .unwrap_or(Value::Undefined.into())
     }
 
-    fn constructor(&self) -> Value<C> {
+    fn constructor(&self) -> ObjectProperty<C> {
         self.resolve_property(&"constructor".into())
-            .unwrap_or(Value::Undefined)
+            .unwrap_or(Value::Undefined.into())
     }
 
     /// # Safety
@@ -191,8 +191,19 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
                 refs.push(o.0.get_ref());
             }
         });
+        
+        
+        let p = self.0.prototype();
 
-        if let Value::Object(o) = self.0.prototype() {
+        if let Value::Object(o) = p.value {
+            refs.push(o.0.get_ref());
+        }
+        
+        if let Value::Object(o) = p.get {
+            refs.push(o.0.get_ref());
+        }
+        
+        if let Value::Object(o) = p.set {
             refs.push(o.0.get_ref());
         }
 
@@ -276,23 +287,17 @@ impl<C: Ctx> Object<C> {
     ) -> Result<Option<Value<C>>, Error<C>> {
         let this = self.get()?;
 
-        let Some(val) = this.resolve_property(name) else {
-            return Ok(if let Some(getter) = this.get_getter(name) {
-                drop(this);
-                let this = Value::Object(self.clone());
-
-                Some(getter.call(ctx, Vec::new(), this)?)
-            } else {
-                None
-            });
+        let Some(p) = this.resolve_property(name) else {
+            return Ok(None)
         };
+       
 
-        Ok(Some(val))
+        p.get(Value::Object(self.clone()), ctx).map(Some)
     }
     pub fn resolve_property_no_get_set(
         &self,
         name: &Value<C>,
-    ) -> Result<Option<Value<C>>, Error<C>> {
+    ) -> Result<Option<ObjectProperty<C>>, Error<C>> {
         let this = self.get()?;
 
         Ok(this.resolve_property(name))
@@ -304,7 +309,7 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    
+
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> { //TODO: maybe this should be called set_property or something
         // # Safety:
         // We attach the values below
@@ -411,8 +416,8 @@ impl<C: Ctx> Object<C> {
     }
 
     #[must_use]
-    pub fn get_constructor(&self) -> Value<C> {
-        self.get().map_or(Value::Undefined, |o| o.constructor())
+    pub fn get_constructor(&self) -> ObjectProperty<C> {
+        self.get().map_or(Value::Undefined.into(), |o| o.constructor())
     }
 
     /// I hate JavaScript...
@@ -454,5 +459,99 @@ impl<C: Ctx> Object<C> {
 
     pub fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>> {
         self.get()?.to_string(ctx)
+    }
+}
+
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub struct ObjectProperty<C: Ctx> {
+    pub value: Value<C>,
+    pub attributes: Attributes,
+    pub get: Value<C>,
+    pub set: Value<C>,
+}
+
+
+impl<C: Ctx> ObjectProperty<C> {
+    #[must_use]
+    pub fn new(value: Value<C>) -> Self {
+        Self {
+            value,
+            attributes: Attributes::new(),
+            get: Value::Undefined,
+            set: Value::Undefined,
+        }
+    }
+
+    #[must_use]
+    pub fn getter(value: Value<C>) -> Self {
+        Self {
+            value,
+            attributes: Attributes::new(),
+            get: Value::Undefined,
+            set: Value::Undefined,
+        }
+    }
+
+    #[must_use]
+    pub fn setter(value: Value<C>) -> Self {
+        Self {
+            value,
+            attributes: Attributes::new(),
+            get: Value::Undefined,
+            set: Value::Undefined,
+        }
+    }
+
+    pub fn get(self, this: Value<C>, ctx: &mut C) -> Result<Value<C>, Error<C>> {
+        if !self.get.is_nullish() {
+            self.get.call(ctx, vec![], this)
+        } else {
+            Ok(self.value)
+        }
+    }
+
+
+    pub fn resolve(&self, this: Value<C>, ctx: &mut C) -> Result<Value<C>, Error<C>> {
+        if !self.get.is_nullish() {
+            self.get.call(ctx, vec![], this)
+        } else {
+            Ok(self.value.copy())
+        }
+    }
+}
+
+
+impl<C: Ctx> From<Variable<C>> for ObjectProperty<C> {
+    fn from(v: Variable<C>) -> Self {
+        Self {
+            value: v.value,
+            attributes: v.properties,
+            get: Value::Undefined,
+            set: Value::Undefined,
+        }
+    }
+}
+
+// impl<C: Ctx> From<Value<C>> for ObjectProperty<C> {
+//     fn from(v: Value<C>) -> Self {
+//         Self {
+//             value: v,
+//             attributes: Attributes::new(),
+//             get: Value::Undefined,
+//             set: Value::Undefined,
+//         }
+//     }
+// }
+
+
+impl<C: Ctx, V: Into<Value<C>>> From<V> for ObjectProperty<C> {
+    fn from(v: V) -> Self {
+        Self {
+            value: v.into(),
+            attributes: Attributes::new(),
+            get: Value::Undefined,
+            set: Value::Undefined,
+        }
     }
 }

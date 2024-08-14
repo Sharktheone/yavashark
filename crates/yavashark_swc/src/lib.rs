@@ -1,3 +1,5 @@
+use rand::random;
+
 #[test]
 fn test() {
     use swc_common::BytePos;
@@ -16,4 +18,52 @@ fn test() {
     let prog = p.parse_program().unwrap();
 
     println!("{:#?}", prog);
+}
+
+
+#[test]
+fn a() {
+    struct Test {
+        value: i32,
+    }
+
+    struct TestClone {
+        value: i32,
+    }
+
+    struct BorrowedTest<'a> {
+        test: &'a Test,
+    }
+
+    impl Test {
+        fn borrow(&self) -> Option<BorrowedTest> {
+            let rand: bool = random();
+            
+            if rand {
+                return None;
+            }
+
+            Some(BorrowedTest { test: self })
+        }
+    }
+
+    impl TestClone {
+        fn cmp(&self, other: &Test) -> bool {
+            self.value == other.value
+        }
+    }
+
+    impl BorrowedTest<'_> {
+        fn do_something(&self) -> TestClone {
+            TestClone { value: self.test.value }
+        }
+    }
+
+    let test = Test { value: 10 };
+
+    if let Some(t) = test.borrow() {
+        let test_clone = t.do_something();
+
+        test_clone.cmp(&test);
+    }
 }

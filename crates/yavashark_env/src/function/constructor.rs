@@ -4,7 +4,7 @@ use std::fmt::{Debug, Formatter};
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Error, Func};
 
-use crate::{Context, Object, ObjectHandle, Value, ValueResult};
+use crate::{Context, Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Context, &Value) -> Value>;
 
@@ -30,8 +30,8 @@ impl Debug for NativeConstructor {
 }
 
 impl Constructor<Context> for NativeConstructor {
-    fn get_constructor(&self) -> Value {
-        (self.f)()
+    fn get_constructor(&self) ->  ObjectProperty{
+        (self.f)().into()
     }
 
     fn special_constructor(&self) -> bool {

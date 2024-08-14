@@ -8,7 +8,7 @@ use yavashark_value::Obj;
 
 use crate::context::Context;
 use crate::object::Object;
-use crate::{Error, NativeFunction, Res, Value, Variable};
+use crate::{Error, NativeFunction, ObjectProperty, Res, Value, Variable};
 
 mod common;
 
@@ -21,17 +21,17 @@ pub struct Prototype {
     object: Object,
 
     //common properties
-    defined_getter: Variable,
-    defined_setter: Variable,
-    lookup_getter: Variable,
-    lookup_setter: Variable,
-    constructor: Variable,
-    has_own_property: Variable,
-    is_prototype_of: Variable,
-    property_is_enumerable: Variable,
-    to_locale_string: Variable,
-    to_string: Variable,
-    value_of: Variable,
+    defined_getter: ObjectProperty,
+    defined_setter: ObjectProperty,
+    lookup_getter: ObjectProperty,
+    lookup_setter: ObjectProperty,
+    constructor: ObjectProperty,
+    has_own_property: ObjectProperty,
+    is_prototype_of: ObjectProperty,
+    property_is_enumerable: ObjectProperty,
+    to_locale_string: ObjectProperty,
+    to_string: ObjectProperty,
+    value_of: ObjectProperty,
 }
 
 impl Default for Prototype {
@@ -167,7 +167,7 @@ impl Obj<Context> for Prototype {
         self.object.define_variable(name, value);
     }
 
-    fn resolve_property(&self, name: &Value) -> Option<Value> {
+    fn resolve_property(&self, name: &Value) -> Option<ObjectProperty> {
         self.object.resolve_property(name)
     }
 
@@ -339,12 +339,12 @@ impl Obj<Context> for Prototype {
         self.object.clear_values();
     }
 
-    fn prototype(&self) -> Value {
-        Value::Undefined
+    fn prototype(&self) -> ObjectProperty {
+        Value::Undefined.into()
     }
 
-    fn constructor(&self) -> Value {
-        self.constructor.value.copy()
+    fn constructor(&self) -> ObjectProperty {
+        self.constructor.clone()
     }
 }
 
