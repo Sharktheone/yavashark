@@ -183,4 +183,8 @@ pub enum Instruction {
     ThrowAcc,
     ThrowReg,
     Throw(VarName),
+    
+    
+    ThisAcc,
+    ThisReg(Reg),
 }
