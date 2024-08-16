@@ -4591,6 +4591,10 @@ dependencies = [
 [[package]]
 name = "yavashark_vm"
 version = "0.1.0"
+dependencies = [
+ "yavashark_bytecode",
+ "yavashark_env",
+]
 
 [[package]]
 name = "zbus"
