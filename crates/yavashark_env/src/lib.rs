@@ -71,6 +71,8 @@ pub type Res = Result<()>;
 
 pub type RuntimeResult = std::result::Result<Value, ControlFlow>;
 
+pub type ControlResult = std::result::Result<(), ControlFlow>;
+
 impl From<Error> for ControlFlow {
     fn from(e: Error) -> Self {
         Self::Error(e)
