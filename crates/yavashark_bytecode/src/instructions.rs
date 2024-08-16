@@ -147,8 +147,10 @@ pub enum Instruction {
 
     Str(VarName, ConstIdx),
     StrAcc(ConstIdx),
+    StrReg(VarName, ConstIdx),
     Lda(VarName, ConstIdx),
     LdaAcc(ConstIdx),
+    LdaReg(VarName, ConstIdx),
 
     LoadMemberAcc(VarName, VarName),
     LoadMemberReg(VarName, VarName, Reg),
