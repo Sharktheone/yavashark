@@ -6,7 +6,6 @@ trait Execute {
     fn execute(&self, vm: &mut VM);
 }
 
-
 impl Execute for Instruction {
     fn execute(&self, vm: &mut VM) -> ControlResult {
         match self {
@@ -93,24 +92,31 @@ impl Execute for Instruction {
 
             Instruction::ZeroFillRShift(lhs, rhs) => instructions::zero_fill_rshift(lhs, rhs, vm),
             Instruction::ZeroFillRShiftAcc(reg) => instructions::zero_fill_rshift_acc(reg, vm),
-            Instruction::ZeroFillRShiftReg(lhs, rhs) => instructions::zero_fill_rshift_reg(lhs, rhs, vm),
+            Instruction::ZeroFillRShiftReg(lhs, rhs) => {
+                instructions::zero_fill_rshift_reg(lhs, rhs, vm)
+            }
 
             Instruction::In(lhs, rhs) => instructions::in_(lhs, rhs, vm),
             Instruction::InAcc(reg) => instructions::in_acc(reg, vm),
             Instruction::InReg(lhs, rhs) => instructions::in_reg(lhs, rhs, vm),
-            
+
             Instruction::InstanceOf(target, name) => instructions::instance_of(target, name, vm),
             Instruction::InstanceOfAcc(reg) => instructions::instance_of_acc(reg, vm),
-            Instruction::InstanceOfReg(target, reg) => instructions::instance_of_reg(target, reg, vm),
+            Instruction::InstanceOfReg(target, reg) => {
+                instructions::instance_of_reg(target, reg, vm)
+            }
 
-            
             Instruction::Exp(target, name) => instructions::exp(target, name, vm),
             Instruction::ExpAcc(reg) => instructions::exp_acc(reg, vm),
             Instruction::ExpReg(target, reg) => instructions::exp_reg(target, reg, vm),
 
-            Instruction::NullishCoalescing(target, name) => instructions::nullish_coalescing(target, name, vm),
+            Instruction::NullishCoalescing(target, name) => {
+                instructions::nullish_coalescing(target, name, vm)
+            }
             Instruction::NullishCoalescingAcc(reg) => instructions::nullish_coalescing_acc(reg, vm),
-            Instruction::NullishCoalescingReg(target, reg) => instructions::nullish_coalescing_reg(target, reg, vm),
+            Instruction::NullishCoalescingReg(target, reg) => {
+                instructions::nullish_coalescing_reg(target, reg, vm)
+            }
 
             Instruction::Dec(name) => instructions::dec(name, vm),
             Instruction::DecAcc => instructions::dec_acc(vm),
@@ -126,7 +132,9 @@ impl Execute for Instruction {
             Instruction::Call(name) => instructions::call(name, vm),
             Instruction::CallReg(reg) => instructions::call_reg(reg, vm),
             Instruction::CallMember(name, member) => instructions::call_member(name, member, vm),
-            Instruction::CallMemberReg(reg, member) => instructions::call_member_reg(reg, member, vm),
+            Instruction::CallMemberReg(reg, member) => {
+                instructions::call_member_reg(reg, member, vm)
+            }
             Instruction::CallMemberAcc(member) => instructions::call_member_acc(member, vm),
             Instruction::CallAcc => instructions::call_acc(vm),
 
@@ -151,7 +159,9 @@ impl Execute for Instruction {
             Instruction::JmpNullAccRel(target) => instructions::jmp_null_acc(target, vm),
             Instruction::JmpUndefRel(target, name) => instructions::jmp_undef(target, name, vm),
             Instruction::JmpUndefAccRel(target) => instructions::jmp_undef_acc(target, vm),
-            Instruction::JmpNullUndefRel(name, addr) => instructions::jmp_null_undef(name, addr, vm),
+            Instruction::JmpNullUndefRel(name, addr) => {
+                instructions::jmp_null_undef(name, addr, vm)
+            }
             Instruction::JmpNullUndefAccRel(addr) => instructions::jmp_null_undef_acc(addr, vm),
 
             Instruction::Str(name, const_idx) => instructions::str(name, const_idx, vm),
@@ -161,19 +171,29 @@ impl Execute for Instruction {
             Instruction::LdaAcc(const_idx) => instructions::lda_acc(const_idx, vm),
             Instruction::LdaReg(name, const_idx) => instructions::lda_reg(name, const_idx, vm),
 
-            Instruction::LoadMemberAcc(target, member) => instructions::load_member_acc(target, member, vm),
-            Instruction::LoadMemberReg(target, name, reg) => instructions::load_member_reg(target, name, reg, vm),
-            Instruction::LoadRegMember(terget, member, reg) => instructions::load_reg_member(target, member, reg, vm),
-            Instruction::LoadRegMemberAcc(reg, member) => instructions::load_reg_member_acc(reg, member, vm),
-            Instruction::LoadAccMember(member, reg) => instructions::load_acc_member(member, reg, vm),
+            Instruction::LoadMemberAcc(target, member) => {
+                instructions::load_member_acc(target, member, vm)
+            }
+            Instruction::LoadMemberReg(target, name, reg) => {
+                instructions::load_member_reg(target, name, reg, vm)
+            }
+            Instruction::LoadRegMember(terget, member, reg) => {
+                instructions::load_reg_member(target, member, reg, vm)
+            }
+            Instruction::LoadRegMemberAcc(reg, member) => {
+                instructions::load_reg_member_acc(reg, member, vm)
+            }
+            Instruction::LoadAccMember(member, reg) => {
+                instructions::load_acc_member(member, reg, vm)
+            }
             Instruction::LoadAccMemberAcc(member) => instructions::load_acc_member_acc(member, vm),
-            Instruction::LoadEnv(name)  => instructions::load_env(name, vm),
+            Instruction::LoadEnv(name) => instructions::load_env(name, vm),
             Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(name, reg, vm),
 
             Instruction::For => instructions::for_(vm),
             Instruction::TypeOf(target, name) => instructions::type_of(target, name, vm),
             Instruction::TypeOfAcc(target) => instructions::type_of_acc(target, vm),
-            Instruction::PushConst(idx) => instructions::push_const(idx, vm), 
+            Instruction::PushConst(idx) => instructions::push_const(idx, vm),
             Instruction::PushReg(reg) => instructions::push_reg(reg, vm),
             Instruction::PushAcc => instructions::push_acc(vm),
             Instruction::Pop => instructions::pop(vm),
