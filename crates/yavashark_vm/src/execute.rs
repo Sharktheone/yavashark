@@ -191,8 +191,10 @@ impl Execute for Instruction {
             Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(name, reg, vm),
 
             Instruction::For => instructions::for_(vm),
+            
             Instruction::TypeOf(target, name) => instructions::type_of(target, name, vm),
             Instruction::TypeOfAcc(target) => instructions::type_of_acc(target, vm),
+            
             Instruction::PushConst(idx) => instructions::push_const(idx, vm),
             Instruction::PushReg(reg) => instructions::push_reg(reg, vm),
             Instruction::PushAcc => instructions::push_acc(vm),
@@ -206,6 +208,7 @@ impl Execute for Instruction {
             Instruction::StackIdxToAcc(idx) => instructions::stack_idx_to_acc(idx, vm),
             Instruction::RegToAcc(reg) => instructions::reg_to_acc(reg, vm),
             Instruction::AccToReg(reg) => instructions::acc_to_reg(reg, vm),
+            
             Instruction::Return => instructions::return_(vm),
             Instruction::ReturnAcc => instructions::return_acc(vm),
             Instruction::ReturnReg(reg) => instructions::return_reg(reg, vm),

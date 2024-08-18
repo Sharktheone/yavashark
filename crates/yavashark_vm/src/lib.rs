@@ -1,6 +1,7 @@
 mod execute;
 mod regs;
 mod stack;
+mod instructions;
 
 pub use regs::*;
 pub use stack::*;
