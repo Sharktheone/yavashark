@@ -1,4 +1,4 @@
-use crate::VM;
+use crate::{instructions, VM};
 use yavashark_bytecode::{Instruction, JmpAddr, Reg, VarName};
 use yavashark_env::ControlResult;
 
@@ -9,25 +9,25 @@ trait Execute {
 impl Execute for Instruction {
     fn execute(&self, vm: &mut VM) -> ControlResult {
         match self {
-            Instruction::Add(lhs, rhs) => instructions::add(lhs, rhs, vm),
-            Instruction::AddAccReg(reg) => instructions::add_acc_reg(reg, vm),
-            Instruction::AddReg(lhs, rhs) => instructions::add_reg(lhs, rhs, vm),
+            Instruction::Add(lhs, rhs) => instructions::add(*lhs, *rhs, vm),
+            Instruction::AddAccReg(reg) => instructions::add_acc_reg(*reg, vm),
+            Instruction::AddReg(lhs, rhs) => instructions::add_reg(*lhs, *rhs, vm),
 
-            Instruction::Sub(lhs, rhs) => instructions::sub(lhs, rhs, vm),
-            Instruction::SubAccReg(reg) => instructions::sub_acc_reg(reg, vm),
-            Instruction::SubReg(lhs, rhs) => instructions::sub_reg(lhs, rhs, vm),
+            Instruction::Sub(lhs, rhs) => instructions::sub(*lhs, *rhs, vm),
+            Instruction::SubAccReg(reg) => instructions::sub_acc_reg(*reg, vm),
+            Instruction::SubReg(lhs, rhs) => instructions::sub_reg(*lhs, *rhs, vm),
 
-            Instruction::Div(lhs, rhs) => instructions::div(lhs, rhs, vm),
-            Instruction::DivAccReg(reg) => instructions::div_acc_reg(reg, vm),
-            Instruction::DivReg(lhs, rhs) => instructions::div_reg(lhs, rhs, vm),
+            Instruction::Div(lhs, rhs) => instructions::div(*lhs, *rhs, vm),
+            Instruction::DivAccReg(reg) => instructions::div_acc_reg(*reg, vm),
+            Instruction::DivReg(lhs, rhs) => instructions::div_reg(*lhs, *rhs, vm),
 
-            Instruction::Mul(lhs, rhs) => instructions::mul(lhs, rhs, vm),
-            Instruction::MulAccReg(reg) => instructions::mul_acc_reg(reg, vm),
-            Instruction::MulReg(lhs, rhs) => instructions::mul_reg(lhs, rhs, vm),
+            Instruction::Mul(lhs, rhs) => instructions::mul(*lhs, *rhs, vm),
+            Instruction::MulAccReg(reg) => instructions::mul_acc_reg(*reg, vm),
+            Instruction::MulReg(lhs, rhs) => instructions::mul_reg(*lhs, *rhs, vm),
 
-            Instruction::Mod(lhs, rhs) => instructions::modulo(lhs, rhs, vm),
-            Instruction::ModAccReg(reg) => instructions::mod_acc_reg(reg, vm),
-            Instruction::ModReg(lhs, rhs) => instructions::mod_reg(lhs, rhs, vm),
+            Instruction::Mod(lhs, rhs) => instructions::modulo(*lhs, *rhs, vm),
+            Instruction::ModAccReg(reg) => instructions::mod_acc_reg(*reg, vm),
+            Instruction::ModReg(lhs, rhs) => instructions::mod_reg(*lhs, *rhs, vm),
 
             Instruction::LNot(var_name) => instructions::logical_not(var_name, vm),
             Instruction::LNotAcc => instructions::logical_not_acc(vm),
@@ -221,5 +221,8 @@ impl Execute for Instruction {
             Instruction::ThisAcc => instructions::this_acc(vm),
             Instruction::ThisReg(reg) => instructions::this_reg(reg, vm),
         }
+        
+        
+        Ok(())
     }
 }

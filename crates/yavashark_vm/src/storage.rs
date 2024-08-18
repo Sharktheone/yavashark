@@ -1,4 +1,4 @@
-use yavashark_bytecode::VarName;
+use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::Value;
 use crate::VM;
 
@@ -9,7 +9,7 @@ impl VM {
         todo!()
     }
     
-    pub fn get_register(&self, reg: usize) -> Value {
+    pub fn get_register(&self, reg: Reg) -> Value {
         todo!()
     }
     
@@ -17,7 +17,7 @@ impl VM {
         todo!()
     }
     
-    pub fn set_register(&mut self, reg: usize, value: Value) {
+    pub fn set_register(&mut self, reg: Reg, value: Value) {
         todo!()
     }
     
