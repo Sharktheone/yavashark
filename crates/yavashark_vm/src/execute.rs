@@ -118,13 +118,13 @@ impl Execute for Instruction {
                 instructions::nullish_coalescing_reg(target, reg, vm)
             }
 
-            Instruction::Dec(name) => instructions::dec(name, vm),
+            Instruction::Dec(name) => instructions::dec(*name, vm),
             Instruction::DecAcc => instructions::dec_acc(vm),
-            Instruction::DecReg(reg) => instructions::dec_reg(reg, vm),
+            Instruction::DecReg(reg) => instructions::dec_reg(*reg, vm),
 
-            Instruction::Inc(VarName) => instructions::inc(name, vm),
+            Instruction::Inc(name) => instructions::inc(*name, vm),
             Instruction::IncAcc => instructions::inc_acc(vm),
-            Instruction::IncReg(Reg) => instructions::inc_reg(reg, vm),
+            Instruction::IncReg(reg) => instructions::inc_reg(*reg, vm),
 
             Instruction::PushScope => instructions::push_scope(vm),
             Instruction::PopScope => instructions::pop_scope(vm),
