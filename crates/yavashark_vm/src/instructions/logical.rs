@@ -1,10 +1,7 @@
-
-
 mod and;
-mod or;
 mod not;
-
+mod or;
 
 pub use and::*;
-pub use or::*;
 pub use not::*;
+pub use or::*;

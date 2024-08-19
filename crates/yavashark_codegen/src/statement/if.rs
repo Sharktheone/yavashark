@@ -18,13 +18,15 @@ impl ByteCodegen {
         if let Some(alt) = alt {
             let idx2 = self.instructions.len();
             self.instructions.push(Instruction::Jmp(0));
-            self.instructions[idx] = Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx as isize);
+            self.instructions[idx] =
+                Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx as isize);
             self.compile_statement(alt)?;
-            
-            self.instructions[idx2] = Instruction::JmpRel(self.instructions.len() as isize - idx2 as isize);
-            
+
+            self.instructions[idx2] =
+                Instruction::JmpRel(self.instructions.len() as isize - idx2 as isize);
         } else {
-            self.instructions[idx] = Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx as isize);
+            self.instructions[idx] =
+                Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx as isize);
         }
 
         Ok(())

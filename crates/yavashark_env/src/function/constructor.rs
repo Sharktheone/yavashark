@@ -30,7 +30,7 @@ impl Debug for NativeConstructor {
 }
 
 impl Constructor<Context> for NativeConstructor {
-    fn get_constructor(&self) ->  ObjectProperty{
+    fn get_constructor(&self) -> ObjectProperty {
         (self.f)().into()
     }
 

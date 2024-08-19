@@ -15,29 +15,32 @@ impl ByteCodegen {
                 }
             }
         }
-        
+
         let idx = self.instructions.len();
         let mut idx2 = None;
-        
+
         if let Some(test) = &stmt.test {
             self.compile_expr(test, stmt.span)?;
-            
+
             idx2 = Some(self.instructions.len());
             self.instructions.push(Instruction::JmpIfNotAccRel(1));
         }
-        
+
         self.compile_statement(&stmt.body)?;
-        
+
         if let Some(update) = &stmt.update {
             self.compile_expr(update, stmt.span)?;
         }
-        
-        self.instructions.push(Instruction::JmpRel(idx as isize - self.instructions.len() as isize));
-        
+
+        self.instructions.push(Instruction::JmpRel(
+            idx as isize - self.instructions.len() as isize,
+        ));
+
         if let Some(idx2) = idx2 {
-            self.instructions[idx2] = Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx2 as isize);
+            self.instructions[idx2] =
+                Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx2 as isize);
         }
-        
+
         Ok(())
     }
 }

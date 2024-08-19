@@ -1,6 +1,5 @@
 #![allow(clippy::needless_pass_by_value)]
 
-
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
@@ -47,8 +46,8 @@ impl Array {
 
         Ok(buf)
     }
-    
-    pub fn override_to_string_internal(&self) -> String{
+
+    pub fn override_to_string_internal(&self) -> String {
         let mut buf = String::new();
 
         for (_, value) in self.object.array.iter() {

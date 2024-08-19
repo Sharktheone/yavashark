@@ -2,15 +2,14 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 
 pub use prototype::*;
-use yavashark_value::{Obj};
+use yavashark_value::Obj;
 
 use crate::context::Context;
-use crate::{Error, Variable, ObjectProperty};
+use crate::{Error, ObjectProperty, Variable};
 use crate::{Res, Value};
 
 pub mod array;
 mod prototype;
-
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Object {
@@ -344,7 +343,10 @@ impl Obj<Context> for Object {
     }
 
     fn constructor(&self) -> ObjectProperty {
-        if let Some(constructor) = self.properties.get(&Value::String("constructor".to_string())) {
+        if let Some(constructor) = self
+            .properties
+            .get(&Value::String("constructor".to_string()))
+        {
             return constructor.clone();
         }
 

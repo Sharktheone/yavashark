@@ -160,7 +160,7 @@ impl Obj<Context> for FunctionPrototype {
         self.object.get_property(name)
     }
 
-     fn define_getter(&mut self, name: Value, value: Value) -> Res {
+    fn define_getter(&mut self, name: Value, value: Value) -> Res {
         self.object.define_getter(name, value)
     }
 
@@ -292,7 +292,7 @@ impl Obj<Context> for FunctionPrototype {
         self.name = Value::String("Function".to_string()).into();
     }
 
-    fn prototype(&self) -> ObjectProperty{
+    fn prototype(&self) -> ObjectProperty {
         self.object.prototype()
     }
 }

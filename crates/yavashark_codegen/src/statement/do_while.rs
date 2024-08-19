@@ -10,8 +10,9 @@ impl ByteCodegen {
 
         self.compile_expr(&stmt.test, stmt.span)?;
 
-        self.instructions.push(Instruction::JmpIfAccRel(idx as isize - self.instructions.len() as isize));
-
+        self.instructions.push(Instruction::JmpIfAccRel(
+            idx as isize - self.instructions.len() as isize,
+        ));
 
         Ok(())
     }

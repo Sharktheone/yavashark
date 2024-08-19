@@ -13,11 +13,13 @@ impl ByteCodegen {
 
         self.compile_statement(&stmt.body)?;
 
-        self.instructions.push(Instruction::JmpRel(idx as isize - self.instructions.len() as isize));
+        self.instructions.push(Instruction::JmpRel(
+            idx as isize - self.instructions.len() as isize,
+        ));
 
-        self.instructions[idx2] = Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx2 as isize);
+        self.instructions[idx2] =
+            Instruction::JmpIfNotAccRel(self.instructions.len() as isize - idx2 as isize);
 
         Ok(())
-
     }
 }

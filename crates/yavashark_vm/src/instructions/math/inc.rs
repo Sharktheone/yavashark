@@ -1,5 +1,5 @@
-use yavashark_bytecode::{Reg, VarName};
 use crate::VM;
+use yavashark_bytecode::{Reg, VarName};
 
 pub fn inc(name: VarName, vm: &mut VM) {
     let val = vm.get_variable(name);

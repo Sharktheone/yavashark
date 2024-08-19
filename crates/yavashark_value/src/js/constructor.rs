@@ -18,34 +18,32 @@ pub trait Constructor<C: Ctx>: Debug + Obj<C> {
     fn proto(&self, ctx: &mut C) -> Value<C> {
         if let Value::Object(obj) = self.value(ctx) {
             let Ok(o) = obj.get() else {
-                return Value::Undefined
+                return Value::Undefined;
             };
-            
+
             let p = o.prototype();
             drop(o);
-        
+
             p.resolve(Value::Object(obj), ctx)
                 .unwrap_or(Value::Undefined)
         } else {
             Value::Undefined //TODO: return an error here
         }
-        
-        
+
         // if let Value::Object(obj) = self.value(ctx) {
         //TODO: this here causes an rust borrow checker bug, but the one above works somehow
         //     if let Ok(o) = obj.get() {
         //         let p = o.prototype();
         //         drop(o);
-        // 
+        //
         //         p.resolve(Value::Object(obj), ctx)
         //             .unwrap_or(Value::Undefined)
         //     } else {
         //         Value::Undefined
         //     }
-        //     
+        //
         // } else {
         //     Value::Undefined //TODO: return an error here
         // }
     }
 }
-

@@ -191,18 +191,17 @@ unsafe impl<C: Ctx> CellCollectable<RefCell<Self>> for BoxedObj<C> {
                 refs.push(o.0.get_ref());
             }
         });
-        
-        
+
         let p = self.0.prototype();
 
         if let Value::Object(o) = p.value {
             refs.push(o.0.get_ref());
         }
-        
+
         if let Value::Object(o) = p.get {
             refs.push(o.0.get_ref());
         }
-        
+
         if let Value::Object(o) = p.set {
             refs.push(o.0.get_ref());
         }
@@ -288,9 +287,8 @@ impl<C: Ctx> Object<C> {
         let this = self.get()?;
 
         let Some(p) = this.resolve_property(name) else {
-            return Ok(None)
+            return Ok(None);
         };
-       
 
         p.get(Value::Object(self.clone()), ctx).map(Some)
     }
@@ -309,8 +307,8 @@ impl<C: Ctx> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-
-    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> { //TODO: maybe this should be called set_property or something
+    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
+        //TODO: maybe this should be called set_property or something
         // # Safety:
         // We attach the values below
         let mut inner = self.get_mut()?;
@@ -336,7 +334,6 @@ impl<C: Ctx> Object<C> {
                 "{name} does not exist on object"
             )))
     }
-
 
     pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
         Ok(self.get()?.contains_key(name))
@@ -417,7 +414,8 @@ impl<C: Ctx> Object<C> {
 
     #[must_use]
     pub fn get_constructor(&self) -> ObjectProperty<C> {
-        self.get().map_or(Value::Undefined.into(), |o| o.constructor())
+        self.get()
+            .map_or(Value::Undefined.into(), |o| o.constructor())
     }
 
     /// I hate JavaScript...
@@ -462,7 +460,6 @@ impl<C: Ctx> Object<C> {
     }
 }
 
-
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct ObjectProperty<C: Ctx> {
     pub value: Value<C>,
@@ -470,7 +467,6 @@ pub struct ObjectProperty<C: Ctx> {
     pub get: Value<C>,
     pub set: Value<C>,
 }
-
 
 impl<C: Ctx> ObjectProperty<C> {
     #[must_use]
@@ -511,7 +507,6 @@ impl<C: Ctx> ObjectProperty<C> {
         }
     }
 
-
     pub fn resolve(&self, this: Value<C>, ctx: &mut C) -> Result<Value<C>, Error<C>> {
         if !self.get.is_nullish() {
             self.get.call(ctx, vec![], this)
@@ -520,7 +515,6 @@ impl<C: Ctx> ObjectProperty<C> {
         }
     }
 }
-
 
 impl<C: Ctx> From<Variable<C>> for ObjectProperty<C> {
     fn from(v: Variable<C>) -> Self {
@@ -543,7 +537,6 @@ impl<C: Ctx> From<Variable<C>> for ObjectProperty<C> {
 //         }
 //     }
 // }
-
 
 impl<C: Ctx, V: Into<Value<C>>> From<V> for ObjectProperty<C> {
     fn from(v: V) -> Self {

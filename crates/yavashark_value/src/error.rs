@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use crate::{Ctx, Value};
+use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Error<C: Ctx> {
@@ -123,7 +123,6 @@ impl<C: Ctx> Error<C> {
         })
     }
 
-    
     pub fn message_internal(&self) -> String {
         match &self.kind {
             ErrorKind::Type(msg)
@@ -136,7 +135,6 @@ impl<C: Ctx> Error<C> {
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         }
     }
-
 
     #[must_use]
     pub const fn stack(&self) -> &StackTrace {
@@ -161,8 +159,6 @@ impl<C: Ctx> Error<C> {
         self.stacktrace.frames.first().map_or(0, |f| f.column)
     }
 }
-
-
 
 impl<C: Ctx> Display for Error<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

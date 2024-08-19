@@ -20,7 +20,6 @@ fn test() {
     println!("{:#?}", prog);
 }
 
-
 #[test]
 fn a() {
     struct Test {
@@ -38,7 +37,7 @@ fn a() {
     impl Test {
         fn borrow(&self) -> Option<BorrowedTest> {
             let rand: bool = random();
-            
+
             if rand {
                 return None;
             }
@@ -55,7 +54,9 @@ fn a() {
 
     impl BorrowedTest<'_> {
         fn do_something(&self) -> TestClone {
-            TestClone { value: self.test.value }
+            TestClone {
+                value: self.test.value,
+            }
         }
     }
 

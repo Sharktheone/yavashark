@@ -1,7 +1,7 @@
 mod execute;
+mod instructions;
 mod regs;
 mod stack;
-mod instructions;
 mod storage;
 
 pub use regs::*;

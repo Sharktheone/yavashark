@@ -48,12 +48,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .push(PathSegment::from(Ident::new("Error", input.span())));
 
     let mut op = crate_path.clone();
-    op
-        .segments
-        .push(PathSegment::from(Ident::new("ObjectProperty", input.span())));
-    
-    
-    
+    op.segments.push(PathSegment::from(Ident::new(
+        "ObjectProperty",
+        input.span(),
+    )));
+
     let mut gc = Vec::new();
 
     let mut function = false;

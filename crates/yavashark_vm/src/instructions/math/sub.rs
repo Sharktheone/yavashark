@@ -1,5 +1,5 @@
-use yavashark_bytecode::{Reg, VarName};
 use crate::VM;
+use yavashark_bytecode::{Reg, VarName};
 
 pub fn sub(lhs: VarName, rhs: VarName, vm: &mut VM) {
     let lhs = vm.get_variable(lhs);
@@ -9,7 +9,6 @@ pub fn sub(lhs: VarName, rhs: VarName, vm: &mut VM) {
 
     vm.set_acc(result);
 }
-
 
 pub fn sub_acc_reg(reg: Reg, vm: &mut VM) {
     let acc = vm.acc();
