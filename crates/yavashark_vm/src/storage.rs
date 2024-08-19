@@ -36,4 +36,10 @@ impl VM {
     pub fn set_acc(&mut self, value: Value) {
         todo!()
     }
+    
+    
+    pub fn set_accb(&mut self, value: bool) {
+        todo!()
+    }
+    
 }
