@@ -4,7 +4,7 @@ use yavashark_bytecode::Instruction;
 
 impl ByteCodegen {
     pub fn compile_this(&mut self, stmt: &ThisExpr) -> Res {
-        self.instructions.push(Instruction::ThisAcc):
+        self.instructions.push(Instruction::ThisAcc);
 
         Ok(())
     }
