@@ -29,14 +29,14 @@ impl Execute for Instruction {
             Instruction::ModAccReg(reg) => instructions::mod_acc_reg(*reg, vm),
             Instruction::ModReg(lhs, rhs) => instructions::mod_reg(*lhs, *rhs, vm),
 
-            Instruction::LNot(var_name) => instructions::logical_not(var_name, vm),
+            Instruction::LNot(var_name) => instructions::logical_not(*var_name, vm),
             Instruction::LNotAcc => instructions::logical_not_acc(vm),
 
-            Instruction::LOr(lhs, rhs) => instructions::logical_or(lhs, rhs, vm),
-            Instruction::LOrAcc(reg) => instructions::logical_or_acc(reg, vm),
+            Instruction::LOr(lhs, rhs) => instructions::logical_or(*lhs, *rhs, vm),
+            Instruction::LOrAcc(reg) => instructions::logical_or_acc(*reg, vm),
 
-            Instruction::LAnd(lhs, rhs) => instructions::logical_and(lhs, rhs, vm),
-            Instruction::LAndAcc(reg) => instructions::logical_and_acc(reg, vm),
+            Instruction::LAnd(lhs, rhs) => instructions::logical_and(*lhs, *rhs, vm),
+            Instruction::LAndAcc(reg) => instructions::logical_and_acc(*reg, vm),
 
             Instruction::BitXor(lhs, rhs) => instructions::bitwise_xor(lhs, rhs, vm),
             Instruction::BitXorAcc(reg) => instructions::bitwise_xor_acc(reg, vm),
