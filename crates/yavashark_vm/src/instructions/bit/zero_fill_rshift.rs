@@ -16,7 +16,6 @@ pub fn zero_fill_rshift_acc(reg: Reg, vm: &mut VM) {
     vm.set_acc(lhs.zero_fill_rshift(&rhs));
 }
 
-
 pub fn zero_fill_rshift_reg(rhs: Reg, lhs: Reg, vm: &mut VM) {
     let rhs = vm.get_register(rhs);
     let lhs = vm.get_register(lhs);
