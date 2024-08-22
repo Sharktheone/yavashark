@@ -659,6 +659,13 @@ impl<C: Ctx> Value<C> {
             _ => false,
         }
     }
+    
+    
+    pub fn zero_fill_rshift(&self, rhs: &Self) -> Self {
+        Value::Number(f64::from(
+            self.to_int_or_null() as u32 >> (rhs.to_int_or_null() as u32 % 32),
+        ))
+    }
 }
 
 impl<C: Ctx> AddAssign for Value<C> {
