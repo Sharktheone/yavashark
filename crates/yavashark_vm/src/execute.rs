@@ -38,17 +38,17 @@ impl Execute for Instruction {
             Instruction::LAnd(lhs, rhs) => instructions::logical_and(*lhs, *rhs, vm),
             Instruction::LAndAcc(reg) => instructions::logical_and_acc(*reg, vm),
 
-            Instruction::BitXor(lhs, rhs) => instructions::bitwise_xor(lhs, rhs, vm),
-            Instruction::BitXorAcc(reg) => instructions::bitwise_xor_acc(reg, vm),
-            Instruction::BitXorReg(lhs, rhs) => instructions::bitwise_xor_reg(lhs, rhs, vm),
+            Instruction::BitXor(lhs, rhs) => instructions::bitwise_xor(*lhs, *rhs, vm),
+            Instruction::BitXorAcc(reg) => instructions::bitwise_xor_acc(*reg, vm),
+            Instruction::BitXorReg(lhs, rhs) => instructions::bitwise_xor_reg(*lhs, *rhs, vm),
 
-            Instruction::BitOr(lhs, rhs) => instructions::bitwise_or(lhs, rhs, vm),
-            Instruction::BitOrAcc(reg) => instructions::bitwise_or_acc(reg, vm),
-            Instruction::BitOrReg(lhs, rhs) => instructions::bitwise_or_reg(lhs, rhs, vm),
+            Instruction::BitOr(lhs, rhs) => instructions::bitwise_or(*lhs, *rhs, vm),
+            Instruction::BitOrAcc(reg) => instructions::bitwise_or_acc(*reg, vm),
+            Instruction::BitOrReg(lhs, rhs) => instructions::bitwise_or_reg(*lhs, *rhs, vm),
 
-            Instruction::BitAnd(lhs, rhs) => instructions::bitwise_and(lhs, rhs, vm),
-            Instruction::BitAndAcc(reg) => instructions::bitwise_and_acc(reg, vm),
-            Instruction::BitAndReg(lhs, rhs) => instructions::bitwise_and_reg(lhs, rhs, vm),
+            Instruction::BitAnd(lhs, rhs) => instructions::bitwise_and(*lhs, *rhs, vm),
+            Instruction::BitAndAcc(reg) => instructions::bitwise_and_acc(*reg, vm),
+            Instruction::BitAndReg(lhs, rhs) => instructions::bitwise_and_reg(*lhs, *rhs, vm),
 
             Instruction::Eq(lhs, rhs) => instructions::eq(lhs, rhs, vm),
             Instruction::EqAcc(reg) => instructions::eq_acc(reg, vm),
@@ -82,18 +82,18 @@ impl Execute for Instruction {
             Instruction::GtEqAcc(reg) => instructions::gt_eq_acc(reg, vm),
             Instruction::GtEqReg(lhs, rhs) => instructions::gt_eq_reg(lhs, rhs, vm),
 
-            Instruction::LShift(lhs, rhs) => instructions::lshift(lhs, rhs, vm),
-            Instruction::LShiftAcc(reg) => instructions::lshift_acc(reg, vm),
-            Instruction::LShiftReg(lhs, rhs) => instructions::lshift_reg(lhs, rhs, vm),
+            Instruction::LShift(lhs, rhs) => instructions::lshift(*lhs, *rhs, vm),
+            Instruction::LShiftAcc(reg) => instructions::lshift_acc(*reg, vm),
+            Instruction::LShiftReg(lhs, rhs) => instructions::lshift_reg(*lhs, *rhs, vm),
 
-            Instruction::RShift(lhs, rhs) => instructions::rshift(lhs, rhs, vm),
-            Instruction::RShiftAcc(reg) => instructions::rshift_acc(reg, vm),
-            Instruction::RShiftReg(lhs, rhs) => instructions::rshift_reg(lhs, rhs, vm),
+            Instruction::RShift(lhs, rhs) => instructions::rshift(*lhs, *rhs, vm),
+            Instruction::RShiftAcc(reg) => instructions::rshift_acc(*reg, vm),
+            Instruction::RShiftReg(lhs, rhs) => instructions::rshift_reg(*lhs, *rhs, vm),
 
-            Instruction::ZeroFillRShift(lhs, rhs) => instructions::zero_fill_rshift(lhs, rhs, vm),
-            Instruction::ZeroFillRShiftAcc(reg) => instructions::zero_fill_rshift_acc(reg, vm),
+            Instruction::ZeroFillRShift(lhs, rhs) => instructions::zero_fill_rshift(*lhs, *rhs, vm),
+            Instruction::ZeroFillRShiftAcc(reg) => instructions::zero_fill_rshift_acc(*reg, vm),
             Instruction::ZeroFillRShiftReg(lhs, rhs) => {
-                instructions::zero_fill_rshift_reg(lhs, rhs, vm)
+                instructions::zero_fill_rshift_reg(*lhs, *rhs, vm)
             }
 
             Instruction::In(lhs, rhs) => instructions::in_(lhs, rhs, vm),
