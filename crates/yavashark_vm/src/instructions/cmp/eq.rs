@@ -22,5 +22,3 @@ pub fn eq_reg(rhs: Reg, lhs: Reg, vm: &mut VM) {
 
     vm.set_acc(lhs.normal_eq(&rhs).into());
 }
-
-

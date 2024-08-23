@@ -1,4 +1,3 @@
-
 use yavashark_bytecode::{Reg, VarName};
 
 use crate::VM;
@@ -23,5 +22,3 @@ pub fn eq_eq_reg(rhs: Reg, lhs: Reg, vm: &mut VM) {
 
     vm.set_acc((lhs == rhs).into());
 }
-
-
