@@ -23,4 +23,4 @@ pub fn eq_reg(rhs: Reg, lhs: Reg, vm: &mut VM) {
     vm.set_acc((lhs == rhs).into());
 }
 
-   
+
