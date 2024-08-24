@@ -34,45 +34,7 @@ impl Interpreter {
             BinaryOp::LogicalOr => left.log_or(right),
             BinaryOp::LogicalAnd => left.log_and(right),
             BinaryOp::In => right.contains_key(&left)?.into(),
-            BinaryOp::InstanceOf => {
-                let Value::Object(obj) = left else {
-                    return Ok(Value::Boolean(false));
-                };
-
-                let Value::Object(constructor) = right else {
-                    return Err(
-                        Error::ty("Right-hand side of 'instanceof' is not an object").into(),
-                    );
-                };
-
-                let Value::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
-                    Error::ty("Right-hand side of 'instanceof' is not a constructor"),
-                )?
-                else {
-                    return Err(Error::ty(
-                        "Right-hand side of 'instanceof' has not an object as constructor",
-                    )
-                    .into());
-                };
-
-                let constructor_proto = constructor.get()?.prototype();
-
-                let mut proto = Some(obj.get()?.prototype());
-
-                while let Some(mut p) = proto {
-                    if p == constructor_proto {
-                        return Ok(Value::Boolean(true));
-                    }
-
-                    if let Value::Object(o) = p {
-                        proto = Some(o.get()?.prototype());
-                    } else {
-                        break;
-                    }
-                }
-
-                return Ok(Value::Boolean(false));
-            }
+            BinaryOp::InstanceOf => left.instance_of(&right, ctx)?.into(),
             BinaryOp::Exp => left.pow(&right),
             BinaryOp::NullishCoalescing => {
                 if left.is_nullish() {

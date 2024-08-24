@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 
-use crate::Ctx;
+use crate::{Ctx, Error};
 
 use super::Value;
 
@@ -664,6 +664,47 @@ impl<C: Ctx> Value<C> {
         Value::Number(f64::from(
             self.to_int_or_null() as u32 >> (rhs.to_int_or_null() as u32 % 32),
         ))
+    }
+    
+    
+    pub fn instance_of(&self, rhs: &Self, ctx: &mut C) -> Result<bool, Error<C>> {
+        let Value::Object(obj) = self else {
+            return Ok(false);
+        };
+
+        let Value::Object(constructor) = rhs else {
+            return Err(
+                Error::ty("Right-hand side of 'instanceof' is not an object").into(),
+            );
+        };
+
+        let Value::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
+            Error::ty("Right-hand side of 'instanceof' is not a constructor"),
+        )?
+        else {
+            return Err(Error::ty(
+                "Right-hand side of 'instanceof' has not an object as constructor",
+            )
+                .into());
+        };
+
+        let constructor_proto = constructor.get()?.prototype();
+
+        let mut proto = Some(obj.get()?.prototype());
+
+        while let Some(mut p) = proto {
+            if p == constructor_proto {
+                return Ok(true);
+            }
+
+            if let Value::Object(o) = p {
+                proto = Some(o.get()?.prototype());
+            } else {
+                break;
+            }
+        }
+
+        Ok(false)
     }
 }
 
