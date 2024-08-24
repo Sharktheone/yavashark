@@ -1,7 +1,6 @@
 mod bit;
 mod call;
 mod cmp;
-mod exp;
 mod r#in;
 mod instanceof;
 mod jmp;
@@ -22,7 +21,6 @@ mod type_of;
 pub use bit::*;
 pub use call::*;
 pub use cmp::*;
-pub use exp::*;
 pub use instanceof::*;
 pub use jmp::*;
 pub use lda::*;
