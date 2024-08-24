@@ -1,5 +1,5 @@
-use yavashark_bytecode::{Reg, VarName};
 use crate::VM;
+use yavashark_bytecode::{Reg, VarName};
 
 pub fn exp(lhs: VarName, rhs: VarName, vm: &mut VM) {
     let lhs = vm.get_variable(lhs);
@@ -7,7 +7,6 @@ pub fn exp(lhs: VarName, rhs: VarName, vm: &mut VM) {
 
     vm.set_acc(lhs.pow(&rhs));
 }
-
 
 pub fn exp_acc(reg: Reg, vm: &mut VM) {
     let acc = vm.acc();

@@ -1,4 +1,3 @@
-
 use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
 
@@ -11,14 +10,12 @@ pub fn nullish_coalescing(lhs: VarName, rhs: VarName, vm: &mut VM) {
     } else {
         vm.set_acc(lhs);
     }
-
 }
 
 pub fn nullish_coalescing_acc(reg: Reg, vm: &mut VM) {
     let acc = vm.acc();
     let reg = vm.get_register(reg);
 
-    
     if acc.is_nullish() {
         vm.set_acc(reg);
     } else {

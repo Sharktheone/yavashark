@@ -102,7 +102,9 @@ impl Execute for Instruction {
 
             Instruction::InstanceOf(target, name) => *instructions::instance_of(*target, *name, vm),
             Instruction::InstanceOfAcc(reg) => instructions::instance_of_acc(*reg, vm),
-            Instruction::InstanceOfReg(target, reg) => instructions::instance_of_reg(*target, *reg, vm),
+            Instruction::InstanceOfReg(target, reg) => {
+                instructions::instance_of_reg(*target, *reg, vm)
+            }
 
             Instruction::Exp(target, name) => instructions::exp(*target, *name, vm),
             Instruction::ExpAcc(reg) => instructions::exp_acc(*reg, vm),
@@ -111,7 +113,9 @@ impl Execute for Instruction {
             Instruction::NullishCoalescing(target, name) => {
                 instructions::nullish_coalescing(*target, *name, vm)
             }
-            Instruction::NullishCoalescingAcc(reg) => instructions::nullish_coalescing_acc(*reg, vm),
+            Instruction::NullishCoalescingAcc(reg) => {
+                instructions::nullish_coalescing_acc(*reg, vm)
+            }
             Instruction::NullishCoalescingReg(target, reg) => {
                 instructions::nullish_coalescing_reg(*target, *reg, vm)
             }

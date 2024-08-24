@@ -666,16 +666,13 @@ impl<C: Ctx> Value<C> {
         ))
     }
 
-
     pub fn instance_of(&self, rhs: &Self, ctx: &mut C) -> Result<bool, Error<C>> {
         let Value::Object(obj) = self else {
             return Ok(false);
         };
 
         let Value::Object(constructor) = rhs else {
-            return Err(
-                Error::ty("Right-hand side of 'instanceof' is not an object").into(),
-            );
+            return Err(Error::ty("Right-hand side of 'instanceof' is not an object").into());
         };
 
         let Value::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
@@ -685,7 +682,7 @@ impl<C: Ctx> Value<C> {
             return Err(Error::ty(
                 "Right-hand side of 'instanceof' has not an object as constructor",
             )
-                .into());
+            .into());
         };
 
         let constructor_proto = constructor.get()?.prototype();

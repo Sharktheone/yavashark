@@ -17,8 +17,6 @@ pub struct VM {
     code: Vec<Instruction>,
 }
 
-
-
 impl VM {
     pub fn get_context(&mut self) -> &mut Context {
         todo!()
