@@ -665,8 +665,8 @@ impl<C: Ctx> Value<C> {
             self.to_int_or_null() as u32 >> (rhs.to_int_or_null() as u32 % 32),
         ))
     }
-    
-    
+
+
     pub fn instance_of(&self, rhs: &Self, ctx: &mut C) -> Result<bool, Error<C>> {
         let Value::Object(obj) = self else {
             return Ok(false);

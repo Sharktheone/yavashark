@@ -1,5 +1,5 @@
 use crate::{instructions, VM};
-use yavashark_bytecode::{Instruction, JmpAddr, Reg, VarName};
+use yavashark_bytecode::Instruction;
 use yavashark_env::ControlResult;
 
 trait Execute {
@@ -96,26 +96,24 @@ impl Execute for Instruction {
                 instructions::zero_fill_rshift_reg(*lhs, *rhs, vm)
             }
 
-            Instruction::In(lhs, rhs) => instructions::in_(lhs, rhs, vm),
-            Instruction::InAcc(reg) => instructions::in_acc(reg, vm),
-            Instruction::InReg(lhs, rhs) => instructions::in_reg(lhs, rhs, vm),
+            Instruction::In(lhs, rhs) => instructions::in_(*lhs, *rhs, vm)?,
+            Instruction::InAcc(reg) => instructions::in_acc(*reg, vm)?,
+            Instruction::InReg(lhs, rhs) => instructions::in_reg(*lhs, *rhs, vm)?,
 
-            Instruction::InstanceOf(target, name) => instructions::instance_of(target, name, vm),
-            Instruction::InstanceOfAcc(reg) => instructions::instance_of_acc(reg, vm),
-            Instruction::InstanceOfReg(target, reg) => {
-                instructions::instance_of_reg(target, reg, vm)
-            }
+            Instruction::InstanceOf(target, name) => *instructions::instance_of(*target, *name, vm),
+            Instruction::InstanceOfAcc(reg) => instructions::instance_of_acc(*reg, vm),
+            Instruction::InstanceOfReg(target, reg) => instructions::instance_of_reg(*target, *reg, vm),
 
-            Instruction::Exp(target, name) => instructions::exp(target, name, vm),
-            Instruction::ExpAcc(reg) => instructions::exp_acc(reg, vm),
-            Instruction::ExpReg(target, reg) => instructions::exp_reg(target, reg, vm),
+            Instruction::Exp(target, name) => instructions::exp(*target, *name, vm),
+            Instruction::ExpAcc(reg) => instructions::exp_acc(*reg, vm),
+            Instruction::ExpReg(target, reg) => instructions::exp_reg(*target, *reg, vm),
 
             Instruction::NullishCoalescing(target, name) => {
-                instructions::nullish_coalescing(target, name, vm)
+                instructions::nullish_coalescing(*target, *name, vm)
             }
-            Instruction::NullishCoalescingAcc(reg) => instructions::nullish_coalescing_acc(reg, vm),
+            Instruction::NullishCoalescingAcc(reg) => instructions::nullish_coalescing_acc(*reg, vm),
             Instruction::NullishCoalescingReg(target, reg) => {
-                instructions::nullish_coalescing_reg(target, reg, vm)
+                instructions::nullish_coalescing_reg(*target, *reg, vm)
             }
 
             Instruction::Dec(name) => instructions::dec(*name, vm),
