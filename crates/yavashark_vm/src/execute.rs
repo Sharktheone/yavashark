@@ -211,14 +211,14 @@ impl Execute for Instruction {
             Instruction::RegToAcc(reg) => instructions::reg_to_acc(reg, vm),
             Instruction::AccToReg(reg) => instructions::acc_to_reg(reg, vm),
 
-            Instruction::Return => instructions::return_(vm),
-            Instruction::ReturnAcc => instructions::return_acc(vm),
-            Instruction::ReturnReg(reg) => instructions::return_reg(reg, vm),
-            Instruction::ReturnVar(name) => instructions::return_var(name, vm),
+            Instruction::Return => instructions::return_()?,
+            Instruction::ReturnAcc => instructions::return_acc(vm)?,
+            Instruction::ReturnReg(reg) => instructions::return_reg(*reg, vm)?,
+            Instruction::ReturnVar(name) => instructions::return_var(*name, vm)?,
 
-            Instruction::ThrowAcc => instructions::throw_acc(vm),
-            Instruction::ThrowReg => instructions::throw_reg(vm),
-            Instruction::Throw(name) => instructions::throw(name, vm),
+            Instruction::ThrowAcc => instructions::throw_acc(vm)?,
+            Instruction::ThrowReg(reg) => instructions::throw_reg(*reg, vm)?,
+            Instruction::Throw(name) => instructions::throw(*name, vm)?,
 
             Instruction::ThisAcc => instructions::this_acc(vm),
             Instruction::ThisReg(reg) => instructions::this_reg(reg, vm),
