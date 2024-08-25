@@ -1,6 +1,7 @@
 mod bit;
 mod call;
 mod cmp;
+mod controlflow;
 mod r#in;
 mod instanceof;
 mod jmp;
@@ -15,11 +16,11 @@ mod stack;
 mod str;
 mod this;
 mod type_of;
-mod controlflow;
 
 pub use bit::*;
 pub use call::*;
 pub use cmp::*;
+pub use controlflow::*;
 pub use instanceof::*;
 pub use jmp::*;
 pub use lda::*;
@@ -34,4 +35,3 @@ pub use stack::*;
 pub use str::*;
 pub use this::*;
 pub use type_of::*;
-pub use controlflow::*;

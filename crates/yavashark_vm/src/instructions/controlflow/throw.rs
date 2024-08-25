@@ -1,7 +1,7 @@
-use yavashark_bytecode::{Reg, VarName};
-use yavashark_env::{ControlFlow, ControlResult};
-use yavashark_env::value::Error;
 use crate::VM;
+use yavashark_bytecode::{Reg, VarName};
+use yavashark_env::value::Error;
+use yavashark_env::{ControlFlow, ControlResult};
 
 pub fn throw_acc(vm: &mut VM) -> ControlResult {
     let acc = vm.acc();
@@ -17,5 +17,3 @@ pub fn throw(var: VarName, vm: &mut VM) -> ControlResult {
     let value = vm.get_variable(var);
     Err(ControlFlow::Error(Error::throw(value)))
 }
-
-
