@@ -184,7 +184,7 @@ pub enum Instruction {
     ReturnVar(VarName),
 
     ThrowAcc,
-    ThrowReg,
+    ThrowReg(Reg),
     Throw(VarName),
 
     ThisAcc,
