@@ -221,7 +221,7 @@ impl Execute for Instruction {
             Instruction::Throw(name) => instructions::throw(*name, vm)?,
 
             Instruction::ThisAcc => instructions::this_acc(vm),
-            Instruction::ThisReg(reg) => instructions::this_reg(reg, vm),
+            Instruction::ThisReg(reg) => instructions::this_reg(*reg, vm),
         }
 
         Ok(())
