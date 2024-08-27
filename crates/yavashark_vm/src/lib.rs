@@ -21,4 +21,13 @@ impl VM {
     pub fn get_context(&mut self) -> &mut Context {
         todo!()
     }
+    
+    
+    pub fn push_scope(&mut self) {
+        todo!()
+    }
+    
+    pub fn pop_scope(&mut self) {
+        todo!()
+    }
 }
