@@ -163,8 +163,8 @@ pub enum Instruction {
     LoadEnvReg(VarName, Reg),
 
     For,
-    TypeOf(VarName, VarName),
-    TypeOfAcc(VarName),
+    TypeOf(VarName),
+    TypeOfAcc,
     PushConst(ConstIdx), // For stack operations
     PushReg(Reg),
     PushAcc,

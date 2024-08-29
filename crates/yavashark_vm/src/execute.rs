@@ -194,8 +194,8 @@ impl Execute for Instruction {
 
             Instruction::For => instructions::for_(vm),
 
-            Instruction::TypeOf(target, name) => instructions::type_of(target, name, vm),
-            Instruction::TypeOfAcc(target) => instructions::type_of_acc(target, vm),
+            Instruction::TypeOf(name) => instructions::type_of(*name, vm),
+            Instruction::TypeOfAcc => instructions::type_of_acc(vm),
 
             Instruction::PushConst(idx) => instructions::push_const(idx, vm),
             Instruction::PushReg(reg) => instructions::push_reg(reg, vm),
