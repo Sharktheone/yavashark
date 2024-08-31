@@ -141,7 +141,7 @@ impl Execute for Instruction {
             Instruction::CallAcc => instructions::call_acc(vm),
 
             Instruction::Jmp(target) => instructions::jmp(target, vm),
-            Instruction::JmpIf(target, name) => instructions::jmp_if(target, name, vm),
+            Instruction::JmpIf(name, target) => instructions::jmp_if(target, name, vm),
             Instruction::JmpIfAcc(target) => instructions::jmp_if_acc(target, vm),
             Instruction::JmpIfNot(target, name) => instructions::jmp_if_not(target, name, vm),
             Instruction::JmpIfNotAcc(target) => instructions::jmp_if_not_acc(target, vm),
