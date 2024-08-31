@@ -152,19 +152,19 @@ impl Execute for Instruction {
             Instruction::JmpNullUndef(name, addr) => instructions::jmp_null_undef(name, addr, vm),
             Instruction::JmpNullUndefAcc(addr) => instructions::jmp_null_undef_acc(addr, vm),
 
-            Instruction::JmpRel(target) => instructions::jmp(target, vm),
-            Instruction::JmpIfRel(target, name) => instructions::jmp_if(target, name, vm),
-            Instruction::JmpIfAccRel(target) => instructions::jmp_if_acc(target, vm),
-            Instruction::JmpIfNotRel(target, name) => instructions::jmp_if_not(target, name, vm),
-            Instruction::JmpIfNotAccRel(target) => instructions::jmp_if_not_acc(target, vm),
-            Instruction::JmpNullRel(target, name) => instructions::jmp_null(target, name, vm),
-            Instruction::JmpNullAccRel(target) => instructions::jmp_null_acc(target, vm),
-            Instruction::JmpUndefRel(target, name) => instructions::jmp_undef(target, name, vm),
-            Instruction::JmpUndefAccRel(target) => instructions::jmp_undef_acc(target, vm),
+            Instruction::JmpRel(target) => instructions::jmp_rel(target, vm),
+            Instruction::JmpIfRel(target, name) => instructions::jmp_if_rel(target, name, vm),
+            Instruction::JmpIfAccRel(target) => instructions::jmp_if_acc_rel(target, vm),
+            Instruction::JmpIfNotRel(target, name) => instructions::jmp_if_not_rel(target, name, vm),
+            Instruction::JmpIfNotAccRel(target) => instructions::jmp_if_not_acc_rel(target, vm),
+            Instruction::JmpNullRel(target, name) => instructions::jmp_null_rel(target, name, vm),
+            Instruction::JmpNullAccRel(target) => instructions::jmp_null_acc_rel(target, vm),
+            Instruction::JmpUndefRel(target, name) => instructions::jmp_undef_rel(target, name, vm),
+            Instruction::JmpUndefAccRel(target) => instructions::jmp_undef_acc_rel(target, vm),
             Instruction::JmpNullUndefRel(name, addr) => {
-                instructions::jmp_null_undef(name, addr, vm)
+                instructions::jmp_null_undef_rel(name, addr, vm)
             }
-            Instruction::JmpNullUndefAccRel(addr) => instructions::jmp_null_undef_acc(addr, vm),
+            Instruction::JmpNullUndefAccRel(addr) => instructions::jmp_null_undef_acc_rel(addr, vm),
 
             Instruction::Str(name, const_idx) => instructions::str(name, const_idx, vm),
             Instruction::StrAcc(const_idx) => instructions::str_acc(const_idx, vm),
