@@ -114,12 +114,12 @@ pub enum Instruction {
     PushScope,
     PopScope,
 
-    Call(VarName),
-    CallReg(Reg),
-    CallMember(VarName, VarName),
-    CallMemberReg(Reg, VarName),
-    CallMemberAcc(VarName),
-    CallAcc,
+    Call(u16, VarName),
+    CallReg(u16, Reg),
+    CallMember(u16, VarName, VarName),
+    CallMemberReg(u16, Reg, VarName),
+    CallMemberAcc(u16, VarName),
+    CallAcc(u16),
 
     Jmp(JmpAddr),
     JmpIf(VarName, JmpAddr),
