@@ -131,14 +131,12 @@ impl Execute for Instruction {
             Instruction::PushScope => instructions::push_scope(vm),
             Instruction::PopScope => instructions::pop_scope(vm),
 
-            Instruction::Call(name) => instructions::call(name, vm),
-            Instruction::CallReg(reg) => instructions::call_reg(reg, vm),
-            Instruction::CallMember(name, member) => instructions::call_member(name, member, vm),
-            Instruction::CallMemberReg(reg, member) => {
-                instructions::call_member_reg(reg, member, vm)
-            }
-            Instruction::CallMemberAcc(member) => instructions::call_member_acc(member, vm),
-            Instruction::CallAcc => instructions::call_acc(vm),
+            Instruction::Call(num_args, name) => instructions::call(*num_args, *name, vm)?,
+            Instruction::CallReg(num_args, reg) => instructions::call_reg(*num_args, *reg, vm)?,
+            Instruction::CallAcc(num_args) => instructions::call_acc(*num_args, vm)?,
+            Instruction::CallMember(num_args, name, member) => instructions::call_member(num_args, name, member, vm),
+            Instruction::CallMemberReg(num_args, reg, member) =>  instructions::call_member_reg(num_args, reg, member, vm),
+            Instruction::CallMemberAcc(num_args, member) => instructions::call_member_acc(num_args, member, vm),
 
             Instruction::Jmp(target) => instructions::jmp(*target, vm),
             Instruction::JmpIf(name, target) => instructions::jmp_if(*target, *name, vm),
