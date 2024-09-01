@@ -29,8 +29,7 @@ impl VM {
     pub fn pop_scope(&mut self) {
         todo!()
     }
-    
-    
+
     pub fn set_pc(&mut self, pc: usize) {
         self.pc = pc;
     }

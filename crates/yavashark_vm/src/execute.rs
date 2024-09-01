@@ -134,9 +134,15 @@ impl Execute for Instruction {
             Instruction::Call(num_args, name) => instructions::call(*num_args, *name, vm)?,
             Instruction::CallReg(num_args, reg) => instructions::call_reg(*num_args, *reg, vm)?,
             Instruction::CallAcc(num_args) => instructions::call_acc(*num_args, vm)?,
-            Instruction::CallMember(num_args, name, member) => instructions::call_member(num_args, name, member, vm),
-            Instruction::CallMemberReg(num_args, reg, member) =>  instructions::call_member_reg(num_args, reg, member, vm),
-            Instruction::CallMemberAcc(num_args, member) => instructions::call_member_acc(num_args, member, vm),
+            Instruction::CallMember(num_args, name, member) => {
+                instructions::call_member(num_args, name, member, vm)
+            }
+            Instruction::CallMemberReg(num_args, reg, member) => {
+                instructions::call_member_reg(num_args, reg, member, vm)
+            }
+            Instruction::CallMemberAcc(num_args, member) => {
+                instructions::call_member_acc(num_args, member, vm)
+            }
 
             Instruction::Jmp(target) => instructions::jmp(*target, vm),
             Instruction::JmpIf(name, target) => instructions::jmp_if(*target, *name, vm),
@@ -153,7 +159,9 @@ impl Execute for Instruction {
             Instruction::JmpRel(target) => instructions::jmp_rel(target, vm),
             Instruction::JmpIfRel(target, name) => instructions::jmp_if_rel(target, name, vm),
             Instruction::JmpIfAccRel(target) => instructions::jmp_if_acc_rel(target, vm),
-            Instruction::JmpIfNotRel(target, name) => instructions::jmp_if_not_rel(target, name, vm),
+            Instruction::JmpIfNotRel(target, name) => {
+                instructions::jmp_if_not_rel(target, name, vm)
+            }
             Instruction::JmpIfNotAccRel(target) => instructions::jmp_if_not_acc_rel(target, vm),
             Instruction::JmpNullRel(target, name) => instructions::jmp_null_rel(target, name, vm),
             Instruction::JmpNullAccRel(target) => instructions::jmp_null_acc_rel(target, vm),

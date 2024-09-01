@@ -1,12 +1,10 @@
+use crate::VM;
 use yavashark_bytecode::{JmpAddr, VarName};
 use yavashark_env::{Value, Variable};
-use crate::VM;
 
 pub fn jmp(target: JmpAddr, vm: &mut VM) {
     vm.set_pc(target);
 }
-
-
 
 pub fn jmp_if(target: JmpAddr, name: VarName, vm: &mut VM) {
     let value = vm.get_variable(name);
@@ -49,7 +47,6 @@ pub fn jmp_null_acc(target: JmpAddr, vm: &mut VM) {
         vm.set_pc(target);
     }
 }
-
 
 pub fn jmp_undef(target: JmpAddr, name: VarName, vm: &mut VM) {
     let value = vm.get_variable(name);
