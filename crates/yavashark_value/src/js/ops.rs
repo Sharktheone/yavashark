@@ -689,12 +689,12 @@ impl<C: Ctx> Value<C> {
 
         let mut proto = Some(obj.get()?.prototype());
 
-        while let Some(mut p) = proto {
+        while let Some(p) = proto {
             if p == constructor_proto {
                 return Ok(true);
             }
 
-            if let Value::Object(o) = p {
+            if let Value::Object(o) = p.value {
                 proto = Some(o.get()?.prototype());
             } else {
                 break;
