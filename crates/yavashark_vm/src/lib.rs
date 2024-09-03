@@ -3,6 +3,7 @@ mod instructions;
 mod regs;
 mod stack;
 mod storage;
+mod value_ext;
 
 pub use regs::*;
 pub use stack::*;
