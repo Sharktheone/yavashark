@@ -179,22 +179,24 @@ impl Execute for Instruction {
             Instruction::LdaAcc(const_idx) => instructions::lda_acc(const_idx, vm),
             Instruction::LdaReg(name, const_idx) => instructions::lda_reg(name, const_idx, vm),
 
-            Instruction::LoadMemberAcc(target, member) => {
-                instructions::load_member_acc(target, member, vm)
+            Instruction::LoadMemberAcc(member) => {
+                instructions::load_member(*member, vm)
             }
-            Instruction::LoadMemberReg(target, name, reg) => {
-                instructions::load_member_reg(target, name, reg, vm)
+            Instruction::LoadMemberReg(target, member) => {
+                instructions::load_member_reg(*target, *member, vm)
             }
-            Instruction::LoadRegMember(terget, member, reg) => {
-                instructions::load_reg_member(target, member, reg, vm)
+            Instruction::LoadRegMember(target, member) => {
+                instructions::load_member(*target, *member, vm)
             }
-            Instruction::LoadRegMemberAcc(reg, member) => {
-                instructions::load_reg_member_acc(reg, member, vm)
-            }
-            Instruction::LoadAccMember(member, reg) => {
-                instructions::load_acc_member(member, reg, vm)
-            }
-            Instruction::LoadAccMemberAcc(member) => instructions::load_acc_member_acc(member, vm),
+            // Instruction::LoadRegMemberAcc(reg, member) => {
+            //     instructions::load_reg_member_acc(reg, member, vm)
+            // }
+            // Instruction::LoadAccMember(member, reg) => {
+            //     instructions::load_acc_member(member, reg, vm)
+            // }
+            // Instruction::LoadAccMemberAcc(member) => instructions::load_acc_member_acc(member, vm),
+            
+            
             Instruction::LoadEnv(name) => instructions::load_env(name, vm),
             Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(name, reg, vm),
 

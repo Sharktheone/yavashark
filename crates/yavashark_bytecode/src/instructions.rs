@@ -152,12 +152,12 @@ pub enum Instruction {
     LdaAcc(ConstIdx),
     LdaReg(VarName, ConstIdx),
 
-    LoadMemberAcc(VarName, VarName),
-    LoadMemberReg(VarName, VarName, Reg),
-    LoadRegMember(Reg, VarName, Reg),
-    LoadRegMemberAcc(Reg, VarName),
-    LoadAccMember(VarName, Reg),
-    LoadAccMemberAcc(VarName),
+    LoadMemberAcc(VarName),
+    LoadMemberReg(Reg, VarName),
+    LoadRegMember(VarName, VarName),
+    // LoadRegMemberAcc(Reg, VarName),
+    // LoadAccMember(VarName, Reg),
+    // LoadAccMemberAcc(VarName),
 
     LoadEnv(VarName),
     LoadEnvReg(VarName, Reg),
