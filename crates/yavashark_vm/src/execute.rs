@@ -193,8 +193,6 @@ impl Execute for Instruction {
             //     instructions::load_acc_member(member, reg, vm)
             // }
             // Instruction::LoadAccMemberAcc(member) => instructions::load_acc_member_acc(member, vm),
-            
-            
             Instruction::LoadEnv(name) => instructions::load_env(name, vm),
             Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(name, reg, vm),
 

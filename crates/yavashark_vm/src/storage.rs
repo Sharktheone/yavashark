@@ -6,7 +6,7 @@ impl VM {
     pub fn get_variable(&self, name: VarName) -> Value {
         todo!()
     }
-    
+
     pub fn var_name(&self, name: VarName) -> &str {
         todo!()
     }

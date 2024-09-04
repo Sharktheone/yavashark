@@ -1,7 +1,7 @@
+use crate::value_ext::ValueExt;
 use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::ControlResult;
-use crate::value_ext::ValueExt;
 
 pub fn call(num_args: u16, var_name: VarName, vm: &mut VM) -> ControlResult {
     let func = vm.get_variable(var_name);
@@ -40,7 +40,7 @@ pub fn call_member(num_args: u16, target: VarName, member: VarName, vm: &mut VM)
     let this = vm.get_this();
 
     let args = vm.get_args(num_args);
-    
+
     func.call(vm.get_context(), args, this)
 }
 
@@ -51,7 +51,7 @@ pub fn call_member_reg(num_args: u16, target: Reg, member: VarName, vm: &mut VM)
     let this = vm.get_this();
 
     let args = vm.get_args(num_args);
-    
+
     func.call(vm.get_context(), args, this)
 }
 
@@ -62,6 +62,6 @@ pub fn call_member_acc(num_args: u16, member: VarName, vm: &mut VM) -> ControlRe
     let this = vm.get_this();
 
     let args = vm.get_args(num_args);
-    
+
     func.call(vm.get_context(), args, this)
 }

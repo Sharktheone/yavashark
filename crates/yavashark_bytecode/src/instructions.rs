@@ -158,7 +158,6 @@ pub enum Instruction {
     // LoadRegMemberAcc(Reg, VarName),
     // LoadAccMember(VarName, Reg),
     // LoadAccMemberAcc(VarName),
-
     LoadEnv(VarName),
     LoadEnvReg(VarName, Reg),
 
