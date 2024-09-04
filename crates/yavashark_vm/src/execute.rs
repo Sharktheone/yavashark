@@ -179,14 +179,12 @@ impl Execute for Instruction {
             Instruction::LdaAcc(const_idx) => instructions::lda_acc(const_idx, vm),
             Instruction::LdaReg(name, const_idx) => instructions::lda_reg(name, const_idx, vm),
 
-            Instruction::LoadMemberAcc(member) => {
-                instructions::load_member(*member, vm)
-            }
+            Instruction::LoadMemberAcc(member) => instructions::load_member_acc(*member, vm)?,
             Instruction::LoadMemberReg(target, member) => {
-                instructions::load_member_reg(*target, *member, vm)
+                instructions::load_member_reg(*target, *member, vm)?
             }
             Instruction::LoadRegMember(target, member) => {
-                instructions::load_member(*target, *member, vm)
+                instructions::load_member(*target, *member, vm)?
             }
             // Instruction::LoadRegMemberAcc(reg, member) => {
             //     instructions::load_reg_member_acc(reg, member, vm)
