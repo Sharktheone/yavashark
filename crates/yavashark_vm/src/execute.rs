@@ -135,13 +135,13 @@ impl Execute for Instruction {
             Instruction::CallReg(num_args, reg) => instructions::call_reg(*num_args, *reg, vm)?,
             Instruction::CallAcc(num_args) => instructions::call_acc(*num_args, vm)?,
             Instruction::CallMember(num_args, name, member) => {
-                instructions::call_member(num_args, name, member, vm)
+                instructions::call_member(*num_args, *name, *member, vm)?
             }
             Instruction::CallMemberReg(num_args, reg, member) => {
-                instructions::call_member_reg(num_args, reg, member, vm)
+                instructions::call_member_reg(*num_args, *reg, *member, vm)?
             }
             Instruction::CallMemberAcc(num_args, member) => {
-                instructions::call_member_acc(num_args, member, vm)
+                instructions::call_member_acc(*num_args, *member, vm)?
             }
 
             Instruction::Jmp(target) => instructions::jmp(*target, vm),
