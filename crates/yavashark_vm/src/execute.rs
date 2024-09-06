@@ -172,12 +172,12 @@ impl Execute for Instruction {
             }
             Instruction::JmpNullUndefAccRel(addr) => instructions::jmp_null_undef_acc_rel(*addr, vm),
 
-            Instruction::Str(name, const_idx) => instructions::str(name, const_idx, vm),
-            Instruction::StrAcc(const_idx) => instructions::str_acc(const_idx, vm),
-            Instruction::StrReg(name, const_idx) => instructions::str_reg(name, const_idx, vm),
-            Instruction::Lda(name, const_idx) => instructions::lda(name, const_idx, vm),
-            Instruction::LdaAcc(const_idx) => instructions::lda_acc(const_idx, vm),
-            Instruction::LdaReg(name, const_idx) => instructions::lda_reg(name, const_idx, vm),
+            // Instruction::Str(name, const_idx) => instructions::str(name, const_idx, vm),
+            // Instruction::StrAcc(const_idx) => instructions::str_acc(const_idx, vm),
+            // Instruction::StrReg(name, const_idx) => instructions::str_reg(name, const_idx, vm),
+            Instruction::Lda(name, const_idx) => instructions::lda(*name, *const_idx, vm),
+            Instruction::LdaAcc(const_idx) => instructions::lda_acc(*const_idx, vm),
+            Instruction::LdaReg(name, const_idx) => instructions::lda_reg(*name, *const_idx, vm),
 
             Instruction::LoadMemberAcc(member) => instructions::load_member_acc(*member, vm)?,
             Instruction::LoadMemberReg(target, member) => {

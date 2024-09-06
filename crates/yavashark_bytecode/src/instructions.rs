@@ -145,12 +145,12 @@ pub enum Instruction {
     JmpNullUndefRel(VarName, JmpOffset),
     JmpNullUndefAccRel(JmpOffset),
 
-    Str(VarName, ConstIdx),
-    StrAcc(ConstIdx),
-    StrReg(VarName, ConstIdx),
+    // Str(VarName, ConstIdx),
+    // StrAcc(ConstIdx),
+    // StrReg(VarName, ConstIdx),
     Lda(VarName, ConstIdx),
     LdaAcc(ConstIdx),
-    LdaReg(VarName, ConstIdx),
+    LdaReg(Reg, ConstIdx),
 
     LoadMemberAcc(VarName),
     LoadMemberReg(Reg, VarName),
