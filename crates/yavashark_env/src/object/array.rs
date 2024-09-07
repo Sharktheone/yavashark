@@ -4,12 +4,14 @@ use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
 use crate::object::Object;
-use crate::Symbol;
+use crate::{ObjectProperty, Symbol};
 use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
 
 #[object(direct(length), to_string)]
 #[derive(Debug)]
 pub struct Array {}
+
+
 
 impl Array {
     pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {
@@ -24,7 +26,7 @@ impl Array {
     pub fn new(proto: Value) -> Self {
         Self {
             object: Object::raw_with_proto(proto),
-            length: Variable::new(Value::Number(0.0)),
+            length: ObjectProperty::new(Value::Number(0.0)),
         }
     }
 
@@ -102,7 +104,7 @@ impl Array {
     fn construct(&mut self, args: Vec<Value>) -> ValueResult {
         let values = args
             .into_iter()
-            .map(Variable::new)
+            .map(ObjectProperty::new)
             .enumerate()
             .collect::<Vec<_>>();
         self.object.array = values;

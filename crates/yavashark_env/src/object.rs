@@ -202,7 +202,7 @@ impl Obj<Context> for Object {
             .get(name)
             .cloned()
             .or_else(|| match &self.prototype.value {
-                Value::Object(o) => o.resolve_property(name).ok().flatten(),
+                Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten().map(|v| v.into()), //TODO: this is wrong, we need a ctx here!
                 _ => None,
             })
     }
@@ -296,8 +296,8 @@ impl Obj<Context> for Object {
     fn properties(&self) -> Vec<(Value, Value)> {
         self.array
             .iter()
-            .map(|(i, v)| (Value::Number(*i as f64), v.copy()))
-            .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.copy())))
+            .map(|(i, v)| (Value::Number(*i as f64), v.value.copy()))
+            .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.value.copy())))
             .collect()
     }
 
@@ -312,8 +312,8 @@ impl Obj<Context> for Object {
     fn values(&self) -> Vec<Value> {
         self.array
             .iter()
-            .map(|(_, v)| v.copy())
-            .chain(self.properties.values().map(Variable::copy))
+            .map(|(_, v)| v.value.copy())
+            .chain(self.properties.values().map(|v| v.value.copy()))
             .collect()
         //TODO: getter (and setter) values
     }
@@ -350,7 +350,7 @@ impl Obj<Context> for Object {
             return constructor.clone();
         }
 
-        if let Value::Object(proto) = self.prototype() {
+        if let Value::Object(proto) = self.prototype().value {
             let Ok(proto) = proto.get() else {
                 return Value::Undefined.into();
             };

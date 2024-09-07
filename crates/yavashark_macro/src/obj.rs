@@ -26,6 +26,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     variable
         .segments
         .push(PathSegment::from(Ident::new("Variable", input.span())));
+    
+    
+    let mut object_property = crate_path.clone();
+    object_property
+        .segments
+        .push(PathSegment::from(Ident::new("ObjectProperty", input.span())));
 
     let mut context = crate_path.clone();
     context
@@ -202,7 +208,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             colon_token: None,
             ty: syn::Type::Path(syn::TypePath {
                 qself: None,
-                path: variable.clone(),
+                path: object_property.clone(),
             }),
         });
     }
@@ -440,9 +446,9 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act, value_path: &Path)
         let act = match r {
             Act::Ref => quote! {Some(& self.#field.value)},
             // Act::RefMut => quote! {Some(&mut self.#field.value)},
-            Act::None => quote! {Some(self.#field.value.copy())},
+            Act::None => quote! {Some(self.#field.clone())},
             Act::Set => quote! {self.#field = value.into()},
-            Act::SetVar => quote! {self.#field = value},
+            Act::SetVar => quote! {self.#field = value.into()},
             Act::Contains => quote! {true},
             Act::Delete => quote! {
                 {
@@ -527,10 +533,10 @@ fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> 
 
         let act = match r {
             List::Properties => {
-                quote! {props.push((#name, self.#field.copy()));}
+                quote! {props.push((#name, self.#field.value.copy()));}
             }
             List::Keys => quote! {keys.push(#name);},
-            List::Values => quote! {values.push(self.#field.copy());},
+            List::Values => quote! {values.push(self.#field.value.copy());},
             List::Clear => quote! {self.#field.value = #value::Undefined;},
         };
 

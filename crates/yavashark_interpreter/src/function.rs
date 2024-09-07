@@ -6,7 +6,7 @@ use yavashark_env::{
     Context, ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
 };
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Func, Obj};
+use yavashark_value::{Constructor, Func, Obj, ObjectProperty};
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function, constructor)]
@@ -78,10 +78,10 @@ impl Func<Context> for JSFunction {
 }
 
 impl Constructor<Context> for JSFunction {
-    fn get_constructor(&self) -> yavashark_value::Value<Context> {
+    fn get_constructor(&self) -> ObjectProperty<Context> {
         self.prototype
             .get_property_no_get_set(&"constructor".into())
-            .unwrap_or(Value::Undefined)
+            .unwrap_or(Value::Undefined.into())
     }
 
     fn value(&self, _ctx: &mut Context) -> Value {

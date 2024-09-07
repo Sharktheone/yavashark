@@ -514,6 +514,16 @@ impl<C: Ctx> ObjectProperty<C> {
             Ok(self.value.copy())
         }
     }
+    
+    
+    pub fn copy(&self) -> Self {
+        Self {
+            value: self.value.copy(),
+            attributes: self.attributes,
+            get: self.get.copy(),
+            set: self.set.copy(),
+        }
+    }
 }
 
 impl<C: Ctx> From<Variable<C>> for ObjectProperty<C> {
