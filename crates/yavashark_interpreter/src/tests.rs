@@ -19,17 +19,17 @@ mod jsf__k {
 
     #[test]
     fn test_nan() {
-        expr!("+[![]]", Value::Number(std::f64::NAN)); //TODO: we can't check for NaN like that
+        expr!("+[![]]", NaN);
     }
 
     #[test]
     fn test_nan2() {
-        expr!("+{}-[]", Value::Number(std::f64::NAN)); //TODO: we can't check for NaN like that
+        expr!("+{}-[]", NaN);
     }
 
     #[test]
     fn test_nan3() {
-        expr!("+{}+[]-+[]", Value::Number(std::f64::NAN)); //TODO: we can't check for NaN like that
+        expr!("+{}+[]-+[]", NaN);
     }
 
     #[test]
@@ -49,7 +49,7 @@ mod jsf__k {
 
     #[test]
     fn test_ten() {
-        expr!("[+!+[]]+[+[]]", Value::Number(10.0));
+        expr!("[+!+[]]+[+[]]", Value::String("10".into()));
     }
 
     #[test]
