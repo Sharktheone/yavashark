@@ -1,7 +1,8 @@
 use crate::VM;
-use yavashark_bytecode::{Reg, VarName};
+use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::Value;
 
+#[allow(unused)]
 impl VM {
     pub fn get_variable(&self, name: VarName) -> Value {
         todo!()
@@ -40,6 +41,15 @@ impl VM {
     }
 
     pub fn set_accb(&mut self, value: bool) {
+        todo!()
+    }
+    
+    pub fn get_this(&self) -> Value {
+        todo!()
+    }
+    
+    
+    pub fn get_constant(&self, const_idx: ConstIdx) -> Value {
         todo!()
     }
 }

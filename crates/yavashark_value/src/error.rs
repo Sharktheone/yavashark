@@ -17,7 +17,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn new_error(error: String) -> Self {
+    pub const fn new_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Runtime(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -33,7 +33,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn reference_error(error: String) -> Self {
+    pub const fn reference_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Reference(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -49,7 +49,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn syn_error(error: String) -> Self {
+    pub const fn syn_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Syntax(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -57,7 +57,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn unknown(error: Option<String>) -> Self {
+    pub const fn unknown(error: Option<String>) -> Self {
         Self {
             kind: ErrorKind::Error(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -65,7 +65,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn unknown_error(error: String) -> Self {
+    pub const fn unknown_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Error(Some(error)),
             stacktrace: StackTrace { frames: vec![] },
@@ -81,7 +81,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn ty_error(error: String) -> Self {
+    pub const fn ty_error(error: String) -> Self {
         Self {
             kind: ErrorKind::Type(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -89,7 +89,7 @@ impl<C: Ctx> Error<C> {
     }
 
     #[must_use]
-    pub fn throw(val: Value<C>) -> Self {
+    pub const fn throw(val: Value<C>) -> Self {
         Self {
             kind: ErrorKind::Throw(val),
             stacktrace: StackTrace { frames: vec![] },
@@ -110,7 +110,7 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    pub fn message(&self, ctx: &mut C) -> Result<String, Error<C>> {
+    pub fn message(&self, ctx: &mut C) -> Result<String, Self> {
         Ok(match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -123,7 +123,7 @@ impl<C: Ctx> Error<C> {
         })
     }
 
-    pub fn message_internal(&self) -> String {
+    #[must_use] pub fn message_internal(&self) -> String {
         match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -131,7 +131,7 @@ impl<C: Ctx> Error<C> {
             | ErrorKind::Internal(msg)
             | ErrorKind::Runtime(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
-            ErrorKind::Throw(val) => format!("{}", val),
+            ErrorKind::Throw(val) => format!("{val}"),
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         }
     }

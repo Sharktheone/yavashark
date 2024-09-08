@@ -240,7 +240,7 @@ impl<C: Ctx> Display for Object<C> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.get() {
             Ok(s) => write!(f, "{}", s.to_string_internal()),
-            Err(e) => write!(f, "Error displaying object: {}", e.to_string()),
+            Err(e) => write!(f, "Error displaying object: {e}"),
         }
     }
 }
@@ -470,7 +470,7 @@ pub struct ObjectProperty<C: Ctx> {
 
 impl<C: Ctx> ObjectProperty<C> {
     #[must_use]
-    pub fn new(value: Value<C>) -> Self {
+    pub const fn new(value: Value<C>) -> Self {
         Self {
             value,
             attributes: Attributes::new(),
@@ -480,7 +480,7 @@ impl<C: Ctx> ObjectProperty<C> {
     }
 
     #[must_use]
-    pub fn getter(value: Value<C>) -> Self {
+    pub const fn getter(value: Value<C>) -> Self {
         Self {
             value,
             attributes: Attributes::new(),
@@ -490,7 +490,7 @@ impl<C: Ctx> ObjectProperty<C> {
     }
 
     #[must_use]
-    pub fn setter(value: Value<C>) -> Self {
+    pub const fn setter(value: Value<C>) -> Self {
         Self {
             value,
             attributes: Attributes::new(),
@@ -500,22 +500,22 @@ impl<C: Ctx> ObjectProperty<C> {
     }
 
     pub fn get(self, this: Value<C>, ctx: &mut C) -> Result<Value<C>, Error<C>> {
-        if !self.get.is_nullish() {
-            self.get.call(ctx, vec![], this)
-        } else {
+        if self.get.is_nullish() {
             Ok(self.value)
+        } else {
+            self.get.call(ctx, vec![], this)
         }
     }
 
     pub fn resolve(&self, this: Value<C>, ctx: &mut C) -> Result<Value<C>, Error<C>> {
-        if !self.get.is_nullish() {
-            self.get.call(ctx, vec![], this)
-        } else {
+        if self.get.is_nullish() {
             Ok(self.value.copy())
+        } else {
+            self.get.call(ctx, vec![], this)
         }
     }
 
-    pub fn copy(&self) -> Self {
+    #[must_use] pub fn copy(&self) -> Self {
         Self {
             value: self.value.copy(),
             attributes: self.attributes,

@@ -33,12 +33,12 @@ pub enum ControlFlow {
 
 impl ControlFlow {
     #[must_use]
-    pub fn error(e: String) -> Self {
+    pub const fn error(e: String) -> Self {
         Self::Error(Error::new_error(e))
     }
 
     #[must_use]
-    pub fn error_reference(e: String) -> Self {
+    pub const fn error_reference(e: String) -> Self {
         Self::Error(Error::reference_error(e))
     }
     #[must_use]
@@ -46,7 +46,7 @@ impl ControlFlow {
         Self::Error(Error::syn(e))
     }
     #[must_use]
-    pub fn error_type(e: String) -> Self {
+    pub const fn error_type(e: String) -> Self {
         Self::Error(Error::ty_error(e))
     }
 
@@ -58,7 +58,7 @@ impl ControlFlow {
     }
 
     #[must_use]
-    pub fn throw(val: Value) -> Self {
+    pub const fn throw(val: Value) -> Self {
         Self::Error(Error::throw(val))
     }
 }

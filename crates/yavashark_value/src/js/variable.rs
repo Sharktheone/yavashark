@@ -11,7 +11,7 @@ pub struct Variable<C: Ctx> {
 
 impl<C: Ctx> Variable<C> {
     #[must_use]
-    pub fn new(value: Value<C>) -> Self {
+    pub const fn new(value: Value<C>) -> Self {
         Self {
             value,
             properties: Attributes::new(),
@@ -19,7 +19,7 @@ impl<C: Ctx> Variable<C> {
     }
 
     #[must_use]
-    pub fn new_read_only(value: Value<C>) -> Self {
+    pub const fn new_read_only(value: Value<C>) -> Self {
         Self {
             value,
             properties: Attributes::new_read_only(),

@@ -73,7 +73,7 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Null, Self::Number(b)) => Self::Number(b),
             (Self::Null, Self::String(b)) => Self::String("null".to_string() + &b),
             (Self::Null, Self::Boolean(b)) => Self::Number(b.num()),
-            (Self::Null, Self::Object(o)) => Self::String(format!("null{}", o)),
+            (Self::Null, Self::Object(o)) => Self::String(format!("null{o}")),
 
             (Self::Undefined, Self::Null) => Self::Number(f64::NAN),
             (Self::Undefined, Self::Undefined) => Self::Number(f64::NAN),
@@ -81,7 +81,7 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Undefined, Self::String(b)) => Self::String("undefined".to_string() + &b),
             (Self::Undefined, Self::Boolean(_)) => Self::Number(f64::NAN),
             (Self::Undefined, Self::Object(o)) => {
-                Self::String(format!("undefined{}", o)) //TODO: this is NOT correct, o.fmt is the wrong method! (but okay for now)
+                Self::String(format!("undefined{o}")) //TODO: this is NOT correct, o.fmt is the wrong method! (but okay for now)
             }
 
             (Self::Number(a), Self::Null) => Self::Number(a),
@@ -89,26 +89,26 @@ impl<C: Ctx> Add for Value<C> {
             (Self::Number(a), Self::Number(b)) => Self::Number(a + b),
             (Self::Number(a), Self::String(b)) => Self::String(a.to_string() + &b),
             (Self::Number(a), Self::Boolean(b)) => Self::Number(a + b.num()),
-            (Self::Number(a), Self::Object(o)) => Self::String(format!("{}{}", a, o)),
+            (Self::Number(a), Self::Object(o)) => Self::String(format!("{a}{o}")),
 
             (Self::String(a), Self::Null) => Self::String(a + "null"),
             (Self::String(a), Self::Undefined) => Self::String(a + "undefined"),
             (Self::String(a), Self::Number(b)) => Self::String(a + &b.to_string()),
             (Self::String(a), Self::String(b)) => Self::String(a + &b),
             (Self::String(a), Self::Boolean(b)) => Self::String(a + &b.to_string()),
-            (Self::String(a), Self::Object(o)) => Self::String(format!("{}{}", a, o)),
+            (Self::String(a), Self::Object(o)) => Self::String(format!("{a}{o}")),
 
             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
             (Self::Boolean(_), Self::Undefined) => Self::Number(f64::NAN),
             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() + b),
             (Self::Boolean(a), Self::String(b)) => Self::String(a.to_string() + &b),
             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() + b.num()),
-            (Self::Boolean(a), Self::Object(o)) => Self::String(a.to_string() + &format!("{}", o)),
+            (Self::Boolean(a), Self::Object(o)) => Self::String(a.to_string() + &format!("{o}")),
 
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
-            (a, b) => Self::String(format!("{}{}", a, b)),
+            (a, b) => Self::String(format!("{a}{b}")),
         }
     }
 }
@@ -641,11 +641,11 @@ impl<C: Ctx> Value<C> {
             }
 
             (Self::Number(a), Self::Object(b)) | (Self::Object(b), Self::Number(a)) => {
-                a.to_string() == format!("{}", b)
+                a.to_string() == format!("{b}")
             }
 
             (Self::String(a), Self::Object(b)) | (Self::Object(b), Self::String(a)) => {
-                *a == format!("{}", b)
+                *a == format!("{b}")
             }
 
             (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => {
@@ -653,36 +653,36 @@ impl<C: Ctx> Value<C> {
             }
 
             (Self::Boolean(a), Self::Object(b)) | (Self::Object(b), Self::Boolean(a)) => {
-                a.num().to_string() == format!("{}", b)
+                a.num().to_string() == format!("{b}")
             }
 
             _ => false,
         }
     }
 
+    #[must_use]
     pub fn zero_fill_rshift(&self, rhs: &Self) -> Self {
-        Value::Number(f64::from(
+        Self::Number(f64::from(
             self.to_int_or_null() as u32 >> (rhs.to_int_or_null() as u32 % 32),
         ))
     }
 
     pub fn instance_of(&self, rhs: &Self, ctx: &mut C) -> Result<bool, Error<C>> {
-        let Value::Object(obj) = self else {
+        let Self::Object(obj) = self else {
             return Ok(false);
         };
 
-        let Value::Object(constructor) = rhs else {
-            return Err(Error::ty("Right-hand side of 'instanceof' is not an object").into());
+        let Self::Object(constructor) = rhs else {
+            return Err(Error::ty("Right-hand side of 'instanceof' is not an object"));
         };
 
-        let Value::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
+        let Self::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
             Error::ty("Right-hand side of 'instanceof' is not a constructor"),
         )?
         else {
             return Err(Error::ty(
                 "Right-hand side of 'instanceof' has not an object as constructor",
-            )
-            .into());
+            ));
         };
 
         let constructor_proto = constructor.get()?.prototype();
@@ -694,7 +694,7 @@ impl<C: Ctx> Value<C> {
                 return Ok(true);
             }
 
-            if let Value::Object(o) = p.value {
+            if let Self::Object(o) = p.value {
                 proto = Some(o.get()?.prototype());
             } else {
                 break;
@@ -720,7 +720,7 @@ impl<C: Ctx> SubAssign for Value<C> {
 #[cfg(test)]
 mod tests {
     use crate::variable::Variable;
-    use crate::Obj;
+    use crate::{Obj, ObjectProperty};
 
     use super::*;
 
@@ -737,7 +737,7 @@ mod tests {
 
         fn define_variable(&mut self, _name: crate::Value<()>, _value: Variable<()>) {}
 
-        fn resolve_property(&self, _name: &Value) -> Option<Value> {
+        fn resolve_property(&self, _name: &Value) -> Option<ObjectProperty<()>> {
             None
         }
 
@@ -745,11 +745,23 @@ mod tests {
             None
         }
 
-        fn get_property_mut(&mut self, _name: &Value) -> Option<&mut Value> {
-            None
+        fn define_getter(&mut self, _name: crate::Value<()>, _value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+            todo!()
         }
 
-        fn delete_property(&mut self, name: &crate::Value<()>) -> Option<crate::Value<()>> {
+        fn define_setter(&mut self, _name: crate::Value<()>, _value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+            todo!()
+        }
+
+        fn get_getter(&self, _name: &crate::Value<()>) -> Option<crate::Value<()>> {
+            todo!()
+        }
+
+        fn get_setter(&self, _name: &crate::Value<()>) -> Option<crate::Value<()>> {
+            todo!()
+        }
+
+        fn delete_property(&mut self, _name: &crate::Value<()>) -> Option<crate::Value<()>> {
             None
         }
 

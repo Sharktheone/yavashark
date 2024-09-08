@@ -427,6 +427,7 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn add_ref_by(&mut self, other: impl Into<GcRef<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.push(other.into());
@@ -435,6 +436,7 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.retain(|x| x.box_ptr() != other.cast());
@@ -443,6 +445,7 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn remove_ref_by_ptr(&mut self, other: *mut GcBox<T>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.retain(|x| x.box_ptr().as_ptr() != other.cast());
@@ -451,10 +454,12 @@ impl<T: Collectable> Refs<T> {
         }
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn inc_strong(&mut self) -> u32 {
         self.strong.fetch_add(1, Ordering::Relaxed)
     }
 
+    #[allow(clippy::needless_pass_by_ref_mut)]
     fn dec_strong(&mut self) -> u32 {
         self.strong.fetch_sub(1, Ordering::Relaxed)
     }
@@ -1120,7 +1125,7 @@ mod tests {
             }
 
             impl Node {
-                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self {
+                const fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self {
                     Self { data, other }
                 }
             }
@@ -1170,7 +1175,7 @@ mod tests {
             }
 
             impl Node {
-                fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self {
+                const fn create(data: i32, other: Vec<Gc<RefCell<Node>>>) -> Self {
                     Self {
                         data,
                         other,
@@ -1178,7 +1183,7 @@ mod tests {
                     }
                 }
 
-                fn create_all(
+                const fn create_all(
                     data: i32,
                     other: Vec<Gc<RefCell<Node>>>,
                     other_type: Vec<Gc<Other>>,
@@ -1413,6 +1418,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::similar_names)]
     fn complex() {
         setup!();
 
@@ -1433,7 +1439,6 @@ mod tests {
             pr.other.push(m3);
             pr.other.push(m4);
 
-            #[allow(clippy::similar_names)]
             {
                 let obj_1 = Node::add_with_other(10, &proto);
                 let obj_2 = Node::add_with_other(10, &proto);

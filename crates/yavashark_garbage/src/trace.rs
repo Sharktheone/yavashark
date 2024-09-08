@@ -31,13 +31,14 @@ pub struct Trace {
 }
 
 impl Trace {
-    #[allow(clippy::unused_self)]
+    #[allow(clippy::unused_self, clippy::needless_pass_by_ref_mut)]
     fn delete_cache(&mut self) {
         #[cfg(feature = "trace")]
         {
             self.svg_content = None;
         }
     }
+    
 }
 
 pub struct Tracer(Arc<Mutex<Trace>>);

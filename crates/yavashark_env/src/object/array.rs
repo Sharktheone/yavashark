@@ -36,7 +36,7 @@ impl Array {
     pub fn override_to_string(&self, ctx: &mut Context) -> Result<String, Error> {
         let mut buf = String::new();
 
-        for (_, value) in self.object.array.iter() {
+        for (_, value) in &self.object.array {
             buf.push_str(&value.value.to_string(ctx)?);
             buf.push_str(", ");
         }
@@ -47,10 +47,11 @@ impl Array {
         Ok(buf)
     }
 
+    #[must_use]
     pub fn override_to_string_internal(&self) -> String {
         let mut buf = String::new();
 
-        for (_, value) in self.object.array.iter() {
+        for (_, value) in &self.object.array {
             buf.push_str(&format!("{}", value.value));
             buf.push_str(", ");
         }

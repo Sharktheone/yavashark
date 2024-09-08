@@ -360,13 +360,13 @@ impl ScopeInternal {
     }
 
     pub fn has_value(&self, name: &str) -> Result<bool> {
-        return if self.variables.contains_key(name) {
+        if self.variables.contains_key(name) {
             Ok(true)
         } else {
             self.parent
                 .as_ref()
                 .map_or(Ok(false), |p| p.borrow()?.has_value(name))
-        };
+        }
     }
 
     #[must_use]
@@ -767,8 +767,8 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_var_and_resolve() {
-        let mut ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&mut ctx);
+        let ctx = Context::new().unwrap();
+        let mut scope = ScopeInternal::new(&ctx);
         scope.declare_var("test".to_string(), Value::Number(42.0));
         let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
@@ -776,8 +776,8 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_read_only_var_and_update_fails() {
-        let mut ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&mut ctx);
+        let ctx = Context::new().unwrap();
+        let mut scope = ScopeInternal::new(&ctx);
         scope
             .declare_read_only_var("test".to_string(), Value::Number(42.0))
             .unwrap();
@@ -787,17 +787,17 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
-        let mut ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&mut ctx);
-        scope.declare_global_var("test".to_string(), Value::Number(42.0));
+        let ctx = Context::new().unwrap();
+        let mut scope = ScopeInternal::new(&ctx);
+        scope.declare_global_var("test".to_string(), Value::Number(42.0)).unwrap();
         let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
-        let mut ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&mut ctx);
+        let ctx = Context::new().unwrap();
+        let mut scope = ScopeInternal::new(&ctx);
         scope
             .update_or_define("test".to_string(), Value::Number(42.0))
             .unwrap();

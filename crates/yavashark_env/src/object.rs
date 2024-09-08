@@ -205,8 +205,7 @@ impl Obj<Context> for Object {
                 Value::Object(o) => o
                     .resolve_property_no_get_set(name)
                     .ok()
-                    .flatten()
-                    .map(|v| v.into()), //TODO: this is wrong, we need a ctx here!
+                    .flatten(), //TODO: this is wrong, we need a ctx here!
                 _ => None,
             })
     }
@@ -226,12 +225,12 @@ impl Obj<Context> for Object {
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         let val = self.properties.get_mut(&name);
         if let Some(prop) = val {
-            prop.get = value.into();
+            prop.get = value;
             return Ok(());
         }
 
         self.properties
-            .insert(name, ObjectProperty::getter(value.into()));
+            .insert(name, ObjectProperty::getter(value));
 
         Ok(())
     }
@@ -239,21 +238,21 @@ impl Obj<Context> for Object {
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
         let val = self.properties.get_mut(&name);
         if let Some(prop) = val {
-            prop.set = value.into();
+            prop.set = value;
             return Ok(());
         }
 
         self.properties
-            .insert(name, ObjectProperty::setter(value.into()));
+            .insert(name, ObjectProperty::setter(value));
 
         Ok(())
     }
 
-    fn get_getter(&self, name: &Value) -> Option<Value> {
+    fn get_getter(&self, _name: &Value) -> Option<Value> {
         todo!("I guess, this can't be removed?")
     }
 
-    fn get_setter(&self, name: &Value) -> Option<Value> {
+    fn get_setter(&self, _name: &Value) -> Option<Value> {
         todo!("I guess, this can't be removed?")
     }
 
@@ -327,15 +326,15 @@ impl Obj<Context> for Object {
     }
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
-        if let Some(value) = self.resolve_array(index) {
-            let done = if let Some((i, _)) = self.array.last() {
+        if let Some(_value) = self.resolve_array(index) {
+            let _done = if let Some((i, _)) = self.array.last() {
                 index > *i
             } else {
                 false
             };
             todo!();
 
-            return (done, Some(value.value)); //TODO: `get_array_or_done` should return `ObjectProperty` instead of `Value`
+            // return (done, Some(value.value)); //TODO: `get_array_or_done` should return `ObjectProperty` instead of `Value`
         }
 
         (true, None)
@@ -379,11 +378,10 @@ mod tests {
 
     #[test]
     fn object_creation_with_proto() {
-        let context = Context::new().unwrap();
         let proto = Value::Number(42.0);
-        let object = Object::with_proto(proto);
+        let object = Object::with_proto(proto.clone());
 
-        // assert_eq!(obj.prototype.value, proto); //TODO: Add a function "get_proto" to Object
+        assert_eq!(object.get_property(&"__proto__".into()), Ok(proto));
     }
 
     #[test]
@@ -396,8 +394,8 @@ mod tests {
 
     #[test]
     fn array_position_empty_array() {
-        let mut context = Context::new().unwrap();
-        let object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let object = Object::raw(&context);
 
         let (index, found) = object.array_position(0);
 
@@ -407,8 +405,8 @@ mod tests {
 
     #[test]
     fn array_position_non_empty_array() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.insert_array(0, Value::Number(42.0).into());
 
         let (index, found) = object.array_position(0);
@@ -419,8 +417,8 @@ mod tests {
 
     #[test]
     fn insert_array() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.insert_array(0, Value::Number(42.0).into());
 
         assert_eq!(object.array[0].1.value, Value::Number(42.0));
@@ -428,8 +426,8 @@ mod tests {
 
     #[test]
     fn resolve_array() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.insert_array(0, Value::Number(42.0).into());
 
         let value = object.resolve_array(0);
@@ -439,8 +437,8 @@ mod tests {
 
     #[test]
     fn get_array() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.insert_array(0, Value::Number(42.0).into());
 
         let value = object.get_array(0);
@@ -450,8 +448,8 @@ mod tests {
 
     #[test]
     fn get_array_mut() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.insert_array(0, Value::Number(42.0).into());
 
         let value = object.get_array_mut(0);
@@ -461,8 +459,8 @@ mod tests {
 
     #[test]
     fn contains_array_key() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.insert_array(0, Value::Number(42.0).into());
 
         let contains = object.contains_array_key(0);
@@ -472,8 +470,8 @@ mod tests {
 
     #[test]
     fn define_property() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         assert_eq!(
@@ -488,8 +486,8 @@ mod tests {
 
     #[test]
     fn resolve_property() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         let value = object.resolve_property(&Value::String("key".to_string()));
@@ -499,8 +497,8 @@ mod tests {
 
     #[test]
     fn get_property() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         let value = object.get_property(&Value::String("key".to_string()));
@@ -510,8 +508,8 @@ mod tests {
 
     #[test]
     fn contains_key() {
-        let mut context = Context::new().unwrap();
-        let mut object = Object::raw(&mut context);
+        let context = Context::new().unwrap();
+        let mut object = Object::raw(&context);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         let contains = object.contains_key(&Value::String("key".to_string()));
