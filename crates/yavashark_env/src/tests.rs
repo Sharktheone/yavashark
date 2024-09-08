@@ -28,10 +28,38 @@ macro_rules! test_eval {
         assert_eq!(state.send_called, $sends);
         assert_eq!(state.got_values, $values);
     }; // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
+    
+    
+    ($code:expr) => {
+        {
+            use swc_common::BytePos;
+            let src = $code;
+            let input =
+                swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+
+            let c = Default::default();
+
+            let mut p = swc_ecma_parser::Parser::new(swc_ecma_parser::Syntax::Es(c), input, None);
+            let script = p.parse_script().unwrap();
+
+            crate::Interpreter::run_test(&script.body)
+        }
+    }
 }
 
 #[macro_export]
 macro_rules! expr {
+    ($code:expr, NaN) => {
+        let (res, _) = test_eval!($code);
+        
+        let res = res.unwrap();
+        
+        if let Value::Number(n) = &res {
+            assert!(n.is_nan(), "Expected NaN, got {}", *n);
+        } else {
+            panic!("Expected a number, got {:?}", res);
+        }
+    };
     ($code:expr, $res:expr) => {
         $crate::test_eval!($code, 0, Vec::<Vec<Value>>::new(), $res)
     };
