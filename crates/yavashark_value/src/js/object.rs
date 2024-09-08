@@ -515,7 +515,8 @@ impl<C: Ctx> ObjectProperty<C> {
         }
     }
 
-    #[must_use] pub fn copy(&self) -> Self {
+    #[must_use]
+    pub fn copy(&self) -> Self {
         Self {
             value: self.value.copy(),
             attributes: self.attributes,

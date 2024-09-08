@@ -673,12 +673,14 @@ impl<C: Ctx> Value<C> {
         };
 
         let Self::Object(constructor) = rhs else {
-            return Err(Error::ty("Right-hand side of 'instanceof' is not an object"));
+            return Err(Error::ty(
+                "Right-hand side of 'instanceof' is not an object",
+            ));
         };
 
-        let Self::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(
-            Error::ty("Right-hand side of 'instanceof' is not a constructor"),
-        )?
+        let Self::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(Error::ty(
+            "Right-hand side of 'instanceof' is not a constructor",
+        ))?
         else {
             return Err(Error::ty(
                 "Right-hand side of 'instanceof' has not an object as constructor",
@@ -745,11 +747,19 @@ mod tests {
             None
         }
 
-        fn define_getter(&mut self, _name: crate::Value<()>, _value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+        fn define_getter(
+            &mut self,
+            _name: crate::Value<()>,
+            _value: crate::Value<()>,
+        ) -> Result<(), crate::Error<()>> {
             todo!()
         }
 
-        fn define_setter(&mut self, _name: crate::Value<()>, _value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+        fn define_setter(
+            &mut self,
+            _name: crate::Value<()>,
+            _value: crate::Value<()>,
+        ) -> Result<(), crate::Error<()>> {
             todo!()
         }
 

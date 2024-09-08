@@ -38,7 +38,6 @@ impl Trace {
             self.svg_content = None;
         }
     }
-    
 }
 
 pub struct Tracer(Arc<Mutex<Trace>>);

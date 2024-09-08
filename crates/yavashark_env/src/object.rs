@@ -202,10 +202,7 @@ impl Obj<Context> for Object {
             .get(name)
             .cloned()
             .or_else(|| match &self.prototype.value {
-                Value::Object(o) => o
-                    .resolve_property_no_get_set(name)
-                    .ok()
-                    .flatten(), //TODO: this is wrong, we need a ctx here!
+                Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a ctx here!
                 _ => None,
             })
     }
@@ -229,8 +226,7 @@ impl Obj<Context> for Object {
             return Ok(());
         }
 
-        self.properties
-            .insert(name, ObjectProperty::getter(value));
+        self.properties.insert(name, ObjectProperty::getter(value));
 
         Ok(())
     }
@@ -242,8 +238,7 @@ impl Obj<Context> for Object {
             return Ok(());
         }
 
-        self.properties
-            .insert(name, ObjectProperty::setter(value));
+        self.properties.insert(name, ObjectProperty::setter(value));
 
         Ok(())
     }

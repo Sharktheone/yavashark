@@ -789,7 +789,9 @@ mod tests {
     fn scope_internal_declare_global_var_and_resolve() {
         let ctx = Context::new().unwrap();
         let mut scope = ScopeInternal::new(&ctx);
-        scope.declare_global_var("test".to_string(), Value::Number(42.0)).unwrap();
+        scope
+            .declare_global_var("test".to_string(), Value::Number(42.0))
+            .unwrap();
         let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }

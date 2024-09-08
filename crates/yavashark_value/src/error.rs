@@ -123,7 +123,8 @@ impl<C: Ctx> Error<C> {
         })
     }
 
-    #[must_use] pub fn message_internal(&self) -> String {
+    #[must_use]
+    pub fn message_internal(&self) -> String {
         match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)

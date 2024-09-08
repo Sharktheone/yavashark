@@ -43,12 +43,11 @@ impl VM {
     pub fn set_accb(&mut self, value: bool) {
         todo!()
     }
-    
+
     pub fn get_this(&self) -> Value {
         todo!()
     }
-    
-    
+
     pub fn get_constant(&self, const_idx: ConstIdx) -> Value {
         todo!()
     }
