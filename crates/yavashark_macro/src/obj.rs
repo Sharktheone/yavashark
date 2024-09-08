@@ -26,12 +26,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     variable
         .segments
         .push(PathSegment::from(Ident::new("Variable", input.span())));
-    
-    
+
     let mut object_property = crate_path.clone();
-    object_property
-        .segments
-        .push(PathSegment::from(Ident::new("ObjectProperty", input.span())));
+    object_property.segments.push(PathSegment::from(Ident::new(
+        "ObjectProperty",
+        input.span(),
+    )));
 
     let mut context = crate_path.clone();
     context

@@ -514,8 +514,7 @@ impl<C: Ctx> ObjectProperty<C> {
             Ok(self.value.copy())
         }
     }
-    
-    
+
     pub fn copy(&self) -> Self {
         Self {
             value: self.value.copy(),

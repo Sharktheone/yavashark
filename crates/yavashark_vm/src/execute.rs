@@ -165,12 +165,16 @@ impl Execute for Instruction {
             Instruction::JmpIfNotAccRel(target) => instructions::jmp_if_not_acc_rel(*target, vm),
             Instruction::JmpNullRel(target, name) => instructions::jmp_null_rel(*name, *target, vm),
             Instruction::JmpNullAccRel(target) => instructions::jmp_null_acc_rel(*target, vm),
-            Instruction::JmpUndefRel(target, name) => instructions::jmp_undef_rel(*name, *target, vm),
+            Instruction::JmpUndefRel(target, name) => {
+                instructions::jmp_undef_rel(*name, *target, vm)
+            }
             Instruction::JmpUndefAccRel(target) => instructions::jmp_undef_acc_rel(*target, vm),
             Instruction::JmpNullUndefRel(name, addr) => {
                 instructions::jmp_null_undef_rel(*addr, *name, vm)
             }
-            Instruction::JmpNullUndefAccRel(addr) => instructions::jmp_null_undef_acc_rel(*addr, vm),
+            Instruction::JmpNullUndefAccRel(addr) => {
+                instructions::jmp_null_undef_acc_rel(*addr, vm)
+            }
 
             // Instruction::Str(name, const_idx) => instructions::str(name, const_idx, vm),
             // Instruction::StrAcc(const_idx) => instructions::str_acc(const_idx, vm),

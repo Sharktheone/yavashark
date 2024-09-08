@@ -1,4 +1,3 @@
-
 use crate::VM;
 use yavashark_bytecode::{JmpOffset, VarName};
 use yavashark_env::{Value, Variable};

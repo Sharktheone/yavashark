@@ -202,7 +202,11 @@ impl Obj<Context> for Object {
             .get(name)
             .cloned()
             .or_else(|| match &self.prototype.value {
-                Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten().map(|v| v.into()), //TODO: this is wrong, we need a ctx here!
+                Value::Object(o) => o
+                    .resolve_property_no_get_set(name)
+                    .ok()
+                    .flatten()
+                    .map(|v| v.into()), //TODO: this is wrong, we need a ctx here!
                 _ => None,
             })
     }
@@ -297,7 +301,11 @@ impl Obj<Context> for Object {
         self.array
             .iter()
             .map(|(i, v)| (Value::Number(*i as f64), v.value.copy()))
-            .chain(self.properties.iter().map(|(k, v)| (k.copy(), v.value.copy())))
+            .chain(
+                self.properties
+                    .iter()
+                    .map(|(k, v)| (k.copy(), v.value.copy())),
+            )
             .collect()
     }
 
