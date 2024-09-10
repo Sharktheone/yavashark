@@ -36,3 +36,25 @@ pub fn pop_to_acc(vm: &mut VM) {
     let value = vm.pop();
     vm.set_acc(value);
 }
+
+
+
+pub fn stack_to_reg(reg: Reg, vm: &mut VM) {
+    let value = vm.pop();
+    vm.set_register(reg, value);
+}
+
+pub fn stack_to_acc(vm: &mut VM) {
+    let value = vm.pop();
+    vm.set_acc(value);
+}
+
+pub fn stack_idx_to_reg(reg: Reg, idx: u32, vm: &mut VM) {
+    let value = vm.get_stack(idx);
+    vm.set_register(reg, value);
+}
+
+pub fn stack_idx_to_acc(idx: u32, vm: &mut VM) {
+    let value = vm.get_stack(idx);
+    vm.set_acc(value);
+}
