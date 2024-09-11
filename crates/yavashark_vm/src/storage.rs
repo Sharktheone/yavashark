@@ -51,8 +51,7 @@ impl VM {
     pub fn get_constant(&self, const_idx: ConstIdx) -> Value {
         todo!()
     }
-    
-    
+
     pub fn get_stack(&self, idx: u32) -> Value {
         todo!()
     }

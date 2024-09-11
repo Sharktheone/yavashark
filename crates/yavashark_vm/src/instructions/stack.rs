@@ -1,5 +1,5 @@
-use yavashark_bytecode::{ConstIdx, Reg};
 use crate::VM;
+use yavashark_bytecode::{ConstIdx, Reg};
 
 pub fn push_const(const_idx: ConstIdx, vm: &mut VM) {
     let value = vm.get_constant(const_idx);
@@ -20,7 +20,6 @@ pub fn pop(vm: &mut VM) {
     vm.pop();
 }
 
-
 pub fn pop_n(n: u32, vm: &mut VM) {
     for _ in 0..n {
         vm.pop();
@@ -36,8 +35,6 @@ pub fn pop_to_acc(vm: &mut VM) {
     let value = vm.pop();
     vm.set_acc(value);
 }
-
-
 
 pub fn stack_to_reg(reg: Reg, vm: &mut VM) {
     let value = vm.pop();
