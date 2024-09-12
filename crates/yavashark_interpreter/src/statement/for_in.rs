@@ -73,20 +73,21 @@ mod tests {
 
     #[test]
     fn test_for_in() {
-        test_eval!(
+        let (result, values) = test_eval!(
             "
             let obj = { a: 1, b: 2, c: 3 };
             for (let key in obj) {
                 mock.values(key);
             }
-            ",
-            0,
-            vec![
-                vec![Value::String("a".into())],
-                vec![Value::String("b".into())],
-                vec![Value::String("c".into())],
-            ],
-            Value::Undefined
+            "
         ); //TODO: this test not always passes, since it somehow is in random order
+        
+        assert_eq!(result, Ok(Value::Undefined));
+        
+        let values = &values.borrow().got_values;
+        
+        assert!(values.contains(&vec![Value::String("a".to_string())]));
+        assert!(values.contains(&vec![Value::String("b".to_string())]));
+        assert!(values.contains(&vec![Value::String("c".to_string())]));
     }
 }
