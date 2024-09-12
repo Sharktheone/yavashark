@@ -35,7 +35,7 @@ impl Interpreter {
             BinaryOp::LogicalAnd => left.log_and(right),
             BinaryOp::In => right.contains_key(&left)?.into(),
             BinaryOp::InstanceOf => left.instance_of(&right, ctx)?.into(),
-            BinaryOp::Exp => left.pow(&right),
+            BinaryOp::Exp => left.pow(&right, ctx)?,
             BinaryOp::NullishCoalescing => {
                 if left.is_nullish() {
                     right

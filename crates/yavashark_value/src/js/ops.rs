@@ -32,9 +32,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use]
-    pub fn to_number(&self) -> f64 {
-        match self {
+    pub fn to_number(&self, ctx: &mut C) -> Result<f64, Error<C>> {
+        Ok(match self {
             Self::Number(n) => *n,
             Self::Boolean(b) => b.num(),
             Self::String(s) => {
@@ -45,8 +44,17 @@ impl<C: Ctx> Value<C> {
                 }
             }
             Self::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
+            Value::Object(o) => {
+                let v = o.to_string(ctx)?;
+                
+                if v.is_empty() {
+                    0.0
+                } else {
+                    v.parse().unwrap_or(f64::NAN)
+                }
+            },
             _ => f64::NAN,
-        }
+        })
     }
 
     #[must_use]
@@ -617,9 +625,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    #[must_use]
-    pub fn pow(&self, rhs: &Self) -> Self {
-        Self::Number(self.to_number().powf(rhs.to_number()))
+    pub fn pow(&self, rhs: &Self, ctx: &mut C) -> Result<Self, Error<C>> {
+        Ok(Self::Number(self.to_number(ctx)?.powf(rhs.to_number(ctx)?)))
     }
 
     #[must_use]

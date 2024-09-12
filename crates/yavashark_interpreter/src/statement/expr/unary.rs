@@ -14,8 +14,8 @@ impl Interpreter {
         })?;
 
         Ok(match stmt.op {
-            UnaryOp::Plus => Value::Number(value.to_number()),
-            UnaryOp::Minus => Value::Number(-value.to_number()),
+            UnaryOp::Plus => Value::Number(value.to_number(ctx)?),
+            UnaryOp::Minus => Value::Number(-value.to_number(ctx)?),
             UnaryOp::Bang => Value::Boolean(!value.is_truthy()),
             UnaryOp::Tilde => Value::Number((!(value.to_int_or_null())) as f64),
             UnaryOp::TypeOf => Value::String(value.type_of().into()),
