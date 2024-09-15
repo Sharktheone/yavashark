@@ -12,7 +12,7 @@ pub fn push_reg(reg: Reg, vm: &mut VM) {
 }
 
 pub fn push_acc(vm: &mut VM) {
-    let value = vm.get_acc();
+    let value = vm.acc();
     vm.push(value);
 }
 
