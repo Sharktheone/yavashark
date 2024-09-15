@@ -3,7 +3,7 @@ use yavashark_bytecode::Instruction;
 use yavashark_env::ControlResult;
 
 trait Execute {
-    fn execute(&self, vm: &mut VM);
+    fn execute(&self, vm: &mut VM) -> ControlResult;
 }
 
 impl Execute for Instruction {
@@ -214,10 +214,10 @@ impl Execute for Instruction {
             Instruction::PopToAcc => instructions::pop_to_acc(vm),
             Instruction::StackToReg(reg) => instructions::stack_to_reg(*reg, vm),
             Instruction::StackToAcc => instructions::stack_to_acc(vm),
-            Instruction::StackIdxToReg(reg, idx) => instructions::stack_idx_to_reg(*reg, idx, vm),
+            Instruction::StackIdxToReg(reg, idx) => instructions::stack_idx_to_reg(*reg, *idx, vm),
             Instruction::StackIdxToAcc(idx) => instructions::stack_idx_to_acc(*idx, vm),
-            Instruction::RegToAcc(reg) => instructions::reg_to_acc(reg, vm),
-            Instruction::AccToReg(reg) => instructions::acc_to_reg(reg, vm),
+            Instruction::RegToAcc(reg) => instructions::reg_to_acc(*reg, vm),
+            Instruction::AccToReg(reg) => instructions::acc_to_reg(*reg, vm),
 
             Instruction::Return => instructions::return_()?,
             Instruction::ReturnAcc => instructions::return_acc(vm)?,
