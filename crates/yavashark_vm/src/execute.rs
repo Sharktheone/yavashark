@@ -200,8 +200,6 @@ impl Execute for Instruction {
             Instruction::LoadEnv(name) => instructions::load_env(name, vm),
             Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(name, reg, vm),
 
-            Instruction::For => instructions::for_(vm),
-
             Instruction::TypeOf(name) => instructions::type_of(*name, vm),
             Instruction::TypeOfAcc => instructions::type_of_acc(vm),
 
