@@ -1,6 +1,6 @@
 use crate::VM;
 use yavashark_bytecode::{JmpAddr, VarName};
-use yavashark_env::{Value, Variable};
+use yavashark_env::Value;
 
 pub fn jmp(target: JmpAddr, vm: &mut VM) {
     vm.set_pc(target);

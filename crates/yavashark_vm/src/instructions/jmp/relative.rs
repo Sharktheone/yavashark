@@ -1,6 +1,6 @@
 use crate::VM;
 use yavashark_bytecode::{JmpOffset, VarName};
-use yavashark_env::{Value, Variable};
+use yavashark_env::Value;
 
 pub fn jmp_rel(target: JmpOffset, vm: &mut VM) {
     vm.offset_pc(target);

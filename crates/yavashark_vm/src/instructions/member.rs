@@ -1,7 +1,7 @@
 use crate::value_ext::ValueExt;
 use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
-use yavashark_env::{ControlResult, Value};
+use yavashark_env::ControlResult;
 
 pub fn load_member(target: VarName, member: VarName, vm: &mut VM) -> ControlResult {
     let value = vm.get_variable(target);

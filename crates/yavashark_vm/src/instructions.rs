@@ -24,6 +24,7 @@ pub use controlflow::*;
 pub use instanceof::*;
 pub use jmp::*;
 pub use lda::*;
+#[allow(unused)]
 pub use load::*;
 pub use logical::*;
 pub use math::*;
@@ -32,6 +33,7 @@ pub use nullish_coalescing::*;
 pub use r#in::*;
 pub use scope::*;
 pub use stack::*;
+#[allow(unused)]
 pub use str::*;
 pub use this::*;
 pub use type_of::*;
