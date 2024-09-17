@@ -1,5 +1,3 @@
-use rand::random;
-
 #[test]
 fn test() {
     use swc_common::BytePos;

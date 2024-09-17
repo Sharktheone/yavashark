@@ -100,10 +100,10 @@ impl Execute for Instruction {
             Instruction::InAcc(reg) => instructions::in_acc(*reg, vm)?,
             Instruction::InReg(lhs, rhs) => instructions::in_reg(*lhs, *rhs, vm)?,
 
-            Instruction::InstanceOf(target, name) => *instructions::instance_of(*target, *name, vm),
-            Instruction::InstanceOfAcc(reg) => instructions::instance_of_acc(*reg, vm),
+            Instruction::InstanceOf(target, name) => instructions::instance_of(*target, *name, vm)?,
+            Instruction::InstanceOfAcc(reg) => instructions::instance_of_acc(*reg, vm)?,
             Instruction::InstanceOfReg(target, reg) => {
-                instructions::instance_of_reg(*target, *reg, vm)
+                instructions::instance_of_reg(*target, *reg, vm)?
             }
 
             Instruction::Exp(target, name) => instructions::exp(*target, *name, vm),
