@@ -3,7 +3,7 @@ use yavashark_bytecode::VarName;
 use yavashark_env::{Error, Value};
 
 pub trait ValueExt {
-    fn get_member(&self, member: VarName, vm: &mut VM) -> Result<Self, Error>;
+    fn get_member(&self, member: VarName, vm: &mut VM) -> Result<Self, Error> where Self: Sized;
 }
 
 impl ValueExt for Value {

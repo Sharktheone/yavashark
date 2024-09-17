@@ -55,4 +55,9 @@ impl VM {
     pub fn get_stack(&self, idx: u32) -> Value {
         todo!()
     }
+    
+    
+    pub fn get_args(&mut self, num: u16) -> Vec<Value> {
+        todo!()
+    }
 }

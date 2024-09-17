@@ -10,7 +10,11 @@ pub fn call(num_args: u16, var_name: VarName, vm: &mut VM) -> ControlResult {
 
     let args = vm.get_args(num_args);
 
-    func.call(vm.get_context(), args, this)
+    let val = func.call(vm.get_context(), args, this)?;
+    
+    vm.set_acc(val);
+    
+    Ok(())
 }
 
 pub fn call_reg(num_args: u16, reg: Reg, vm: &mut VM) -> ControlResult {
@@ -20,7 +24,11 @@ pub fn call_reg(num_args: u16, reg: Reg, vm: &mut VM) -> ControlResult {
 
     let args = vm.get_args(num_args);
 
-    func.call(vm.get_context(), args, this)
+    let val = func.call(vm.get_context(), args, this)?;
+    
+    vm.set_acc(val);
+    
+    Ok(())
 }
 
 pub fn call_acc(num_args: u16, vm: &mut VM) -> ControlResult {
@@ -30,7 +38,11 @@ pub fn call_acc(num_args: u16, vm: &mut VM) -> ControlResult {
 
     let args = vm.get_args(num_args);
 
-    func.call(vm.get_context(), args, this)
+    let val = func.call(vm.get_context(), args, this)?;
+    
+    vm.set_acc(val);
+    
+    Ok(())
 }
 
 pub fn call_member(num_args: u16, target: VarName, member: VarName, vm: &mut VM) -> ControlResult {
@@ -41,7 +53,11 @@ pub fn call_member(num_args: u16, target: VarName, member: VarName, vm: &mut VM)
 
     let args = vm.get_args(num_args);
 
-    func.call(vm.get_context(), args, this)
+    let val = func.call(vm.get_context(), args, this)?;
+    
+    vm.set_acc(val);
+    
+    Ok(())
 }
 
 pub fn call_member_reg(num_args: u16, target: Reg, member: VarName, vm: &mut VM) -> ControlResult {
@@ -52,7 +68,11 @@ pub fn call_member_reg(num_args: u16, target: Reg, member: VarName, vm: &mut VM)
 
     let args = vm.get_args(num_args);
 
-    func.call(vm.get_context(), args, this)
+    let val = func.call(vm.get_context(), args, this)?;
+    
+    vm.set_acc(val);
+    
+    Ok(())
 }
 
 pub fn call_member_acc(num_args: u16, member: VarName, vm: &mut VM) -> ControlResult {
@@ -63,5 +83,9 @@ pub fn call_member_acc(num_args: u16, member: VarName, vm: &mut VM) -> ControlRe
 
     let args = vm.get_args(num_args);
 
-    func.call(vm.get_context(), args, this)
+    let val = func.call(vm.get_context(), args, this)?;
+    
+    vm.set_acc(val);
+    
+    Ok(())
 }
