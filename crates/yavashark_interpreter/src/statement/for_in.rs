@@ -81,11 +81,11 @@ mod tests {
             }
             "
         ); //TODO: this test not always passes, since it somehow is in random order
-        
+
         assert_eq!(result, Ok(Value::Undefined));
-        
+
         let values = &values.borrow().got_values;
-        
+
         assert!(values.contains(&vec![Value::String("a".to_string())]));
         assert!(values.contains(&vec![Value::String("b".to_string())]));
         assert!(values.contains(&vec![Value::String("c".to_string())]));

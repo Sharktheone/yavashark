@@ -56,7 +56,6 @@ pub fn stack_idx_to_acc(idx: u32, vm: &mut VM) {
     vm.set_acc(value);
 }
 
-
 pub fn reg_to_acc(reg: Reg, vm: &mut VM) {
     let value = vm.get_register(reg);
     vm.set_acc(value);
