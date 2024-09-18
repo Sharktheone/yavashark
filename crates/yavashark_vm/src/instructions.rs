@@ -16,6 +16,7 @@ mod stack;
 mod str;
 mod this;
 mod type_of;
+mod env;
 
 pub use bit::*;
 pub use call::*;
@@ -37,3 +38,4 @@ pub use stack::*;
 pub use str::*;
 pub use this::*;
 pub use type_of::*;
+pub use env::*;

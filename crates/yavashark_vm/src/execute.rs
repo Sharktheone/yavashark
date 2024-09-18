@@ -106,9 +106,9 @@ impl Execute for Instruction {
                 instructions::instance_of_reg(*target, *reg, vm)?
             }
 
-            Instruction::Exp(target, name) => instructions::exp(*target, *name, vm),
-            Instruction::ExpAcc(reg) => instructions::exp_acc(*reg, vm),
-            Instruction::ExpReg(target, reg) => instructions::exp_reg(*target, *reg, vm),
+            Instruction::Exp(target, name) => instructions::exp(*target, *name, vm)?,
+            Instruction::ExpAcc(reg) => instructions::exp_acc(*reg, vm)?,
+            Instruction::ExpReg(target, reg) => instructions::exp_reg(*target, *reg, vm)?,
 
             Instruction::NullishCoalescing(target, name) => {
                 instructions::nullish_coalescing(*target, *name, vm)
@@ -197,8 +197,10 @@ impl Execute for Instruction {
             //     instructions::load_acc_member(member, reg, vm)
             // }
             // Instruction::LoadAccMemberAcc(member) => instructions::load_acc_member_acc(member, vm),
-            // Instruction::LoadEnv(name) => instructions::load_env(name, vm),
-            // Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(name, reg, vm),
+            
+            
+            Instruction::LoadEnv(name) => instructions::load_env(*name, vm),
+            Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(*name, *reg, vm),
 
             Instruction::TypeOf(name) => instructions::type_of(*name, vm),
             Instruction::TypeOfAcc => instructions::type_of_acc(vm),
