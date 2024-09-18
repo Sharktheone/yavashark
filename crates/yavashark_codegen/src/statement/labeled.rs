@@ -10,7 +10,7 @@ impl ByteCodegen {
 
         self.labels.push((name.clone(), self.instructions.len()));
 
-        self.compile_stmt(&stmt.body)?;
+        self.compile_statement(&stmt.body)?;
 
         let lbl = self.labels.pop();
 

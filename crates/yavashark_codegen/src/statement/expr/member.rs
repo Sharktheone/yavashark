@@ -10,7 +10,7 @@ impl ByteCodegen {
             let var_name = self.allocate_variable(ident.sym.as_str().to_string());
 
             self.instructions
-                .push(Instruction::LoadAccMemberAcc(var_name));
+                .push(Instruction::LoadMemberAcc(var_name));
         } else {
             todo!()
         }
