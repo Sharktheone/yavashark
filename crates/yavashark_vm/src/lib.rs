@@ -34,4 +34,9 @@ impl VM {
     pub fn set_pc(&mut self, pc: usize) {
         self.pc = pc;
     }
+
+    pub fn offset_pc(&mut self, offset: isize) {
+        // pc won't be above isize::MAX, since this is `Vec`'s length limit
+        self.pc = (self.pc as isize + offset) as usize;
+    }
 }
