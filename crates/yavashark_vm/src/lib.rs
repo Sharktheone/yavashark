@@ -9,7 +9,7 @@ mod data;
 pub use regs::*;
 pub use stack::*;
 use yavashark_bytecode::Instruction;
-use yavashark_env::{Context, Res};
+use yavashark_env::{Context, Res, Value};
 use yavashark_env::scope::Scope;
 use crate::data::DataSection;
 
@@ -23,6 +23,8 @@ pub struct VM {
 
     current_scope: Scope,
     
+    acc: Value,
+
     ctx: Context,
 }
 
@@ -33,13 +35,13 @@ impl VM {
 
     pub fn push_scope(&mut self) -> Res {
         self.current_scope = self.current_scope.child()?;
-        
+
         Ok(())
     }
 
     pub fn pop_scope(&mut self) -> Res {
         self.current_scope = self.current_scope.parent()?.ok_or("No parent scope")?;
-        
+
         Ok(())
     }
 
