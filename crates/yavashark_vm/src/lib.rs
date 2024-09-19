@@ -4,12 +4,14 @@ mod regs;
 mod stack;
 mod storage;
 mod value_ext;
+mod data;
 
 pub use regs::*;
 pub use stack::*;
 use yavashark_bytecode::Instruction;
 use yavashark_env::{Context, Res};
 use yavashark_env::scope::Scope;
+use crate::data::DataSection;
 
 pub struct VM {
     regs: Registers,
@@ -17,7 +19,8 @@ pub struct VM {
 
     pc: usize,
     code: Vec<Instruction>,
-    
+    data: DataSection,
+
     current_scope: Scope,
     
     ctx: Context,
