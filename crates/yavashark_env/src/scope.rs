@@ -691,6 +691,13 @@ impl Scope {
     pub fn this(&self) -> Result<Value> {
         Ok(self.scope.borrow()?.this.copy())
     }
+    
+    
+    pub fn parent(&self) -> Result<Option<Self>> {
+        Ok(self.scope.borrow()?.parent.as_ref().map(|p| Self {
+            scope: Gc::clone(p),
+        }))
+    }
 }
 
 impl CustomGcRefUntyped for Scope {

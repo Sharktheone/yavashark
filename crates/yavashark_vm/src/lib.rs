@@ -8,7 +8,8 @@ mod value_ext;
 pub use regs::*;
 pub use stack::*;
 use yavashark_bytecode::Instruction;
-use yavashark_env::Context;
+use yavashark_env::{Context, Res};
+use yavashark_env::scope::Scope;
 
 pub struct VM {
     regs: Registers,
@@ -16,19 +17,27 @@ pub struct VM {
 
     pc: usize,
     code: Vec<Instruction>,
+    
+    current_scope: Scope,
+    
+    ctx: Context,
 }
 
 impl VM {
     pub fn get_context(&mut self) -> &mut Context {
-        todo!()
+        &mut self.ctx
     }
 
-    pub fn push_scope(&mut self) {
-        todo!()
+    pub fn push_scope(&mut self) -> Res {
+        self.current_scope = self.current_scope.child()?;
+        
+        Ok(())
     }
 
-    pub fn pop_scope(&mut self) {
-        todo!()
+    pub fn pop_scope(&mut self) -> Res {
+        self.current_scope = self.current_scope.parent()?.ok_or("No parent scope")?;
+        
+        Ok(())
     }
 
     pub fn set_pc(&mut self, pc: usize) {
