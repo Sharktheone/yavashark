@@ -5,21 +5,21 @@ use yavashark_env::value::Error;
 
 #[allow(unused)]
 impl VM {
-    pub fn get_variable(&self, name: VarName) -> Result<Option<Value>> {
+    pub fn get_variable(&self, name: VarName) -> Result<Value> {
         
         let Some(name) = self.var_name(name) else {
-            return Ok(None);
+            return Err(Error::reference("Invalid variable name"));
         };
         
-        self.current_scope.resolve(name)
+        self.current_scope.resolve(name)?.ok_or(Error::reference("Variable not found"))
     }
 
     pub fn var_name(&self, name: VarName) -> Option<&str> {
         self.data.var_names.get(name as usize).map(|s| s.as_str())
     }
 
-    pub fn get_register(&self, reg: Reg) -> Option<Value> {
-        self.regs.get(reg)
+    pub fn get_register(&self, reg: Reg) -> Result<Value> {
+        self.regs.get(reg).ok_or(Error::reference("Invalid register"))
     }
 
     pub fn set_variable(&mut self, name: VarName, value: Value) -> Res {
