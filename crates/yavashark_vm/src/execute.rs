@@ -2,7 +2,7 @@ use crate::{instructions, VM};
 use yavashark_bytecode::Instruction;
 use yavashark_env::ControlResult;
 
-trait Execute {
+pub trait Execute {
     fn execute(&self, vm: &mut VM) -> ControlResult;
 }
 

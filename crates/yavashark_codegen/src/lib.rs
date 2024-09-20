@@ -16,6 +16,7 @@ mod utils;
 
 pub use labels::*;
 
+#[derive(Debug)]
 struct ByteCodegen {
     instructions: Vec<Instruction>,
     variables: Vec<String>,

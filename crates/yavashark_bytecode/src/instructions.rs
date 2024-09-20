@@ -1,6 +1,7 @@
 use crate::{ConstIdx, JmpAddr, JmpOffset, Reg, VarName};
 
 #[repr(u16)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Instruction {
     Add(VarName, VarName),
     AddAccReg(Reg),

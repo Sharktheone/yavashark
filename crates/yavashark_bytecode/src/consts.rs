@@ -1,3 +1,8 @@
+
+
+
+
+#[derive(Debug, Clone)]
 pub enum ConstValue {
     Null,
     Undefined,
@@ -8,4 +13,5 @@ pub enum ConstValue {
     Symbol(String),
 }
 
+#[derive(Debug, Clone)]
 pub struct ObjectLiteralBlueprint {}
