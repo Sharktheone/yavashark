@@ -11,7 +11,7 @@ pub use regs::*;
 pub use stack::*;
 use yavashark_bytecode::Instruction;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, Res, Value};
+use yavashark_env::{Context, Error, Res, Value};
 use crate::execute::Execute;
 
 pub struct VM {
@@ -41,7 +41,7 @@ impl VM {
     }
 
     pub fn pop_scope(&mut self) -> Res {
-        self.current_scope = self.current_scope.parent()?.ok_or("No parent scope")?;
+        self.current_scope = self.current_scope.parent()?.ok_or(Error::new("No parent scope"))?;
 
         Ok(())
     }
