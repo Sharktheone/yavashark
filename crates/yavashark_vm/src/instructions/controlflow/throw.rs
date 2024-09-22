@@ -9,11 +9,11 @@ pub fn throw_acc(vm: &mut VM) -> ControlResult {
 }
 
 pub fn throw_reg(reg: Reg, vm: &mut VM) -> ControlResult {
-    let value = vm.get_register(reg);
+    let value = vm.get_register(reg)?;
     Err(ControlFlow::Error(Error::throw(value)))
 }
 
 pub fn throw(var: VarName, vm: &mut VM) -> ControlResult {
-    let value = vm.get_variable(var);
+    let value = vm.get_variable(var)?;
     Err(ControlFlow::Error(Error::throw(value)))
 }
