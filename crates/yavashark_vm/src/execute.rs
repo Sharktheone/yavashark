@@ -207,9 +207,9 @@ impl Execute for Instruction {
 
             Instruction::PushConst(idx) => instructions::push_const(*idx, vm)?,
             Instruction::PushReg(reg) => instructions::push_reg(*reg, vm)?,
-            Instruction::PushAcc => instructions::push_acc(vm)?,
-            Instruction::Pop => instructions::pop(vm)?,
-            Instruction::PopN(b) => instructions::pop_n(*b, vm)?,
+            Instruction::PushAcc => instructions::push_acc(vm),
+            Instruction::Pop => instructions::pop(vm),
+            Instruction::PopN(b) => instructions::pop_n(*b, vm),
             Instruction::PopToReg(reg) => instructions::pop_to_reg(*reg, vm)?,
             Instruction::PopToAcc => instructions::pop_to_acc(vm)?,
             Instruction::StackToReg(reg) => instructions::stack_to_reg(*reg, vm)?,

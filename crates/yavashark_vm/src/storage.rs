@@ -55,7 +55,7 @@ impl VM {
         self.current_scope.this()
     }
 
-    pub fn get_constant(&self, const_idx: ConstIdx) -> Option<Value> {
+    pub fn get_constant(&self, const_idx: ConstIdx) -> Result<Value> {
         todo!()
     }
 
