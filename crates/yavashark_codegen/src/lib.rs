@@ -54,4 +54,6 @@ fn test_compile() {
     };
 
     bc.compile_statements(&script.body);
+    
+    println!("{:?}", bc);
 }

@@ -93,7 +93,7 @@ impl Execute for Instruction {
             Instruction::ZeroFillRShift(lhs, rhs) => instructions::zero_fill_rshift(*lhs, *rhs, vm)?,
             Instruction::ZeroFillRShiftAcc(reg) => instructions::zero_fill_rshift_acc(*reg, vm)?,
             Instruction::ZeroFillRShiftReg(lhs, rhs) => {
-                instructions::zero_fill_rshift_reg(*lhs, *rhs, vm)
+                instructions::zero_fill_rshift_reg(*lhs, *rhs, vm)?
             }
 
             Instruction::In(lhs, rhs) => instructions::in_(*lhs, *rhs, vm)?,
