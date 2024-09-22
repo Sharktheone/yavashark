@@ -13,11 +13,11 @@ pub fn return_acc(vm: &mut VM) -> ControlResult {
 }
 
 pub fn return_reg(reg: Reg, vm: &mut VM) -> ControlResult {
-    let value = vm.get_register(reg);
+    let value = vm.get_register(reg)?;
     Err(ControlFlow::Return(value))
 }
 
 pub fn return_var(var: VarName, vm: &mut VM) -> ControlResult {
-    let value = vm.get_variable(var);
+    let value = vm.get_variable(var)?;
     Err(ControlFlow::Return(value))
 }
