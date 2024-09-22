@@ -3,8 +3,8 @@ use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::Res;
 
 pub fn exp(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
-    let lhs = vm.get_variable(lhs);
-    let rhs = vm.get_variable(rhs);
+    let lhs = vm.get_variable(lhs)?;
+    let rhs = vm.get_variable(rhs)?;
     
     let ctx = vm.get_context();
     
@@ -17,7 +17,7 @@ pub fn exp(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
 
 pub fn exp_acc(reg: Reg, vm: &mut VM) -> Res {
     let acc = vm.acc();
-    let reg = vm.get_register(reg);
+    let reg = vm.get_register(reg)?;
     
     let ctx = vm.get_context();
     
@@ -29,8 +29,8 @@ pub fn exp_acc(reg: Reg, vm: &mut VM) -> Res {
 }
 
 pub fn exp_reg(reg1: Reg, reg2: Reg, vm: &mut VM) -> Res {
-    let reg1 = vm.get_register(reg1);
-    let reg2 = vm.get_register(reg2);
+    let reg1 = vm.get_register(reg1)?;
+    let reg2 = vm.get_register(reg2)?;
     
     let ctx = vm.get_context();
     

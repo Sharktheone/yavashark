@@ -4,7 +4,7 @@ use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::ControlResult;
 
 pub fn load_member(target: VarName, member: VarName, vm: &mut VM) -> ControlResult {
-    let value = vm.get_variable(target);
+    let value = vm.get_variable(target)?;
     let member = value.get_member(member, vm)?;
     vm.set_acc(member);
 
@@ -20,7 +20,7 @@ pub fn load_member_acc(member: VarName, vm: &mut VM) -> ControlResult {
 }
 
 pub fn load_member_reg(target: Reg, member: VarName, vm: &mut VM) -> ControlResult {
-    let value = vm.get_register(target);
+    let value = vm.get_register(target)?;
     let member = value.get_member(member, vm)?;
     vm.set_acc(member);
 

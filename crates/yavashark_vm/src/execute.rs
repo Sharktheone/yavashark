@@ -111,13 +111,13 @@ impl Execute for Instruction {
             Instruction::ExpReg(target, reg) => instructions::exp_reg(*target, *reg, vm)?,
 
             Instruction::NullishCoalescing(target, name) => {
-                instructions::nullish_coalescing(*target, *name, vm)
+                instructions::nullish_coalescing(*target, *name, vm)?
             }
             Instruction::NullishCoalescingAcc(reg) => {
-                instructions::nullish_coalescing_acc(*reg, vm)
+                instructions::nullish_coalescing_acc(*reg, vm)?
             }
             Instruction::NullishCoalescingReg(target, reg) => {
-                instructions::nullish_coalescing_reg(*target, *reg, vm)
+                instructions::nullish_coalescing_reg(*target, *reg, vm)?
             }
 
             Instruction::Dec(name) => instructions::dec(*name, vm)?,
