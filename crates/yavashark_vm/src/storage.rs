@@ -56,7 +56,9 @@ impl VM {
     }
 
     pub fn get_constant(&self, const_idx: ConstIdx) -> Result<Value> {
-        todo!()
+        let val = self.data.constants.get(const_idx as usize).ok_or(Error::reference("Invalid constant index"))?;
+        
+        Ok(val.clone().into_value())
     }
 
     pub fn get_stack(&self, idx: u32) -> Option<Value> {
