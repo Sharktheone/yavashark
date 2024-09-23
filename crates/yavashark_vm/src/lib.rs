@@ -81,10 +81,10 @@ mod test {
             regs: Registers::new(),
             stack: Stack::new(),
             pc: 0,
-            code: vec![Instruction::LoadEnv(0), Instruction::LoadMemberAcc(1), Instruction::CallAcc(1), Instruction::LdaAcc(0), Instruction::JmpIfNotAccRel(5), Instruction::LoadEnv(2), Instruction::LoadMemberAcc(3), Instruction::CallAcc(1), Instruction::JmpRel(4), Instruction::LoadEnv(4), Instruction::LoadMemberAcc(5), Instruction::CallAcc(1)],
+            code: vec![Instruction::LdaAcc(0), Instruction::PushAcc, Instruction::LoadEnv(0), Instruction::LoadMemberAcc(1), Instruction::CallAcc(1), Instruction::LdaAcc(1), Instruction::JmpIfNotAccRel(7), Instruction::LdaAcc(2), Instruction::PushAcc, Instruction::LoadEnv(2), Instruction::LoadMemberAcc(3), Instruction::CallAcc(1), Instruction::JmpRel(6), Instruction::LdaAcc(3), Instruction::PushAcc, Instruction::LoadEnv(4), Instruction::LoadMemberAcc(5), Instruction::CallAcc(1)],
             data: DataSection {
                 var_names: vec!["console".to_string(), "log".to_string(), "console".to_string(), "log".to_string(), "console".to_string(), "log".to_string()],
-                constants: vec![ConstValue::Boolean(true)],
+                constants: vec![ConstValue::String("Hello, World!".into()), ConstValue::Boolean(true), ConstValue::String("True".into()), ConstValue::String("False".into())],
             },
             current_scope: Scope::new(&ctx),
             acc: Value::Undefined,
