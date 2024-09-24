@@ -2,7 +2,7 @@
 
 use swc_common::input::StringInput;
 use swc_common::BytePos;
-use swc_ecma_ast::LabeledStmt;
+use swc_ecma_ast::{LabeledStmt, Stmt};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 
 use yavashark_bytecode::{ConstValue, Instruction};
@@ -17,13 +17,36 @@ mod utils;
 pub use labels::*;
 
 #[derive(Debug)]
-struct ByteCodegen {
-    instructions: Vec<Instruction>,
-    variables: Vec<String>,
-    literals: Vec<ConstValue>,
+pub struct ByteCodegen {
+    pub instructions: Vec<Instruction>,
+    pub variables: Vec<String>,
+    pub literals: Vec<ConstValue>,
     labels: Vec<(String, usize)>,
     loop_label: Option<usize>,
     label_backpatch: Vec<(LabelName, usize)>,
+}
+
+
+impl ByteCodegen {
+    pub fn new() -> Self {
+        Self {
+            instructions: vec![],
+            variables: vec![],
+            literals: vec![],
+            labels: vec![],
+            loop_label: None,
+            label_backpatch: vec![],
+        }
+    }
+    
+    
+    pub fn compile(script: &Vec<Stmt>) -> Result<Self, CompileError> {
+        let mut bc = ByteCodegen::new();
+        
+        bc.compile_statements(script)?;
+        
+        Ok(bc)
+    }
 }
 
 #[test]

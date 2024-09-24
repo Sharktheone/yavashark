@@ -4,7 +4,8 @@ mod regs;
 mod stack;
 mod storage;
 mod value_ext;
-mod data;
+pub mod data;
+
 
 use crate::data::DataSection;
 pub use regs::*;
@@ -30,6 +31,40 @@ pub struct VM {
 }
 
 impl VM {
+    
+    
+    pub fn new(code: Vec<Instruction>, data: DataSection) -> anyhow::Result<Self> {
+        
+        
+        let ctx = Context::new()?;
+        
+        Ok(Self {
+            regs: Registers::new(),
+            stack: Stack::new(),
+            pc: 0,
+            code,
+            data,
+            current_scope: Scope::new(&ctx),
+            acc: Value::Undefined,
+            ctx,
+        })
+    }
+    
+    
+    pub fn with_context(code: Vec<Instruction>, data: DataSection, ctx: Context) -> Self {
+        Self {
+            regs: Registers::new(),
+            stack: Stack::new(),
+            pc: 0,
+            code,
+            data,
+            current_scope: Scope::new(&ctx),
+            acc: Value::Undefined,
+            ctx,
+        }
+    }
+    
+    
     pub fn get_context(&mut self) -> &mut Context {
         &mut self.ctx
     }
