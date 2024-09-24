@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 yavashark_env = { path = "../yavashark_env" }
 yavashark_bytecode = { path = "../yavashark_bytecode" }
+anyhow = "1.0.86"
 
 [lints]
 workspace = true

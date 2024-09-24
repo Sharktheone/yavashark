@@ -7,9 +7,9 @@ edition = "2021"
 yavashark_env = { path = "../yavashark_env" }
 yavashark_value = { path = "../yavashark_value" }
 yavashark_bytecode = { path = "../yavashark_bytecode" }
-swc_ecma_parser = "0.148.1"
-swc_ecma_ast = "0.117.3"
-swc_common = "0.36.2"
+swc_ecma_parser = "0.152.0"
+swc_ecma_ast = "0.121.0"
+swc_common = "0.40.0"
 anyhow = "1.0.86"
 log = "0.4.22"
 
