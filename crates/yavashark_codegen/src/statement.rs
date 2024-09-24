@@ -45,9 +45,11 @@ impl ByteCodegen {
         }
     }
 
-    pub fn compile_statements(&mut self, script: &Vec<Stmt>) {
+    pub fn compile_statements(&mut self, script: &Vec<Stmt>) -> Res {
         for stmt in script {
-            self.compile_statement(stmt);
+            self.compile_statement(stmt)?;
         }
+        
+        Ok(())
     }
 }
