@@ -43,7 +43,7 @@ impl Interpreter {
         if let Value::Object(obj) = obj {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
-                MemberProp::PrivateName(p) => Value::String(p.id.sym.to_string()),
+                MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
                 MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
             };
 
