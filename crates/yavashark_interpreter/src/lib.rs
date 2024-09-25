@@ -56,7 +56,7 @@ impl Interpreter {
 mod temp_test {
     use swc_common::input::StringInput;
     use swc_common::BytePos;
-    use swc_ecma_parser::{EsConfig, EsSyntax, Parser, Syntax};
+    use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 
     use super::*;
 

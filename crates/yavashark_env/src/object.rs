@@ -321,15 +321,14 @@ impl Obj<Context> for Object {
     }
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
-        if let Some(_value) = self.resolve_array(index) {
-            let _done = if let Some((i, _)) = self.array.last() {
+        if let Some(value) = self.resolve_array(index) {
+            let done = if let Some((i, _)) = self.array.last() {
+                
                 index > *i
             } else {
-                false
+                true
             };
-            todo!();
-
-            // return (done, Some(value.value)); //TODO: `get_array_or_done` should return `ObjectProperty` instead of `Value`
+            return (done, Some(value.value));
         }
 
         (true, None)

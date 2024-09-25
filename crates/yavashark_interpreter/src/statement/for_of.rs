@@ -70,6 +70,7 @@ mod tests {
             for (let i of arr) {
                 mock.values(i);
                 sum += i;
+                console.log(sum)
             }
             console.log(sum)
             sum
