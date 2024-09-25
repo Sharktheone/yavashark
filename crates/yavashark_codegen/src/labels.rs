@@ -17,12 +17,12 @@ impl ByteCodegen {
         self.label_backpatch.push((LabelName::Loop, target));
     }
 
-    pub fn compile_label_jump(&mut self, name: String) -> Res {
+    pub fn compile_label_jump(&mut self, name: &str) -> Res {
         let target = self
             .labels
             .iter()
             .rev()
-            .find(|(n, _)| n == &name)
+            .find(|(n, _)| n == name)
             .ok_or(anyhow!("Label {} not found", name))?
             .1;
 

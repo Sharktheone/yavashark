@@ -51,7 +51,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             }
             ClassMember::PrivateMethod(method) => {
                 let (name, func) = create_method(
-                    &PropName::Ident(format!("#{}", method.key.name.to_string()).as_str().into()),
+                    &PropName::Ident(format!("#{}", method.key.name).as_str().into()),
                     method.function.params.clone(),
                     method.function.body.clone(),
                     scope,
@@ -67,7 +67,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             }
 
             ClassMember::PrivateProp(o) => {
-                let key = format!("#{}", o.key.name.to_string());
+                let key = format!("#{}", o.key.name);
                 let value = if let Some(value) = &o.value {
                     Interpreter::run_expr(ctx, value, stmt.span, scope)?
                 } else {

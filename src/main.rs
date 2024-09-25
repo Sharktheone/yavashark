@@ -5,6 +5,7 @@ use yavashark_codegen::ByteCodegen;
 use yavashark_vm::data::DataSection;
 use yavashark_vm::VM;
 
+#[allow(clippy::unwrap_used)]
 fn main() {
     let matches = clap::Command::new("yavashark")
         .version("0.1.0")
@@ -76,7 +77,7 @@ fn main() {
     let script = p.parse_script().unwrap();
 
     if ast {
-        println!("AST:\n{:#?}", script);
+        println!("AST:\n{script:#?}");
     }
 
     if interpreter {
@@ -88,7 +89,7 @@ fn main() {
         let bc = ByteCodegen::compile(&script.body).unwrap();
 
         if instructions {
-            println!("{:#?}", bc);
+            println!("{bc:#?}");
         }
 
         if bytecode {

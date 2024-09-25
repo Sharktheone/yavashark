@@ -49,10 +49,13 @@ impl Array {
 
     #[must_use]
     pub fn override_to_string_internal(&self) -> String {
+        use std::fmt::Write as _;
+        
         let mut buf = String::new();
 
         for (_, value) in &self.object.array {
-            buf.push_str(&format!("{}", value.value));
+            let _ = write!(buf, "{}", value.value);
+            
             buf.push_str(", ");
         }
 

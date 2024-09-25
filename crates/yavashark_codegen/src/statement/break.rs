@@ -8,14 +8,11 @@ impl ByteCodegen {
             let name = label.sym.to_string();
 
             self.backpatch(name, self.instructions.len());
-
-            self.instructions.push(Instruction::JmpRel(1));
         } else {
             self.backpatch_break(self.instructions.len());
-
-            self.instructions.push(Instruction::JmpRel(1));
         }
 
+        self.instructions.push(Instruction::JmpRel(1));
         Ok(())
     }
 }

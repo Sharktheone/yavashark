@@ -44,7 +44,7 @@ impl<C: Ctx> Value<C> {
                 }
             }
             Self::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
-            Value::Object(o) => {
+            Self::Object(o) => {
                 let v = o.to_string(ctx)?;
 
                 if v.is_empty() {

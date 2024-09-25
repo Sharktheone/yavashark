@@ -15,8 +15,8 @@ impl VM {
             .ok_or(Error::reference("Variable not found"))
     }
 
-    pub fn var_name(&self, name: VarName) -> Option<&str> {
-        self.data.var_names.get(name as usize).map(|s| s.as_str())
+    #[must_use] pub fn var_name(&self, name: VarName) -> Option<&str> {
+        self.data.var_names.get(name as usize).map(std::string::String::as_str)
     }
 
     pub fn get_register(&self, reg: Reg) -> Result<Value> {
@@ -37,23 +37,23 @@ impl VM {
     }
 
     pub fn push(&mut self, value: Value) {
-        self.stack.push(value)
+        self.stack.push(value);
     }
 
     pub fn pop(&mut self) -> Option<Value> {
         self.stack.pop()
     }
 
-    pub fn acc(&self) -> Value {
+    #[must_use] pub fn acc(&self) -> Value {
         self.acc.clone()
     }
 
     pub fn set_acc(&mut self, value: Value) {
-        self.acc = value
+        self.acc = value;
     }
 
     pub fn set_accb(&mut self, value: bool) {
-        self.acc = Value::Boolean(value)
+        self.acc = Value::Boolean(value);
     }
 
     pub fn get_this(&self) -> Result<Value> {
@@ -70,7 +70,7 @@ impl VM {
         Ok(val.clone().into_value())
     }
 
-    pub fn get_stack(&self, idx: u32) -> Option<Value> {
+    #[must_use] pub fn get_stack(&self, idx: u32) -> Option<Value> {
         self.stack.get(idx as usize).cloned()
     }
 

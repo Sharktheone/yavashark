@@ -37,7 +37,7 @@ impl ByteCodegen {
             BinaryOp::RShift => self.instructions.push(Instruction::RShiftAcc(0)),
             BinaryOp::ZeroFillRShift => self.instructions.push(Instruction::ZeroFillRShiftAcc(0)),
 
-            BinaryOp::LogicalOr => self.instructions.push(Instruction::LAndAcc(0)),
+            BinaryOp::LogicalOr => self.instructions.push(Instruction::LOrAcc(0)),
             BinaryOp::LogicalAnd => self.instructions.push(Instruction::LAndAcc(0)),
 
             BinaryOp::In => self.instructions.push(Instruction::InAcc(0)),
@@ -46,7 +46,7 @@ impl ByteCodegen {
             BinaryOp::Exp => self.instructions.push(Instruction::ExpAcc(0)),
 
             BinaryOp::NullishCoalescing => {
-                self.instructions.push(Instruction::NullishCoalescingAcc(0))
+                self.instructions.push(Instruction::NullishCoalescingAcc(0));
             }
         }
 

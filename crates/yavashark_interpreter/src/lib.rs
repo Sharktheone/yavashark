@@ -56,7 +56,7 @@ impl Interpreter {
 mod temp_test {
     use swc_common::input::StringInput;
     use swc_common::BytePos;
-    use swc_ecma_parser::{EsConfig, Parser, Syntax};
+    use swc_ecma_parser::{EsConfig, EsSyntax, Parser, Syntax};
 
     use super::*;
 
@@ -295,7 +295,7 @@ mod temp_test {
 
             let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
 
-            let c = EsConfig::default();
+            let c = EsSyntax::default();
 
             let mut p = Parser::new(Syntax::Es(c), input, None);
             let script = p.parse_script().unwrap();

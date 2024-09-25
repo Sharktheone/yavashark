@@ -1,6 +1,11 @@
+#![allow(clippy::similar_names)]
+
 use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::Res;
+
+
+
 
 pub fn exp(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
     let lhs = vm.get_variable(lhs)?;

@@ -8,7 +8,7 @@ impl ByteCodegen {
         if let Some(label) = &stmt.label {
             let name = label.sym.to_string();
 
-            self.compile_label_jump(name)?;
+            self.compile_label_jump(&name)?;
         } else {
             let target = self
                 .loop_label

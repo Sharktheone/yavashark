@@ -45,7 +45,7 @@ impl VM {
         })
     }
 
-    pub fn with_context(code: Vec<Instruction>, data: DataSection, ctx: Context) -> Self {
+    #[must_use] pub fn with_context(code: Vec<Instruction>, data: DataSection, ctx: Context) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
@@ -88,7 +88,7 @@ impl VM {
 
     pub fn run(&mut self) -> Res {
         while self.pc < self.code.len() {
-            let instr = self.code[self.pc].clone();
+            let instr = self.code[self.pc];
             self.pc += 1;
 
             instr.execute(self)?;
@@ -152,6 +152,6 @@ mod test {
             ctx,
         };
 
-        vm.run().unwrap()
+        vm.run().unwrap();
     }
 }

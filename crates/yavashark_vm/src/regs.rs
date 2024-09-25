@@ -8,14 +8,20 @@ pub struct Registers {
     regs: [Value; NUM_REGS],
 }
 
+impl Default for Registers {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Registers {
-    pub fn new() -> Self {
+    #[must_use] pub const fn new() -> Self {
         Self {
             regs: [const { Value::Undefined }; NUM_REGS],
         }
     }
 
-    pub fn get(&self, reg: Reg) -> Option<Value> {
+    #[must_use] pub fn get(&self, reg: Reg) -> Option<Value> {
         self.regs.get(reg as usize).cloned()
     }
 

@@ -14,18 +14,19 @@ impl ByteCodegen {
 
         let lbl = self.labels.pop();
 
-        debug_assert_eq!(lbl.unwrap().0, name.clone(), "Label mismatch; coding error");
-
+        
         self.backpatch_label(name, self.instructions.len());
 
         Ok(())
     }
 
     fn backpatch_label(&mut self, name: String, pos: usize) {
+        let name = LabelName::Label(name);
+        
         let (backpatch, rem) = self
             .label_backpatch
-            .drain(..) //TODO: maybe this could just be `.clone()`?
-            .partition(|(n, _)| *n == LabelName::Label(name.clone()));
+            .drain(..)
+            .partition(|(n, _)| *n == name);
 
         self.label_backpatch = rem;
 

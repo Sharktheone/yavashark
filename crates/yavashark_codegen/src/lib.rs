@@ -26,8 +26,14 @@ pub struct ByteCodegen {
     label_backpatch: Vec<(LabelName, usize)>,
 }
 
+impl Default for ByteCodegen {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ByteCodegen {
-    pub fn new() -> Self {
+    #[must_use] pub const fn new() -> Self {
         Self {
             instructions: vec![],
             variables: vec![],
@@ -39,7 +45,7 @@ impl ByteCodegen {
     }
 
     pub fn compile(script: &Vec<Stmt>) -> Result<Self, CompileError> {
-        let mut bc = ByteCodegen::new();
+        let mut bc = Self::new();
 
         bc.compile_statements(script)?;
 
@@ -58,7 +64,7 @@ fn test_compile() {
     }
  "#;
 
-    let input = StringInput::new(src.into(), BytePos(0), BytePos(src.len() as u32));
+    let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
     let c = EsSyntax::default();
 
@@ -76,5 +82,5 @@ fn test_compile() {
 
     bc.compile_statements(&script.body);
 
-    println!("{:?}", bc);
+    println!("{bc:?}");
 }

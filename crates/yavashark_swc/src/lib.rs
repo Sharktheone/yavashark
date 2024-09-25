@@ -1,3 +1,4 @@
+
 #[test]
 fn test() {
     use swc_common::BytePos;
@@ -20,6 +21,7 @@ fn test() {
 
 #[test]
 fn a() {
+    use rand::random;
     struct Test {
         value: i32,
     }

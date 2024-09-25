@@ -13,18 +13,18 @@ pub enum ConstValue {
 }
 
 impl ConstValue {
-    pub fn into_value(self) -> Value {
+    #[must_use] pub fn into_value(self) -> Value {
         match self {
-            ConstValue::Null => Value::Null,
-            ConstValue::Undefined => Value::Undefined,
-            ConstValue::Number(n) => Value::Number(n),
-            ConstValue::String(s) => Value::String(s),
-            ConstValue::Boolean(b) => Value::Boolean(b),
-            ConstValue::Object(_) => todo!(),
-            ConstValue::Symbol(s) => Value::Symbol(s),
+            Self::Null => Value::Null,
+            Self::Undefined => Value::Undefined,
+            Self::Number(n) => Value::Number(n),
+            Self::String(s) => Value::String(s),
+            Self::Boolean(b) => Value::Boolean(b),
+            Self::Object(_) => todo!(),
+            Self::Symbol(s) => Value::Symbol(s),
         }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct ObjectLiteralBlueprint {}
+pub struct ObjectLiteralBlueprint;
