@@ -1,17 +1,18 @@
 use crate::VM;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
-use yavashark_env::{Res, Value, Result};
 use yavashark_env::value::Error;
+use yavashark_env::{Res, Result, Value};
 
 #[allow(unused)]
 impl VM {
     pub fn get_variable(&self, name: VarName) -> Result<Value> {
-        
         let Some(name) = self.var_name(name) else {
             return Err(Error::reference("Invalid variable name"));
         };
-        
-        self.current_scope.resolve(name)?.ok_or(Error::reference("Variable not found"))
+
+        self.current_scope
+            .resolve(name)?
+            .ok_or(Error::reference("Variable not found"))
     }
 
     pub fn var_name(&self, name: VarName) -> Option<&str> {
@@ -19,11 +20,15 @@ impl VM {
     }
 
     pub fn get_register(&self, reg: Reg) -> Result<Value> {
-        self.regs.get(reg).ok_or(Error::reference("Invalid register"))
+        self.regs
+            .get(reg)
+            .ok_or(Error::reference("Invalid register"))
     }
 
     pub fn set_variable(&mut self, name: VarName, value: Value) -> Res {
-        let name = self.var_name(name).ok_or(Error::reference("Invalid variable name"))?;
+        let name = self
+            .var_name(name)
+            .ok_or(Error::reference("Invalid variable name"))?;
         self.current_scope.declare_var(name.into(), value)
     }
 
@@ -56,16 +61,19 @@ impl VM {
     }
 
     pub fn get_constant(&self, const_idx: ConstIdx) -> Result<Value> {
-        let val = self.data.constants.get(const_idx as usize).ok_or(Error::reference("Invalid constant index"))?;
-        
+        let val = self
+            .data
+            .constants
+            .get(const_idx as usize)
+            .ok_or(Error::reference("Invalid constant index"))?;
+
         Ok(val.clone().into_value())
     }
 
     pub fn get_stack(&self, idx: u32) -> Option<Value> {
         self.stack.get(idx as usize).cloned()
     }
-    
-    
+
     pub fn get_args(&mut self, num: u16) -> Vec<Value> {
         self.stack.pop_n(num as usize)
     }

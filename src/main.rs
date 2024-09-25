@@ -9,52 +9,55 @@ fn main() {
     let matches = clap::Command::new("yavashark")
         .version("0.1.0")
         .about("A JavaScript interpreter written in Rust")
-        .arg(clap::Arg::new("source")
-            .help("The source file to interpret")
-            .required(true)
-            .index(1))
-        .arg(clap::Arg::new("interpreter")
-                 .help("Run with the tree-walk-interpreter")
-                 .short('i')
-                 .required(false)
-                 .default_value("false")
-                 .action(clap::ArgAction::SetTrue),
+        .arg(
+            clap::Arg::new("source")
+                .help("The source file to interpret")
+                .required(true)
+                .index(1),
         )
-        .arg(clap::Arg::new("bytecode")
-                 .help("Run with the bytecode-interpreter")
-                 .short('b')
-                 .required(false)
-                 .default_value("false")
-                 .action(clap::ArgAction::SetTrue),
+        .arg(
+            clap::Arg::new("interpreter")
+                .help("Run with the tree-walk-interpreter")
+                .short('i')
+                .required(false)
+                .default_value("false")
+                .action(clap::ArgAction::SetTrue),
         )
-        .arg(clap::Arg::new("ast")
-                 .help("Print the AST")
-                 .short('a')
-                 .required(false)
-                 .default_value("false")
-                 .action(clap::ArgAction::SetTrue),
+        .arg(
+            clap::Arg::new("bytecode")
+                .help("Run with the bytecode-interpreter")
+                .short('b')
+                .required(false)
+                .default_value("false")
+                .action(clap::ArgAction::SetTrue),
         )
-        .arg(clap::Arg::new("instructions")
-                 .help("Print the instructions")
-                 .short('I')
-                 .required(false)
-                 .default_value("false")
-                 .action(clap::ArgAction::SetTrue),
+        .arg(
+            clap::Arg::new("ast")
+                .help("Print the AST")
+                .short('a')
+                .required(false)
+                .default_value("false")
+                .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            clap::Arg::new("instructions")
+                .help("Print the instructions")
+                .short('I')
+                .required(false)
+                .default_value("false")
+                .action(clap::ArgAction::SetTrue),
         )
         .get_matches();
-
 
     let interpreter = matches.get_flag("interpreter");
     let bytecode = matches.get_flag("bytecode");
     let ast = matches.get_flag("ast");
     let instructions = matches.get_flag("instructions");
 
-
     if !(interpreter || bytecode || ast || instructions) {
         println!("No interpreter specified");
         return;
     }
-
 
     let src = matches.get_one::<String>("source").unwrap();
 
@@ -84,7 +87,6 @@ fn main() {
     if bytecode || instructions {
         let bc = ByteCodegen::compile(&script.body).unwrap();
 
-
         if instructions {
             println!("{:#?}", bc);
         }
@@ -94,18 +96,9 @@ fn main() {
 
             let mut vm = VM::new(bc.instructions, data).unwrap();
 
-
             vm.run().unwrap();
 
             println!("Bytecode: {:?}", vm.acc());
         }
     }
 }
-
-
-
-
-
-
-
-

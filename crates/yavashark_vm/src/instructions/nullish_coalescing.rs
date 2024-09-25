@@ -11,7 +11,7 @@ pub fn nullish_coalescing(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
     } else {
         vm.set_acc(lhs);
     }
-    
+
     Ok(())
 }
 
@@ -24,7 +24,7 @@ pub fn nullish_coalescing_acc(reg: Reg, vm: &mut VM) -> Res {
     } else {
         vm.set_acc(acc);
     }
-    
+
     Ok(())
 }
 
@@ -37,6 +37,6 @@ pub fn nullish_coalescing_reg(reg1: Reg, reg2: Reg, vm: &mut VM) -> Res {
     } else {
         vm.set_acc(reg1);
     }
-    
+
     Ok(())
 }

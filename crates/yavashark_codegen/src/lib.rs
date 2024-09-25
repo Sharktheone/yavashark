@@ -26,7 +26,6 @@ pub struct ByteCodegen {
     label_backpatch: Vec<(LabelName, usize)>,
 }
 
-
 impl ByteCodegen {
     pub fn new() -> Self {
         Self {
@@ -38,13 +37,12 @@ impl ByteCodegen {
             label_backpatch: vec![],
         }
     }
-    
-    
+
     pub fn compile(script: &Vec<Stmt>) -> Result<Self, CompileError> {
         let mut bc = ByteCodegen::new();
-        
+
         bc.compile_statements(script)?;
-        
+
         Ok(bc)
     }
 }
@@ -77,6 +75,6 @@ fn test_compile() {
     };
 
     bc.compile_statements(&script.body);
-    
+
     println!("{:?}", bc);
 }

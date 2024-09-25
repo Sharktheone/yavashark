@@ -9,8 +9,7 @@ pub fn add(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
     let result = lhs + rhs;
 
     vm.set_acc(result);
-    
-    
+
     Ok(())
 }
 
@@ -21,7 +20,7 @@ pub fn add_acc_reg(reg: Reg, vm: &mut VM) -> Res {
     let result = acc + reg;
 
     vm.set_acc(result);
-    
+
     Ok(())
 }
 
@@ -32,7 +31,6 @@ pub fn add_reg(reg1: Reg, reg2: Reg, vm: &mut VM) -> Res {
     let result = reg1 + reg2;
 
     vm.set_acc(result);
-    
-    
+
     Ok(())
 }

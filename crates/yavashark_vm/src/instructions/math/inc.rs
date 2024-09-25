@@ -8,7 +8,7 @@ pub fn inc(name: VarName, vm: &mut VM) -> Res {
     let result = val + 1.into();
 
     vm.set_acc(result);
-    
+
     Ok(())
 }
 
@@ -18,7 +18,7 @@ pub fn inc_acc(vm: &mut VM) -> Res {
     let result = acc + 1.into();
 
     vm.set_acc(result);
-    
+
     Ok(())
 }
 
@@ -28,6 +28,6 @@ pub fn inc_reg(name: Reg, vm: &mut VM) -> Res {
     let result = val + 1.into();
 
     vm.set_acc(result);
-    
+
     Ok(())
 }

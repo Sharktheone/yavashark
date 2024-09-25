@@ -49,7 +49,7 @@ impl ByteCodegen {
         for stmt in script {
             self.compile_statement(stmt)?;
         }
-        
+
         Ok(())
     }
 }

@@ -90,7 +90,9 @@ impl Execute for Instruction {
             Instruction::RShiftAcc(reg) => instructions::rshift_acc(*reg, vm)?,
             Instruction::RShiftReg(lhs, rhs) => instructions::rshift_reg(*lhs, *rhs, vm)?,
 
-            Instruction::ZeroFillRShift(lhs, rhs) => instructions::zero_fill_rshift(*lhs, *rhs, vm)?,
+            Instruction::ZeroFillRShift(lhs, rhs) => {
+                instructions::zero_fill_rshift(*lhs, *rhs, vm)?
+            }
             Instruction::ZeroFillRShiftAcc(reg) => instructions::zero_fill_rshift_acc(*reg, vm)?,
             Instruction::ZeroFillRShiftReg(lhs, rhs) => {
                 instructions::zero_fill_rshift_reg(*lhs, *rhs, vm)?
@@ -153,7 +155,9 @@ impl Execute for Instruction {
             Instruction::JmpNullAcc(target) => instructions::jmp_null_acc(*target, vm)?,
             Instruction::JmpUndef(target, name) => instructions::jmp_undef(*name, *target, vm)?,
             Instruction::JmpUndefAcc(target) => instructions::jmp_undef_acc(*target, vm)?,
-            Instruction::JmpNullUndef(name, addr) => instructions::jmp_null_undef(*addr, *name, vm)?,
+            Instruction::JmpNullUndef(name, addr) => {
+                instructions::jmp_null_undef(*addr, *name, vm)?
+            }
             Instruction::JmpNullUndefAcc(addr) => instructions::jmp_null_undef_acc(*addr, vm)?,
 
             Instruction::JmpRel(target) => instructions::jmp_rel(*target, vm),
@@ -163,7 +167,9 @@ impl Execute for Instruction {
                 instructions::jmp_if_not_rel(*name, *target, vm)?
             }
             Instruction::JmpIfNotAccRel(target) => instructions::jmp_if_not_acc_rel(*target, vm)?,
-            Instruction::JmpNullRel(target, name) => instructions::jmp_null_rel(*name, *target, vm)?,
+            Instruction::JmpNullRel(target, name) => {
+                instructions::jmp_null_rel(*name, *target, vm)?
+            }
             Instruction::JmpNullAccRel(target) => instructions::jmp_null_acc_rel(*target, vm)?,
             Instruction::JmpUndefRel(target, name) => {
                 instructions::jmp_undef_rel(*name, *target, vm)?
@@ -197,8 +203,6 @@ impl Execute for Instruction {
             //     instructions::load_acc_member(member, reg, vm)
             // }
             // Instruction::LoadAccMemberAcc(member) => instructions::load_acc_member_acc(member, vm)?,
-            
-            
             Instruction::LoadEnv(name) => instructions::load_env(*name, vm)?,
             Instruction::LoadEnvReg(name, reg) => instructions::load_env_reg(*name, *reg, vm)?,
 

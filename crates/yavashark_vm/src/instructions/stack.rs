@@ -60,14 +60,18 @@ pub fn stack_to_acc(vm: &mut VM) -> Res {
 }
 
 pub fn stack_idx_to_reg(reg: Reg, idx: u32, vm: &mut VM) -> Res {
-    let value = vm.get_stack(idx).ok_or(Error::new("Stack index out of bounds"))?;
+    let value = vm
+        .get_stack(idx)
+        .ok_or(Error::new("Stack index out of bounds"))?;
     vm.set_register(reg, value)?;
 
     Ok(())
 }
 
 pub fn stack_idx_to_acc(idx: u32, vm: &mut VM) -> Res {
-    let value = vm.get_stack(idx).ok_or(Error::new("Stack index out of bounds"))?;
+    let value = vm
+        .get_stack(idx)
+        .ok_or(Error::new("Stack index out of bounds"))?;
     vm.set_acc(value);
 
     Ok(())

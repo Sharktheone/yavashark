@@ -7,7 +7,7 @@ pub fn logical_or(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
     let rhs = vm.get_variable(rhs)?;
 
     vm.set_acc(lhs.log_or(rhs));
-    
+
     Ok(())
 }
 
@@ -16,6 +16,6 @@ pub fn logical_or_acc(reg: Reg, vm: &mut VM) -> Res {
     let lhs = vm.acc();
 
     vm.set_acc(lhs.log_or(rhs));
-    
+
     Ok(())
 }

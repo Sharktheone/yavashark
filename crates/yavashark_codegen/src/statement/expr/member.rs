@@ -9,8 +9,7 @@ impl ByteCodegen {
         if let MemberProp::Ident(ident) = &stmt.prop {
             let var_name = self.allocate_variable(ident.sym.as_str().to_string());
 
-            self.instructions
-                .push(Instruction::LoadMemberAcc(var_name));
+            self.instructions.push(Instruction::LoadMemberAcc(var_name));
         } else {
             todo!()
         }

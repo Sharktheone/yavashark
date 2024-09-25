@@ -11,7 +11,7 @@ pub fn jmp_if_rel(target: JmpOffset, name: VarName, vm: &mut VM) -> Res {
     if value.is_truthy() {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -20,7 +20,7 @@ pub fn jmp_if_acc_rel(target: JmpOffset, vm: &mut VM) -> Res {
     if value.is_truthy() {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -29,7 +29,7 @@ pub fn jmp_if_not_rel(target: JmpOffset, name: VarName, vm: &mut VM) -> Res {
     if !value.is_truthy() {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -38,7 +38,7 @@ pub fn jmp_if_not_acc_rel(target: JmpOffset, vm: &mut VM) -> Res {
     if !value.is_truthy() {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -47,7 +47,7 @@ pub fn jmp_null_rel(target: JmpOffset, name: VarName, vm: &mut VM) -> Res {
     if value == Value::Null {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -56,7 +56,7 @@ pub fn jmp_null_acc_rel(target: JmpOffset, vm: &mut VM) -> Res {
     if value == Value::Null {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -65,7 +65,7 @@ pub fn jmp_undef_rel(target: JmpOffset, name: VarName, vm: &mut VM) -> Res {
     if value == Value::Undefined {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -74,7 +74,7 @@ pub fn jmp_undef_acc_rel(target: JmpOffset, vm: &mut VM) -> Res {
     if value == Value::Undefined {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -83,7 +83,7 @@ pub fn jmp_null_undef_rel(target: JmpOffset, name: VarName, vm: &mut VM) -> Res 
     if value == Value::Null || value == Value::Undefined {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }
 
@@ -92,6 +92,6 @@ pub fn jmp_null_undef_acc_rel(target: JmpOffset, vm: &mut VM) -> Res {
     if value == Value::Null || value == Value::Undefined {
         vm.offset_pc(target);
     }
-    
+
     Ok(())
 }

@@ -12,7 +12,6 @@ pub enum ConstValue {
     Symbol(ConstString),
 }
 
-
 impl ConstValue {
     pub fn into_value(self) -> Value {
         match self {
@@ -26,7 +25,6 @@ impl ConstValue {
         }
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct ObjectLiteralBlueprint {}

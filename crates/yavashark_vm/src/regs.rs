@@ -1,13 +1,12 @@
 use yavashark_bytecode::Reg;
-use yavashark_env::{Res, Value};
 use yavashark_env::value::Error;
+use yavashark_env::{Res, Value};
 
 pub const NUM_REGS: usize = 32;
 
 pub struct Registers {
     regs: [Value; NUM_REGS],
 }
-
 
 impl Registers {
     pub fn new() -> Self {
@@ -21,6 +20,9 @@ impl Registers {
     }
 
     pub fn set(&mut self, reg: Reg, value: Value) -> Res {
-        self.regs.get_mut(reg as usize).map(|r| *r = value).ok_or(Error::new("Invalid register"))
+        self.regs
+            .get_mut(reg as usize)
+            .map(|r| *r = value)
+            .ok_or(Error::new("Invalid register"))
     }
 }

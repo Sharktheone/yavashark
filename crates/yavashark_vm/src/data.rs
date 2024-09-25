@@ -5,7 +5,6 @@ pub struct DataSection {
     pub constants: Vec<ConstValue>,
 }
 
-
 impl DataSection {
     pub fn new(var_names: Vec<String>, constants: Vec<ConstValue>) -> Self {
         Self {
@@ -13,5 +12,4 @@ impl DataSection {
             constants,
         }
     }
-
 }
