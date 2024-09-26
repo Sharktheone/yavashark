@@ -195,13 +195,19 @@ mod tests {
     fn try_catch_with_error_thrown_and_finalizer() {
         test_eval!(
             r#"
+            
+            let ret = undefined;
+            
             try {
                 throw new Error("error message");
             } catch (e) {
                 e.message
             } finally {
-                "finalizer executed"
+                ret = "finalizer executed"
             }
+            
+            
+            ret
             "#,
             0,
             Vec::<Vec<Value>>::new(),
