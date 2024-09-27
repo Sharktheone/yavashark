@@ -4,7 +4,7 @@ use crate::context::Context;
 use crate::{Error, NativeFunction, Value};
 
 pub fn get_error(ctx: &Context) -> Value {
-    NativeFunction::new(
+    NativeFunction::special(
         "error",
         |args, _, _| {
             let message = args.first().map(std::string::ToString::to_string);

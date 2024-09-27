@@ -5,7 +5,7 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::Func;
+use yavashark_value::{AsAny, Constructor, Func, Obj, ObjectProperty};
 
 use crate::context::Context;
 use crate::object::Object;
@@ -17,15 +17,34 @@ mod prototype;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
 
-pub struct NativeFunctionBuilder(NativeFunction);
+pub struct NativeFunctionBuilder(NativeFunction, bool);
 
-#[object(function)]
+#[object(function, constructor, direct(constructor))]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
     pub data: Option<Box<dyn Any>>,
     special_constructor: bool,
     // pub prototype: ConstructorPrototype,
+}
+
+
+impl Constructor<Context> for NativeFunction {
+    fn get_constructor(&self) -> ObjectProperty<Context> {
+        self.constructor.copy()
+    }
+
+    fn special_constructor(&self) -> bool {
+        self.special_constructor
+    }
+
+    fn value(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+        ObjectHandle::new(ctx).into()
+    }
+
+    fn proto(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+        todo!()
+    }
 }
 
 impl NativeFunction {
@@ -37,9 +56,20 @@ impl NativeFunction {
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
             special_constructor: false,
+            constructor: Value::Undefined.into(),
         };
 
-        ObjectHandle::new(this)
+        let mut handle = ObjectHandle::new(this);
+        
+        
+        let constructor = ObjectProperty::new(handle.clone().into());
+        
+        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+        
+        this.constructor = constructor;
+        
+        handle
+        
     }
 
     #[allow(clippy::new_ret_no_self)]
@@ -54,9 +84,49 @@ impl NativeFunction {
             object: Object::raw_with_proto(ctx.proto.func.clone().into()),
             data: None,
             special_constructor: false,
+            constructor: Value::Undefined.into(),
         };
 
-        ObjectHandle::new(this)
+
+        let mut handle = ObjectHandle::new(this);
+
+
+        let constructor = ObjectProperty::new(handle.clone().into());
+
+        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+
+        this.constructor = constructor;
+
+        handle
+
+    }
+    
+    #[allow(clippy::new_ret_no_self)]
+    pub fn special(
+        name: &str,
+        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        ctx: &Context,
+    ) -> ObjectHandle {
+        let this = Self {
+            name: name.to_string(),
+            f: Box::new(f),
+            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
+            data: None,
+            special_constructor: true,
+            constructor: Value::Undefined.into(),
+        };
+
+        let mut handle = ObjectHandle::new(this);
+
+
+        let constructor = ObjectProperty::new(handle.clone().into());
+
+        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+
+        this.constructor = constructor;
+
+        handle
+
     }
 
     pub fn with_proto(
@@ -70,9 +140,19 @@ impl NativeFunction {
             object: Object::raw_with_proto(proto),
             data: None,
             special_constructor: false,
+            constructor: Value::Undefined.into(),
         };
 
-        ObjectHandle::new(this)
+        let mut handle = ObjectHandle::new(this);
+
+
+        let constructor = ObjectProperty::new(handle.clone().into());
+
+        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+
+        this.constructor = constructor;
+
+        handle
     }
 
     pub fn special_with_proto(
@@ -86,9 +166,20 @@ impl NativeFunction {
             object: Object::raw_with_proto(proto),
             data: None,
             special_constructor: true,
+            constructor: Value::Undefined.into(),
         };
 
-        ObjectHandle::new(this)
+
+        let mut handle = ObjectHandle::new(this);
+
+
+        let constructor = ObjectProperty::new(handle.clone().into());
+
+        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+
+        this.constructor = constructor;
+
+        handle
     }
 
     #[must_use]
@@ -99,7 +190,8 @@ impl NativeFunction {
             object: Object::raw_with_proto(Value::Undefined),
             data: None,
             special_constructor: false,
-        })
+            constructor: Value::Undefined.into(),
+        }, true)
     }
 }
 
@@ -158,11 +250,26 @@ impl NativeFunctionBuilder {
         self.0.special_constructor = special;
         self
     }
+    
+    pub fn constructor(mut self, constructor: Value) -> Self {
+        self.0.constructor = constructor.into();
+        self.1 = false;
+        self
+    }
 
     /// Builds the function handle.
     #[must_use]
     pub fn build(self) -> ObjectHandle {
-        ObjectHandle::new(self.0)
+        let mut handle = ObjectHandle::new(self.0);
+
+
+        let constructor = ObjectProperty::new(handle.clone().into());
+
+        let this = handle.as_any_mut().downcast_mut::<NativeFunction>().unwrap();
+
+        this.constructor = constructor;
+
+        handle
     }
 }
 
