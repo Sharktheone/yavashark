@@ -1,4 +1,6 @@
-use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, BinaryOp, MemberExpr, MemberProp, SimpleAssignTarget};
+use swc_ecma_ast::{
+    AssignExpr, AssignOp, AssignTarget, BinaryOp, MemberExpr, MemberProp, SimpleAssignTarget,
+};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, Error, Res, RuntimeResult, Value};
@@ -8,22 +10,18 @@ use crate::Interpreter;
 impl Interpreter {
     pub fn run_assign(ctx: &mut Context, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
         let value = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
-        
-        
-        
+
         if stmt.op == AssignOp::Assign {
-            return Ok(Self::assign_target(ctx, &stmt.left, value, scope).map(|()| Value::Undefined)?);
+            return Ok(
+                Self::assign_target(ctx, &stmt.left, value, scope).map(|()| Value::Undefined)?
+            );
         }
-        
-        
-        
-        
-        Ok(Self::assign_target_op(ctx, stmt.op, &stmt.left, value, scope)?)
-        
+
+        Ok(Self::assign_target_op(
+            ctx, stmt.op, &stmt.left, value, scope,
+        )?)
     }
 
-    
-    
     pub fn assign_target(
         ctx: &mut Context,
         target: &AssignTarget,
@@ -65,8 +63,7 @@ impl Interpreter {
             Err(Error::ty("Invalid left-hand side in assignment"))
         }
     }
-    
-    
+
     pub fn assign_target_op(
         ctx: &mut Context,
         op: AssignOp,
@@ -78,14 +75,15 @@ impl Interpreter {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
                     let name = i.sym.to_string();
-                    
-                    let right = scope.resolve(&name)?.ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
-                    
+
+                    let right = scope
+                        .resolve(&name)?
+                        .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
+
                     let value = Self::run_assign_op(op, left, right, ctx)?;
-                    
-                    
+
                     scope.update(&name, value.copy())?;
-                    
+
                     Ok(value)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member_op(ctx, op, m, left, scope),
@@ -111,10 +109,11 @@ impl Interpreter {
                 MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
                 MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
             };
-            
-            
-            let right = obj.resolve_property(&name, ctx)?.unwrap_or(Value::Undefined);
-            
+
+            let right = obj
+                .resolve_property(&name, ctx)?
+                .unwrap_or(Value::Undefined);
+
             let value = Self::run_assign_op(op, left, right, ctx)?;
 
             obj.define_property(name, value.copy());
@@ -123,13 +122,13 @@ impl Interpreter {
             Err(Error::ty("Invalid left-hand side in assignment").into())
         }
     }
-    
-    
 
-    
-    
-    
-    pub fn run_assign_op(op: AssignOp, left: Value, right: Value, ctx: &mut Context) -> RuntimeResult {
+    pub fn run_assign_op(
+        op: AssignOp,
+        left: Value,
+        right: Value,
+        ctx: &mut Context,
+    ) -> RuntimeResult {
         Ok(match op {
             AssignOp::Assign => right,
             AssignOp::AddAssign => left + right,
@@ -153,10 +152,6 @@ impl Interpreter {
                     left
                 }
             }
-  
         })
     }
 }
-
-
-

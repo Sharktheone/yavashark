@@ -15,8 +15,12 @@ impl VM {
             .ok_or(Error::reference("Variable not found"))
     }
 
-    #[must_use] pub fn var_name(&self, name: VarName) -> Option<&str> {
-        self.data.var_names.get(name as usize).map(std::string::String::as_str)
+    #[must_use]
+    pub fn var_name(&self, name: VarName) -> Option<&str> {
+        self.data
+            .var_names
+            .get(name as usize)
+            .map(std::string::String::as_str)
     }
 
     pub fn get_register(&self, reg: Reg) -> Result<Value> {
@@ -44,7 +48,8 @@ impl VM {
         self.stack.pop()
     }
 
-    #[must_use] pub fn acc(&self) -> Value {
+    #[must_use]
+    pub fn acc(&self) -> Value {
         self.acc.clone()
     }
 
@@ -70,7 +75,8 @@ impl VM {
         Ok(val.clone().into_value())
     }
 
-    #[must_use] pub fn get_stack(&self, idx: u32) -> Option<Value> {
+    #[must_use]
+    pub fn get_stack(&self, idx: u32) -> Option<Value> {
         self.stack.get(idx as usize).cloned()
     }
 

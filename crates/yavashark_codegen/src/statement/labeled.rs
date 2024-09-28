@@ -14,7 +14,6 @@ impl ByteCodegen {
 
         let lbl = self.labels.pop();
 
-        
         self.backpatch_label(name, self.instructions.len());
 
         Ok(())
@@ -22,7 +21,7 @@ impl ByteCodegen {
 
     fn backpatch_label(&mut self, name: String, pos: usize) {
         let name = LabelName::Label(name);
-        
+
         let (backpatch, rem) = self
             .label_backpatch
             .drain(..)

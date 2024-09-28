@@ -33,7 +33,8 @@ impl Default for ByteCodegen {
 }
 
 impl ByteCodegen {
-    #[must_use] pub const fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             instructions: vec![],
             variables: vec![],

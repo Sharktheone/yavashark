@@ -11,7 +11,8 @@ impl Default for Stack {
 }
 
 impl Stack {
-    #[must_use] pub const fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self { stack: Vec::new() }
     }
 
@@ -23,11 +24,13 @@ impl Stack {
         self.stack.pop()
     }
 
-    #[must_use] pub fn peek(&self) -> Option<&Value> {
+    #[must_use]
+    pub fn peek(&self) -> Option<&Value> {
         self.stack.last()
     }
 
-    #[must_use] pub fn get(&self, idx: usize) -> Option<&Value> {
+    #[must_use]
+    pub fn get(&self, idx: usize) -> Option<&Value> {
         self.stack.get(idx)
     }
 
@@ -43,11 +46,13 @@ impl Stack {
         values
     }
 
-    #[must_use] pub fn len(&self) -> usize {
+    #[must_use]
+    pub fn len(&self) -> usize {
         self.stack.len()
     }
-    
-    #[must_use] pub fn is_empty(&self) -> bool {
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
         self.stack.is_empty()
     }
 }

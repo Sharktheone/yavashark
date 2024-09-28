@@ -28,7 +28,6 @@ pub struct NativeFunction {
     // pub prototype: ConstructorPrototype,
 }
 
-
 impl Constructor<Context> for NativeFunction {
     fn get_constructor(&self) -> ObjectProperty<Context> {
         self.constructor.copy()
@@ -60,16 +59,14 @@ impl NativeFunction {
         };
 
         let mut handle = ObjectHandle::new(this);
-        
-        
+
         let constructor = ObjectProperty::new(handle.clone().into());
-        
+
         let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
-        
+
         this.constructor = constructor;
-        
+
         handle
-        
     }
 
     #[allow(clippy::new_ret_no_self)]
@@ -87,9 +84,7 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-
         let mut handle = ObjectHandle::new(this);
-
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -98,9 +93,8 @@ impl NativeFunction {
         this.constructor = constructor;
 
         handle
-
     }
-    
+
     #[allow(clippy::new_ret_no_self)]
     pub fn special(
         name: &str,
@@ -118,7 +112,6 @@ impl NativeFunction {
 
         let mut handle = ObjectHandle::new(this);
 
-
         let constructor = ObjectProperty::new(handle.clone().into());
 
         let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
@@ -126,7 +119,6 @@ impl NativeFunction {
         this.constructor = constructor;
 
         handle
-
     }
 
     pub fn with_proto(
@@ -144,7 +136,6 @@ impl NativeFunction {
         };
 
         let mut handle = ObjectHandle::new(this);
-
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -169,9 +160,7 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-
         let mut handle = ObjectHandle::new(this);
-
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -184,14 +173,17 @@ impl NativeFunction {
 
     #[must_use]
     pub fn builder() -> NativeFunctionBuilder {
-        NativeFunctionBuilder(Self {
-            name: String::new(),
-            f: Box::new(|_, _, _| Ok(Value::Undefined)),
-            object: Object::raw_with_proto(Value::Undefined),
-            data: None,
-            special_constructor: false,
-            constructor: Value::Undefined.into(),
-        }, true)
+        NativeFunctionBuilder(
+            Self {
+                name: String::new(),
+                f: Box::new(|_, _, _| Ok(Value::Undefined)),
+                object: Object::raw_with_proto(Value::Undefined),
+                data: None,
+                special_constructor: false,
+                constructor: Value::Undefined.into(),
+            },
+            true,
+        )
     }
 }
 
@@ -250,7 +242,7 @@ impl NativeFunctionBuilder {
         self.0.special_constructor = special;
         self
     }
-    
+
     pub fn constructor(mut self, constructor: Value) -> Self {
         self.0.constructor = constructor.into();
         self.1 = false;
@@ -262,10 +254,12 @@ impl NativeFunctionBuilder {
     pub fn build(self) -> ObjectHandle {
         let mut handle = ObjectHandle::new(self.0);
 
-
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle.as_any_mut().downcast_mut::<NativeFunction>().unwrap();
+        let this = handle
+            .as_any_mut()
+            .downcast_mut::<NativeFunction>()
+            .unwrap();
 
         this.constructor = constructor;
 

@@ -13,7 +13,8 @@ pub enum ConstValue {
 }
 
 impl ConstValue {
-    #[must_use] pub fn into_value(self) -> Value {
+    #[must_use]
+    pub fn into_value(self) -> Value {
         match self {
             Self::Null => Value::Null,
             Self::Undefined => Value::Undefined,

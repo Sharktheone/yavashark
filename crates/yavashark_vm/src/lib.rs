@@ -45,7 +45,8 @@ impl VM {
         })
     }
 
-    #[must_use] pub fn with_context(code: Vec<Instruction>, data: DataSection, ctx: Context) -> Self {
+    #[must_use]
+    pub fn with_context(code: Vec<Instruction>, data: DataSection, ctx: Context) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),

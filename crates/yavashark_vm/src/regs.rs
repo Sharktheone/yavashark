@@ -15,13 +15,15 @@ impl Default for Registers {
 }
 
 impl Registers {
-    #[must_use] pub const fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             regs: [const { Value::Undefined }; NUM_REGS],
         }
     }
 
-    #[must_use] pub fn get(&self, reg: Reg) -> Option<Value> {
+    #[must_use]
+    pub fn get(&self, reg: Reg) -> Option<Value> {
         self.regs.get(reg as usize).cloned()
     }
 
