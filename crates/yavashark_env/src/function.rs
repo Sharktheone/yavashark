@@ -5,7 +5,7 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{AsAny, Constructor, Func, Obj, ObjectProperty};
+use yavashark_value::{AsAny, Constructor, Func, ObjectProperty};
 
 use crate::context::Context;
 use crate::object::Object;
@@ -37,12 +37,8 @@ impl Constructor<Context> for NativeFunction {
         self.special_constructor
     }
 
-    fn value(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
-        ObjectHandle::new(ctx).into()
-    }
-
-    fn proto(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
-        todo!()
+    fn value(&self, ctx: &mut Context) -> Value {
+        Object::new(ctx).into()
     }
 }
 
