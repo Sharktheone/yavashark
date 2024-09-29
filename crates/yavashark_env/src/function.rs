@@ -5,7 +5,7 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{AsAny, Constructor, Func, ObjectProperty};
+use yavashark_value::{Constructor, Func, ObjectProperty};
 
 use crate::context::Context;
 use crate::object::Object;
@@ -54,13 +54,19 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-        let mut handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+        {
+            let mut this = handle.get_mut().unwrap();
 
-        this.constructor = constructor;
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().unwrap();
+
+            this.constructor = constructor;
+        }
 
         handle
     }
@@ -80,13 +86,19 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-        let mut handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+        {
+            let mut this = handle.get_mut().unwrap();
 
-        this.constructor = constructor;
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().unwrap();
+
+            this.constructor = constructor;
+        }
 
         handle
     }
@@ -106,13 +118,21 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-        let mut handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
 
-        this.constructor = constructor;
+        {
+            let mut this = handle.get_mut().unwrap();
+
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().unwrap();
+
+            this.constructor = constructor;
+        }
+
 
         handle
     }
@@ -131,13 +151,20 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-        let mut handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
 
-        this.constructor = constructor;
+        {
+            let mut this = handle.get_mut().unwrap();
+
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().unwrap();
+
+            this.constructor = constructor;
+        }
 
         handle
     }
@@ -156,13 +183,19 @@ impl NativeFunction {
             constructor: Value::Undefined.into(),
         };
 
-        let mut handle = ObjectHandle::new(this);
+        let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle.as_any_mut().downcast_mut::<Self>().unwrap();
+        {
+            let mut this = handle.get_mut().unwrap();
 
-        this.constructor = constructor;
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().unwrap();
+
+            this.constructor = constructor;
+        }
 
         handle
     }
@@ -248,16 +281,19 @@ impl NativeFunctionBuilder {
     /// Builds the function handle.
     #[must_use]
     pub fn build(self) -> ObjectHandle {
-        let mut handle = ObjectHandle::new(self.0);
+        let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-        let this = handle
-            .as_any_mut()
-            .downcast_mut::<NativeFunction>()
-            .unwrap();
+        {
+            let mut this = handle.get_mut().unwrap();
 
-        this.constructor = constructor;
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<NativeFunction>().unwrap();
+
+            this.constructor = constructor;
+        }
 
         handle
     }
