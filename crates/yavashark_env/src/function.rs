@@ -122,7 +122,6 @@ impl NativeFunction {
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
-
         {
             let mut this = handle.get_mut().unwrap();
 
@@ -132,7 +131,6 @@ impl NativeFunction {
 
             this.constructor = constructor;
         }
-
 
         handle
     }
@@ -154,7 +152,6 @@ impl NativeFunction {
         let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
-
 
         {
             let mut this = handle.get_mut().unwrap();
