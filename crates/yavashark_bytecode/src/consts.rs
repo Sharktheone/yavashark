@@ -4,7 +4,7 @@ use crate::data::DataSection;
 use crate::function::BytecodeFunction;
 use crate::Instruction;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ConstValue {
     Null,
     Undefined,
@@ -32,12 +32,12 @@ impl ConstValue {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ObjectLiteralBlueprint;
 
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionBlueprint {
     pub name: Option<String>,
     pub params: Vec<String>,

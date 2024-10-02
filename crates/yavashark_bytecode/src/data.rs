@@ -1,6 +1,6 @@
 use crate::ConstValue;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DataSection {
     pub var_names: Vec<String>,
     pub constants: Vec<ConstValue>,
