@@ -1,7 +1,7 @@
 use crate::VM;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
-use yavashark_env::{Res, Result, Value};
+use yavashark_env::{Context, Res, Result, Value};
 
 #[allow(unused)]
 impl VM {
@@ -72,7 +72,7 @@ impl VM {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        Ok(val.clone().into_value())
+        Ok(val.clone().into_value(&self.ctx))
     }
 
     #[must_use]

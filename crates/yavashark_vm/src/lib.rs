@@ -1,4 +1,3 @@
-pub mod data;
 mod execute;
 mod instructions;
 mod regs;
@@ -6,13 +5,17 @@ mod stack;
 mod storage;
 mod value_ext;
 
-use crate::data::DataSection;
 use crate::execute::Execute;
 pub use regs::*;
 pub use stack::*;
+use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, Error, Res, Value};
+
+
+
+pub use yavashark_bytecode;
 
 pub struct VM {
     regs: Registers,
