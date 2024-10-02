@@ -10,6 +10,8 @@ pub use instructions::*;
 mod consts;
 mod instructions;
 pub mod writer;
+pub mod data;
+mod function;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;

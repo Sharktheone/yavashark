@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 yavashark_env = { path = "../yavashark_env" }
 yavashark_value = { path = "../yavashark_value" }
+yavashark_macro = { path = "../yavashark_macro" }
 bincode = "2.0.0-rc.3"
 
 [lints]

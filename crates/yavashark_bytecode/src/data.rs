@@ -1,5 +1,6 @@
-use yavashark_bytecode::ConstValue;
+use crate::ConstValue;
 
+#[derive(Debug, Clone)]
 pub struct DataSection {
     pub var_names: Vec<String>,
     pub constants: Vec<ConstValue>,

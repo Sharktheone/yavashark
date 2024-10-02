@@ -4625,6 +4625,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "yavashark_env",
+ "yavashark_macro",
  "yavashark_value",
 ]
 
