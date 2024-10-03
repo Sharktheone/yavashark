@@ -2,8 +2,8 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
-use yavashark_vm::VM;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
+use yavashark_vm::VM;
 
 #[allow(clippy::unwrap_used)]
 fn main() {

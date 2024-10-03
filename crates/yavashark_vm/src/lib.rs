@@ -13,8 +13,6 @@ use yavashark_bytecode::Instruction;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, Error, Res, Value};
 
-
-
 pub use yavashark_bytecode;
 
 pub struct VM {

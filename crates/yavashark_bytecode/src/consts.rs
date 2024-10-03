@@ -1,8 +1,8 @@
-use yavashark_env::{Context, Value};
-use yavashark_value::ConstString;
 use crate::data::DataSection;
 use crate::function::BytecodeFunction;
 use crate::Instruction;
+use yavashark_env::{Context, Value};
+use yavashark_value::ConstString;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ConstValue {
@@ -34,8 +34,6 @@ impl ConstValue {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ObjectLiteralBlueprint;
-
-
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct FunctionBlueprint {
