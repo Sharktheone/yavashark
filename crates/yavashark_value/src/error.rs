@@ -163,7 +163,14 @@ impl<C: Ctx> Error<C> {
 
 impl<C: Ctx> Display for Error<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}", self.name(), self.message_internal())
+        let msg = self.message_internal();
+
+
+        if msg.is_empty() {
+            write!(f, "{}", self.name())
+        } else {
+            write!(f, "{}: {}", self.name(), msg)
+        }
     }
 }
 
