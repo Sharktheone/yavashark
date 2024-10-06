@@ -2,6 +2,7 @@ use crate::Interpreter;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::error::ErrorObj;
 
 impl Interpreter {
     pub fn run_try(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
@@ -23,111 +24,10 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
         if let Some(catch) = &stmt.handler {
             let scope = &mut Scope::with_parent(scope)?;
             if let Some(param) = &catch.param {
-                //TODO: Error must be an object, then replace it with self.run_pat
-                match param {
-                    Pat::Ident(ident) => {
-                        scope.declare_var(ident.sym.to_string(), format!("{err:?}").into());
-                        //TODO impl Obj for Error
-                    }
-                    Pat::Object(obj) => {
-                        for prop in &obj.props {
-                            match prop {
-                                ObjectPatProp::Assign(assign) => {
-                                    match assign.key.sym.to_string().as_str() {
-                                        "message" => {
-                                            scope.declare_var(
-                                                "message".to_string(),
-                                                Value::String(err.message(ctx)?),
-                                            );
-                                        }
-                                        "stack" => {
-                                            scope.declare_var(
-                                                "stack".to_string(),
-                                                format!("{:?}", err.stack()).into(),
-                                            ); //TODO impl Obj for StackTrace
-                                        }
-                                        "name" => {
-                                            scope
-                                                .declare_var("name".to_string(), err.name().into());
-                                        }
-                                        "fileName" => {
-                                            scope.declare_var(
-                                                "fileName".to_string(),
-                                                err.file_name().into(),
-                                            );
-                                        }
-                                        "lineNumber" => {
-                                            scope.declare_var(
-                                                "lineNumber".to_string(),
-                                                err.line_number().into(),
-                                            );
-                                        }
-                                        "columnNumber" => {
-                                            scope.declare_var(
-                                                "columnNumber".to_string(),
-                                                err.column_number().into(),
-                                            );
-                                        }
-                                        (name) => {
-                                            let value = if let Some(v) = assign.value.as_ref() {
-                                                Interpreter::run_expr(ctx, v, assign.span, scope)?
-                                            } else {
-                                                Value::Undefined
-                                            };
-                                            scope.declare_var(name.to_string(), value);
-                                        }
-                                    }
-                                }
-                                ObjectPatProp::KeyValue(kv) => {
-                                    let key = match &kv.key {
-                                        PropName::Ident(ident) => ident.sym.to_string(),
-                                        _ => {
-                                            todo!()
-                                        }
-                                    };
-
-                                    let name = match *kv.value {
-                                        Pat::Ident(ref ident) => ident.sym.to_string(),
-                                        _ => {
-                                            todo!()
-                                        }
-                                    };
-
-                                    match key.as_str() {
-                                        "message" => {
-                                            scope.declare_var(name, err.message(ctx)?.into());
-                                        }
-                                        "stack" => {
-                                            scope.declare_var(
-                                                name,
-                                                format!("{:?}", err.stack()).into(),
-                                            );
-                                        }
-                                        "name" => {
-                                            scope.declare_var(name, err.name().into());
-                                        }
-                                        "fileName" => {
-                                            scope.declare_var(name, err.file_name().into());
-                                        }
-                                        "lineNumber" => {
-                                            scope.declare_var(name, err.line_number().into());
-                                        }
-                                        "columnNumber" => {
-                                            scope.declare_var(name, err.column_number().into());
-                                        }
-                                        (_) => {
-                                            scope.declare_var(name, Value::Undefined);
-                                        }
-                                    }
-                                }
-                                ObjectPatProp::Rest(_) => {
-                                    todo!()
-                                }
-                            }
-                        }
-                    }
-                    _ => {}
-                }
+                let err = ErrorObj::new(err, ctx).into();
+                
+                
+                Interpreter::run_pat(ctx, param, scope, err);
             }
 
             Interpreter::run_block(ctx, &catch.body, scope)

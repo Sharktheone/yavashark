@@ -5,7 +5,7 @@ pub use object::*;
 
 mod console;
 mod context;
-mod error;
+pub mod error;
 mod function;
 mod object;
 pub mod scope;
