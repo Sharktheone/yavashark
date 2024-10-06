@@ -1,8 +1,8 @@
 use crate::Interpreter;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
+use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult, Value};
-use yavashark_env::error::ErrorObj;
 
 impl Interpreter {
     pub fn run_try(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
@@ -25,8 +25,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
             let scope = &mut Scope::with_parent(scope)?;
             if let Some(param) = &catch.param {
                 let err = ErrorObj::new(err, ctx).into();
-                
-                
+
                 Interpreter::run_pat(ctx, param, scope, err);
             }
 

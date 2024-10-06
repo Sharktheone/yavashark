@@ -17,9 +17,7 @@ impl Interpreter {
             );
         }
 
-        Self::assign_target_op(
-            ctx, stmt.op, &stmt.left, value, scope,
-        )
+        Self::assign_target_op(ctx, stmt.op, &stmt.left, value, scope)
     }
 
     pub fn assign_target(

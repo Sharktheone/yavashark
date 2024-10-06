@@ -7,7 +7,9 @@ pub fn get_error(ctx: &Context) -> Value {
     NativeFunction::special(
         "error",
         |args, this, ctx| {
-            let message = args.first().map_or(String::new(), std::string::ToString::to_string);
+            let message = args
+                .first()
+                .map_or(String::new(), std::string::ToString::to_string);
 
             let err = ErrorObj::raw_from(message, ctx);
 
@@ -17,7 +19,7 @@ pub fn get_error(ctx: &Context) -> Value {
         },
         ctx,
     )
-        .into()
+    .into()
 }
 
 #[object(to_string)]
@@ -26,7 +28,6 @@ pub fn get_error(ctx: &Context) -> Value {
 pub struct ErrorObj {
     error: Error,
 }
-
 
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
@@ -50,7 +51,6 @@ impl ErrorObj {
         ObjectHandle::new(this)
     }
 
-
     #[must_use]
     pub fn raw_from(message: String, ctx: &Context) -> Self {
         Self {
@@ -62,7 +62,6 @@ impl ErrorObj {
     pub fn override_to_string(&self, _: &mut Context) -> Result<String> {
         Ok(self.error.to_string())
     }
-
 
     #[must_use]
     pub fn override_to_string_internal(&self) -> String {

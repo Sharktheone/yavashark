@@ -172,7 +172,6 @@ impl NativeFunction {
         handle
     }
 
-
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: &str,
@@ -191,7 +190,6 @@ impl NativeFunction {
         let handle = ObjectHandle::new(this);
 
         let constructor = ObjectProperty::new(handle.clone().into());
-
 
         #[allow(clippy::expect_used)]
         {
@@ -293,7 +291,6 @@ impl NativeFunctionBuilder {
         let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());
-
 
         #[allow(clippy::expect_used)]
         {
