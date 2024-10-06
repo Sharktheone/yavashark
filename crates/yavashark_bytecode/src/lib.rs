@@ -9,7 +9,7 @@ pub use instructions::*;
 
 mod consts;
 pub mod data;
-mod function;
+pub mod function;
 mod instructions;
 pub mod writer;
 

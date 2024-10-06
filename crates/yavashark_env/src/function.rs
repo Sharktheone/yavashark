@@ -44,6 +44,7 @@ impl Constructor<Context> for NativeFunction {
 
 impl NativeFunction {
     #[must_use]
+    #[allow(clippy::missing_panics_doc)]
     pub fn new_boxed(name: String, f: NativeFn, ctx: &Context) -> ObjectHandle {
         let this = Self {
             name,
@@ -58,12 +59,13 @@ impl NativeFunction {
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
+        #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().unwrap();
+            let mut this = handle.get_mut().expect("unreachable");
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<Self>().unwrap();
+            let this = this.downcast_mut::<Self>().expect("unreachable");
 
             this.constructor = constructor;
         }
@@ -71,7 +73,7 @@ impl NativeFunction {
         handle
     }
 
-    #[allow(clippy::new_ret_no_self)]
+    #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn new(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
@@ -90,12 +92,13 @@ impl NativeFunction {
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
+        #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().unwrap();
+            let mut this = handle.get_mut().expect("unreachable");
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<Self>().unwrap();
+            let this = this.downcast_mut::<Self>().expect("unreachable");
 
             this.constructor = constructor;
         }
@@ -103,7 +106,7 @@ impl NativeFunction {
         handle
     }
 
-    #[allow(clippy::new_ret_no_self)]
+    #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn special(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
@@ -122,12 +125,13 @@ impl NativeFunction {
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
+        #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().unwrap();
+            let mut this = handle.get_mut().expect("unreachable");
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<Self>().unwrap();
+            let this = this.downcast_mut::<Self>().expect("unreachable");
 
             this.constructor = constructor;
         }
@@ -135,6 +139,7 @@ impl NativeFunction {
         handle
     }
 
+    #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
@@ -153,12 +158,13 @@ impl NativeFunction {
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
+        #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().unwrap();
+            let mut this = handle.get_mut().expect("unreachable");
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<Self>().unwrap();
+            let this = this.downcast_mut::<Self>().expect("unreachable");
 
             this.constructor = constructor;
         }
@@ -166,6 +172,8 @@ impl NativeFunction {
         handle
     }
 
+
+    #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
@@ -184,12 +192,14 @@ impl NativeFunction {
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
+
+        #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().unwrap();
+            let mut this = handle.get_mut().expect("unreachable");
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<Self>().unwrap();
+            let this = this.downcast_mut::<Self>().expect("unreachable");
 
             this.constructor = constructor;
         }
@@ -269,6 +279,7 @@ impl NativeFunctionBuilder {
         self
     }
 
+    #[must_use]
     pub fn constructor(mut self, constructor: Value) -> Self {
         self.0.constructor = constructor.into();
         self.1 = false;
@@ -277,17 +288,20 @@ impl NativeFunctionBuilder {
 
     /// Builds the function handle.
     #[must_use]
+    #[allow(clippy::missing_panics_doc)]
     pub fn build(self) -> ObjectHandle {
         let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
+
+        #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().unwrap();
+            let mut this = handle.get_mut().expect("unreachable");
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<NativeFunction>().unwrap();
+            let this = this.downcast_mut::<NativeFunction>().expect("unreachable");
 
             this.constructor = constructor;
         }

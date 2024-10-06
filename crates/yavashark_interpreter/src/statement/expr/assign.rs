@@ -1,5 +1,5 @@
 use swc_ecma_ast::{
-    AssignExpr, AssignOp, AssignTarget, BinaryOp, MemberExpr, MemberProp, SimpleAssignTarget,
+    AssignExpr, AssignOp, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget,
 };
 
 use yavashark_env::scope::Scope;
@@ -17,9 +17,9 @@ impl Interpreter {
             );
         }
 
-        Ok(Self::assign_target_op(
+        Self::assign_target_op(
             ctx, stmt.op, &stmt.left, value, scope,
-        )?)
+        )
     }
 
     pub fn assign_target(

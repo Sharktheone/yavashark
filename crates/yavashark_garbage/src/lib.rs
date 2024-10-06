@@ -1,7 +1,6 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
-use std::any::type_name;
 use std::fmt::{Debug, Formatter};
 use std::ops::Deref;
 use std::ptr::NonNull;
@@ -41,7 +40,7 @@ pub unsafe trait Collectable: Sized {
 
     #[cfg(feature = "easy_debug")]
     fn trace_name(&self) -> &'static str {
-        type_name::<Self>()
+        std::any::type_name::<Self>()
     }
 }
 
@@ -344,7 +343,7 @@ impl<T: Collectable> Gc<T> {
             refs: Refs::new(),
             flags: Flags::new(),
             #[cfg(feature = "easy_debug")]
-            ty_name: type_name::<T>(),
+            ty_name: std::any::type_name::<T>(),
             #[cfg(feature = "easy_debug")]
             name,
         };
@@ -382,7 +381,7 @@ impl<T: Collectable> Gc<T> {
             refs: Refs::new(),
             flags: Flags::root(),
             #[cfg(feature = "easy_debug")]
-            ty_name: type_name::<T>(),
+            ty_name: std::any::type_name::<T>(),
             #[cfg(feature = "easy_debug")]
             name,
         };
@@ -416,6 +415,7 @@ struct Refs<T: Collectable> {
 }
 
 impl<T: Collectable> Refs<T> {
+    #[allow(clippy::missing_const_for_fn)]
     fn new() -> Self {
         Self {
             ref_by: RwLock::new(Vec::new()),
