@@ -49,10 +49,11 @@ mod tests {
             try {
                 throw new Error("error message");
             } catch ({message}) {
+                mock.send()
                 message
             }
             "#,
-            0,
+            1,
             Vec::<Vec<Value>>::new(),
             Value::String("error message".to_string())
         );
@@ -62,11 +63,15 @@ mod tests {
     fn try_catch_with_error_thrown() {
         test_eval!(
             r#"
+            
+            ret = undefined;
             try {
                 throw new Error("error message");
             } catch (e) {
-                e.message
+                mock.send()
+                ret = e.message
             }
+            ret
             "#,
             0,
             Vec::<Vec<Value>>::new(),
@@ -118,6 +123,30 @@ mod tests {
     fn try_catch_with_no_error_thrown_and_finalizer() {
         test_eval!(
             r#"
+
+            let ret = undefined;
+
+            try {
+                ret = "no error"
+            } catch (e) {
+                e.message
+            } finally {
+                ret = "finalizer executed"
+            }
+
+
+            ret
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::String("finalizer executed".to_string())
+        );
+    }
+
+    #[test]
+    fn try_catch_ret_finalizer() {
+        test_eval!(
+            r#"
             try {
                 "no error"
             } catch (e) {
@@ -128,7 +157,7 @@ mod tests {
             "#,
             0,
             Vec::<Vec<Value>>::new(),
-            Value::String("finalizer executed".to_string())
+            Value::String("no error".to_string())
         );
     }
 
@@ -136,15 +165,17 @@ mod tests {
     fn try_catch_with_error_thrown_and_no_catch_block() {
         test_eval!(
             r#"
+
             try {
                 throw new Error("error message");
             } finally {
-                "finalizer executed"
+                mock..send()
             }
+
             "#,
-            0,
+            1,
             Vec::<Vec<Value>>::new(),
-            Value::String("finalizer executed".to_string())
+            Value::Undefined
         );
     }
 }
