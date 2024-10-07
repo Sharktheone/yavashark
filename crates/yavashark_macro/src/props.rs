@@ -1,6 +1,6 @@
 use proc_macro::TokenStream as TokenStream1;
 
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
 use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
@@ -13,6 +13,9 @@ struct Item {
     is_mut: bool,
     has_ctx: bool,
     has_this: bool,
+    get: bool,
+    set: bool,
+    span: Span,
 }
 
 #[allow(unused)]
@@ -76,6 +79,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         writable: bool,
         enumerable: bool,
         configurable: bool,
+        get: bool,
+        set: bool,
     }
 
     let mut properties = Vec::new();
@@ -88,6 +93,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let mut writable = false;
         let mut enumerable = false;
         let mut configurable = false;
+        
+        
+        let mut get = false;
+        let mut set = false;
 
         let mut name = None;
 
@@ -125,6 +134,14 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     .expect("Failed to parse attributes");
                 continue;
             }
+            
+            if attr.path().is_ident("get") {
+                get = true;
+            }
+            
+            if attr.path().is_ident("set") {
+                set = true;
+            }
 
             if attr.path().is_ident("name") {
                 name = Some(
@@ -147,6 +164,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             writable,
             enumerable,
             configurable,
+            get,
+            set
         };
 
         properties.push(prop);
@@ -231,7 +250,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         self_mut = true;
                     }
                 }
-
+                
                 remove.push(idx);
                 properties.push(Item {
                     name: func.sig.ident.clone(),
@@ -240,6 +259,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     is_mut: false,
                     has_ctx: false,
                     has_this: false,
+                    get: false,
+                    set: false,
+                    span: attr.span(),
                 });
             }
             if attr.path().is_ident("prop") {
@@ -266,6 +288,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let mut assert_last_or_this = false;
                 let mut assert_last = false;
+                let mut get = false;
+                let mut set = false;
 
                 func.sig.inputs.iter().for_each(|arg| {
                     if let FnArg::Typed(arg) = arg {
@@ -313,6 +337,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     is_mut: self_mut,
                     has_ctx,
                     has_this,
+                    span: attr.span(),
+                    get,
+                    set,
                 });
             }
             if attr.path().is_ident("new") {
@@ -385,6 +412,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 deez.#name(args #ctx #this)
             }}
         };
+        
+        if prop.get && prop.set {
+            todo!("compiler error")
+        }
+        
 
         let prop = quote! {
             let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
