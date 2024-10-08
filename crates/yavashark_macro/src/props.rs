@@ -417,6 +417,31 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             todo!("compiler error")
         }
         
+        
+        let def = if prop.get {
+            quote! {
+                obj.define_getter(#fn_name.into(), function);
+            }
+            
+        } else if prop.set {
+            quote! {
+                obj.define_setter(#fn_name.into(), function);
+            }
+            
+        } else {
+            quote! {
+                obj.define_variable(
+                    #fn_name.into(),
+                    #variable::new_with_attributes(
+                        function,
+                        #writable,
+                        #enumerable,
+                        #configurable
+                    )
+                );
+            }
+        };
+        
 
         let prop = quote! {
             let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
@@ -426,15 +451,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }
             }, func_proto.copy()).into();
 
-            obj.define_variable(
-                #fn_name.into(),
-                #variable::new_with_attributes(
-                    function,
-                    #writable,
-                    #enumerable,
-                    #configurable
-                )
-            );
+            #def
         };
 
         props.extend(prop);
