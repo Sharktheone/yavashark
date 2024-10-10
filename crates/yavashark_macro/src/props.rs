@@ -74,7 +74,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         .segments
         .push(PathSegment::from(Ident::new("Value", item.span())));
 
-    
     let mut constructor = None;
     let mut properties: Vec<Item> = Vec::new();
 
@@ -154,7 +153,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         self_mut = true;
                     }
                 }
-                
+
                 remove.push(idx);
                 properties.push(Item {
                     name: func.sig.ident.clone(),
@@ -316,22 +315,19 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 deez.#name(args #ctx #this)
             }}
         };
-        
+
         if prop.get && prop.set {
             todo!("compiler error")
         }
-        
-        
+
         let def = if prop.get {
             quote! {
                 obj.define_getter(#fn_name.into(), function);
             }
-            
         } else if prop.set {
             quote! {
                 obj.define_setter(#fn_name.into(), function);
             }
-            
         } else {
             quote! {
                 obj.define_variable(
@@ -345,7 +341,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 );
             }
         };
-        
 
         let prop = quote! {
             let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
