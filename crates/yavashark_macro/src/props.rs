@@ -317,7 +317,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         if prop.get && prop.set {
-            todo!("compiler error")
+            return syn::Error::new(prop.span, "cannot have set and get in on the same function")
+                .to_compile_error()
+                .into();
         }
 
         let def = if prop.get {
