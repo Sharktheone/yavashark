@@ -1,6 +1,6 @@
 use crate::context::Context;
-use crate::{Error, NativeFunction, Object, ObjectHandle, Result, Value};
-use yavashark_macro::object;
+use crate::{Error, NativeFunction, Object, ObjectHandle, Result, Value, ValueResult};
+use yavashark_macro::{object, properties};
 
 #[must_use]
 pub fn get_error(ctx: &Context) -> Value {
@@ -59,6 +59,7 @@ impl ErrorObj {
         }
     }
 
+
     pub fn override_to_string(&self, _: &mut Context) -> Result<String> {
         Ok(self.error.to_string())
     }
@@ -66,5 +67,23 @@ impl ErrorObj {
     #[must_use]
     pub fn override_to_string_internal(&self) -> String {
         self.error.to_string()
+    }
+}
+
+
+
+#[properties]
+impl ErrorObj {
+
+
+
+    #[must_use]
+    #[get(message)]
+    pub fn get_message(&self, _: Vec<Value>, ctx: &mut Context) -> ValueResult {
+        
+        
+        println!("Getter exec!");
+        
+        Ok(self.error.message(ctx)?.into())
     }
 }
