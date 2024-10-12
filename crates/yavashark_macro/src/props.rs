@@ -22,8 +22,6 @@ struct Item {
 pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
 
-    let mut call = None;
-    let mut constructor = None;
     let mut new = None;
 
     let crate_path = Path::from(Ident::new("crate", item.span()));
