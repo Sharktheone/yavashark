@@ -3,7 +3,7 @@ use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{FnArg, ImplItem, LitBool, Path, PathSegment};
+use syn::{FnArg, ImplItem, Path, PathSegment};
 
 #[derive(Debug)]
 struct Item {
@@ -165,7 +165,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     span: attr.span(),
                 });
             }
-            if attr.path().is_ident("prop") {
+            if attr.path().is_ident("prop") || attr.path().is_ident("get") || attr.path().is_ident("set") {
                 for prop in &mut properties {
                     if prop.name == func.sig.ident {
                         return syn::Error::new(attr.span(), "Duplicate prop attribute")
@@ -174,7 +174,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
-                let rename = attr.parse_args::<Path>().ok();
+                let rename;
+                if attr.path().is_ident("prop") {
+
+                    rename = attr.parse_args::<Path>().ok();
+                } else {
+                    rename = None;
+                }
 
                 let mut self_mut = false;
 
@@ -253,6 +259,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }) {
                         return e.to_compile_error().into();
                     }
+                    
+                    
+                    remove.push(idx);
                 }
 
                 remove.push(idx);
@@ -348,11 +357,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let def = if let Some(name) = prop.get {
             quote! {
-                obj.define_getter(stringify!(#name), function);
+                obj.define_getter(stringify!(#name).into(), function);
             }
         } else if let Some(name) = prop.set {
             quote! {
-                obj.define_setter(stringify!(#name), function);
+                obj.define_setter(stringify!(#name).into(), function);
             }
         } else {
             quote! {
@@ -371,7 +380,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let prop = quote! {
             let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
                 match this #copy {
-                    #value::Object(x) => #any_cast,
+                    #value::Object(ref x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this))),
                 }
             }, func_proto.copy()).into();
