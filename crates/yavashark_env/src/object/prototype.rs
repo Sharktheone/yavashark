@@ -168,6 +168,22 @@ impl Obj<Context> for Prototype {
     }
 
     fn resolve_property(&self, name: &Value) -> Option<ObjectProperty> {
+        if let Value::String(name) = name {
+            match name.as_str() {
+                "__define_getter__" => return Some(self.defined_getter.copy()),
+                "__define_setter__" => return Some(self.defined_setter.copy()),
+                "__lookup_getter__" => return Some(self.lookup_getter.copy()),
+                "__lookup_setter__" => return Some(self.lookup_setter.copy()),
+                "constructor" => return Some(self.constructor.copy()),
+                "hasOwnProperty" => return Some(self.has_own_property.copy()),
+                "isPrototypeOf" => return Some(self.is_prototype_of.copy()),
+                "propertyIsEnumerable" => return Some(self.property_is_enumerable.copy()),
+                "toLocaleString" => return Some(self.to_locale_string.copy()),
+                "toString" => return Some(self.to_string.copy()),
+                "valueOf" => return Some(self.value_of.copy()),
+                _ => {}
+            }
+        }
         self.object.resolve_property(name)
     }
 
