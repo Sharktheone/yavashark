@@ -13,8 +13,8 @@ struct Item {
     is_mut: bool,
     has_ctx: bool,
     has_this: bool,
-    get: bool,
-    set: bool,
+    get: Option<Ident>,
+    set: Option<Ident>,
     span: Span,
 }
 
@@ -160,8 +160,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     is_mut: false,
                     has_ctx: false,
                     has_this: false,
-                    get: false,
-                    set: false,
+                    get: None,
+                    set: None,
                     span: attr.span(),
                 });
             }
@@ -189,8 +189,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let mut assert_last_or_this = false;
                 let mut assert_last = false;
-                let mut get = false;
-                let mut set = false;
 
                 func.sig.inputs.iter().for_each(|arg| {
                     if let FnArg::Typed(arg) = arg {
@@ -228,6 +226,34 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         }
                     }
                 });
+                let mut get = None;
+                
+                if attr.path().is_ident("get") {
+                    if let Err(e) = attr.parse_nested_meta(|attr| {
+                        
+                        get = Some(attr.path.require_ident()?.clone());
+                        
+                        
+                        Ok(())
+                    }) {
+                        return e.to_compile_error().into();
+                    }
+                }
+                
+                
+                let mut set = None;
+                
+                if attr.path().is_ident("set") {
+                    if let Err(e) = attr.parse_nested_meta(|attr| {
+
+                        get = Some(attr.path.require_ident()?.clone());
+
+
+                        Ok(())
+                    }) {
+                        return e.to_compile_error().into();
+                    }
+                }
 
                 remove.push(idx);
 
@@ -314,19 +340,19 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }}
         };
 
-        if prop.get && prop.set {
+        if prop.get.is_some() && prop.set.is_some() {
             return syn::Error::new(prop.span, "cannot have set and get in on the same function")
                 .to_compile_error()
                 .into();
         }
 
-        let def = if prop.get {
+        let def = if let Some(name) = prop.get {
             quote! {
-                obj.define_getter(#fn_name.into(), function);
+                obj.define_getter(stringify!(#name), function);
             }
-        } else if prop.set {
+        } else if let Some(name) = prop.set {
             quote! {
-                obj.define_setter(#fn_name.into(), function);
+                obj.define_setter(stringify!(#name), function);
             }
         } else {
             quote! {
