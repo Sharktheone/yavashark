@@ -40,7 +40,7 @@ pub fn to_locale_string(args: Vec<Value>, this: Value, ctx: &mut Context) -> Val
 }
 
 pub fn to_string(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
-    todo!()
+    Ok(this.to_string(ctx)?.into())
 }
 
 pub fn value_of(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
