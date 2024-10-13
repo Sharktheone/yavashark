@@ -10,7 +10,8 @@ pub fn get_error(ctx: &Context) -> Value {
             let message = args
                 .first()
                 .map_or(String::new(), std::string::ToString::to_string);
-
+            
+            
             let err = ErrorObj::raw_from(message, ctx);
 
             this.exchange(Box::new(err))?;
@@ -26,7 +27,7 @@ pub fn get_error(ctx: &Context) -> Value {
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct ErrorObj {
-    error: Error,
+    pub(crate) error: Error,
 }
 
 impl ErrorObj {
@@ -79,10 +80,6 @@ impl ErrorObj {
 
     #[get(message)]
     pub fn get_message(&self, _: Vec<Value>, ctx: &mut Context) -> ValueResult {
-        
-        
-        println!("Getter exec!");
-        
         Ok(self.error.message(ctx)?.into())
     }
 }
