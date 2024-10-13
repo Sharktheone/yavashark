@@ -437,8 +437,8 @@ impl<C: Ctx> Object<C> {
 
         inner.define_getter(name, value)
     }
-    
-    
+
+
     pub fn id(&self) -> usize {
         self.0.ptr_id()
     }
@@ -487,9 +487,9 @@ impl<C: Ctx> ObjectProperty<C> {
     #[must_use]
     pub const fn getter(value: Value<C>) -> Self {
         Self {
-            value,
+            value: Value::Undefined,
             attributes: Attributes::new(),
-            get: Value::Undefined,
+            get: value,
             set: Value::Undefined,
         }
     }
@@ -497,10 +497,10 @@ impl<C: Ctx> ObjectProperty<C> {
     #[must_use]
     pub const fn setter(value: Value<C>) -> Self {
         Self {
-            value,
+            value: Value::Undefined,
             attributes: Attributes::new(),
             get: Value::Undefined,
-            set: Value::Undefined,
+            set: value,
         }
     }
 
