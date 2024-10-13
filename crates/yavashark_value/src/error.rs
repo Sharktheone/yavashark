@@ -1,7 +1,7 @@
 use crate::{Ctx, Value};
 use std::fmt::Display;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Error<C: Ctx> {
     pub kind: ErrorKind<C>,
     pub stacktrace: StackTrace,
@@ -173,7 +173,7 @@ impl<C: Ctx> Display for Error<C> {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ErrorKind<C: Ctx> {
     Type(String),
     Reference(String),
@@ -185,12 +185,12 @@ pub enum ErrorKind<C: Ctx> {
     Error(Option<String>),
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct StackFrame {
     pub function: String,
     pub file: String,

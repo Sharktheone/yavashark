@@ -12,6 +12,7 @@ pub mod scope;
 #[cfg(feature = "tests")]
 pub mod tests;
 
+use crate::error::ErrorObj;
 pub use yavashark_value as value;
 
 pub type Value = yavashark_value::Value<Context>;
@@ -58,7 +59,22 @@ impl ControlFlow {
     }
 
     #[must_use]
-    pub const fn throw(val: Value) -> Self {
+    pub fn throw(val: Value) -> Self {
+        if let Value::Object(obj) = &val {
+            {
+                if let Ok(obj) = obj.get() {
+                    let this = (***obj).as_any();
+
+                    if let Some(err) = this.downcast_ref::<ErrorObj>() {
+                        let e = &err.error;
+
+                        return Self::Error(e.clone());
+                    }
+                }
+            }
+        }
+
+
         Self::Error(Error::throw(val))
     }
 }
