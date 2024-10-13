@@ -15,7 +15,7 @@ pub trait PrettyPrint {
     }
 
     fn pretty_print_key(&self) -> String;
-    
+
     fn pretty_print_circular(&self, not: &mut Vec<usize>) -> String;
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String;
 }
@@ -28,7 +28,7 @@ impl PrettyPrint for Object<Context> {
     fn pretty_print_circular(&self, not: &mut Vec<usize>) -> String { let id = self.id();
 
         if not.contains(&id) {
-            return "[Circular *1]".green().to_string()
+            return "[Circular *1]".bright_green().to_string()
         }
 
         not.push(id);
@@ -63,16 +63,16 @@ impl PrettyPrint for Object<Context> {
 
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String {
         let id = self.id();
-        
+
         if not.contains(&id) {
-            return "[Circular *1]".green().to_string()
+            return "[Circular *1]".bright_green().to_string()
         }
-        
+
         not.push(id);
-        
-        
-        
-        
+
+
+
+
         let mut str = if self.is_function() {
             format!("[Function: {}] ", self.name())
                 .bright_green()
@@ -103,9 +103,9 @@ impl PrettyPrint for Object<Context> {
         };
 
         str.push_str("\n}");
-        
+
         not.pop();
-        
+
         str
     }
 }
