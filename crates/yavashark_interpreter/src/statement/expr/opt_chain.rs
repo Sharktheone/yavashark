@@ -43,16 +43,19 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResu
             Interpreter::run_member_on(ctx, value, &member.prop, member.span, scope)
         }
         OptChainBase::Call(call) => {
-            let callee = Interpreter::run_expr(ctx, &call.callee, call.span, scope)?;
+            let (callee, this) = Interpreter::run_call_expr(ctx, &call.callee, call.span, scope)?;
 
             println!("{:?} is {}", callee, stmt.optional);
 
             if (callee == Value::Undefined || callee == Value::Null) && stmt.optional {
                 return Err(ControlFlow::OptChainShortCircuit);
             }
+            
+            let this = this.unwrap_or(scope.this()?);
+            
 
             Ok(Interpreter::run_call_on(
-                ctx, callee, &call.args, call.span, scope,
+                ctx, callee, this, &call.args, call.span, scope,
             )?)
         }
     }
