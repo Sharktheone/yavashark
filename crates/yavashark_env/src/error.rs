@@ -34,7 +34,7 @@ impl ErrorObj {
     #[must_use]
     pub fn new(error: Error, ctx: &Context) -> ObjectHandle {
         let this = Self {
-            object: Object::raw(ctx),
+            object: Object::raw_with_proto(ctx.proto.error.clone().into()),
             error,
         };
 
@@ -44,7 +44,7 @@ impl ErrorObj {
     #[must_use]
     pub fn new_from(message: String, ctx: &Context) -> ObjectHandle {
         let this = Self {
-            object: Object::raw(ctx),
+            object: Object::raw_with_proto(ctx.proto.error.clone().into()),
             error: Error::unknown_error(message),
         };
 
@@ -54,7 +54,7 @@ impl ErrorObj {
     #[must_use]
     pub fn raw_from(message: String, ctx: &Context) -> Self {
         Self {
-            object: Object::raw(ctx),
+            object: Object::raw_with_proto(ctx.proto.error.clone().into()),
             error: Error::unknown_error(message),
         }
     }

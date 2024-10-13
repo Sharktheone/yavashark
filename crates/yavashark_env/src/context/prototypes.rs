@@ -3,6 +3,7 @@ use anyhow::anyhow;
 use crate::object::array::ArrayIterator;
 use crate::object::{array::Array, Object, Prototype};
 use crate::{FunctionPrototype, ObjectHandle};
+use crate::error::ErrorObj;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {
@@ -10,6 +11,7 @@ pub struct Prototypes {
     pub func: ObjectHandle,
     pub(crate) array: ObjectHandle,
     pub(crate) array_iter: ObjectHandle,
+    pub(crate) error: ObjectHandle,
 }
 
 impl Prototypes {
@@ -58,12 +60,19 @@ impl Prototypes {
             func_prototype.clone().into(),
         )
         .map_err(|e| anyhow!(format!("{e:?}")))?;
+        
+        let error_prototype = ErrorObj::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         Ok(Self {
             obj: obj_prototype,
             func: func_prototype,
             array: array_prototype,
             array_iter: array_iter_prototype,
+            error: error_prototype,
         })
     }
 }
