@@ -73,7 +73,7 @@ mod tests {
             }
             ret
             "#,
-            0,
+            1,
             Vec::<Vec<Value>>::new(),
             Value::String("error message".to_string())
         );
@@ -169,7 +169,7 @@ mod tests {
             try {
                 throw new Error("error message");
             } finally {
-                mock..send()
+                mock.send()
             }
 
             "#,
