@@ -293,6 +293,11 @@ impl<T: Collectable> Gc<T> {
             gc: self.inner,
         }
     }
+    
+    
+    pub fn ptr_id(&self) -> usize {
+        self.inner.as_ptr() as usize
+    }
 
     #[must_use]
     pub fn as_ptr(&self) -> *mut T {

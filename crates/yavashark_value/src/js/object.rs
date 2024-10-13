@@ -437,6 +437,11 @@ impl<C: Ctx> Object<C> {
 
         inner.define_getter(name, value)
     }
+    
+    
+    pub fn id(&self) -> usize {
+        self.0.ptr_id()
+    }
 }
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
