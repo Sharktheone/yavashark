@@ -357,11 +357,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let def = if let Some(name) = prop.get {
             quote! {
-                obj.define_getter(stringify!(#name).into(), function);
+                obj.define_getter(stringify!(#name).into(), function)?;
             }
         } else if let Some(name) = prop.set {
             quote! {
-                obj.define_setter(stringify!(#name).into(), function);
+                obj.define_setter(stringify!(#name).into(), function)?;
             }
         } else {
             quote! {

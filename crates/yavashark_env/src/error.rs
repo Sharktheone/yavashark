@@ -77,7 +77,6 @@ impl ErrorObj {
 
 
 
-    #[must_use]
     #[get(message)]
     pub fn get_message(&self, _: Vec<Value>, ctx: &mut Context) -> ValueResult {
         
