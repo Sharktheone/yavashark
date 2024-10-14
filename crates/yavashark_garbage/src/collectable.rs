@@ -93,14 +93,14 @@ impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     }
 }
 
-pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>> {
+pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     /// # Safety
     /// This value should only be set None when the guard is dropped
-    value: Option<RefMut<'a, T>>,
+    value: Option<RefMut<'a, V>>,
     gc: NonNull<GcBox<RefCell<T>>>,
 }
 
-impl<T: CellCollectable<RefCell<T>>> Drop for GcMutRefCellGuard<'_, T> {
+impl<T: CellCollectable<RefCell<T>>, V> Drop for GcMutRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
         unsafe {
             drop(self.value.take());
@@ -109,8 +109,8 @@ impl<T: CellCollectable<RefCell<T>>> Drop for GcMutRefCellGuard<'_, T> {
     }
 }
 
-impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcMutRefCellGuard<'a, T> {
-    type Target = RefMut<'a, T>;
+impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for GcMutRefCellGuard<'a, T, V> {
+    type Target = RefMut<'a, V>;
 
     fn deref(&self) -> &Self::Target {
         #[allow(clippy::unwrap_used)]
@@ -118,7 +118,7 @@ impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcMutRefCellGuard<'a, T> {
     }
 }
 
-impl<'a, T: CellCollectable<RefCell<T>>> DerefMut for GcMutRefCellGuard<'a, T> {
+impl<'a, T: CellCollectable<RefCell<T>>, V> DerefMut for GcMutRefCellGuard<'a, T, V> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         #[allow(clippy::unwrap_used)]
         self.value.as_mut().unwrap() // this can only be None if the guard is dropped
@@ -145,6 +145,23 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
                 value,
                 gc: self.inner,
             })
+        }
+    }
+}
+
+
+impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
+    
+    pub fn map<R, F: FnOnce(&mut V) -> &mut R>(mut self, f: F) -> GcMutRefCellGuard<'a, T, R> {
+        
+        let value = self.value.take().unwrap();
+        
+        let value = RefMut::map(value, f);
+        
+        
+        GcMutRefCellGuard {
+            value: Some(value),
+            gc: self.gc
         }
     }
 }
