@@ -72,15 +72,18 @@ cell!(RwLock, try_read);
 cell!(StdMutex, lock);
 cell!(Mutex, try_lock);
 
-pub struct GcRefCellGuard<'a, T: CellCollectable<RefCell<T>>> {
-    value: Ref<'a, T>,
+pub struct GcRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
+    // this is always Some, except when the destructor runs
+    value: Option<Ref<'a, V>>,
     gc: NonNull<GcBox<RefCell<T>>>,
 }
 
-impl<T: CellCollectable<RefCell<T>>> Drop for GcRefCellGuard<'_, T> {
+impl<T: CellCollectable<RefCell<T>>, V> Drop for GcRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
         unsafe {
-            GcBox::update_refs(self.gc);
+            if self.value.is_some() {
+                GcBox::update_refs(self.gc);
+            }
         }
     }
 }
@@ -89,7 +92,21 @@ impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     type Target = Ref<'a, T>;
 
     fn deref(&self) -> &Self::Target {
-        &self.value
+        self.value.as_ref().unwrap()
+    }
+}
+
+
+impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
+
+    pub fn map<R, F: FnOnce(&V) -> &R>(mut self, f: F) -> GcRefCellGuard<'a, T, R> {
+        let value = Ref::map(self.value.take().unwrap(), f);
+
+
+        GcRefCellGuard {
+            value: Some(value),
+            gc: self.gc,
+        }
     }
 }
 
@@ -103,8 +120,10 @@ pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
 impl<T: CellCollectable<RefCell<T>>, V> Drop for GcMutRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
         unsafe {
-            drop(self.value.take());
-            GcBox::update_refs(self.gc);
+            if self.value.is_some() {
+                drop(self.value.take());
+                GcBox::update_refs(self.gc);
+            }
         }
     }
 }
@@ -131,7 +150,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
 
             Ok(GcRefCellGuard {
-                value,
+                value: Some(value),
                 gc: self.inner,
             })
         }
