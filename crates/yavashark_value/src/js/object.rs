@@ -442,26 +442,27 @@ impl<C: Ctx> Object<C> {
     pub fn id(&self) -> usize {
         self.0.ptr_id()
     }
-    
-    
-    
-    //TODO: add a way on the GcGuard to map the value to something different and return that with the guard
-    //
-    // pub fn downcast<T: Obj<C> + 'static>(&self) -> Result<Option<&T>, Error<C>> {
-    //     let obj = self.get()?;
-    //     
-    //     let this = (***obj).as_any();
-    //     
-    //     Ok(this.downcast_ref::<T>())
-    // }
-    // 
-    // pub fn downcast_mut<T: Obj<C> + 'static>(&self) -> Result<Option<&mut T>, Error<C>> {
-    //     let mut obj = self.get_mut()?;
-    // 
-    //     let this = (***obj).as_any_mut();
-    // 
-    //     Ok(this.downcast_mut::<T>())
-    // }
+
+
+    pub fn downcast<T: Obj<C> + 'static>(&self) -> Result<Option<GcRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
+        let obj = self.get()?;
+
+        Ok(obj.maybe_map(|r| {
+            let this = (**r).as_any();
+
+            this.downcast_ref::<T>()
+        }).ok())
+    }
+
+    pub fn downcast_mut<T: Obj<C> + 'static>(&self) -> Result<Option<GcMutRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
+        let obj = self.get_mut()?;
+
+        Ok(obj.maybe_map(|r| {
+            let this = (**r).as_any_mut();
+            
+            this.downcast_mut::<T>()
+        }).ok())
+    }
 }
 
 impl<C: Ctx> From<Box<dyn Obj<C>>> for Object<C> {
