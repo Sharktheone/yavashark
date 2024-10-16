@@ -98,7 +98,6 @@ impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
 
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
-
     pub fn map<R, F: FnOnce(&V) -> &R>(mut self, f: F) -> GcRefCellGuard<'a, T, R> {
         let value = Ref::map(self.value.take().unwrap(), f);
 
@@ -107,6 +106,25 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
             value: Some(value),
             gc: self.gc,
         }
+    }
+    
+    pub fn maybe_map<R, F: FnOnce(&V) -> Option<&R>>(mut self, f: F) -> Result<GcRefCellGuard<'a, T, R>, Self> {
+        let value = self.value.take().unwrap();
+
+        let value = match Ref::filter_map(value, f) {
+            Ok(v) => v,
+            Err(v) => {
+                self.value = Some(v);
+
+
+                return Err(self);
+            }
+        };
+
+        Ok(GcRefCellGuard {
+            value: Some(value),
+            gc: self.gc,
+        })
     }
 }
 
@@ -170,17 +188,33 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
-    
     pub fn map<R, F: FnOnce(&mut V) -> &mut R>(mut self, f: F) -> GcMutRefCellGuard<'a, T, R> {
-        
         let value = self.value.take().unwrap();
-        
+
         let value = RefMut::map(value, f);
-        
-        
+
         GcMutRefCellGuard {
             value: Some(value),
-            gc: self.gc
+            gc: self.gc,
         }
+    }
+
+    pub fn maybe_map<R, F: FnOnce(&mut V) -> Option<&mut R>>(mut self, f: F) -> Result<GcMutRefCellGuard<'a, T, R>, Self> {
+        let value = self.value.take().unwrap();
+
+        let value = match RefMut::filter_map(value, f) {
+            Ok(v) => v,
+            Err(v) => {
+                self.value = Some(v);
+
+
+                return Err(self);
+            }
+        };
+
+        Ok(GcMutRefCellGuard {
+            value: Some(value),
+            gc: self.gc,
+        })
     }
 }
