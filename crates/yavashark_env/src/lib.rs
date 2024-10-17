@@ -74,7 +74,6 @@ impl ControlFlow {
             }
         }
 
-
         Self::Error(Error::throw(val))
     }
 }

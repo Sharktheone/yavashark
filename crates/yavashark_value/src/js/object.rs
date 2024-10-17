@@ -438,30 +438,36 @@ impl<C: Ctx> Object<C> {
         inner.define_getter(name, value)
     }
 
-
     pub fn id(&self) -> usize {
         self.0.ptr_id()
     }
 
-
-    pub fn downcast<T: Obj<C> + 'static>(&self) -> Result<Option<GcRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
+    pub fn downcast<T: Obj<C> + 'static>(
+        &self,
+    ) -> Result<Option<GcRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
         let obj = self.get()?;
 
-        Ok(obj.maybe_map(|r| {
-            let this = (**r).as_any();
+        Ok(obj
+            .maybe_map(|r| {
+                let this = (**r).as_any();
 
-            this.downcast_ref::<T>()
-        }).ok())
+                this.downcast_ref::<T>()
+            })
+            .ok())
     }
 
-    pub fn downcast_mut<T: Obj<C> + 'static>(&self) -> Result<Option<GcMutRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
+    pub fn downcast_mut<T: Obj<C> + 'static>(
+        &self,
+    ) -> Result<Option<GcMutRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
         let obj = self.get_mut()?;
 
-        Ok(obj.maybe_map(|r| {
-            let this = (**r).as_any_mut();
-            
-            this.downcast_mut::<T>()
-        }).ok())
+        Ok(obj
+            .maybe_map(|r| {
+                let this = (**r).as_any_mut();
+
+                this.downcast_mut::<T>()
+            })
+            .ok())
     }
 }
 

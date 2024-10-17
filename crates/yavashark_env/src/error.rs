@@ -10,8 +10,7 @@ pub fn get_error(ctx: &Context) -> Value {
             let message = args
                 .first()
                 .map_or(String::new(), std::string::ToString::to_string);
-            
-            
+
             let err = ErrorObj::raw_from(message, ctx);
 
             this.exchange(Box::new(err))?;
@@ -60,7 +59,6 @@ impl ErrorObj {
         }
     }
 
-
     pub fn override_to_string(&self, _: &mut Context) -> Result<String> {
         Ok(self.error.to_string())
     }
@@ -71,13 +69,8 @@ impl ErrorObj {
     }
 }
 
-
-
 #[properties]
 impl ErrorObj {
-
-
-
     #[get(message)]
     pub fn get_message(&self, _: Vec<Value>, ctx: &mut Context) -> ValueResult {
         Ok(self.error.message(ctx)?.into())

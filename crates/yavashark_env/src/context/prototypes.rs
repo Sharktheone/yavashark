@@ -1,9 +1,9 @@
 use anyhow::anyhow;
 
+use crate::error::ErrorObj;
 use crate::object::array::ArrayIterator;
 use crate::object::{array::Array, Object, Prototype};
 use crate::{FunctionPrototype, ObjectHandle};
-use crate::error::ErrorObj;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Prototypes {
@@ -60,7 +60,7 @@ impl Prototypes {
             func_prototype.clone().into(),
         )
         .map_err(|e| anyhow!(format!("{e:?}")))?;
-        
+
         let error_prototype = ErrorObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),

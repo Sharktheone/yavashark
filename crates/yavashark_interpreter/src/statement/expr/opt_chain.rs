@@ -50,9 +50,8 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResu
             if (callee == Value::Undefined || callee == Value::Null) && stmt.optional {
                 return Err(ControlFlow::OptChainShortCircuit);
             }
-            
+
             let this = this.unwrap_or(scope.this()?);
-            
 
             Ok(Interpreter::run_call_on(
                 ctx, callee, this, &call.args, call.span, scope,

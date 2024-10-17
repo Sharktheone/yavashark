@@ -165,7 +165,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     span: attr.span(),
                 });
             }
-            if attr.path().is_ident("prop") || attr.path().is_ident("get") || attr.path().is_ident("set") {
+            if attr.path().is_ident("prop")
+                || attr.path().is_ident("get")
+                || attr.path().is_ident("set")
+            {
                 for prop in &mut properties {
                     if prop.name == func.sig.ident {
                         return syn::Error::new(attr.span(), "Duplicate prop attribute")
@@ -176,7 +179,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 let rename;
                 if attr.path().is_ident("prop") {
-
                     rename = attr.parse_args::<Path>().ok();
                 } else {
                     rename = None;
@@ -233,34 +235,28 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 });
                 let mut get = None;
-                
+
                 if attr.path().is_ident("get") {
                     if let Err(e) = attr.parse_nested_meta(|attr| {
-                        
                         get = Some(attr.path.require_ident()?.clone());
-                        
-                        
+
                         Ok(())
                     }) {
                         return e.to_compile_error().into();
                     }
                 }
-                
-                
+
                 let mut set = None;
-                
+
                 if attr.path().is_ident("set") {
                     if let Err(e) = attr.parse_nested_meta(|attr| {
-
                         get = Some(attr.path.require_ident()?.clone());
-
 
                         Ok(())
                     }) {
                         return e.to_compile_error().into();
                     }
-                    
-                    
+
                     remove.push(idx);
                 }
 

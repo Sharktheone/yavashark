@@ -25,14 +25,14 @@ impl PrettyPrint for Object<Context> {
         format!("'{self}'").green().to_string()
     }
 
-    fn pretty_print_circular(&self, not: &mut Vec<usize>) -> String { let id = self.id();
+    fn pretty_print_circular(&self, not: &mut Vec<usize>) -> String {
+        let id = self.id();
 
         if not.contains(&id) {
-            return "[Circular *1]".bright_green().to_string()
+            return "[Circular *1]".bright_green().to_string();
         }
 
         not.push(id);
-
 
         let mut str = String::new();
         str.push_str("{ ");
@@ -60,18 +60,14 @@ impl PrettyPrint for Object<Context> {
         str
     }
 
-
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String {
         let id = self.id();
 
         if not.contains(&id) {
-            return "[Circular *1]".bright_green().to_string()
+            return "[Circular *1]".bright_green().to_string();
         }
 
         not.push(id);
-
-
-
 
         let mut str = if self.is_function() {
             format!("[Function: {}] ", self.name())
