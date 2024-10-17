@@ -41,6 +41,7 @@ fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
 #[cfg(test)]
 mod tests {
     use yavashark_env::{test_eval, Value};
+    use yavashark_value::ErrorKind;
 
     #[test]
     fn try_stmt() {
@@ -163,7 +164,7 @@ mod tests {
 
     #[test]
     fn try_catch_with_error_thrown_and_no_catch_block() {
-        test_eval!(
+        let (result, value) = test_eval!(
             r#"
 
             try {
@@ -172,10 +173,18 @@ mod tests {
                 mock.send()
             }
 
-            "#,
-            1,
-            Vec::<Vec<Value>>::new(),
-            Value::Undefined
+            "#
         );
+        
+        assert!(result.is_err());
+        
+        let err = result.unwrap_err();
+        
+        assert_eq!(err.kind, ErrorKind::Error(Some("error message".to_string())));
+        
+        let state = value.borrow();
+        
+        assert_eq!(state.send_called, 1)
+        
     }
 }
