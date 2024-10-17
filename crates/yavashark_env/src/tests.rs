@@ -8,6 +8,28 @@ use crate::{NativeFunction, Value};
 #[macro_export]
 #[allow(clippy::crate_in_macro_def)]
 macro_rules! test_eval {
+    ($code:expr, $sends:literal, $values:expr, object) => {
+        use swc_common::BytePos;
+        let src = $code;
+        let input =
+            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+
+        let c = Default::default();
+
+        let mut p = swc_ecma_parser::Parser::new(swc_ecma_parser::Syntax::Es(c), input, None);
+        let script = p.parse_script().unwrap();
+
+        let (result, values) = crate::Interpreter::run_test(&script.body);
+
+        let result = result.unwrap();
+
+        assert!(matches!(result, Value::Object(_)));
+        let state = values.borrow();
+        assert_eq!(state.send_called, $sends);
+        assert_eq!(state.got_values, $values);
+    }; // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
+    
+    
     ($code:expr, $sends:literal, $values:expr, $ret:expr) => {
         use swc_common::BytePos;
         let src = $code;
