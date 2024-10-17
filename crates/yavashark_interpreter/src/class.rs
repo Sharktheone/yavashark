@@ -162,8 +162,6 @@ fn define_on_class(
     Ok(())
 }
 
-/*
-
 #[cfg(test)]
 mod tests {
     #[test]
@@ -171,9 +169,9 @@ mod tests {
         use yavashark_env::{test_eval, Value};
 
         test_eval!(
-            r#"
+            r"
             class A {
-                constructor(a){
+                constructor(a) {
                     this.a = a;
                 }
 
@@ -193,10 +191,10 @@ mod tests {
             }
 
             new A(1);
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
-            Value::Object(_)
+            object
         );
     }
 
@@ -206,7 +204,7 @@ mod tests {
         use yavashark_env::{test_eval, Value};
 
         test_eval!(
-            r#"
+            r"
             class A {
                 constructor(a){
                     this.a = a;
@@ -235,10 +233,10 @@ mod tests {
             }
 
             new B(1, 2);
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
-            Value::Object
+            object
         );
     }
 
@@ -248,7 +246,7 @@ mod tests {
         use yavashark_env::{test_eval, Value};
 
         test_eval!(
-            r#"
+            r"
             class A {
                 static {
                     this.a = 1;
@@ -256,11 +254,10 @@ mod tests {
             }
 
             A.a;
-            "#,
+            ",
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(1.0)
         );
     }
 }
-*/
