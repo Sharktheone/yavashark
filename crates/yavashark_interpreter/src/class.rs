@@ -1,5 +1,5 @@
 use swc_common::Span;
-use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, PropName};
+use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
 
 use crate::function::JSFunction;
 use yavashark_env::{
@@ -36,7 +36,18 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                 define_on_class(name, func, &mut class, &mut proto, method.is_static, false);
             }
             ClassMember::Constructor(constructor) => {
-                let params = Vec::new(); //TODO
+                let mut params = Vec::new();
+                
+                for param in &constructor.params {
+                    let ParamOrTsParamProp::Param(param) = param else {
+                        return Err(Error::syn("typescript not supported"))
+                    };
+                    
+                    params.push(param.clone())
+                    
+                    
+                    
+                }
 
                 let (name, func) = create_method(
                     &PropName::Ident("constructor".into()),
