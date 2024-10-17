@@ -294,6 +294,7 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
+    #[must_use]
     pub fn ptr_id(&self) -> usize {
         self.inner.as_ptr() as usize
     }

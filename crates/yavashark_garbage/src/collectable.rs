@@ -92,13 +92,16 @@ impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     type Target = Ref<'a, T>;
 
     fn deref(&self) -> &Self::Target {
-        self.value.as_ref().unwrap()
+        #[allow(clippy::expect_used)]
+        self.value.as_ref().expect("unreachable")
     }
 }
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
+    #[allow(clippy::missing_panics_doc)]
     pub fn map<R, F: FnOnce(&V) -> &R>(mut self, f: F) -> GcRefCellGuard<'a, T, R> {
-        let value = Ref::map(self.value.take().unwrap(), f);
+        #[allow(clippy::expect_used)]
+        let value = Ref::map(self.value.take().expect("unreachable"), f);
 
         GcRefCellGuard {
             value: Some(value),
@@ -106,11 +109,13 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc)]
     pub fn maybe_map<R, F: FnOnce(&V) -> Option<&R>>(
         mut self,
         f: F,
     ) -> Result<GcRefCellGuard<'a, T, R>, Self> {
-        let value = self.value.take().unwrap();
+        #[allow(clippy::expect_used)]
+        let value = self.value.take().expect("unreachable");
 
         let value = match Ref::filter_map(value, f) {
             Ok(v) => v,
@@ -150,15 +155,15 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for GcMutRefCellGuard<'a, T, V
     type Target = RefMut<'a, V>;
 
     fn deref(&self) -> &Self::Target {
-        #[allow(clippy::unwrap_used)]
-        self.value.as_ref().unwrap() // this can only be None if the guard is dropped
+        #[allow(clippy::expect_used)]
+        self.value.as_ref().expect("unreachable") // this can only be None if the guard is dropped
     }
 }
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> DerefMut for GcMutRefCellGuard<'a, T, V> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        #[allow(clippy::unwrap_used)]
-        self.value.as_mut().unwrap() // this can only be None if the guard is dropped
+        #[allow(clippy::expect_used)]
+        self.value.as_mut().expect("unreachable") // this can only be None if the guard is dropped
     }
 }
 
@@ -187,8 +192,11 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 }
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
+
+    #[allow(clippy::missing_panics_doc)]
     pub fn map<R, F: FnOnce(&mut V) -> &mut R>(mut self, f: F) -> GcMutRefCellGuard<'a, T, R> {
-        let value = self.value.take().unwrap();
+        #[allow(clippy::expect_used)]
+        let value = self.value.take().expect("unreachable");
 
         let value = RefMut::map(value, f);
 
@@ -198,11 +206,13 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
         }
     }
 
+    #[allow(clippy::missing_panics_doc)]
     pub fn maybe_map<R, F: FnOnce(&mut V) -> Option<&mut R>>(
         mut self,
         f: F,
     ) -> Result<GcMutRefCellGuard<'a, T, R>, Self> {
-        let value = self.value.take().unwrap();
+        #[allow(clippy::expect_used)]
+        let value = self.value.take().expect("unreachable");
 
         let value = match RefMut::filter_map(value, f) {
             Ok(v) => v,

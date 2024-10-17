@@ -177,12 +177,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
-                let rename;
-                if attr.path().is_ident("prop") {
-                    rename = attr.parse_args::<Path>().ok();
+                let rename = if attr.path().is_ident("prop") {
+                    attr.parse_args::<Path>().ok()
                 } else {
-                    rename = None;
-                }
+                    None
+                };
 
                 let mut self_mut = false;
 

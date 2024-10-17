@@ -16,12 +16,12 @@ impl Interpreter {
 
         let this = this.unwrap_or(scope.this()?);
 
-        Self::run_call_on(ctx, callee, this, &stmt.args, stmt.span, scope)
+        Self::run_call_on(ctx, &callee, this, &stmt.args, stmt.span, scope)
     }
 
     pub fn run_call_on(
         ctx: &mut Context,
-        callee: Value,
+        callee: &Value,
         this: Value,
         args: &[ExprOrSpread],
         span: Span,
@@ -38,7 +38,8 @@ impl Interpreter {
             Err(Error::ty_error(format!("{callee} is not a function",)))
         }
     }
-
+    
+    #[allow(clippy::cognitive_complexity)]
     pub fn run_call_expr(
         ctx: &mut Context,
         expr: &Expr,

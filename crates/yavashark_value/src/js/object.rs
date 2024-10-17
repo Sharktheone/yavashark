@@ -438,6 +438,7 @@ impl<C: Ctx> Object<C> {
         inner.define_getter(name, value)
     }
 
+    #[must_use]
     pub fn id(&self) -> usize {
         self.0.ptr_id()
     }
