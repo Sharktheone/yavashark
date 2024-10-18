@@ -2,21 +2,63 @@ use swc_common::Span;
 use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, Error, RuntimeResult, Value, ValueResult};
+use yavashark_env::{Context, ControlFlow, Error, Value, ValueResult};
 
 use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_call(ctx: &mut Context, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
-        let Callee::Expr(callee_expr) = &stmt.callee else {
-            return Err(Error::ty_error("Unsupported callee".to_string()));
-        };
+        match &stmt.callee {
+            Callee::Expr(callee_expr) => {
+                let Callee::Expr(callee_expr) = &stmt.callee else {
+                    return Err(Error::ty_error("Unsupported callee".to_string()));
+                };
 
-        let (callee, this) = Self::run_call_expr(ctx, callee_expr, stmt.span, scope)?;
+                let (callee, this) = Self::run_call_expr(ctx, callee_expr, stmt.span, scope)?;
 
-        let this = this.unwrap_or(scope.this()?);
+                let this = this.unwrap_or(scope.this()?);
 
-        Self::run_call_on(ctx, &callee, this, &stmt.args, stmt.span, scope)
+                Self::run_call_on(ctx, &callee, this, &stmt.args, stmt.span, scope)
+            }
+
+            Callee::Super(sup) => {
+                let class = scope.this()?;
+
+                let Value::Object(obj) = &class else {
+                    return Err(Error::ty("expected object"))
+                };
+
+
+                let obj = obj.get()?;
+
+                let proto = obj.prototype();
+
+                drop(obj);
+                
+                let proto = proto.resolve(class, ctx)?;
+
+
+                let Value::Object(constructor) = &proto else {
+                    return Err(Error::ty_error(format!(
+                        "{:?} is not a constructor",
+                        stmt.callee
+                    )));
+                };
+
+
+                let constructor = constructor
+                    .get_constructor();
+
+                let constructor = constructor.resolve(proto.copy(), ctx)?;
+                
+                
+                Self::run_call_on(ctx, &constructor, proto, &stmt.args, stmt.span, scope)
+            }
+
+            Callee::Import(import) => {
+                todo!()
+            }
+        }
     }
 
     pub fn run_call_on(
@@ -35,10 +77,10 @@ impl Interpreter {
 
             f.call(ctx, args, this) //In strict mode, this is undefined
         } else {
-            Err(Error::ty_error(format!("{callee} is not a function",)))
+            Err(Error::ty_error(format!("{callee} is not a function", )))
         }
     }
-    
+
     #[allow(clippy::cognitive_complexity)]
     pub fn run_call_expr(
         ctx: &mut Context,
