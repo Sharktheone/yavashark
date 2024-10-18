@@ -25,18 +25,16 @@ impl Interpreter {
                 let class = scope.this()?;
 
                 let Value::Object(obj) = &class else {
-                    return Err(Error::ty("expected object"))
+                    return Err(Error::ty("expected object"));
                 };
-
 
                 let obj = obj.get()?;
 
                 let proto = obj.prototype();
 
                 drop(obj);
-                
-                let proto = proto.resolve(class, ctx)?;
 
+                let proto = proto.resolve(class, ctx)?;
 
                 let Value::Object(constructor) = &proto else {
                     return Err(Error::ty_error(format!(
@@ -45,13 +43,10 @@ impl Interpreter {
                     )));
                 };
 
-
-                let constructor = constructor
-                    .get_constructor();
+                let constructor = constructor.get_constructor();
 
                 let constructor = constructor.resolve(proto.copy(), ctx)?;
-                
-                
+
                 Self::run_call_on(ctx, &constructor, proto, &stmt.args, stmt.span, scope)
             }
 
@@ -77,7 +72,7 @@ impl Interpreter {
 
             f.call(ctx, args, this) //In strict mode, this is undefined
         } else {
-            Err(Error::ty_error(format!("{callee} is not a function", )))
+            Err(Error::ty_error(format!("{callee} is not a function",)))
         }
     }
 

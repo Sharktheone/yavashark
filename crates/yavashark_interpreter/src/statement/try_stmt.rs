@@ -175,16 +175,18 @@ mod tests {
 
             "#
         );
-        
+
         assert!(result.is_err());
-        
+
         let err = result.unwrap_err();
-        
-        assert_eq!(err.kind, ErrorKind::Error(Some("error message".to_string())));
-        
+
+        assert_eq!(
+            err.kind,
+            ErrorKind::Error(Some("error message".to_string()))
+        );
+
         let state = value.borrow();
-        
+
         assert_eq!(state.send_called, 1)
-        
     }
 }

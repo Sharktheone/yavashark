@@ -40,13 +40,10 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
 
                 for param in &constructor.params {
                     let ParamOrTsParamProp::Param(param) = param else {
-                        return Err(Error::syn("typescript not supported"))
+                        return Err(Error::syn("typescript not supported"));
                     };
 
                     params.push(param.clone())
-
-
-
                 }
 
                 let (name, func) = create_method(
@@ -209,7 +206,6 @@ mod tests {
         );
     }
 
-
     #[test]
     fn test_decl_class_with_super() {
         use yavashark_env::{test_eval, Value};
@@ -253,7 +249,6 @@ mod tests {
             object
         );
     }
-
 
     #[test]
     fn test_decl_class_with_static_block() {

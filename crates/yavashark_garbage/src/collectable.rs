@@ -192,7 +192,6 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 }
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
-
     #[allow(clippy::missing_panics_doc)]
     pub fn map<R, F: FnOnce(&mut V) -> &mut R>(mut self, f: F) -> GcMutRefCellGuard<'a, T, R> {
         #[allow(clippy::expect_used)]

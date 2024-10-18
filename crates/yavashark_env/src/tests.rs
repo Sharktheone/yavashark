@@ -28,8 +28,7 @@ macro_rules! test_eval {
         assert_eq!(state.send_called, $sends);
         assert_eq!(state.got_values, $values);
     }; // ($code:expr, $sends:literal, $values:expr, $ret:expr) => {}; //TODO
-    
-    
+
     ($code:expr, $sends:literal, $values:expr, $ret:expr) => {
         use swc_common::BytePos;
         let src = $code;
