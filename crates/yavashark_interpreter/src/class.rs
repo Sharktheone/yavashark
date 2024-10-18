@@ -37,16 +37,16 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             }
             ClassMember::Constructor(constructor) => {
                 let mut params = Vec::new();
-                
+
                 for param in &constructor.params {
                     let ParamOrTsParamProp::Param(param) = param else {
                         return Err(Error::syn("typescript not supported"))
                     };
-                    
+
                     params.push(param.clone())
-                    
-                    
-                    
+
+
+
                 }
 
                 let (name, func) = create_method(
@@ -215,9 +215,10 @@ mod tests {
         use yavashark_env::{test_eval, Value};
 
         test_eval!(
-            r"
+            r#"
             class A {
                 constructor(a){
+                    console.log("A constructor called") 
                     this.a = a;
                 }
 
@@ -239,12 +240,14 @@ mod tests {
             class B extends A {
                 constructor(a, b){
                     super(a);
+                    console.log("Weee"); 
                     this.b = b;
+                    console.log("wooooo"); 
                 }
             }
 
             new B(1, 2);
-            ",
+            "#,
             0,
             Vec::<Vec<Value>>::new(),
             object
