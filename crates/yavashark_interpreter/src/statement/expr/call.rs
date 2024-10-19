@@ -23,27 +23,11 @@ impl Interpreter {
 
             Callee::Super(sup) => {
                 let class = scope.this()?;
+                
+                let proto = class.prototype(ctx)?;
+                let sup = proto.prototype(ctx)?;
 
-                let Value::Object(obj) = &class else {
-                    return Err(Error::ty("expected object"));
-                };
-
-                let obj = obj.get()?;
-
-                let proto = obj.prototype();
-
-                drop(obj);
-
-                let proto = proto.resolve(class, ctx)?;
-
-                let Value::Object(constructor) = &proto else {
-                    return Err(Error::ty_error(format!(
-                        "{:?} is not a constructor",
-                        stmt.callee
-                    )));
-                };
-
-                let constructor = constructor.get_constructor();
+                let constructor = sup.as_object()?.get_constructor();
 
                 let constructor = constructor.resolve(proto.copy(), ctx)?;
 
