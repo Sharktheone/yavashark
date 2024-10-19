@@ -54,6 +54,8 @@ impl Interpreter {
             }
         }
 
+        dbg!(f.to_string(ctx));
+
         let _ = f.call(ctx, call_args, this.copy())?;
 
         Ok(this) //This is always an object, so it will also be updated when we copy it

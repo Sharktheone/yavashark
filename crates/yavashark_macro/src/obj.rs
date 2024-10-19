@@ -326,11 +326,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     } else {
         quote! {
             fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
-                self.object.to_string(ctx)
+                Ok(format!("[object {}]", self.name()))
             }
 
             fn to_string_internal(&self) -> String {
-                self.object.to_string_internal()
+                format!("[object {}]", self.name())
             }
         }
     };
@@ -338,7 +338,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let name = if name {
         quote! {
             fn name(&self) -> String {
-                yavashark_value::CustomName::name(self)
+                yavashark_value::CustomName::custom_name(self)
             }
         }
     } else {

@@ -1,3 +1,3 @@
 pub trait CustomName {
-    fn name(&self) -> String;
+    fn custom_name(&self) -> String;
 }

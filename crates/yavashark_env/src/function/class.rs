@@ -93,7 +93,7 @@ pub struct ClassInstance {
 }
 
 impl CustomName for ClassInstance {
-    fn name(&self) -> String {
+    fn custom_name(&self) -> String {
         self.name.clone()
     }
 }
