@@ -164,6 +164,29 @@ impl<C: Ctx> Value<C> {
             _ => None,
         }
     }
+    
+    
+    pub fn prototype(&self, ctx: &mut C) -> Result<Value<C>, Error<C>> {
+        let obj = self.as_object()?;
+
+        let obj = obj.get()?;
+
+        let proto = obj.prototype();
+
+        drop(obj);
+
+        proto.resolve(self.copy(), ctx)
+    }
+    
+    
+    pub fn as_object(&self) -> Result<&Object<C>, Error<C>> {
+        let Value::Object(obj) = &self else {
+            return Err(Error::ty("expected object"));
+        };
+        
+        
+        Ok(obj)
+    }
 }
 
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
