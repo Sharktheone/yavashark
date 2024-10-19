@@ -23,7 +23,7 @@ impl Interpreter {
 
             Callee::Super(sup) => {
                 let class = scope.this()?;
-                
+
                 let proto = class.prototype(ctx)?;
                 let sup = proto.prototype(ctx)?;
 

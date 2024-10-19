@@ -119,10 +119,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             to_string = true;
             return Ok(());
         }
-        
+
         if meta.path.is_ident("name") {
             name = true;
-            return Ok(())
+            return Ok(());
         }
 
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
@@ -334,8 +334,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-    
-    
+
     let name = if name {
         quote! {
             fn name(&self) -> String {
@@ -344,7 +343,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     } else {
         quote! {
-            
+
             fn name(&self) -> String {
                 self.object.name()
             }

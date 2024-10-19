@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
+use crate::{Context, Error, Object, ObjectProperty, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, CustomName, Func, Obj};
-use crate::{Context, Error, Object, ObjectProperty, Value, ValueResult};
 
 #[object(function, constructor)]
 #[derive(Debug)]
@@ -91,8 +91,6 @@ pub struct ClassInstance {
     pub(crate) private_props: HashMap<String, Value>,
     name: String,
 }
-
-
 
 impl CustomName for ClassInstance {
     fn name(&self) -> String {

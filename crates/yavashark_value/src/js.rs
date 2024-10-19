@@ -6,10 +6,10 @@ use std::hash::Hash;
 pub use constructor::*;
 pub use context::*;
 pub use function::*;
+pub use name::*;
 pub use object::*;
 pub use symbol::*;
 pub use variable::*;
-pub use name::*;
 use yavashark_garbage::{Collectable, GcRef};
 
 use crate::Error;
@@ -18,14 +18,11 @@ mod constructor;
 mod context;
 mod conversion;
 mod function;
+mod name;
 mod object;
 mod ops;
 mod symbol;
 pub mod variable;
-mod name;
-
-
-
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {
@@ -169,8 +166,7 @@ impl<C: Ctx> Value<C> {
             _ => None,
         }
     }
-    
-    
+
     pub fn prototype(&self, ctx: &mut C) -> Result<Value<C>, Error<C>> {
         let obj = self.as_object()?;
 
@@ -182,14 +178,12 @@ impl<C: Ctx> Value<C> {
 
         proto.resolve(self.copy(), ctx)
     }
-    
-    
+
     pub fn as_object(&self) -> Result<&Object<C>, Error<C>> {
         let Value::Object(obj) = &self else {
             return Err(Error::ty("expected object"));
         };
-        
-        
+
         Ok(obj)
     }
 }
