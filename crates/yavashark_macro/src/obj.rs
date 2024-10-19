@@ -63,6 +63,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut function = false;
     let mut to_string = false;
+    let mut name = false;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -117,6 +118,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         if meta.path.is_ident("to_string") {
             to_string = true;
             return Ok(());
+        }
+        
+        if meta.path.is_ident("name") {
+            name = true;
+            return Ok(())
         }
 
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
@@ -328,6 +334,22 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
+    
+    
+    let name = if name {
+        quote! {
+            fn name(&self) -> String {
+                yavashark_value::CustomName::name(self)
+            }
+        }
+    } else {
+        quote! {
+            
+            fn name(&self) -> String {
+                self.object.name()
+            }
+        }
+    };
 
     let expanded = quote! {
         #input
@@ -381,11 +403,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.contains_key(name)
             }
 
-            fn name(&self) -> String {
-                self.object.name()
-            }
 
             #to_string
+            #name
 
             fn properties(&self) -> Vec<(#value, #value)> {
                 let mut props = self.object.properties();

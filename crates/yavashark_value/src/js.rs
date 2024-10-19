@@ -9,6 +9,7 @@ pub use function::*;
 pub use object::*;
 pub use symbol::*;
 pub use variable::*;
+pub use name::*;
 use yavashark_garbage::{Collectable, GcRef};
 
 use crate::Error;
@@ -21,6 +22,10 @@ mod object;
 mod ops;
 mod symbol;
 pub mod variable;
+mod name;
+
+
+
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {
