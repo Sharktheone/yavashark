@@ -12,12 +12,12 @@ use crate::Interpreter;
 pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let mut class = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(ctx, class, stmt.span, scope)?;
-        JSClass::new_with_proto(super_class)
+        JSClass::new_with_proto(super_class, name.clone())
     } else {
-        JSClass::new(ctx)
+        JSClass::new(ctx, name.clone())
     };
 
-    let mut proto = ClassInstance::new(ctx);
+    let mut proto = ClassInstance::new(ctx, name.clone());
 
     let mut statics = Vec::new();
 
@@ -43,7 +43,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                         return Err(Error::syn("typescript not supported"));
                     };
 
-                    params.push(param.clone())
+                    params.push(param.clone());
                 }
 
                 let (name, func) = create_method(

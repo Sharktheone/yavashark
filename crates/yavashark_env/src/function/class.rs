@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
 use yavashark_macro::{object, properties};
-use yavashark_value::{Constructor, Func, Obj};
-
+use yavashark_value::{Constructor, CustomName, Func, Obj};
 use crate::{Context, Error, Object, ObjectProperty, Value, ValueResult};
 
 #[object(function, constructor)]
@@ -11,6 +10,7 @@ pub struct Class {
     pub private_props: HashMap<String, Value>,
     #[gc]
     pub prototype: Value,
+    pub name: String,
 }
 
 impl Func<Context> for Class {
@@ -42,18 +42,19 @@ impl Constructor<Context> for Class {
 
 impl Class {
     #[must_use]
-    pub fn new(ctx: &Context) -> Self {
-        Self::new_with_proto(ctx.proto.func.clone().into())
+    pub fn new(ctx: &Context, name: String) -> Self {
+        Self::new_with_proto(ctx.proto.func.clone().into(), name)
     }
 
     #[must_use]
-    pub fn new_with_proto(proto: Value) -> Self {
+    pub fn new_with_proto(proto: Value, name: String) -> Self {
         let object = Object::raw_with_proto(proto);
 
         Self {
             object,
             private_props: HashMap::new(),
             prototype: Value::Undefined,
+            name,
         }
     }
 
@@ -84,18 +85,28 @@ impl Class {
     }
 }
 
-#[object]
+#[object(name)]
 #[derive(Debug)]
 pub struct ClassInstance {
     pub(crate) private_props: HashMap<String, Value>,
+    name: String,
+}
+
+
+
+impl CustomName for ClassInstance {
+    fn name(&self) -> String {
+        self.name.clone()
+    }
 }
 
 impl ClassInstance {
     #[must_use]
-    pub fn new(ctx: &Context) -> Self {
+    pub fn new(ctx: &Context, name: String) -> Self {
         Self {
             private_props: HashMap::new(),
             object: Object::raw(ctx),
+            name,
         }
     }
 
