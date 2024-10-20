@@ -2,7 +2,9 @@ use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
 
 use crate::function::JSFunction;
-use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Context, Error, Object, Res, Value, ValueResult};
+use yavashark_env::{
+    scope::Scope, Class as JSClass, ClassInstance, Context, Error, Object, Res, Value, ValueResult,
+};
 use yavashark_value::Obj;
 
 use crate::Interpreter;
@@ -11,11 +13,16 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(ctx, class, stmt.span, scope)?;
         let p = super_class.get_property(&"prototype".into(), ctx)?;
-        
-        
-        (JSClass::new_with_proto(super_class, name.clone()), ClassInstance::new_with_proto(p, name.clone()))
+
+        (
+            JSClass::new_with_proto(super_class, name.clone()),
+            ClassInstance::new_with_proto(p, name.clone()),
+        )
     } else {
-        (JSClass::new(ctx, name.clone()), ClassInstance::new(ctx, name.clone()))
+        (
+            JSClass::new(ctx, name.clone()),
+            ClassInstance::new(ctx, name.clone()),
+        )
     };
 
     let mut statics = Vec::new();
@@ -89,11 +96,14 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             }
             ClassMember::ClassProp(p) => {
                 let name = prop_name_to_value(&p.key, ctx, p.span, scope)?;
-                
-                let value = p.value.as_ref().map_or(Ok(Value::Undefined), (|val| Interpreter::run_expr(ctx, val, p.span, scope)))?;
+
+                let value = p.value.as_ref().map_or(
+                    Ok(Value::Undefined),
+                    (|val| Interpreter::run_expr(ctx, val, p.span, scope)),
+                )?;
 
                 define_on_class(name, value, &mut class, &mut proto, p.is_static, false)?;
-            },
+            }
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
     }
@@ -125,7 +135,12 @@ fn create_method(
     Ok((name, func.into()))
 }
 
-fn prop_name_to_value(name: &PropName, ctx: &mut Context, span: Span, scope: &mut Scope) -> ValueResult {
+fn prop_name_to_value(
+    name: &PropName,
+    ctx: &mut Context,
+    span: Span,
+    scope: &mut Scope,
+) -> ValueResult {
     Ok(match name {
         PropName::Ident(ident) => ident.sym.to_string().into(),
         PropName::Computed(computed) => {

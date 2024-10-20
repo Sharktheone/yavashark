@@ -64,7 +64,7 @@ impl Class {
     pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
         self.private_props.get(key)
     }
-    
+
     pub fn set_proto(&mut self, proto: ObjectProperty) {
         self.prototype = proto;
     }
@@ -117,8 +117,6 @@ impl ClassInstance {
             name,
         }
     }
-
-
 
     pub fn set_private_prop(&mut self, key: String, value: Value) {
         self.private_props.insert(key, value);
