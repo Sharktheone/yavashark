@@ -167,7 +167,7 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn prototype(&self, ctx: &mut C) -> Result<Value<C>, Error<C>> {
+    pub fn prototype(&self, ctx: &mut C) -> Result<Self, Error<C>> {
         let obj = self.as_object()?;
 
         let obj = obj.get()?;
@@ -180,7 +180,7 @@ impl<C: Ctx> Value<C> {
     }
 
     pub fn as_object(&self) -> Result<&Object<C>, Error<C>> {
-        let Value::Object(obj) = &self else {
+        let Self::Object(obj) = &self else {
             return Err(Error::ty("expected object"));
         };
 

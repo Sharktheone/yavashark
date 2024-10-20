@@ -187,6 +187,6 @@ mod tests {
 
         let state = value.borrow();
 
-        assert_eq!(state.send_called, 1)
+        assert_eq!(state.send_called, 1);
     }
 }
