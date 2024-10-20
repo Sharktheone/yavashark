@@ -4,12 +4,10 @@ use crate::{Context, Error, Object, ObjectProperty, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, CustomName, Func, Obj};
 
-#[object(function, constructor)]
+#[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
 pub struct Class {
     pub private_props: HashMap<String, Value>,
-    #[gc]
-    pub prototype: Value,
     pub name: String,
 }
 
@@ -28,7 +26,7 @@ impl Func<Context> for Class {
 
 impl Constructor<Context> for Class {
     fn get_constructor(&self) -> ObjectProperty {
-        if let Value::Object(o) = self.prototype.copy() {
+        if let Value::Object(o) = self.prototype.value.copy() {
             o.get_constructor()
         } else {
             self.object.constructor()
@@ -36,7 +34,7 @@ impl Constructor<Context> for Class {
     }
 
     fn value(&self, _ctx: &mut Context) -> Value {
-        Object::raw_with_proto(self.prototype.clone()).into_value()
+        Object::raw_with_proto(self.prototype.value.clone()).into_value()
     }
 }
 
@@ -53,7 +51,7 @@ impl Class {
         Self {
             object,
             private_props: HashMap::new(),
-            prototype: Value::Undefined,
+            prototype: Value::Undefined.into(),
             name,
         }
     }
@@ -65,6 +63,10 @@ impl Class {
     #[must_use]
     pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
         self.private_props.get(key)
+    }
+    
+    pub fn set_proto(&mut self, proto: ObjectProperty) {
+        self.prototype = proto;
     }
 }
 
@@ -107,6 +109,16 @@ impl ClassInstance {
             name,
         }
     }
+    #[must_use]
+    pub fn new_with_proto(proto: Value, name: String) -> Self {
+        Self {
+            private_props: HashMap::new(),
+            object: Object::raw_with_proto(proto),
+            name,
+        }
+    }
+
+
 
     pub fn set_private_prop(&mut self, key: String, value: Value) {
         self.private_props.insert(key, value);

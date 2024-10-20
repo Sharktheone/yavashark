@@ -10,11 +10,14 @@ use yavashark_value::Obj;
 use crate::Interpreter;
 
 pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: String) -> Res {
-    let mut class = if let Some(class) = &stmt.super_class {
+    let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(ctx, class, stmt.span, scope)?;
-        JSClass::new_with_proto(super_class, name.clone())
+        let p = super_class.get_property(&"prototype".into(), ctx)?;
+        
+        
+        (JSClass::new_with_proto(super_class, name.clone()), ClassInstance::new_with_proto(p, name.clone()))
     } else {
-        JSClass::new(ctx, name.clone())
+        (JSClass::new(ctx, name.clone()), ClassInstance::new(ctx, name.clone()))
     };
 
     let mut proto = ClassInstance::new(ctx, name.clone());
@@ -93,7 +96,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
         }
     }
 
-    class.prototype = proto.into_value();
+    class.set_proto(proto.into_value().into());
 
     let this = class.into_value();
 
@@ -241,7 +244,16 @@ mod tests {
                     console.log("wooooo"); 
                 }
             }
-
+            
+            
+            
+            console.log(A)
+            console.log(B)
+            console.log(A.prototype)
+            console.log(B.prototype) 
+            console.log(A.__proto__)
+            console.log(B.__proto__)
+            
             new B(1, 2);
             "#,
             0,
