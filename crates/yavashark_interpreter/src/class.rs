@@ -20,8 +20,6 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
         (JSClass::new(ctx, name.clone()), ClassInstance::new(ctx, name.clone()))
     };
 
-    let mut proto = ClassInstance::new(ctx, name.clone());
-
     let mut statics = Vec::new();
 
     for item in &stmt.body {
