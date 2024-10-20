@@ -2,9 +2,7 @@ use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
 
 use crate::function::JSFunction;
-use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Context, Error, Object, Res, Value,
-};
+use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Context, Error, Object, Res, Value, ValueResult};
 use yavashark_value::Obj;
 
 use crate::Interpreter;
@@ -68,7 +66,7 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
                     stmt.span,
                 )?;
 
-                define_on_class(name, func, &mut class, &mut proto, method.is_static, true);
+                define_on_class(name, func, &mut class, &mut proto, method.is_static, true)?;
             }
 
             ClassMember::StaticBlock(s) => {
@@ -89,7 +87,13 @@ pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: Stri
             ClassMember::TsIndexSignature(_) => {
                 return Err(Error::syn("TsIndexSignature is not supported"))
             }
-            ClassMember::ClassProp(_) => return Err(Error::syn("ClassProp is not supported")),
+            ClassMember::ClassProp(p) => {
+                let name = prop_name_to_value(&p.key, ctx, p.span, scope)?;
+                
+                let value = p.value.as_ref().map_or(Ok(Value::Undefined), (|val| Interpreter::run_expr(ctx, val, p.span, scope)))?;
+
+                define_on_class(name, value, &mut class, &mut proto, p.is_static, false)?;
+            },
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
     }
@@ -115,7 +119,14 @@ fn create_method(
     ctx: &mut Context,
     span: Span,
 ) -> Result<(Value, Value), Error> {
-    let name = match name {
+    let name = prop_name_to_value(name, ctx, span, scope)?;
+
+    let func = JSFunction::new(name.to_string(ctx)?, params, body, scope.clone(), ctx);
+    Ok((name, func.into()))
+}
+
+fn prop_name_to_value(name: &PropName, ctx: &mut Context, span: Span, scope: &mut Scope) -> ValueResult {
+    Ok(match name {
         PropName::Ident(ident) => ident.sym.to_string().into(),
         PropName::Computed(computed) => {
             let expr = &computed.expr;
@@ -124,10 +135,7 @@ fn create_method(
         PropName::Num(num) => num.value.to_string().into(),
         PropName::Str(str) => str.value.to_string().into(),
         PropName::BigInt(_) => unimplemented!(),
-    };
-
-    let func = JSFunction::new(name.to_string(ctx)?, params, body, scope.clone(), ctx);
-    Ok((name, func.into()))
+    })
 }
 
 fn define_on_class(
@@ -232,6 +240,10 @@ mod tests {
                 }
 
                 static #e = 5;
+                
+                ee = 55;
+                
+                static na = "GE";   
             }
 
             class B extends A {
@@ -241,6 +253,10 @@ mod tests {
                     this.b = b;
                     console.log("wooooo"); 
                 }
+                
+                e = 99;  
+                
+                static n = "HE";  
             }
             
             
