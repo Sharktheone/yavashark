@@ -13,7 +13,9 @@ log = "0.4.21"
 
 
 [features]
+default = []
 tests = []
+test262 = []
 
 [lints]
 workspace = true

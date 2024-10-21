@@ -11,6 +11,8 @@ mod object;
 pub mod scope;
 #[cfg(feature = "tests")]
 pub mod tests;
+#[cfg(feature = "test262")]
+mod test262;    
 
 use crate::error::ErrorObj;
 pub use yavashark_value as value;
