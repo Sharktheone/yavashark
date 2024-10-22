@@ -543,7 +543,7 @@ fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> 
 
     for (field, rename) in properties {
         let name = if let Some(rename) = rename {
-            quote! { stringify!(#rename) }
+            quote! { #value::string(stringify!(#rename)) }
         } else {
             quote! {
                 #value::string(stringify!(#field))
