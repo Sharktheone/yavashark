@@ -1,3 +1,4 @@
+use yavashark_macro::object;
 use yavashark_value::Error;
 use crate::{Context, NativeFunction, ObjectHandle, Value};
 
@@ -15,4 +16,12 @@ pub fn print(ctx: &mut Context) -> ObjectHandle {
         
         Ok(Value::Undefined)
     }, ctx)
+}
+
+
+
+#[object(direct(abstract_module_source(AbstractModuleSource)))]
+#[derive(Debug)]
+struct Test262 {
+    
 }
