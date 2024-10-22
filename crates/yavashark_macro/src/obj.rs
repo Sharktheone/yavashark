@@ -480,20 +480,20 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act, value_path: &Path)
         if let Some(rename) = rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
-                    #rename => {
+                    & stringify!(#rename) => {
                         #act;
                         return;
                     }
                 }
             } else {
                 quote! {
-                    & #rename => {
+                    & stringify!(#rename) => {
                         return #act;
                     }
                 }
             };
 
-            match_non_string.extend(expanded);
+            match_properties_define.extend(expanded); //TODO: we currently don't have a way to set up a non string field
             continue;
         }
 
@@ -543,7 +543,7 @@ fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> 
 
     for (field, rename) in properties {
         let name = if let Some(rename) = rename {
-            quote! { #rename }
+            quote! { stringify!(#rename) }
         } else {
             quote! {
                 #value::string(stringify!(#field))
