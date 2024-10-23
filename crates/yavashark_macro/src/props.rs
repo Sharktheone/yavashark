@@ -322,7 +322,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let fn_name = prop
             .rename
             .as_ref()
-            .map(ToTokens::to_token_stream)
+            .map(|name| {
+                quote! {
+                    stringify!(#name)
+                }
+            })
             .unwrap_or(quote! {
                 stringify!(#name)
             });
