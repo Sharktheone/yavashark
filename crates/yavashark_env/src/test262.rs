@@ -80,12 +80,9 @@ impl Test262 {
         Ok(Value::Undefined)
     }
 
-    fn gc(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
-        Ok(Value::Undefined)
-    }
-
-    #[prop(IsHTMLDDA)]
-    fn is_htmldda(&self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
+    fn gc(&self, _args: Vec<Value>, _ctx: &Context) -> ValueResult {
+        // gc is always handled automatically when something goes out of scope. We don't need an extra function for that.
+        
         Ok(Value::Undefined)
     }
 }
