@@ -480,14 +480,14 @@ fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act, value_path: &Path)
         if let Some(rename) = rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
-                    & stringify!(#rename) => {
+                    stringify!(#rename) => {
                         #act;
                         return;
                     }
                 }
             } else {
                 quote! {
-                    & stringify!(#rename) => {
+                    stringify!(#rename) => {
                         return #act;
                     }
                 }
