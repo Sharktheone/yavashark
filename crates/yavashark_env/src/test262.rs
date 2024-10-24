@@ -1,7 +1,18 @@
+use std::sync::OnceLock;
+use swc_common::BytePos;
+use swc_common::input::StringInput;
+use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use crate::{scope, Context, NativeFunction, Object, ObjectHandle, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::Error;
 use crate::scope::Scope;
+
+
+
+type RunScript = fn(&str, &mut Context, &mut Scope) -> ValueResult;
+
+static RUN_SCRIPT: OnceLock<RunScript> = OnceLock::new();
+
 
 pub fn print(ctx: &mut Context) -> ObjectHandle {
     NativeFunction::new(
@@ -77,7 +88,26 @@ impl Test262 {
 
     #[prop(evalScript)]
     fn eval_script(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
-        Ok(Value::Undefined)
+        
+        
+        let input = args.first()
+            .ok_or(Error::ty("expected one argument"))?;
+        
+        let Value::String(input) = input else {
+            return Err(Error::ty("expected string"));
+        };
+        
+        
+        if input.is_empty() {
+            return Ok(Value::Undefined)
+        }
+        
+        let mut other_scope = Scope::global(ctx); //TODO: this is NOT the correct way of handling scopes here, since the script should be executed in the current scope.
+        
+        let (ctx, scope) = self.realm.as_mut().map(|r| (&mut r.ctx, &mut r.scope)).unwrap_or((ctx, &mut other_scope));
+        
+        RUN_SCRIPT.get()
+            .ok_or(Error::new("Run script callback was not initialized"))?(input, ctx, scope)
     }
 
     fn gc(&self, _args: Vec<Value>, _ctx: &Context) -> ValueResult {
