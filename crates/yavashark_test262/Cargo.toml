@@ -1,0 +1,12 @@
+[package]
+name = "yavashark_test262"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+yavashark_env = { path = "../yavashark_env" }
+yavashark_macro = { path = "../yavashark_macro" }
+yavashark_value = { path = "../yavashark_value" }
+
+[lints]
+workspace = true

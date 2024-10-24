@@ -4691,6 +4691,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_test262"
+version = "0.1.0"
+dependencies = [
+ "yavashark_env",
+ "yavashark_macro",
+ "yavashark_value",
+]
+
+[[package]]
 name = "yavashark_value"
 version = "0.1.0"
 dependencies = [

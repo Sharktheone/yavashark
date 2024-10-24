@@ -1,11 +1,8 @@
 use std::sync::OnceLock;
-use swc_common::BytePos;
-use swc_common::input::StringInput;
-use swc_ecma_parser::{EsSyntax, Parser, Syntax};
-use crate::{scope, Context, NativeFunction, Object, ObjectHandle, Value, ValueResult};
+use yavashark_env::{Context, NativeFunction, Object, ObjectHandle, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::Error;
-use crate::scope::Scope;
+use yavashark_env::scope::Scope;
 
 
 
