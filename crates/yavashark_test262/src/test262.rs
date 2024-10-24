@@ -1,14 +1,10 @@
-use std::sync::OnceLock;
-use yavashark_env::{Context, NativeFunction, Object, ObjectHandle, Value, ValueResult};
+use swc_common::BytePos;
+use swc_common::input::StringInput;
+use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+use yavashark_env::{Context, ControlFlow, NativeFunction, Object, ObjectHandle, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::Error;
 use yavashark_env::scope::Scope;
-
-
-
-type RunScript = fn(&str, &mut Context, &mut Scope) -> ValueResult;
-
-static RUN_SCRIPT: OnceLock<RunScript> = OnceLock::new();
 
 
 pub fn print(ctx: &mut Context) -> ObjectHandle {
@@ -98,15 +94,34 @@ impl Test262 {
         if input.is_empty() {
             return Ok(Value::Undefined)
         }
-        
+
+
+        let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32 - 1));
+
+        let c = EsSyntax::default();
+
+        let mut p = Parser::new(Syntax::Es(c), input, None);
+
+        let script = p.parse_script().map_err(|e| Error::syn_error(format!("{e:?}")))?;
+
+
         let mut other_scope = Scope::global(ctx); //TODO: this is NOT the correct way of handling scopes here, since the script should be executed in the current scope.
         
         let (ctx, scope) = self.realm.as_mut().map(|r| (&mut r.ctx, &mut r.scope)).unwrap_or((ctx, &mut other_scope));
-        
-        RUN_SCRIPT.get()
-            .ok_or(Error::new("Run script callback was not initialized"))?(input, ctx, scope)
+
+
+        yavashark_interpreter::Interpreter::run_statements(ctx, &script.body, scope)
+            .or_else(|e| match e {
+                ControlFlow::Error(e) => Err(e),
+                ControlFlow::Return(v) => Ok(v),
+                _ => Ok(Value::Undefined),
+            })
+
+
+        //TODO: we should respect, what interpreter is currently running. Since the bytecode is highly experimental ride now, this is okay.
     }
 
+    #[allow(clippy::unused_self)]
     fn gc(&self, _args: Vec<Value>, _ctx: &Context) -> ValueResult {
         // gc is always handled automatically when something goes out of scope. We don't need an extra function for that.
         

@@ -4694,7 +4694,10 @@ dependencies = [
 name = "yavashark_test262"
 version = "0.1.0"
 dependencies = [
+ "swc_common 0.40.1",
+ "swc_ecma_parser 0.152.1",
  "yavashark_env",
+ "yavashark_interpreter",
  "yavashark_macro",
  "yavashark_value",
 ]
