@@ -9,6 +9,8 @@ pub mod error;
 mod function;
 pub mod object;
 pub mod scope;
+
+pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
 
