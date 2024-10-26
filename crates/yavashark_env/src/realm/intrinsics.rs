@@ -1,7 +1,7 @@
-use anyhow::anyhow;
-use crate::{FunctionPrototype, Object, ObjectHandle, Prototype};
 use crate::array::{Array, ArrayIterator};
 use crate::error::ErrorObj;
+use crate::{FunctionPrototype, Object, ObjectHandle, Prototype};
+use anyhow::anyhow;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -51,19 +51,19 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         let error_prototype = ErrorObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )
-            .map_err(|e| anyhow!(format!("{e:?}")))?;
+        .map_err(|e| anyhow!(format!("{e:?}")))?;
 
         Ok(Self {
             obj: obj_prototype,

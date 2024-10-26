@@ -86,22 +86,19 @@ impl Test262 {
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
 
-
         let ctx = self.ctx.as_mut().unwrap_or(ctx);
-        
-        let mut scope = Scope::global(ctx);
-        
-        
-        // scope.declare_var("$test262".to_owned(), test262) TODO: we need the realm for that :/
-        
 
-        yavashark_interpreter::Interpreter::run_statements(ctx, &script.body, &mut scope).or_else(|e| {
-            match e {
+        let mut scope = Scope::global(ctx);
+
+        // scope.declare_var("$test262".to_owned(), test262) TODO: we need the realm for that :/
+
+        yavashark_interpreter::Interpreter::run_statements(ctx, &script.body, &mut scope).or_else(
+            |e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
                 _ => Ok(Value::Undefined),
-            }
-        })
+            },
+        )
 
         //TODO: we should respect, what interpreter is currently running. Since the bytecode is highly experimental ride now, this is okay.
     }

@@ -1,3 +1,1 @@
-pub struct Environment {
-    
-}
+pub struct Environment {}
