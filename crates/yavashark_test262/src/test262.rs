@@ -27,13 +27,7 @@ pub fn print(ctx: &mut Context) -> ObjectHandle {
 #[object(direct(abstract_module_source(AbstractModuleSource)))]
 #[derive(Debug)]
 struct Test262 {
-    realm: Option<Realm>,
-}
-
-#[derive(Debug)]
-struct Realm {
-    ctx: Context,
-    scope: Scope,
+    ctx: Option<Context>,
 }
 
 impl Test262 {
@@ -41,15 +35,15 @@ impl Test262 {
         Self {
             object: Object::raw(ctx),
             abstract_module_source: Value::Undefined.into(),
-            realm: None,
+            ctx: None,
         }
     }
 
-    fn with_realm(ctx: Context, scope: Scope) -> Self {
+    fn with_realm(ctx: &Context, new_ctx: Context) -> Self {
         Self {
-            object: Object::raw(&ctx),
+            object: Object::raw(ctx),
             abstract_module_source: Value::Undefined.into(),
-            realm: Some(Realm { ctx, scope }),
+            ctx: Some(new_ctx),
         }
     }
 }
@@ -58,14 +52,9 @@ impl Test262 {
 #[allow(clippy::needless_pass_by_value)]
 impl Test262 {
     #[prop(createRealm)]
-    fn create_realm(&self, _args: Vec<Value>, _ctx: &Context) -> ValueResult {
+    fn create_realm(&self, _args: Vec<Value>, ctx: &Context) -> ValueResult {
         let new_ctx = Context::new().map_err(|e| Error::new_error(e.to_string()))?;
-
-        let mut scope = Scope::global(&new_ctx);
-
-        let this: Value = ObjectHandle::new(Self::with_realm(new_ctx, scope.clone())).into();
-
-        scope.declare_var("$262".to_string(), this.copy())?;
+        let this: Value = ObjectHandle::new(Self::with_realm(ctx, new_ctx)).into();
 
         Ok(this)
     }
@@ -97,15 +86,16 @@ impl Test262 {
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
 
-        let mut other_scope = Scope::global(ctx); //TODO: this is NOT the correct way of handling scopes here, since the script should be executed in the current scope.
 
-        let (ctx, scope) = self
-            .realm
-            .as_mut()
-            .map(|r| (&mut r.ctx, &mut r.scope))
-            .unwrap_or((ctx, &mut other_scope));
+        let ctx = self.ctx.as_mut().unwrap_or(ctx);
+        
+        let mut scope = Scope::global(ctx);
+        
+        
+        // scope.declare_var("$test262".to_owned(), test262) TODO: we need the realm for that :/
+        
 
-        yavashark_interpreter::Interpreter::run_statements(ctx, &script.body, scope).or_else(|e| {
+        yavashark_interpreter::Interpreter::run_statements(ctx, &script.body, &mut scope).or_else(|e| {
             match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
