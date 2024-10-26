@@ -6,9 +6,9 @@ use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
 
 pub struct Realm {
-    intrinsics: Intrinsics,// [[Intrinsics]]
-    global: ObjectHandle, // [[GlobalObject]]
-    env: Environment, // [[GlobalEnv]]
+    pub intrinsics: Intrinsics,// [[Intrinsics]]
+    pub global: ObjectHandle, // [[GlobalObject]]
+    pub env: Environment, // [[GlobalEnv]]
 }
 
 
@@ -29,3 +29,6 @@ impl Realm {
         })
     }
 }
+
+
+

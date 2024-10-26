@@ -13,6 +13,7 @@ pub mod scope;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
+mod global;
 
 use crate::error::ErrorObj;
 pub use yavashark_value as value;
