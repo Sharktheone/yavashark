@@ -258,7 +258,7 @@ impl Obj<Context> for Prototype {
         "Object".to_string()
     }
 
-    fn to_string(&self, _ctx: &mut Context) -> Result<String, Error> {
+    fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
         Ok("[object Object]".to_string())
     }
 

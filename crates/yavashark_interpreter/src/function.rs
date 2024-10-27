@@ -28,7 +28,7 @@ impl JSFunction {
         params: Vec<Param>,
         block: Option<BlockStmt>,
         scope: Scope,
-        ctx: &mut Context,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let prototype = Object::new(ctx);
 
@@ -49,7 +49,7 @@ impl JSFunction {
 }
 
 impl Func<Context> for JSFunction {
-    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         for (i, p) in self.params.iter().enumerate() {
             let Pat::Ident(name) = &p.pat else {
@@ -84,11 +84,11 @@ impl Constructor<Context> for JSFunction {
             .unwrap_or(Value::Undefined.into())
     }
 
-    fn value(&self, _ctx: &mut Context) -> Value {
+    fn value(&self, _realm: &mut Realm) -> Value {
         Object::with_proto(self.prototype.clone()).into()
     }
 
-    fn proto(&self, ctx: &mut Context) -> yavashark_value::Value<Context> {
+    fn proto(&self, realm: &mut Realm) -> yavashark_value::Value<Context> {
         self.prototype.clone()
     }
 }

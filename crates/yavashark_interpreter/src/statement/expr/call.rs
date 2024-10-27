@@ -7,7 +7,7 @@ use yavashark_env::{Context, ControlFlow, Error, Value, ValueResult};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_call(ctx: &mut Context, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
+    pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
         match &stmt.callee {
             Callee::Expr(callee_expr) => {
                 let Callee::Expr(callee_expr) = &stmt.callee else {
@@ -41,7 +41,7 @@ impl Interpreter {
     }
 
     pub fn run_call_on(
-        ctx: &mut Context,
+        realm: &mut Realm,
         callee: &Value,
         this: Value,
         args: &[ExprOrSpread],
@@ -62,7 +62,7 @@ impl Interpreter {
 
     #[allow(clippy::cognitive_complexity)]
     pub fn run_call_expr(
-        ctx: &mut Context,
+        realm: &mut Realm,
         expr: &Expr,
         span: Span,
         scope: &mut Scope,
@@ -116,7 +116,7 @@ impl Interpreter {
     }
 
     pub fn run_call_member(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &MemberExpr,
         scope: &mut Scope,
     ) -> Result<(Value, Value), ControlFlow> {

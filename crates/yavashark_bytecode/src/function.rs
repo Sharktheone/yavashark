@@ -14,7 +14,7 @@ pub struct BytecodeFunction {
 
 impl BytecodeFunction {
     #[must_use]
-    pub fn from_blueprint(b: FunctionBlueprint, ctx: &Context) -> ObjectHandle {
+    pub fn from_blueprint(b: FunctionBlueprint, realm: &Realm) -> ObjectHandle {
         let object = Object::raw(ctx);
 
         let this = Self {

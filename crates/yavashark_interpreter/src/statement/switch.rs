@@ -5,7 +5,7 @@ use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_switch(ctx: &mut Context, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_switch(realm: &mut Realm, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
         let discriminant = Self::run_expr(ctx, &stmt.discriminant, stmt.span, scope)?;
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_breakable()?;

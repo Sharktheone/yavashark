@@ -6,7 +6,7 @@ use yavashark_env::scope::Scope;
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_if(ctx: &mut Context, stmt: &IfStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_if(realm: &mut Realm, stmt: &IfStmt, scope: &mut Scope) -> RuntimeResult {
         let test = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
 
         if test.is_truthy() {

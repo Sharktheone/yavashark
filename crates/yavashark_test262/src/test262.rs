@@ -8,7 +8,7 @@ use yavashark_env::{
 use yavashark_macro::{object, properties};
 use yavashark_value::Error;
 
-pub fn print(ctx: &mut Context) -> ObjectHandle {
+pub fn print(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
         "print",
         |args, _, _| {
@@ -31,7 +31,7 @@ struct Test262 {
 }
 
 impl Test262 {
-    fn new(ctx: &Context) -> Self {
+    fn new(realm: &Realm) -> Self {
         Self {
             object: Object::raw(ctx),
             abstract_module_source: Value::Undefined.into(),
@@ -39,7 +39,7 @@ impl Test262 {
         }
     }
 
-    fn with_realm(ctx: &Context, new_ctx: Context) -> Self {
+    fn with_realm(realm: &Realm, new_ctx: Context) -> Self {
         Self {
             object: Object::raw(ctx),
             abstract_module_source: Value::Undefined.into(),
@@ -52,7 +52,7 @@ impl Test262 {
 #[allow(clippy::needless_pass_by_value)]
 impl Test262 {
     #[prop(createRealm)]
-    fn create_realm(&self, _args: Vec<Value>, ctx: &Context) -> ValueResult {
+    fn create_realm(&self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
         let new_ctx = Context::new().map_err(|e| Error::new_error(e.to_string()))?;
         let this: Value = ObjectHandle::new(Self::with_realm(ctx, new_ctx)).into();
 
@@ -60,12 +60,12 @@ impl Test262 {
     }
 
     #[prop(detachArrayBuffer)]
-    fn detach_array_buffer(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
+    fn detach_array_buffer(&mut self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         Ok(Value::Undefined)
     }
 
     #[prop(evalScript)]
-    fn eval_script(&mut self, args: Vec<Value>, ctx: &mut Context) -> ValueResult {
+    fn eval_script(&mut self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         let input = args.first().ok_or(Error::ty("expected one argument"))?;
 
         let Value::String(input) = input else {
@@ -104,7 +104,7 @@ impl Test262 {
     }
 
     #[allow(clippy::unused_self)]
-    fn gc(&self, _args: Vec<Value>, _ctx: &Context) -> ValueResult {
+    fn gc(&self, _args: Vec<Value>, _realm: &Realm) -> ValueResult {
         // gc is always handled automatically when something goes out of scope. We don't need an extra function for that.
 
         Ok(Value::Undefined)

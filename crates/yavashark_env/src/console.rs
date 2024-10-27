@@ -7,7 +7,7 @@ use crate::Value;
 mod print;
 
 #[must_use]
-pub fn get_console(ctx: &Context) -> Value {
+pub fn get_console(realm: &Realm) -> Value {
     let console = Object::new(ctx);
 
     let _ = console.define_property(

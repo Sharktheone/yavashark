@@ -38,7 +38,7 @@ impl Constructor<Context> for NativeConstructor {
         self.special
     }
 
-    fn value(&self, ctx: &mut Context) -> Value {
+    fn value(&self, realm: &mut Realm) -> Value {
         if let Some(f) = &self.f_value {
             return f(ctx, &self.proto);
         }
@@ -46,13 +46,13 @@ impl Constructor<Context> for NativeConstructor {
         Object::with_proto(self.proto.clone()).into()
     }
 
-    fn proto(&self, _ctx: &mut Context) -> Value {
+    fn proto(&self, _realm: &mut Realm) -> Value {
         self.proto.clone()
     }
 }
 
 impl Func<Context> for NativeConstructor {
-    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         if self.special {
             (self.f)().call(ctx, args, this.copy())?;
 
@@ -72,7 +72,7 @@ impl NativeConstructor {
         name: String,
         f: impl Fn() -> Value + 'static,
         value: Option<ValueFn>,
-        ctx: &Context,
+        realm: &Realm,
     ) -> ObjectHandle {
         Self::with_proto(
             name,
@@ -108,7 +108,7 @@ impl NativeConstructor {
         name: String,
         f: impl Fn() -> Value + 'static,
         value: Option<ValueFn>,
-        ctx: &Context,
+        realm: &Realm,
     ) -> ObjectHandle {
         Self::special_with_proto(
             name,

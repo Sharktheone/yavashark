@@ -89,7 +89,7 @@ pub struct State {
 }
 
 #[must_use]
-pub fn mock_object(ctx: &Context) -> (Value, Rc<RefCell<State>>) {
+pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
     let obj = Object::new(ctx);
 
     let state = Rc::new(RefCell::new(State {

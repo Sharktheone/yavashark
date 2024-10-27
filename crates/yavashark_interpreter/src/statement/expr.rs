@@ -84,11 +84,11 @@ mod call;
 mod r#yield;
 
 impl Interpreter {
-    pub fn run_expr_stmt(ctx: &mut Context, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_expr_stmt(realm: &mut Realm, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
         Self::run_expr(ctx, &stmt.expr, stmt.span, scope)
     }
     pub fn run_expr(
-        ctx: &mut Context,
+        realm: &mut Realm,
         expr: &Expr,
         span: Span,
         scope: &mut Scope,

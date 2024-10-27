@@ -5,7 +5,7 @@ use yavashark_env::value::Obj;
 use yavashark_env::{Context, ControlFlow, Error, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_for_in(ctx: &mut Context, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_for_in(realm: &mut Realm, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
         let obj = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 
         match obj {
@@ -15,7 +15,7 @@ impl Interpreter {
     }
 
     pub fn run_for_in_obj(
-        ctx: &mut Context,
+        realm: &mut Realm,
         obj: &dyn Obj<Context>,
         stmt: &ForInStmt,
         scope: &mut Scope,

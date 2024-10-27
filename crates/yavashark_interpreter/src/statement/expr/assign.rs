@@ -8,7 +8,7 @@ use yavashark_env::{Context, Error, Res, RuntimeResult, Value};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_assign(ctx: &mut Context, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_assign(realm: &mut Realm, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
         let value = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 
         if stmt.op == AssignOp::Assign {
@@ -21,7 +21,7 @@ impl Interpreter {
     }
 
     pub fn assign_target(
-        ctx: &mut Context,
+        realm: &mut Realm,
         target: &AssignTarget,
         value: Value,
         scope: &mut Scope,
@@ -42,7 +42,7 @@ impl Interpreter {
     }
 
     pub fn assign_member(
-        ctx: &mut Context,
+        realm: &mut Realm,
         m: &MemberExpr,
         value: Value,
         scope: &mut Scope,
@@ -63,7 +63,7 @@ impl Interpreter {
     }
 
     pub fn assign_target_op(
-        ctx: &mut Context,
+        realm: &mut Realm,
         op: AssignOp,
         target: &AssignTarget,
         left: Value,
@@ -94,7 +94,7 @@ impl Interpreter {
     }
 
     pub fn assign_member_op(
-        ctx: &mut Context,
+        realm: &mut Realm,
         op: AssignOp,
         m: &MemberExpr,
         left: Value,
@@ -125,7 +125,7 @@ impl Interpreter {
         op: AssignOp,
         left: Value,
         right: Value,
-        ctx: &mut Context,
+        realm: &mut Realm,
     ) -> RuntimeResult {
         Ok(match op {
             AssignOp::Assign => right,

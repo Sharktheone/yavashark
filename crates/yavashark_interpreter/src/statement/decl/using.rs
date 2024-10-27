@@ -5,7 +5,7 @@ use yavashark_env::{Context, Res};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn decl_using(ctx: &mut Context, stmt: &UsingDecl, scope: &mut Scope) -> Res {
+    pub fn decl_using(realm: &mut Realm, stmt: &UsingDecl, scope: &mut Scope) -> Res {
         todo!()
     }
 }

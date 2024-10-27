@@ -5,14 +5,14 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_member(ctx: &mut Context, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
         let value = Self::run_expr(ctx, &stmt.obj, stmt.span, scope)?;
 
         Self::run_member_on(ctx, value, &stmt.prop, stmt.span, scope)
     }
 
     pub fn run_member_on(
-        ctx: &mut Context,
+        realm: &mut Realm,
         value: Value,
         prop: &MemberProp,
         span: Span,

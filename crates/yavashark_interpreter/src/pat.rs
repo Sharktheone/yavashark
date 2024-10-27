@@ -9,13 +9,13 @@ use yavashark_env::{Context, Error, Object, Res, Value, ValueResult};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_pat(ctx: &mut Context, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
+    pub fn run_pat(realm: &mut Realm, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
         Self::run_pat_internal(ctx, stmt, scope, value, false, DUMMY_SP)
     }
 
     #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
     pub fn run_pat_internal(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &Pat,
         scope: &mut Scope,
         value: Value,
@@ -126,7 +126,7 @@ impl Interpreter {
     }
 
     pub fn prop_name_to_value(
-        ctx: &mut Context,
+        realm: &mut Realm,
         prop: &PropName,
         scope: &mut Scope,
     ) -> ValueResult {

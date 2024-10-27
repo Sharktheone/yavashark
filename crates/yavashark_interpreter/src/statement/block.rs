@@ -6,13 +6,13 @@ use yavashark_env::{Context, RuntimeResult, Value};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_block(ctx: &mut Context, stmt: &BlockStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_block(realm: &mut Realm, stmt: &BlockStmt, scope: &mut Scope) -> RuntimeResult {
         let scope = &mut Scope::with_parent(scope)?;
 
         Self::run_statements(ctx, &stmt.stmts, scope)
     }
     pub fn run_block_this(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &BlockStmt,
         scope: &mut Scope,
         this: Value,

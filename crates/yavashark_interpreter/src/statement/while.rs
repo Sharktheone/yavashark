@@ -5,7 +5,7 @@ use crate::scope::Scope;
 use crate::{Interpreter, Value};
 
 impl Interpreter {
-    pub fn run_while(ctx: &mut Context, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_while(realm: &mut Realm, stmt: &WhileStmt, scope: &mut Scope) -> RuntimeResult {
         let label = scope.last_label()?;
 
         loop {

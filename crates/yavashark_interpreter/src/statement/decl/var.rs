@@ -5,7 +5,7 @@ use yavashark_env::{Context, Error, Res, Value};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn decl_var(ctx: &mut Context, stmt: &VarDecl, scope: &mut Scope) -> Res {
+    pub fn decl_var(realm: &mut Realm, stmt: &VarDecl, scope: &mut Scope) -> Res {
         match stmt.kind {
             VarDeclKind::Var => {
                 for decl in &stmt.decls {

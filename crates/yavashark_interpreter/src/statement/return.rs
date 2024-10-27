@@ -6,7 +6,7 @@ use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_return(ctx: &mut Context, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_return(realm: &mut Realm, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_returnable()? {
             return Err(ControlFlow::error_syntax("Illegal return statement"));
         }

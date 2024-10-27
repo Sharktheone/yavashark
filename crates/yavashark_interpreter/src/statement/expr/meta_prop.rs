@@ -5,7 +5,7 @@ use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
     pub fn run_meta_prop(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &MetaPropExpr,
         scope: &mut Scope,
     ) -> RuntimeResult {

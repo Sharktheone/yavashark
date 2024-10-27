@@ -5,7 +5,7 @@ use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_opt_chain(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &OptChainExpr,
         scope: &mut Scope,
     ) -> RuntimeResult {
@@ -31,7 +31,7 @@ impl Interpreter {
     }
 }
 
-fn run(stmt: &OptChainExpr, scope: &mut Scope, ctx: &mut Context) -> RuntimeResult {
+fn run(stmt: &OptChainExpr, scope: &mut Scope, realm: &mut Realm) -> RuntimeResult {
     match &*stmt.base {
         OptChainBase::Member(member) => {
             let value = Interpreter::run_expr(ctx, &member.obj, member.span, scope)?;

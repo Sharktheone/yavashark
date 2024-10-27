@@ -24,7 +24,7 @@ mod r#while;
 mod with;
 
 impl Interpreter {
-    pub fn run_statement(ctx: &mut Context, stmt: &Stmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_statement(realm: &mut Realm, stmt: &Stmt, scope: &mut Scope) -> RuntimeResult {
         match stmt {
             Stmt::Block(block) => Self::run_block(ctx, block, scope),
             Stmt::Empty(_) => Ok(Value::Undefined),
@@ -51,7 +51,7 @@ impl Interpreter {
     }
 
     pub fn run_statements(
-        ctx: &mut Context,
+        realm: &mut Realm,
         script: &Vec<Stmt>,
         scope: &mut Scope,
     ) -> RuntimeResult {

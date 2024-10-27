@@ -5,7 +5,7 @@ use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
     pub fn run_private_name(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &PrivateName,
         scope: &mut Scope,
     ) -> RuntimeResult {

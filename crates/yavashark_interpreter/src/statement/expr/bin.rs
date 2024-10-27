@@ -7,7 +7,7 @@ use yavashark_value::Error;
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_bin(ctx: &mut Context, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_bin(realm: &mut Realm, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
         let left = Self::run_expr(ctx, &stmt.left, stmt.span, scope)?;
         let right = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 

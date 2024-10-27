@@ -181,7 +181,7 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
 
 impl ScopeInternal {
     #[must_use]
-    pub fn new(ctx: &Context) -> Self {
+    pub fn new(realm: &Realm) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -220,7 +220,7 @@ impl ScopeInternal {
 
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn global(ctx: &Context) -> Self {
+    pub fn global(realm: &Realm) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -516,14 +516,14 @@ impl ScopeInternal {
 
 impl Scope {
     #[must_use]
-    pub fn new(ctx: &Context) -> Self {
+    pub fn new(realm: &Realm) -> Self {
         Self {
             scope: Gc::new(RefCell::new(ScopeInternal::new(ctx))),
         }
     }
 
     #[must_use]
-    pub fn global(ctx: &Context) -> Self {
+    pub fn global(realm: &Realm) -> Self {
         Self {
             scope: Gc::new(RefCell::new(ScopeInternal::global(ctx))),
         }

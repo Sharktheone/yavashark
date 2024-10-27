@@ -7,6 +7,7 @@ use yavashark_value::Obj;
 use crate::context::Context;
 use crate::{Error, ObjectProperty, Variable};
 use crate::{Res, Value};
+use crate::realm::Realm;
 
 pub mod array;
 mod prototype;
@@ -21,7 +22,7 @@ pub struct Object {
 impl Object {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
-    pub fn new(context: &Context) -> crate::ObjectHandle {
+    pub fn new(realm: &Realm) -> crate::ObjectHandle {
         let prototype = context.proto.obj.clone().into();
 
         let this: Box<dyn Obj<Context>> = Box::new(Self {
@@ -45,7 +46,7 @@ impl Object {
     }
 
     #[must_use]
-    pub fn raw(context: &Context) -> Self {
+    pub fn raw(realm: &Realm) -> Self {
         let prototype = context.proto.obj.clone().into();
 
         Self {
@@ -160,7 +161,7 @@ impl Object {
     }
 
     #[must_use]
-    pub fn from_values(values: Vec<(Value, Value)>, ctx: &Context) -> Self {
+    pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Self {
         let mut object = Self::raw(ctx);
 
         for (key, value) in values {
@@ -279,7 +280,7 @@ impl Obj<Context> for Object {
         "Object".to_string()
     }
 
-    fn to_string(&self, _ctx: &mut Context) -> Result<String, Error> {
+    fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
         if let Some(_to_string) = self.get_property(&Value::String("toString".to_string())) {
             // to_string.call(ctx, vec![], Value::Object(obj))?;
         }

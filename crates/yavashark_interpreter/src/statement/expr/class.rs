@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
-    pub fn run_class(ctx: &mut Context, stmt: &ClassExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_class(realm: &mut Realm, stmt: &ClassExpr, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

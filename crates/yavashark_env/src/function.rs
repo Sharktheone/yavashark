@@ -37,7 +37,7 @@ impl Constructor<Context> for NativeFunction {
         self.special_constructor
     }
 
-    fn value(&self, ctx: &mut Context) -> Value {
+    fn value(&self, realm: &mut Realm) -> Value {
         Object::new(ctx).into()
     }
 }
@@ -45,7 +45,7 @@ impl Constructor<Context> for NativeFunction {
 impl NativeFunction {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn new_boxed(name: String, f: NativeFn, ctx: &Context) -> ObjectHandle {
+    pub fn new_boxed(name: String, f: NativeFn, realm: &Realm) -> ObjectHandle {
         let this = Self {
             name,
             f,
@@ -77,7 +77,7 @@ impl NativeFunction {
     pub fn new(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
-        ctx: &Context,
+        realm: &Realm,
     ) -> ObjectHandle {
         let this = Self {
             name: name.to_string(),
@@ -110,7 +110,7 @@ impl NativeFunction {
     pub fn special(
         name: &str,
         f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
-        ctx: &Context,
+        realm: &Realm,
     ) -> ObjectHandle {
         let this = Self {
             name: name.to_string(),
@@ -259,7 +259,7 @@ impl NativeFunctionBuilder {
 
     /// Note: Overrides the prototype of the object
     #[must_use]
-    pub fn context(mut self, ctx: &Context) -> Self {
+    pub fn context(mut self, realm: &Realm) -> Self {
         self.0.object.prototype = ctx.proto.func.clone().into();
         self
     }
@@ -314,7 +314,7 @@ impl Debug for NativeFunction {
 }
 
 impl Func<Context> for NativeFunction {
-    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         (self.f)(args, this, ctx)
     }
 }

@@ -14,7 +14,7 @@ pub struct Class {
 impl Func<Context> for Class {
     fn call(
         &mut self,
-        _ctx: &mut Context,
+        _realm: &mut Realm,
         _args: Vec<Value>,
         _this: Value,
     ) -> Result<Value, Error> {
@@ -33,14 +33,14 @@ impl Constructor<Context> for Class {
         }
     }
 
-    fn value(&self, _ctx: &mut Context) -> Value {
+    fn value(&self, _realm: &mut Realm) -> Value {
         Object::raw_with_proto(self.prototype.value.clone()).into_value()
     }
 }
 
 impl Class {
     #[must_use]
-    pub fn new(ctx: &Context, name: String) -> Self {
+    pub fn new(realm: &Realm, name: String) -> Self {
         Self::new_with_proto(ctx.proto.func.clone().into(), name)
     }
 
@@ -73,7 +73,7 @@ impl Class {
 #[properties]
 impl Class {
     #[constructor(raw)]
-    pub fn construct(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
+    pub fn construct(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
         if let Value::Object(o) = this.copy() {
             let deez = o.get()?;
             let constructor = deez.constructor();
@@ -102,7 +102,7 @@ impl CustomName for ClassInstance {
 
 impl ClassInstance {
     #[must_use]
-    pub fn new(ctx: &Context, name: String) -> Self {
+    pub fn new(realm: &Realm, name: String) -> Self {
         Self {
             private_props: HashMap::new(),
             object: Object::raw(ctx),

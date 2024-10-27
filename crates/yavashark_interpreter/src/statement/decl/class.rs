@@ -6,7 +6,7 @@ use yavashark_env::{Context, Res};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn decl_class(ctx: &mut Context, stmt: &ClassDecl, scope: &mut Scope) -> Res {
+    pub fn decl_class(realm: &mut Realm, stmt: &ClassDecl, scope: &mut Scope) -> Res {
         let name = stmt.ident.sym.to_string();
 
         decl_class(ctx, &stmt.class, scope, name)

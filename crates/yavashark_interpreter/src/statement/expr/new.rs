@@ -6,7 +6,7 @@ use yavashark_env::{Context, ControlFlow, Object, RuntimeResult, Value};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_new(ctx: &mut Context, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_new(realm: &mut Realm, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
         let callee = Self::run_expr(ctx, &stmt.callee, stmt.span, scope)?;
 
         let Value::Object(constructor) = callee else {

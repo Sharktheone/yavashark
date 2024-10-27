@@ -6,7 +6,7 @@ use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_continue(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &ContinueStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {

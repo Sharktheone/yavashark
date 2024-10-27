@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_for_of(ctx: &mut Context, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_for_of(realm: &mut Realm, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
         let obj = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
 
         let scope = &mut Scope::with_parent(scope)?;

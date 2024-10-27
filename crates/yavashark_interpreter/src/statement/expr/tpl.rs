@@ -6,7 +6,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
-    pub fn run_tpl(ctx: &mut Context, stmt: &Tpl, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_tpl(realm: &mut Realm, stmt: &Tpl, scope: &mut Scope) -> RuntimeResult {
         let mut result = String::new();
 
         let len = max(stmt.quasis.len(), stmt.exprs.len());

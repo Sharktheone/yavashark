@@ -6,7 +6,7 @@ use yavashark_env::{Context, RuntimeResult};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_yield(ctx: &mut Context, stmt: &YieldExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_yield(realm: &mut Realm, stmt: &YieldExpr, scope: &mut Scope) -> RuntimeResult {
         todo!()
     }
 }

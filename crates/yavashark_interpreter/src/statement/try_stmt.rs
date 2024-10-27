@@ -5,7 +5,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_try(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_try(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
         let res = catch(ctx, stmt, scope);
 
         if let Some(finalizer) = &stmt.finalizer {
@@ -16,7 +16,7 @@ impl Interpreter {
     }
 }
 
-fn catch(ctx: &mut Context, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
+fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
     let try_block = Interpreter::run_block(ctx, &stmt.block, scope);
 
     if let Err(e) = try_block {

@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, ControlFlow, RuntimeResult};
 
 impl Interpreter {
-    pub fn run_ident(ctx: &mut Context, stmt: &Ident, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_ident(realm: &mut Realm, stmt: &Ident, scope: &mut Scope) -> RuntimeResult {
         let ident = stmt.sym.to_string();
         let value = scope.resolve(&ident)?;
         value.map_or_else(

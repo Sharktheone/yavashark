@@ -3,7 +3,7 @@ use crate::{Error, NativeFunction, Object, ObjectHandle, Result, Value, ValueRes
 use yavashark_macro::{object, properties};
 
 #[must_use]
-pub fn get_error(ctx: &Context) -> Value {
+pub fn get_error(realm: &Realm) -> Value {
     NativeFunction::special(
         "error",
         |args, this, ctx| {
@@ -32,7 +32,7 @@ pub struct ErrorObj {
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
-    pub fn new(error: Error, ctx: &Context) -> ObjectHandle {
+    pub fn new(error: Error, realm: &Realm) -> ObjectHandle {
         let this = Self {
             object: Object::raw_with_proto(ctx.proto.error.clone().into()),
             error,
@@ -42,7 +42,7 @@ impl ErrorObj {
     }
 
     #[must_use]
-    pub fn new_from(message: String, ctx: &Context) -> ObjectHandle {
+    pub fn new_from(message: String, realm: &Realm) -> ObjectHandle {
         let this = Self {
             object: Object::raw_with_proto(ctx.proto.error.clone().into()),
             error: Error::unknown_error(message),
@@ -52,7 +52,7 @@ impl ErrorObj {
     }
 
     #[must_use]
-    pub fn raw_from(message: String, ctx: &Context) -> Self {
+    pub fn raw_from(message: String, realm: &Realm) -> Self {
         Self {
             object: Object::raw_with_proto(ctx.proto.error.clone().into()),
             error: Error::unknown_error(message),
@@ -72,7 +72,7 @@ impl ErrorObj {
 #[properties]
 impl ErrorObj {
     #[get(message)]
-    pub fn get_message(&self, _: Vec<Value>, ctx: &mut Context) -> ValueResult {
+    pub fn get_message(&self, _: Vec<Value>, realm: &mut Realm) -> ValueResult {
         Ok(self.error.message(ctx)?.into())
     }
 }

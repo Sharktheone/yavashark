@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_unary(ctx: &mut Context, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_unary(realm: &mut Realm, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
         let value = Self::run_expr(ctx, &stmt.arg, stmt.span, scope).or_else(|v| {
             if stmt.op == UnaryOp::TypeOf {
                 Ok(Value::String("undefined".to_string()))

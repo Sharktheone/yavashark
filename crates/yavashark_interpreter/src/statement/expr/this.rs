@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
-    pub fn run_this(ctx: &mut Context, stmt: &ThisExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_this(realm: &mut Realm, stmt: &ThisExpr, scope: &mut Scope) -> RuntimeResult {
         Ok(scope.this()?.copy())
     }
 }

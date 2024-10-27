@@ -6,7 +6,7 @@ use yavashark_env::value::Obj;
 use yavashark_env::{Context, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_array(ctx: &mut Context, stmt: &ArrayLit, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_array(realm: &mut Realm, stmt: &ArrayLit, scope: &mut Scope) -> RuntimeResult {
         let mut arr = Array::from_ctx(ctx);
 
         for elem in &stmt.elems {

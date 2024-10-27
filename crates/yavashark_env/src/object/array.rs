@@ -12,7 +12,7 @@ use crate::{ObjectProperty, Symbol};
 pub struct Array {}
 
 impl Array {
-    pub fn with_elements(ctx: &Context, elements: Vec<Value>) -> Result<Self, Error> {
+    pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self, Error> {
         let mut array = Self::new(ctx.proto.array.clone().into());
 
         array.object.set_array(elements);
@@ -29,11 +29,11 @@ impl Array {
     }
 
     #[must_use]
-    pub fn from_ctx(ctx: &Context) -> Self {
+    pub fn from_ctx(realm: &Realm) -> Self {
         Self::new(ctx.proto.array.clone().into())
     }
 
-    pub fn override_to_string(&self, ctx: &mut Context) -> Result<String, Error> {
+    pub fn override_to_string(&self, realm: &mut Realm) -> Result<String, Error> {
         let mut buf = String::new();
 
         for (_, value) in &self.object.array {
@@ -85,7 +85,7 @@ impl Array {
 
     #[prop(Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
-    fn iterator(&self, _args: Vec<Value>, ctx: &Context, this: Value) -> ValueResult {
+    fn iterator(&self, _args: Vec<Value>, realm: &Realm, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(Error::ty_error(format!("Expected object, found {this:?}")));
         };
@@ -128,7 +128,7 @@ pub struct ArrayIterator {
 #[properties]
 impl ArrayIterator {
     #[prop]
-    pub fn next(&mut self, _args: Vec<Value>, ctx: &Context) -> ValueResult {
+    pub fn next(&mut self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
         if self.done {
             let obj = Object::new(ctx);
             obj.define_property("value".into(), Value::Undefined)?;

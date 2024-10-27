@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
-    pub fn run_cond(ctx: &mut Context, stmt: &CondExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_cond(realm: &mut Realm, stmt: &CondExpr, scope: &mut Scope) -> RuntimeResult {
         let test = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
 
         if test.is_truthy() {

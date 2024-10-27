@@ -40,22 +40,22 @@ impl FunctionPrototype {
 }
 
 #[allow(unused)]
-fn apply(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
+fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
 
 #[allow(unused)]
-fn bind(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
+fn bind(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
 
 #[allow(unused)]
-fn call(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
+fn call(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
 
 #[allow(unused)]
-fn constructor(args: Vec<Value>, this: Value, ctx: &mut Context) -> ValueResult {
+fn constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
 
@@ -231,7 +231,7 @@ impl Obj<Context> for FunctionPrototype {
         "FunctionPrototype".to_string()
     }
 
-    fn to_string(&self, _ctx: &mut Context) -> Result<String, Error> {
+    fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
         Ok("function () { [Native code] } ".to_string())
     }
 

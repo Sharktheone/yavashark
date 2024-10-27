@@ -5,7 +5,7 @@ use yavashark_env::{Context, ControlFlow, RuntimeResult};
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_break(ctx: &mut Context, stmt: &BreakStmt, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_break(realm: &mut Realm, stmt: &BreakStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_breakable()? {
             return Err(ControlFlow::error_syntax("Illegal break statement"));
         }

@@ -8,7 +8,7 @@ use crate::function::JSFunction;
 use crate::Interpreter;
 
 impl Interpreter {
-    pub fn run_object(ctx: &mut Context, stmt: &ObjectLit, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_object(realm: &mut Realm, stmt: &ObjectLit, scope: &mut Scope) -> RuntimeResult {
         let mut obj = Object::new(ctx);
 
         for prop in &stmt.props {
@@ -113,7 +113,7 @@ impl Interpreter {
         Ok(Value::Object(obj))
     }
 
-    pub fn run_prop_name(ctx: &mut Context, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_prop_name(realm: &mut Realm, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
         Ok(match prop {
             PropName::Ident(ident) => Value::String(ident.sym.to_string()),
             PropName::Str(str_) => Value::String(str_.value.to_string()),

@@ -3,7 +3,7 @@ use swc_ecma_ast::Lit;
 use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_lit(ctx: &mut Context, stmt: &Lit) -> RuntimeResult {
+    pub fn run_lit(realm: &mut Realm, stmt: &Lit) -> RuntimeResult {
         Ok(match stmt {
             Lit::Str(s) => Value::String(s.value.as_str().to_owned()),
             Lit::Bool(b) => Value::Boolean(b.value),

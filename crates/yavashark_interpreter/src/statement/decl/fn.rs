@@ -5,7 +5,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, Res};
 
 impl Interpreter {
-    pub fn decl_fn(ctx: &mut Context, stmt: &FnDecl, scope: &mut Scope) -> Res {
+    pub fn decl_fn(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Res {
         let mut fn_scope = Scope::with_parent(scope)?;
 
         fn_scope.state_set_function()?;

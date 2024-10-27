@@ -5,7 +5,7 @@ use yavashark_env::{Context, RuntimeResult};
 
 impl Interpreter {
     pub fn run_debugger(
-        ctx: &mut Context,
+        realm: &mut Realm,
         stmt: &DebuggerStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {

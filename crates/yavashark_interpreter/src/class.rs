@@ -9,7 +9,7 @@ use yavashark_value::Obj;
 
 use crate::Interpreter;
 
-pub fn decl_class(ctx: &mut Context, stmt: &Class, scope: &mut Scope, name: String) -> Res {
+pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(ctx, class, stmt.span, scope)?;
         let p = super_class.get_property(&"prototype".into(), ctx)?;
@@ -126,7 +126,7 @@ fn create_method(
     params: Vec<Param>,
     body: Option<BlockStmt>,
     scope: &mut Scope,
-    ctx: &mut Context,
+    realm: &mut Realm,
     span: Span,
 ) -> Result<(Value, Value), Error> {
     let name = prop_name_to_value(name, ctx, span, scope)?;
@@ -137,7 +137,7 @@ fn create_method(
 
 fn prop_name_to_value(
     name: &PropName,
-    ctx: &mut Context,
+    realm: &mut Realm,
     span: Span,
     scope: &mut Scope,
 ) -> ValueResult {

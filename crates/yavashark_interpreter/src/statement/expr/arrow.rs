@@ -21,7 +21,7 @@ pub struct ArrowFunction {
 }
 
 impl Func<Context> for ArrowFunction {
-    fn call(&mut self, ctx: &mut Context, args: Vec<Value>, _this: Value) -> ValueResult {
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut self.scope.child()?;
         scope.state_set_function()?;
 
@@ -44,7 +44,7 @@ impl Func<Context> for ArrowFunction {
 }
 
 impl Interpreter {
-    pub fn run_arrow(ctx: &mut Context, stmt: &ArrowExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_arrow(realm: &mut Realm, stmt: &ArrowExpr, scope: &mut Scope) -> RuntimeResult {
         let this = scope.this()?.copy();
 
         let arrow = ArrowFunction {

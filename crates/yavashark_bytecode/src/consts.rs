@@ -18,7 +18,7 @@ pub enum ConstValue {
 
 impl ConstValue {
     #[must_use]
-    pub fn into_value(self, ctx: &Context) -> Value {
+    pub fn into_value(self, realm: &Realm) -> Value {
         match self {
             Self::Null => Value::Null,
             Self::Undefined => Value::Undefined,

@@ -9,7 +9,7 @@ mod using;
 mod var;
 
 impl Interpreter {
-    pub fn run_decl(ctx: &mut Context, stmt: &Decl, scope: &mut Scope) -> Res {
+    pub fn run_decl(realm: &mut Realm, stmt: &Decl, scope: &mut Scope) -> Res {
         match stmt {
             Decl::Class(c) => Self::decl_class(ctx, c, scope),
             Decl::Fn(f) => Self::decl_fn(ctx, f, scope),

@@ -4,7 +4,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Context, Error, RuntimeResult, Value};
 
 impl Interpreter {
-    pub fn run_update(ctx: &mut Context, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {
+    pub fn run_update(realm: &mut Realm, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {
         fn update(value: Value, op: UpdateOp) -> (Value, Value) {
             match op {
                 UpdateOp::PlusPlus => (
