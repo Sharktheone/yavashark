@@ -3,8 +3,9 @@ use log::info;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::scope::Scope;
 use yavashark_env::{
-    Context, ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
+    ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
 };
+use yavashark_env::realm::Realm;
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Func, Obj, ObjectProperty};
 
@@ -30,14 +31,14 @@ impl JSFunction {
         scope: Scope,
         realm: &mut Realm,
     ) -> ObjectHandle {
-        let prototype = Object::new(ctx);
+        let prototype = Object::new(realm);
 
         let this = Self {
             name,
             params,
             block,
             scope,
-            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
+            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             prototype: prototype.clone().into(),
         };
 
@@ -48,7 +49,7 @@ impl JSFunction {
     }
 }
 
-impl Func<Context> for JSFunction {
+impl Func<Realm> for JSFunction {
     fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         for (i, p) in self.params.iter().enumerate() {
@@ -63,7 +64,7 @@ impl Func<Context> for JSFunction {
         }
 
         if let Some(block) = &self.block {
-            if let Err(e) = Interpreter::run_block_this(ctx, block, scope, this) {
+            if let Err(e) = Interpreter::run_block_this(realm, block, scope, this) {
                 return match e {
                     ControlFlow::Error(e) => Err(e),
                     ControlFlow::Return(v) => Ok(v),
@@ -77,8 +78,8 @@ impl Func<Context> for JSFunction {
     }
 }
 
-impl Constructor<Context> for JSFunction {
-    fn get_constructor(&self) -> ObjectProperty<Context> {
+impl Constructor<Realm> for JSFunction {
+    fn get_constructor(&self) -> ObjectProperty<Realm> {
         self.prototype
             .get_property_no_get_set(&"constructor".into())
             .unwrap_or(Value::Undefined.into())
@@ -88,7 +89,7 @@ impl Constructor<Context> for JSFunction {
         Object::with_proto(self.prototype.clone()).into()
     }
 
-    fn proto(&self, realm: &mut Realm) -> yavashark_value::Value<Context> {
+    fn proto(&self, realm: &mut Realm) -> yavashark_value::Value<Realm> {
         self.prototype.clone()
     }
 }
@@ -100,7 +101,7 @@ mod tests {
     use swc_common::DUMMY_SP;
     use swc_ecma_ast::{BlockStmt, Param, Pat};
     use yavashark_env::scope::Scope;
-    use yavashark_env::{test_eval, Context};
+    use yavashark_env::{test_eval};
 
     #[test]
     fn test_function() {

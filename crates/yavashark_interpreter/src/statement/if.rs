@@ -1,5 +1,5 @@
 use swc_ecma_ast::IfStmt;
-use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::{Realm, RuntimeResult, Value};
 
 use yavashark_env::scope::Scope;
 
@@ -7,12 +7,12 @@ use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_if(realm: &mut Realm, stmt: &IfStmt, scope: &mut Scope) -> RuntimeResult {
-        let test = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
+        let test = Self::run_expr(realm, &stmt.test, stmt.span, scope)?;
 
         if test.is_truthy() {
-            Self::run_statement(ctx, &stmt.cons, scope)
+            Self::run_statement(realm, &stmt.cons, scope)
         } else if let Some(alt) = &stmt.alt {
-            Self::run_statement(ctx, alt, scope)
+            Self::run_statement(realm, alt, scope)
         } else {
             Ok(Value::Undefined)
         }

@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{Realm, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for(realm: &mut Realm, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
@@ -12,30 +12,30 @@ impl Interpreter {
         if let Some(init) = &stmt.init {
             match init {
                 VarDeclOrExpr::VarDecl(v) => {
-                    Self::decl_var(ctx, v, scope)?;
+                    Self::decl_var(realm, v, scope)?;
                 }
                 VarDeclOrExpr::Expr(e) => {
-                    Self::run_expr(ctx, e, stmt.span, scope)?;
+                    Self::run_expr(realm, e, stmt.span, scope)?;
                 }
             }
         }
 
         loop {
             if let Some(test) = &stmt.test {
-                let value = Self::run_expr(ctx, test, stmt.span, scope)?;
+                let value = Self::run_expr(realm, test, stmt.span, scope)?;
                 if value.is_falsey() {
                     break Ok(Value::Undefined);
                 }
             }
 
-            if let Err(e) = Self::run_statement(ctx, &stmt.body, scope) {
+            if let Err(e) = Self::run_statement(realm, &stmt.body, scope) {
                 match e {
                     ControlFlow::Break(l) if label.as_ref() == l.as_ref() => {
                         break Ok(Value::Undefined);
                     }
                     ControlFlow::Continue(l) if label.as_ref() == l.as_ref() => {
                         if let Some(update) = &stmt.update {
-                            Self::run_expr(ctx, update, stmt.span, scope)?;
+                            Self::run_expr(realm, update, stmt.span, scope)?;
                         }
                         continue;
                     }
@@ -44,7 +44,7 @@ impl Interpreter {
             }
 
             if let Some(update) = &stmt.update {
-                Self::run_expr(ctx, update, stmt.span, scope)?;
+                Self::run_expr(realm, update, stmt.span, scope)?;
             }
         }
     }

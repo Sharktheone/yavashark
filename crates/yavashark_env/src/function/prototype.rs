@@ -2,9 +2,9 @@
 
 use yavashark_value::Obj;
 
-use crate::context::Context;
 use crate::object::Object;
 use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::realm::Realm;
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -59,7 +59,7 @@ fn constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult 
     todo!()
 }
 
-impl Obj<Context> for FunctionPrototype {
+impl Obj<Realm> for FunctionPrototype {
     fn define_property(&mut self, name: Value, value: Value) {
         if let Value::String(name) = &name {
             match name.as_str() {

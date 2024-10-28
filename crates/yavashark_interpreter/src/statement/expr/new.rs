@@ -1,13 +1,13 @@
 use swc_ecma_ast::NewExpr;
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, Object, RuntimeResult, Value};
+use yavashark_env::{Realm, ControlFlow, Object, RuntimeResult, Value};
 
 use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_new(realm: &mut Realm, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
-        let callee = Self::run_expr(ctx, &stmt.callee, stmt.span, scope)?;
+        let callee = Self::run_expr(realm, &stmt.callee, stmt.span, scope)?;
 
         let Value::Object(constructor) = callee else {
             return Err(ControlFlow::error_type(format!(
@@ -17,7 +17,7 @@ impl Interpreter {
         };
 
         let this = constructor
-            .get_constructor_value(ctx)
+            .get_constructor_value(realm)
             .ok_or(ControlFlow::error_type(format!(
                 "{:?} is not a constructor2",
                 stmt.callee
@@ -43,7 +43,7 @@ impl Interpreter {
 
             for arg in args {
                 call_args.push(Self::run_expr(
-                    ctx,
+                    realm,
                     &arg.expr,
                     arg.spread.unwrap_or(stmt.span),
                     scope,
@@ -54,9 +54,9 @@ impl Interpreter {
             }
         }
 
-        dbg!(f.to_string(ctx));
+        dbg!(f.to_string(realm));
 
-        let _ = f.call(ctx, call_args, this.copy())?;
+        let _ = f.call(realm, call_args, this.copy())?;
 
         Ok(this) //This is always an object, so it will also be updated when we copy it
     }

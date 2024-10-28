@@ -29,7 +29,7 @@ pub use tpl::*;
 pub use unary::*;
 pub use update::*;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult};
+use yavashark_env::{Realm, ControlFlow, RuntimeResult};
 
 mod this;
 
@@ -85,7 +85,7 @@ mod r#yield;
 
 impl Interpreter {
     pub fn run_expr_stmt(realm: &mut Realm, stmt: &ExprStmt, scope: &mut Scope) -> RuntimeResult {
-        Self::run_expr(ctx, &stmt.expr, stmt.span, scope)
+        Self::run_expr(realm, &stmt.expr, stmt.span, scope)
     }
     pub fn run_expr(
         realm: &mut Realm,
@@ -94,32 +94,32 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         match expr {
-            Expr::This(stmt) => Self::run_this(ctx, stmt, scope),
-            Expr::Array(stmt) => Self::run_array(ctx, stmt, scope),
-            Expr::Object(stmt) => Self::run_object(ctx, stmt, scope),
-            Expr::Fn(stmt) => Self::run_fn(ctx, stmt, scope),
-            Expr::Unary(stmt) => Self::run_unary(ctx, stmt, scope),
-            Expr::Update(stmt) => Self::run_update(ctx, stmt, scope),
-            Expr::Bin(stmt) => Self::run_bin(ctx, stmt, scope),
-            Expr::Assign(stmt) => Self::run_assign(ctx, stmt, scope),
-            Expr::Member(stmt) => Self::run_member(ctx, stmt, scope),
-            Expr::SuperProp(stmt) => Self::run_super_prop(ctx, stmt, scope),
-            Expr::Cond(stmt) => Self::run_cond(ctx, stmt, scope),
-            Expr::Call(stmt) => Ok(Self::run_call(ctx, stmt, scope)?),
-            Expr::New(stmt) => Self::run_new(ctx, stmt, scope),
-            Expr::Seq(stmt) => Self::run_seq(ctx, stmt, scope),
-            Expr::Ident(stmt) => Self::run_ident(ctx, stmt, scope),
-            Expr::Lit(stmt) => Self::run_lit(ctx, stmt),
-            Expr::Tpl(stmt) => Self::run_tpl(ctx, stmt, scope),
-            Expr::TaggedTpl(stmt) => Self::run_tagged_tpl(ctx, stmt, scope),
-            Expr::Arrow(stmt) => Self::run_arrow(ctx, stmt, scope),
-            Expr::Class(stmt) => Self::run_class(ctx, stmt, scope),
-            Expr::Yield(stmt) => Self::run_yield(ctx, stmt, scope),
-            Expr::MetaProp(stmt) => Self::run_meta_prop(ctx, stmt, scope),
-            Expr::Await(stmt) => Self::run_await(ctx, stmt, scope),
-            Expr::Paren(stmt) => Self::run_paren(ctx, stmt, scope),
-            Expr::PrivateName(stmt) => Self::run_private_name(ctx, stmt, scope),
-            Expr::OptChain(stmt) => Self::run_opt_chain(ctx, stmt, scope),
+            Expr::This(stmt) => Self::run_this(realm, stmt, scope),
+            Expr::Array(stmt) => Self::run_array(realm, stmt, scope),
+            Expr::Object(stmt) => Self::run_object(realm, stmt, scope),
+            Expr::Fn(stmt) => Self::run_fn(realm, stmt, scope),
+            Expr::Unary(stmt) => Self::run_unary(realm, stmt, scope),
+            Expr::Update(stmt) => Self::run_update(realm, stmt, scope),
+            Expr::Bin(stmt) => Self::run_bin(realm, stmt, scope),
+            Expr::Assign(stmt) => Self::run_assign(realm, stmt, scope),
+            Expr::Member(stmt) => Self::run_member(realm, stmt, scope),
+            Expr::SuperProp(stmt) => Self::run_super_prop(realm, stmt, scope),
+            Expr::Cond(stmt) => Self::run_cond(realm, stmt, scope),
+            Expr::Call(stmt) => Ok(Self::run_call(realm, stmt, scope)?),
+            Expr::New(stmt) => Self::run_new(realm, stmt, scope),
+            Expr::Seq(stmt) => Self::run_seq(realm, stmt, scope),
+            Expr::Ident(stmt) => Self::run_ident(realm, stmt, scope),
+            Expr::Lit(stmt) => Self::run_lit(realm, stmt),
+            Expr::Tpl(stmt) => Self::run_tpl(realm, stmt, scope),
+            Expr::TaggedTpl(stmt) => Self::run_tagged_tpl(realm, stmt, scope),
+            Expr::Arrow(stmt) => Self::run_arrow(realm, stmt, scope),
+            Expr::Class(stmt) => Self::run_class(realm, stmt, scope),
+            Expr::Yield(stmt) => Self::run_yield(realm, stmt, scope),
+            Expr::MetaProp(stmt) => Self::run_meta_prop(realm, stmt, scope),
+            Expr::Await(stmt) => Self::run_await(realm, stmt, scope),
+            Expr::Paren(stmt) => Self::run_paren(realm, stmt, scope),
+            Expr::PrivateName(stmt) => Self::run_private_name(realm, stmt, scope),
+            Expr::OptChain(stmt) => Self::run_opt_chain(realm, stmt, scope),
             Expr::Invalid(stmt) => Err(ControlFlow::error(format!(
                 "{:?}: Invalid expression.",
                 stmt.span

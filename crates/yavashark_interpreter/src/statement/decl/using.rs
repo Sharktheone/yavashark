@@ -1,6 +1,6 @@
 use swc_ecma_ast::UsingDecl;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, Res};
+use yavashark_env::{Realm, Res};
 
 use crate::Interpreter;
 

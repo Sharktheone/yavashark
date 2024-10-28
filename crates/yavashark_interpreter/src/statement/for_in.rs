@@ -2,21 +2,21 @@ use crate::Interpreter;
 use swc_ecma_ast::{ForHead, ForInStmt};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{Context, ControlFlow, Error, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for_in(realm: &mut Realm, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
-        let obj = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
+        let obj = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
         match obj {
-            Value::Object(obj) => Self::run_for_in_obj(ctx, &***obj.get()?, stmt, scope),
+            Value::Object(obj) => Self::run_for_in_obj(realm, &***obj.get()?, stmt, scope),
             _ => Err(Error::ty_error(format!("{obj:?} is not an object")).into()),
         }
     }
 
     pub fn run_for_in_obj(
         realm: &mut Realm,
-        obj: &dyn Obj<Context>,
+        obj: &dyn Obj<Realm>,
         stmt: &ForInStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {
@@ -49,7 +49,7 @@ impl Interpreter {
         for key in obj.keys() {
             scope.declare_var(decl.clone(), key);
 
-            let result = Self::run_statement(ctx, &stmt.body, scope);
+            let result = Self::run_statement(realm, &stmt.body, scope);
             match result {
                 Ok(_) => {}
                 Err(ControlFlow::Return(v)) => return Ok(v),

@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use crate::context::Context;
 use crate::object::Object;
 use crate::{NativeFunction, Value};
+use crate::realm::Realm;
 
 #[macro_export]
 #[allow(clippy::crate_in_macro_def)]
@@ -90,7 +90,7 @@ pub struct State {
 
 #[must_use]
 pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
-    let obj = Object::new(ctx);
+    let obj = Object::new(realm);
 
     let state = Rc::new(RefCell::new(State {
         send_called: 0,
@@ -108,7 +108,7 @@ pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
 
                 Ok(Value::Undefined)
             },
-            ctx,
+            realm,
         )
         .into(),
     );
@@ -124,7 +124,7 @@ pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
 
                 Ok(Value::Undefined)
             },
-            ctx,
+            realm,
         )
         .into(),
     );

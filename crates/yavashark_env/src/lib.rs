@@ -1,10 +1,8 @@
 pub use console::*;
-pub use context::*;
 pub use function::*;
 pub use object::*;
 
 mod console;
-mod context;
 pub mod error;
 mod function;
 pub mod object;
@@ -17,14 +15,15 @@ pub mod tests;
 
 use crate::error::ErrorObj;
 pub use yavashark_value as value;
+pub use crate::realm::Realm;
 
-pub type Value = yavashark_value::Value<Context>;
-pub type Error = yavashark_value::Error<Context>;
-pub type ObjectHandle = yavashark_value::Object<Context>;
-pub type Variable = yavashark_value::variable::Variable<Context>;
-pub type Symbol = yavashark_value::Symbol<Context>;
+pub type Value = yavashark_value::Value<Realm>;
+pub type Error = yavashark_value::Error<Realm>;
+pub type ObjectHandle = yavashark_value::Object<Realm>;
+pub type Variable = yavashark_value::variable::Variable<Realm>;
+pub type Symbol = yavashark_value::Symbol<Realm>;
 
-pub type ObjectProperty = yavashark_value::ObjectProperty<Context>;
+pub type ObjectProperty = yavashark_value::ObjectProperty<Realm>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ControlFlow {

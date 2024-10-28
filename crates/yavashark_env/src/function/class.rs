@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use crate::{Context, Error, Object, ObjectProperty, Value, ValueResult};
+use crate::{Error, Object, ObjectProperty, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, CustomName, Func, Obj};
+use crate::realm::Realm;
 
 #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
@@ -11,7 +12,7 @@ pub struct Class {
     pub name: String,
 }
 
-impl Func<Context> for Class {
+impl Func<Realm> for Class {
     fn call(
         &mut self,
         _realm: &mut Realm,
@@ -24,7 +25,7 @@ impl Func<Context> for Class {
     }
 }
 
-impl Constructor<Context> for Class {
+impl Constructor<Realm> for Class {
     fn get_constructor(&self) -> ObjectProperty {
         if let Value::Object(o) = self.prototype.value.copy() {
             o.get_constructor()
@@ -41,7 +42,7 @@ impl Constructor<Context> for Class {
 impl Class {
     #[must_use]
     pub fn new(realm: &Realm, name: String) -> Self {
-        Self::new_with_proto(ctx.proto.func.clone().into(), name)
+        Self::new_with_proto(realm.intrinsics.func.clone().into(), name)
     }
 
     #[must_use]
@@ -78,9 +79,9 @@ impl Class {
             let deez = o.get()?;
             let constructor = deez.constructor();
             drop(deez);
-            let constructor = constructor.resolve(Value::Object(o), ctx)?;
+            let constructor = constructor.resolve(Value::Object(o), realm)?;
 
-            constructor.call(ctx, args, this)
+            constructor.call(realm, args, this)
         } else {
             Err(Error::ty("Class constructor called with invalid receiver"))
         }
@@ -105,7 +106,7 @@ impl ClassInstance {
     pub fn new(realm: &Realm, name: String) -> Self {
         Self {
             private_props: HashMap::new(),
-            object: Object::raw(ctx),
+            object: Object::raw(realm),
             name,
         }
     }

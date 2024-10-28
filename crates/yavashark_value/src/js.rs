@@ -42,7 +42,7 @@ impl Display for ConstString {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Value<C: Ctx> {
+pub enum Value<C: Realm> {
     Null,
     Undefined,
     Number(f64),
@@ -52,13 +52,13 @@ pub enum Value<C: Ctx> {
     Symbol(ConstString),
 }
 
-impl<C: Ctx> Clone for Value<C> {
+impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
         self.copy()
     }
 }
 
-impl<C: Ctx> Eq for Value<C> {}
+impl<C: Realm> Eq for Value<C> {}
 
 #[derive(Debug, Hash)]
 pub enum Type {
@@ -72,7 +72,7 @@ pub enum Type {
     Symbol,
 }
 
-impl<C: Ctx> Hash for Value<C> {
+impl<C: Realm> Hash for Value<C> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         //Hash the type and the value to minimize collisions
         match self {
@@ -87,7 +87,7 @@ impl<C: Ctx> Hash for Value<C> {
     }
 }
 
-impl<C: Ctx> Value<C> {
+impl<C: Realm> Value<C> {
     #[must_use]
     pub fn copy(&self) -> Self {
         match self {
@@ -167,7 +167,7 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn prototype(&self, ctx: &mut C) -> Result<Self, Error<C>> {
+    pub fn prototype(&self, realm: &mut C) -> Result<Self, Error<C>> {
         let obj = self.as_object()?;
 
         let obj = obj.get()?;
@@ -176,7 +176,7 @@ impl<C: Ctx> Value<C> {
 
         drop(obj);
 
-        proto.resolve(self.copy(), ctx)
+        proto.resolve(self.copy(), realm)
     }
 
     pub fn as_object(&self) -> Result<&Object<C>, Error<C>> {
@@ -189,7 +189,7 @@ impl<C: Ctx> Value<C> {
 }
 
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
-impl<C: Ctx> Display for Value<C> {
+impl<C: Realm> Display for Value<C> {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
@@ -204,7 +204,7 @@ impl<C: Ctx> Display for Value<C> {
     }
 }
 
-impl<C: Ctx> CustomGcRefUntyped for Value<C> {
+impl<C: Realm> CustomGcRefUntyped for Value<C> {
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         match self {
             Self::Object(o) => Some(o.gc_get_untyped_ref()),
@@ -213,33 +213,33 @@ impl<C: Ctx> CustomGcRefUntyped for Value<C> {
     }
 }
 
-impl<C: Ctx> Value<C> {
+impl<C: Realm> Value<C> {
     #[allow(clippy::iter_not_returning_iterator)]
-    pub fn iter<'a>(&self, ctx: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
+    pub fn iter<'a>(&self, realm: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
         let iter = self
-            .get_property(&Symbol::ITERATOR, ctx)
+            .get_property(&Symbol::ITERATOR, realm)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
-        let iter = iter.call(ctx, Vec::new(), self.copy())?;
+        let iter = iter.call(realm, Vec::new(), self.copy())?;
 
         Ok(CtxIter {
             next_obj: iter,
-            ctx,
+            realm,
         })
     }
 
-    pub fn iter_no_ctx(&self, ctx: &mut C) -> Result<Iter<C>, Error<C>> {
+    pub fn iter_no_realm(&self, realm: &mut C) -> Result<Iter<C>, Error<C>> {
         let iter = self
-            .get_property(&Symbol::ITERATOR, ctx)
+            .get_property(&Symbol::ITERATOR, realm)
             .map_err(|_| Error::ty("Result of the Symbol.iterator method is not an object"))?;
-        let iter = iter.call(ctx, Vec::new(), self.copy())?;
+        let iter = iter.call(realm, Vec::new(), self.copy())?;
 
         Ok(Iter { next_obj: iter })
     }
 
-    pub fn get_property(&self, name: &Self, ctx: &mut C) -> Result<Self, Error<C>> {
+    pub fn get_property(&self, name: &Self, realm: &mut C) -> Result<Self, Error<C>> {
         match self {
             Self::Object(o) => {
-                o.resolve_property(name, ctx)?
+                o.resolve_property(name, realm)?
                     .ok_or(Error::reference_error(format!(
                         "{name} does not exist on object"
                     )))
@@ -273,17 +273,17 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn call(&self, ctx: &mut C, args: Vec<Self>, this: Self) -> Result<Self, Error<C>> {
+    pub fn call(&self, realm: &mut C, args: Vec<Self>, this: Self) -> Result<Self, Error<C>> {
         match self {
-            Self::Object(o) => o.call(ctx, args, this),
+            Self::Object(o) => o.call(realm, args, this),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
 
-    pub fn call_method(&self, name: &Self, ctx: &mut C, args: Vec<Self>) -> Result<Self, Error<C>> {
-        let method = self.get_property(name, ctx)?;
+    pub fn call_method(&self, name: &Self, realm: &mut C, args: Vec<Self>) -> Result<Self, Error<C>> {
+        let method = self.get_property(name, realm)?;
 
-        method.call(ctx, args, self.copy())
+        method.call(realm, args, self.copy())
     }
 
     #[allow(clippy::type_complexity)]
@@ -317,9 +317,9 @@ impl<C: Ctx> Value<C> {
         Ok(())
     }
 
-    pub fn to_string(&self, ctx: &mut C) -> Result<String, Error<C>> {
+    pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {
         Ok(match self {
-            Self::Object(o) => o.to_string(ctx)?,
+            Self::Object(o) => o.to_string(realm)?,
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => n.to_string(),
@@ -331,28 +331,28 @@ impl<C: Ctx> Value<C> {
 }
 
 #[derive(Debug)]
-pub struct Iter<C: Ctx> {
+pub struct Iter<C: Realm> {
     next_obj: Value<C>,
 }
 
-pub struct CtxIter<'a, C: Ctx> {
+pub struct CtxIter<'a, C: Realm> {
     next_obj: Value<C>,
-    ctx: &'a mut C,
+    realm: &'a mut C,
 }
 
-impl<C: Ctx> Iterator for CtxIter<'_, C> {
+impl<C: Realm> Iterator for CtxIter<'_, C> {
     type Item = Result<Value<C>, Error<C>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let next = self
             .next_obj
-            .call_method(&"next".into(), self.ctx, Vec::new());
+            .call_method(&"next".into(), self.realm, Vec::new());
         let next = match next {
             Ok(next) => next,
             Err(e) => return Some(Err(e)),
         };
 
-        let done = next.get_property(&Value::string("done"), self.ctx);
+        let done = next.get_property(&Value::string("done"), self.realm);
 
         let done = match done {
             Ok(done) => done.is_truthy(),
@@ -363,19 +363,19 @@ impl<C: Ctx> Iterator for CtxIter<'_, C> {
             return None;
         }
 
-        Some(next.get_property(&Value::string("value"), self.ctx))
+        Some(next.get_property(&Value::string("value"), self.realm))
     }
 }
 
-impl<C: Ctx> Iter<C> {
-    pub fn next(&self, ctx: &mut C) -> Result<Option<Value<C>>, Error<C>> {
-        let next = self.next_obj.call_method(&"next".into(), ctx, Vec::new())?;
-        let done = next.get_property(&Value::string("done"), ctx)?;
+impl<C: Realm> Iter<C> {
+    pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+        let next = self.next_obj.call_method(&"next".into(), realm, Vec::new())?;
+        let done = next.get_property(&Value::string("done"), realm)?;
 
         if done.is_truthy() {
             return Ok(None);
         }
-        next.get_property(&Value::string("value"), ctx).map(Some)
+        next.get_property(&Value::string("value"), realm).map(Some)
     }
 }
 

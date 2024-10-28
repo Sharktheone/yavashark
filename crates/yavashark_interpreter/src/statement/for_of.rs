@@ -1,11 +1,11 @@
 use crate::Interpreter;
 use swc_ecma_ast::{ForHead, ForOfStmt};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for_of(realm: &mut Realm, stmt: &ForOfStmt, scope: &mut Scope) -> RuntimeResult {
-        let obj = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
+        let obj = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
         let scope = &mut Scope::with_parent(scope)?;
         let label = scope.last_label()?;
@@ -33,12 +33,12 @@ impl Interpreter {
             .sym
             .to_string();
 
-        let iter = obj.iter_no_ctx(ctx)?;
+        let iter = obj.iter_no_realm(realm)?;
 
-        while let Some(key) = iter.next(ctx)? {
+        while let Some(key) = iter.next(realm)? {
             scope.declare_var(decl.clone(), key);
 
-            let result = Self::run_statement(ctx, &stmt.body, scope);
+            let result = Self::run_statement(realm, &stmt.body, scope);
             match result {
                 Ok(_) => {}
                 Err(ControlFlow::Return(v)) => return Ok(v),

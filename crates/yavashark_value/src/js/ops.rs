@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 
-use crate::{Ctx, Error};
+use crate::{Realm, Error};
 
 use super::Value;
 
@@ -21,7 +21,7 @@ impl ToNumber for bool {
     }
 }
 
-impl<C: Ctx> Value<C> {
+impl<C: Realm> Value<C> {
     #[must_use]
     pub fn to_number_or_null(&self) -> f64 {
         match self {
@@ -32,7 +32,7 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn to_number(&self, ctx: &mut C) -> Result<f64, Error<C>> {
+    pub fn to_number(&self, realm: &mut C) -> Result<f64, Error<C>> {
         Ok(match self {
             Self::Number(n) => *n,
             Self::Boolean(b) => b.num(),
@@ -45,7 +45,7 @@ impl<C: Ctx> Value<C> {
             }
             Self::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
             Self::Object(o) => {
-                let v = o.to_string(ctx)?;
+                let v = o.to_string(realm)?;
 
                 if v.is_empty() {
                     0.0
@@ -69,7 +69,7 @@ impl<C: Ctx> Value<C> {
     }
 }
 
-impl<C: Ctx> Add for Value<C> {
+impl<C: Realm> Add for Value<C> {
     // type Output = Result<Value<C>, Error<C>>;
 
     type Output = Self;
@@ -121,7 +121,7 @@ impl<C: Ctx> Add for Value<C> {
     }
 }
 
-impl<C: Ctx> Sub for Value<C> {
+impl<C: Realm> Sub for Value<C> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -177,7 +177,7 @@ impl<C: Ctx> Sub for Value<C> {
     }
 }
 
-impl<C: Ctx> Mul for Value<C> {
+impl<C: Realm> Mul for Value<C> {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -217,7 +217,7 @@ impl<C: Ctx> Mul for Value<C> {
     }
 }
 
-impl<C: Ctx> Div for Value<C> {
+impl<C: Realm> Div for Value<C> {
     type Output = Self;
 
     //TODO: handle div by zero => return Infinity
@@ -276,7 +276,7 @@ impl<C: Ctx> Div for Value<C> {
     }
 }
 
-impl<C: Ctx> Rem for Value<C> {
+impl<C: Realm> Rem for Value<C> {
     type Output = Self;
 
     fn rem(self, rhs: Self) -> Self::Output {
@@ -321,7 +321,7 @@ impl<C: Ctx> Rem for Value<C> {
     }
 }
 
-impl<C: Ctx> PartialOrd for Value<C> {
+impl<C: Realm> PartialOrd for Value<C> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
             (Self::Null, Self::Null) => Some(Ordering::Equal),
@@ -386,7 +386,7 @@ impl<C: Ctx> PartialOrd for Value<C> {
     }
 }
 
-impl<C: Ctx> Shl for Value<C> {
+impl<C: Realm> Shl for Value<C> {
     type Output = Self;
 
     fn shl(self, rhs: Self) -> Self::Output {
@@ -484,7 +484,7 @@ impl<C: Ctx> Shl for Value<C> {
     }
 }
 
-impl<C: Ctx> Shr for Value<C> {
+impl<C: Realm> Shr for Value<C> {
     type Output = Self;
 
     fn shr(self, rhs: Self) -> Self::Output {
@@ -582,7 +582,7 @@ impl<C: Ctx> Shr for Value<C> {
     }
 }
 
-impl<C: Ctx> BitOr for Value<C> {
+impl<C: Realm> BitOr for Value<C> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
@@ -590,7 +590,7 @@ impl<C: Ctx> BitOr for Value<C> {
     }
 }
 
-impl<C: Ctx> BitAnd for Value<C> {
+impl<C: Realm> BitAnd for Value<C> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
@@ -598,7 +598,7 @@ impl<C: Ctx> BitAnd for Value<C> {
     }
 }
 
-impl<C: Ctx> BitXor for Value<C> {
+impl<C: Realm> BitXor for Value<C> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
@@ -606,7 +606,7 @@ impl<C: Ctx> BitXor for Value<C> {
     }
 }
 
-impl<C: Ctx> Value<C> {
+impl<C: Realm> Value<C> {
     #[must_use]
     pub fn log_or(&self, rhs: Self) -> Self {
         if self.is_truthy() {
@@ -625,8 +625,8 @@ impl<C: Ctx> Value<C> {
         }
     }
 
-    pub fn pow(&self, rhs: &Self, ctx: &mut C) -> Result<Self, Error<C>> {
-        Ok(Self::Number(self.to_number(ctx)?.powf(rhs.to_number(ctx)?)))
+    pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
+        Ok(Self::Number(self.to_number(realm)?.powf(rhs.to_number(realm)?)))
     }
 
     #[must_use]
@@ -674,7 +674,7 @@ impl<C: Ctx> Value<C> {
         ))
     }
 
-    pub fn instance_of(&self, rhs: &Self, ctx: &mut C) -> Result<bool, Error<C>> {
+    pub fn instance_of(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
         let Self::Object(obj) = self else {
             return Ok(false);
         };
@@ -685,7 +685,7 @@ impl<C: Ctx> Value<C> {
             ));
         };
 
-        let Self::Object(constructor) = constructor.get_constructor_value(ctx).ok_or(Error::ty(
+        let Self::Object(constructor) = constructor.get_constructor_value(realm).ok_or(Error::ty(
             "Right-hand side of 'instanceof' is not a constructor",
         ))?
         else {
@@ -714,13 +714,13 @@ impl<C: Ctx> Value<C> {
     }
 }
 
-impl<C: Ctx> AddAssign for Value<C> {
+impl<C: Realm> AddAssign for Value<C> {
     fn add_assign(&mut self, rhs: Self) {
         *self = self.copy() + rhs; //TODO: don't copy the value
     }
 }
 
-impl<C: Ctx> SubAssign for Value<C> {
+impl<C: Realm> SubAssign for Value<C> {
     fn sub_assign(&mut self, rhs: Self) {
         *self = self.copy() - rhs; //TODO: don't copy the value
     }
@@ -739,7 +739,7 @@ mod tests {
     #[derive(Debug, PartialEq)]
     struct Object;
 
-    impl Ctx for () {}
+    impl Realm for () {}
 
     impl Obj<()> for Object {
         fn define_property(&mut self, _name: Value, _value: Value) {}
@@ -786,7 +786,7 @@ mod tests {
             "Object".to_string()
         }
 
-        fn to_string(&self, _ctx: &mut ()) -> Result<String, Error> {
+        fn to_string(&self, _realm: &mut ()) -> Result<String, Error> {
             Ok(format!("[object {}]", self.name()))
         }
 

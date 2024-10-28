@@ -1,6 +1,7 @@
 use crate::data::DataSection;
 use crate::{FunctionBlueprint, Instruction};
-use yavashark_env::{Context, Object, ObjectHandle};
+use yavashark_env::{Object, ObjectHandle};
+use yavashark_env::realm::Realm;
 use yavashark_macro::object;
 
 #[derive(Debug)]
@@ -15,7 +16,7 @@ pub struct BytecodeFunction {
 impl BytecodeFunction {
     #[must_use]
     pub fn from_blueprint(b: FunctionBlueprint, realm: &Realm) -> ObjectHandle {
-        let object = Object::raw(ctx);
+        let object = Object::raw(realm);
 
         let this = Self {
             object,

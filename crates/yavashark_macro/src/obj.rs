@@ -33,10 +33,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         input.span(),
     )));
 
-    let mut context = crate_path.clone();
-    context
+    let mut realm = crate_path.clone();
+    realm
         .segments
-        .push(PathSegment::from(Ident::new("Context", input.span())));
+        .push(PathSegment::from(Ident::new("Realm", input.span())));
 
     let mut value = crate_path.clone();
     value
@@ -101,7 +101,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
 
         if meta.path.is_ident("context") {
-            context = meta.path;
+            realm = meta.path;
             return Ok(());
         }
 
@@ -235,8 +235,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let function = if function {
         quote! {
-            fn call(&mut self, ctx: &mut #context, args: Vec< #value>, this: #value) -> #value_result {
-                yavashark_value::Func::call(self, ctx, args, this)
+            fn call(&mut self, realm: &mut #realm, args: Vec< #value>, this: #value) -> #value_result {
+                yavashark_value::Func::call(self, realm, args, this)
             }
 
             fn is_function(&self) -> bool {
@@ -276,7 +276,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .collect::<TokenStream>();
 
         quote! {
-            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<std::cell::RefCell<yavashark_value::BoxedObj<#context>>>> {
+            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<std::cell::RefCell<yavashark_value::BoxedObj<#realm >>>> {
                 use yavashark_value::{CustomGcRef, CustomGcRefUntyped};
                 let mut refs = Vec::with_capacity(#len);
 
@@ -293,16 +293,16 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 yavashark_value::Constructor::get_constructor(self)
             }
 
-            fn get_constructor_proto(&self, ctx: &mut #context) -> Option<#value> {
-                Some(yavashark_value::Constructor::proto(self, ctx))
+            fn get_constructor_proto(&self, realm: &mut #realm) -> Option<#value> {
+                Some(yavashark_value::Constructor::proto(self, realm))
             }
 
             fn special_constructor(&self) -> bool {
                 yavashark_value::Constructor::special_constructor(self)
             }
 
-            fn get_constructor_value(&self, ctx: &mut #context) -> Option<#value> {
-                Some(yavashark_value::Constructor::value(self, ctx))
+            fn get_constructor_value(&self, realm: &mut #realm) -> Option<#value> {
+                Some(yavashark_value::Constructor::value(self, realm))
             }
         }
     } else {
@@ -315,8 +315,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let to_string = if to_string {
         quote! {
-            fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
-                self.override_to_string(ctx)
+            fn to_string(&self, realm: &mut #realm) -> Result<String, #error> {
+                self.override_to_string(realm)
             }
 
             fn to_string_internal(&self) -> String {
@@ -325,7 +325,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     } else {
         quote! {
-            fn to_string(&self, ctx: &mut #context) -> Result<String, #error> {
+            fn to_string(&self, realm: &mut #realm) -> Result<String, #error> {
                 Ok(format!("[object {}]", self.name()))
             }
 
@@ -353,7 +353,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let expanded = quote! {
         #input
 
-        impl yavashark_value::Obj<#context> for #struct_name {
+        impl yavashark_value::Obj<#realm> for #struct_name {
             fn define_property(&mut self, name: #value, value: #value) {
                 #properties_define
                 self.object.define_property(name, value);

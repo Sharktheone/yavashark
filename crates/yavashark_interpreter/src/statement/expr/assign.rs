@@ -3,21 +3,21 @@ use swc_ecma_ast::{
 };
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, Error, Res, RuntimeResult, Value};
+use yavashark_env::{Realm, Error, Res, RuntimeResult, Value};
 
 use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_assign(realm: &mut Realm, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
-        let value = Self::run_expr(ctx, &stmt.right, stmt.span, scope)?;
+        let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
         if stmt.op == AssignOp::Assign {
             return Ok(
-                Self::assign_target(ctx, &stmt.left, value, scope).map(|()| Value::Undefined)?
+                Self::assign_target(realm, &stmt.left, value, scope).map(|()| Value::Undefined)?
             );
         }
 
-        Self::assign_target_op(ctx, stmt.op, &stmt.left, value, scope)
+        Self::assign_target_op(realm, stmt.op, &stmt.left, value, scope)
     }
 
     pub fn assign_target(
@@ -32,7 +32,7 @@ impl Interpreter {
                     let name = i.sym.to_string();
                     scope.update_or_define(name, value)
                 }
-                SimpleAssignTarget::Member(m) => Self::assign_member(ctx, m, value, scope),
+                SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -47,12 +47,12 @@ impl Interpreter {
         value: Value,
         scope: &mut Scope,
     ) -> Res {
-        let obj = Self::run_expr(ctx, &m.obj, m.span, scope)?;
+        let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
-                MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
+                MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
             obj.define_property(name, value);
@@ -78,13 +78,13 @@ impl Interpreter {
                         .resolve(&name)?
                         .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
 
-                    let value = Self::run_assign_op(op, left, right, ctx)?;
+                    let value = Self::run_assign_op(op, left, right, realm)?;
 
                     scope.update(&name, value.copy())?;
 
                     Ok(value)
                 }
-                SimpleAssignTarget::Member(m) => Self::assign_member_op(ctx, op, m, left, scope),
+                SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, left, scope),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -100,19 +100,19 @@ impl Interpreter {
         left: Value,
         scope: &mut Scope,
     ) -> RuntimeResult {
-        let obj = Self::run_expr(ctx, &m.obj, m.span, scope)?;
+        let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
         if let Value::Object(obj) = obj {
             let name = match &m.prop {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
-                MemberProp::Computed(c) => Self::run_expr(ctx, &c.expr, c.span, scope)?,
+                MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
             let right = obj
-                .resolve_property(&name, ctx)?
+                .resolve_property(&name, realm)?
                 .unwrap_or(Value::Undefined);
 
-            let value = Self::run_assign_op(op, left, right, ctx)?;
+            let value = Self::run_assign_op(op, left, right, realm)?;
 
             obj.define_property(name, value.copy());
             Ok(value)
@@ -140,7 +140,7 @@ impl Interpreter {
             AssignOp::BitOrAssign => left | right,
             AssignOp::BitXorAssign => left ^ right,
             AssignOp::BitAndAssign => left & right,
-            AssignOp::ExpAssign => left.pow(&right, ctx)?,
+            AssignOp::ExpAssign => left.pow(&right, realm)?,
             AssignOp::AndAssign => left.log_and(right),
             AssignOp::OrAssign => left.log_or(right),
             AssignOp::NullishAssign => {

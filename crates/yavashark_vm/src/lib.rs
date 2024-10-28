@@ -11,7 +11,7 @@ pub use stack::*;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, Error, Res, Value};
+use yavashark_env::{Realm, Error, Res, Value};
 
 pub use yavashark_bytecode;
 
@@ -27,12 +27,12 @@ pub struct VM {
 
     acc: Value,
 
-    ctx: Context,
+    realm: Realm,
 }
 
 impl VM {
     pub fn new(code: Vec<Instruction>, data: DataSection) -> anyhow::Result<Self> {
-        let ctx = Context::new()?;
+        let realm = Realm::new()?;
 
         Ok(Self {
             regs: Registers::new(),
@@ -40,28 +40,28 @@ impl VM {
             pc: 0,
             code,
             data,
-            current_scope: Scope::new(&ctx),
+            current_scope: Scope::new(&realm),
             acc: Value::Undefined,
-            ctx,
+            realm,
         })
     }
 
     #[must_use]
-    pub fn with_context(code: Vec<Instruction>, data: DataSection, ctx: Context) -> Self {
+    pub fn with_realm(code: Vec<Instruction>, data: DataSection, realm: Realm) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
             pc: 0,
             code,
             data,
-            current_scope: Scope::new(&ctx),
+            current_scope: Scope::new(&realm),
             acc: Value::Undefined,
-            ctx,
+            realm,
         }
     }
 
-    pub fn get_context(&mut self) -> &mut Context {
-        &mut self.ctx
+    pub fn get_realm(&mut self) -> &mut Realm {
+        &mut self.realm
     }
 
     pub fn push_scope(&mut self) -> Res {
@@ -107,7 +107,7 @@ mod test {
 
     #[test]
     fn test_vm() {
-        let ctx = Context::new().unwrap();
+        let realm = Realm::new().unwrap();
 
         let mut vm = VM {
             regs: Registers::new(),
@@ -149,9 +149,9 @@ mod test {
                     ConstValue::String("False".into()),
                 ],
             },
-            current_scope: Scope::new(&ctx),
+            current_scope: Scope::new(&realm),
             acc: Value::Undefined,
-            ctx,
+            realm,
         };
 
         vm.run().unwrap();

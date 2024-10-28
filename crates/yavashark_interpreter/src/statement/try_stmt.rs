@@ -2,14 +2,14 @@ use crate::Interpreter;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, RuntimeResult, Value};
+use yavashark_env::{Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_try(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
-        let res = catch(ctx, stmt, scope);
+        let res = catch(realm, stmt, scope);
 
         if let Some(finalizer) = &stmt.finalizer {
-            let _ = Self::run_block(ctx, finalizer, scope)?;
+            let _ = Self::run_block(realm, finalizer, scope)?;
         }
 
         res
@@ -17,19 +17,19 @@ impl Interpreter {
 }
 
 fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
-    let try_block = Interpreter::run_block(ctx, &stmt.block, scope);
+    let try_block = Interpreter::run_block(realm, &stmt.block, scope);
 
     if let Err(e) = try_block {
         let err = e.get_error()?;
         if let Some(catch) = &stmt.handler {
             let scope = &mut Scope::with_parent(scope)?;
             if let Some(param) = &catch.param {
-                let err = ErrorObj::new(err, ctx).into();
+                let err = ErrorObj::new(err, realm).into();
 
-                Interpreter::run_pat(ctx, param, scope, err);
+                Interpreter::run_pat(realm, param, scope, err);
             }
 
-            Interpreter::run_block(ctx, &catch.body, scope)
+            Interpreter::run_block(realm, &catch.body, scope)
         } else {
             Err(err.into())
         }

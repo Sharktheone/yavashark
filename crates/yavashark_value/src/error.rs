@@ -1,13 +1,13 @@
-use crate::{Ctx, Value};
+use crate::{Realm, Value};
 use std::fmt::Display;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Error<C: Ctx> {
+pub struct Error<C: Realm> {
     pub kind: ErrorKind<C>,
     pub stacktrace: StackTrace,
 }
 
-impl<C: Ctx> Error<C> {
+impl<C: Realm> Error<C> {
     #[must_use]
     pub fn new(error: &str) -> Self {
         Self {
@@ -110,7 +110,7 @@ impl<C: Ctx> Error<C> {
         }
     }
 
-    pub fn message(&self, ctx: &mut C) -> Result<String, Self> {
+    pub fn message(&self, realm: &mut C) -> Result<String, Self> {
         Ok(match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -118,7 +118,7 @@ impl<C: Ctx> Error<C> {
             | ErrorKind::Internal(msg)
             | ErrorKind::Runtime(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
-            ErrorKind::Throw(val) => val.to_string(ctx)?,
+            ErrorKind::Throw(val) => val.to_string(realm)?,
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         })
     }
@@ -161,7 +161,7 @@ impl<C: Ctx> Error<C> {
     }
 }
 
-impl<C: Ctx> Display for Error<C> {
+impl<C: Realm> Display for Error<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let msg = self.message_internal();
 
@@ -174,7 +174,7 @@ impl<C: Ctx> Display for Error<C> {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum ErrorKind<C: Ctx> {
+pub enum ErrorKind<C: Realm> {
     Type(String),
     Reference(String),
     Range(String),
@@ -228,7 +228,7 @@ mod anyhow_impl {
     impl std::error::Error for SyncError {}
 }
 
-impl<T: std::error::Error, C: Ctx> From<T> for Error<C> {
+impl<T: std::error::Error, C: Realm> From<T> for Error<C> {
     fn from(value: T) -> Self {
         Self::new_error(value.to_string())
     }

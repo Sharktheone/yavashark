@@ -2,7 +2,7 @@ use crate::function::JSFunction;
 use crate::Interpreter;
 use swc_ecma_ast::FnExpr;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::{Realm, RuntimeResult};
 
 impl Interpreter {
     pub fn run_fn(realm: &mut Realm, stmt: &FnExpr, scope: &mut Scope) -> RuntimeResult {
@@ -20,7 +20,7 @@ impl Interpreter {
             stmt.function.params.clone(),
             stmt.function.body.clone(),
             fn_scope,
-            ctx,
+            realm,
         );
 
         Ok(function.into())

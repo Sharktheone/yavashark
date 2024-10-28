@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::{OptChainBase, OptChainExpr};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{Realm, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_opt_chain(
@@ -21,7 +21,7 @@ impl Interpreter {
 
         let scope = scope_new.as_mut().unwrap_or(scope);
 
-        let res = run(stmt, scope, ctx);
+        let res = run(stmt, scope, realm);
 
         if res == Err(ControlFlow::OptChainShortCircuit) && is_first_optional {
             Ok(Value::Undefined)
@@ -34,16 +34,16 @@ impl Interpreter {
 fn run(stmt: &OptChainExpr, scope: &mut Scope, realm: &mut Realm) -> RuntimeResult {
     match &*stmt.base {
         OptChainBase::Member(member) => {
-            let value = Interpreter::run_expr(ctx, &member.obj, member.span, scope)?;
+            let value = Interpreter::run_expr(realm, &member.obj, member.span, scope)?;
 
             if (value == Value::Undefined || value == Value::Null) && stmt.optional {
                 return Err(ControlFlow::OptChainShortCircuit);
             }
 
-            Interpreter::run_member_on(ctx, value, &member.prop, member.span, scope)
+            Interpreter::run_member_on(realm, value, &member.prop, member.span, scope)
         }
         OptChainBase::Call(call) => {
-            let (callee, this) = Interpreter::run_call_expr(ctx, &call.callee, call.span, scope)?;
+            let (callee, this) = Interpreter::run_call_expr(realm, &call.callee, call.span, scope)?;
 
             println!("{:?} is {}", callee, stmt.optional);
 
@@ -54,7 +54,7 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, realm: &mut Realm) -> RuntimeResu
             let this = this.unwrap_or(scope.this()?);
 
             Ok(Interpreter::run_call_on(
-                ctx, &callee, this, &call.args, call.span, scope,
+                realm, &callee, this, &call.args, call.span, scope,
             )?)
         }
     }

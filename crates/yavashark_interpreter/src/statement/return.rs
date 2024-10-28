@@ -1,7 +1,7 @@
 use swc_ecma_ast::ReturnStmt;
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 use crate::Interpreter;
 
@@ -12,7 +12,7 @@ impl Interpreter {
         }
 
         let value = if let Some(arg) = &stmt.arg {
-            Self::run_expr(ctx, arg, stmt.span, scope)?
+            Self::run_expr(realm, arg, stmt.span, scope)?
         } else {
             Value::Undefined
         };

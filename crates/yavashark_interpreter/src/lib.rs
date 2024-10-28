@@ -6,7 +6,7 @@ use std::rc::Rc;
 use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
-use yavashark_env::{scope, Context, ControlFlow, Value, ValueResult};
+use yavashark_env::{scope, ControlFlow, Realm, Value, ValueResult};
 
 mod class;
 mod function;
@@ -19,7 +19,7 @@ pub struct Interpreter;
 
 impl Interpreter {
     pub fn run(script: &Vec<Stmt>) -> anyhow::Result<Value> {
-        let mut context = &mut Context::new()?;
+        let mut context = &mut Realm::new()?;
         let mut scope = scope::Scope::global(context);
 
         Self::run_statements(context, script, &mut scope)
@@ -34,7 +34,7 @@ impl Interpreter {
     #[cfg(test)]
     #[allow(clippy::missing_panics_doc)]
     pub fn run_test(script: &Vec<Stmt>) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
-        let mut context = &mut Context::new().unwrap();
+        let mut context = &mut Realm::new().unwrap();
         let mut scope = scope::Scope::global(context);
 
         let (mock, state) = yavashark_env::tests::mock_object(context);

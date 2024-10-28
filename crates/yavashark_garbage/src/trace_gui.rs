@@ -78,7 +78,7 @@ impl App {
 
 impl eframe::App for App {
     fn update(&mut self, realm: &Realm, _frame: &mut Frame) {
-        CentralPanel::default().show(ctx, |ui| {
+        CentralPanel::default().show(realm, |ui| {
             ui.heading("Garbage Collector Trace");
 
             let img = egui::Image::from_bytes("bytes://graph.svg", self.layout())
@@ -99,12 +99,12 @@ impl eframe::App for App {
             let transform =
                 TSTransform::from_translation(ui.min_rect().left_top().to_vec2()) * self.transform;
 
-            if let Some(pointer) = ui.ctx().input(|i| i.pointer.hover_pos()) {
+            if let Some(pointer) = ui.realm().input(|i| i.pointer.hover_pos()) {
                 // Note: doesn't catch zooming / panning if a button in this PanZoom container is hovered.
                 if response.hovered() {
                     let pointer_in_layer = transform.inverse() * pointer;
-                    let zoom_delta = ui.ctx().input(egui::InputState::zoom_delta);
-                    let pan_delta = ui.ctx().input(|i| i.smooth_scroll_delta);
+                    let zoom_delta = ui.realm().input(egui::InputState::zoom_delta);
+                    let pan_delta = ui.realm().input(|i| i.smooth_scroll_delta);
 
                     // Zoom in on pointer:
                     self.transform = self.transform
@@ -118,14 +118,14 @@ impl eframe::App for App {
             }
 
             let id = Area::new(Id::new("graph"))
-                .show(ctx, |ui| {
+                .show(realm, |ui| {
                     ui.set_clip_rect(self.transform.inverse() * rect);
                     ui.add(img);
                 })
                 .response
                 .layer_id;
 
-            ui.ctx().set_transform_layer(id, transform);
+            ui.realm().set_transform_layer(id, transform);
         });
     }
 }

@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::DoWhileStmt;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{Realm, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_do_while(realm: &mut Realm, stmt: &DoWhileStmt, scope: &mut Scope) -> RuntimeResult {
@@ -13,7 +13,7 @@ impl Interpreter {
             let scope = &mut Scope::with_parent(scope)?;
             scope.state_set_loop();
 
-            result = match Self::run_statement(ctx, &stmt.body, scope) {
+            result = match Self::run_statement(realm, &stmt.body, scope) {
                 Ok(v) => v,
                 Err(c) => match c {
                     ControlFlow::Break(l) if last_loop.as_ref() == l.as_ref() => {
@@ -27,7 +27,7 @@ impl Interpreter {
                 Err(e) => return Err(e),
             };
 
-            let condition = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
+            let condition = Self::run_expr(realm, &stmt.test, stmt.span, scope)?;
 
             if condition.is_falsey() {
                 break;

@@ -1,15 +1,15 @@
 use std::fmt::Debug;
 
 use crate::Value;
-use crate::{Ctx, Error};
+use crate::{Realm, Error};
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct Variable<C: Ctx> {
+pub struct Variable<C: Realm> {
     pub value: Value<C>,
     pub properties: Attributes,
 }
 
-impl<C: Ctx> Variable<C> {
+impl<C: Realm> Variable<C> {
     #[must_use]
     pub const fn new(value: Value<C>) -> Self {
         Self {
@@ -174,7 +174,7 @@ impl Default for Attributes {
     }
 }
 
-impl<C: Ctx, V: Into<Value<C>>> From<V> for Variable<C> {
+impl<C: Realm, V: Into<Value<C>>> From<V> for Variable<C> {
     fn from(value: V) -> Self {
         Self::new(value.into())
     }

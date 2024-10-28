@@ -2,9 +2,7 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::scope::Scope;
-use yavashark_env::{
-    Context, ControlFlow, NativeFunction, Object, ObjectHandle, Value, ValueResult,
-};
+use yavashark_env::{ControlFlow, NativeFunction, Object, ObjectHandle, Realm, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::Error;
 
@@ -20,30 +18,30 @@ pub fn print(realm: &mut Realm) -> ObjectHandle {
 
             Ok(Value::Undefined)
         },
-        ctx,
+        realm,
     )
 }
 
 #[object(direct(abstract_module_source(AbstractModuleSource)))]
 #[derive(Debug)]
 struct Test262 {
-    ctx: Option<Context>,
+    realm: Option<Realm>,
 }
 
 impl Test262 {
     fn new(realm: &Realm) -> Self {
         Self {
-            object: Object::raw(ctx),
+            object: Object::raw(realm),
             abstract_module_source: Value::Undefined.into(),
-            ctx: None,
+            realm: None,
         }
     }
 
-    fn with_realm(realm: &Realm, new_ctx: Context) -> Self {
+    fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
         Self {
-            object: Object::raw(ctx),
+            object: Object::raw(realm),
             abstract_module_source: Value::Undefined.into(),
-            ctx: Some(new_ctx),
+            realm: Some(new_realm),
         }
     }
 }
@@ -53,8 +51,8 @@ impl Test262 {
 impl Test262 {
     #[prop(createRealm)]
     fn create_realm(&self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
-        let new_ctx = Context::new().map_err(|e| Error::new_error(e.to_string()))?;
-        let this: Value = ObjectHandle::new(Self::with_realm(ctx, new_ctx)).into();
+        let new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
+        let this: Value = ObjectHandle::new(Self::with_realm(realm, new_realm)).into();
 
         Ok(this)
     }
@@ -86,13 +84,13 @@ impl Test262 {
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
 
-        let ctx = self.ctx.as_mut().unwrap_or(ctx);
+        let realm = self.realm.as_mut().unwrap_or(realm);
 
-        let mut scope = Scope::global(ctx);
+        let mut scope = Scope::global(realm);
 
         // scope.declare_var("$test262".to_owned(), test262) TODO: we need the realm for that :/
 
-        yavashark_interpreter::Interpreter::run_statements(ctx, &script.body, &mut scope).or_else(
+        yavashark_interpreter::Interpreter::run_statements(realm, &script.body, &mut scope).or_else(
             |e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),

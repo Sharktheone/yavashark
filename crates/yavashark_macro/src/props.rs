@@ -11,7 +11,7 @@ struct Item {
     attributes: Option<Attributes>,
     rename: Option<Path>,
     is_mut: bool,
-    has_ctx: bool,
+    has_realm: bool,
     has_this: bool,
     get: Option<Ident>,
     set: Option<Ident>,
@@ -26,10 +26,10 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let crate_path = Path::from(Ident::new("crate", item.span()));
 
-    let mut context = crate_path.clone();
-    context
+    let mut realm = crate_path.clone();
+    realm
         .segments
-        .push(PathSegment::from(Ident::new("Context", item.span())));
+        .push(PathSegment::from(Ident::new("Realm", item.span())));
 
     let mut error = crate_path.clone();
     error
@@ -158,7 +158,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     attributes: Some(attrs),
                     rename: None,
                     is_mut: false,
-                    has_ctx: false,
+                    has_realm: false,
                     has_this: false,
                     get: None,
                     set: None,
@@ -191,7 +191,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
-                let mut has_ctx = false;
+                let mut has_realm = false;
                 let mut has_this = false;
 
                 let mut assert_last_or_this = false;
@@ -202,11 +202,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         match &*arg.ty {
                             syn::Type::Reference(r) => {
                                 if let syn::Type::Path(p) = &*r.elem {
-                                    if p.path.is_ident("Context") {
+                                    if p.path.is_ident("Realm") {
                                         if assert_last {
                                             panic!("this must be the last argument");
                                         }
-                                        has_ctx = true;
+                                        has_realm = true;
                                         assert_last_or_this = true;
                                         return;
                                     }
@@ -266,7 +266,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     attributes: None,
                     rename,
                     is_mut: self_mut,
-                    has_ctx,
+                    has_realm,
                     has_this,
                     span: attr.span(),
                     get,
@@ -301,8 +301,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         let enumerable = attrs.enumerable;
         let configurable = attrs.configurable;
 
-        let ctx = if prop.has_ctx {
-            quote! {, ctx }
+        let realm = if prop.has_realm {
+            quote! {, realm }
         } else {
             TokenStream::new()
         };
@@ -336,7 +336,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut x = x.get_mut()?;
                 let mut deez = (***x).as_any_mut().downcast_mut::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
-                deez.#name(args, ctx)
+                deez.#name(args, realm)
             }}
         } else {
             quote! {{
@@ -344,7 +344,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let deez = (***x).as_any().downcast_ref::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this)))?;
 
-                deez.#name(args #ctx #this)
+                deez.#name(args #realm #this)
             }}
         };
 
@@ -377,7 +377,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         let prop = quote! {
-            let function = #native_function::with_proto(stringify!(#name), |args, this, ctx| {
+            let function = #native_function::with_proto(stringify!(#name), |args, this, realm| {
                 match this #copy {
                     #value::Object(ref x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this))),
@@ -405,13 +405,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let constructor_fn = if raw {
             quote! {
-                let constructor_function: #value = #native_function::#create("constructor", |args, this, ctx| {
-                    Self::#constructor(args, this, ctx)
+                let constructor_function: #value = #native_function::#create("constructor", |args, this, realm| {
+                    Self::#constructor(args, this, realm)
                 }, func_proto.copy()).into();
             }
         } else {
             quote! {
-                let constructor_function: #value = #native_function::#create("constructor", |args, mut this, ctx| {
+                let constructor_function: #value = #native_function::#create("constructor", |args, mut this, realm| {
                     if let #value::Object(x) = this {
                         let mut x = x.get_mut()?;
                         let mut deez = (***x).as_any_mut().downcast_mut::<Self>()

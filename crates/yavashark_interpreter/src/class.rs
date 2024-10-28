@@ -2,17 +2,15 @@ use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
 
 use crate::function::JSFunction;
-use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Context, Error, Object, Res, Value, ValueResult,
-};
+use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_value::Obj;
 
 use crate::Interpreter;
 
 pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
-        let super_class = Interpreter::run_expr(ctx, class, stmt.span, scope)?;
-        let p = super_class.get_property(&"prototype".into(), ctx)?;
+        let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
+        let p = super_class.get_property(&"prototype".into(), realm)?;
 
         (
             JSClass::new_with_proto(super_class, name.clone()),
@@ -20,8 +18,8 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
         )
     } else {
         (
-            JSClass::new(ctx, name.clone()),
-            ClassInstance::new(ctx, name.clone()),
+            JSClass::new(realm, name.clone()),
+            ClassInstance::new(realm, name.clone()),
         )
     };
 
@@ -35,7 +33,7 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
                     method.function.params.clone(),
                     method.function.body.clone(),
                     scope,
-                    ctx,
+                    realm,
                     stmt.span,
                 )?;
 
@@ -57,7 +55,7 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
                     params,
                     constructor.body.clone(),
                     scope,
-                    ctx,
+                    realm,
                     stmt.span,
                 )?;
 
@@ -69,7 +67,7 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
                     method.function.params.clone(),
                     method.function.body.clone(),
                     scope,
-                    ctx,
+                    realm,
                     stmt.span,
                 )?;
 
@@ -83,7 +81,7 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
             ClassMember::PrivateProp(o) => {
                 let key = format!("#{}", o.key.name);
                 let value = if let Some(value) = &o.value {
-                    Interpreter::run_expr(ctx, value, stmt.span, scope)?
+                    Interpreter::run_expr(realm, value, stmt.span, scope)?
                 } else {
                     Value::Undefined
                 };
@@ -95,11 +93,11 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
                 return Err(Error::syn("TsIndexSignature is not supported"))
             }
             ClassMember::ClassProp(p) => {
-                let name = prop_name_to_value(&p.key, ctx, p.span, scope)?;
+                let name = prop_name_to_value(&p.key, realm, p.span, scope)?;
 
                 let value = p.value.as_ref().map_or(
                     Ok(Value::Undefined),
-                    (|val| Interpreter::run_expr(ctx, val, p.span, scope)),
+                    (|val| Interpreter::run_expr(realm, val, p.span, scope)),
                 )?;
 
                 define_on_class(name, value, &mut class, &mut proto, p.is_static, false)?;
@@ -115,7 +113,7 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
     scope.declare_var(name, this.clone());
 
     for static_block in statics {
-        Interpreter::run_block_this(ctx, &static_block, scope, this.copy())?;
+        Interpreter::run_block_this(realm, &static_block, scope, this.copy())?;
     }
 
     Ok(())
@@ -129,9 +127,9 @@ fn create_method(
     realm: &mut Realm,
     span: Span,
 ) -> Result<(Value, Value), Error> {
-    let name = prop_name_to_value(name, ctx, span, scope)?;
+    let name = prop_name_to_value(name, realm, span, scope)?;
 
-    let func = JSFunction::new(name.to_string(ctx)?, params, body, scope.clone(), ctx);
+    let func = JSFunction::new(name.to_string(realm)?, params, body, scope.clone(), realm);
     Ok((name, func.into()))
 }
 
@@ -145,7 +143,7 @@ fn prop_name_to_value(
         PropName::Ident(ident) => ident.sym.to_string().into(),
         PropName::Computed(computed) => {
             let expr = &computed.expr;
-            Interpreter::run_expr(ctx, expr, span, scope)?
+            Interpreter::run_expr(realm, expr, span, scope)?
         }
         PropName::Num(num) => num.value.to_string().into(),
         PropName::Str(str) => str.value.to_string().into(),

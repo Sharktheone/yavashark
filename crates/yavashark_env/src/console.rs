@@ -1,14 +1,14 @@
 use crate::console::print::PrettyPrint;
-use crate::context::Context;
 use crate::object::Object;
 use crate::NativeFunction;
+use crate::realm::Realm;
 use crate::Value;
 
 mod print;
 
 #[must_use]
 pub fn get_console(realm: &Realm) -> Value {
-    let console = Object::new(ctx);
+    let console = Object::new(realm);
 
     let _ = console.define_property(
         "log".into(),
@@ -28,7 +28,7 @@ pub fn get_console(realm: &Realm) -> Value {
 
                 Ok(Value::Undefined)
             },
-            ctx,
+            realm,
         )
         .into(),
     ); // This can only fail if we have an existing borrow to the object, which we clearly don't

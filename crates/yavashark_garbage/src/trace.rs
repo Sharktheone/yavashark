@@ -71,7 +71,7 @@ impl Tracer {
                 "GC Trace",
                 options,
                 Box::new(move |cc| {
-                    egui_extras::install_image_loaders(&cc.egui_ctx);
+                    egui_extras::install_image_loaders(&cc.egui_realm);
                     Box::new(App::new(tracer2))
                 }),
             );

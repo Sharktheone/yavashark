@@ -1,7 +1,8 @@
 use crate::data::DataSection;
 use crate::function::BytecodeFunction;
 use crate::Instruction;
-use yavashark_env::{Context, Value};
+use yavashark_env::{Value};
+use yavashark_env::realm::Realm;
 use yavashark_value::ConstString;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -27,7 +28,7 @@ impl ConstValue {
             Self::Boolean(b) => Value::Boolean(b),
             Self::Object(_) => todo!(),
             Self::Symbol(s) => Value::Symbol(s),
-            Self::Function(f) => BytecodeFunction::from_blueprint(f, ctx).into(),
+            Self::Function(f) => BytecodeFunction::from_blueprint(f, realm).into(),
         }
     }
 }

@@ -2,7 +2,7 @@ use colored::Colorize;
 
 use yavashark_value::{Object, Value};
 
-use crate::context::Context;
+use crate::realm::Realm;
 
 pub trait PrettyPrint {
     fn pretty_print(&self) -> String {
@@ -20,7 +20,7 @@ pub trait PrettyPrint {
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String;
 }
 
-impl PrettyPrint for Object<Context> {
+impl PrettyPrint for Object<Realm> {
     fn pretty_print_key(&self) -> String {
         format!("'{self}'").green().to_string()
     }
@@ -106,7 +106,7 @@ impl PrettyPrint for Object<Context> {
     }
 }
 
-impl PrettyPrint for Value<Context> {
+impl PrettyPrint for Value<Realm> {
     fn pretty_print_key(&self) -> String {
         match self {
             Self::Undefined => "undefined".bright_black().to_string(),

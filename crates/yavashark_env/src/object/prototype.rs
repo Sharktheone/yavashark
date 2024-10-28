@@ -6,13 +6,13 @@ use common::{
 };
 use yavashark_value::Obj;
 
-use crate::context::Context;
 use crate::object::Object;
 use crate::{Error, NativeFunction, ObjectProperty, Res, Value, Variable};
+use crate::realm::Realm;
 
 mod common;
 
-pub trait Proto: Obj<Context> {
+pub trait Proto: Obj<Realm> {
     fn as_any(&mut self) -> &mut dyn Any;
 }
 
@@ -98,7 +98,7 @@ impl Prototype {
     ];
 }
 
-impl Obj<Context> for Prototype {
+impl Obj<Realm> for Prototype {
     fn define_property(&mut self, name: Value, value: Value) {
         if let Value::String(name) = &name {
             match name.as_str() {

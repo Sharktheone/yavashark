@@ -16,6 +16,6 @@ impl ValueExt for Value {
                 .to_string(),
         );
 
-        self.get_property(&member, vm.get_context())
+        self.get_property(&member, vm.get_realm())
     }
 }

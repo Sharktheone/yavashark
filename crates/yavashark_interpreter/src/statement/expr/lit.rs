@@ -1,6 +1,6 @@
 use crate::Interpreter;
 use swc_ecma_ast::Lit;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{Realm, ControlFlow, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_lit(realm: &mut Realm, stmt: &Lit) -> RuntimeResult {

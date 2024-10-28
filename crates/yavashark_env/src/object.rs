@@ -4,7 +4,6 @@ use std::fmt::Debug;
 pub use prototype::*;
 use yavashark_value::Obj;
 
-use crate::context::Context;
 use crate::{Error, ObjectProperty, Variable};
 use crate::{Res, Value};
 use crate::realm::Realm;
@@ -23,9 +22,9 @@ impl Object {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
     pub fn new(realm: &Realm) -> crate::ObjectHandle {
-        let prototype = context.proto.obj.clone().into();
+        let prototype = realm.intrinsics.obj.clone().into();
 
-        let this: Box<dyn Obj<Context>> = Box::new(Self {
+        let this: Box<dyn Obj<Realm>> = Box::new(Self {
             properties: HashMap::new(),
             prototype,
             array: Vec::new(),
@@ -36,7 +35,7 @@ impl Object {
 
     #[must_use]
     pub fn with_proto(proto: Value) -> crate::ObjectHandle {
-        let this: Box<dyn Obj<Context>> = Box::new(Self {
+        let this: Box<dyn Obj<Realm>> = Box::new(Self {
             properties: HashMap::new(),
             prototype: proto.into(),
             array: Vec::new(),
@@ -47,7 +46,7 @@ impl Object {
 
     #[must_use]
     pub fn raw(realm: &Realm) -> Self {
-        let prototype = context.proto.obj.clone().into();
+        let prototype = realm.intrinsics.obj.clone().into();
 
         Self {
             properties: HashMap::new(),
@@ -162,7 +161,7 @@ impl Object {
 
     #[must_use]
     pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Self {
-        let mut object = Self::raw(ctx);
+        let mut object = Self::raw(realm);
 
         for (key, value) in values {
             object.define_property(key, value);
@@ -172,7 +171,7 @@ impl Object {
     }
 }
 
-impl Obj<Context> for Object {
+impl Obj<Realm> for Object {
     fn define_property(&mut self, name: Value, value: Value) {
         if let Value::Number(n) = &name {
             self.insert_array(*n as usize, value.into());
@@ -203,7 +202,7 @@ impl Obj<Context> for Object {
             .get(name)
             .cloned()
             .or_else(|| match &self.prototype.value {
-                Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a ctx here!
+                Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a realm here!
                 _ => None,
             })
     }
@@ -282,7 +281,7 @@ impl Obj<Context> for Object {
 
     fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
         if let Some(_to_string) = self.get_property(&Value::String("toString".to_string())) {
-            // to_string.call(ctx, vec![], Value::Object(obj))?;
+            // to_string.call(realm, vec![], Value::Object(obj))?;
         }
 
         Ok("[object Object]".to_string())
@@ -365,7 +364,6 @@ impl Obj<Context> for Object {
 
 #[cfg(test)]
 mod tests {
-    use crate::context::Context;
     use crate::Value;
 
     use super::*;
@@ -388,8 +386,8 @@ mod tests {
 
     #[test]
     fn array_position_empty_array() {
-        let context = Context::new().unwrap();
-        let object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let object = Object::raw(&realm);
 
         let (index, found) = object.array_position(0);
 
@@ -399,8 +397,8 @@ mod tests {
 
     #[test]
     fn array_position_non_empty_array() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
         let (index, found) = object.array_position(0);
@@ -411,8 +409,8 @@ mod tests {
 
     #[test]
     fn insert_array() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
         assert_eq!(object.array[0].1.value, Value::Number(42.0));
@@ -420,8 +418,8 @@ mod tests {
 
     #[test]
     fn resolve_array() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
         let value = object.resolve_array(0);
@@ -431,8 +429,8 @@ mod tests {
 
     #[test]
     fn get_array() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
         let value = object.get_array(0);
@@ -442,8 +440,8 @@ mod tests {
 
     #[test]
     fn get_array_mut() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
         let value = object.get_array_mut(0);
@@ -453,8 +451,8 @@ mod tests {
 
     #[test]
     fn contains_array_key() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
         let contains = object.contains_array_key(0);
@@ -464,8 +462,8 @@ mod tests {
 
     #[test]
     fn define_property() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         assert_eq!(
@@ -480,8 +478,8 @@ mod tests {
 
     #[test]
     fn resolve_property() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         let value = object.resolve_property(&Value::String("key".to_string()));
@@ -491,8 +489,8 @@ mod tests {
 
     #[test]
     fn get_property() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         let value = object.get_property(&Value::String("key".to_string()));
@@ -502,8 +500,8 @@ mod tests {
 
     #[test]
     fn contains_key() {
-        let context = Context::new().unwrap();
-        let mut object = Object::raw(&context);
+        let realm =Realm::new().unwrap();
+        let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
         let contains = object.contains_key(&Value::String("key".to_string()));

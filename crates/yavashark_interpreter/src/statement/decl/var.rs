@@ -1,6 +1,6 @@
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, Error, Res, Value};
+use yavashark_env::{Realm, Error, Res, Value};
 
 use crate::Interpreter;
 
@@ -16,7 +16,7 @@ impl Interpreter {
 
                     let init = &decl.init;
                     if let Some(init) = init {
-                        let value = Self::run_expr(ctx, init, stmt.span, scope)?;
+                        let value = Self::run_expr(realm, init, stmt.span, scope)?;
                         scope.declare_global_var(id.sym.to_string(), value);
                     } else {
                         scope.declare_global_var(id.sym.to_string(), Value::Undefined);
@@ -34,7 +34,7 @@ impl Interpreter {
 
                     let init = &decl.init;
                     if let Some(init) = init {
-                        let value = Self::run_expr(ctx, init, stmt.span, scope)?;
+                        let value = Self::run_expr(realm, init, stmt.span, scope)?;
                         scope.declare_var(id.sym.to_string(), value);
                     } else {
                         scope.declare_var(id.sym.to_string(), Value::Undefined);
@@ -51,7 +51,7 @@ impl Interpreter {
 
                     let init = &decl.init;
                     if let Some(init) = init {
-                        let value = Self::run_expr(ctx, init, stmt.span, scope)?;
+                        let value = Self::run_expr(realm, init, stmt.span, scope)?;
                         scope.declare_read_only_var(id.sym.to_string(), value);
                     } else {
                         return Err(Error::new("Const declaration must have an initializer"));

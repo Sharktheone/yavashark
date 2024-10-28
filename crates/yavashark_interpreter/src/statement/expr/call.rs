@@ -2,7 +2,7 @@ use swc_common::Span;
 use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, Error, Value, ValueResult};
+use yavashark_env::{Realm, ControlFlow, Error, Value, ValueResult};
 
 use crate::Interpreter;
 
@@ -14,24 +14,24 @@ impl Interpreter {
                     return Err(Error::ty_error("Unsupported callee".to_string()));
                 };
 
-                let (callee, this) = Self::run_call_expr(ctx, callee_expr, stmt.span, scope)?;
+                let (callee, this) = Self::run_call_expr(realm, callee_expr, stmt.span, scope)?;
 
                 let this = this.unwrap_or(scope.this()?);
 
-                Self::run_call_on(ctx, &callee, this, &stmt.args, stmt.span, scope)
+                Self::run_call_on(realm, &callee, this, &stmt.args, stmt.span, scope)
             }
 
             Callee::Super(sup) => {
                 let class = scope.this()?;
 
-                let proto = class.prototype(ctx)?;
-                let sup = proto.prototype(ctx)?;
+                let proto = class.prototype(realm)?;
+                let sup = proto.prototype(realm)?;
 
                 let constructor = sup.as_object()?.get_constructor();
 
-                let constructor = constructor.resolve(proto.copy(), ctx)?;
+                let constructor = constructor.resolve(proto.copy(), realm)?;
 
-                Self::run_call_on(ctx, &constructor, proto, &stmt.args, stmt.span, scope)
+                Self::run_call_on(realm, &constructor, proto, &stmt.args, stmt.span, scope)
             }
 
             Callee::Import(import) => {
@@ -51,10 +51,10 @@ impl Interpreter {
         if let Value::Object(f) = callee.copy() {
             let args = args
                 .iter()
-                .map(|arg| Self::run_expr(ctx, &arg.expr, arg.spread.unwrap_or(span), scope))
+                .map(|arg| Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(span), scope))
                 .collect::<Result<Vec<Value>, ControlFlow>>()?;
 
-            f.call(ctx, args, this) //In strict mode, this is undefined
+            f.call(realm, args, this) //In strict mode, this is undefined
         } else {
             Err(Error::ty_error(format!("{callee} is not a function",)))
         }
@@ -69,36 +69,36 @@ impl Interpreter {
     ) -> Result<(Value, Option<Value>), ControlFlow> {
         Ok((
             match expr {
-                Expr::This(stmt) => Self::run_this(ctx, stmt, scope)?,
-                Expr::Array(stmt) => Self::run_array(ctx, stmt, scope)?,
-                Expr::Object(stmt) => Self::run_object(ctx, stmt, scope)?,
-                Expr::Fn(stmt) => Self::run_fn(ctx, stmt, scope)?,
-                Expr::Unary(stmt) => Self::run_unary(ctx, stmt, scope)?,
-                Expr::Update(stmt) => Self::run_update(ctx, stmt, scope)?,
-                Expr::Bin(stmt) => Self::run_bin(ctx, stmt, scope)?,
-                Expr::Assign(stmt) => Self::run_assign(ctx, stmt, scope)?,
+                Expr::This(stmt) => Self::run_this(realm, stmt, scope)?,
+                Expr::Array(stmt) => Self::run_array(realm, stmt, scope)?,
+                Expr::Object(stmt) => Self::run_object(realm, stmt, scope)?,
+                Expr::Fn(stmt) => Self::run_fn(realm, stmt, scope)?,
+                Expr::Unary(stmt) => Self::run_unary(realm, stmt, scope)?,
+                Expr::Update(stmt) => Self::run_update(realm, stmt, scope)?,
+                Expr::Bin(stmt) => Self::run_bin(realm, stmt, scope)?,
+                Expr::Assign(stmt) => Self::run_assign(realm, stmt, scope)?,
                 Expr::Member(stmt) => {
-                    let (val, par) = Self::run_call_member(ctx, stmt, scope)?;
+                    let (val, par) = Self::run_call_member(realm, stmt, scope)?;
 
                     return Ok((val, Some(par)));
                 }
-                Expr::SuperProp(stmt) => Self::run_super_prop(ctx, stmt, scope)?,
-                Expr::Cond(stmt) => Self::run_cond(ctx, stmt, scope)?,
-                Expr::Call(stmt) => Self::run_call(ctx, stmt, scope)?,
-                Expr::New(stmt) => Self::run_new(ctx, stmt, scope)?,
-                Expr::Seq(stmt) => Self::run_seq(ctx, stmt, scope)?,
-                Expr::Ident(stmt) => Self::run_ident(ctx, stmt, scope)?,
-                Expr::Lit(stmt) => Self::run_lit(ctx, stmt)?,
-                Expr::Tpl(stmt) => Self::run_tpl(ctx, stmt, scope)?,
-                Expr::TaggedTpl(stmt) => Self::run_tagged_tpl(ctx, stmt, scope)?,
-                Expr::Arrow(stmt) => Self::run_arrow(ctx, stmt, scope)?,
-                Expr::Class(stmt) => Self::run_class(ctx, stmt, scope)?,
-                Expr::Yield(stmt) => Self::run_yield(ctx, stmt, scope)?,
-                Expr::MetaProp(stmt) => Self::run_meta_prop(ctx, stmt, scope)?,
-                Expr::Await(stmt) => Self::run_await(ctx, stmt, scope)?,
-                Expr::Paren(stmt) => Self::run_paren(ctx, stmt, scope)?,
-                Expr::PrivateName(stmt) => Self::run_private_name(ctx, stmt, scope)?,
-                Expr::OptChain(stmt) => Self::run_opt_chain(ctx, stmt, scope)?,
+                Expr::SuperProp(stmt) => Self::run_super_prop(realm, stmt, scope)?,
+                Expr::Cond(stmt) => Self::run_cond(realm, stmt, scope)?,
+                Expr::Call(stmt) => Self::run_call(realm, stmt, scope)?,
+                Expr::New(stmt) => Self::run_new(realm, stmt, scope)?,
+                Expr::Seq(stmt) => Self::run_seq(realm, stmt, scope)?,
+                Expr::Ident(stmt) => Self::run_ident(realm, stmt, scope)?,
+                Expr::Lit(stmt) => Self::run_lit(realm, stmt)?,
+                Expr::Tpl(stmt) => Self::run_tpl(realm, stmt, scope)?,
+                Expr::TaggedTpl(stmt) => Self::run_tagged_tpl(realm, stmt, scope)?,
+                Expr::Arrow(stmt) => Self::run_arrow(realm, stmt, scope)?,
+                Expr::Class(stmt) => Self::run_class(realm, stmt, scope)?,
+                Expr::Yield(stmt) => Self::run_yield(realm, stmt, scope)?,
+                Expr::MetaProp(stmt) => Self::run_meta_prop(realm, stmt, scope)?,
+                Expr::Await(stmt) => Self::run_await(realm, stmt, scope)?,
+                Expr::Paren(stmt) => Self::run_paren(realm, stmt, scope)?,
+                Expr::PrivateName(stmt) => Self::run_private_name(realm, stmt, scope)?,
+                Expr::OptChain(stmt) => Self::run_opt_chain(realm, stmt, scope)?,
                 Expr::Invalid(stmt) => {
                     return Err(ControlFlow::error(format!(
                         "{:?}: Invalid expression.",
@@ -120,10 +120,10 @@ impl Interpreter {
         stmt: &MemberExpr,
         scope: &mut Scope,
     ) -> Result<(Value, Value), ControlFlow> {
-        let (value, par) = Self::run_call_expr(ctx, &stmt.obj, stmt.span, scope)?;
+        let (value, par) = Self::run_call_expr(realm, &stmt.obj, stmt.span, scope)?;
 
         Ok((
-            Self::run_member_on(ctx, value.copy(), &stmt.prop, stmt.span, scope)?,
+            Self::run_member_on(realm, value.copy(), &stmt.prop, stmt.span, scope)?,
             par.unwrap_or(value),
         ))
     }

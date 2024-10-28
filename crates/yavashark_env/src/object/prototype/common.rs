@@ -1,7 +1,7 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
-use crate::context::Context;
 use crate::{Value, ValueResult};
+use crate::realm::Realm;
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
@@ -40,7 +40,7 @@ pub fn to_locale_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 }
 
 pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    Ok(this.to_string(ctx)?.into())
+    Ok(this.to_string(realm)?.into())
 }
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {

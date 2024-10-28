@@ -3,7 +3,7 @@ use crate::realm::Realm;
 use crate::{get_console, ObjectHandle, Res, Value, Variable};
 
 pub fn init_global_obj(obj: ObjectHandle, realm: &mut Realm) -> Res {
-    let mut obj = obj.get()?;
+    let mut obj = obj.get_mut()?;
 
     obj.define_variable(
         "undefined".into(),

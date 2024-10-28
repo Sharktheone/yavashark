@@ -7,15 +7,15 @@ pub use prototype::*;
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Func, ObjectProperty};
 
-use crate::context::Context;
 use crate::object::Object;
 use crate::{ObjectHandle, Value, ValueResult};
+use crate::realm::Realm;
 
 mod class;
 mod constructor;
 mod prototype;
 
-type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Context) -> ValueResult>;
+type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction, bool);
 
@@ -28,8 +28,8 @@ pub struct NativeFunction {
     // pub prototype: ConstructorPrototype,
 }
 
-impl Constructor<Context> for NativeFunction {
-    fn get_constructor(&self) -> ObjectProperty<Context> {
+impl Constructor<Realm> for NativeFunction {
+    fn get_constructor(&self) -> ObjectProperty<Realm> {
         self.constructor.copy()
     }
 
@@ -38,7 +38,7 @@ impl Constructor<Context> for NativeFunction {
     }
 
     fn value(&self, realm: &mut Realm) -> Value {
-        Object::new(ctx).into()
+        Object::new(realm).into()
     }
 }
 
@@ -49,7 +49,7 @@ impl NativeFunction {
         let this = Self {
             name,
             f,
-            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
+            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             data: None,
             special_constructor: false,
             constructor: Value::Undefined.into(),
@@ -76,13 +76,13 @@ impl NativeFunction {
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn new(
         name: &str,
-        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         realm: &Realm,
     ) -> ObjectHandle {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
+            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             data: None,
             special_constructor: false,
             constructor: Value::Undefined.into(),
@@ -109,13 +109,13 @@ impl NativeFunction {
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn special(
         name: &str,
-        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         realm: &Realm,
     ) -> ObjectHandle {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(ctx.proto.func.clone().into()),
+            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             data: None,
             special_constructor: true,
             constructor: Value::Undefined.into(),
@@ -142,7 +142,7 @@ impl NativeFunction {
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: &str,
-        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: Value,
     ) -> ObjectHandle {
         let this = Self {
@@ -175,7 +175,7 @@ impl NativeFunction {
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: &str,
-        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: Value,
     ) -> ObjectHandle {
         let this = Self {
@@ -237,7 +237,7 @@ impl NativeFunctionBuilder {
     #[must_use]
     pub fn boxed_func(
         mut self,
-        f: impl Fn(Vec<Value>, Value, &mut Context) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
     ) -> Self {
         self.0.f = Box::new(f);
         self
@@ -260,7 +260,7 @@ impl NativeFunctionBuilder {
     /// Note: Overrides the prototype of the object
     #[must_use]
     pub fn context(mut self, realm: &Realm) -> Self {
-        self.0.object.prototype = ctx.proto.func.clone().into();
+        self.0.object.prototype = realm.intrinsics.func.clone().into();
         self
     }
 
@@ -313,8 +313,8 @@ impl Debug for NativeFunction {
     }
 }
 
-impl Func<Context> for NativeFunction {
+impl Func<Realm> for NativeFunction {
     fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        (self.f)(args, this, ctx)
+        (self.f)(args, this, realm)
     }
 }

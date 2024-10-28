@@ -1,25 +1,25 @@
 use swc_ecma_ast::SwitchStmt;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_switch(realm: &mut Realm, stmt: &SwitchStmt, scope: &mut Scope) -> RuntimeResult {
-        let discriminant = Self::run_expr(ctx, &stmt.discriminant, stmt.span, scope)?;
+        let discriminant = Self::run_expr(realm, &stmt.discriminant, stmt.span, scope)?;
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_breakable()?;
 
         for case in &stmt.cases {
             if let Some(test) = &case.test {
-                let test = Self::run_expr(ctx, test, case.span, scope)?;
+                let test = Self::run_expr(realm, test, case.span, scope)?;
                 if discriminant == test {
                 } else {
                     continue;
                 }
             }
 
-            if let Err(e) = Self::run_statements(ctx, &case.cons, scope) {
+            if let Err(e) = Self::run_statements(realm, &case.cons, scope) {
                 return match &e {
                     ControlFlow::Break(_) => Ok(Value::Undefined),
                     _ => Err(e),

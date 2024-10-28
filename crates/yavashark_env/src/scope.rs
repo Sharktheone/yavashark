@@ -7,9 +7,9 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
 
 use crate::console::get_console;
-use crate::context::Context;
 use crate::error::get_error;
 use crate::{Error, Res, Result, Value, Variable};
+use crate::realm::Realm;
 
 pub struct MutValue {
     pub name: String,
@@ -207,7 +207,7 @@ impl ScopeInternal {
         );
         variables.insert(
             "console".to_string(),
-            Variable::new_read_only(get_console(ctx)),
+            Variable::new_read_only(get_console(realm)),
         );
         Self {
             parent: None,
@@ -246,15 +246,15 @@ impl ScopeInternal {
         );
         variables.insert(
             "console".to_string(),
-            Variable::new_read_only(get_console(ctx)),
+            Variable::new_read_only(get_console(realm)),
         );
 
-        variables.insert("Error".to_string(), Variable::new_read_only(get_error(ctx)));
+        variables.insert("Error".to_string(), Variable::new_read_only(get_error(realm)));
 
         #[allow(clippy::expect_used)]
         variables.insert(
             "Array".to_string(),
-            ctx.proto
+            realm.intrinsics
                 .array
                 .get_property(&"constructor".into())
                 .expect("Failed to get Array constructor") //This can only happen when we have a programming error
@@ -518,14 +518,14 @@ impl Scope {
     #[must_use]
     pub fn new(realm: &Realm) -> Self {
         Self {
-            scope: Gc::new(RefCell::new(ScopeInternal::new(ctx))),
+            scope: Gc::new(RefCell::new(ScopeInternal::new(realm))),
         }
     }
 
     #[must_use]
     pub fn global(realm: &Realm) -> Self {
         Self {
-            scope: Gc::new(RefCell::new(ScopeInternal::global(ctx))),
+            scope: Gc::new(RefCell::new(ScopeInternal::global(realm))),
         }
     }
 
@@ -773,8 +773,8 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_var_and_resolve() {
-        let ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&ctx);
+        let realm = Realm::new().unwrap();
+        let mut scope = ScopeInternal::new(&realm);
         scope.declare_var("test".to_string(), Value::Number(42.0));
         let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
@@ -782,8 +782,8 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_read_only_var_and_update_fails() {
-        let ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&ctx);
+        let realm = Realm::new().unwrap();
+        let mut scope = ScopeInternal::new(&realm);
         scope
             .declare_read_only_var("test".to_string(), Value::Number(42.0))
             .unwrap();
@@ -793,8 +793,8 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
-        let ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&ctx);
+        let realm = Realm::new().unwrap();
+        let mut scope = ScopeInternal::new(&realm);
         scope
             .declare_global_var("test".to_string(), Value::Number(42.0))
             .unwrap();
@@ -804,8 +804,8 @@ mod tests {
 
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
-        let ctx = Context::new().unwrap();
-        let mut scope = ScopeInternal::new(&ctx);
+        let realm = Realm::new().unwrap();
+        let mut scope = ScopeInternal::new(&realm);
         scope
             .update_or_define("test".to_string(), Value::Number(42.0))
             .unwrap();

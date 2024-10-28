@@ -4,8 +4,9 @@ use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
 use crate::object::Object;
-use crate::{Context, Error, ObjectHandle, Value, ValueResult, Variable};
-use crate::{ObjectProperty, Symbol};
+use crate::{Error, ObjectHandle, Value, ValueResult, Variable};
+use crate::{ObjectProperty};
+use crate::realm::Realm;
 
 #[object(direct(length), to_string)]
 #[derive(Debug)]
@@ -13,7 +14,7 @@ pub struct Array {}
 
 impl Array {
     pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self, Error> {
-        let mut array = Self::new(ctx.proto.array.clone().into());
+        let mut array = Self::new(realm.intrinsics.array.clone().into());
 
         array.object.set_array(elements);
 
@@ -29,15 +30,15 @@ impl Array {
     }
 
     #[must_use]
-    pub fn from_ctx(realm: &Realm) -> Self {
-        Self::new(ctx.proto.array.clone().into())
+    pub fn from_realm(realm: &Realm) -> Self {
+        Self::new(realm.intrinsics.array.clone().into())
     }
 
     pub fn override_to_string(&self, realm: &mut Realm) -> Result<String, Error> {
         let mut buf = String::new();
 
         for (_, value) in &self.object.array {
-            buf.push_str(&value.value.to_string(ctx)?);
+            buf.push_str(&value.value.to_string(realm)?);
             buf.push_str(", ");
         }
 
@@ -70,7 +71,7 @@ impl Array {
 impl Array {
     #[new]
     #[must_use]
-    pub fn create(_: &mut Context, proto: &Value) -> Value {
+    pub fn create(_: &mut Realm, proto: &Value) -> Value {
         let this = Self::new(proto.copy());
 
         ObjectHandle::new(this).into()
@@ -91,13 +92,13 @@ impl Array {
         };
 
         let iter = ArrayIterator {
-            object: Object::raw_with_proto(ctx.proto.array_iter.clone().into()),
+            object: Object::raw_with_proto(realm.intrinsics.array_iter.clone().into()),
             inner: obj,
             next: 0,
             done: false,
         };
 
-        let iter: Box<dyn Obj<Context>> = Box::new(iter);
+        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
 
         Ok(iter.into())
     }
@@ -130,7 +131,7 @@ impl ArrayIterator {
     #[prop]
     pub fn next(&mut self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
         if self.done {
-            let obj = Object::new(ctx);
+            let obj = Object::new(realm);
             obj.define_property("value".into(), Value::Undefined)?;
             obj.define_property("done".into(), Value::Boolean(true))?;
             return Ok(obj.into());
@@ -144,7 +145,7 @@ impl ArrayIterator {
 
         if done {
             self.done = true;
-            let obj = Object::new(ctx);
+            let obj = Object::new(realm);
             obj.define_property("value".into(), Value::Undefined)?;
             obj.define_property("done".into(), Value::Boolean(true))?;
             return Ok(obj.into());
@@ -157,7 +158,7 @@ impl ArrayIterator {
             Value::Undefined
         };
 
-        let obj = Object::new(ctx);
+        let obj = Object::new(realm);
         obj.define_property("value".into(), value)?;
         obj.define_property("done".into(), Value::Boolean(self.done))?;
 

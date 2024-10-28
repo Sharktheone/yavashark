@@ -3,7 +3,7 @@ use std::cmp::max;
 use swc_common::Spanned;
 use swc_ecma_ast::Tpl;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Context, RuntimeResult};
+use yavashark_env::{Realm, RuntimeResult};
 
 impl Interpreter {
     pub fn run_tpl(realm: &mut Realm, stmt: &Tpl, scope: &mut Scope) -> RuntimeResult {
@@ -17,8 +17,8 @@ impl Interpreter {
             }
 
             if let Some(expr) = stmt.exprs.get(i) {
-                let value = Self::run_expr(ctx, expr, expr.span(), scope)?;
-                result.push_str(&value.to_string(ctx)?);
+                let value = Self::run_expr(realm, expr, expr.span(), scope)?;
+                result.push_str(&value.to_string(realm)?);
             }
         }
 

@@ -4,9 +4,10 @@ use std::fmt::{Debug, Formatter};
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Error, Func};
 
-use crate::{Context, Object, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::realm::Realm;
 
-type ValueFn = Box<dyn Fn(&mut Context, &Value) -> Value>;
+type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 
 #[object(function, constructor)]
 pub struct NativeConstructor {
@@ -29,7 +30,7 @@ impl Debug for NativeConstructor {
     }
 }
 
-impl Constructor<Context> for NativeConstructor {
+impl Constructor<Realm> for NativeConstructor {
     fn get_constructor(&self) -> ObjectProperty {
         (self.f)().into()
     }
@@ -40,7 +41,7 @@ impl Constructor<Context> for NativeConstructor {
 
     fn value(&self, realm: &mut Realm) -> Value {
         if let Some(f) = &self.f_value {
-            return f(ctx, &self.proto);
+            return f(realm, &self.proto);
         }
 
         Object::with_proto(self.proto.clone()).into()
@@ -51,10 +52,10 @@ impl Constructor<Context> for NativeConstructor {
     }
 }
 
-impl Func<Context> for NativeConstructor {
+impl Func<Realm> for NativeConstructor {
     fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         if self.special {
-            (self.f)().call(ctx, args, this.copy())?;
+            (self.f)().call(realm, args, this.copy())?;
 
             Ok(Value::Undefined)
         } else {
@@ -78,8 +79,8 @@ impl NativeConstructor {
             name,
             f,
             value,
-            ctx.proto.func.clone().into(),
-            ctx.proto.func.clone().into(),
+            realm.intrinsics.func.clone().into(),
+            realm.intrinsics.func.clone().into(),
         )
     }
 
@@ -114,8 +115,8 @@ impl NativeConstructor {
             name,
             f,
             value,
-            ctx.proto.func.clone().into(),
-            ctx.proto.func.clone().into(),
+            realm.intrinsics.func.clone().into(),
+            realm.intrinsics.func.clone().into(),
         )
     }
 

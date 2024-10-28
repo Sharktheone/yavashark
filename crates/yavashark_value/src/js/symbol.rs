@@ -1,4 +1,4 @@
-use crate::{Ctx, Value};
+use crate::{Realm, Value};
 
 macro_rules! symbol {
     ($name:ident, $symbol:ident) => {
@@ -6,11 +6,11 @@ macro_rules! symbol {
     };
 }
 
-pub struct Symbol<C: Ctx> {
+pub struct Symbol<C: Realm> {
     _marker: std::marker::PhantomData<C>,
 }
 
-impl<C: Ctx> Symbol<C> {
+impl<C: Realm> Symbol<C> {
     symbol!(ASYNC_ITERATOR, asyncIterator);
     symbol!(HAS_INSTANCE, hasInstance);
     symbol!(IS_CONCAT_SPREADABLE, isConcatSpreadable);

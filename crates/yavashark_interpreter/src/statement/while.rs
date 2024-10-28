@@ -1,5 +1,5 @@
 use swc_ecma_ast::WhileStmt;
-use yavashark_env::{Context, ControlFlow, RuntimeResult};
+use yavashark_env::{ControlFlow, Realm, RuntimeResult};
 
 use crate::scope::Scope;
 use crate::{Interpreter, Value};
@@ -12,13 +12,13 @@ impl Interpreter {
             let scope = &mut Scope::with_parent(scope)?;
             scope.state_set_loop()?;
 
-            let cond = Self::run_expr(ctx, &stmt.test, stmt.span, scope)?;
+            let cond = Self::run_expr(realm, &stmt.test, stmt.span, scope)?;
 
             if !cond.is_truthy() {
                 break Ok(Value::Undefined);
             }
 
-            let result = Self::run_statement(ctx, &stmt.body, scope);
+            let result = Self::run_statement(realm, &stmt.body, scope);
 
             match result {
                 Ok(_) => {}
