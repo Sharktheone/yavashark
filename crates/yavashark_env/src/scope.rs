@@ -8,8 +8,8 @@ use yavashark_value::CustomGcRefUntyped;
 
 use crate::console::get_console;
 use crate::error::get_error;
-use crate::{Error, Res, Result, Value, Variable};
 use crate::realm::Realm;
+use crate::{Error, ObjectHandle, Res, Result, Value, Variable};
 
 pub struct MutValue {
     pub name: String,
@@ -25,8 +25,6 @@ pub struct ScopeState {
 #[allow(unused)]
 impl ScopeState {
     const NONE: u8 = 0b0;
-
-    const GLOBAL: u8 = 0b1;
     const FUNCTION: u8 = 0b10;
     const ITERATION: u8 = 0b100;
     const BREAKABLE: u8 = 0b1000;
@@ -34,9 +32,6 @@ impl ScopeState {
     const CONTINUABLE: u8 = 0b10_0000;
     const OPT_CHAIN: u8 = 0b100_0000;
     const STATE_NONE: Self = Self { state: Self::NONE };
-    const STATE_GLOBAL: Self = Self {
-        state: Self::GLOBAL,
-    };
     const STATE_FUNCTION: Self = Self {
         state: Self::FUNCTION,
     };
@@ -68,14 +63,10 @@ impl ScopeState {
         let mut state = self.state;
 
         state &= !Self::FUNCTION; // Remove the function state
-        state &= !Self::GLOBAL; // Remove the global state
 
         Self { state }
     }
 
-    pub fn set_global(&mut self) {
-        self.state |= Self::GLOBAL;
-    }
     pub fn set_function(&mut self) {
         self.state |= Self::FUNCTION;
         self.state |= Self::RETURNABLE;
@@ -106,11 +97,6 @@ impl ScopeState {
     #[must_use]
     pub const fn is_function(&self) -> bool {
         self.state & Self::FUNCTION != 0
-    }
-
-    #[must_use]
-    pub const fn is_global(&self) -> bool {
-        self.state & Self::GLOBAL != 0
     }
 
     #[must_use]
@@ -148,9 +134,35 @@ pub struct Scope {
     scope: Gc<RefCell<ScopeInternal>>,
 }
 
+
+#[derive(Debug)]
+pub enum ParentOrGlobal {
+    Parent(Gc<RefCell<ScopeInternal>>),
+    Global(ObjectHandle),
+}
+
+impl Clone for ParentOrGlobal {
+    fn clone(&self) -> Self {
+        match self {
+            Self::Parent(p) => Self::Parent(p.clone()),
+            ParentOrGlobal::Global(g) => Self::Global(g.clone()),
+        }
+    }
+}
+
+
+impl ParentOrGlobal {
+    fn get_ref(&self) -> GcRef<RefCell<ScopeInternal>> {
+        match self {
+            Self::Parent(p) => p.get_ref(),
+            Self::Global(g) => g.gc_get_untyped_ref(),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct ScopeInternal {
-    parent: Option<Gc<RefCell<ScopeInternal>>>,
+    parent: ParentOrGlobal,
     variables: HashMap<String, Variable>,
     pub available_labels: Vec<String>,
     pub state: ScopeState,
@@ -167,9 +179,7 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
             }
         }
 
-        if let Some(parent) = &self.parent {
-            refs.push(parent.get_ref());
-        }
+        refs.push(self.parent.get_ref());
 
         if let Some(this) = self.this.gc_untyped_ref() {
             refs.push(this);
@@ -210,7 +220,7 @@ impl ScopeInternal {
             Variable::new_read_only(get_console(realm)),
         );
         Self {
-            parent: None,
+            parent: ParentOrGlobal::Global(realm.global.clone()),
             variables,
             available_labels: Vec::new(),
             state: ScopeState::new(),
@@ -262,10 +272,10 @@ impl ScopeInternal {
         );
 
         Self {
-            parent: None,
+            parent: ParentOrGlobal::Global(realm.global.clone()),
             variables,
             available_labels: Vec::new(),
-            state: ScopeState::STATE_GLOBAL,
+            state: ScopeState::STATE_NONE,
             this: Value::string("global"),
         }
     }
@@ -304,7 +314,7 @@ impl ScopeInternal {
         let this = parent.borrow()?.this.copy();
 
         Ok(Self {
-            parent: Some(parent),
+            parent: ParentOrGlobal::Parent(parent),
             variables,
             available_labels,
             state,
@@ -336,36 +346,49 @@ impl ScopeInternal {
 
     pub fn declare_global_var(&mut self, name: String, value: Value) -> Res {
         #[allow(clippy::if_same_then_else)]
-        if self.state.is_global() || self.state.is_function() {
+        if self.state.is_function() {
             self.variables.insert(name, Variable::new(value));
-        } else if let Some(p) = self.parent.as_ref() {
-            p.borrow_mut()?.declare_global_var(name, value.copy())?;
         } else {
-            self.variables.insert(name, Variable::new(value));
+            match &self.parent {
+                ParentOrGlobal::Global(global) => {
+                    global.define_variable(name.into(), Variable::new(value))?;
+                }
+                ParentOrGlobal::Parent(p) => {
+                    p.borrow_mut()?.declare_global_var(name, value.copy())?;
+                }
+            }
         }
 
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str) -> Result<Option<Value>> {
+    pub fn resolve(&self, name: &str, realm: &mut Realm) -> Result<Option<Value>> {
         if let Some(v) = self.variables.get(name) {
             return Ok(Some(v.copy()));
         }
 
-        if let Some(p) = self.parent.as_ref() {
-            return p.borrow()?.resolve(name);
+        match &self.parent {
+            ParentOrGlobal::Parent(parent) => {
+                parent.borrow()?.resolve(name, realm)
+            }
+            ParentOrGlobal::Global(global) => {
+                global.resolve_property(&name.into(), realm)
+            }
         }
-
-        Ok(None)
     }
 
     pub fn has_value(&self, name: &str) -> Result<bool> {
         if self.variables.contains_key(name) {
             Ok(true)
         } else {
-            self.parent
-                .as_ref()
-                .map_or(Ok(false), |p| p.borrow()?.has_value(name))
+            match &self.parent {
+                ParentOrGlobal::Parent(parent) => {
+                    parent.borrow()?.has_value(name)
+                }
+                ParentOrGlobal::Global(global) => {
+                    global.contains_key(&name.into())
+                }
+            }
         }
     }
 
@@ -380,10 +403,6 @@ impl ScopeInternal {
 
     pub fn last_label(&mut self) -> Option<&String> {
         self.available_labels.last()
-    }
-
-    pub fn state_set_global(&mut self) {
-        self.state.set_global();
     }
 
     pub fn state_set_function(&mut self) {
@@ -413,11 +432,6 @@ impl ScopeInternal {
     #[must_use]
     pub const fn state_is_function(&self) -> bool {
         self.state.is_function()
-    }
-
-    #[must_use]
-    pub const fn state_is_global(&self) -> bool {
-        self.state.is_global()
     }
 
     #[must_use]
@@ -457,9 +471,23 @@ impl ScopeInternal {
             }
             v.value = value;
             return Ok(true);
-        } else if let Some(p) = self.parent.as_ref() {
-            return p.borrow_mut()?.update(name, value);
+        } else {
+            match &self.parent {
+                ParentOrGlobal::Parent(p) => {
+                    return p.borrow_mut()?.update(name, value);
+                }
+                ParentOrGlobal::Global(global) => {
+                    let name = name.into();
+
+                    if global.contains_key(&name)? {
+                        global.define_property(name, value)?;
+
+                        return Ok(true);
+                    }
+                }
+            }
         }
+
 
         Ok(false)
     }
@@ -472,45 +500,26 @@ impl ScopeInternal {
 
             v.value = value;
             return Ok(());
-        } else if let Some(p) = self.parent.as_ref() {
-            if p.borrow_mut()?.update(&name, value.copy())? {
-                return Ok(());
+        } else {
+            match &self.parent {
+                ParentOrGlobal::Parent(p) => if p.borrow_mut()?.update(&name, value.copy())? {
+                    return Ok(());
+                }
+                ParentOrGlobal::Global(global) => {
+                    let name = name.clone().into();
+
+                    if global.contains_key(&name)? {
+                        global.define_property(name, value)?;
+
+                        return Ok(());
+                    }
+                }
             }
         }
 
         self.declare_var(name, value);
 
         Ok(())
-    }
-
-    pub fn with_mut(&mut self, name: &str, f: &impl Fn(&mut Value)) -> Res {
-        if let Some(v) = self.variables.get_mut(name) {
-            if !v.properties.is_writable() {
-                return Err(Error::ty("Assignment to constant variable"));
-            }
-
-            f(&mut v.value);
-            Ok(())
-        } else if let Some(p) = self.parent.as_ref() {
-            p.borrow_mut()?.with_mut(name, f)
-        } else {
-            Err(Error::new("Variable not found"))
-        }
-    }
-
-    pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
-        self.variables.get(name).map_or_else(
-            || {
-                self.parent.as_ref().map_or_else(
-                    || Err(Error::new("Variable not found")),
-                    |p| p.borrow()?.with(name, f),
-                )
-            },
-            |v| {
-                f(&v.value);
-                Ok(())
-            },
-        )
     }
 }
 
@@ -561,8 +570,8 @@ impl Scope {
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str) -> Result<Option<Value>> {
-        self.scope.borrow()?.resolve(name)
+    pub fn resolve(&self, name: &str, realm: &mut Realm) -> Result<Option<Value>> {
+        self.scope.borrow()?.resolve(name, realm)
     }
 
     pub fn has_label(&self, label: &str) -> Result<bool> {
@@ -573,7 +582,7 @@ impl Scope {
         if scope.has_label(label) {
             Ok(true)
         } else {
-            if let Some(p) = scope.parent.as_ref() {
+            if let ParentOrGlobal::Parent(p) = &scope.parent {
                 return Ok(p.borrow()?.has_label(label));
             }
             Ok(false)
@@ -595,11 +604,6 @@ impl Scope {
             .borrow()
             .map(|x| x.state.clone())
             .unwrap_or_default()
-    }
-
-    pub fn state_set_global(&mut self) -> Res {
-        self.scope.borrow_mut()?.state_set_global();
-        Ok(())
     }
 
     pub fn state_set_function(&mut self) -> Res {
@@ -636,8 +640,8 @@ impl Scope {
         Ok(self.scope.borrow()?.state_is_function())
     }
 
-    pub fn state_is_global(&self) -> Result<bool> {
-        Ok(self.scope.borrow()?.state_is_global())
+    pub fn is_global(&self) -> Result<bool> {
+        Ok(matches!(self.parent()?, ParentOrGlobal::Global(_)))
     }
 
     pub fn state_is_iteration(&self) -> Result<bool> {
@@ -676,13 +680,6 @@ impl Scope {
         self.scope.borrow_mut()?.update_or_define(name, value)
     }
 
-    pub fn with_mut(&mut self, name: &str, f: &impl Fn(&mut Value)) -> Res {
-        self.scope.borrow_mut()?.with_mut(name, f)
-    }
-
-    pub fn with(&self, name: &str, f: &impl Fn(&Value)) -> Res {
-        self.scope.borrow()?.with(name, f)
-    }
 
     pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)
@@ -692,10 +689,8 @@ impl Scope {
         Ok(self.scope.borrow()?.this.copy())
     }
 
-    pub fn parent(&self) -> Result<Option<Self>> {
-        Ok(self.scope.borrow()?.parent.as_ref().map(|p| Self {
-            scope: Gc::clone(p),
-        }))
+    pub fn parent(&self) -> Result<ParentOrGlobal> {
+        Ok(self.scope.borrow()?.parent.clone())
     }
 }
 
@@ -727,13 +722,6 @@ mod tests {
     fn scope_state_new_is_none() {
         let state = ScopeState::new();
         assert!(state.is_none());
-    }
-
-    #[test]
-    fn scope_state_set_global_is_global() {
-        let mut state = ScopeState::new();
-        state.set_global();
-        assert!(state.is_global());
     }
 
     #[test]
@@ -773,10 +761,10 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_var_and_resolve() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm);
         scope.declare_var("test".to_string(), Value::Number(42.0));
-        let value = scope.resolve("test").unwrap().unwrap();
+        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
@@ -793,23 +781,23 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm);
         scope
             .declare_global_var("test".to_string(), Value::Number(42.0))
             .unwrap();
-        let value = scope.resolve("test").unwrap().unwrap();
+        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm);
         scope
             .update_or_define("test".to_string(), Value::Number(42.0))
             .unwrap();
-        let value = scope.resolve("test").unwrap().unwrap();
+        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 }

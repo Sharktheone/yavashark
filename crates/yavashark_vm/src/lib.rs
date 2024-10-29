@@ -10,7 +10,7 @@ pub use regs::*;
 pub use stack::*;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
-use yavashark_env::scope::Scope;
+use yavashark_env::scope::{ParentOrGlobal, Scope};
 use yavashark_env::{Realm, Error, Res, Value};
 
 pub use yavashark_bytecode;
@@ -71,10 +71,15 @@ impl VM {
     }
 
     pub fn pop_scope(&mut self) -> Res {
-        self.current_scope = self
+        let scope = self
             .current_scope
-            .parent()?
-            .ok_or(Error::new("No parent scope"))?;
+            .parent()?;
+        
+        if let ParentOrGlobal::Parent(p) = scope {
+            self.current_scope = p.into();
+        } else {
+            return Err(Error::new("No parent scope"))
+        }
 
         Ok(())
     }
