@@ -254,22 +254,6 @@ impl ScopeInternal {
             "false".to_string(),
             Variable::new_read_only(Value::Boolean(false)),
         );
-        variables.insert(
-            "console".to_string(),
-            Variable::new_read_only(get_console(realm)),
-        );
-
-        variables.insert("Error".to_string(), Variable::new_read_only(get_error(realm)));
-
-        #[allow(clippy::expect_used)]
-        variables.insert(
-            "Array".to_string(),
-            realm.intrinsics
-                .array
-                .get_property(&"constructor".into())
-                .expect("Failed to get Array constructor") //This can only happen when we have a programming error
-                .into(),
-        );
 
         Self {
             parent: ParentOrGlobal::Global(realm.global.clone()),
