@@ -1,4 +1,4 @@
-
+pub mod harness;
 mod test262;
 
 pub type Value = yavashark_value::Value<Realm>;
@@ -13,3 +13,7 @@ pub type NativeFunction = yavashark_env::NativeFunction;
 
 pub use yavashark_env::object;
 use yavashark_env::Realm;
+
+
+
+const TEST262_DIR: &str = "../test262";
