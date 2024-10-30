@@ -7,6 +7,7 @@ use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
 use yavashark_env::{scope, ControlFlow, Realm, Value, ValueResult};
+use yavashark_env::scope::Scope;
 
 mod class;
 mod function;
@@ -19,16 +20,28 @@ pub struct Interpreter;
 
 impl Interpreter {
     pub fn run(script: &Vec<Stmt>) -> anyhow::Result<Value> {
-        let mut context = &mut Realm::new()?;
-        let mut scope = scope::Scope::global(context);
+        let mut realm = &mut Realm::new()?;
+        let mut scope = Scope::global(realm);
 
-        Self::run_statements(context, script, &mut scope)
+        Self::run_statements(realm, script, &mut scope)
             .or_else(|e| match e {
                 ControlFlow::Error(e) => Err(e),
                 ControlFlow::Return(v) => Ok(v),
                 _ => Ok(Value::Undefined),
             })
             .map_err(|e| anyhow!("{e:?}"))
+    }
+    
+    
+    pub fn run_in(script: &Vec<Stmt>, realm: &mut Realm, scope: &mut Scope) -> anyhow::Result<Value> {
+        Self::run_statements(realm, script, scope)
+            .or_else(|e| match e {
+                ControlFlow::Error(e) => Err(e),
+                ControlFlow::Return(v) => Ok(v),
+                _ => Ok(Value::Undefined),
+            })
+            .map_err(|e| anyhow!("{e:?}"))
+        
     }
 
     #[cfg(test)]
