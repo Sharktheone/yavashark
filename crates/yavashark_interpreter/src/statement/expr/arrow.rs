@@ -29,7 +29,9 @@ impl Func<Realm> for ArrowFunction {
 
         let res = match &*self.expr.body {
             BlockStmtOrExpr::BlockStmt(stmt) => Interpreter::run_block(realm, stmt, scope),
-            BlockStmtOrExpr::Expr(expr) => Interpreter::run_expr(realm, expr, self.expr.span, scope),
+            BlockStmtOrExpr::Expr(expr) => {
+                Interpreter::run_expr(realm, expr, self.expr.span, scope)
+            }
         };
 
         match res {

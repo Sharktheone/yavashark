@@ -4,9 +4,9 @@ use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
 use crate::object::Object;
-use crate::{Error, ObjectHandle, Value, ValueResult, Variable};
-use crate::{ObjectProperty};
 use crate::realm::Realm;
+use crate::ObjectProperty;
+use crate::{Error, ObjectHandle, Value, ValueResult, Variable};
 
 #[object(direct(length), to_string)]
 #[derive(Debug)]

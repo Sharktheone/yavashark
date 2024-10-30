@@ -2,7 +2,7 @@ use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, ControlFlow, Object, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 
 use crate::function::JSFunction;
 use crate::Interpreter;

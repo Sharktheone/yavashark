@@ -1,8 +1,8 @@
 use crate::data::DataSection;
 use crate::function::BytecodeFunction;
 use crate::Instruction;
-use yavashark_env::{Value};
 use yavashark_env::realm::Realm;
+use yavashark_env::Value;
 use yavashark_value::ConstString;
 
 #[derive(Debug, Clone, PartialEq)]

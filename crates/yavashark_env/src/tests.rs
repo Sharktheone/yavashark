@@ -2,8 +2,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::object::Object;
-use crate::{NativeFunction, Value};
 use crate::realm::Realm;
+use crate::{NativeFunction, Value};
 
 #[macro_export]
 #[allow(clippy::crate_in_macro_def)]

@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Error, RuntimeResult, Value};
+use yavashark_env::{Error, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_update(realm: &mut Realm, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {

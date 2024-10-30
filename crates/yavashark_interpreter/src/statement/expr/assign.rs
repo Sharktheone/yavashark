@@ -3,7 +3,7 @@ use swc_ecma_ast::{
 };
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Error, Res, RuntimeResult, Value};
+use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
 
 use crate::Interpreter;
 

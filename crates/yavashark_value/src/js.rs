@@ -238,12 +238,11 @@ impl<C: Realm> Value<C> {
 
     pub fn get_property(&self, name: &Self, realm: &mut C) -> Result<Self, Error<C>> {
         match self {
-            Self::Object(o) => {
-                o.resolve_property(name, realm)?
-                    .ok_or(Error::reference_error(format!(
-                        "{name} does not exist on object"
-                    )))
-            }
+            Self::Object(o) => o
+                .resolve_property(name, realm)?
+                .ok_or(Error::reference_error(format!(
+                    "{name} does not exist on object"
+                ))),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -280,7 +279,12 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn call_method(&self, name: &Self, realm: &mut C, args: Vec<Self>) -> Result<Self, Error<C>> {
+    pub fn call_method(
+        &self,
+        name: &Self,
+        realm: &mut C,
+        args: Vec<Self>,
+    ) -> Result<Self, Error<C>> {
         let method = self.get_property(name, realm)?;
 
         method.call(realm, args, self.copy())
@@ -369,7 +373,9 @@ impl<C: Realm> Iterator for CtxIter<'_, C> {
 
 impl<C: Realm> Iter<C> {
     pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
-        let next = self.next_obj.call_method(&"next".into(), realm, Vec::new())?;
+        let next = self
+            .next_obj
+            .call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property(&Value::string("done"), realm)?;
 
         if done.is_truthy() {

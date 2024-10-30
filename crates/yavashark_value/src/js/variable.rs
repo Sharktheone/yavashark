@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
 use crate::Value;
-use crate::{Realm, Error};
+use crate::{Error, Realm};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Variable<C: Realm> {

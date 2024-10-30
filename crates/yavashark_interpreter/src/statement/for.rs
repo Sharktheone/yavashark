@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for(realm: &mut Realm, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {

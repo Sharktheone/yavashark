@@ -4,7 +4,7 @@ use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{Realm, Error, Object, Res, Value, ValueResult};
+use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
 
 use crate::Interpreter;
 

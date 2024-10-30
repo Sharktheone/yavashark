@@ -4,9 +4,9 @@ use std::fmt::Debug;
 pub use prototype::*;
 use yavashark_value::Obj;
 
+use crate::realm::Realm;
 use crate::{Error, ObjectProperty, Variable};
 use crate::{Res, Value};
-use crate::realm::Realm;
 
 pub mod array;
 mod prototype;
@@ -386,7 +386,7 @@ mod tests {
 
     #[test]
     fn array_position_empty_array() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let object = Object::raw(&realm);
 
         let (index, found) = object.array_position(0);
@@ -397,7 +397,7 @@ mod tests {
 
     #[test]
     fn array_position_non_empty_array() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
@@ -409,7 +409,7 @@ mod tests {
 
     #[test]
     fn insert_array() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
@@ -418,7 +418,7 @@ mod tests {
 
     #[test]
     fn resolve_array() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
@@ -429,7 +429,7 @@ mod tests {
 
     #[test]
     fn get_array() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
@@ -440,7 +440,7 @@ mod tests {
 
     #[test]
     fn get_array_mut() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
@@ -451,7 +451,7 @@ mod tests {
 
     #[test]
     fn contains_array_key() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.insert_array(0, Value::Number(42.0).into());
 
@@ -462,7 +462,7 @@ mod tests {
 
     #[test]
     fn define_property() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
@@ -478,7 +478,7 @@ mod tests {
 
     #[test]
     fn resolve_property() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
@@ -489,7 +489,7 @@ mod tests {
 
     #[test]
     fn get_property() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 
@@ -500,7 +500,7 @@ mod tests {
 
     #[test]
     fn contains_key() {
-        let realm =Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut object = Object::raw(&realm);
         object.define_property(Value::String("key".to_string()), Value::Number(42.0));
 

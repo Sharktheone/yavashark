@@ -1,6 +1,6 @@
+use crate::realm::Realm;
 use crate::{Error, NativeFunction, Object, ObjectHandle, Result, Value, ValueResult};
 use yavashark_macro::{object, properties};
-use crate::realm::Realm;
 
 #[must_use]
 pub fn get_error(realm: &Realm) -> Value {

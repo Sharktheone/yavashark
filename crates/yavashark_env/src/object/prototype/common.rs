@@ -1,7 +1,7 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
-use crate::{Value, ValueResult};
 use crate::realm::Realm;
+use crate::{Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()

@@ -3,8 +3,8 @@
 use yavashark_value::Obj;
 
 use crate::object::Object;
-use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
 use crate::realm::Realm;
+use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 pub struct FunctionPrototype {

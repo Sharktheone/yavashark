@@ -2,7 +2,7 @@ use swc_common::Span;
 use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, ControlFlow, Error, Value, ValueResult};
+use yavashark_env::{ControlFlow, Error, Realm, Value, ValueResult};
 
 use crate::Interpreter;
 

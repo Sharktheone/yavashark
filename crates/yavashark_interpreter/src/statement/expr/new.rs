@@ -1,7 +1,7 @@
 use swc_ecma_ast::NewExpr;
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, ControlFlow, Object, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 
 use crate::Interpreter;
 

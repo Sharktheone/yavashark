@@ -134,7 +134,6 @@ pub struct Scope {
     scope: Gc<RefCell<ScopeInternal>>,
 }
 
-
 #[derive(Debug)]
 pub enum ParentOrGlobal {
     Parent(Gc<RefCell<ScopeInternal>>),
@@ -149,7 +148,6 @@ impl Clone for ParentOrGlobal {
         }
     }
 }
-
 
 impl ParentOrGlobal {
     fn get_ref(&self) -> GcRef<RefCell<ScopeInternal>> {
@@ -352,12 +350,8 @@ impl ScopeInternal {
         }
 
         match &self.parent {
-            ParentOrGlobal::Parent(parent) => {
-                parent.borrow()?.resolve(name, realm)
-            }
-            ParentOrGlobal::Global(global) => {
-                global.resolve_property(&name.into(), realm)
-            }
+            ParentOrGlobal::Parent(parent) => parent.borrow()?.resolve(name, realm),
+            ParentOrGlobal::Global(global) => global.resolve_property(&name.into(), realm),
         }
     }
 
@@ -366,12 +360,8 @@ impl ScopeInternal {
             Ok(true)
         } else {
             match &self.parent {
-                ParentOrGlobal::Parent(parent) => {
-                    parent.borrow()?.has_value(name)
-                }
-                ParentOrGlobal::Global(global) => {
-                    global.contains_key(&name.into())
-                }
+                ParentOrGlobal::Parent(parent) => parent.borrow()?.has_value(name),
+                ParentOrGlobal::Global(global) => global.contains_key(&name.into()),
             }
         }
     }
@@ -472,7 +462,6 @@ impl ScopeInternal {
             }
         }
 
-
         Ok(false)
     }
 
@@ -486,8 +475,10 @@ impl ScopeInternal {
             return Ok(());
         } else {
             match &self.parent {
-                ParentOrGlobal::Parent(p) => if p.borrow_mut()?.update(&name, value.copy())? {
-                    return Ok(());
+                ParentOrGlobal::Parent(p) => {
+                    if p.borrow_mut()?.update(&name, value.copy())? {
+                        return Ok(());
+                    }
                 }
                 ParentOrGlobal::Global(global) => {
                     let name = name.clone().into();
@@ -663,7 +654,6 @@ impl Scope {
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
         self.scope.borrow_mut()?.update_or_define(name, value)
     }
-
 
     pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)

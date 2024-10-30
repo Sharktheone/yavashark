@@ -8,8 +8,8 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func, ObjectProperty};
 
 use crate::object::Object;
-use crate::{ObjectHandle, Value, ValueResult};
 use crate::realm::Realm;
+use crate::{ObjectHandle, Value, ValueResult};
 
 mod class;
 mod constructor;

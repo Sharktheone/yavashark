@@ -1,7 +1,7 @@
 use crate::data::DataSection;
 use crate::{FunctionBlueprint, Instruction};
-use yavashark_env::{Object, ObjectHandle};
 use yavashark_env::realm::Realm;
+use yavashark_env::{Object, ObjectHandle};
 use yavashark_macro::object;
 
 #[derive(Debug)]

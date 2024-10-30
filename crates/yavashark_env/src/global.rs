@@ -4,7 +4,7 @@ use crate::{get_console, ObjectHandle, Res, Value, Variable};
 
 pub fn init_global_obj(obj: ObjectHandle, realm: &mut Realm) -> Res {
     let mut obj = obj.get_mut()?;
-    
+
     obj.define_variable(
         "console".into(),
         Variable::new_read_only(get_console(realm)),

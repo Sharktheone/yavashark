@@ -1,11 +1,9 @@
 use crate::Interpreter;
 use log::info;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
-use yavashark_env::scope::Scope;
-use yavashark_env::{
-    ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable,
-};
 use yavashark_env::realm::Realm;
+use yavashark_env::scope::Scope;
+use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable};
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Func, Obj, ObjectProperty};
 
@@ -101,7 +99,7 @@ mod tests {
     use swc_common::DUMMY_SP;
     use swc_ecma_ast::{BlockStmt, Param, Pat};
     use yavashark_env::scope::Scope;
-    use yavashark_env::{test_eval};
+    use yavashark_env::test_eval;
 
     #[test]
     fn test_function() {

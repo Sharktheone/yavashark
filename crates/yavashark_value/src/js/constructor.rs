@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::{Realm, Obj, ObjectProperty, Value};
+use crate::{Obj, ObjectProperty, Realm, Value};
 
 pub trait Constructor<C: Realm>: Debug + Obj<C> {
     /// Gets the constructor function for this object.

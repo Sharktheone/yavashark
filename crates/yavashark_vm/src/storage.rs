@@ -6,9 +6,7 @@ use yavashark_env::{Res, Result, Value};
 #[allow(unused)]
 impl VM {
     pub fn get_variable(&mut self, name: VarName) -> Result<Value> {
-        let Some(name) = self.data
-            .var_names
-            .get(name as usize) else {
+        let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
 

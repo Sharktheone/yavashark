@@ -2,7 +2,9 @@ use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
 
 use crate::function::JSFunction;
-use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
+use yavashark_env::{
+    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
+};
 use yavashark_value::Obj;
 
 use crate::Interpreter;

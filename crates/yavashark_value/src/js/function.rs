@@ -1,4 +1,4 @@
-use crate::{Realm, Error, Obj, Value};
+use crate::{Error, Obj, Realm, Value};
 use std::fmt::Debug;
 
 pub trait Func<C: Realm>: Debug + Obj<C> {

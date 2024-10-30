@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
+use crate::realm::Realm;
 use crate::{Error, Object, ObjectProperty, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, CustomName, Func, Obj};
-use crate::realm::Realm;
 
 #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]

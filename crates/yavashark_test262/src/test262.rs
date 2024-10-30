@@ -52,13 +52,11 @@ impl Test262 {
     #[prop(createRealm)]
     fn create_realm(&self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
         let new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
-        
-        
+
         let global = new_realm.global.clone();
-        
-        
+
         let this: Value = ObjectHandle::new(Self::with_realm(realm, new_realm)).into();
-        
+
         global.define_property("$262".into(), this.copy())?;
 
         Ok(this)
@@ -92,9 +90,8 @@ impl Test262 {
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
 
         let realm = self.realm.as_mut().unwrap_or(realm);
-        
-        let mut scope = Scope::global(realm);
 
+        let mut scope = Scope::global(realm);
 
         yavashark_interpreter::Interpreter::run_statements(realm, &script.body, &mut scope).or_else(
             |e| match e {

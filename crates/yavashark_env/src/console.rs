@@ -1,7 +1,7 @@
 use crate::console::print::PrettyPrint;
 use crate::object::Object;
-use crate::NativeFunction;
 use crate::realm::Realm;
+use crate::NativeFunction;
 use crate::Value;
 
 mod print;

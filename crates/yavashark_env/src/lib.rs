@@ -14,8 +14,8 @@ pub mod realm;
 pub mod tests;
 
 use crate::error::ErrorObj;
-pub use yavashark_value as value;
 pub use crate::realm::Realm;
+pub use yavashark_value as value;
 
 pub type Value = yavashark_value::Value<Realm>;
 pub type Error = yavashark_value::Error<Realm>;

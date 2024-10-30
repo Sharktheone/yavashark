@@ -1,4 +1,4 @@
-use crate::{Realm, Object, Value};
+use crate::{Object, Realm, Value};
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {

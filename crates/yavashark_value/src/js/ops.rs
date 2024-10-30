@@ -3,7 +3,7 @@
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 
-use crate::{Realm, Error};
+use crate::{Error, Realm};
 
 use super::Value;
 
@@ -626,7 +626,9 @@ impl<C: Realm> Value<C> {
     }
 
     pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
-        Ok(Self::Number(self.to_number(realm)?.powf(rhs.to_number(realm)?)))
+        Ok(Self::Number(
+            self.to_number(realm)?.powf(rhs.to_number(realm)?),
+        ))
     }
 
     #[must_use]
@@ -685,9 +687,9 @@ impl<C: Realm> Value<C> {
             ));
         };
 
-        let Self::Object(constructor) = constructor.get_constructor_value(realm).ok_or(Error::ty(
-            "Right-hand side of 'instanceof' is not a constructor",
-        ))?
+        let Self::Object(constructor) = constructor.get_constructor_value(realm).ok_or(
+            Error::ty("Right-hand side of 'instanceof' is not a constructor"),
+        )?
         else {
             return Err(Error::ty(
                 "Right-hand side of 'instanceof' has not an object as constructor",

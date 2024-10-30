@@ -4,8 +4,8 @@ use std::fmt::{Debug, Formatter};
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Error, Func};
 
-use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 use crate::realm::Realm;
+use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 

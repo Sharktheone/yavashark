@@ -2,7 +2,7 @@ use crate::Interpreter;
 use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, ControlFlow, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -29,7 +29,9 @@ impl Interpreter {
         };
 
         match value {
-            Value::Object(o) => Ok(o.resolve_property(&name, realm)?.unwrap_or(Value::Undefined)),
+            Value::Object(o) => Ok(o
+                .resolve_property(&name, realm)?
+                .unwrap_or(Value::Undefined)),
             Value::Undefined => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of undefined",
             ))),

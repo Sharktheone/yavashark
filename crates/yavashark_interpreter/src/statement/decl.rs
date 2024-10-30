@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::Decl;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Error, Res};
+use yavashark_env::{Error, Realm, Res};
 
 mod class;
 mod r#fn;
