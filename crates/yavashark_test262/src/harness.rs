@@ -1,5 +1,6 @@
 use std::path::Path;
 use std::sync::LazyLock;
+use anyhow::anyhow;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_ast::Stmt;
@@ -7,7 +8,8 @@ use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::Realm;
 use yavashark_env::scope::Scope;
 use yavashark_interpreter::Interpreter;
-use crate::TEST262_DIR;
+use crate::test262::Test262;
+use crate::{ObjectHandle, TEST262_DIR};
 
 const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
 
@@ -48,4 +50,24 @@ pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope) -> anyhow::Res
     }
     
     Ok(())
+}
+
+
+
+pub fn setup_global() -> anyhow::Result<(Realm, Scope)> {
+    let mut r = Realm::new()?;
+    let mut s = Scope::global(&mut r);
+    
+    
+    let t262 = ObjectHandle::new(Test262::new(&r));
+        
+    r.global.define_property("$262".into(), t262.into())
+        .map_err(|e| anyhow!("{e:?}"))?;
+    
+    run_harness_in_realm(&mut r, &mut s)?;
+    
+    
+    
+    
+    Ok((r, s))
 }

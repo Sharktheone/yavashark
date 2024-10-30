@@ -24,12 +24,12 @@ pub fn print(realm: &mut Realm) -> ObjectHandle {
 
 #[object(direct(abstract_module_source(AbstractModuleSource)))]
 #[derive(Debug)]
-struct Test262 {
+pub struct Test262 {
     realm: Option<Realm>,
 }
 
 impl Test262 {
-    fn new(realm: &Realm) -> Self {
+    pub fn new(realm: &Realm) -> Self {
         Self {
             object: Object::raw(realm),
             abstract_module_source: Value::Undefined.into(),
@@ -37,7 +37,7 @@ impl Test262 {
         }
     }
 
-    fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
+    pub fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
         Self {
             object: Object::raw(realm),
             abstract_module_source: Value::Undefined.into(),
