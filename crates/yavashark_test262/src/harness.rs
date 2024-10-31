@@ -48,7 +48,7 @@ pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope) -> anyhow::Res
 
 pub fn setup_global() -> anyhow::Result<(Realm, Scope)> {
     let mut r = Realm::new()?;
-    let mut s = Scope::global(&mut r);
+    let mut s = Scope::global(&r);
 
     let t262 = ObjectHandle::new(Test262::new(&r));
 
