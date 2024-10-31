@@ -1,4 +1,4 @@
-use crate::test262::Test262;
+use crate::test262::{print, Test262};
 use crate::{ObjectHandle, TEST262_DIR};
 use anyhow::anyhow;
 use std::path::Path;
@@ -54,6 +54,12 @@ pub fn setup_global() -> anyhow::Result<(Realm, Scope)> {
 
     r.global
         .define_property("$262".into(), t262.into())
+        .map_err(|e| anyhow!("{e:?}"))?;
+
+
+    let print = print(&mut r).into();
+    r.global
+        .define_property("print".into(), print)
         .map_err(|e| anyhow!("{e:?}"))?;
 
     run_harness_in_realm(&mut r, &mut s)?;
