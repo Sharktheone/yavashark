@@ -18,4 +18,4 @@ anyhow = "1.0.89"
 
 
 [lints]
-workspace = true
+#workspace = true # this is test code, so we are fine, not having all clippy lints
