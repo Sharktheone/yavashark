@@ -1,2 +1,2 @@
-#[derive(Debug, Clone, PartialEq)]
-pub struct Environment {}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Environment;

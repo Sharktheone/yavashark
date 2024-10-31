@@ -7,7 +7,6 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
 
 use crate::console::get_console;
-use crate::error::get_error;
 use crate::realm::Realm;
 use crate::{Error, ObjectHandle, Res, Result, Value, Variable};
 
@@ -144,7 +143,7 @@ impl Clone for ParentOrGlobal {
     fn clone(&self) -> Self {
         match self {
             Self::Parent(p) => Self::Parent(p.clone()),
-            ParentOrGlobal::Global(g) => Self::Global(g.clone()),
+            Self::Global(g) => Self::Global(g.clone()),
         }
     }
 }
@@ -445,19 +444,19 @@ impl ScopeInternal {
             }
             v.value = value;
             return Ok(true);
-        } else {
-            match &self.parent {
-                ParentOrGlobal::Parent(p) => {
-                    return p.borrow_mut()?.update(name, value);
-                }
-                ParentOrGlobal::Global(global) => {
-                    let name = name.into();
+        }
 
-                    if global.contains_key(&name)? {
-                        global.define_property(name, value)?;
+        match &self.parent {
+            ParentOrGlobal::Parent(p) => {
+                return p.borrow_mut()?.update(name, value);
+            }
+            ParentOrGlobal::Global(global) => {
+                let name = name.into();
 
-                        return Ok(true);
-                    }
+                if global.contains_key(&name)? {
+                    global.define_property(name, value)?;
+
+                    return Ok(true);
                 }
             }
         }
@@ -473,21 +472,21 @@ impl ScopeInternal {
 
             v.value = value;
             return Ok(());
-        } else {
-            match &self.parent {
-                ParentOrGlobal::Parent(p) => {
-                    if p.borrow_mut()?.update(&name, value.copy())? {
-                        return Ok(());
-                    }
+        }
+
+        match &self.parent {
+            ParentOrGlobal::Parent(p) => {
+                if p.borrow_mut()?.update(&name, value.copy())? {
+                    return Ok(());
                 }
-                ParentOrGlobal::Global(global) => {
-                    let name = name.clone().into();
+            }
+            ParentOrGlobal::Global(global) => {
+                let name = name.clone().into();
 
-                    if global.contains_key(&name)? {
-                        global.define_property(name, value)?;
+                if global.contains_key(&name)? {
+                    global.define_property(name, value)?;
 
-                        return Ok(());
-                    }
+                    return Ok(());
                 }
             }
         }

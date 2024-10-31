@@ -459,7 +459,7 @@ enum Act {
 
 fn match_prop(properties: &Vec<(Path, Option<Path>)>, r: Act, value_path: &Path) -> TokenStream {
     let mut match_properties_define = TokenStream::new();
-    let mut match_non_string = TokenStream::new();
+    let match_non_string = TokenStream::new();
 
     for (field, rename) in properties {
         let act = match r {

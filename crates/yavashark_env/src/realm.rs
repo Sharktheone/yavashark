@@ -22,13 +22,13 @@ impl Realm {
 
         let global = Object::with_proto(intrinsics.obj.clone().into());
 
-        let mut realm = Self {
+        let realm = Self {
             env: Environment {},
             intrinsics,
             global: global.clone(),
         };
 
-        init_global_obj(global, &mut realm).map_err(|e| anyhow!("{e:?}"))?;
+        init_global_obj(&global, &realm).map_err(|e| anyhow!("{e:?}"))?;
 
         Ok(realm)
     }

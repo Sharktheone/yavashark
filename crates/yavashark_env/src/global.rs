@@ -1,8 +1,8 @@
 use crate::error::get_error;
 use crate::realm::Realm;
-use crate::{get_console, ObjectHandle, Res, Value, Variable};
+use crate::{get_console, ObjectHandle, Res, Variable};
 
-pub fn init_global_obj(obj: ObjectHandle, realm: &mut Realm) -> Res {
+pub fn init_global_obj(obj: &ObjectHandle, realm: &Realm) -> Res {
     let mut obj = obj.get_mut()?;
 
     obj.define_variable(
