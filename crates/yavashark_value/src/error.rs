@@ -1,98 +1,112 @@
 use crate::{Realm, Value};
 use std::fmt::Display;
+use std::ops::Range;
+use std::path::PathBuf;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Error<C: Realm> {
     pub kind: ErrorKind<C>,
     pub stacktrace: StackTrace,
+    pub loc: Location,
 }
 
 impl<C: Realm> Error<C> {
     #[must_use]
-    pub fn new(error: &str) -> Self {
+    pub fn new(error: &str, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Runtime(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
+            loc
         }
     }
 
     #[must_use]
-    pub const fn new_error(error: String) -> Self {
+    pub const fn new_error(error: String, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Runtime(error),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub fn reference(error: &str) -> Self {
+    pub fn reference(error: &str, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Reference(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub const fn reference_error(error: String) -> Self {
+    pub const fn reference_error(error: String, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Reference(error),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub fn syn(error: &str) -> Self {
+    pub fn syn(error: &str, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Syntax(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
+            loc
         }
     }
 
     #[must_use]
-    pub const fn syn_error(error: String) -> Self {
+    pub const fn syn_error(error: String, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Syntax(error),
             stacktrace: StackTrace { frames: vec![] },
+            loc
         }
     }
 
     #[must_use]
-    pub const fn unknown(error: Option<String>) -> Self {
+    pub const fn unknown(error: Option<String>, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Error(error),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub const fn unknown_error(error: String) -> Self {
+    pub const fn unknown_error(error: String, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Error(Some(error)),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub fn ty(error: &str) -> Self {
+    pub fn ty(error: &str, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Type(error.to_string()),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub const fn ty_error(error: String) -> Self {
+    pub const fn ty_error(error: String, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Type(error),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
     #[must_use]
-    pub const fn throw(val: Value<C>) -> Self {
+    pub const fn throw(val: Value<C>, loc: Location) -> Self {
         Self {
             kind: ErrorKind::Throw(val),
             stacktrace: StackTrace { frames: vec![] },
+            loc,
         }
     }
 
@@ -197,6 +211,19 @@ pub struct StackFrame {
     pub line: u32,
     pub column: u32,
 }
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Location {
+    Source {
+        range: Range<u32>,
+        path: PathBuf,
+    },
+    Native {
+        path: PathBuf,
+        line: u32,
+        offset: u32,
+    },
+    NativeUnknown,
+}
 
 #[cfg(feature = "anyhow")]
 mod anyhow_impl {
@@ -230,6 +257,6 @@ mod anyhow_impl {
 
 impl<T: std::error::Error, C: Realm> From<T> for Error<C> {
     fn from(value: T) -> Self {
-        Self::new_error(value.to_string())
+        Self::new_error(value.to_string(), Location::NativeUnknown)
     }
 }
