@@ -1,5 +1,7 @@
 use crate::{Realm, Value};
 use std::fmt::Display;
+use std::ops::Range;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Error<C: Realm> {
@@ -147,17 +149,17 @@ impl<C: Realm> Error<C> {
         self.stacktrace
             .frames
             .first()
-            .map_or("", |f| f.file.as_str())
+            .map_or("", |f| f.file())
     }
 
     #[must_use]
     pub fn line_number(&self) -> u32 {
-        self.stacktrace.frames.first().map_or(0, |f| f.line)
+        self.stacktrace.frames.first().map_or(0, |f| f.line())
     }
 
     #[must_use]
     pub fn column_number(&self) -> u32 {
-        self.stacktrace.frames.first().map_or(0, |f| f.column)
+        self.stacktrace.frames.first().map_or(0, |f| f.column())
     }
 }
 
@@ -193,9 +195,79 @@ pub struct StackTrace {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct StackFrame {
     pub function: String,
-    pub file: String,
-    pub line: u32,
-    pub column: u32,
+    pub loc: Location,
+    
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Location {
+    Source {
+        range: Range<u32>,
+        path: PathBuf,
+    },
+    Native {
+        path: PathBuf,
+        line: u32,
+        column: u32,
+    },
+    NativeUnknown,
+}
+
+
+impl Location {
+    fn file(&self) -> &str {
+        match self {
+            Self::Source { path, ..} => {
+                path.to_str().unwrap_or("<unknown>")
+            }
+            Self::Native { path, ..} => {
+                path.to_str().unwrap_or("<unknown>")
+            }
+            
+            Location::NativeUnknown => {
+                "<unknown>"
+            }
+        }
+    }
+    
+    fn line(&self) -> usize {
+        match self {
+            Self::Source { range, path} => {
+                line_of_range(range.clone(), path)
+            }
+            Self::Native { line, ..} => {
+                *line as usize
+            }
+
+            Location::NativeUnknown => {
+                0
+            }
+        }
+    }
+    
+    fn column(&self) -> usize {
+        match self {
+            Self::Source { range, path} => {
+                col_of_range(range.clone(), path.as_path())
+            }
+            Self::Native { column, ..} => {
+                *column as usize
+            }
+
+            Location::NativeUnknown => {
+                0
+            }
+        }
+    }
+}
+
+
+fn line_of_range(_range: Range<u32>, _path: &Path) -> usize {
+    0 //TODO
+}
+
+fn col_of_range(_range: Range<u32>, _path: &Path) -> usize {
+    0 //TODO
 }
 
 #[cfg(feature = "anyhow")]
