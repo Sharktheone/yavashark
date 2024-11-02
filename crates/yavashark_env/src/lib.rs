@@ -16,6 +16,7 @@ pub mod tests;
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
 pub use yavashark_value as value;
+use yavashark_value::Location;
 
 pub type Value = yavashark_value::Value<Realm>;
 pub type Error = yavashark_value::Error<Realm>;
@@ -77,6 +78,13 @@ impl ControlFlow {
         }
 
         Self::Error(Error::throw(val))
+    }
+    
+    
+    pub fn attach_location(&mut self, loc: Location) {
+        if let Self::Error(e) = self {
+            e.attach_span(loc)
+        }
     }
 }
 

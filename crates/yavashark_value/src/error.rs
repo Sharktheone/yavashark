@@ -161,6 +161,11 @@ impl<C: Realm> Error<C> {
     pub fn column_number(&self) -> u32 {
         self.stacktrace.frames.first().map_or(0, |f| f.column())
     }
+    
+    
+    pub fn attach_location(&mut self, loc: Location) {
+        self.stacktrace.attach_location(loc)
+    }
 }
 
 impl<C: Realm> Display for Error<C> {
@@ -190,6 +195,19 @@ pub enum ErrorKind<C: Realm> {
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
+}
+
+
+
+impl StackTrace {
+    fn attach_location(&mut self, loc: Location) {
+        if self.frames.is_empty() {
+            self.frames.push(StackFrame {
+                loc,
+                function: String::new(),
+            })
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
