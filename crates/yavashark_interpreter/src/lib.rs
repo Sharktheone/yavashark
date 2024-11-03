@@ -1,6 +1,9 @@
 #![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
+extern crate core;
+
 use std::cell::RefCell;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 use anyhow::anyhow;
@@ -15,13 +18,14 @@ mod pat;
 pub mod statement;
 #[cfg(test)]
 mod tests;
+mod location;
 
 pub struct Interpreter;
 
 impl Interpreter {
-    pub fn run(script: &Vec<Stmt>) -> anyhow::Result<Value> {
+    pub fn run(script: &Vec<Stmt>, file: PathBuf) -> anyhow::Result<Value> {
         let mut realm = &mut Realm::new()?;
-        let mut scope = Scope::global(realm);
+        let mut scope = Scope::global(realm, file);
 
         Self::run_statements(realm, script, &mut scope)
             .or_else(|e| match e {
@@ -48,9 +52,9 @@ impl Interpreter {
 
     #[cfg(test)]
     #[allow(clippy::missing_panics_doc)]
-    pub fn run_test(script: &Vec<Stmt>) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
+    pub fn run_test(script: &Vec<Stmt>, file: PathBuf) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
         let mut context = &mut Realm::new().unwrap();
-        let mut scope = scope::Scope::global(context);
+        let mut scope = Scope::global(context, file);
 
         let (mock, state) = yavashark_env::tests::mock_object(context);
 
@@ -315,7 +319,7 @@ mod temp_test {
             let mut p = Parser::new(Syntax::Es(c), input, None);
             let script = p.parse_script().unwrap();
 
-            let result = Interpreter::run(&script.body).unwrap();
+            let result = Interpreter::run(&script.body, PathBuf::from("test.js")).unwrap();
 
             println!("{result:?}");
         }

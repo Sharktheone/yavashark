@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
@@ -61,6 +62,8 @@ fn main() {
     }
 
     let src = matches.get_one::<String>("source").unwrap();
+    
+    let path = PathBuf::from(src);
 
     let input = std::fs::read_to_string(src).unwrap();
 
@@ -81,7 +84,7 @@ fn main() {
     }
 
     if interpreter {
-        let result = yavashark_interpreter::Interpreter::run(&script.body).unwrap();
+        let result = yavashark_interpreter::Interpreter::run(&script.body, path.clone()).unwrap();
         println!("Interpreter: {result:?}");
     }
 
@@ -95,7 +98,7 @@ fn main() {
         if bytecode {
             let data = DataSection::new(bc.variables, bc.literals);
 
-            let mut vm = VM::new(bc.instructions, data).unwrap();
+            let mut vm = VM::new(bc.instructions, data, path).unwrap();
 
             vm.run().unwrap();
 

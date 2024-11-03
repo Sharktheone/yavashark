@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 use yavashark_garbage::collectable::CellCollectable;
@@ -164,6 +165,7 @@ pub struct ScopeInternal {
     pub available_labels: Vec<String>,
     pub state: ScopeState,
     pub this: Value,
+    pub file: Option<PathBuf>,
 }
 
 unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
@@ -188,7 +190,7 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
 
 impl ScopeInternal {
     #[must_use]
-    pub fn new(realm: &Realm) -> Self {
+    pub fn new(realm: &Realm, path: PathBuf) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -222,12 +224,13 @@ impl ScopeInternal {
             available_labels: Vec::new(),
             state: ScopeState::new(),
             this: Value::Undefined,
+            file: Some(path),
         }
     }
 
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn global(realm: &Realm) -> Self {
+    pub fn global(realm: &Realm, path: PathBuf) -> Self {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -258,6 +261,7 @@ impl ScopeInternal {
             available_labels: Vec::new(),
             state: ScopeState::STATE_NONE,
             this: Value::string("global"),
+            file: Some(path)
         }
     }
 
@@ -300,6 +304,7 @@ impl ScopeInternal {
             available_labels,
             state,
             this,
+            file: None,
         })
     }
 
@@ -495,20 +500,42 @@ impl ScopeInternal {
 
         Ok(())
     }
+    
+    pub fn set_file(&mut self, file: PathBuf) {
+        self.file = Some(file)
+    }
+    
+    
+    pub fn get_current_file(&self) -> Result<PathBuf> {
+        if let Some(f) = self.file.clone() {
+            return Ok(f)
+        }
+
+
+
+        match &self.parent {
+            ParentOrGlobal::Parent(p) => {
+                p.borrow()?.get_current_file()
+            }
+            ParentOrGlobal::Global(_) => {
+                Ok(PathBuf::new())
+            }
+        }
+    }
 }
 
 impl Scope {
     #[must_use]
-    pub fn new(realm: &Realm) -> Self {
+    pub fn new(realm: &Realm, path: PathBuf) -> Self {
         Self {
-            scope: Gc::new(RefCell::new(ScopeInternal::new(realm))),
+            scope: Gc::new(RefCell::new(ScopeInternal::new(realm, path))),
         }
     }
 
     #[must_use]
-    pub fn global(realm: &Realm) -> Self {
+    pub fn global(realm: &Realm, path: PathBuf) -> Self {
         Self {
-            scope: Gc::new(RefCell::new(ScopeInternal::global(realm))),
+            scope: Gc::new(RefCell::new(ScopeInternal::global(realm, path))),
         }
     }
 
@@ -665,6 +692,17 @@ impl Scope {
     pub fn parent(&self) -> Result<ParentOrGlobal> {
         Ok(self.scope.borrow()?.parent.clone())
     }
+    
+    
+    pub fn set_path(&mut self, path: PathBuf) -> Res {
+        self.scope.borrow_mut()?.set_file(path);
+        
+        Ok(())
+    }
+    
+    pub fn get_current_path(&self) -> Result<PathBuf> {
+        self.scope.borrow()?.get_current_file()
+    }
 }
 
 impl CustomGcRefUntyped for Scope {
@@ -735,7 +773,7 @@ mod tests {
     #[test]
     fn scope_internal_declare_var_and_resolve() {
         let mut realm = Realm::new().unwrap();
-        let mut scope = ScopeInternal::new(&realm);
+        let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope.declare_var("test".to_string(), Value::Number(42.0));
         let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
@@ -744,7 +782,7 @@ mod tests {
     #[test]
     fn scope_internal_declare_read_only_var_and_update_fails() {
         let realm = Realm::new().unwrap();
-        let mut scope = ScopeInternal::new(&realm);
+        let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
             .declare_read_only_var("test".to_string(), Value::Number(42.0))
             .unwrap();
@@ -755,7 +793,7 @@ mod tests {
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
         let mut realm = Realm::new().unwrap();
-        let mut scope = ScopeInternal::new(&realm);
+        let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
             .declare_global_var("test".to_string(), Value::Number(42.0))
             .unwrap();
@@ -766,7 +804,7 @@ mod tests {
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
         let mut realm = Realm::new().unwrap();
-        let mut scope = ScopeInternal::new(&realm);
+        let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
             .update_or_define("test".to_string(), Value::Number(42.0))
             .unwrap();

@@ -66,3 +66,18 @@ pub fn setup_global() -> anyhow::Result<(Realm, Scope)> {
 
     Ok((r, s))
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use crate::harness::setup_global;
+
+    #[test]
+    fn new_harness() {
+        let (_global, _scope) = setup_global().unwrap();
+        
+        
+        
+    }
+}

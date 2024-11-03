@@ -4,6 +4,7 @@ use swc_ecma_ast::Stmt;
 use yavashark_env::{scope::Scope, Realm, RuntimeResult, Value};
 
 use crate::Interpreter;
+use crate::location::get_location;
 
 mod block;
 mod r#break;
@@ -53,7 +54,7 @@ impl Interpreter {
         
         
         res.map_err(|mut e| {
-            e.attach_location(stmt.span().into());
+            e.attach_location(get_location(stmt.span(), scope));
             
             e
         })

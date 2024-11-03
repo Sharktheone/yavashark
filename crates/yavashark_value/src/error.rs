@@ -149,24 +149,24 @@ impl<C: Realm> Error<C> {
         self.stacktrace
             .frames
             .first()
-            .map_or("", |f| f.file())
+            .map_or("", |f| f.loc.file())
     }
 
     #[must_use]
     pub fn line_number(&self) -> u32 {
-        self.stacktrace.frames.first().map_or(0, |f| f.line())
+        self.stacktrace.frames.first().map_or(0, |f| f.loc.line())
     }
 
     #[must_use]
     pub fn column_number(&self) -> u32 {
-        self.stacktrace.frames.first().map_or(0, |f| f.column())
+        self.stacktrace.frames.first().map_or(0, |f| f.loc.column())
     }
-    
-    
+
+
     pub fn attach_location(&mut self, loc: Location) {
         self.stacktrace.attach_location(loc)
     }
-    
+
     pub fn attach_function_stack(&mut self, function: String, loc: Location) {
         self.stacktrace.attach_function_stack(function, loc)
     }
@@ -212,8 +212,8 @@ impl StackTrace {
             })
         }
     }
-    
-    
+
+
     fn attach_function_stack(&mut self, function: String, loc: Location) {
         self.frames.push(StackFrame {
             loc,
@@ -226,7 +226,7 @@ impl StackTrace {
 pub struct StackFrame {
     pub function: String,
     pub loc: Location,
-    
+
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -234,6 +234,10 @@ pub enum Location {
     Source {
         range: Range<u32>,
         path: PathBuf,
+    },
+    SourceRange {
+        //path is unknown
+        range: Range<u32>
     },
     Native {
         path: PathBuf,
@@ -243,30 +247,35 @@ pub enum Location {
     NativeUnknown,
 }
 
-
 impl Location {
     fn file(&self) -> &str {
         match self {
             Self::Source { path, ..} => {
                 path.to_str().unwrap_or("<unknown>")
             }
+            Self::SourceRange {..} => {
+                "<unknown>"
+            }
             Self::Native { path, ..} => {
                 path.to_str().unwrap_or("<unknown>")
             }
-            
+
             Location::NativeUnknown => {
                 "<unknown>"
             }
         }
     }
-    
-    fn line(&self) -> usize {
+
+    fn line(&self) -> u32 {
         match self {
             Self::Source { range, path} => {
                 line_of_range(range.clone(), path)
             }
+            Self::SourceRange { .. } => {
+                0
+            }
             Self::Native { line, ..} => {
-                *line as usize
+                *line
             }
 
             Location::NativeUnknown => {
@@ -274,14 +283,17 @@ impl Location {
             }
         }
     }
-    
-    fn column(&self) -> usize {
+
+    fn column(&self) -> u32 {
         match self {
             Self::Source { range, path} => {
                 col_of_range(range.clone(), path.as_path())
             }
+            Self::SourceRange { .. } => {
+                0
+            }
             Self::Native { column, ..} => {
-                *column as usize
+                *column
             }
 
             Location::NativeUnknown => {
@@ -292,11 +304,11 @@ impl Location {
 }
 
 
-fn line_of_range(_range: Range<u32>, _path: &Path) -> usize {
+fn line_of_range(_range: Range<u32>, _path: &Path) -> u32 {
     0 //TODO
 }
 
-fn col_of_range(_range: Range<u32>, _path: &Path) -> usize {
+fn col_of_range(_range: Range<u32>, _path: &Path) -> u32 {
     0 //TODO
 }
 

@@ -5,6 +5,7 @@ mod stack;
 mod storage;
 mod value_ext;
 
+use std::path::PathBuf;
 use crate::execute::Execute;
 pub use regs::*;
 pub use stack::*;
@@ -31,7 +32,7 @@ pub struct VM {
 }
 
 impl VM {
-    pub fn new(code: Vec<Instruction>, data: DataSection) -> anyhow::Result<Self> {
+    pub fn new(code: Vec<Instruction>, data: DataSection, file: PathBuf) -> anyhow::Result<Self> {
         let realm = Realm::new()?;
 
         Ok(Self {
@@ -40,21 +41,21 @@ impl VM {
             pc: 0,
             code,
             data,
-            current_scope: Scope::new(&realm),
+            current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
         })
     }
 
     #[must_use]
-    pub fn with_realm(code: Vec<Instruction>, data: DataSection, realm: Realm) -> Self {
+    pub fn with_realm(code: Vec<Instruction>, data: DataSection, realm: Realm, file: PathBuf) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
             pc: 0,
             code,
             data,
-            current_scope: Scope::new(&realm),
+            current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
         }
@@ -152,7 +153,7 @@ mod test {
                     ConstValue::String("False".into()),
                 ],
             },
-            current_scope: Scope::new(&realm),
+            current_scope: Scope::new(&realm, PathBuf::from("test.js")),
             acc: Value::Undefined,
             realm,
         };
