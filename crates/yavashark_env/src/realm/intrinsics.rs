@@ -1,6 +1,6 @@
 use crate::array::{Array, ArrayIterator};
 use crate::error::ErrorObj;
-use crate::{FunctionPrototype, Object, ObjectHandle, Prototype};
+use crate::{FunctionPrototype, Object, ObjectHandle, Prototype, Error};
 use anyhow::anyhow;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -13,7 +13,7 @@ pub struct Intrinsics {
 }
 
 impl Intrinsics {
-    pub(crate) fn new() -> Result<Self, anyhow::Error> {
+    pub(crate) fn new() -> Result<Self, Error> {
         let obj_prototype = ObjectHandle::new(Prototype::new());
 
         let func_prototype =
@@ -21,28 +21,26 @@ impl Intrinsics {
 
         {
             let mut obj = obj_prototype
-                .get_mut()
-                .map_err(|e| anyhow!(format!("{e:?}")))?;
+                .get_mut()?;
 
             let obj = obj.as_any_mut();
 
             let proto = obj
                 .downcast_mut::<Prototype>()
-                .ok_or_else(|| anyhow!("downcast_mut::<Prototype> failed"))?;
+                .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
 
             proto.initialize(func_prototype.clone().into());
         }
 
         {
             let mut func = func_prototype
-                .get_mut()
-                .map_err(|e| anyhow!(format!("{e:?}")))?;
+                .get_mut()?;
 
             let func = func.as_any_mut();
 
             let proto = func
                 .downcast_mut::<FunctionPrototype>()
-                .ok_or_else(|| anyhow!("downcast_mut::<FunctionPrototype> failed"))?;
+                .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
 
             proto.initialize(func_prototype.clone().into());
         }
@@ -50,20 +48,17 @@ impl Intrinsics {
         let array_prototype = Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
-        )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
+        )?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
-        )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
+        )?;
 
         let error_prototype = ErrorObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
-        )
-        .map_err(|e| anyhow!(format!("{e:?}")))?;
+        )?;
 
         Ok(Self {
             obj: obj_prototype,

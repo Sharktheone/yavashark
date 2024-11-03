@@ -4,7 +4,7 @@ mod intrinsics;
 use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
-use crate::{Object, ObjectHandle};
+use crate::{Object, ObjectHandle, Result};
 use anyhow::anyhow;
 use std::fmt::Debug;
 use yavashark_value::Realm as RealmT;
@@ -17,7 +17,7 @@ pub struct Realm {
 }
 
 impl Realm {
-    pub fn new() -> anyhow::Result<Self> {
+    pub fn new() -> Result<Self> {
         let intrinsics = Intrinsics::new()?;
 
         let global = Object::with_proto(intrinsics.obj.clone().into());
@@ -28,7 +28,7 @@ impl Realm {
             global: global.clone(),
         };
 
-        init_global_obj(&global, &realm).map_err(|e| anyhow!("{e:?}"))?;
+        init_global_obj(&global, &realm)?;
 
         Ok(realm)
     }
