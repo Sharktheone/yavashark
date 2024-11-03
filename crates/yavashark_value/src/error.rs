@@ -173,13 +173,13 @@ impl<C: Realm> Error<C> {
 }
 
 impl<C: Realm> Display for Error<C> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let msg = self.message_internal();
 
         if msg.is_empty() {
             write!(f, "{}", self.name())
         } else {
-            write!(f, "{}: {}", self.name(), msg)
+            write!(f, "{}: {}\n{}", self.name(), msg, self.stacktrace)
         }
     }
 }
