@@ -55,6 +55,11 @@ impl Interpreter {
                 .collect::<Result<Vec<Value>, ControlFlow>>()?;
 
             f.call(realm, args, this) //In strict mode, this is undefined
+                .map_err(|mut e| {
+                    e.attach_function_stack(f.name(), span.into());
+                    
+                    e
+                })
         } else {
             Err(Error::ty_error(format!("{callee} is not a function",)))
         }

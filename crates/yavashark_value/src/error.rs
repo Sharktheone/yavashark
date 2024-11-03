@@ -166,6 +166,10 @@ impl<C: Realm> Error<C> {
     pub fn attach_location(&mut self, loc: Location) {
         self.stacktrace.attach_location(loc)
     }
+    
+    pub fn attach_function_stack(&mut self, function: String, loc: Location) {
+        self.stacktrace.attach_function_stack(function, loc)
+    }
 }
 
 impl<C: Realm> Display for Error<C> {
@@ -207,6 +211,14 @@ impl StackTrace {
                 function: String::new(),
             })
         }
+    }
+    
+    
+    fn attach_function_stack(&mut self, function: String, loc: Location) {
+        self.frames.push(StackFrame {
+            loc,
+            function,
+        })
     }
 }
 
