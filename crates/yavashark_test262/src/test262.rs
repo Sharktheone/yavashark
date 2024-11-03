@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
@@ -91,7 +92,7 @@ impl Test262 {
 
         let realm = self.realm.as_mut().unwrap_or(realm);
 
-        let mut scope = Scope::global(realm);
+        let mut scope = Scope::global(realm, PathBuf::new());
 
         yavashark_interpreter::Interpreter::run_statements(realm, &script.body, &mut scope).or_else(
             |e| match e {
