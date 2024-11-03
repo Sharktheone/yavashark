@@ -1,5 +1,7 @@
 use crate::{Realm, Value};
-use std::fmt::Display;
+use std::fmt::{Debug, Display, Formatter};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
 
@@ -196,9 +198,27 @@ pub enum ErrorKind<C: Realm> {
     Error(Option<String>),
 }
 
+
+
+
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
+}
+
+
+
+
+impl Display for StackTrace {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        for t in &self.frames {
+            Display::fmt(t, f)?
+        }
+        
+        Ok(())
+    }
+    
 }
 
 
@@ -226,7 +246,13 @@ impl StackTrace {
 pub struct StackFrame {
     pub function: String,
     pub loc: Location,
+}
 
+
+impl Display for StackFrame {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "    at {} ({}:{})", self.function, self.loc.file(), self.loc.line()) 
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -304,13 +330,45 @@ impl Location {
 }
 
 
-fn line_of_range(_range: Range<u32>, _path: &Path) -> u32 {
-    0 //TODO
+fn line_of_range(range: Range<u32>, path: &Path) -> u32 {
+    let file = File::open(path).expect("Failed to open file");
+    let reader = BufReader::new(file);
+
+    let mut total_chars = 0u32;
+    for (line_number, line) in reader.lines().enumerate() {
+        let line = line.expect("Failed to read line");
+        let line_length = line.len() as u32 + 1;
+
+        if total_chars + line_length > range.start {
+            return (line_number + 1) as u32;
+        }
+
+        total_chars += line_length;
+    }
+
+    0
 }
 
-fn col_of_range(_range: Range<u32>, _path: &Path) -> u32 {
-    0 //TODO
+fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
+    let file = File::open(path).expect("Failed to open file");
+    let reader = BufReader::new(file);
+
+    let mut total_chars = 0u32;
+    for line in reader.lines() {
+        let line = line.expect("Failed to read line");
+        let line_length = line.len() as u32 + 1;
+
+        if total_chars + line_length > range.start {
+            return range.start - total_chars + 1;
+        }
+
+        total_chars += line_length;
+    }
+
+    0 
 }
+
+
 
 #[cfg(feature = "anyhow")]
 mod anyhow_impl {
