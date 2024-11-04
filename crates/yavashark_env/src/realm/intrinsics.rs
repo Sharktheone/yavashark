@@ -1,6 +1,6 @@
 use crate::array::{Array, ArrayIterator};
 use crate::error::ErrorObj;
-use crate::{FunctionPrototype, Object, ObjectHandle, Prototype, Error};
+use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype};
 use anyhow::anyhow;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -20,8 +20,7 @@ impl Intrinsics {
             ObjectHandle::new(FunctionPrototype::new(obj_prototype.clone().into()));
 
         {
-            let mut obj = obj_prototype
-                .get_mut()?;
+            let mut obj = obj_prototype.get_mut()?;
 
             let obj = obj.as_any_mut();
 
@@ -33,8 +32,7 @@ impl Intrinsics {
         }
 
         {
-            let mut func = func_prototype
-                .get_mut()?;
+            let mut func = func_prototype.get_mut()?;
 
             let func = func.as_any_mut();
 

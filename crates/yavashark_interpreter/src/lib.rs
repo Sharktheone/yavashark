@@ -10,15 +10,15 @@ use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{scope, ControlFlow, Realm, Value, ValueResult, Result};
+use yavashark_env::{scope, ControlFlow, Realm, Result, Value, ValueResult};
 
 mod class;
 mod function;
+mod location;
 mod pat;
 pub mod statement;
 #[cfg(test)]
 mod tests;
-mod location;
 
 pub struct Interpreter;
 
@@ -27,30 +27,27 @@ impl Interpreter {
         let mut realm = &mut Realm::new()?;
         let mut scope = Scope::global(realm, file);
 
-        Self::run_statements(realm, script, &mut scope)
-            .or_else(|e| match e {
-                ControlFlow::Error(e) => Err(e),
-                ControlFlow::Return(v) => Ok(v),
-                _ => Ok(Value::Undefined),
-            })
+        Self::run_statements(realm, script, &mut scope).or_else(|e| match e {
+            ControlFlow::Error(e) => Err(e),
+            ControlFlow::Return(v) => Ok(v),
+            _ => Ok(Value::Undefined),
+        })
     }
 
-    pub fn run_in(
-        script: &Vec<Stmt>,
-        realm: &mut Realm,
-        scope: &mut Scope,
-    ) -> Result<Value> {
-        Self::run_statements(realm, script, scope)
-            .or_else(|e| match e {
-                ControlFlow::Error(e) => Err(e),
-                ControlFlow::Return(v) => Ok(v),
-                _ => Ok(Value::Undefined),
-            })
+    pub fn run_in(script: &Vec<Stmt>, realm: &mut Realm, scope: &mut Scope) -> Result<Value> {
+        Self::run_statements(realm, script, scope).or_else(|e| match e {
+            ControlFlow::Error(e) => Err(e),
+            ControlFlow::Return(v) => Ok(v),
+            _ => Ok(Value::Undefined),
+        })
     }
 
     #[cfg(test)]
     #[allow(clippy::missing_panics_doc)]
-    pub fn run_test(script: &Vec<Stmt>, file: PathBuf) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
+    pub fn run_test(
+        script: &Vec<Stmt>,
+        file: PathBuf,
+    ) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
         let mut context = &mut Realm::new().unwrap();
         let mut scope = Scope::global(context, file);
 

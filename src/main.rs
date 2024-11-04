@@ -62,7 +62,7 @@ fn main() {
     }
 
     let src = matches.get_one::<String>("source").unwrap();
-    
+
     let path = PathBuf::from(src);
 
     let input = std::fs::read_to_string(src).unwrap();

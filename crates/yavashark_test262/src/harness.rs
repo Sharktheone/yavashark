@@ -21,10 +21,7 @@ static COMPILED: LazyLock<Vec<(Vec<Stmt>, PathBuf)>> = LazyLock::new(|| {
         .map(|f| {
             let path = p.join(Path::new(f));
 
-            (
-                parse_file(path.as_path()),
-                path
-            )
+            (parse_file(path.as_path()), path)
         })
         .collect()
 });
@@ -65,19 +62,15 @@ pub fn setup_global(file: PathBuf) -> Result<(Realm, Scope)> {
 
     let t262 = ObjectHandle::new(Test262::new(&r));
 
-    r.global
-        .define_property("$262".into(), t262.into())?;
-
+    r.global.define_property("$262".into(), t262.into())?;
 
     let print = print(&mut r).into();
-    r.global
-        .define_property("print".into(), print)?;
+    r.global.define_property("print".into(), print)?;
 
     run_harness_in_realm(&mut r, &mut s)?;
 
     Ok((r, s))
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -91,7 +84,6 @@ mod tests {
             Err(e) => {
                 panic!("Failed to create new harness: {e}")
             }
-            
         };
     }
 }

@@ -261,7 +261,7 @@ impl ScopeInternal {
             available_labels: Vec::new(),
             state: ScopeState::STATE_NONE,
             this: Value::string("global"),
-            file: Some(path)
+            file: Some(path),
         }
     }
 
@@ -500,26 +500,19 @@ impl ScopeInternal {
 
         Ok(())
     }
-    
+
     pub fn set_file(&mut self, file: PathBuf) {
         self.file = Some(file)
     }
-    
-    
+
     pub fn get_current_file(&self) -> Result<PathBuf> {
         if let Some(f) = self.file.clone() {
-            return Ok(f)
+            return Ok(f);
         }
 
-
-
         match &self.parent {
-            ParentOrGlobal::Parent(p) => {
-                p.borrow()?.get_current_file()
-            }
-            ParentOrGlobal::Global(_) => {
-                Ok(PathBuf::new())
-            }
+            ParentOrGlobal::Parent(p) => p.borrow()?.get_current_file(),
+            ParentOrGlobal::Global(_) => Ok(PathBuf::new()),
         }
     }
 }
@@ -692,14 +685,13 @@ impl Scope {
     pub fn parent(&self) -> Result<ParentOrGlobal> {
         Ok(self.scope.borrow()?.parent.clone())
     }
-    
-    
+
     pub fn set_path(&mut self, path: PathBuf) -> Res {
         self.scope.borrow_mut()?.set_file(path);
-        
+
         Ok(())
     }
-    
+
     pub fn get_current_path(&self) -> Result<PathBuf> {
         self.scope.borrow()?.get_current_file()
     }

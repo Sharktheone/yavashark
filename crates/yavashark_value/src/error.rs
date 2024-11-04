@@ -148,10 +148,7 @@ impl<C: Realm> Error<C> {
 
     #[must_use]
     pub fn file_name(&self) -> &str {
-        self.stacktrace
-            .frames
-            .first()
-            .map_or("", |f| f.loc.file())
+        self.stacktrace.frames.first().map_or("", |f| f.loc.file())
     }
 
     #[must_use]
@@ -163,7 +160,6 @@ impl<C: Realm> Error<C> {
     pub fn column_number(&self) -> u32 {
         self.stacktrace.frames.first().map_or(0, |f| f.loc.column())
     }
-
 
     pub fn attach_location(&mut self, loc: Location) {
         self.stacktrace.attach_location(loc)
@@ -198,30 +194,20 @@ pub enum ErrorKind<C: Realm> {
     Error(Option<String>),
 }
 
-
-
-
-
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
 }
-
-
-
 
 impl Display for StackTrace {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         for t in &self.frames {
             Display::fmt(t, f)?
         }
-        
+
         Ok(())
     }
-    
 }
-
-
 
 impl StackTrace {
     fn attach_location(&mut self, loc: Location) {
@@ -233,12 +219,8 @@ impl StackTrace {
         }
     }
 
-
     fn attach_function_stack(&mut self, function: String, loc: Location) {
-        self.frames.push(StackFrame {
-            loc,
-            function,
-        })
+        self.frames.push(StackFrame { loc, function })
     }
 }
 
@@ -248,10 +230,19 @@ pub struct StackFrame {
     pub loc: Location,
 }
 
-
 impl Display for StackFrame {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "    at {} ({}:{})", self.function, self.loc.file(), self.loc.line()) 
+        if self.function.is_empty() {
+            return write!(f, "    at {}:{}", self.loc.file(), self.loc.line());
+        }
+
+        write!(
+            f,
+            "    at {} ({}:{})",
+            self.function,
+            self.loc.file(),
+            self.loc.line()
+        )
     }
 }
 
@@ -263,7 +254,7 @@ pub enum Location {
     },
     SourceRange {
         //path is unknown
-        range: Range<u32>
+        range: Range<u32>,
     },
     Native {
         path: PathBuf,
@@ -276,59 +267,34 @@ pub enum Location {
 impl Location {
     fn file(&self) -> &str {
         match self {
-            Self::Source { path, ..} => {
-                path.to_str().unwrap_or("<unknown>")
-            }
-            Self::SourceRange {..} => {
-                "<unknown>"
-            }
-            Self::Native { path, ..} => {
-                path.to_str().unwrap_or("<unknown>")
-            }
+            Self::Source { path, .. } => path.to_str().unwrap_or("<unknown>"),
+            Self::SourceRange { .. } => "<unknown>",
+            Self::Native { path, .. } => path.to_str().unwrap_or("<unknown>"),
 
-            Location::NativeUnknown => {
-                "<unknown>"
-            }
+            Location::NativeUnknown => "<unknown>",
         }
     }
 
     fn line(&self) -> u32 {
         match self {
-            Self::Source { range, path} => {
-                line_of_range(range.clone(), path)
-            }
-            Self::SourceRange { .. } => {
-                0
-            }
-            Self::Native { line, ..} => {
-                *line
-            }
+            Self::Source { range, path } => line_of_range(range.clone(), path),
+            Self::SourceRange { .. } => 0,
+            Self::Native { line, .. } => *line,
 
-            Location::NativeUnknown => {
-                0
-            }
+            Location::NativeUnknown => 0,
         }
     }
 
     fn column(&self) -> u32 {
         match self {
-            Self::Source { range, path} => {
-                col_of_range(range.clone(), path.as_path())
-            }
-            Self::SourceRange { .. } => {
-                0
-            }
-            Self::Native { column, ..} => {
-                *column
-            }
+            Self::Source { range, path } => col_of_range(range.clone(), path.as_path()),
+            Self::SourceRange { .. } => 0,
+            Self::Native { column, .. } => *column,
 
-            Location::NativeUnknown => {
-                0
-            }
+            Location::NativeUnknown => 0,
         }
     }
 }
-
 
 fn line_of_range(range: Range<u32>, path: &Path) -> u32 {
     let file = File::open(path).expect("Failed to open file");
@@ -365,10 +331,8 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
         total_chars += line_length;
     }
 
-    0 
+    0
 }
-
-
 
 #[cfg(feature = "anyhow")]
 mod anyhow_impl {

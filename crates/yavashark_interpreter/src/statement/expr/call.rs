@@ -4,8 +4,8 @@ use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, Realm, Value, ValueResult};
 
-use crate::Interpreter;
 use crate::location::get_location;
+use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
@@ -58,7 +58,7 @@ impl Interpreter {
             f.call(realm, args, this) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, &scope));
-                    
+
                     e
                 })
         } else {

@@ -5,10 +5,10 @@ mod stack;
 mod storage;
 mod value_ext;
 
-use std::path::PathBuf;
 use crate::execute::Execute;
 pub use regs::*;
 pub use stack::*;
+use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
 use yavashark_env::scope::{ParentOrGlobal, Scope};
@@ -48,7 +48,12 @@ impl VM {
     }
 
     #[must_use]
-    pub fn with_realm(code: Vec<Instruction>, data: DataSection, realm: Realm, file: PathBuf) -> Self {
+    pub fn with_realm(
+        code: Vec<Instruction>,
+        data: DataSection,
+        realm: Realm,
+        file: PathBuf,
+    ) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
