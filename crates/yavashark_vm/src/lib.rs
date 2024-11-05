@@ -13,6 +13,7 @@ use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
 use yavashark_env::scope::{ParentOrGlobal, Scope};
 use yavashark_env::{Error, Realm, Res, Value};
+use yavashark_env::Result;
 
 pub use yavashark_bytecode;
 
@@ -32,7 +33,7 @@ pub struct VM {
 }
 
 impl VM {
-    pub fn new(code: Vec<Instruction>, data: DataSection, file: PathBuf) -> anyhow::Result<Self> {
+    pub fn new(code: Vec<Instruction>, data: DataSection, file: PathBuf) -> Result<Self> {
         let realm = Realm::new()?;
 
         Ok(Self {
