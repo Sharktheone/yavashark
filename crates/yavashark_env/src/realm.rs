@@ -5,7 +5,6 @@ use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
 use crate::{Object, ObjectHandle, Result};
-use anyhow::anyhow;
 use std::fmt::Debug;
 use yavashark_value::Realm as RealmT;
 

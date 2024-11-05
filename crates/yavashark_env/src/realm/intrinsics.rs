@@ -1,7 +1,6 @@
 use crate::array::{Array, ArrayIterator};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype};
-use anyhow::anyhow;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
