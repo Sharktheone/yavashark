@@ -82,7 +82,7 @@ impl ControlFlow {
 
     pub fn attach_location(&mut self, loc: Location) {
         if let Self::Error(e) = self {
-            e.attach_location(loc)
+            e.attach_location(loc);
         }
     }
 }

@@ -26,6 +26,7 @@ pub fn print(realm: &mut Realm) -> ObjectHandle {
 #[object(direct(abstract_module_source(AbstractModuleSource)))]
 #[derive(Debug)]
 pub struct Test262 {
+    #[allow(unused)]
     realm: Option<Realm>,
 }
 
@@ -38,6 +39,7 @@ impl Test262 {
         }
     }
 
+    #[allow(unused)]
     pub fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
         Self {
             object: Object::raw(realm),
@@ -64,7 +66,7 @@ impl Test262 {
     }
 
     #[prop(detachArrayBuffer)]
-    fn detach_array_buffer(&mut self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
+    fn detach_array_buffer(&mut self, _args: Vec<Value>, _realm: &mut Realm) -> ValueResult {
         Ok(Value::Undefined)
     }
 

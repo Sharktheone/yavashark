@@ -502,7 +502,7 @@ impl ScopeInternal {
     }
 
     pub fn set_file(&mut self, file: PathBuf) {
-        self.file = Some(file)
+        self.file = Some(file);
     }
 
     pub fn get_current_file(&self) -> Result<PathBuf> {

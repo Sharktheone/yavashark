@@ -57,7 +57,7 @@ impl Interpreter {
 
             f.call(realm, args, this) //In strict mode, this is undefined
                 .map_err(|mut e| {
-                    e.attach_function_stack(f.name(), get_location(span, &scope));
+                    e.attach_function_stack(f.name(), get_location(span, scope));
 
                     e
                 })

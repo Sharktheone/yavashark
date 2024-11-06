@@ -1,6 +1,5 @@
 use crate::test262::{print, Test262};
-use crate::{Error, ObjectHandle, TEST262_DIR};
-use anyhow::anyhow;
+use crate::{ObjectHandle, TEST262_DIR};
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use swc_common::input::StringInput;
