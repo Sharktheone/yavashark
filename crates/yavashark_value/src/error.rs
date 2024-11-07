@@ -267,7 +267,9 @@ pub enum Location {
 impl Location {
     fn file(&self) -> &str {
         match self {
-            Self::Source { path, .. } | Self::Native { path, .. } => path.to_str().unwrap_or("<unknown>"),
+            Self::Source { path, .. } | Self::Native { path, .. } => {
+                path.to_str().unwrap_or("<unknown>")
+            }
 
             Self::SourceRange { .. } | Self::NativeUnknown => "<unknown>",
         }
@@ -293,10 +295,8 @@ impl Location {
 }
 
 fn line_of_range(range: Range<u32>, path: &Path) -> u32 {
-    let Ok(file) = File::open(path) else {
-        return 0
-    };
-    
+    let Ok(file) = File::open(path) else { return 0 };
+
     let reader = BufReader::new(file);
 
     let mut total_chars = 0u32;
@@ -315,10 +315,8 @@ fn line_of_range(range: Range<u32>, path: &Path) -> u32 {
 }
 
 fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
-    let Ok(file) = File::open(path) else {
-        return 0
-    };
-    
+    let Ok(file) = File::open(path) else { return 0 };
+
     let reader = BufReader::new(file);
 
     let mut total_chars = 0u32;

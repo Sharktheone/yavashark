@@ -12,8 +12,8 @@ use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
 use yavashark_env::scope::{ParentOrGlobal, Scope};
-use yavashark_env::{Error, Realm, Res, Value};
 use yavashark_env::Result;
+use yavashark_env::{Error, Realm, Res, Value};
 
 pub use yavashark_bytecode;
 
