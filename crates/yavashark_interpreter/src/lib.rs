@@ -46,10 +46,9 @@ impl Interpreter {
     #[allow(clippy::missing_panics_doc)]
     pub fn run_test(
         script: &Vec<Stmt>,
-        file: PathBuf,
     ) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
         let mut context = &mut Realm::new().unwrap();
-        let mut scope = Scope::global(context, file);
+        let mut scope = Scope::global(context, PathBuf::from("test.js"));
 
         let (mock, state) = yavashark_env::tests::mock_object(context);
 
