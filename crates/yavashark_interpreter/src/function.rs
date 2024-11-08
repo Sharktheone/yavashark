@@ -8,7 +8,7 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func, Obj, ObjectProperty};
 
 #[allow(clippy::module_name_repetitions)]
-#[object(function, constructor)]
+#[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
 pub struct JSFunction {
     pub name: String,
@@ -16,8 +16,6 @@ pub struct JSFunction {
     pub block: Option<BlockStmt>,
     #[gc(untyped)]
     pub scope: Scope,
-    #[gc]
-    pub prototype: Value,
 }
 
 impl JSFunction {
@@ -78,17 +76,17 @@ impl Func<Realm> for JSFunction {
 
 impl Constructor<Realm> for JSFunction {
     fn get_constructor(&self) -> ObjectProperty<Realm> {
-        self.prototype
+        self.prototype.value
             .get_property_no_get_set(&"constructor".into())
             .unwrap_or(Value::Undefined.into())
     }
 
     fn value(&self, _realm: &mut Realm) -> Value {
-        Object::with_proto(self.prototype.clone()).into()
+        Object::with_proto(self.prototype.value.clone()).into()
     }
 
     fn proto(&self, realm: &mut Realm) -> yavashark_value::Value<Realm> {
-        self.prototype.clone()
+        self.prototype.value.clone()
     }
 }
 
@@ -148,6 +146,29 @@ mod tests {
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)
+        );
+    }
+    
+    #[test]
+    fn attach_arbitrary() {
+        test_eval!(
+            "
+                function foo() {}
+                
+                console.log(foo)  
+                
+                console.log(foo.prototype)  
+                
+                foo.prototype.a = 1  
+                 
+                console.log(foo.prototype.a)
+                
+                
+                foo.prototype.a   
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Number(1.0)
         );
     }
 }
