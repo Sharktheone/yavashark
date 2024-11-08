@@ -1,6 +1,6 @@
 use std::path::Path;
-use swc_common::BytePos;
 use swc_common::input::StringInput;
+use swc_common::BytePos;
 use swc_ecma_ast::Stmt;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 

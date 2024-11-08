@@ -1,6 +1,6 @@
 pub mod harness;
-mod test262;
 pub mod run;
+mod test262;
 mod utils;
 
 pub type Value = yavashark_value::Value<Realm>;

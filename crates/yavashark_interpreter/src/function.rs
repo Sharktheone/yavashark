@@ -76,7 +76,8 @@ impl Func<Realm> for JSFunction {
 
 impl Constructor<Realm> for JSFunction {
     fn get_constructor(&self) -> ObjectProperty<Realm> {
-        self.prototype.value
+        self.prototype
+            .value
             .get_property_no_get_set(&"constructor".into())
             .unwrap_or(Value::Undefined.into())
     }
@@ -148,23 +149,23 @@ mod tests {
             Value::Number(3.0)
         );
     }
-    
+
     #[test]
     fn attach_arbitrary() {
         test_eval!(
             "
                 function foo() {}
-                
-                console.log(foo)  
-                
-                console.log(foo.prototype)  
-                
-                foo.prototype.a = 1  
-                 
+
+                console.log(foo)
+
+                console.log(foo.prototype)
+
+                foo.prototype.a = 1
+
                 console.log(foo.prototype.a)
-                
-                
-                foo.prototype.a   
+
+
+                foo.prototype.a
             ",
             0,
             Vec::<Vec<Value>>::new(),
