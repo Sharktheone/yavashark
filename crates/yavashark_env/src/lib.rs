@@ -2,7 +2,7 @@ pub use console::*;
 pub use function::*;
 pub use object::*;
 
-mod console;
+pub mod console;
 pub mod error;
 mod function;
 pub mod object;
