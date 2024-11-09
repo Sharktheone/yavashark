@@ -84,7 +84,7 @@ impl Array {
         self.length.value = Value::Number(index as f64 + 1.0);
     }
 
-    #[prop(Symbol::ITERATOR)]
+    #[prop(crate::Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
     fn iterator(&self, _args: Vec<Value>, realm: &Realm, this: Value) -> ValueResult {
         let Value::Object(obj) = this else {

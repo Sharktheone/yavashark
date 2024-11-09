@@ -324,7 +324,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .as_ref()
             .map(|name| {
                 quote! {
-                    stringify!(#name)
+                    #name
                 }
             })
             .unwrap_or(quote! {

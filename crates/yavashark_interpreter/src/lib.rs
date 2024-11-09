@@ -1,4 +1,7 @@
-#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
+#![allow(
+    unused,
+    clippy::needless_pass_by_ref_mut
+)] //pass by ref mut is just temporary until all functions are implemented
 
 extern crate core;
 
@@ -6,7 +9,6 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use anyhow::anyhow;
 use swc_ecma_ast::Stmt;
 
 use yavashark_env::scope::Scope;
@@ -65,11 +67,11 @@ impl Interpreter {
 
 #[cfg(test)]
 mod temp_test {
+    use super::*;
     use swc_common::input::StringInput;
     use swc_common::BytePos;
     use swc_ecma_parser::{EsSyntax, Parser, Syntax};
-
-    use super::*;
+    use yavashark_env::test_eval;
 
     #[test]
     fn math() {
@@ -323,6 +325,33 @@ mod temp_test {
             "LEAKED OBJECTS: {}/{}",
             yavashark_value::OBJECT_COUNT.get(),
             yavashark_value::OBJECT_ALLOC.get()
+        );
+    }
+
+
+    #[test]
+    fn iterator() {
+        test_eval!(
+            r#"
+            let array = [1,2,3,4]
+            
+            
+            console.log(array.__proto__)
+            
+               
+            // for (let i in array) {
+            //     console.log("in", i)
+            // }
+            
+            for (let i of array) {
+                console.log("of", i)
+            }
+            
+            
+            "#,
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Undefined
         );
     }
 }

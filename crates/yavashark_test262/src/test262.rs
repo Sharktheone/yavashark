@@ -52,7 +52,7 @@ impl Test262 {
 #[properties]
 #[allow(clippy::needless_pass_by_value)]
 impl Test262 {
-    #[prop(createRealm)]
+    #[prop("createRealm")]
     fn create_realm(&self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
         let new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
 
@@ -65,12 +65,12 @@ impl Test262 {
         Ok(this)
     }
 
-    #[prop(detachArrayBuffer)]
+    #[prop("detachArrayBuffer")]
     fn detach_array_buffer(&mut self, _args: Vec<Value>, _realm: &mut Realm) -> ValueResult {
         Ok(Value::Undefined)
     }
 
-    #[prop(evalScript)]
+    #[prop("evalScript")]
     fn eval_script(&mut self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         let input = args.first().ok_or(Error::ty("expected one argument"))?;
 
