@@ -14,6 +14,8 @@ swc_common = "0.40.0"
 swc_ecma_parser = "0.152.0"
 swc_ecma_ast = "0.121.2"
 anyhow = "1.0.89"
+yaml-rust2 = "0.9.0"
+bitflags = "2.6.0"
 
 
 
