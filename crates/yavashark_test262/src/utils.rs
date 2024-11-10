@@ -16,6 +16,13 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
     let c = EsSyntax::default();
 
     let mut p = Parser::new(Syntax::Es(c), input, None);
+    
 
-    p.parse_script().unwrap().body
+    match p.parse_script() {
+        Ok(s) => s,
+        Err(e) => {
+            println!("PARSE_ERROR:\n{e:?}");
+            panic!()
+        }
+    }.body
 }
