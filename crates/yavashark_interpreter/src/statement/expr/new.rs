@@ -54,8 +54,6 @@ impl Interpreter {
             }
         }
 
-        dbg!(f.to_string(realm));
-
         let _ = f.call(realm, call_args, this.copy())?;
 
         Ok(this) //This is always an object, so it will also be updated when we copy it

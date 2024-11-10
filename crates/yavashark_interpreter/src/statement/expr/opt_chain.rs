@@ -45,8 +45,6 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, realm: &mut Realm) -> RuntimeResu
         OptChainBase::Call(call) => {
             let (callee, this) = Interpreter::run_call_expr(realm, &call.callee, call.span, scope)?;
 
-            println!("{:?} is {}", callee, stmt.optional);
-
             if (callee == Value::Undefined || callee == Value::Null) && stmt.optional {
                 return Err(ControlFlow::OptChainShortCircuit);
             }

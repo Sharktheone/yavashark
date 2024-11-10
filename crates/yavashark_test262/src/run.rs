@@ -9,9 +9,7 @@ pub fn run_file(file: PathBuf) -> ValueResult {
     let path = Path::new(TEST262_DIR).join("test").join(&file);
     let (mut realm, mut scope) = setup_global(file.clone())?;
 
-    let stmt = parse_file(&path);
-
-    println!("Running...");
+    let stmt = parse_file(&file);
 
     Interpreter::run_in(&stmt, &mut realm, &mut scope)
 }
