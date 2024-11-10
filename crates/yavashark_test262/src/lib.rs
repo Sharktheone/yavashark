@@ -1,4 +1,5 @@
 pub mod harness;
+mod metadata;
 pub mod run;
 mod test262;
 mod utils;
