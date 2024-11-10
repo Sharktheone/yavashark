@@ -7,8 +7,7 @@ fn main() {
     args.next();
 
     let f = args.next().expect("please provide a test path");
-    
-    
+
     let path = PathBuf::from(f);
 
     match run_file(path) {

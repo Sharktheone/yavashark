@@ -1,6 +1,6 @@
 use crate::harness::setup_global;
 use crate::utils::parse_file;
-use std::path::{PathBuf};
+use std::path::PathBuf;
 use yavashark_env::ValueResult;
 use yavashark_interpreter::Interpreter;
 
