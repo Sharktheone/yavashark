@@ -7,11 +7,12 @@ fn main() {
     args.next();
 
     let f = args.next().expect("please provide a test path");
-
+    
+    
     let path = PathBuf::from(f);
 
     match run_file(path) {
-        Err(e) => println!("Test failed: {e}"),
-        Ok(v) => println!("Test succeeded: {v}"),
+        Err(e) => println!("FAIL:\n {e}"),
+        Ok(v) => println!("PASS:\n {v}"),
     }
 }
