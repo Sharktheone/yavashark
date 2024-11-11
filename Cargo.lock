@@ -4651,6 +4651,7 @@ dependencies = [
  "anyhow",
  "colored",
  "log",
+ "paste",
  "yavashark_garbage",
  "yavashark_macro",
  "yavashark_value",

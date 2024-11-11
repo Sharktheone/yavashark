@@ -1,6 +1,6 @@
 use crate::array::{Array, ArrayIterator};
 use crate::error::ErrorObj;
-use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype};
+use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Variable, Value};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -9,6 +9,29 @@ pub struct Intrinsics {
     pub(crate) array: ObjectHandle,
     pub(crate) array_iter: ObjectHandle,
     pub(crate) error: ObjectHandle,
+}
+
+
+macro_rules! constructor {
+    ($name:ident) => {
+        paste::paste! {
+            pub fn [<$name _constructor>] (&self) -> Variable {
+                self.$name
+                    .get_property(&"constructor".into())
+                    .unwrap_or(Value::Undefined)
+                    .into()
+            }
+        }
+    };
+}
+
+
+impl Intrinsics {
+    constructor!(obj);
+    constructor!(func);
+    constructor!(array);
+    constructor!(array_iter);
+    constructor!(error);
 }
 
 impl Intrinsics {

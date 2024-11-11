@@ -10,6 +10,7 @@ yavashark_macro = { path = "../yavashark_macro" }
 anyhow = "1.0.86"
 colored = "2.1.0"
 log = "0.4.21"
+paste = "1.0.15"
 
 
 [features]

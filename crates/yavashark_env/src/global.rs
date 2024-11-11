@@ -16,11 +16,7 @@ pub fn init_global_obj(obj: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable(
         "Array".into(),
         realm
-            .intrinsics
-            .array
-            .get_property(&"constructor".into())
-            .expect("Failed to get Array constructor") //This can only happen when we have a programming error
-            .into(),
+            .intrinsics.array_constructor()
     );
 
     Ok(())
