@@ -1,22 +1,23 @@
 use std::ops::Index;
 use bitflags::bitflags;
 use yaml_rust2::Yaml;
+use clap::Parser;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Metadata {
-    negative: Option<Negative>,
-    includes: Vec<String>,
-    flags: Flags,
-    locale: Vec<String>,
+    pub negative: Option<Negative>,
+    pub includes: Vec<String>,
+    pub flags: Flags,
+    pub locale: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
 pub struct Negative {
-    phase: NegativePhase,
-    ty: String,
+    pub phase: NegativePhase,
+    pub ty: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum NegativePhase {
     Parse,
     Resolution,
@@ -24,8 +25,8 @@ pub enum NegativePhase {
 }
 
 bitflags! {
-    #[derive(Clone, Debug)]
-    struct Flags: u16 {
+    #[derive(Clone, Debug, Default)]
+    pub struct Flags: u16 {
         const ONLY_STRICT = 1 << 0;
         const NO_STRICT = 1 << 1;
         const MODULE = 1 << 2;
@@ -39,12 +40,12 @@ bitflags! {
 }
 
 impl Metadata {
-    fn parse(yaml: &Yaml) -> Self {
+    pub fn parse(yaml: &Yaml) -> Self {
         let negative = yaml.index("negative");
-        
+
         let negative = Negative::parse(negative);
-        
-        
+
+
         let includes = if let Yaml::Array(includes) = yaml.index("includes") {
             includes.iter().filter_map(|v| {
                 if let Yaml::String(v) = v {
@@ -56,13 +57,13 @@ impl Metadata {
         } else {
             Vec::new()
         };
-        
-        
+
+
         let flags = if let Yaml::Array(flag) = yaml.index("flags") {
             let mut flags = Flags::empty();
-            
+
             for f in flag {
-                
+
                 if let Yaml::String(f) = f {
                     match f.as_str() {
                         "onlyStrict" => flags.insert(Flags::ONLY_STRICT),
@@ -74,21 +75,21 @@ impl Metadata {
                         "CanBlockIsFalse" => flags.insert(Flags::CAN_BLOCK_IS_FALSE),
                         "CanBlockIsTrue" => flags.insert(Flags::CAN_BLOCK_IS_TRUE),
                         "non-deterministic" => flags.insert(Flags::NON_DETERMINISTIC),
-                        
+
                         _ => {}
                     }
                 }
             }
-            
-            
+
+
             flags
-            
+
         } else {
             Flags::empty()
         };
-        
-        
-        
+
+
+
         let locale = if let Yaml::Array(locale) = yaml.index("locale") {
             locale.iter().filter_map(|v| {
                 if let Yaml::String(v) = v {
@@ -100,16 +101,16 @@ impl Metadata {
         } else {
             Vec::new()
         };
-        
-        
+
+
         Self {
             negative,
             flags,
             includes,
             locale
         }
-        
-        
+
+
     }
 }
 
@@ -119,19 +120,19 @@ impl Negative {
         let Yaml::String(ty) = yaml.index("type") else {
             return None
         };
-        
+
         let Yaml::String(phase) = yaml.index("phase") else {
             return None
         };
-        
+
         let phase = match phase.as_str() {
             "parse" => NegativePhase::Parse,
             "resolution" => NegativePhase::Resolution,
-            "runtime" => NegativePhase::Resolution,
+            "runtime" => NegativePhase::Runtime,
             _ => return None,
         };
-        
-        
+
+
         Some(Self {
             phase,
             ty: ty.clone(),
