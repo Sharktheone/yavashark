@@ -9,3 +9,28 @@ impl Interpreter {
         Self::run_statement(realm, &stmt.body, scope)
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use yavashark_env::{test_eval, Value};
+
+    #[test]
+    fn labeled_continue() {
+        test_eval!(
+            r"
+            var count = 0;
+            label: for (let x = 0; x < 10;) {
+                while (true) {
+                    x++;
+                    count++;
+                    continue label;
+                }
+            }
+            ",
+            0,
+            Vec::<Vec<Value>>::new(),
+            Value::Undefined
+        );
+    }
+}

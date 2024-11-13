@@ -163,6 +163,7 @@ pub struct ScopeInternal {
     parent: ParentOrGlobal,
     variables: HashMap<String, Variable>,
     pub available_labels: Vec<String>,
+    pub last_label_is_current: bool,
     pub state: ScopeState,
     pub this: Value,
     pub file: Option<PathBuf>,
@@ -222,6 +223,7 @@ impl ScopeInternal {
             parent: ParentOrGlobal::Global(realm.global.clone()),
             variables,
             available_labels: Vec::new(),
+            last_label_is_current: false,
             state: ScopeState::new(),
             this: Value::Undefined,
             file: Some(path),
@@ -259,6 +261,7 @@ impl ScopeInternal {
             parent: ParentOrGlobal::Global(realm.global.clone()),
             variables,
             available_labels: Vec::new(),
+            last_label_is_current: false,
             state: ScopeState::STATE_NONE,
             this: Value::string("global"),
             file: Some(path),
@@ -302,6 +305,7 @@ impl ScopeInternal {
             parent: ParentOrGlobal::Parent(parent),
             variables,
             available_labels,
+            last_label_is_current: false,
             state,
             this,
             file: None,
@@ -377,10 +381,18 @@ impl ScopeInternal {
 
     pub fn declare_label(&mut self, label: String) {
         self.available_labels.push(label);
+        self.last_label_is_current = true;
     }
 
     pub fn last_label(&mut self) -> Option<&String> {
+        if !self.last_label_is_current {
+            return None
+        }
         self.available_labels.last()
+    }
+    
+    pub fn set_no_label(&mut self) {
+        self.last_label_is_current = false;
     }
 
     pub fn state_set_function(&mut self) {
@@ -590,6 +602,10 @@ impl Scope {
 
     pub fn last_label(&self) -> Result<Option<String>> {
         Ok(self.scope.borrow_mut()?.last_label().cloned())
+    }
+    
+    pub fn set_no_label(&self) -> Res {
+        Ok(self.scope.borrow_mut()?.set_no_label())
     }
 
     #[must_use]
