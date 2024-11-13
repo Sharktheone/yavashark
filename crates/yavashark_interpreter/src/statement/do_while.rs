@@ -20,6 +20,12 @@ impl Interpreter {
                         break;
                     }
                     ControlFlow::Continue(l) if last_loop.as_ref() == l.as_ref() => {
+                        let condition = Self::run_expr(realm, &stmt.test, stmt.span, scope)?;
+
+                        if condition.is_falsey() {
+                            break;
+                        }
+                        
                         continue;
                     }
                     _ => return Err(c),
@@ -131,6 +137,21 @@ mod tests {
             0,
             Vec::<Vec<Value>>::new(),
             Value::Number(3.0)
+        );
+    }
+    
+    #[test]
+    fn run_do_while_false_continue() {
+        test_eval!(
+            r"
+            do {
+                mock.send()
+                continue
+            } while(false)
+            ",
+            1,
+            Vec::<Vec<Value>>::new(),
+            Value::Undefined
         );
     }
 }
