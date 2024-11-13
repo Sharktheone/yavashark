@@ -1,7 +1,6 @@
 use std::ops::Index;
 use bitflags::bitflags;
 use yaml_rust2::Yaml;
-use clap::Parser;
 
 #[derive(Clone, Debug, Default)]
 pub struct Metadata {
