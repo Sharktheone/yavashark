@@ -10,7 +10,6 @@ import (
 
 const (
 	TEST_ROOT  = "test262/test"
-	SKIP_EXTRA = true
 
 	WORKERS = 128
 )
