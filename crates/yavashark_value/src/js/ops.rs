@@ -642,6 +642,10 @@ impl<C: Realm> Value<C> {
             (Self::Symbol(a), Self::Symbol(b)) => a == b,
 
             (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => {
+                if *a == 0.0 && b.is_empty() {
+                    return true
+                }
+                
                 a.to_string() == *b
             }
 
@@ -650,7 +654,13 @@ impl<C: Realm> Value<C> {
             }
 
             (Self::Number(a), Self::Object(b)) | (Self::Object(b), Self::Number(a)) => {
-                a.to_string() == format!("{b}")
+                let b = format!("{b}");
+
+                if *a == 0.0 && b.is_empty() {
+                    return true
+                }
+
+                a.to_string() == *b
             }
 
             (Self::String(a), Self::Object(b)) | (Self::Object(b), Self::String(a)) => {
