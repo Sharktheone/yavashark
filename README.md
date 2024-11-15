@@ -6,11 +6,9 @@ JavaScript.
 
 ## Project Status
 
-Currently, I'm working on the JS-Tree-Walk-Interpreter. This is more a test to see, how to implement an interpreter in
-Rust.
-Specifically on the JS Garbage Collector.
+Currently, I am working on getting more test 262 tests running.
 
-Next up would be an JS-Bytecode-Interpreter, which will be a test for the TS-Bytecode-Interpreter.
+Next up would be an TS-Bytecode-Interpreter
 
 After that, I will start with the TS-Bytecode-Interpreter, which will be the first step to run TypeScript natively.
 
