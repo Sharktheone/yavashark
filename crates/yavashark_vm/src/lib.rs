@@ -67,6 +67,25 @@ impl VM {
         }
     }
 
+    #[must_use]
+    pub fn with_realm_scope(
+        code: Vec<Instruction>,
+        data: DataSection,
+        realm: Realm,
+        scope: Scope,
+        file: PathBuf,
+    ) -> Self {
+        Self {
+            regs: Registers::new(),
+            stack: Stack::new(),
+            pc: 0,
+            code,
+            data,
+            current_scope: scope,
+            acc: Value::Undefined,
+            realm,
+        }
+    }
     pub fn get_realm(&mut self) -> &mut Realm {
         &mut self.realm
     }
