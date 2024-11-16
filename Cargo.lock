@@ -4762,6 +4762,7 @@ dependencies = [
  "swc_common 0.40.2",
  "swc_ecma_parser 0.152.2",
  "yavashark_codegen",
+ "yavashark_env",
  "yavashark_interpreter",
  "yavashark_vm",
 ]
