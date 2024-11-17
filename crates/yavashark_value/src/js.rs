@@ -216,8 +216,7 @@ impl<C: Realm> CustomGcRefUntyped for Value<C> {
 impl<C: Realm> Value<C> {
     #[allow(clippy::iter_not_returning_iterator)]
     pub fn iter<'a>(&self, realm: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
-        let iter = self
-            .get_property(&Symbol::ITERATOR, realm)?;
+        let iter = self.get_property(&Symbol::ITERATOR, realm)?;
         let iter = iter.call(realm, Vec::new(), self.copy())?;
 
         Ok(CtxIter {
@@ -227,8 +226,7 @@ impl<C: Realm> Value<C> {
     }
 
     pub fn iter_no_realm(&self, realm: &mut C) -> Result<Iter<C>, Error<C>> {
-        let iter = self
-            .get_property(&Symbol::ITERATOR, realm)?;
+        let iter = self.get_property(&Symbol::ITERATOR, realm)?;
         let iter = iter.call(realm, Vec::new(), self.copy())?;
 
         Ok(Iter { next_obj: iter })

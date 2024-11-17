@@ -8,15 +8,10 @@ struct Repl {
 const OPEN_BRACES: &[char] = &['(', '{', '['];
 const CLOSE_BRACES: &[char] = &[')', '}', ']'];
 
-
-
 impl Repl {
     fn new(callback: Box<dyn Fn(String)>) -> Self {
-        Self {
-            callback,
-        }
+        Self { callback }
     }
-
 
     fn run(&self) {
         let braces_open = 0u8;
@@ -35,8 +30,6 @@ impl Repl {
             }
 
             io::stdin().read_line(&mut input).unwrap();
-
-
         }
     }
 }

@@ -1,5 +1,5 @@
-use std::ops::Index;
 use bitflags::bitflags;
+use std::ops::Index;
 use yaml_rust2::Yaml;
 
 #[derive(Clone, Debug, Default)]
@@ -44,25 +44,25 @@ impl Metadata {
 
         let negative = Negative::parse(negative);
 
-
         let includes = if let Yaml::Array(includes) = yaml.index("includes") {
-            includes.iter().filter_map(|v| {
-                if let Yaml::String(v) = v {
-                    Some(v.clone())
-                } else {
-                    None
-                }
-            }).collect()
+            includes
+                .iter()
+                .filter_map(|v| {
+                    if let Yaml::String(v) = v {
+                        Some(v.clone())
+                    } else {
+                        None
+                    }
+                })
+                .collect()
         } else {
             Vec::new()
         };
-
 
         let flags = if let Yaml::Array(flag) = yaml.index("flags") {
             let mut flags = Flags::empty();
 
             for f in flag {
-
                 if let Yaml::String(f) = f {
                     match f.as_str() {
                         "onlyStrict" => flags.insert(Flags::ONLY_STRICT),
@@ -80,48 +80,43 @@ impl Metadata {
                 }
             }
 
-
             flags
-
         } else {
             Flags::empty()
         };
 
-
-
         let locale = if let Yaml::Array(locale) = yaml.index("locale") {
-            locale.iter().filter_map(|v| {
-                if let Yaml::String(v) = v {
-                    Some(v.clone())
-                } else {
-                    None
-                }
-            }).collect()
+            locale
+                .iter()
+                .filter_map(|v| {
+                    if let Yaml::String(v) = v {
+                        Some(v.clone())
+                    } else {
+                        None
+                    }
+                })
+                .collect()
         } else {
             Vec::new()
         };
-
 
         Self {
             negative,
             flags,
             includes,
-            locale
+            locale,
         }
-
-
     }
 }
-
 
 impl Negative {
     fn parse(yaml: &Yaml) -> Option<Self> {
         let Yaml::String(ty) = yaml.index("type") else {
-            return None
+            return None;
         };
 
         let Yaml::String(phase) = yaml.index("phase") else {
-            return None
+            return None;
         };
 
         let phase = match phase.as_str() {
@@ -130,7 +125,6 @@ impl Negative {
             "runtime" => NegativePhase::Runtime,
             _ => return None,
         };
-
 
         Some(Self {
             phase,

@@ -386,11 +386,11 @@ impl ScopeInternal {
 
     pub fn last_label(&mut self) -> Option<&String> {
         if !self.last_label_is_current {
-            return None
+            return None;
         }
         self.available_labels.last()
     }
-    
+
     pub fn set_no_label(&mut self) {
         self.last_label_is_current = false;
     }
@@ -603,7 +603,7 @@ impl Scope {
     pub fn last_label(&self) -> Result<Option<String>> {
         Ok(self.scope.borrow_mut()?.last_label().cloned())
     }
-    
+
     pub fn set_no_label(&self) -> Res {
         Ok(self.scope.borrow_mut()?.set_no_label())
     }

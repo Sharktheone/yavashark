@@ -643,9 +643,9 @@ impl<C: Realm> Value<C> {
 
             (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => {
                 if *a == 0.0 && b.is_empty() {
-                    return true
+                    return true;
                 }
-                
+
                 a.to_string() == *b
             }
 
@@ -657,7 +657,7 @@ impl<C: Realm> Value<C> {
                 let b = format!("{b}");
 
                 if *a == 0.0 && b.is_empty() {
-                    return true
+                    return true;
                 }
 
                 a.to_string() == *b

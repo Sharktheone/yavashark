@@ -6,7 +6,7 @@ use yavashark_interpreter::Interpreter;
 
 pub fn run_file(file: PathBuf) -> ValueResult {
     let (mut realm, mut scope) = setup_global(file.clone())?;
-    
+
     let stmt = parse_file(&file);
 
     Interpreter::run_in(&stmt, &mut realm, &mut scope)

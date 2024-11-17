@@ -50,7 +50,7 @@ impl Interpreter {
                 .map_err(std::convert::Into::into),
             Stmt::Expr(expr) => Self::run_expr_stmt(realm, expr, scope),
         };
-        
+
         scope.set_no_label()?;
 
         res.map_err(|mut e| {

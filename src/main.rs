@@ -1,15 +1,15 @@
 mod repl;
 
+use std::io;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use std::io;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
-use yavashark_env::Realm;
 use yavashark_env::scope::Scope;
+use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
 
@@ -108,7 +108,8 @@ fn main() {
         }
 
         if interpreter {
-            let result = yavashark_interpreter::Interpreter::run(&script.body, path.clone()).unwrap();
+            let result =
+                yavashark_interpreter::Interpreter::run(&script.body, path.clone()).unwrap();
             println!("Interpreter: {result:?}");
         }
 
@@ -140,7 +141,6 @@ fn main() {
         let mut vm_realm = Realm::new().unwrap();
         let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
-
         let syn = Syntax::Es(EsSyntax::default());
 
         let mut input = String::new();
@@ -162,12 +162,16 @@ fn main() {
             }
 
             if interpreter {
-                let result = yavashark_interpreter::Interpreter::run_in(&script.body, &mut interpreter_realm, &mut interpreter_scope).unwrap();
+                let result = yavashark_interpreter::Interpreter::run_in(
+                    &script.body,
+                    &mut interpreter_realm,
+                    &mut interpreter_scope,
+                )
+                .unwrap();
 
                 if bytecode {
                     println!("Interpreter: {}", result.pretty_print())
                 } else {
-
                     println!("{}", result.pretty_print())
                 }
             }
@@ -182,7 +186,13 @@ fn main() {
                 if bytecode {
                     let data = DataSection::new(bc.variables, bc.literals);
 
-                    let mut vm = VM::with_realm_scope(bc.instructions, data, vm_realm.clone(), vm_scope.clone(), path.to_path_buf());
+                    let mut vm = VM::with_realm_scope(
+                        bc.instructions,
+                        data,
+                        vm_realm.clone(),
+                        vm_scope.clone(),
+                        path.to_path_buf(),
+                    );
 
                     vm.run().unwrap();
 

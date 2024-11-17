@@ -25,7 +25,7 @@ impl Interpreter {
                         if condition.is_falsey() {
                             break;
                         }
-                        
+
                         continue;
                     }
                     _ => return Err(c),
@@ -139,7 +139,7 @@ mod tests {
             Value::Number(3.0)
         );
     }
-    
+
     #[test]
     fn run_do_while_false_continue() {
         test_eval!(

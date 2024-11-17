@@ -1,7 +1,4 @@
-#![allow(
-    unused,
-    clippy::needless_pass_by_ref_mut
-)] //pass by ref mut is just temporary until all functions are implemented
+#![allow(unused, clippy::needless_pass_by_ref_mut)] //pass by ref mut is just temporary until all functions are implemented
 
 extern crate core;
 
@@ -327,7 +324,6 @@ mod temp_test {
             yavashark_value::OBJECT_ALLOC.get()
         );
     }
-
 
     #[test]
     fn iterator() {

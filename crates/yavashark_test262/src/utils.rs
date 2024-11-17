@@ -13,20 +13,21 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
     if input.is_empty() {
         return Vec::new();
     }
-    
+
     let c = EsSyntax::default();
 
     let metadata;
 
     {
-        let end = input.find("\n---*/\n").map(|x| x + 7).unwrap_or(input.len());
-        
+        let end = input
+            .find("\n---*/\n")
+            .map(|x| x + 7)
+            .unwrap_or(input.len());
 
         let input = &input[..end];
         let max = BytePos(input.len() as u32);
 
         let input = StringInput::new(&input[..end], BytePos(0), max);
-
 
         let comments = SingleThreadedComments::default();
 
@@ -52,17 +53,17 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
             .flatten()
             .collect::<Vec<_>>();
 
-
-        metadata = meta.first().map(Metadata::parse).unwrap_or(Metadata::default());
+        metadata = meta
+            .first()
+            .map(Metadata::parse)
+            .unwrap_or(Metadata::default());
     };
-    
-    
-    let end = BytePos(input.len() as u32 - 1);
-    
-    let input = StringInput::new(&input, BytePos(0), end);
-    
-    let mut p = Parser::new(Syntax::Es(c), input, None);
 
+    let end = BytePos(input.len() as u32 - 1);
+
+    let input = StringInput::new(&input, BytePos(0), end);
+
+    let mut p = Parser::new(Syntax::Es(c), input, None);
 
     let s = match p.parse_script() {
         Ok(s) => s,
@@ -72,7 +73,7 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
                     return Vec::new();
                 }
             }
-            
+
             println!("PARSE_ERROR:\n{e:?}");
             panic!()
         }

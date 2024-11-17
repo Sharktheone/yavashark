@@ -13,11 +13,7 @@ pub fn init_global_obj(obj: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("Error".into(), Variable::new_read_only(get_error(realm)));
 
     #[allow(clippy::expect_used)]
-    obj.define_variable(
-        "Array".into(),
-        realm
-            .intrinsics.array_constructor()
-    );
+    obj.define_variable("Array".into(), realm.intrinsics.array_constructor());
 
     Ok(())
 }
