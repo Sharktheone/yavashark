@@ -1,3 +1,4 @@
+mod repl;
 
 use std::io::Write;
 use std::path::{Path, PathBuf};
