@@ -142,25 +142,14 @@ fn main() {
         let mut vm_realm = Realm::new().unwrap();
         let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
+
         let syn = Syntax::Es(EsSyntax::default());
         
-        
-        let repl = Repl::new(Box::new(|str| {
-            println!("got: \n{str}")
-        }));
-        
-        
-        repl.run();
-        
-        
+        let mut repl = Repl::new(Box::new(move |input| {
 
-        let mut input = String::new();
-        loop {
-            print!("> ");
-            let _ = io::stdout().flush();
-
-            input.clear();
-            io::stdin().read_line(&mut input).unwrap();
+            if input.is_empty() {
+                return;
+            }
 
             let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32 - 1));
 
@@ -178,7 +167,7 @@ fn main() {
                     &mut interpreter_realm,
                     &mut interpreter_scope,
                 )
-                .unwrap();
+                    .unwrap();
 
                 if bytecode {
                     println!("Interpreter: {}", result.pretty_print())
@@ -210,6 +199,9 @@ fn main() {
                     println!("Bytecode: {:?}", vm.acc());
                 }
             }
-        }
+        }));
+        
+        
+        repl.run();
     }
 }

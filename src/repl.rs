@@ -2,18 +2,18 @@ use std::io;
 use std::io::Write;
 
 pub struct Repl {
-    callback: Box<dyn Fn(&str)>,
+    callback: Box<dyn FnMut(&str)>,
 }
 
 const OPEN_BRACES: &[char] = &['(', '{', '['];
 const CLOSE_BRACES: &[char] = &[')', '}', ']'];
 
 impl Repl {
-    pub fn new(callback: Box<dyn Fn(&str)>) -> Self {
+    pub fn new(callback: Box<dyn FnMut(&str)>) -> Self {
         Self { callback }
     }
 
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         let mut braces_open = 0u8;
 
         let mut input = String::new();
