@@ -12,6 +12,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
+use crate::repl::Repl;
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -142,6 +143,16 @@ fn main() {
         let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
         let syn = Syntax::Es(EsSyntax::default());
+        
+        
+        let repl = Repl::new(Box::new(|str| {
+            println!("got: \n{str}")
+        }));
+        
+        
+        repl.run();
+        
+        
 
         let mut input = String::new();
         loop {

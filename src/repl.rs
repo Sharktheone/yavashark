@@ -1,7 +1,7 @@
 use std::io;
 use std::io::Write;
 
-struct Repl {
+pub struct Repl {
     callback: Box<dyn Fn(&str)>,
 }
 
@@ -9,11 +9,11 @@ const OPEN_BRACES: &[char] = &['(', '{', '['];
 const CLOSE_BRACES: &[char] = &[')', '}', ']'];
 
 impl Repl {
-    fn new(callback: Box<dyn Fn(&str)>) -> Self {
+    pub fn new(callback: Box<dyn Fn(&str)>) -> Self {
         Self { callback }
     }
 
-    fn run(&self) {
+    pub fn run(&self) {
         let mut braces_open = 0u8;
 
         let mut input = String::new();
@@ -29,7 +29,7 @@ impl Repl {
                 let _ = io::stdout().flush();
             }
             
-            let offset = input.len() - 1;
+            let offset = if input.is_empty() { 0 } else { input.len() - 1 };
 
             io::stdin().read_line(&mut input).unwrap();
             
