@@ -31,7 +31,10 @@ impl Repl {
             
             let offset = if input.is_empty() { 0 } else { input.len() - 1 };
 
-            io::stdin().read_line(&mut input).unwrap();
+            if let Err(e) = io::stdin().read_line(&mut input) {
+                println!("Error: \n{e}");
+                return;
+            }
             
             for i in input[offset..].chars() {
                 if OPEN_BRACES.contains(&i) {

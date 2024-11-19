@@ -5,6 +5,7 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use swc_common::input::StringInput;
 use swc_common::BytePos;
+use swc_common::errors::{Handler, HANDLER};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
@@ -155,7 +156,22 @@ fn main() {
 
             let mut p = Parser::new(syn, input, None);
 
-            let script = p.parse_script().unwrap(); //TODO: print Syntax Error
+            let script = match p.parse_script() {
+                Ok(s) => s,
+                Err(e) => {
+                    // HANDLER.with(|h| {
+                    //     let mut diagnostic = e.into_diagnostic(h);
+                    //     
+                    //     diagnostic.emit();
+                    //     
+                    //     
+                    // });
+                    
+                    eprintln!("{:?}", e);
+                    
+                    return
+                } 
+            };
 
             if ast {
                 println!("AST:\n{script:#?}");
