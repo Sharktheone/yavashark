@@ -9,19 +9,23 @@ use crate::TEST262_DIR;
 pub fn run_file(file: PathBuf) -> ValueResult {
     let (mut realm, mut scope) = setup_global(file.clone())?;
     
-    run_file_in(&file, &mut realm, &mut scope)
+    run_file_in(file, &mut realm, &mut scope)
 }
 
 
 
-pub fn run_file_in(file: &Path, realm: &mut Realm, scope: &mut Scope) -> ValueResult {
+pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope) -> ValueResult {
     let (stmt, metadata) = parse_file(&file);
     
     for inc in metadata.includes {
         let path = Path::new(TEST262_DIR).join("harness").join(inc);
         
-        run_file_in(&path, realm, scope)?;
+        scope.set_path(path.clone())?;
+        
+        run_file_in(path, realm, scope)?;
     }
+    
+    scope.set_path(file)?;
     
     
     
