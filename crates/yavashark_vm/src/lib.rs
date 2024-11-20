@@ -68,12 +68,11 @@ impl VM {
     }
 
     #[must_use]
-    pub fn with_realm_scope(
+    pub const fn with_realm_scope(
         code: Vec<Instruction>,
         data: DataSection,
         realm: Realm,
         scope: Scope,
-        file: PathBuf,
     ) -> Self {
         Self {
             regs: Registers::new(),

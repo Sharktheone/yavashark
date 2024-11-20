@@ -1,11 +1,8 @@
 mod repl;
 
-use std::io;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 use swc_common::input::StringInput;
 use swc_common::BytePos;
-use swc_common::errors::{Handler, HANDLER};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
@@ -140,7 +137,7 @@ fn main() {
         let mut interpreter_realm = Realm::new().unwrap();
         let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
-        let mut vm_realm = Realm::new().unwrap();
+        let vm_realm = Realm::new().unwrap();
         let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
 
@@ -152,7 +149,7 @@ fn main() {
                 return;
             }
 
-            let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32 - 1));
+            let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32 - 1));
 
             let mut p = Parser::new(syn, input, None);
 
@@ -167,7 +164,7 @@ fn main() {
                     //     
                     // });
                     
-                    eprintln!("{:?}", e);
+                    eprintln!("{e:?}");
                     
                     return
                 } 
@@ -186,9 +183,9 @@ fn main() {
                     .unwrap();
 
                 if bytecode {
-                    println!("Interpreter: {}", result.pretty_print())
+                    println!("Interpreter: {}", result.pretty_print());
                 } else {
-                    println!("{}", result.pretty_print())
+                    println!("{}", result.pretty_print());
                 }
             }
 
@@ -207,7 +204,6 @@ fn main() {
                         data,
                         vm_realm.clone(),
                         vm_scope.clone(),
-                        path.to_path_buf(),
                     );
 
                     vm.run().unwrap();

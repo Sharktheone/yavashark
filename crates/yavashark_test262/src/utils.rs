@@ -33,15 +33,14 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
 
         let mut p = Parser::new(Syntax::Es(c), input, Some(&comments));
 
-        let x = p.parse_script();
+        _ = p.parse_script();
 
-        let (leading, a) = comments.take_all();
+        let (leading, _) = comments.take_all();
 
         let meta = leading
             .borrow()
             .iter()
-            .map(|(_, x)| x)
-            .flatten()
+            .flat_map(|(_, x)| x)
             .filter(|comment| {
                 if comment.kind != CommentKind::Block {
                     return false;
