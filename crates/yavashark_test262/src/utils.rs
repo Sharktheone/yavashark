@@ -7,11 +7,11 @@ use swc_ecma_ast::Stmt;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yaml_rust2::yaml::YamlDecoder;
 
-pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
+pub(crate) fn parse_file(f: &Path) -> (Vec<Stmt>, Metadata) {
     let input = std::fs::read_to_string(f).unwrap();
 
     if input.is_empty() {
-        return Vec::new();
+        return (Vec::new(), Metadata::default());
     }
 
     let c = EsSyntax::default();
@@ -69,7 +69,7 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
         Err(e) => {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    return Vec::new();
+                    return (Vec::new(), Metadata::default());
                 }
             }
 
@@ -77,5 +77,5 @@ pub(crate) fn parse_file(f: &Path) -> Vec<Stmt> {
             panic!()
         }
     };
-    s.body
+    (s.body, metadata)
 }

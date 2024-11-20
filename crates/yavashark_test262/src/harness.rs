@@ -18,7 +18,7 @@ static COMPILED: LazyLock<Vec<(Vec<Stmt>, PathBuf)>> = LazyLock::new(|| {
         .map(|f| {
             let path = p.join(Path::new(f));
 
-            (parse_file(path.as_path()), path)
+            (parse_file(path.as_path()).0, path) //TODO: if sta.js or assert.js has actually some metadata, this needs to be changed
         })
         .collect()
 });
