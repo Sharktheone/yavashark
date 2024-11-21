@@ -28,26 +28,24 @@ impl Repl {
                 print!("...");
                 let _ = io::stdout().flush();
             }
-            
+
             let offset = if input.is_empty() { 0 } else { input.len() - 1 };
 
             if let Err(e) = io::stdin().read_line(&mut input) {
                 println!("Error: \n{e}");
                 return;
             }
-            
+
             for i in input[offset..].chars() {
                 if OPEN_BRACES.contains(&i) {
                     braces_open += 1;
                 }
-                
+
                 if CLOSE_BRACES.contains(&i) {
                     braces_open -= 1;
                 }
-                
             }
-            
-            
+
             if braces_open == 0 {
                 (self.callback)(&input);
             }

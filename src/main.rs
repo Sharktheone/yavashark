@@ -1,5 +1,6 @@
 mod repl;
 
+use crate::repl::Repl;
 use std::path::{Path, PathBuf};
 use swc_common::input::StringInput;
 use swc_common::BytePos;
@@ -10,7 +11,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
-use crate::repl::Repl;
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -140,11 +140,9 @@ fn main() {
         let vm_realm = Realm::new().unwrap();
         let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
-
         let syn = Syntax::Es(EsSyntax::default());
-        
-        let mut repl = Repl::new(Box::new(move |input| {
 
+        let mut repl = Repl::new(Box::new(move |input| {
             if input.is_empty() {
                 return;
             }
@@ -158,16 +156,16 @@ fn main() {
                 Err(e) => {
                     // HANDLER.with(|h| {
                     //     let mut diagnostic = e.into_diagnostic(h);
-                    //     
+                    //
                     //     diagnostic.emit();
-                    //     
-                    //     
+                    //
+                    //
                     // });
-                    
+
                     eprintln!("{e:?}");
-                    
-                    return
-                } 
+
+                    return;
+                }
             };
 
             if ast {
@@ -180,7 +178,7 @@ fn main() {
                     &mut interpreter_realm,
                     &mut interpreter_scope,
                 )
-                    .unwrap();
+                .unwrap();
 
                 if bytecode {
                     println!("Interpreter: {}", result.pretty_print());
@@ -212,8 +210,7 @@ fn main() {
                 }
             }
         }));
-        
-        
+
         repl.run();
     }
 }

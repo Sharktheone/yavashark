@@ -1,10 +1,10 @@
 use crate::Interpreter;
 use log::info;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
+use yavashark_env::array::Array;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable};
-use yavashark_env::array::Array;
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Func, Obj, ObjectProperty};
 
@@ -59,15 +59,12 @@ impl Func<Realm> for JSFunction {
                 args.get(i).unwrap_or(&Value::Undefined).copy(),
             );
         }
-        
+
         let args = Array::with_elements(realm, args)?;
-        
+
         let args = ObjectHandle::new(args);
-        
-        scope.declare_var(
-            "arguments".into(),    
-            args.into()
-        );
+
+        scope.declare_var("arguments".into(), args.into());
 
         if let Some(block) = &self.block {
             if let Err(e) = Interpreter::run_block_this(realm, block, scope, this) {
@@ -182,7 +179,7 @@ mod tests {
             Value::Number(1.0)
         );
     }
-    
+
     #[test]
     fn arguments() {
         test_eval!(
@@ -198,7 +195,13 @@ mod tests {
                 foo(1,2,3,4,5)
             "#,
             0,
-            vec![vec![Value::Number(1.0)],vec![Value::Number(2.0)],vec![Value::Number(3.0)],vec![Value::Number(4.0)],vec![Value::Number(5.0)]],
+            vec![
+                vec![Value::Number(1.0)],
+                vec![Value::Number(2.0)],
+                vec![Value::Number(3.0)],
+                vec![Value::Number(4.0)],
+                vec![Value::Number(5.0)]
+            ],
             Value::Undefined
         );
     }

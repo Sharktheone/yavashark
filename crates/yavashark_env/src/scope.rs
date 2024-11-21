@@ -606,7 +606,7 @@ impl Scope {
 
     pub fn set_no_label(&self) -> Res {
         self.scope.borrow_mut()?.set_no_label();
-        
+
         Ok(())
     }
 
