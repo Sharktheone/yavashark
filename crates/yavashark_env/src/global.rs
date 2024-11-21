@@ -14,6 +14,8 @@ pub fn init_global_obj(obj: &ObjectHandle, realm: &Realm) -> Res {
 
     #[allow(clippy::expect_used)]
     obj.define_variable("Array".into(), realm.intrinsics.array_constructor());
+    
+    obj.define_variable("Object".into(), realm.intrinsics.obj_constructor());
 
     Ok(())
 }
