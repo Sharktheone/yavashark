@@ -9,7 +9,7 @@ use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 
-#[object(function, constructor)]
+#[object(function, constructor, direct(constructor))]
 pub struct NativeConstructor {
     /// The name of the constructor
     pub name: String,
@@ -100,9 +100,26 @@ impl NativeConstructor {
             proto,
             special: false,
             object: Object::raw_with_proto(self_proto),
+            constructor: Value::Undefined.into(),
         };
 
-        ObjectHandle::new(this)
+        let handle = ObjectHandle::new(this);
+
+
+        #[allow(clippy::expect_used)]
+        {
+            let constructor = handle.clone();
+            let mut this = handle.get_mut().expect("unreachable");
+
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().expect("unreachable");
+
+            this.constructor = constructor.into();
+        }
+        
+        
+        handle
     }
 
     pub fn special(
@@ -136,8 +153,25 @@ impl NativeConstructor {
             proto,
             special: true,
             object: Object::raw_with_proto(self_proto),
+            constructor: Value::Undefined.into()
         };
 
-        ObjectHandle::new(this)
+        let handle = ObjectHandle::new(this);
+
+
+        #[allow(clippy::expect_used)]
+        {
+            let constructor = handle.clone();
+            let mut this = handle.get_mut().expect("unreachable");
+
+            let this = this.as_any_mut();
+
+            let this = this.downcast_mut::<Self>().expect("unreachable");
+
+            this.constructor = constructor.into();
+        }
+
+
+        handle
     }
 }
