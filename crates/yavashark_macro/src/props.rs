@@ -26,6 +26,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let crate_path = Path::from(Ident::new("crate", item.span()));
 
+
     let mut realm = crate_path.clone();
     realm
         .segments
@@ -441,6 +442,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let function: #value = #native_constructor::#create("constructor".to_string(), move || {
                     constructor_function.copy()
             }, #new, obj.clone().into(), func_proto.copy()).into();
+
+
+            function.define_property("prototype".into(), obj.clone().into());
 
             obj.define_variable(
                 "constructor".into(),
