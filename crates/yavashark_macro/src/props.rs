@@ -444,7 +444,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }, #new, obj.clone().into(), func_proto.copy()).into();
 
 
-            function.define_property("prototype".into(), obj.clone().into());
+            function.define_property("prototype".into(), obj.clone().into())?;
 
             obj.define_variable(
                 "constructor".into(),
