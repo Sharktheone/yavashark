@@ -60,7 +60,7 @@ impl Intrinsics {
                 .downcast_mut::<FunctionPrototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
 
-            proto.initialize(func_prototype.clone().into());
+            proto.initialize(func_prototype.clone().into())?;
         }
 
         let array_prototype = Array::initialize_proto(

@@ -31,11 +31,14 @@ impl FunctionPrototype {
         }
     }
 
-    pub fn initialize(&mut self, func: Value) {
+    pub fn initialize(&mut self, func: Value) -> Res {
         self.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
         self.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
         self.call = NativeFunction::with_proto("call", call, func.copy()).into();
         self.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
+        
+        
+        self.constructor.value.define_property("prototype".into(), func.into())
     }
 }
 
