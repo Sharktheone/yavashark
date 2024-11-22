@@ -35,7 +35,7 @@ impl FunctionPrototype {
         self.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
         self.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
         self.call = NativeFunction::with_proto("call", call, func.copy()).into();
-        self.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
+        self.constructor = func.into()
     }
 }
 
@@ -54,10 +54,6 @@ fn call(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
 
-#[allow(unused)]
-fn constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
-}
 
 impl Obj<Realm> for FunctionPrototype {
     fn define_property(&mut self, name: Value, value: Value) {
