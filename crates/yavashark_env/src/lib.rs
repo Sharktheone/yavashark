@@ -12,6 +12,7 @@ mod global;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
+mod builtins;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
