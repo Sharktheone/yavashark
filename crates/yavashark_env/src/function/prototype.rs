@@ -5,6 +5,7 @@ use yavashark_value::Obj;
 use crate::object::Object;
 use crate::realm::Realm;
 use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::function::bound::BoundFunction;
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -48,8 +49,8 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 }
 
 #[allow(unused)]
-fn bind(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
+fn bind(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    BoundFunction::new(this, args.remove(0), args, realm)
 }
 
 #[allow(unused)]

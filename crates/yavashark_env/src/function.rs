@@ -14,6 +14,7 @@ use crate::{ObjectHandle, Value, ValueResult};
 mod class;
 mod constructor;
 mod prototype;
+mod bound;
 
 type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
