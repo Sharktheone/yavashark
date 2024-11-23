@@ -54,8 +54,10 @@ fn bind(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 }
 
 #[allow(unused)]
-fn call(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
+fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    let new_this = args.remove(0);
+    
+    this.call(realm, args, new_this)
 }
 
 #[allow(unused)]
