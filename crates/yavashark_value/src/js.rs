@@ -186,6 +186,14 @@ impl<C: Realm> Value<C> {
 
         Ok(obj)
     }
+    
+    pub fn as_number(&self) -> f64 {
+        let Self::Number(n) = &self else {
+            return f64::NAN
+        };
+
+        *n
+    }
 }
 
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
