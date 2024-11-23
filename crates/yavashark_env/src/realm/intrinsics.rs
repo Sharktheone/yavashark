@@ -40,6 +40,7 @@ impl Intrinsics {
             ObjectHandle::new(FunctionPrototype::new(obj_prototype.clone().into()));
 
         {
+            let obj_this = obj_prototype.clone().into();
             let mut obj = obj_prototype.get_mut()?;
 
             let obj = obj.as_any_mut();
@@ -48,7 +49,7 @@ impl Intrinsics {
                 .downcast_mut::<Prototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
 
-            proto.initialize(func_prototype.clone().into());
+            proto.initialize(func_prototype.clone().into(), obj_this)?;
         }
 
         {

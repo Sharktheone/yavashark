@@ -59,7 +59,7 @@ impl Prototype {
         }
     }
 
-    pub(crate) fn initialize(&mut self, func: Value) {
+    pub(crate) fn initialize(&mut self, func: Value, this: Value) -> Res {
         self.defined_getter =
             NativeFunction::with_proto("__define_getter__", define_getter, func.copy()).into();
         self.defined_setter =
@@ -70,6 +70,10 @@ impl Prototype {
             NativeFunction::with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
         self.constructor =
             NativeFunction::with_proto("Object", object_constructor, func.copy()).into();
+        
+        
+        self.constructor.value.define_property("prototype".into(), this)?;
+        
         self.has_own_property =
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
         self.is_prototype_of =
@@ -81,6 +85,8 @@ impl Prototype {
             NativeFunction::with_proto("toLocaleString", to_locale_string, func.copy()).into();
         self.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
         self.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
+        
+        Ok(())
     }
 
     const DIRECT_PROPERTIES: &'static [&'static str] = &[
