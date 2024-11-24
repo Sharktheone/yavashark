@@ -18,16 +18,16 @@ impl Math {
 
 #[properties]
 impl Math {
-    #[prop("pow")]
-    fn pow(args: Vec<Value>, _: Value) -> ValueResult {
-        if args.len() < 2 {
-            return Ok(Value::Number(f64::NAN))
-        }
-        
-        let base = args[0].as_number();
-        let exponent = args[1].as_number();
-        
-        Ok(base.powf(exponent).into())
-    }
+    // #[prop("pow")]
+    // fn pow(args: Vec<Value>, _: Value) -> ValueResult {
+    //     if args.len() < 2 {
+    //         return Ok(Value::Number(f64::NAN))
+    //     }
+    //     
+    //     let base = args[0].as_number();
+    //     let exponent = args[1].as_number();
+    //     
+    //     Ok(base.powf(exponent).into())
+    // }
 
 }
