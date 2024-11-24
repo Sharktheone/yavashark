@@ -142,6 +142,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             if attr.meta.path().is_ident("gc") {
                 let mut ty = true;
                 let mut func = None;
+                let mut multi = false;
 
                 if !matches!(attr.meta, syn::Meta::Path(_)) {
                     if let Err(e) = attr.parse_nested_meta(|meta| {
@@ -157,6 +158,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                                     .cloned()
                                     .ok_or(syn::Error::new(meta.path.span(), "Expected ident"))?,
                             );
+                            return Ok(());
+                        }
+
+                        if meta.path.is_ident("multi") {
+                            multi = true;
                             return Ok(());
                         }
 
@@ -178,9 +184,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
                 }
-                .clone();
+                    .clone();
 
-                gc.push((id, ty, func));
+                gc.push((id, ty, multi, func));
 
                 return false;
             }
@@ -256,12 +262,20 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .into_iter()
             .map(|gc| {
                 let mut func = if gc.1 {
-                    Ident::new("gc_ref", Span::call_site())
+                    if gc.2 {
+                        Ident::new("gc_ref_multi", Span::call_site())
+                    } else {
+                        Ident::new("gc_ref", Span::call_site())
+                    }
                 } else {
-                    Ident::new("gc_untyped_ref", Span::call_site())
+                    if gc.2 {
+                        Ident::new("gc_untyped_ref_multi", Span::call_site())
+                    } else {
+                        Ident::new("gc_untyped_ref", Span::call_site())
+                    }
                 };
 
-                if let Some(f) = gc.2 {
+                if let Some(f) = gc.3 {
                     func = f;
                 }
 
