@@ -184,7 +184,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
                 }
-                    .clone();
+                .clone();
 
                 gc.push((id, ty, multi, func));
 

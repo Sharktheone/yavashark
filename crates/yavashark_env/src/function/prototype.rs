@@ -2,10 +2,10 @@
 
 use yavashark_value::Obj;
 
+use crate::function::bound::BoundFunction;
 use crate::object::Object;
 use crate::realm::Realm;
 use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
-use crate::function::bound::BoundFunction;
 
 #[derive(Debug)]
 pub struct FunctionPrototype {
@@ -37,9 +37,10 @@ impl FunctionPrototype {
         self.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
         self.call = NativeFunction::with_proto("call", call, func.copy()).into();
         self.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
-        
-        
-        self.constructor.value.define_property("prototype".into(), func.into())
+
+        self.constructor
+            .value
+            .define_property("prototype".into(), func.into())
     }
 }
 
@@ -56,7 +57,7 @@ fn bind(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 #[allow(unused)]
 fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     let new_this = args.remove(0);
-    
+
     this.call(realm, args, new_this)
 }
 

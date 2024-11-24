@@ -26,7 +26,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let crate_path = Path::from(Ident::new("crate", item.span()));
 
-
     let mut realm = crate_path.clone();
     realm
         .segments
@@ -343,7 +342,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             quote! {{
                 let x = x.get()?;
                 let deez = (***x).as_any().downcast_ref::<Self>()
-                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this)))?;
+                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?} trace: {}", #fn_name, this, x.class_name())))?;
 
                 deez.#name(args #realm #this)
             }}

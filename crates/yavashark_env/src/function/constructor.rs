@@ -105,7 +105,6 @@ impl NativeConstructor {
 
         let handle = ObjectHandle::new(this);
 
-
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
@@ -117,8 +116,7 @@ impl NativeConstructor {
 
             this.constructor = constructor.into();
         }
-        
-        
+
         handle
     }
 
@@ -153,11 +151,10 @@ impl NativeConstructor {
             proto,
             special: true,
             object: Object::raw_with_proto(self_proto),
-            constructor: Value::Undefined.into()
+            constructor: Value::Undefined.into(),
         };
 
         let handle = ObjectHandle::new(this);
-
 
         #[allow(clippy::expect_used)]
         {
@@ -170,7 +167,6 @@ impl NativeConstructor {
 
             this.constructor = constructor.into();
         }
-
 
         handle
     }

@@ -1,7 +1,7 @@
 use crate::array::{Array, ArrayIterator};
+use crate::builtins::Math;
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
-use crate::builtins::Math;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -91,12 +91,8 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
-        
-        let math_obj = Math::new(
-            obj_prototype.clone().into(),
-            func_prototype.clone().into(),
-        )?;
+
+        let math_obj = Math::new(obj_prototype.clone().into(), func_prototype.clone().into())?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -104,7 +100,7 @@ impl Intrinsics {
             array: array_prototype,
             array_iter: array_iter_prototype,
             error: error_prototype,
-            math: math_obj
+            math: math_obj,
         })
     }
 }
