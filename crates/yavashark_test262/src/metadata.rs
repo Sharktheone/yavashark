@@ -3,6 +3,7 @@ use std::ops::Index;
 use yaml_rust2::Yaml;
 
 #[derive(Clone, Debug, Default)]
+#[allow(unused)]
 pub struct Metadata {
     pub negative: Option<Negative>,
     pub includes: Vec<String>,
@@ -11,6 +12,7 @@ pub struct Metadata {
 }
 
 #[derive(Clone, Debug)]
+#[allow(unused)]
 pub struct Negative {
     pub phase: NegativePhase,
     pub ty: String,

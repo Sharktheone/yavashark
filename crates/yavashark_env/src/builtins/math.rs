@@ -7,9 +7,10 @@ use yavashark_value::Obj;
 pub struct Math {}
 
 impl Math {
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Result<ObjectHandle> {
         let mut this = Self {
-            object: Object::raw_with_proto(proto.clone().into()),
+            object: Object::raw_with_proto(proto.into()),
         };
 
         this.initialize(func.into())?;
@@ -21,12 +22,11 @@ impl Math {
 #[properties]
 impl Math {
     #[prop("pow")]
-    fn pow(&self, args: Vec<Value>, this: Value) -> ValueResult {
+    #[allow(clippy::unused_self, clippy::needless_pass_by_value)]
+    fn pow(&self, args: Vec<Value>, _: Value) -> ValueResult {
         if args.len() < 2 {
             return Ok(Value::Number(f64::NAN));
         }
-
-        let k = this.as_object()?.get()?;
 
         let base = args[0].as_number();
         let exponent = args[1].as_number();
@@ -34,11 +34,11 @@ impl Math {
         Ok(base.powf(exponent).into())
     }
     pub(crate) fn initialize(&mut self, func_proto: Value) -> Res {
-        use yavashark_value::{AsAny, Obj};
+        use yavashark_value::{Obj};
         let function = crate::NativeFunction::with_proto(
             stringify!(pow),
-            |args, this, realm| match this.copy() {
-                crate::Value::Object(ref x) => {
+            |args, this, _| match this.copy() {
+                Value::Object(ref x) => {
                     let x = x.get()?;
                     let deez = (***x)
                         .as_any()
@@ -56,7 +56,7 @@ impl Math {
                     this
                 ))),
             },
-            func_proto.copy(),
+            func_proto,
         )
         .into();
         self.define_variable(

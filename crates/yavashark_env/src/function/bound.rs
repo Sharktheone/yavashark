@@ -20,7 +20,8 @@ impl Func<Realm> for BoundFunction {
 }
 
 impl BoundFunction {
-    pub fn new(func: Value, this: Value, args: Vec<Value>, realm: &Realm) -> ValueResult {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(func: Value, this: Value, _: Vec<Value>, realm: &Realm) -> ValueResult {
         let f = func.as_object()?;
 
         if !f.is_function() {

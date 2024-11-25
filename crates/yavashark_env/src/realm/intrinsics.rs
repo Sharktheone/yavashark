@@ -92,7 +92,7 @@ impl Intrinsics {
             func_prototype.clone().into(),
         )?;
 
-        let math_obj = Math::new(obj_prototype.clone().into(), func_prototype.clone().into())?;
+        let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone())?;
 
         Ok(Self {
             obj: obj_prototype,

@@ -84,6 +84,7 @@ impl NativeConstructor {
         )
     }
 
+    #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: String,
         f: impl Fn() -> Value + 'static,
@@ -135,6 +136,8 @@ impl NativeConstructor {
         )
     }
 
+
+    #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: String,
         f: impl Fn() -> Value + 'static,

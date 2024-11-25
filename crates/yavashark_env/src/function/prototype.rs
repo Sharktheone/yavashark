@@ -40,7 +40,7 @@ impl FunctionPrototype {
 
         self.constructor
             .value
-            .define_property("prototype".into(), func.into())
+            .define_property("prototype".into(), func)
     }
 }
 

@@ -267,12 +267,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     } else {
                         Ident::new("gc_ref", Span::call_site())
                     }
+                } else if gc.2 {
+                    Ident::new("gc_untyped_ref_multi", Span::call_site())
                 } else {
-                    if gc.2 {
-                        Ident::new("gc_untyped_ref_multi", Span::call_site())
-                    } else {
-                        Ident::new("gc_untyped_ref", Span::call_site())
-                    }
+                    Ident::new("gc_untyped_ref", Span::call_site())
                 };
 
                 if let Some(f) = gc.3 {
