@@ -13,8 +13,6 @@ yavashark_macro = { path = "../yavashark_macro" }
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_env = { path = "../yavashark_env", features = ["tests"] }
 yavashark_value = { path = "../yavashark_value" }
-anyhow = "1.0.83"
-colored = "2.1.0"
 log = "0.4.21"
 env_logger = "0.11.3"
 

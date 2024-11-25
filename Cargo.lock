@@ -4656,17 +4656,13 @@ dependencies = [
  "swc_ecma_ast",
  "swc_ecma_parser",
  "yavashark_bytecode",
- "yavashark_env",
- "yavashark_value",
 ]
 
 [[package]]
 name = "yavashark_env"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "colored",
- "log",
  "paste",
  "yavashark_garbage",
  "yavashark_macro",
@@ -4677,7 +4673,6 @@ dependencies = [
 name = "yavashark_garbage"
 version = "0.1.0"
 dependencies = [
- "bitflags 2.6.0",
  "eframe",
  "egui",
  "egui_extras",
@@ -4694,8 +4689,6 @@ dependencies = [
 name = "yavashark_interpreter"
 version = "0.1.0"
 dependencies = [
- "anyhow",
- "colored",
  "env_logger",
  "log",
  "swc_common",
@@ -4727,7 +4720,6 @@ dependencies = [
 name = "yavashark_parser"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "slotmap",
  "yavashark_lexer",
 ]
@@ -4745,7 +4737,6 @@ dependencies = [
 name = "yavashark_test262"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "bitflags 2.6.0",
  "swc_common",
  "swc_ecma_ast",
@@ -4769,7 +4760,6 @@ dependencies = [
 name = "yavashark_vm"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "yavashark_bytecode",
  "yavashark_env",
 ]
