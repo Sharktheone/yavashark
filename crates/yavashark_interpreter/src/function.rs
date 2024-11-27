@@ -6,10 +6,10 @@ use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable};
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Func, Obj, ObjectProperty};
+use yavashark_value::{Constructor, CustomName, Func, Obj, ObjectProperty};
 
 #[allow(clippy::module_name_repetitions)]
-#[object(function, constructor, direct(prototype))]
+#[object(function, constructor, direct(prototype), name)]
 #[derive(Debug)]
 pub struct JSFunction {
     pub name: String,
@@ -17,6 +17,13 @@ pub struct JSFunction {
     pub block: Option<BlockStmt>,
     #[gc(untyped)]
     pub scope: Scope,
+}
+
+
+impl CustomName for JSFunction {
+    fn custom_name(&self) -> String {
+        self.name.clone()
+    }
 }
 
 impl JSFunction {

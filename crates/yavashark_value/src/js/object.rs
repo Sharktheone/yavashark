@@ -342,7 +342,7 @@ impl<C: Realm> Object<C> {
     #[must_use]
     pub fn name(&self) -> String {
         self.get()
-            .map_or_else(|_| "Object".to_string(), |o| o.name())
+            .map_or_else(|_| "<unknown>".to_string(), |o| o.name())
     }
 
     #[allow(clippy::type_complexity)]
