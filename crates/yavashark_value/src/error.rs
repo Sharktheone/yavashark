@@ -110,7 +110,7 @@ impl<C: Realm> Error<C> {
             ErrorKind::Runtime(_) => "RuntimeError",
             ErrorKind::Syntax(_) => "SyntaxError",
             ErrorKind::Error(_) => "Error",
-            ErrorKind::Throw(_) => "TODO: Throw",
+            ErrorKind::Throw(_) => "Uncaught",
         }
     }
 
