@@ -3,7 +3,7 @@ use crate::utils::parse_file;
 use crate::TEST262_DIR;
 use std::path::{Path, PathBuf};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Error};
+use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
 use yavashark_value::ErrorKind;
 
@@ -35,10 +35,7 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope) -> Resul
                     Err(e) => return e,
                 }
             }
-            
+
             e
-        }
-        
-        )
-    
+        })
 }

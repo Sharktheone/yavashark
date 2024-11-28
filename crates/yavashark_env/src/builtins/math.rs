@@ -34,7 +34,7 @@ impl Math {
         Ok(base.powf(exponent).into())
     }
     pub(crate) fn initialize(&mut self, func_proto: Value) -> Res {
-        use yavashark_value::{Obj};
+        use yavashark_value::Obj;
         let function = crate::NativeFunction::with_proto(
             stringify!(pow),
             |args, this, _| match this.copy() {

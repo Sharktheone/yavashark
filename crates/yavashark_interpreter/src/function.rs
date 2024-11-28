@@ -19,7 +19,6 @@ pub struct JSFunction {
     pub scope: Scope,
 }
 
-
 impl CustomName for JSFunction {
     fn custom_name(&self) -> String {
         self.name.clone()

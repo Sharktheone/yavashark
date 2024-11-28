@@ -136,7 +136,6 @@ impl NativeConstructor {
         )
     }
 
-
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: String,
