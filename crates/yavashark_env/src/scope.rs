@@ -527,6 +527,11 @@ impl ScopeInternal {
             ParentOrGlobal::Global(_) => Ok(PathBuf::new()),
         }
     }
+    
+    
+    pub fn copy_path(&mut self) {
+        self.file = self.get_current_file().ok();
+    }
 }
 
 impl Scope {
@@ -713,6 +718,12 @@ impl Scope {
     pub fn get_current_path(&self) -> Result<PathBuf> {
         self.scope.borrow()?.get_current_file()
     }
+    
+    pub fn copy_path(&self) -> Res {
+        self.scope.borrow_mut()?.copy_path();
+        
+        Ok(())
+    }
 }
 
 impl CustomGcRefUntyped for Scope {
@@ -734,6 +745,8 @@ impl From<Gc<RefCell<ScopeInternal>>> for Scope {
         Self { scope }
     }
 }
+
+
 
 #[cfg(test)]
 mod tests {

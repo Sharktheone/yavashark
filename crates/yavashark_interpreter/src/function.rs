@@ -35,6 +35,9 @@ impl JSFunction {
         realm: &mut Realm,
     ) -> ObjectHandle {
         let prototype = Object::new(realm);
+        
+        
+        scope.copy_path();
 
         let this = Self {
             name,
