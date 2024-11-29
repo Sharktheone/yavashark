@@ -280,10 +280,6 @@ impl Obj<Realm> for Object {
     }
 
     fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
-        if let Some(_to_string) = self.get_property(&Value::String("toString".to_string())) {
-            // to_string.call(realm, vec![], Value::Object(obj))?;
-        }
-
         Ok("[object Object]".to_string())
     }
 
