@@ -27,7 +27,7 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
     todo!()
 }
 
-pub fn has_own_property_descriptor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+pub fn get_own_property_descriptor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
 
