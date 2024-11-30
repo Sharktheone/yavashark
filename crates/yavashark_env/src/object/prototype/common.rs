@@ -27,6 +27,10 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
     todo!()
 }
 
+pub fn has_own_property_descriptor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    todo!()
+}
+
 pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
@@ -46,3 +50,4 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
 }
+

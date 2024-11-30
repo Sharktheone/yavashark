@@ -27,6 +27,7 @@ pub struct Prototype {
     lookup_setter: ObjectProperty,
     constructor: ObjectProperty,
     has_own_property: ObjectProperty,
+    has_own_property_descriptor: ObjectProperty,
     is_prototype_of: ObjectProperty,
     property_is_enumerable: ObjectProperty,
     to_locale_string: ObjectProperty,
@@ -51,6 +52,7 @@ impl Prototype {
             lookup_setter: Value::Undefined.into(),
             constructor: Value::Undefined.into(),
             has_own_property: Value::Undefined.into(),
+            has_own_property_descriptor: Value::Undefined.into(),
             is_prototype_of: Value::Undefined.into(),
             property_is_enumerable: Value::Undefined.into(),
             to_locale_string: Value::Undefined.into(),
@@ -77,6 +79,8 @@ impl Prototype {
 
         self.has_own_property =
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
+        self.has_own_property_descriptor =
+            NativeFunction::with_proto("hasOwnPropertyDescriptor", has_own_property, func.copy()).into();
         self.is_prototype_of =
             NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
         self.property_is_enumerable =
@@ -137,6 +141,11 @@ impl Obj<Realm> for Prototype {
                     self.has_own_property = value.into();
                     return;
                 }
+                
+                "hasOwnPropertyDescriptor" => {
+                    self.has_own_property_descriptor = value.into();
+                    return;
+                }
 
                 "isPrototypeOf" => {
                     self.is_prototype_of = value.into();
@@ -183,6 +192,7 @@ impl Obj<Realm> for Prototype {
                 "__lookup_setter__" => return Some(self.lookup_setter.copy()),
                 "constructor" => return Some(self.constructor.copy()),
                 "hasOwnProperty" => return Some(self.has_own_property.copy()),
+                "hasOwnPropertyDescriptor" => return Some(self.has_own_property_descriptor.copy()),
                 "isPrototypeOf" => return Some(self.is_prototype_of.copy()),
                 "propertyIsEnumerable" => return Some(self.property_is_enumerable.copy()),
                 "toLocaleString" => return Some(self.to_locale_string.copy()),
@@ -203,6 +213,7 @@ impl Obj<Realm> for Prototype {
                 "__lookup_setter__" => return Some(&self.lookup_setter.value),
                 "constructor" => return Some(&self.constructor.value),
                 "hasOwnProperty" => return Some(&self.has_own_property.value),
+                "hasOwnPropertyDescriptor" => return Some(&self.has_own_property_descriptor.value),
                 "isPrototypeOf" => return Some(&self.is_prototype_of.value),
                 "propertyIsEnumerable" => return Some(&self.property_is_enumerable.value),
                 "toLocaleString" => return Some(&self.to_locale_string.value),
@@ -249,6 +260,7 @@ impl Obj<Realm> for Prototype {
                 | "__lookup_setter__"
                 | "constructor"
                 | "hasOwnProperty"
+                | "hasOwnPropertyDescriptor"
                 | "isPrototypeOf"
                 | "propertyIsEnumerable"
                 | "toLocaleString"
@@ -300,6 +312,10 @@ impl Obj<Realm> for Prototype {
             self.has_own_property.value.copy(),
         ));
         props.push((
+            Value::String("hasOwnPropertyDescriptor".to_string()),
+            self.has_own_property_descriptor.value.copy(),
+        ));
+        props.push((
             Value::String("isPrototypeOf".to_string()),
             self.is_prototype_of.value.copy(),
         ));
@@ -330,6 +346,7 @@ impl Obj<Realm> for Prototype {
         keys.push(Value::String("__lookup_setter__".to_string()));
         keys.push(Value::String("constructor".to_string()));
         keys.push(Value::String("hasOwnProperty".to_string()));
+        keys.push(Value::String("hasOwnPropertyDescriptor".to_string()));
         keys.push(Value::String("isPrototypeOf".to_string()));
         keys.push(Value::String("propertyIsEnumerable".to_string()));
         keys.push(Value::String("toLocaleString".to_string()));
@@ -346,6 +363,7 @@ impl Obj<Realm> for Prototype {
         values.push(self.lookup_setter.value.copy());
         values.push(self.constructor.value.copy());
         values.push(self.has_own_property.value.copy());
+        values.push(self.has_own_property_descriptor.value.copy());
         values.push(self.is_prototype_of.value.copy());
         values.push(self.property_is_enumerable.value.copy());
         values.push(self.to_locale_string.value.copy());
