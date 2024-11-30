@@ -17,6 +17,7 @@ impl Array {
         let mut array = Self::new(realm.intrinsics.array.clone().into());
 
         array.object.set_array(elements);
+        array.length.value = Value::Number(array.object.array.len() as f64);
 
         Ok(array)
     }
