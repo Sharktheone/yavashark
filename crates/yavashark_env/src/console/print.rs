@@ -109,13 +109,13 @@ impl PrettyPrint for Object<Realm> {
 impl PrettyPrint for Value<Realm> {
     fn pretty_print_key(&self) -> String {
         match self {
-            Self::Undefined => "undefined".bright_black().to_string(),
-            Self::Null => "null".white().bold().to_string(),
-            Self::Boolean(b) => b.to_string().yellow().to_string(),
-            Self::Number(n) => n.to_string().bright_yellow().to_string(),
-            Self::String(s) => format!("\"{}\"", s.to_string()).green().to_string(),
+            Self::Undefined => "undefined".to_string(),
+            Self::Null => "null".to_string(),
+            Self::Boolean(b) => b.to_string(),
+            Self::Number(n) => n.to_string(),
+            Self::String(s) => s.to_string(),
             Self::Object(o) => o.pretty_print_key(),
-            Self::Symbol(s) => s.to_string().cyan().to_string(),
+            Self::Symbol(s) => s.to_string(),
         }
     }
 
