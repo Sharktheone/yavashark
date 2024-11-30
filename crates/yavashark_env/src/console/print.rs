@@ -113,7 +113,7 @@ impl PrettyPrint for Value<Realm> {
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
-            Self::String(s) => s.to_string().green().to_string(),
+            Self::String(s) => format!("\"{}\"", s.to_string()).green().to_string(),
             Self::Object(o) => o.pretty_print_key(),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
@@ -125,7 +125,7 @@ impl PrettyPrint for Value<Realm> {
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
-            Self::String(s) => s.to_string().green().to_string(),
+            Self::String(s) => format!("\"{}\"", s.to_string()).green().to_string(),
             Self::Object(o) => o.pretty_print_circular(not),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
@@ -137,7 +137,7 @@ impl PrettyPrint for Value<Realm> {
             Self::Null => "null".white().bold().to_string(),
             Self::Boolean(b) => b.to_string().yellow().to_string(),
             Self::Number(n) => n.to_string().bright_yellow().to_string(),
-            Self::String(s) => s.to_string().green().to_string(),
+            Self::String(s) => format!("\"{}\"", s.to_string()).green().to_string(),
             Self::Object(o) => o.pretty_print_circular_nl(not),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
         }
