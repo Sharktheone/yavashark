@@ -1,7 +1,7 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
 use crate::realm::Realm;
-use crate::{Value, ValueResult};
+use crate::{Object, Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     todo!()
@@ -28,7 +28,29 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 }
 
 pub fn get_own_property_descriptor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
+    if args.len() < 2{
+        return Ok(Value::Undefined);
+    }
+    
+    
+    let Value::Object(obj) = &args[0] else {
+        return Ok(Value::Undefined);
+    };
+    
+    let key = &args[1];
+    
+    let obj = obj.get()?;
+    
+    let Some(prop) = obj.resolve_property(key) else {
+        return Ok(Value::Undefined);
+    };
+    
+    let desc = Object::new(realm);
+    
+    prop.descriptor(desc.clone())?;
+    
+    
+    Ok(desc.into())
 }
 
 pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
