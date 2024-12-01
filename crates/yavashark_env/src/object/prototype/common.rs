@@ -24,7 +24,20 @@ pub fn object_constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> V
 }
 
 pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
+    if args.len() < 2{
+        return Ok(Value::Undefined);
+    }
+
+
+    let Value::Object(obj) = &args[0] else {
+        return Ok(Value::Undefined);
+    };
+
+    let key = &args[1];
+    
+    let obj = obj.get()?;
+
+    Ok(obj.contains_key(key).into())
 }
 
 pub fn get_own_property_descriptor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
