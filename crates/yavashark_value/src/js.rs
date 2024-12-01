@@ -195,6 +195,11 @@ impl<C: Realm> Value<C> {
 
         *n
     }
+    
+    
+    pub fn is_undefined(&self) -> bool {
+        matches!(self, Self::Undefined)
+    }
 }
 
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
