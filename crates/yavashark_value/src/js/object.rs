@@ -566,6 +566,23 @@ impl<C: Realm> ObjectProperty<C> {
             set: self.set.copy(),
         }
     }
+    
+    
+    pub fn descriptor(self, obj: Object<C>) -> Result<(), Error<C>> {
+        
+        if self.set.is_undefined() || self.get.is_undefined() {
+            
+        } else {
+            obj.define_property("value".into(), self.value)?;
+        }
+        
+        obj.define_property("writable".into(), self.attributes.is_writable().into())?;
+        obj.define_property("enumerable".into(), self.attributes.is_enumerable().into())?;
+        obj.define_property("configurable".into(), self.attributes.is_configurable().into())?;
+        
+        
+        Ok(())
+    }
 }
 
 impl<C: Realm> From<Variable<C>> for ObjectProperty<C> {
