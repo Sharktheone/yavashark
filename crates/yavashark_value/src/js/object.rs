@@ -491,9 +491,9 @@ impl<C: Realm> Object<C> {
     pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {
         if let Some(to_string) = self.resolve_property(&"toString".into(), realm)? {
             let to_string = to_string.copy();
-            
+
             let val = to_string.call(realm, vec![], Value::Object(self.clone()))?;
-            
+
             val.to_string(realm)
         } else {
             let this = self.get()?;
@@ -566,21 +566,20 @@ impl<C: Realm> ObjectProperty<C> {
             set: self.set.copy(),
         }
     }
-    
-    
+
     pub fn descriptor(self, obj: Object<C>) -> Result<(), Error<C>> {
-        
         if self.set.is_undefined() || self.get.is_undefined() {
-            
         } else {
             obj.define_property("value".into(), self.value)?;
         }
-        
+
         obj.define_property("writable".into(), self.attributes.is_writable().into())?;
         obj.define_property("enumerable".into(), self.attributes.is_enumerable().into())?;
-        obj.define_property("configurable".into(), self.attributes.is_configurable().into())?;
-        
-        
+        obj.define_property(
+            "configurable".into(),
+            self.attributes.is_configurable().into(),
+        )?;
+
         Ok(())
     }
 }

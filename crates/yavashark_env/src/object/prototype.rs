@@ -80,7 +80,8 @@ impl Prototype {
         self.has_own_property =
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
         self.get_own_property_descriptor =
-            NativeFunction::with_proto("getOwnPropertyDescriptor", has_own_property, func.copy()).into();
+            NativeFunction::with_proto("getOwnPropertyDescriptor", has_own_property, func.copy())
+                .into();
         self.is_prototype_of =
             NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
         self.property_is_enumerable =
@@ -141,7 +142,7 @@ impl Obj<Realm> for Prototype {
                     self.has_own_property = value.into();
                     return;
                 }
-                
+
                 "getOwnPropertyDescriptor" => {
                     self.get_own_property_descriptor = value.into();
                     return;

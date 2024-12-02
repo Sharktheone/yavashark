@@ -195,8 +195,7 @@ impl<C: Realm> Value<C> {
 
         *n
     }
-    
-    
+
     pub fn is_undefined(&self) -> bool {
         matches!(self, Self::Undefined)
     }
