@@ -1,6 +1,6 @@
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
-use crate::{ObjectHandle, Realm, Value, Object};
+use crate::{ObjectHandle, Realm, Object, ValueResult};
 
 #[object]
 #[derive(Debug)]
@@ -17,7 +17,6 @@ impl StringConstructor {
             object: Object::raw_with_proto(proto.into()),
         };
 
-        this.initialize(func.into())?;
 
         Ok(this.into_object())
     }
@@ -28,10 +27,8 @@ impl StringConstructor {
 impl StringConstructor {
     #[new]
     #[must_use]
-    pub fn create(realm: &mut Realm) -> Value {
-        let this = Self::new(proto.copy());
-
-        ObjectHandle::new(this).into()
+    pub fn create(realm: &mut Realm) -> ValueResult {
+        Ok(Self::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone())?.into())
     }
     
 }
