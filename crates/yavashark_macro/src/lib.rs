@@ -3,6 +3,7 @@ extern crate proc_macro;
 use std::env;
 
 mod obj;
+mod properties;
 mod props;
 
 #[proc_macro_attribute]
@@ -15,6 +16,14 @@ pub fn object(
 
 #[proc_macro_attribute]
 pub fn properties(
+    attrs: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    properties::properties(attrs, item)
+}
+
+#[proc_macro_attribute]
+pub fn properties_new(
     attrs: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
