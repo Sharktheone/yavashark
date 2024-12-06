@@ -5,6 +5,7 @@ use std::env;
 mod obj;
 mod properties;
 mod props;
+mod config;
 
 #[proc_macro_attribute]
 pub fn object(
