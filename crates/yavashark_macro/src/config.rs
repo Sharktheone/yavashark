@@ -1,7 +1,7 @@
 use proc_macro2::{Ident, Span};
 use syn::{Path, PathSegment};
 
-struct Config {
+pub struct Config {
     crate_path: Path,
     realm: Path,
     error: Path,
@@ -11,6 +11,7 @@ struct Config {
     object_handle: Path,
     object: Path,
     value: Path,
+    value_result: Path,
 }
 
 
@@ -64,6 +65,10 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("Value", span)));
         
+        let mut value_result = crate_path.clone();
+        value_result
+            .segments
+            .push(PathSegment::from(Ident::new("ValueResult", span)));
         
         Self {
             crate_path,
@@ -75,6 +80,7 @@ impl Config {
             object_handle,
             object,
             value,
+            value_result,
         }
     }
 }
