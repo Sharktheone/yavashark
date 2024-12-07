@@ -2,17 +2,17 @@ use proc_macro2::{Ident, Span};
 use syn::{Path, PathSegment};
 
 pub struct Config {
-    crate_path: Path,
-    realm: Path,
-    error: Path,
-    native_function: Path,
-    native_constructor: Path,
-    variable: Path,
-    object_handle: Path,
-    object: Path,
-    value: Path,
-    value_result: Path,
-    object_property: Path,
+    pub crate_path: Path,
+    pub realm: Path,
+    pub error: Path,
+    pub native_function: Path,
+    pub native_constructor: Path,
+    pub variable: Path,
+    pub object_handle: Path,
+    pub object: Path,
+    pub value: Path,
+    pub value_result: Path,
+    pub object_property: Path,
 }
 
 
@@ -92,3 +92,29 @@ impl Config {
         }
     }
 }
+
+
+mod config_macro {
+    macro_rules! config {
+        () => {
+            let config = $crate::config::Config::new(proc_macro2::Span::call_site());
+
+            let crate_path = config.crate_path;
+            let realm = config.realm;
+            let error = config.error;
+            let native_function = config.native_function;
+            let native_constructor = config.native_constructor;
+            let variable = config.variable;
+            let object_handle = config.object_handle;
+            let object_path = config.object;
+            let value = config.value;
+            let value_result = config.value_result;
+            let object_property = config.object_property;
+
+        };
+    }
+    
+    pub(crate) use config;
+}
+
+pub(crate) use config_macro::config;
