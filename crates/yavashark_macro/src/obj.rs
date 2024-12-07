@@ -1,11 +1,9 @@
+use crate::config::config;
 use proc_macro::TokenStream as TokenStream1;
-
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
-use syn::{FieldMutability, Fields, Path, PathSegment};
-
-use crate::env_path;
+use syn::{FieldMutability, Fields, Path};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -13,51 +11,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut direct = Vec::new();
     let mut constructor = false;
 
-    let span = input.span();
-
-    let crate_path = env_path();
-
-    let mut obj_path = crate_path.clone();
-    obj_path
-        .segments
-        .push(PathSegment::from(Ident::new("Object", input.span())));
-
-    let mut variable = crate_path.clone();
-    variable
-        .segments
-        .push(PathSegment::from(Ident::new("Variable", input.span())));
-
-    let mut object_property = crate_path.clone();
-    object_property.segments.push(PathSegment::from(Ident::new(
-        "ObjectProperty",
-        input.span(),
-    )));
-
-    let mut realm = crate_path.clone();
-    realm
-        .segments
-        .push(PathSegment::from(Ident::new("Realm", input.span())));
-
-    let mut value = crate_path.clone();
-    value
-        .segments
-        .push(PathSegment::from(Ident::new("Value", input.span())));
-
-    let mut value_result = crate_path.clone();
-    value_result
-        .segments
-        .push(PathSegment::from(Ident::new("ValueResult", input.span())));
-
-    let mut error = crate_path.clone();
-    error
-        .segments
-        .push(PathSegment::from(Ident::new("Error", input.span())));
-
-    let mut op = crate_path.clone();
-    op.segments.push(PathSegment::from(Ident::new(
-        "ObjectProperty",
-        input.span(),
-    )));
+    config!();
 
     let mut gc = Vec::new();
 
@@ -83,30 +37,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 Ok(())
             })?;
-            return Ok(());
-        }
-        if meta.path.is_ident("object") {
-            obj_path = meta.path;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("function") {
-            function = true;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("variable") {
-            variable = meta.path;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("context") {
-            realm = meta.path;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("value") {
-            value = meta.path;
             return Ok(());
         }
 
@@ -203,14 +133,14 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
         mutability: FieldMutability::None,
-        ident: Some(Ident::new("object", span)),
+        ident: Some(Ident::new("object", Span::call_site())),
         colon_token: None,
         ty: syn::Type::Path(syn::TypePath {
             qself: None,
-            path: obj_path.clone(),
+            path: object_path.clone(),
         }),
     });
-
+    
     for (path, _) in &direct {
         fields.named.push(syn::Field {
             attrs: Vec::new(),
@@ -227,17 +157,17 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let struct_name = &input.ident;
 
-    let properties_define = match_prop(&direct, Act::Set, &value);
-    let properties_variable_define = match_prop(&direct, Act::SetVar, &value);
-    let properties_resolve = match_prop(&direct, Act::None, &value);
-    let properties_get = match_prop(&direct, Act::Ref, &value);
-    let properties_contains = match_prop(&direct, Act::Contains, &value);
-    let properties_delete = match_prop(&direct, Act::Delete, &value);
+    let properties_define = match_prop(&direct, Act::Set, value);
+    let properties_variable_define = match_prop(&direct, Act::SetVar, value);
+    let properties_resolve = match_prop(&direct, Act::None, value);
+    let properties_get = match_prop(&direct, Act::Ref, value);
+    let properties_contains = match_prop(&direct, Act::Contains, value);
+    let properties_delete = match_prop(&direct, Act::Delete, value);
 
-    let properties = match_list(&direct, List::Properties, &value);
-    let keys = match_list(&direct, List::Keys, &value);
-    let values = match_list(&direct, List::Values, &value);
-    let clear = match_list(&direct, List::Clear, &value);
+    let properties = match_list(&direct, List::Properties, value);
+    let keys = match_list(&direct, List::Keys, value);
+    let values = match_list(&direct, List::Values, value);
+    let clear = match_list(&direct, List::Clear, value);
 
     let function = if function {
         quote! {
