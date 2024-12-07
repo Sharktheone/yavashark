@@ -12,11 +12,12 @@ pub struct Config {
     object: Path,
     value: Path,
     value_result: Path,
+    object_property: Path,
 }
 
 
 impl Config {
-    fn new(span: Span) -> Self {
+    pub fn new(span: Span) -> Self {
         let crate_path = Path::from(Ident::new("crate", span));
 
         let mut realm = crate_path.clone();
@@ -70,6 +71,12 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("ValueResult", span)));
         
+        let mut object_property = crate_path.clone();
+        object_property.segments.push(PathSegment::from(Ident::new(
+            "ObjectProperty",
+            span,
+        )));
+        
         Self {
             crate_path,
             realm,
@@ -81,6 +88,7 @@ impl Config {
             object,
             value,
             value_result,
+            object_property,
         }
     }
 }
