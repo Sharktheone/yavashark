@@ -6,13 +6,14 @@ use yavashark_garbage::GcRef;
 pub trait ObjectImpl<R: Realm>: Debug + AsAny {
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
     fn get_wrapped_object(&self) -> &impl Obj<R>;
+    fn get_wrapped_object_mut(&mut self) -> &mut impl Obj<R>;
 
     fn define_property(&mut self, name: Value<R>, value: Value<R>) {
-        self.get_wrapped_object().define_property(name, value);
+        self.get_wrapped_object_mut().define_property(name, value);
     }
 
     fn define_variable(&mut self, name: Value<R>, value: Variable<R>) {
-        self.get_wrapped_object().define_variable(name, value);
+        self.get_wrapped_object_mut().define_variable(name, value);
     }
 
     fn resolve_property(&self, name: &Value<R>) -> Option<ObjectProperty<R>> {
@@ -24,10 +25,10 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
     }
 
     fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
-        self.get_wrapped_object().define_getter(name, value)
+        self.get_wrapped_object_mut().define_getter(name, value)
     }
     fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
-        self.get_wrapped_object().define_setter(name, value)
+        self.get_wrapped_object_mut().define_setter(name, value)
     }
     fn get_getter(&self, name: &Value<R>) -> Option<Value<R>> {
         self.get_wrapped_object().get_getter(name)
@@ -37,7 +38,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
     }
 
     fn delete_property(&mut self, name: &Value<R>) -> Option<Value<R>> {
-        self.get_wrapped_object().delete_property(name)
+        self.get_wrapped_object_mut().delete_property(name)
     }
 
     fn contains_key(&self, name: &Value<R>) -> bool {
@@ -95,7 +96,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
         args: Vec<Value<R>>,
         this: Value<R>,
     ) -> Result<Value<R>, Error<R>> {
-        self.get_wrapped_object().call(realm, args, this)
+        self.get_wrapped_object_mut().call(realm, args, this)
     }
 
     fn is_function(&self) -> bool {
