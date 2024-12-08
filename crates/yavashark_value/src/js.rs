@@ -20,10 +20,10 @@ mod conversion;
 mod function;
 mod name;
 mod object;
+mod object_impl;
 mod ops;
 mod symbol;
 pub mod variable;
-mod object_impl;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {

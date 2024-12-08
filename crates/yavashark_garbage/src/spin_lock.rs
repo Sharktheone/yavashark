@@ -15,8 +15,14 @@ pub trait SpinLock<'a, T> {
 }
 
 impl<'a, T> SpinLock<'a, T> for RwLock<T> {
-    type WriteTarget<W: 'a> = RwLockWriteGuard<'a, W> where Self: 'a;
-    type ReadTarget<R: 'a> = RwLockReadGuard<'a, R> where Self: 'a;
+    type WriteTarget<W: 'a>
+        = RwLockWriteGuard<'a, W>
+    where
+        Self: 'a;
+    type ReadTarget<R: 'a>
+        = RwLockReadGuard<'a, R>
+    where
+        Self: 'a;
 
     fn spin_write(&'a self) -> Option<Self::WriteTarget<T>> {
         let mut retries = 500;

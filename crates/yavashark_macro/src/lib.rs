@@ -2,10 +2,10 @@ extern crate proc_macro;
 
 use std::env;
 
+mod config;
 mod obj;
 mod properties;
 mod props;
-mod config;
 
 #[proc_macro_attribute]
 pub fn object(

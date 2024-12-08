@@ -1,7 +1,7 @@
+use crate::{AsAny, BoxedObj, Error, Obj, Object, ObjectProperty, Realm, Value, Variable};
 use std::cell::RefCell;
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
-use crate::{AsAny, BoxedObj, Error, Obj, Object, ObjectProperty, Realm, Value, Variable};
 
 pub trait ObjectImpl<R: Realm>: Debug + AsAny {
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
@@ -96,7 +96,6 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
         this: Value<R>,
     ) -> Result<Value<R>, Error<R>> {
         self.get_wrapped_object().call(realm, args, this)
-        
     }
 
     fn is_function(&self) -> bool {
@@ -135,94 +134,93 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
     }
 }
 
-
 impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
     fn define_property(&mut self, name: Value<R>, value: Value<R>) {
         ObjectImpl::define_property(self, name, value)
     }
-    
+
     fn define_variable(&mut self, name: Value<R>, value: Variable<R>) {
         ObjectImpl::define_variable(self, name, value)
     }
-    
+
     fn resolve_property(&self, name: &Value<R>) -> Option<ObjectProperty<R>> {
         ObjectImpl::resolve_property(self, name)
     }
-    
+
     fn get_property(&self, name: &Value<R>) -> Option<&Value<R>> {
         ObjectImpl::get_property(self, name)
     }
-    
+
     fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         ObjectImpl::define_getter(self, name, value)
     }
-    
+
     fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         ObjectImpl::define_setter(self, name, value)
     }
-    
+
     fn get_getter(&self, name: &Value<R>) -> Option<Value<R>> {
         ObjectImpl::get_getter(self, name)
     }
-    
+
     fn get_setter(&self, name: &Value<R>) -> Option<Value<R>> {
         ObjectImpl::get_setter(self, name)
     }
-    
+
     fn delete_property(&mut self, name: &Value<R>) -> Option<Value<R>> {
         ObjectImpl::delete_property(self, name)
     }
-    
+
     fn contains_key(&self, name: &Value<R>) -> bool {
         ObjectImpl::contains_key(self, name)
     }
-    
+
     fn name(&self) -> String {
         ObjectImpl::name(self)
     }
-    
+
     fn to_string(&self, realm: &mut R) -> Result<String, Error<R>> {
         ObjectImpl::to_string(self, realm)
     }
-    
+
     fn to_string_internal(&self) -> String {
         ObjectImpl::to_string_internal(self)
     }
-    
+
     fn properties(&self) -> Vec<(Value<R>, Value<R>)> {
         ObjectImpl::properties(self)
     }
-    
+
     fn keys(&self) -> Vec<Value<R>> {
         ObjectImpl::keys(self)
     }
-    
+
     fn values(&self) -> Vec<Value<R>> {
         ObjectImpl::values(self)
     }
-    
+
     fn into_object(self) -> Object<R>
     where
         Self: Sized + 'static,
     {
         ObjectImpl::into_object(self)
     }
-    
+
     fn into_value(self) -> Value<R>
     where
         Self: Sized + 'static,
     {
         ObjectImpl::into_value(self)
     }
-    
+
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<R>>) {
         ObjectImpl::get_array_or_done(self, index)
     }
-    
+
     fn clear_values(&mut self) {
         ObjectImpl::clear_values(self)
     }
-    
+
     fn call(
         &mut self,
         realm: &mut R,
@@ -231,39 +229,36 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
     ) -> Result<Value<R>, Error<R>> {
         ObjectImpl::call(self, realm, args, this)
     }
-    
+
     fn is_function(&self) -> bool {
         ObjectImpl::is_function(self)
     }
-    
+
     fn prototype(&self) -> ObjectProperty<R> {
         ObjectImpl::prototype(self)
     }
-    
+
     fn constructor(&self) -> ObjectProperty<R> {
         ObjectImpl::constructor(self)
     }
-    
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<R>>>>
-    {
+
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<R>>>> {
         ObjectImpl::custom_gc_refs(self)
     }
-    
+
     fn class_name(&self) -> &'static str {
         ObjectImpl::class_name(self)
     }
-    
+
     fn get_constructor_value(&self, realm: &mut R) -> Option<Value<R>> {
         ObjectImpl::get_constructor_value(self, realm)
     }
-    
+
     fn get_constructor_proto(&self, realm: &mut R) -> Option<Value<R>> {
         ObjectImpl::get_constructor_proto(self, realm)
     }
-    
+
     fn special_constructor(&self) -> bool {
         ObjectImpl::special_constructor(self)
     }
 }
-
-
