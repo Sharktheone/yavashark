@@ -1,4 +1,4 @@
-use crate::config::config;
+use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
@@ -11,7 +11,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut direct = Vec::new();
     let mut constructor = false;
 
-    config!();
+    let conf = Config::new(Span::call_site());
+
+    let realm = &conf.realm;
+    let error = &conf.error;
+    let variable = &conf.variable;
+    let object_path = &conf.object;
+    let value = &conf.value;
+    let value_result = &conf.value_result;
+    let object_property = &conf.object_property;
 
     let mut gc = Vec::new();
 
@@ -140,7 +148,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             path: object_path.clone(),
         }),
     });
-    
+
     for (path, _) in &direct {
         fields.named.push(syn::Field {
             attrs: Vec::new(),
@@ -231,7 +239,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let constructor = if constructor {
         quote! {
-            fn constructor(&self) -> #op {
+            fn constructor(&self) -> #object_property {
                 yavashark_value::Constructor::get_constructor(self)
             }
 
@@ -249,7 +257,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     } else {
         quote! {
-            fn constructor(&self) -> #op {
+            fn constructor(&self) -> #object_property {
                 self.object.constructor()
             }
         }
@@ -307,7 +315,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.define_variable(name, value);
             }
 
-            fn resolve_property(&self, name: &#value) -> Option<#op> {
+            fn resolve_property(&self, name: &#value) -> Option<#object_property> {
                 #properties_resolve
                 self.object.resolve_property(name)
             }
@@ -374,7 +382,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.clear_values();
             }
 
-            fn prototype(&self) -> #op {
+            fn prototype(&self) -> #object_property {
                 self.object.prototype()
             }
             #constructor

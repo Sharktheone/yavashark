@@ -15,7 +15,6 @@ pub struct Config {
     pub object_property: Path,
 }
 
-
 impl Config {
     pub fn new(span: Span) -> Self {
         let crate_path = Path::from(Ident::new("crate", span));
@@ -38,10 +37,7 @@ impl Config {
         let mut native_constructor = crate_path.clone();
         native_constructor
             .segments
-            .push(PathSegment::from(Ident::new(
-                "NativeConstructor",
-                span
-            )));
+            .push(PathSegment::from(Ident::new("NativeConstructor", span)));
 
         let mut variable = crate_path.clone();
         variable
@@ -65,18 +61,17 @@ impl Config {
         value
             .segments
             .push(PathSegment::from(Ident::new("Value", span)));
-        
+
         let mut value_result = crate_path.clone();
         value_result
             .segments
             .push(PathSegment::from(Ident::new("ValueResult", span)));
-        
+
         let mut object_property = crate_path.clone();
-        object_property.segments.push(PathSegment::from(Ident::new(
-            "ObjectProperty",
-            span,
-        )));
-        
+        object_property
+            .segments
+            .push(PathSegment::from(Ident::new("ObjectProperty", span)));
+
         Self {
             crate_path,
             realm,
@@ -93,28 +88,3 @@ impl Config {
     }
 }
 
-
-mod config_macro {
-    macro_rules! config {
-        () => {
-            let config = $crate::config::Config::new(proc_macro2::Span::call_site());
-
-            let crate_path = config.crate_path;
-            let realm = config.realm;
-            let error = config.error;
-            let native_function = config.native_function;
-            let native_constructor = config.native_constructor;
-            let variable = config.variable;
-            let object_handle = config.object_handle;
-            let object_path = config.object;
-            let value = config.value;
-            let value_result = config.value_result;
-            let object_property = config.object_property;
-
-        };
-    }
-    
-    pub(crate) use config;
-}
-
-pub(crate) use config_macro::config;
