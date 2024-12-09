@@ -24,7 +24,6 @@ pub struct NativeFunctionBuilder(NativeFunction, bool);
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
-    pub data: Option<Box<dyn Any>>,
     special_constructor: bool,
     // pub prototype: ConstructorPrototype,
 }
@@ -51,7 +50,6 @@ impl NativeFunction {
             name,
             f,
             object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
-            data: None,
             special_constructor: false,
             constructor: Value::Undefined.into(),
         };
@@ -84,7 +82,6 @@ impl NativeFunction {
             name: name.to_string(),
             f: Box::new(f),
             object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
-            data: None,
             special_constructor: false,
             constructor: Value::Undefined.into(),
         };
@@ -117,7 +114,6 @@ impl NativeFunction {
             name: name.to_string(),
             f: Box::new(f),
             object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
-            data: None,
             special_constructor: true,
             constructor: Value::Undefined.into(),
         };
@@ -150,7 +146,6 @@ impl NativeFunction {
             name: name.to_string(),
             f: Box::new(f),
             object: Object::raw_with_proto(proto),
-            data: None,
             special_constructor: false,
             constructor: Value::Undefined.into(),
         };
@@ -183,7 +178,6 @@ impl NativeFunction {
             name: name.to_string(),
             f: Box::new(f),
             object: Object::raw_with_proto(proto),
-            data: None,
             special_constructor: true,
             constructor: Value::Undefined.into(),
         };
@@ -262,13 +256,6 @@ impl NativeFunctionBuilder {
     #[must_use]
     pub fn context(mut self, realm: &Realm) -> Self {
         self.0.object.prototype = realm.intrinsics.func.clone().into();
-        self
-    }
-
-    // Sets the data that can be accessed by the function
-    #[must_use]
-    pub fn data(mut self, data: Box<dyn Any>) -> Self {
-        self.0.data = Some(data);
         self
     }
 
