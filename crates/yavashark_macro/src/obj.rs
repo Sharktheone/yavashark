@@ -48,6 +48,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             return Ok(());
         }
 
+
+        if meta.path.is_ident("function") {
+            function = true;
+            return Ok(());
+        }
+
         if meta.path.is_ident("constructor") {
             constructor = true;
             return Ok(());
