@@ -4,6 +4,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
 use syn::{FnArg, ImplItem, Path, PathSegment};
+use crate::config::Config;
 
 #[derive(Debug)]
 struct Item {
@@ -24,53 +25,16 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut new = None;
 
-    let crate_path = Path::from(Ident::new("crate", item.span()));
-
-    let mut realm = crate_path.clone();
-    realm
-        .segments
-        .push(PathSegment::from(Ident::new("Realm", item.span())));
-
-    let mut error = crate_path.clone();
-    error
-        .segments
-        .push(PathSegment::from(Ident::new("Error", item.span())));
-
-    let mut native_function = crate_path.clone();
-    native_function
-        .segments
-        .push(PathSegment::from(Ident::new("NativeFunction", item.span())));
-
-    let mut native_constructor = crate_path.clone();
-    native_constructor
-        .segments
-        .push(PathSegment::from(Ident::new(
-            "NativeConstructor",
-            item.span(),
-        )));
-
-    let mut variable = crate_path.clone();
-    variable
-        .segments
-        .push(PathSegment::from(Ident::new("Variable", item.span())));
-
-    let mut object_handle = crate_path.clone();
-    object_handle
-        .segments
-        .push(PathSegment::from(Ident::new("ObjectHandle", item.span())));
-
-    let mut object = crate_path.clone();
-    object
-        .segments
-        .push(PathSegment::from(Ident::new("object", item.span())));
-    object
-        .segments
-        .push(PathSegment::from(Ident::new("Object", item.span())));
-
-    let mut value = crate_path;
-    value
-        .segments
-        .push(PathSegment::from(Ident::new("Value", item.span())));
+    let config = Config::new(item.span()); 
+    
+    let variable = config.variable;
+    let native_function = config.native_function;
+    let native_constructor = config.native_constructor;
+    let value = config.value;
+    let object = config.object;
+    let object_handle = config.object_handle;
+    let error = config.error;
+    
 
     let mut constructor = None;
     let mut properties: Vec<Item> = Vec::new();
