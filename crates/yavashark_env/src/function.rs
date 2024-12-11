@@ -207,7 +207,6 @@ impl NativeFunction {
                 name: String::new(),
                 f: Box::new(|_, _, _| Ok(Value::Undefined)),
                 object: Object::raw_with_proto(Value::Undefined),
-                data: None,
                 special_constructor: false,
                 constructor: Value::Undefined.into(),
             },
