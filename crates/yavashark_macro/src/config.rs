@@ -1,6 +1,7 @@
 use proc_macro2::{Ident, Span};
 use syn::{Path, PathSegment};
 
+#[allow(unused)]
 pub struct Config {
     pub env_path: Path,
     pub realm: Path,

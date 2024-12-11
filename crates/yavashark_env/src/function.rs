@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::fmt::Debug;
 
 pub use class::*;
