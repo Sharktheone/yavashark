@@ -7,9 +7,9 @@ use yavashark_value::Obj;
 pub struct StringConstructor {}
 
 impl StringConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> crate::Result<ObjectHandle> {
-        let mut this = Self {
+    #[allow(clippy::new_ret_no_self, dead_code)]
+    pub fn new(proto: ObjectHandle, _func: ObjectHandle) -> crate::Result<ObjectHandle> {
+        let this = Self {
             object: Object::raw_with_proto(proto.into()),
         };
 
@@ -20,8 +20,7 @@ impl StringConstructor {
 #[properties]
 impl StringConstructor {
     #[new]
-    #[must_use]
-    pub fn create(realm: &mut Realm) -> ValueResult {
+    pub fn create(realm: &Realm) -> ValueResult {
         Ok(Self::new(realm.intrinsics.obj.clone(), realm.intrinsics.func.clone())?.into())
     }
 }

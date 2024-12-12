@@ -137,11 +137,11 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
 
 impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
     fn define_property(&mut self, name: Value<R>, value: Value<R>) {
-        ObjectImpl::define_property(self, name, value)
+        ObjectImpl::define_property(self, name, value);
     }
 
     fn define_variable(&mut self, name: Value<R>, value: Variable<R>) {
-        ObjectImpl::define_variable(self, name, value)
+        ObjectImpl::define_variable(self, name, value);
     }
 
     fn resolve_property(&self, name: &Value<R>) -> Option<ObjectProperty<R>> {
@@ -219,7 +219,7 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
     }
 
     fn clear_values(&mut self) {
-        ObjectImpl::clear_values(self)
+        ObjectImpl::clear_values(self);
     }
 
     fn call(

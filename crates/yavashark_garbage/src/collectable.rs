@@ -160,7 +160,7 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for GcMutRefCellGuard<'a, T, V
     }
 }
 
-impl<'a, T: CellCollectable<RefCell<T>>, V> DerefMut for GcMutRefCellGuard<'a, T, V> {
+impl<T: CellCollectable<RefCell<T>>, V> DerefMut for GcMutRefCellGuard<'_, T, V> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         #[allow(clippy::expect_used)]
         self.value.as_mut().expect("unreachable") // this can only be None if the guard is dropped

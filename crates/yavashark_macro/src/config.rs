@@ -74,7 +74,7 @@ impl Config {
             .push(PathSegment::from(Ident::new("ObjectProperty", span)));
 
         Self {
-            env_path: env_path,
+            env_path,
             realm,
             error,
             native_function,

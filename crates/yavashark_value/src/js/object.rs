@@ -569,7 +569,7 @@ impl<C: Realm> ObjectProperty<C> {
         }
     }
 
-    pub fn descriptor(self, obj: Object<C>) -> Result<(), Error<C>> {
+    pub fn descriptor(self, obj: &Object<C>) -> Result<(), Error<C>> {
         if self.set.is_undefined() || self.get.is_undefined() {
         } else {
             obj.define_property("value".into(), self.value)?;

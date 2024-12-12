@@ -113,7 +113,7 @@ impl<C: Realm> Value<C> {
     }
 
     #[must_use]
-    pub fn is_nan(&self) -> bool {
+    pub const fn is_nan(&self) -> bool {
         match self {
             Self::Number(n) => n.is_nan(),
             _ => false,
@@ -197,7 +197,8 @@ impl<C: Realm> Value<C> {
         *n
     }
 
-    pub fn is_undefined(&self) -> bool {
+    #[must_use]
+    pub const fn is_undefined(&self) -> bool {
         matches!(self, Self::Undefined)
     }
 }

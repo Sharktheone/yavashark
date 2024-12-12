@@ -42,7 +42,7 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 pub fn get_own_property_descriptor(
     args: Vec<Value>,
     this: Value,
-    realm: &mut Realm,
+    realm: &Realm,
 ) -> ValueResult {
     if args.len() < 2 {
         return Ok(Value::Undefined);
@@ -62,7 +62,7 @@ pub fn get_own_property_descriptor(
 
     let desc = Object::new(realm);
 
-    prop.descriptor(desc.clone())?;
+    prop.descriptor(&desc)?;
 
     Ok(desc.into())
 }
