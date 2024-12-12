@@ -1,10 +1,10 @@
 use proc_macro::TokenStream as TokenStream1;
 
+use crate::config::Config;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{FnArg, ImplItem, Path, PathSegment};
-use crate::config::Config;
+use syn::{FnArg, ImplItem, Path};
 
 #[derive(Debug)]
 struct Item {
@@ -25,8 +25,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut new = None;
 
-    let config = Config::new(item.span()); 
-    
+    let config = Config::new(item.span());
+
     let variable = config.variable;
     let native_function = config.native_function;
     let native_constructor = config.native_constructor;
@@ -34,7 +34,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let object = config.object;
     let object_handle = config.object_handle;
     let error = config.error;
-    
 
     let mut constructor = None;
     let mut properties: Vec<Item> = Vec::new();
