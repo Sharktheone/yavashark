@@ -88,7 +88,9 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny {
         self.get_wrapped_object().get_array_or_done(index)
     }
 
-    fn clear_values(&mut self);
+    fn clear_values(&mut self) {
+        self.get_wrapped_object_mut().clear_values()
+    }
 
     fn call(
         &mut self,
