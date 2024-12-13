@@ -4,7 +4,7 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Func, ObjectProperty};
+use yavashark_value::{Constructor, Func, Obj, ObjectImpl, ObjectProperty};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -27,17 +27,28 @@ pub struct NativeFunction {
     // pub prototype: ConstructorPrototype,
 }
 
-impl Constructor<Realm> for NativeFunction {
-    fn get_constructor(&self) -> ObjectProperty<Realm> {
-        self.constructor.copy()
+
+
+impl ObjectImpl<Realm> for NativeFunction {
+    fn get_wrapped_object(&self) -> &impl Obj<Realm> {
+        &self.object
     }
 
+    fn get_wrapped_object_mut(&mut self) -> &mut impl Obj<Realm> {
+        &mut self.object
+    }
+
+
+    fn get_constructor_proto(&self, realm: &mut Realm) -> Option<Value> {
+        Some(self.constructor.value.copy()) //TODO: this is not correct (i think)
+    }
+    
     fn special_constructor(&self) -> bool {
         self.special_constructor
     }
 
-    fn value(&self, realm: &mut Realm) -> Value {
-        Object::new(realm).into()
+    fn get_constructor_value(&self, realm: &mut Realm) -> Option<yavashark_value::Value<Realm>> {
+        Some(Object::new(realm).into())
     }
 }
 
