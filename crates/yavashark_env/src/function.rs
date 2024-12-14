@@ -39,16 +39,16 @@ impl ObjectImpl<Realm> for NativeFunction {
     }
 
 
+    fn get_constructor_value(&self, realm: &mut Realm) -> Option<yavashark_value::Value<Realm>> {
+        Some(Object::new(realm).into())
+    }
+
     fn get_constructor_proto(&self, realm: &mut Realm) -> Option<Value> {
         Some(self.constructor.value.copy()) //TODO: this is not correct (i think)
     }
-    
+
     fn special_constructor(&self) -> bool {
         self.special_constructor
-    }
-
-    fn get_constructor_value(&self, realm: &mut Realm) -> Option<yavashark_value::Value<Realm>> {
-        Some(Object::new(realm).into())
     }
 }
 
