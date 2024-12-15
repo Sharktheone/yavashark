@@ -4,7 +4,7 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Func, Obj, ObjectImpl, ObjectProperty};
+use yavashark_value::{Constructor, Error, Func, Obj, ObjectImpl, ObjectProperty};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -49,6 +49,10 @@ impl ObjectImpl<Realm> for NativeFunction {
 
     fn special_constructor(&self) -> bool {
         self.special_constructor
+    }
+
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+        (self.f)(args, this, realm)
     }
 }
 
@@ -307,11 +311,5 @@ impl NativeFunctionBuilder {
 impl Debug for NativeFunction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "[Function: {}]", self.name)
-    }
-}
-
-impl Func<Realm> for NativeFunction {
-    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        (self.f)(args, this, realm)
     }
 }
