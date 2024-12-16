@@ -8,7 +8,7 @@ use yavashark_value::{Constructor, Error, Func, Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{ObjectHandle, Value, ValueResult, ObjectProperty};
+use crate::{ObjectHandle, ObjectProperty, Value, ValueResult};
 
 mod bound;
 mod class;
@@ -28,7 +28,6 @@ pub struct NativeFunction {
     // pub prototype: ConstructorPrototype,
 }
 
-
 //#[custom_props(constructor)] TODO
 impl ObjectImpl<Realm> for NativeFunction {
     fn get_wrapped_object(&self) -> &impl Obj<Realm> {
@@ -38,7 +37,6 @@ impl ObjectImpl<Realm> for NativeFunction {
     fn get_wrapped_object_mut(&mut self) -> &mut impl Obj<Realm> {
         &mut self.object
     }
-
 
     fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         (self.f)(args, this, realm)
