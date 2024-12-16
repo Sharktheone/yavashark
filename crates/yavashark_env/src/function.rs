@@ -4,11 +4,11 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Error, Func, Obj, ObjectImpl, ObjectProperty};
+use yavashark_value::{Constructor, Error, Func, Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{ObjectHandle, Value, ValueResult};
+use crate::{ObjectHandle, Value, ValueResult, ObjectProperty};
 
 mod bound;
 mod class;
@@ -19,16 +19,17 @@ type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction, bool);
 
-#[object(function, constructor, direct(constructor))]
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
-    special_constructor: bool,
+    pub special_constructor: bool,
+    pub constructor: ObjectProperty,
+    pub object: Object,
     // pub prototype: ConstructorPrototype,
 }
 
 
-
+//#[custom_props(constructor)] TODO
 impl ObjectImpl<Realm> for NativeFunction {
     fn get_wrapped_object(&self) -> &impl Obj<Realm> {
         &self.object
@@ -38,6 +39,10 @@ impl ObjectImpl<Realm> for NativeFunction {
         &mut self.object
     }
 
+
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+        (self.f)(args, this, realm)
+    }
 
     fn get_constructor_value(&self, realm: &mut Realm) -> Option<yavashark_value::Value<Realm>> {
         Some(Object::new(realm).into())
@@ -49,10 +54,6 @@ impl ObjectImpl<Realm> for NativeFunction {
 
     fn special_constructor(&self) -> bool {
         self.special_constructor
-    }
-
-    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        (self.f)(args, this, realm)
     }
 }
 
