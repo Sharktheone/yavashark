@@ -6,6 +6,7 @@ mod config;
 mod obj;
 mod properties;
 mod props;
+mod custom_props;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -31,6 +32,13 @@ pub fn properties_new(
     props::properties(attrs, item)
 }
 
+#[proc_macro_attribute]
+pub fn custom_props(
+    attrs: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    custom_props::custom_props(attrs, item)
+}
 fn env_path() -> syn::Path {
     let name = env::var("CARGO_PKG_NAME").unwrap_or("".to_string());
     if name == "yavashark_env" {

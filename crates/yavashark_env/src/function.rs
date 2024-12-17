@@ -3,8 +3,8 @@ use std::fmt::Debug;
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
-use yavashark_macro::object;
-use yavashark_value::{Constructor, Error, Func, Obj, ObjectImpl};
+use yavashark_macro::custom_props;
+use yavashark_value::{Constructor, Func, Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -28,7 +28,7 @@ pub struct NativeFunction {
     // pub prototype: ConstructorPrototype,
 }
 
-//#[custom_props(constructor)] TODO
+#[custom_props(constructor)]
 impl ObjectImpl<Realm> for NativeFunction {
     fn get_wrapped_object(&self) -> &impl Obj<Realm> {
         &self.object
