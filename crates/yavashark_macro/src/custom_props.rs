@@ -6,8 +6,49 @@ use syn::spanned::Spanned;
 use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
-    item //TODO
-    
+    let conf = Config::new(Span::call_site());
+
+    let mut direct = Vec::new();
+
+    let parser = syn::meta::parser(|meta| {
+        if meta.path.is_ident("direct") {
+            meta.parse_nested_meta(|meta| {
+                let mut rename = None;
+
+                let _ = meta.parse_nested_meta(|meta| {
+                    rename = Some(meta.path);
+                    Ok(())
+                });
+
+                direct.push((meta.path, rename));
+
+                Ok(())
+            })?;
+            return Ok(());
+        }
+
+        Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
+    });
+
+
+    syn::parse_macro_input!(attrs with parser);
+
+    let value = &conf.value;
+
+    let properties_define = match_prop(&direct, Act::Set, value);
+    let properties_variable_define = match_prop(&direct, Act::SetVar, value);
+    let properties_resolve = match_prop(&direct, Act::None, value);
+    let properties_get = match_prop(&direct, Act::Ref, value);
+    let properties_contains = match_prop(&direct, Act::Contains, value);
+    let properties_delete = match_prop(&direct, Act::Delete, value);
+
+    let properties = match_list(&direct, List::Properties, value);
+    let keys = match_list(&direct, List::Keys, value);
+    let values = match_list(&direct, List::Values, value);
+    let clear = match_list(&direct, List::Clear, value);
+
+    item
+}
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Act {
