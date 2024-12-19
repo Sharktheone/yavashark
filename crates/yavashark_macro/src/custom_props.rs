@@ -30,7 +30,6 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
     });
 
-
     syn::parse_macro_input!(attrs with parser);
 
     let value = &conf.value;

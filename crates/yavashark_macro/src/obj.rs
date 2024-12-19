@@ -1,10 +1,10 @@
 use crate::config::Config;
+use crate::custom_props::{match_list, match_prop, Act, List};
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
 use syn::{FieldMutability, Fields, Path};
-use crate::custom_props::{match_list, match_prop, Act, List};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -401,4 +401,3 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     TokenStream1::from(expanded)
 }
-
