@@ -1,7 +1,7 @@
 use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
 use syn::Path;
 
@@ -31,6 +31,8 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     });
 
     syn::parse_macro_input!(attrs with parser);
+    
+    let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
 
     let value = &conf.value;
 
@@ -46,7 +48,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let values = match_list(&direct, List::Values, value);
     let clear = match_list(&direct, List::Clear, value);
 
-    item
+    item.to_token_stream().into()
 }
 
 #[derive(Debug, Eq, PartialEq)]
