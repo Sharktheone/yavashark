@@ -2,7 +2,6 @@ use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
 use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
@@ -11,42 +10,136 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut direct = Vec::new();
 
     let parser = syn::meta::parser(|meta| {
-        if meta.path.is_ident("direct") {
-            meta.parse_nested_meta(|meta| {
-                let mut rename = None;
+        let mut rename = None;
 
-                let _ = meta.parse_nested_meta(|meta| {
-                    rename = Some(meta.path);
-                    Ok(())
-                });
+        let _ = meta.parse_nested_meta(|meta| {
+            rename = Some(meta.path);
+            Ok(())
+        });
 
-                direct.push((meta.path, rename));
+        direct.push((meta.path, rename));
 
-                Ok(())
-            })?;
-            return Ok(());
-        }
-
-        Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
+        Ok(())
     });
 
     syn::parse_macro_input!(attrs with parser);
-    
+
+    if direct.is_empty() {
+        return item;
+    }
+
     let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
+    
 
     let value = &conf.value;
+    let variable = &conf.variable;
+    let obj_prop = &conf.object_property;
 
     let properties_define = match_prop(&direct, Act::Set, value);
+
+    item.items.push(syn::parse_quote! {
+        fn define_property(&mut self, name: Value, value: Value) {
+            #properties_define
+
+            self.get_wrapped_object_mut().define_property(name, value);
+        }
+    });
+
     let properties_variable_define = match_prop(&direct, Act::SetVar, value);
+
+    item.items.push(syn::parse_quote! {
+        fn define_variable(&mut self, name: Value, value: #variable) {
+            #properties_variable_define
+
+            self.get_wrapped_object_mut().define_variable(name, value);
+        }
+    });
+
     let properties_resolve = match_prop(&direct, Act::None, value);
+
+    item.items.push(syn::parse_quote! {
+        fn resolve_property(&self, name: & #value) -> Option<#obj_prop> {
+            #properties_resolve
+
+            self.get_wrapped_object().resolve_property(name)
+        }
+    });
+
     let properties_get = match_prop(&direct, Act::Ref, value);
+
+    item.items.push(syn::parse_quote! {
+        fn get_property(&self, name: & #value) -> Option<& #value> {
+            #properties_get
+
+            self.get_wrapped_object().get_property(name)
+        }
+    });
+
     let properties_contains = match_prop(&direct, Act::Contains, value);
+
+    item.items.push(syn::parse_quote! {
+        fn contains_key(&self, name: & #value) -> bool {
+            #properties_contains
+
+            self.get_wrapped_object().contains_key(name)
+        }
+    });
+
     let properties_delete = match_prop(&direct, Act::Delete, value);
 
+    item.items.push(syn::parse_quote! {
+        fn delete_property(&mut self, name: &Value) -> Option<Value> {
+            #properties_delete
+
+            self.get_wrapped_object_mut().delete_property(name)
+        }
+    });
+
     let properties = match_list(&direct, List::Properties, value);
+
+    item.items.push(syn::parse_quote! {
+        fn properties(&self) -> Vec<(#value, #value)> {
+            let mut props = self.get_wrapped_object().properties();
+
+            #properties
+
+            props
+        }
+    });
+
     let keys = match_list(&direct, List::Keys, value);
+
+    item.items.push(syn::parse_quote! {
+        fn keys(&self) -> Vec<#value> {
+            let mut keys = self.get_wrapped_object().keys();
+
+            #keys
+
+            keys
+        }
+    });
+
     let values = match_list(&direct, List::Values, value);
+
+    item.items.push(syn::parse_quote! {
+        fn values(&self) -> Vec<#value> {
+            let mut values = self.get_wrapped_object().values();
+
+            #values
+
+            values
+        }
+    });
+
     let clear = match_list(&direct, List::Clear, value);
+
+    item.items.push(syn::parse_quote! {
+        fn clear_values(&mut self) {
+            self.get_wrapped_object_mut().clear_values();
+
+            #clear
+        }
+    });
 
     item.to_token_stream().into()
 }
@@ -117,7 +210,7 @@ pub fn match_prop(
 
     if !match_properties_define.is_empty() {
         match_properties_define = quote! {
-            if let Value::String(name) = &name {
+            if let #value_path::String(name) = &name {
                 match name.as_str() {
                     #match_properties_define
                     _ => {}
