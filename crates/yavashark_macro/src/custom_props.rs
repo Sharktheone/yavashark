@@ -75,16 +75,6 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties_contains = match_prop(&direct, Act::Contains, value);
-
-    item.items.push(syn::parse_quote! {
-        fn contains_key(&self, name: & #value) -> bool {
-            #properties_contains
-
-            self.get_wrapped_object().contains_key(name)
-        }
-    });
-
     let properties_delete = match_prop(&direct, Act::Delete, value);
 
     item.items.push(syn::parse_quote! {
@@ -92,6 +82,16 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #properties_delete
 
             self.get_wrapped_object_mut().delete_property(name)
+        }
+    });
+
+    let properties_contains = match_prop(&direct, Act::Contains, value);
+
+    item.items.push(syn::parse_quote! {
+        fn contains_key(&self, name: & #value) -> bool {
+            #properties_contains
+
+            self.get_wrapped_object().contains_key(name)
         }
     });
 

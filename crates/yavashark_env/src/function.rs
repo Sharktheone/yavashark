@@ -4,7 +4,7 @@ pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use yavashark_macro::custom_props;
-use yavashark_value::{Constructor, Func, Obj, ObjectImpl};
+use yavashark_value::{Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
