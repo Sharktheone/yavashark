@@ -11,7 +11,7 @@ impl Interpreter {
 
         let Value::Object(constructor) = callee else {
             return Err(ControlFlow::error_type(format!(
-                "{:?} is not a constructor1",
+                "{:?} is not a constructor",
                 stmt.callee
             )));
         };
@@ -19,7 +19,7 @@ impl Interpreter {
         let this = constructor
             .get_constructor_value(realm)
             .ok_or(ControlFlow::error_type(format!(
-                "{:?} is not a constructor2",
+                "{:?} is not a constructor",
                 stmt.callee
             )))?;
 
@@ -28,7 +28,7 @@ impl Interpreter {
         } else {
             let Value::Object(o) = constructor.get_constructor().value else {
                 return Err(ControlFlow::error_type(format!(
-                    "{:?} is not a constructor3",
+                    "{:?} is not a constructor",
                     stmt.callee
                 )));
             };
