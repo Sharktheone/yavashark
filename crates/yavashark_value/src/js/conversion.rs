@@ -1,4 +1,4 @@
-use crate::{Object, Realm, Value};
+use crate::{Error, Object, Realm, Value};
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -105,5 +105,20 @@ impl<C: Realm> From<f32> for Value<C> {
 impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
     fn from(o: O) -> Self {
         Self::Object(o.into())
+    }
+}
+
+
+pub trait FromValue<C: Realm>: Sized {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>>;
+}
+
+
+impl<C: Realm> FromValue<C> for String {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::String(s) => Ok(s),
+            _ => Err(Error::ty_error(format!("Expected a string, found {:?}", value))),
+        }
     }
 }
