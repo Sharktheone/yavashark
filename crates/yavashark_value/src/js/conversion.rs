@@ -122,3 +122,160 @@ impl<C: Realm> FromValue<C> for String {
         }
     }
 }
+
+
+impl<C: Realm> FromValue<C> for f64 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for bool {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Boolean(b) => Ok(b),
+            _ => Err(Error::ty_error(format!("Expected a boolean, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for Object<C> {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Object(o) => Ok(o),
+            _ => Err(Error::ty_error(format!("Expected an object, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for () {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Undefined => Ok(()),
+            _ => Err(Error::ty_error(format!("Expected undefined, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for usize {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as usize),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for isize {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as isize),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for u8 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as u8),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for u16 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as u16),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for u32 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as u32),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for u64 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as u64),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for i8 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as i8),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for i16 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as i16),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for i32 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as i32),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for i64 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as i64),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for f32 {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::Number(n) => Ok(n as f32),
+            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<C: Realm> FromValue<C> for Value<C> {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        Ok(value)
+    }
+}
