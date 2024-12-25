@@ -1,10 +1,9 @@
 use crate::{
-    AsAny, BoxedObj, Error, Obj, Object, ObjectImpl, ObjectProperty, Realm, Value, Variable,
+    AsAny, BoxedObj, Error, Obj, Object, ObjectProperty, Realm, Value, Variable,
 };
-use std::any::{type_name, type_name_of_val};
-use std::fmt::{Debug, Formatter};
-use std::ops::{Deref, DerefMut};
-use yavashark_garbage::collectable::{GcMutRefCellGuard, GcRefCellGuard};
+use std::any::type_name;
+use std::fmt::Debug;
+use yavashark_garbage::collectable::OwningGcRefCellGuard;
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -178,7 +177,6 @@ impl<C: Realm> FromValue<C> for () {
     }
 }
 
-
 macro_rules! impl_from_value {
     ($($t:ty),*) => {
         $(
@@ -197,14 +195,13 @@ macro_rules! impl_from_value {
 
 impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32);
 
-
 impl<C: Realm> FromValue<C> for Value<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         Ok(value)
     }
 }
 
-impl<R: Realm, O: Obj<R>> FromValue<R> for GcRefCellGuard<'_, BoxedObj<R>, O> {
+impl<R: Realm, O: Obj<R>> FromValue<R> for OwningGcRefCellGuard<'_, BoxedObj<R>, O> {
     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
         let Value::Object(obj) = value else {
             return Err(Error::ty_error(format!(
@@ -213,7 +210,7 @@ impl<R: Realm, O: Obj<R>> FromValue<R> for GcRefCellGuard<'_, BoxedObj<R>, O> {
             )));
         };
 
-        obj.get()?
+        obj.get_owned()?
             .maybe_map(|this| {
                 let any = this.as_any();
 
@@ -229,30 +226,30 @@ impl<R: Realm, O: Obj<R>> FromValue<R> for GcRefCellGuard<'_, BoxedObj<R>, O> {
     }
 }
 
-impl<R: Realm, O: Obj<R>> FromValue<R> for GcMutRefCellGuard<'_, BoxedObj<R>, O> {
-    fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
-        let Value::Object(obj) = value else {
-            return Err(Error::ty_error(format!(
-                "Expected a number, found {:?}",
-                value
-            )));
-        };
-
-        obj.get_mut()?
-            .maybe_map(|this| {
-                let any = this.as_any_mut();
-
-                any.downcast_mut()
-            })
-            .map_err(|other| {
-                Error::ty_error(format!(
-                    "Expected {}, found {}",
-                    type_name::<O>(),
-                    other.class_name()
-                ))
-            })
-    }
-}
+// impl<R: Realm, O: Obj<R>> FromValue<R> for GcMutRefCellGuard<'_, BoxedObj<R>, O> {
+//     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
+//         let Value::Object(obj) = value else {
+//             return Err(Error::ty_error(format!(
+//                 "Expected a number, found {:?}",
+//                 value
+//             )));
+//         };
+//
+//         obj.get_mut()?
+//             .maybe_map(|this| {
+//                 let any = this.as_any_mut();
+//
+//                 any.downcast_mut()
+//             })
+//             .map_err(|other| {
+//                 Error::ty_error(format!(
+//                     "Expected {}, found {}",
+//                     type_name::<O>(),
+//                     other.class_name()
+//                 ))
+//             })
+//     }
+// }
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 struct Re;
