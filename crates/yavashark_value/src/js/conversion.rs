@@ -1,4 +1,8 @@
-use crate::{Error, Object, Realm, Value};
+use std::any::{type_name, type_name_of_val};
+use std::fmt::{Debug, Formatter};
+use std::ops::{Deref, DerefMut};
+use yavashark_garbage::collectable::{GcMutRefCellGuard, GcRefCellGuard};
+use crate::{AsAny, BoxedObj, Error, Obj, Object, ObjectImpl, ObjectProperty, Realm, Value, Variable};
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -278,4 +282,171 @@ impl<C: Realm> FromValue<C> for Value<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         Ok(value)
     }
+}
+
+pub trait ObjectConversion<C: Realm> {
+    fn ref_from_value(value: Value<C>) -> Result<impl Deref<Target = Self>, Error<C>>;
+
+    fn mut_from_value(value: Value<C>) -> Result<impl DerefMut<Target = Self>, Error<C>>;
+}
+
+// impl<R: Realm, O: Obj<R>> ObjectConversion<R>  for O {
+//     fn ref_from_value(value: Value<R>) -> Result<impl Deref<Target = Self>, Error<R>> {
+//         let Value::Object(obj) = value else {
+//             return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
+//         };
+//
+//         obj.get();
+//     }
+//
+//     fn mut_from_value(value: Value<R>) -> Result<impl DerefMut<Target = Self>, Error<R>> {
+//         let Value::Object(obj) = value else {
+//             return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
+//         };
+//
+//         let mut this = &mut ***obj.get_mut()?;
+//
+//
+//
+//
+//         let any = this.as_any_mut();
+//
+//         let this = any.downcast_mut();
+//     }
+// }
+//
+impl<R: Realm, O: Obj<R>> FromValue<R> for GcRefCellGuard<'_, BoxedObj<R>, O> {
+    fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
+        let Value::Object(obj) = value else {
+            return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
+        };
+
+        obj.get()?.maybe_map(|this| {
+            let any = this.as_any();
+            
+            any.downcast_ref()
+        }).map_err(|other|
+            Error::ty_error(format!("Expected {}, found {}", type_name::<O>(), other.class_name()))
+        )
+    }
+}
+
+
+impl<R: Realm, O: Obj<R>> FromValue<R> for GcMutRefCellGuard<'_, BoxedObj<R>, O> {
+    fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
+        let Value::Object(obj) = value else {
+            return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
+        };
+
+        obj.get_mut()?.maybe_map(|this| {
+            let any = this.as_any_mut();
+            
+            any.downcast_mut()
+        }).map_err(|other|
+            Error::ty_error(format!("Expected {}, found {}", type_name::<O>(), other.class_name()))
+        )
+    }
+}
+
+
+
+#[derive(Eq, PartialEq, Clone, Debug)]
+struct Re;
+
+impl Realm for Re {
+
+}
+
+
+#[derive(Debug)]
+struct O1;
+
+impl Obj<Re> for O1 {
+    fn define_property(&mut self, name: Value<Re>, value: Value<Re>) {
+        todo!()
+    }
+
+    fn define_variable(&mut self, name: Value<Re>, value: Variable<Re>) {
+        todo!()
+    }
+
+    fn resolve_property(&self, name: &Value<Re>) -> Option<ObjectProperty<Re>> {
+        todo!()
+    }
+
+    fn get_property(&self, name: &Value<Re>) -> Option<&Value<Re>> {
+        todo!()
+    }
+
+    fn define_getter(&mut self, name: Value<Re>, value: Value<Re>) -> Result<(), Error<Re>> {
+        todo!()
+    }
+
+    fn define_setter(&mut self, name: Value<Re>, value: Value<Re>) -> Result<(), Error<Re>> {
+        todo!()
+    }
+
+    fn get_getter(&self, name: &Value<Re>) -> Option<Value<Re>> {
+        todo!()
+    }
+
+    fn get_setter(&self, name: &Value<Re>) -> Option<Value<Re>> {
+        todo!()
+    }
+
+    fn delete_property(&mut self, name: &Value<Re>) -> Option<Value<Re>> {
+        todo!()
+    }
+
+    fn name(&self) -> String {
+        todo!()
+    }
+
+    fn to_string(&self, realm: &mut Re) -> Result<String, Error<Re>> {
+        todo!()
+    }
+
+    fn to_string_internal(&self) -> String {
+        todo!()
+    }
+
+    fn properties(&self) -> Vec<(Value<Re>, Value<Re>)> {
+        todo!()
+    }
+
+    fn keys(&self) -> Vec<Value<Re>> {
+        todo!()
+    }
+
+    fn values(&self) -> Vec<Value<Re>> {
+        todo!()
+    }
+
+    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<Re>>) {
+        todo!()
+    }
+
+    fn clear_values(&mut self) {
+        todo!()
+    }
+}
+
+
+#[test]
+fn conv() {
+    let values: Vec<Value<Re>> = vec![];
+
+
+    let v1 = FromValue::from_value(values[0].copy()).unwrap();
+    let v2 = FromValue::from_value(values[0].copy()).unwrap();
+    let v3 = FromValue::from_value(values[0].copy()).unwrap();
+    let v4 = FromValue::from_value(values[0].copy()).unwrap();
+
+
+    test_func(v1, v2, &*v3, &mut *v4)
+}
+
+fn test_func<T: Obj<R>, R: Realm>(s: f32, a: i32, g: &T, r: &mut O1) {
+
+
 }
