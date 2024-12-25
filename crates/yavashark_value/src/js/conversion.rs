@@ -1,8 +1,10 @@
+use crate::{
+    AsAny, BoxedObj, Error, Obj, Object, ObjectImpl, ObjectProperty, Realm, Value, Variable,
+};
 use std::any::{type_name, type_name_of_val};
 use std::fmt::{Debug, Formatter};
 use std::ops::{Deref, DerefMut};
 use yavashark_garbage::collectable::{GcMutRefCellGuard, GcRefCellGuard};
-use crate::{AsAny, BoxedObj, Error, Obj, Object, ObjectImpl, ObjectProperty, Realm, Value, Variable};
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -112,171 +114,201 @@ impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
     }
 }
 
-
 pub trait FromValue<C: Realm>: Sized {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>>;
 }
-
 
 impl<C: Realm> FromValue<C> for String {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::String(s) => Ok(s),
-            _ => Err(Error::ty_error(format!("Expected a string, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a string, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for f64 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for bool {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Boolean(b) => Ok(b),
-            _ => Err(Error::ty_error(format!("Expected a boolean, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a boolean, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for Object<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Object(o) => Ok(o),
-            _ => Err(Error::ty_error(format!("Expected an object, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected an object, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for () {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Undefined => Ok(()),
-            _ => Err(Error::ty_error(format!("Expected undefined, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected undefined, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for usize {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as usize),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for isize {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as isize),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for u8 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as u8),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for u16 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as u16),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for u32 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as u32),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for u64 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as u64),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for i8 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as i8),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for i16 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as i16),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for i32 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as i32),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for i64 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as i64),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for f32 {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::Number(n) => Ok(n as f32),
-            _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+            _ => Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            ))),
         }
     }
 }
-
 
 impl<C: Realm> FromValue<C> for Value<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
@@ -318,45 +350,57 @@ pub trait ObjectConversion<C: Realm> {
 impl<R: Realm, O: Obj<R>> FromValue<R> for GcRefCellGuard<'_, BoxedObj<R>, O> {
     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
         let Value::Object(obj) = value else {
-            return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
+            return Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            )));
         };
 
-        obj.get()?.maybe_map(|this| {
-            let any = this.as_any();
-            
-            any.downcast_ref()
-        }).map_err(|other|
-            Error::ty_error(format!("Expected {}, found {}", type_name::<O>(), other.class_name()))
-        )
+        obj.get()?
+            .maybe_map(|this| {
+                let any = this.as_any();
+
+                any.downcast_ref()
+            })
+            .map_err(|other| {
+                Error::ty_error(format!(
+                    "Expected {}, found {}",
+                    type_name::<O>(),
+                    other.class_name()
+                ))
+            })
     }
 }
-
 
 impl<R: Realm, O: Obj<R>> FromValue<R> for GcMutRefCellGuard<'_, BoxedObj<R>, O> {
     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
         let Value::Object(obj) = value else {
-            return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
+            return Err(Error::ty_error(format!(
+                "Expected a number, found {:?}",
+                value
+            )));
         };
 
-        obj.get_mut()?.maybe_map(|this| {
-            let any = this.as_any_mut();
-            
-            any.downcast_mut()
-        }).map_err(|other|
-            Error::ty_error(format!("Expected {}, found {}", type_name::<O>(), other.class_name()))
-        )
+        obj.get_mut()?
+            .maybe_map(|this| {
+                let any = this.as_any_mut();
+
+                any.downcast_mut()
+            })
+            .map_err(|other| {
+                Error::ty_error(format!(
+                    "Expected {}, found {}",
+                    type_name::<O>(),
+                    other.class_name()
+                ))
+            })
     }
 }
-
-
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 struct Re;
 
-impl Realm for Re {
-
-}
-
+impl Realm for Re {}
 
 #[derive(Debug)]
 struct O1;
@@ -431,22 +475,16 @@ impl Obj<Re> for O1 {
     }
 }
 
-
 #[test]
 fn conv() {
     let values: Vec<Value<Re>> = vec![];
-
 
     let v1 = FromValue::from_value(values[0].copy()).unwrap();
     let v2 = FromValue::from_value(values[0].copy()).unwrap();
     let v3 = FromValue::from_value(values[0].copy()).unwrap();
     let v4 = FromValue::from_value(values[0].copy()).unwrap();
 
-
     test_func(v1, v2, &*v3, &mut *v4)
 }
 
-fn test_func<T: Obj<R>, R: Realm>(s: f32, a: i32, g: &T, r: &mut O1) {
-
-
-}
+fn test_func<T: Obj<R>, R: Realm>(s: f32, a: i32, g: &T, r: &mut O1) {}

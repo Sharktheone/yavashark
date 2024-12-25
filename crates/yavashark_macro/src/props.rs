@@ -1,8 +1,8 @@
-use proc_macro::{TokenStream as TokenStream1};
+use crate::config::Config;
+use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::TokenStream;
 use quote::quote;
 use syn::ImplItem;
-use crate::config::Config;
 
 #[derive(Debug, Clone, Copy)]
 enum Mode {
@@ -75,7 +75,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         mode = Mode::Raw;
                         panic!("Mixed up modes currently not supported!")
                     }
-
                 });
 
                 props.push(Prop::Method(Method {
@@ -101,7 +100,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     if attr.path().is_ident("raw") {
                         mode = Mode::Raw;
                     }
-
                 });
 
                 props.push(Prop::Constant(Constant {
@@ -142,17 +140,15 @@ struct Constant {
 impl Method {
     fn init_tokens(&self, config: &Config) -> TokenStream {
         let native_function = &config.native_function;
-        
+
         let name = &self.name;
-        
+
         let js_name = &self.js_name;
-        
-        
+
         quote! {
             #native_function::with_proto(stringify!(#js_name), |args, mut this, realm| {
-                
+
             });
         }
     }
-    
 }

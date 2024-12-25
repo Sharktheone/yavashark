@@ -29,7 +29,6 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let mut item: syn::ItemImpl = syn::parse_macro_input!(item);
-    
 
     let value = &conf.value;
     let variable = &conf.variable;
