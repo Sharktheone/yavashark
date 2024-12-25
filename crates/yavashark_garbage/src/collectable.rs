@@ -133,6 +133,75 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
     }
 }
 
+pub struct OwningGcRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
+    // this is always Some, except when the destructor runs
+    value: Option<Ref<'a, V>>,
+    gc: NonNull<GcBox<RefCell<T>>>,
+    _clone: Option<Gc<RefCell<T>>>, // this is used to keep the Gc alive
+}
+
+impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcRefCellGuard<'_, T, V> {
+    fn drop(&mut self) {
+        drop(self._clone.take());
+        drop(self.value.take());
+        unsafe {
+            if self.value.is_some() {
+                GcBox::update_refs(self.gc);
+            }
+        }
+    }
+}
+
+
+impl<'a, T: CellCollectable<RefCell<T>>> Deref for OwningGcRefCellGuard<'a, T> {
+    type Target = Ref<'a, T>;
+
+    fn deref(&self) -> &Self::Target {
+        #[allow(clippy::expect_used)]
+        self.value.as_ref().expect("unreachable")
+    }
+}
+
+impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcRefCellGuard<'a, T, V> {
+    #[allow(clippy::missing_panics_doc)]
+    pub fn map<R, F: FnOnce(&V) -> &R>(mut self, f: F) -> OwningGcRefCellGuard<'a, T, R> {
+        #[allow(clippy::expect_used)]
+        let value = Ref::map(self.value.take().expect("unreachable"), f);
+
+        OwningGcRefCellGuard {
+            value: Some(value),
+            gc: self.gc,
+            _clone: self._clone.take(),
+        }
+    }
+
+    #[allow(clippy::missing_panics_doc)]
+    pub fn maybe_map<R, F: FnOnce(&V) -> Option<&R>>(
+        mut self,
+        f: F,
+    ) -> Result<OwningGcRefCellGuard<'a, T, R>, Self> {
+        #[allow(clippy::expect_used)]
+        let value = self.value.take().expect("unreachable");
+
+        let value = match Ref::filter_map(value, f) {
+            Ok(v) => v,
+            Err(v) => {
+                self.value = Some(v);
+
+                return Err(self);
+            }
+        };
+
+        Ok(OwningGcRefCellGuard {
+            value: Some(value),
+            gc: self.gc,
+            _clone: self._clone.take(),
+        })
+    }
+}
+
+
+
 pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     /// # Safety
     /// This value should only be set None when the guard is dropped
@@ -178,6 +247,18 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
+    
+    pub fn own<'a, 'b>(&'a self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
+        unsafe {
+            let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
+
+            Ok(OwningGcRefCellGuard {
+                value: Some(value),
+                gc: self.inner,
+                _clone: Some(self.clone()),
+            })
+        }
+    }
 
     pub fn borrow_mut(&self) -> Result<GcMutRefCellGuard<T>, BorrowMutError> {
         unsafe {
@@ -189,7 +270,9 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
+
 }
+
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
     #[allow(clippy::missing_panics_doc)]
