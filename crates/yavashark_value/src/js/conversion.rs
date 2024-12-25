@@ -204,37 +204,6 @@ impl<C: Realm> FromValue<C> for Value<C> {
     }
 }
 
-pub trait ObjectConversion<C: Realm> {
-    fn ref_from_value(value: Value<C>) -> Result<impl Deref<Target = Self>, Error<C>>;
-
-    fn mut_from_value(value: Value<C>) -> Result<impl DerefMut<Target = Self>, Error<C>>;
-}
-
-// impl<R: Realm, O: Obj<R>> ObjectConversion<R>  for O {
-//     fn ref_from_value(value: Value<R>) -> Result<impl Deref<Target = Self>, Error<R>> {
-//         let Value::Object(obj) = value else {
-//             return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
-//         };
-//
-//         obj.get();
-//     }
-//
-//     fn mut_from_value(value: Value<R>) -> Result<impl DerefMut<Target = Self>, Error<R>> {
-//         let Value::Object(obj) = value else {
-//             return Err(Error::ty_error(format!("Expected a number, found {:?}", value)));
-//         };
-//
-//         let mut this = &mut ***obj.get_mut()?;
-//
-//
-//
-//
-//         let any = this.as_any_mut();
-//
-//         let this = any.downcast_mut();
-//     }
-// }
-//
 impl<R: Realm, O: Obj<R>> FromValue<R> for GcRefCellGuard<'_, BoxedObj<R>, O> {
     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
         let Value::Object(obj) = value else {
