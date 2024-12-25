@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
 
-pub trait ObjectImpl<R: Realm>: Debug + AsAny {
+pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
     fn get_wrapped_object(&self) -> &impl Obj<R>;
     fn get_wrapped_object_mut(&mut self) -> &mut impl Obj<R>;

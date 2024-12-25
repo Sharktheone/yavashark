@@ -6,7 +6,9 @@ use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::collectable::{CellCollectable, GcMutRefCellGuard, GcRefCellGuard};
+use yavashark_garbage::collectable::{
+    CellCollectable, GcMutRefCellGuard, GcRefCellGuard, OwningGcRefCellGuard,
+};
 use yavashark_garbage::{Collectable, Gc, GcRef};
 
 use crate::js::context::Realm;
@@ -32,7 +34,7 @@ impl<T: Sized + 'static> AsAny for T {
     }
 }
 
-pub trait Obj<R: Realm>: Debug + AsAny {
+pub trait Obj<R: Realm>: Debug + AsAny + 'static {
     fn define_property(&mut self, name: Value<R>, value: Value<R>);
 
     fn define_variable(&mut self, name: Value<R>, value: Variable<R>);
@@ -278,6 +280,12 @@ impl<C: Realm> Object<C> {
     pub fn get(&self) -> Result<GcRefCellGuard<BoxedObj<C>>, Error<C>> {
         self.0
             .borrow()
+            .map_err(|_| Error::new("failed to borrow object"))
+    }
+
+    pub fn get_owned<'a, 'b>(&'a self) -> Result<OwningGcRefCellGuard<'b, BoxedObj<C>>, Error<C>> {
+        self.0
+            .own()
             .map_err(|_| Error::new("failed to borrow object"))
     }
 

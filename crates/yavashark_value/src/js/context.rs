@@ -1,3 +1,3 @@
 use std::fmt::Debug;
 
-pub trait Realm: Eq + Clone + Debug {}
+pub trait Realm: Eq + Clone + Debug + 'static {}
