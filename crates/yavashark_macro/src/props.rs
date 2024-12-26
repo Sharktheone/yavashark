@@ -42,9 +42,11 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut realm = None;
                 let mut variadic = None;
                 let mut mode = mode;
+                let mut has_receiver = false;
 
                 func.sig.inputs.iter().fold(0, |idx, arg| {
                     let syn::FnArg::Typed(pat) = arg else {
+                        has_receiver = true;
                         return idx;
                     };
 
@@ -85,6 +87,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     realm,
                     variadic,
                     mode,
+                    has_receiver,
                 }))
             }
 
@@ -129,6 +132,7 @@ struct Method {
     realm: Option<usize>,
     variadic: Option<usize>,
     mode: Mode,
+    has_receiver: bool,
 }
 
 struct Constant {
