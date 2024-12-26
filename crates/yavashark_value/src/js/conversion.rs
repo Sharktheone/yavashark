@@ -326,13 +326,14 @@ impl Obj<Re> for O1 {
 #[test]
 fn conv() {
     let values: Vec<Value<Re>> = vec![];
+    
 
-    let v1: String = FromValue::from_value(values[0].copy()).unwrap();
-    let v2: f64 = FromValue::from_value(values[0].copy()).unwrap();
+    let v1 = FromValue::from_value(values[0].copy()).unwrap();
+    let v2 = FromValue::from_value(values[0].copy()).unwrap();
     let v3: OwningGcRefCellGuard<_, O1> = FromValue::from_value(values[0].copy()).unwrap();
     // let mut v4: GcMutRefCellGuard<_> = FromValue::from_value(values[0].copy()).unwrap();
 
-    // test_func(v1, v2, &O1, &mut v4)
+    test_func(v1, v2, &O1, &mut O1)
 }
 
-fn test_func<R: Realm>(s: f32, a: i32, g: &O1, r: &mut O1) {}
+fn test_func(s: f32, a: i32, g: &O1, r: &mut O1) {}
