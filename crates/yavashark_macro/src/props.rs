@@ -147,6 +147,7 @@ impl Method {
         
         
         let mut arg_prepare = TokenStream::new();
+        let mut call_args = TokenStream::new();
         
         for i in 0..self.args {
             if Some(i) == self.this {
@@ -165,6 +166,10 @@ impl Method {
             
             arg_prepare.extend(quote! {
                 let #argname = args.get(#i).ok_or_else(|| Error::new("Missing argument"))?;
+            });
+            
+            call_args.extend(quote! {
+                #argname,
             });
             
         }
