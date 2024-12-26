@@ -163,17 +163,6 @@ impl<C: Realm> FromValue<C> for String {
     }
 }
 
-impl<C: Realm> FromValue<C> for f64 {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
-        match value {
-            Value::Number(n) => Ok(n),
-            _ => Err(Error::ty_error(format!(
-                "Expected a number, found {value:?}"
-            ))),
-        }
-    }
-}
-
 impl<C: Realm> FromValue<C> for bool {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
@@ -261,7 +250,7 @@ macro_rules! impl_from_value {
     () => {};
 }
 
-impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32);
+impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
 
 impl<C: Realm> FromValue<C> for Value<C> {
     fn from_value(value: Self) -> Result<Self, Error<C>> {
