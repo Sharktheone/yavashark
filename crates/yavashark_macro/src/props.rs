@@ -179,11 +179,27 @@ impl Method {
         }
         
         
+        let call = if self.has_receiver {
+            quote! {
+                this.#name(#call_args)
+            }
+        } else {
+            quote! {
+                Self::#name(#call_args)
+            }
+        };
+        
+        
+        
+        
         
 
 
         quote! {
             #native_function::with_proto(stringify!(#js_name), |args, mut this, realm| {
+                #arg_prepare
+                let result = #call;
+                Ok(result)
 
             });
         }
