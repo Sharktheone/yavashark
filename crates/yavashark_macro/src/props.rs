@@ -48,7 +48,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return idx;
                     };
 
-                    let ident = pat.attrs.iter().for_each(|attr| {
+                    pat.attrs.iter().for_each(|attr| {
                         if attr.path().is_ident("this") {
                             this = Some(idx);
                         }

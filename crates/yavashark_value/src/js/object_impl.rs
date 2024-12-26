@@ -89,7 +89,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     }
 
     fn clear_values(&mut self) {
-        self.get_wrapped_object_mut().clear_values()
+        self.get_wrapped_object_mut().clear_values();
     }
 
     fn call(

@@ -88,6 +88,8 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for GcRefCellGuard<'_, T, V> {
     }
 }
 
+
+
 impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     type Target = Ref<'a, T>;
 
@@ -248,7 +250,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
         }
     }
     
-    pub fn own<'a, 'b>(&'a self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
+    pub fn own<'b>(&self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
         unsafe {
             let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
 

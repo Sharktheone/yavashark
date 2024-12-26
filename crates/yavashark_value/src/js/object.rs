@@ -283,7 +283,7 @@ impl<C: Realm> Object<C> {
             .map_err(|_| Error::new("failed to borrow object"))
     }
 
-    pub fn get_owned<'a, 'b>(&'a self) -> Result<OwningGcRefCellGuard<'b, BoxedObj<C>>, Error<C>> {
+    pub fn get_owned<'b>(&self) -> Result<OwningGcRefCellGuard<'b, BoxedObj<C>>, Error<C>> {
         self.0
             .own()
             .map_err(|_| Error::new("failed to borrow object"))

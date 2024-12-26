@@ -30,7 +30,7 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope) -> Resul
         .and_then(|v| v.to_string(realm))
         .map_err(|mut e| {
             if let ErrorKind::Throw(v) = &mut e.kind {
-                match (&*v).to_string(realm) {
+                match (*v).to_string(realm) {
                     Ok(msg) => *v = msg.into(),
                     Err(e) => return e,
                 }

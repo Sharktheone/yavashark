@@ -191,7 +191,7 @@ mod tests {
     #[test]
     fn arguments() {
         test_eval!(
-            r#"
+            r"
                 function foo() {
                     console.log(arguments)
                     for (let arg of arguments) {
@@ -201,7 +201,7 @@ mod tests {
                 
                 
                 foo(1,2,3,4,5)
-            "#,
+            ",
             0,
             vec![
                 vec![Value::Number(1.0)],

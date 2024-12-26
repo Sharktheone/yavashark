@@ -122,8 +122,7 @@ impl<C: Realm> FromValue<C> for String {
         match value {
             Value::String(s) => Ok(s),
             _ => Err(Error::ty_error(format!(
-                "Expected a string, found {:?}",
-                value
+                "Expected a string, found {value:?}"
             ))),
         }
     }
@@ -134,8 +133,7 @@ impl<C: Realm> FromValue<C> for f64 {
         match value {
             Value::Number(n) => Ok(n),
             _ => Err(Error::ty_error(format!(
-                "Expected a number, found {:?}",
-                value
+                "Expected a number, found {value:?}"
             ))),
         }
     }
@@ -146,8 +144,7 @@ impl<C: Realm> FromValue<C> for bool {
         match value {
             Value::Boolean(b) => Ok(b),
             _ => Err(Error::ty_error(format!(
-                "Expected a boolean, found {:?}",
-                value
+                "Expected a boolean, found {value:?}"
             ))),
         }
     }
@@ -158,8 +155,7 @@ impl<C: Realm> FromValue<C> for Object<C> {
         match value {
             Value::Object(o) => Ok(o),
             _ => Err(Error::ty_error(format!(
-                "Expected an object, found {:?}",
-                value
+                "Expected an object, found {value:?}"
             ))),
         }
     }
@@ -170,8 +166,7 @@ impl<C: Realm> FromValue<C> for () {
         match value {
             Value::Undefined => Ok(()),
             _ => Err(Error::ty_error(format!(
-                "Expected undefined, found {:?}",
-                value
+                "Expected undefined, found {value:?}"
             ))),
         }
     }
@@ -196,7 +191,7 @@ macro_rules! impl_from_value {
 impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32);
 
 impl<C: Realm> FromValue<C> for Value<C> {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+    fn from_value(value: Self) -> Result<Self, Error<C>> {
         Ok(value)
     }
 }
@@ -205,8 +200,7 @@ impl<R: Realm, O: Obj<R>> FromValue<R> for OwningGcRefCellGuard<'_, BoxedObj<R>,
     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
         let Value::Object(obj) = value else {
             return Err(Error::ty_error(format!(
-                "Expected a number, found {:?}",
-                value
+                "Expected a number, found {value:?}"
             )));
         };
 
