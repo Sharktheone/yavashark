@@ -107,6 +107,13 @@ impl<C: Realm> From<f32> for Value<C> {
     }
 }
 
+
+impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
+    fn from(value: Value<C>) -> Self {
+        Ok(value)
+    }
+}
+
 impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
     fn from(o: O) -> Self {
         Self::Object(o.into())
@@ -326,7 +333,7 @@ impl Obj<Re> for O1 {
 #[test]
 fn conv() {
     let values: Vec<Value<Re>> = vec![];
-    
+
 
     let v1 = FromValue::from_value(values[0].copy()).unwrap();
     let v2 = FromValue::from_value(values[0].copy()).unwrap();
