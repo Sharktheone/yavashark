@@ -144,6 +144,34 @@ impl Method {
         let name = &self.name;
 
         let js_name = &self.js_name;
+        
+        
+        let mut arg_prepare = TokenStream::new();
+        
+        for i in 0..self.args {
+            if Some(i) == self.this {
+                todo!()
+            }
+            
+            if Some(i) == self.realm {
+                todo!()
+            }
+            
+            if Some(i) == self.variadic {
+                todo!()
+            }
+            
+            let argname = syn::Ident::new(&format!("arg{}", i), proc_macro2::Span::call_site());
+            
+            arg_prepare.extend(quote! {
+                let #argname = args.get(#i).ok_or_else(|| Error::new("Missing argument"))?;
+            });
+            
+        }
+        
+        
+        
+
 
         quote! {
             #native_function::with_proto(stringify!(#js_name), |args, mut this, realm| {
