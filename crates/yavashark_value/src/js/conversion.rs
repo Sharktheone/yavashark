@@ -124,6 +124,34 @@ pub trait FromValue<C: Realm>: Sized {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>>;
 }
 
+
+pub trait IntoValue<C: Realm> {
+    fn into_value(self) -> Value<C>;
+}
+
+pub trait TryIntoValue<C: Realm>: Sized {
+    fn try_into_value(self) -> Result<Value<C>, Error<C>>;
+}
+
+impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for T {
+    fn try_into_value(self) -> Result<Value<C>, Error<C>> {
+        Ok(self.into_value())
+    }
+}
+
+impl<C: Realm> IntoValue<C> for Value<C> {
+    fn into_value(self) -> Value<C> {
+        self
+    }
+}
+
+impl<C: Realm> FromValue<C> for Value<C> {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        Ok(value)
+    }
+}
+
+
 impl<C: Realm> FromValue<C> for String {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
@@ -179,6 +207,38 @@ impl<C: Realm> FromValue<C> for () {
     }
 }
 
+
+
+impl<C: Realm> IntoValue<C> for String {
+    fn into_value(self) -> Value<C> {
+        Value::String(self)
+    }
+}
+
+impl<C: Realm> IntoValue<C> for bool {
+    fn into_value(self) -> Value<C> {
+        Value::Boolean(self)
+    }
+}
+
+impl<C: Realm> IntoValue<C> for Object<C> {
+    fn into_value(self) -> Value<C> {
+        Value::Object(self)
+    }
+}
+
+impl<C: Realm> IntoValue<C> for () {
+    fn into_value(self) -> Value<C> {
+        Value::Undefined
+    }
+}
+
+impl<C: Realm, O: Obj<C>> IntoValue<C> for O {
+    fn into_value(self) -> Value<C> {
+        Value::Object(Object::new(self))
+    }
+}
+
 macro_rules! impl_from_value {
     ($($t:ty),*) => {
         $(
@@ -188,6 +248,12 @@ macro_rules! impl_from_value {
                         Value::Number(n) => Ok(n as $t),
                         _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
                     }
+                }
+            }
+        
+            impl<C: Realm> IntoValue<C> for $t {
+                fn into_value(self) -> Value<C> {
+                    Value::Number(self as f64)
                 }
             }
         )*
