@@ -144,11 +144,6 @@ pub struct OwningGcRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
 impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
         drop(self.value.take());
-        unsafe {
-            if self.value.is_some() {
-                GcBox::update_refs(self.gc.inner);
-            }
-        }
     }
 }
 
