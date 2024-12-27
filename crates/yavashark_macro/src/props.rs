@@ -165,7 +165,11 @@ impl Method {
             }
             
             if Some(i) == self.realm {
-                todo!()
+                arg_prepare.extend(quote! {
+                    let #argname = realm;
+                });
+                
+                continue;
             }
             
             if Some(i) == self.variadic {
