@@ -89,7 +89,6 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for GcRefCellGuard<'_, T, V> {
 }
 
 
-
 impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     type Target = Ref<'a, T>;
 
@@ -135,6 +134,7 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
     }
 }
 
+// I hope this doesn't bite me in the ass if so, the person finding it can say "well..."
 pub struct OwningGcRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     // this is always Some, except when the destructor runs
     value: Option<Ref<'a, V>>,
@@ -194,7 +194,7 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcRefCellGuard<'a, T, V> {
 }
 
 
-
+// I hope this doesn't bite me in the ass if so, the person finding it can say "well..."
 pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     /// # Safety
     /// This value should only be set None when the guard is dropped
@@ -229,6 +229,36 @@ impl<T: CellCollectable<RefCell<T>>, V> DerefMut for GcMutRefCellGuard<'_, T, V>
     }
 }
 
+
+pub struct OwningGcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
+    /// # Safety
+    /// This value should only be set None when the guard is dropped
+    value: Option<RefMut<'a, V>>,
+    gc: Gc<RefCell<T>>,
+}
+
+impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcMutRefCellGuard<'_, T, V> {
+    fn drop(&mut self) {
+        drop(self.value.take());
+    }
+}
+
+impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for OwningGcMutRefCellGuard<'a, T, V> {
+    type Target = V;
+
+    fn deref(&self) -> &Self::Target {
+        #[allow(clippy::expect_used)]
+        self.value.as_ref().expect("unreachable") // this can only be None if the guard is dropped
+    }
+}
+
+impl<T: CellCollectable<RefCell<T>>, V> DerefMut for OwningGcMutRefCellGuard<'_, T, V> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        #[allow(clippy::expect_used)]
+        self.value.as_mut().expect("unreachable") // this can only be None if the guard is dropped
+    }
+}
+
 impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
     pub fn borrow(&self) -> Result<GcRefCellGuard<T>, BorrowError> {
         unsafe {
@@ -240,8 +270,8 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
-    
-    pub fn own<'b>(&self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
+
+    pub fn own<'b, 'a>(&'a self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
         unsafe {
             let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
 
@@ -262,7 +292,17 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
+    
+    pub fn own_mut<'b, 'a>(&'a self) -> Result<OwningGcMutRefCellGuard<'b, T>, BorrowMutError> {
+        unsafe {
+            let value = Some((*(*self.inner.as_ptr()).value.as_ptr()).try_borrow_mut()?);
 
+            Ok(OwningGcMutRefCellGuard {
+                value,
+                gc: self.clone(),
+            })
+        }
+    }
 }
 
 
