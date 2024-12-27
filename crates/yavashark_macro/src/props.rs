@@ -43,11 +43,16 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut variadic = None;
                 let mut mode = mode;
                 let mut has_receiver = false;
+                let mut rec_mutability = false;
 
                 func.sig.inputs.iter().fold(0, |idx, arg| {
-                    let syn::FnArg::Typed(pat) = arg else {
-                        has_receiver = true;
-                        return idx;
+                    let pat = match arg {
+                        syn::FnArg::Typed(pat) => pat,
+                        syn::FnArg::Receiver(rec) => {
+                            has_receiver = true;
+                            rec_mutability = rec.mutability.is_some();
+                            return idx;
+                        }
                     };
 
                     pat.attrs.iter().for_each(|attr| {
@@ -88,6 +93,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     variadic,
                     mode,
                     has_receiver,
+                    rec_mutability,
                 }))
             }
 
@@ -133,6 +139,7 @@ struct Method {
     variadic: Option<usize>,
     mode: Mode,
     has_receiver: bool,
+    rec_mutability: bool,
 }
 
 struct Constant {
