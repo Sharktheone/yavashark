@@ -154,8 +154,14 @@ impl Method {
         let mut call_args = TokenStream::new();
         
         for i in 0..self.args {
+            let argname = syn::Ident::new(&format!("arg{}", i), proc_macro2::Span::call_site());
+            
             if Some(i) == self.this {
-                todo!()
+                arg_prepare.extend(quote! {
+                    let #argname = this.copy();
+                });
+                
+                continue;
             }
             
             if Some(i) == self.realm {
@@ -165,8 +171,6 @@ impl Method {
             if Some(i) == self.variadic {
                 todo!()
             }
-            
-            let argname = syn::Ident::new(&format!("arg{}", i), proc_macro2::Span::call_site());
             
             arg_prepare.extend(quote! {
                 let #argname = args.get(#i).ok_or_else(|| Error::new("Missing argument"))?;
@@ -189,17 +193,10 @@ impl Method {
             }
         };
         
-        
-        
-        
-        
-
-
         quote! {
             #native_function::with_proto(stringify!(#js_name), |args, mut this, realm| {
                 #arg_prepare
-                let result = #call;
-                Ok(result)
+                #call.into_value().into();
 
             });
         }
