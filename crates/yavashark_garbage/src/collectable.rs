@@ -155,12 +155,12 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcRefCellGuard<'_, T, V> 
 }
 
 
-impl<'a, T: CellCollectable<RefCell<T>>> Deref for OwningGcRefCellGuard<'a, T> {
-    type Target = Ref<'a, T>;
+impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for OwningGcRefCellGuard<'a, T, V> {
+    type Target = V;
 
     fn deref(&self) -> &Self::Target {
         #[allow(clippy::expect_used)]
-        self.value.as_ref().expect("unreachable")
+        &**self.value.as_ref().expect("unreachable")
     }
 }
 
