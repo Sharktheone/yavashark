@@ -138,17 +138,15 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> GcRefCellGuard<'a, T, V> {
 pub struct OwningGcRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     // this is always Some, except when the destructor runs
     value: Option<Ref<'a, V>>,
-    gc: NonNull<GcBox<RefCell<T>>>,
-    _clone: Option<Gc<RefCell<T>>>, // this is used to keep the Gc alive
+    gc: Gc<RefCell<T>>, // this is used to keep the Gc alive
 }
 
 impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
-        drop(self._clone.take());
         drop(self.value.take());
         unsafe {
             if self.value.is_some() {
-                GcBox::update_refs(self.gc);
+                GcBox::update_refs(self.gc.inner);
             }
         }
     }
@@ -172,8 +170,7 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcRefCellGuard<'a, T, V> {
 
         OwningGcRefCellGuard {
             value: Some(value),
-            gc: self.gc,
-            _clone: self._clone.take(),
+            gc: self.gc.clone(),
         }
     }
 
@@ -196,8 +193,7 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcRefCellGuard<'a, T, V> {
 
         Ok(OwningGcRefCellGuard {
             value: Some(value),
-            gc: self.gc,
-            _clone: self._clone.take(),
+            gc: self.gc.clone(),
         })
     }
 }
@@ -256,8 +252,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
 
             Ok(OwningGcRefCellGuard {
                 value: Some(value),
-                gc: self.inner,
-                _clone: Some(self.clone()),
+                gc: self.clone(),
             })
         }
     }
