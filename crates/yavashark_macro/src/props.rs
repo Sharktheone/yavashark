@@ -173,7 +173,10 @@ impl Method {
             }
             
             if Some(i) == self.variadic {
-                todo!()
+                arg_prepare.extend(quote! {
+                    let #argname = args.get(#i..).unwrap_or_default();
+                });
+                continue;
             }
             
             arg_prepare.extend(quote! {
