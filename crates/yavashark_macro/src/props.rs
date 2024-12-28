@@ -1,7 +1,7 @@
 use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
-use proc_macro2::TokenStream;
-use quote::quote;
+use proc_macro2::{Span, TokenStream};
+use quote::{quote, ToTokens};
 use syn::ImplItem;
 
 #[derive(Debug, Clone, Copy)]
@@ -122,7 +122,62 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     }
 
-    TokenStream::new().into()
+    let config = Config::new(Span::call_site());
+    let variable = &config.variable;
+    let object = &config.object;
+    let value = &config.value;
+    let handle = &config.object_handle;
+    let error = &config.error;
+
+    let mut init = TokenStream::new();
+
+    for prop in props {
+        let (prop, name, js_name) = match prop {
+            Prop::Method(method) => (method.init_tokens(&config), method.name, method.js_name),
+            Prop::Constant(constant) => (
+                constant.init_tokens(&config),
+                constant.name,
+                constant.js_name,
+            ),
+        };
+
+        let name = js_name
+            .map(|js_name| quote! {#js_name})
+            .unwrap_or_else(|| quote! {stringify!(#name)});
+
+        init.extend(quote! {
+            {
+                let prop = #prop;
+
+                obj.define_variable(#name.into(), #variable::new(prop))?;
+            }
+        });
+    }
+
+    let init_fn = match mode {
+        Mode::Prototype => quote! {
+            fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#handle, #error> {
+                use yavashark_value::{AsAny, Obj};
+                
+                #init
+                
+                let obj = obj.into_object();
+                
+                
+                Ok(obj)
+            }
+        },
+        Mode::Raw => quote! {
+            fn initialize(&mut self) -> Result<(), #error> {
+                let obj = self;
+                
+                #init
+            }
+        },
+    };
+
+
+    item.to_token_stream().into()
 }
 
 enum Prop {
@@ -160,7 +215,7 @@ impl Method {
         let mut call_args = TokenStream::new();
 
         for i in 0..self.args {
-            let argname = syn::Ident::new(&format!("arg{}", i), proc_macro2::Span::call_site());
+            let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
 
             if Some(i) == self.this {
                 arg_prepare.extend(quote! {
@@ -228,11 +283,10 @@ impl Method {
     }
 }
 
-
 impl Constant {
     fn init_tokens(&self, config: &Config) -> TokenStream {
         let name = &self.name;
-        
+
         quote! {
             Self::#name.into_value()
         }
