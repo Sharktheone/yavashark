@@ -3,7 +3,7 @@ use crate::{
 };
 use std::any::type_name;
 use std::fmt::Debug;
-use yavashark_garbage::collectable::OwningGcRefCellGuard;
+use yavashark_garbage::collectable::{OwningGcMutRefCellGuard, OwningGcRefCellGuard};
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -389,13 +389,14 @@ impl Obj<Re> for O1 {
 fn conv() {
     let values: Vec<Value<Re>> = vec![];
 
-
     let v1 = FromValue::from_value(values[0].copy()).unwrap();
     let v2 = FromValue::from_value(values[0].copy()).unwrap();
+    
+    
     let v3: OwningGcRefCellGuard<_, O1> = FromValue::from_value(values[0].copy()).unwrap();
-    // let mut v4: GcMutRefCellGuard<_> = FromValue::from_value(values[0].copy()).unwrap();
+    let mut v4: OwningGcMutRefCellGuard<_, O1> = FromValue::from_value(values[0].copy()).unwrap();
 
-    test_func(v1, v2, &O1, &mut O1)
+    test_func(v1, v2, &*v3, &mut *v4)
 }
 
 fn test_func(s: f32, a: i32, g: &O1, r: &mut O1) {}

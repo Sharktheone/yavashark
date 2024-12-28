@@ -155,48 +155,45 @@ impl Method {
         let name = &self.name;
 
         let js_name = &self.js_name;
-        
-        
+
         let mut arg_prepare = TokenStream::new();
         let mut call_args = TokenStream::new();
-        
+
         for i in 0..self.args {
             let argname = syn::Ident::new(&format!("arg{}", i), proc_macro2::Span::call_site());
-            
+
             if Some(i) == self.this {
                 arg_prepare.extend(quote! {
                     let #argname = this.copy();
                 });
-                
+
                 continue;
             }
-            
+
             if Some(i) == self.realm {
                 arg_prepare.extend(quote! {
                     let #argname = realm;
                 });
-                
+
                 continue;
             }
-            
+
             if Some(i) == self.variadic {
                 arg_prepare.extend(quote! {
                     let #argname = args.get(#i..).unwrap_or_default();
                 });
                 continue;
             }
-            
+
             arg_prepare.extend(quote! {
                 let #argname = args.get(#i).ok_or_else(|| Error::new("Missing argument"))?;
             });
-            
+
             call_args.extend(quote! {
                 #argname,
             });
-            
         }
-        
-        
+
         let call = if self.has_receiver {
             quote! {
                 this.#name(#call_args)
@@ -206,12 +203,26 @@ impl Method {
                 Self::#name(#call_args)
             }
         };
-        
+
+        let prepare_receiver = if self.has_receiver {
+            if self.rec_mutability {
+                quote! {
+                    let mut this: yavashark_garbage::collectable::OwningGcMutRefCellGuard<_, Self> = FromValue::from_value(this)?;
+                }
+            } else {
+                quote! {
+                    let this: yavashark_garbage::collectable::OwningGcRefCellGuard<_, Self> = FromValue::from_value(this)?;
+                }
+            }
+        } else {
+            TokenStream::new()
+        };
+
         quote! {
             #native_function::with_proto(stringify!(#js_name), |args, mut this, realm| {
                 #arg_prepare
+                #prepare_receiver
                 #call.into_value().into();
-
             });
         }
     }
