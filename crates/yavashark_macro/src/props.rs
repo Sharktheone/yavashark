@@ -223,7 +223,7 @@ impl Method {
                 #arg_prepare
                 #prepare_receiver
                 #call.into_value().into();
-            });
+            })
         }
     }
 }
