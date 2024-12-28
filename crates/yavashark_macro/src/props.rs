@@ -37,7 +37,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     for item in &mut item.items {
         match item {
             ImplItem::Fn(func) => {
-                let mut js_name = func.sig.ident.clone();
+                let mut js_name = None;
                 let mut this = None;
                 let mut realm = None;
                 let mut variadic = None;
@@ -86,7 +86,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 props.push(Prop::Method(Method {
                     name: func.sig.ident.clone(),
-                    js_name: js_name.into(),
+                    js_name,
                     args: func.sig.inputs.len(),
                     this,
                     realm,
@@ -98,7 +98,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
             ImplItem::Const(constant) => {
-                let mut js_name = constant.ident.clone();
+                let mut js_name = None;
                 let mut mode = mode;
 
                 constant.attrs.iter().for_each(|attr| {
@@ -113,7 +113,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 props.push(Prop::Constant(Constant {
                     name: constant.ident.clone(),
-                    js_name: js_name.into(),
+                    js_name,
                     mode,
                 }))
             }
@@ -132,7 +132,7 @@ enum Prop {
 
 struct Method {
     name: syn::Ident,
-    js_name: syn::Path,
+    js_name: Option<syn::Path>,
     args: usize,
     this: Option<usize>,
     realm: Option<usize>,
@@ -144,7 +144,7 @@ struct Method {
 
 struct Constant {
     name: syn::Ident,
-    js_name: syn::Ident,
+    js_name: Option<syn::Path>,
     mode: Mode,
 }
 
