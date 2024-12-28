@@ -227,3 +227,14 @@ impl Method {
         }
     }
 }
+
+
+impl Constant {
+    fn init_tokens(&self, config: &Config) -> TokenStream {
+        let name = &self.name;
+        
+        quote! {
+            Self::#name.into_value()
+        }
+    }
+}
