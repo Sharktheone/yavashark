@@ -86,7 +86,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 props.push(Prop::Method(Method {
                     name: func.sig.ident.clone(),
-                    js_name,
+                    js_name: js_name.into(),
                     args: func.sig.inputs.len(),
                     this,
                     realm,
@@ -113,7 +113,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 props.push(Prop::Constant(Constant {
                     name: constant.ident.clone(),
-                    js_name,
+                    js_name: js_name.into(),
                     mode,
                 }))
             }
@@ -132,7 +132,7 @@ enum Prop {
 
 struct Method {
     name: syn::Ident,
-    js_name: syn::Ident,
+    js_name: syn::Path,
     args: usize,
     this: Option<usize>,
     realm: Option<usize>,
