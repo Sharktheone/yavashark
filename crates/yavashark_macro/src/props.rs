@@ -149,7 +149,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             {
                 let prop = #prop;
 
-                obj.define_variable(#name.into(), #variable::new(prop))?;
+                obj.define_variable(#name.into(), #variable::new(prop.into()));
             }
         });
     }
@@ -157,7 +157,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let init_fn = match mode {
         Mode::Prototype => quote! {
             fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#handle, #error> {
-                use yavashark_value::{AsAny, Obj};
+                use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 
                 #init
                 
@@ -169,6 +169,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         },
         Mode::Raw => quote! {
             fn initialize(&mut self) -> Result<(), #error> {
+                use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 let obj = self;
                 
                 #init

@@ -10,6 +10,7 @@ pub use name::*;
 pub use object::*;
 pub use symbol::*;
 pub use variable::*;
+pub use conversion::*;
 use yavashark_garbage::{Collectable, GcRef};
 
 use crate::Error;
