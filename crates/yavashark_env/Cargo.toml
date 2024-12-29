@@ -9,6 +9,7 @@ yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_macro = { path = "../yavashark_macro" }
 colored = "2.1.0"
 paste = "1.0.15"
+rand = "0.8.5"
 
 
 [features]

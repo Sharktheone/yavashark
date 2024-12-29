@@ -1,5 +1,5 @@
-use crate::{Error, Object, ObjectHandle, Res, Result, Value, ValueResult};
-use yavashark_macro::{object, properties, properties_new};
+use crate::{Error, Object, ObjectHandle, Result};
+use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
 #[object]
@@ -19,64 +19,158 @@ impl Math {
     }
 }
 
-
-
 #[properties_new(raw)]
 impl Math {
-    const PI: f64 = std::f64::consts::PI;
     const E: f64 = std::f64::consts::E;
-    
-    fn pow(left: f64, right: f64) -> f64 {
-        left.powf(right)
-    }
-    
-}
+    const LN10: f64 = std::f64::consts::LN_10;
+    const LN2: f64 = std::f64::consts::LN_2;
+    const LOG10E: f64 = std::f64::consts::LOG10_E;
+    const LOG2E: f64 = std::f64::consts::LOG2_E;
+    const PI: f64 = std::f64::consts::PI;
+    const SQRT1_2: f64 = std::f64::consts::FRAC_1_SQRT_2;
+    const SQRT2: f64 = std::f64::consts::SQRT_2;
 
-// #[properties]
-// impl Math {
-//     #[prop("pow")]
-//     #[allow(clippy::unused_self, clippy::needless_pass_by_value)]
-//     fn pow(&self, args: Vec<Value>, _: Value) -> ValueResult {
-//         if args.len() < 2 {
-//             return Ok(Value::Number(f64::NAN));
-//         }
-// 
-//         let base = args[0].as_number();
-//         let exponent = args[1].as_number();
-// 
-//         Ok(base.powf(exponent).into())
-//     }
-//     pub(crate) fn initialize(&mut self, func_proto: Value) -> Res {
-//         use yavashark_value::Obj;
-//         let function = crate::NativeFunction::with_proto(
-//             stringify!(pow),
-//             |args, this, _| match this.copy() {
-//                 Value::Object(ref x) => {
-//                     let x = x.get()?;
-//                     let deez = (***x)
-//                         .as_any()
-//                         .downcast_ref::<Self>()
-//                         .ok_or(Error::ty_error(format!(
-//                             "Function {:?} was not called with a valid this value: {:?}",
-//                             stringify!(pow),
-//                             this
-//                         )))?;
-//                     deez.pow(args, this)
-//                 }
-//                 _ => Err(Error::ty_error(format!(
-//                     "Function {:?} was not called with a valid this value: {:?}",
-//                     stringify!(pow),
-//                     this
-//                 ))),
-//             },
-//             func_proto,
-//         )
-//         .into();
-//         self.define_variable(
-//             stringify!(pow).into(),
-//             crate::Variable::new_with_attributes(function, true, false, false),
-//         );
-// 
-//         Ok(())
-//     }
-// }
+    fn abs(value: f64) -> f64 {
+        value.abs()
+    }
+
+    fn acos(value: f64) -> f64 {
+        value.acos()
+    }
+
+    fn acosh(value: f64) -> f64 {
+        value.acosh()
+    }
+
+    fn asin(value: f64) -> f64 {
+        value.asin()
+    }
+
+    fn asinh(value: f64) -> f64 {
+        value.asinh()
+    }
+
+    fn atan(value: f64) -> f64 {
+        value.atan()
+    }
+
+    fn atan2(left: f64, right: f64) -> f64 {
+        left.atan2(right)
+    }
+
+    fn atanh(value: f64) -> f64 {
+        value.atanh()
+    }
+
+    fn cbrt(value: f64) -> f64 {
+        value.cbrt()
+    }
+
+    fn ceil(value: f64) -> f64 {
+        value.ceil()
+    }
+
+    const fn clz32(value: f64) -> f64 {
+        value.to_bits().leading_zeros() as f64
+    }
+
+    fn cos(value: f64) -> f64 {
+        value.cos()
+    }
+
+    fn cosh(value: f64) -> f64 {
+        value.cosh()
+    }
+
+    fn exp(value: f64) -> f64 {
+        value.exp()
+    }
+
+    fn expm1(value: f64) -> f64 {
+        value.exp_m1()
+    }
+
+    fn floor(value: f64) -> f64 {
+        value.floor()
+    }
+
+    fn f16round(value: f64) -> f64 {
+        value.round() //TODO: Implement f16round
+    }
+
+    fn fround(value: f64) -> f64 {
+        value.round()
+    }
+
+    fn hypot(left: f64, right: f64) -> f64 {
+        left.hypot(right)
+    }
+
+    const fn imul(left: f64, right: f64) -> f64 {
+        (left as i32 * right as i32) as f64
+    }
+
+    fn log(value: f64) -> f64 {
+        value.ln()
+    }
+
+    fn log10(value: f64) -> f64 {
+        value.log10()
+    }
+
+    fn log1p(value: f64) -> f64 {
+        value.ln_1p()
+    }
+
+    fn log2(value: f64) -> f64 {
+        value.log2()
+    }
+
+    fn max(left: f64, right: f64) -> f64 {
+        left.max(right) //TODO: this needs to be variadic
+    }
+
+    fn min(left: f64, right: f64) -> f64 {
+        left.min(right) //TODO: this needs to be variadic
+    }
+
+    fn pow(base: f64, exponent: f64) -> f64 {
+        base.powf(exponent)
+    }
+
+    fn random() -> f64 {
+        rand::random()
+    }
+
+    fn round(value: f64) -> f64 {
+        value.round()
+    }
+
+    fn sign(value: f64) -> f64 {
+        value.signum()
+    }
+
+    fn sin(value: f64) -> f64 {
+        value.sin()
+    }
+
+    fn sinh(value: f64) -> f64 {
+        value.sinh()
+    }
+
+    fn sqrt(value: f64) -> f64 {
+        value.sqrt()
+    }
+
+    fn tan(value: f64) -> f64 {
+        value.tan()
+    }
+
+    fn tanh(value: f64) -> f64 {
+        value.tanh()
+    }
+
+    fn trunc(value: f64) -> f64 {
+        value.trunc()
+    }
+}
