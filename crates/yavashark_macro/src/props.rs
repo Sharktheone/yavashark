@@ -244,7 +244,7 @@ impl Method {
             }
 
             arg_prepare.extend(quote! {
-                let #argname = args.get(#i).ok_or_else(|| Error::new("Missing argument"))?;
+                let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| Error::new("Missing argument"))?.copy())?;
             });
 
             call_args.extend(quote! {
