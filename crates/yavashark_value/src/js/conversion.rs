@@ -222,11 +222,11 @@ impl<C: Realm> IntoValue<C> for () {
     }
 }
 
-impl<C: Realm, O: Obj<C>> IntoValue<C> for O {
-    fn into_value(self) -> Value<C> {
-        Value::Object(Object::new(self))
-    }
-}
+// impl<C: Realm, O: Obj<C>> IntoValue<C> for O {
+//     fn into_value(self) -> Value<C> {
+//         Value::Object(Object::new(self))
+//     }
+// }
 
 macro_rules! impl_from_value {
     ($($t:ty),*) => {
@@ -385,8 +385,8 @@ fn conv() {
 
     let v1 = FromValue::from_value(values[0].copy()).unwrap();
     let v2 = FromValue::from_value(values[0].copy()).unwrap();
-    
-    
+
+
     let v3: OwningGcRefCellGuard<_, O1> = FromValue::from_value(values[0].copy()).unwrap();
     let mut v4: OwningGcMutRefCellGuard<_, O1> = FromValue::from_value(values[0].copy()).unwrap();
 
