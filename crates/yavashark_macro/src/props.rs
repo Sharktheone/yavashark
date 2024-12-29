@@ -4,7 +4,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::ImplItem;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
     /// All methods and properties will be put on the prototype of the class => Array.prototype.map
     Prototype,
@@ -168,11 +168,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         },
         Mode::Raw => quote! {
-            fn initialize(&mut self) -> Result<(), #error> {
+            fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
                 use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 let obj = self;
                 
                 #init
+                
+                Ok(())
             }
         },
     };
@@ -280,8 +282,8 @@ impl Method {
             #native_function::with_proto(stringify!(#name), |args, mut this, realm| {
                 #arg_prepare
                 #prepare_receiver
-                #call.into_value().into();
-            })
+                #call.into_value().into()
+            }, func_proto.copy())
         }
     }
 }
