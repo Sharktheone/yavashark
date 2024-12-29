@@ -252,12 +252,6 @@ macro_rules! impl_from_value {
 
 impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
 
-impl<C: Realm> FromValue<C> for Value<C> {
-    fn from_value(value: Self) -> Result<Self, Error<C>> {
-        Ok(value)
-    }
-}
-
 impl<R: Realm, O: Obj<R>> FromValue<R> for OwningGcRefCellGuard<'_, BoxedObj<R>, O> {
     fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
         let Value::Object(obj) = value else {
