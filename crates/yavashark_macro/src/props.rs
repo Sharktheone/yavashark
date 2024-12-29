@@ -176,6 +176,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         },
     };
+    
+    item.items.push(ImplItem::Verbatim(init_fn));
 
 
     item.to_token_stream().into()
