@@ -277,7 +277,7 @@ impl Method {
         };
 
         quote! {
-            #native_function::with_proto(stringify!(#js_name), |args, mut this, realm| {
+            #native_function::with_proto(stringify!(#name), |args, mut this, realm| {
                 #arg_prepare
                 #prepare_receiver
                 #call.into_value().into();
