@@ -276,3 +276,27 @@ impl<R: Realm, O: Obj<R>> FromValue<R> for OwningGcRefCellGuard<'_, BoxedObj<R>,
             })
     }
 }
+
+impl<R: Realm, O: Obj<R>> FromValue<R> for OwningGcMutRefCellGuard<'_, BoxedObj<R>, O> {
+    fn from_value(value: Value<R>) -> Result<Self, Error<R>> {
+        let Value::Object(obj) = value else {
+            return Err(Error::ty_error(format!(
+                "Expected a number, found {value:?}"
+            )));
+        };
+
+        obj.get_owned_mut()?
+            .maybe_map(|this| {
+                let any = this.as_any_mut();
+
+                any.downcast_mut()
+            })
+            .map_err(|other| {
+                Error::ty_error(format!(
+                    "Expected {}, found {}",
+                    type_name::<O>(),
+                    other.class_name()
+                ))
+            })
+    }
+}
