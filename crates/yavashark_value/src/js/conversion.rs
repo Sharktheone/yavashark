@@ -139,6 +139,12 @@ impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for T {
     }
 }
 
+impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for Result<T, Error<C>> {
+    fn try_into_value(self) -> Result<Value<C>, Error<C>> {
+        self.map(IntoValue::into_value)
+    }
+}
+
 impl<C: Realm> IntoValue<C> for Value<C> {
     fn into_value(self) -> Value<C> {
         self
