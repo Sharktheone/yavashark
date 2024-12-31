@@ -129,6 +129,7 @@ pub trait IntoValue<C: Realm> {
     fn into_value(self) -> Value<C>;
 }
 
+
 pub trait TryIntoValue<C: Realm>: Sized {
     fn try_into_value(self) -> Result<Value<C>, Error<C>>;
 }
@@ -139,11 +140,31 @@ impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for T {
     }
 }
 
-impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for Result<T, Error<C>> {
-    fn try_into_value(self) -> Result<Value<C>, Error<C>> {
-        self.map(IntoValue::into_value)
+
+// impl<C: Realm, T: TryIntoValue<C>> TryIntoValue<C> for Result<T, Error<C>> {
+//     fn try_into_value(self) -> Result<Value<C>, Error<C>> {
+//         self?.try_into_value()
+//     }
+// }
+
+
+pub trait ToResult<T, C: Realm> {
+    fn to_result(self) -> Result<T, Error<C>>;
+}
+
+impl<T, C: Realm> ToResult<T, C> for Result<T, Error<C>> {
+    fn to_result(self) -> Result<T, Error<C>> {
+        self
     }
 }
+
+impl<T, C: Realm> ToResult<T, C> for T {
+    fn to_result(self) -> Result<T, Error<C>> {
+        Ok(self)
+    }
+}
+
+
 
 impl<C: Realm> IntoValue<C> for Value<C> {
     fn into_value(self) -> Value<C> {
@@ -240,7 +261,7 @@ macro_rules! impl_from_value {
                     }
                 }
             }
-        
+            
             impl<C: Realm> IntoValue<C> for $t {
                 fn into_value(self) -> Value<C> {
                     Value::Number(self as f64)
