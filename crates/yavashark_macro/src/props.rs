@@ -54,20 +54,31 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             return;
                         }
                     };
+                    
+                    let mut remove = Vec::new();
 
-                    pat.attrs.iter().for_each(|attr| {
+                    pat.attrs.iter().enumerate().for_each(|(idx_remove, attr)| {
                         if attr.path().is_ident("this") {
                             this = Some(idx);
+                            remove.push(idx_remove);
                         }
 
                         if attr.path().is_ident("realm") {
                             realm = Some(idx);
+                            remove.push(idx_remove);
                         }
 
                         if attr.path().is_ident("variadic") {
                             variadic = Some(idx);
+                            remove.push(idx_remove);
                         }
                     });
+                    
+                    remove.sort();
+                    
+                    for idx in remove.into_iter().rev() {
+                        pat.attrs.remove(idx);
+                    }
                 });
 
                 func.attrs.iter().for_each(|attr| {
