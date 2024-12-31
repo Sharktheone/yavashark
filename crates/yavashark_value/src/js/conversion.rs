@@ -148,21 +148,6 @@ impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for T {
 // }
 
 
-pub trait ToResult<T, C: Realm> {
-    fn to_result(self) -> Result<T, Error<C>>;
-}
-
-impl<T, C: Realm> ToResult<T, C> for Result<T, Error<C>> {
-    fn to_result(self) -> Result<T, Error<C>> {
-        self
-    }
-}
-
-impl<T, C: Realm> ToResult<T, C> for T {
-    fn to_result(self) -> Result<T, Error<C>> {
-        Ok(self)
-    }
-}
 
 
 
@@ -261,7 +246,7 @@ macro_rules! impl_from_value {
                     }
                 }
             }
-            
+
             impl<C: Realm> IntoValue<C> for $t {
                 fn into_value(self) -> Value<C> {
                     Value::Number(self as f64)
