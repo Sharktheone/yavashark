@@ -64,7 +64,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             realm = Some(idx);
                         }
 
-                        if attr.path().is_ident("rest") {
+                        if attr.path().is_ident("variadic") {
                             variadic = Some(idx);
                         }
                     });
@@ -227,27 +227,21 @@ impl Method {
                     let #argname = this.copy();
                 });
 
-                continue;
-            }
-
-            if Some(i) == self.realm {
+            } else if Some(i) == self.realm {
                 arg_prepare.extend(quote! {
                     let #argname = realm;
                 });
-
-                continue;
-            }
-
-            if Some(i) == self.variadic {
+            } else if Some(i) == self.variadic {
                 arg_prepare.extend(quote! {
                     let #argname = args.get(#i..).unwrap_or_default();
                 });
                 continue;
-            }
-
-            arg_prepare.extend(quote! {
+            } else {
+                arg_prepare.extend(quote! {
                 let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| Error::new("Missing argument"))?.copy())?;
             });
+            }
+
 
             call_args.extend(quote! {
                 #argname,
