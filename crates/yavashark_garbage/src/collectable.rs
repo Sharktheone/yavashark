@@ -259,6 +259,42 @@ impl<T: CellCollectable<RefCell<T>>, V> DerefMut for OwningGcMutRefCellGuard<'_,
     }
 }
 
+impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcMutRefCellGuard<'a, T, V> {
+    #[allow(clippy::missing_panics_doc)]
+    pub fn map<R, F: FnOnce(&mut V) -> &mut R>(mut self, f: F) -> OwningGcMutRefCellGuard<'a, T, R> {
+        #[allow(clippy::expect_used)]
+        let value = RefMut::map(self.value.take().expect("unreachable"), f);
+
+        OwningGcMutRefCellGuard {
+            value: Some(value),
+            gc: self.gc.clone(),
+        }
+    }
+
+    #[allow(clippy::missing_panics_doc)]
+    pub fn maybe_map<R, F: FnOnce(&mut V) -> Option<&mut R>>(
+        mut self,
+        f: F,
+    ) -> Result<OwningGcMutRefCellGuard<'a, T, R>, Self> {
+        #[allow(clippy::expect_used)]
+        let value = self.value.take().expect("unreachable");
+
+        let value = match RefMut::filter_map(value, f) {
+            Ok(v) => v,
+            Err(v) => {
+                self.value = Some(v);
+
+                return Err(self);
+            }
+        };
+
+        Ok(OwningGcMutRefCellGuard {
+            value: Some(value),
+            gc: self.gc.clone(),
+        })
+    }
+}
+
 impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
     pub fn borrow(&self) -> Result<GcRefCellGuard<T>, BorrowError> {
         unsafe {
