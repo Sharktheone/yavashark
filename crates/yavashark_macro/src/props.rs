@@ -45,13 +45,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut has_receiver = false;
                 let mut rec_mutability = false;
 
-                func.sig.inputs.iter().fold(0, |idx, arg| {
+                func.sig.inputs.iter_mut().enumerate().for_each(|(idx, arg)| {
                     let pat = match arg {
                         syn::FnArg::Typed(pat) => pat,
                         syn::FnArg::Receiver(rec) => {
                             has_receiver = true;
                             rec_mutability = rec.mutability.is_some();
-                            return idx;
+                            return;
                         }
                     };
 
@@ -68,8 +68,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             variadic = Some(idx);
                         }
                     });
-
-                    idx + 1
                 });
 
                 func.attrs.iter().for_each(|attr| {
