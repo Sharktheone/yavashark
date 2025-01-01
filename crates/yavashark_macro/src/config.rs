@@ -14,6 +14,7 @@ pub struct Config {
     pub value: Path,
     pub value_result: Path,
     pub object_property: Path,
+    pub try_into_value: Path,
 }
 
 impl Config {
@@ -72,6 +73,14 @@ impl Config {
         object_property
             .segments
             .push(PathSegment::from(Ident::new("ObjectProperty", span)));
+        
+        let mut try_into_value = env_path.clone();
+        try_into_value
+            .segments
+            .push(PathSegment::from(Ident::new("conversion", span)));
+        try_into_value
+            .segments
+            .push(PathSegment::from(Ident::new("TryIntoValue", span)));
 
         Self {
             env_path,
@@ -85,6 +94,7 @@ impl Config {
             value,
             value_result,
             object_property,
+            try_into_value,
         }
     }
 }
