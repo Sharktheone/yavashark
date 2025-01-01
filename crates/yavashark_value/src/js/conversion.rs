@@ -130,25 +130,6 @@ pub trait IntoValue<C: Realm> {
 }
 
 
-pub trait TryIntoValue<C: Realm>: Sized {
-    fn try_into_value(self) -> Result<Value<C>, Error<C>>;
-}
-
-impl<C: Realm, T: IntoValue<C>> TryIntoValue<C> for T {
-    fn try_into_value(self) -> Result<Value<C>, Error<C>> {
-        Ok(self.into_value())
-    }
-}
-
-
-// impl<C: Realm, T: TryIntoValue<C>> TryIntoValue<C> for Result<T, Error<C>> {
-//     fn try_into_value(self) -> Result<Value<C>, Error<C>> {
-//         self?.try_into_value()
-//     }
-// }
-
-
-
 
 
 impl<C: Realm> IntoValue<C> for Value<C> {
