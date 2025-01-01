@@ -24,6 +24,11 @@ yavashark_vm = { path = "crates/yavashark_vm" }
 yavashark_env = { path = "crates/yavashark_env"}
 
 
+[profile.release]
+lto = "fat"
+opt-level = 3
+codegen-units = 1
+
 [lints]
 workspace = true
 
