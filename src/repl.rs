@@ -13,7 +13,7 @@ impl Repl {
         Self { callback }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) -> ! {
         let mut braces_open = 0u8;
 
         let mut input = String::new();
@@ -33,7 +33,7 @@ impl Repl {
 
             if let Err(e) = io::stdin().read_line(&mut input) {
                 println!("Error: \n{e}");
-                return;
+                continue;
             }
 
             for i in input[offset..].chars() {
