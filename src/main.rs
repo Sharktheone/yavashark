@@ -173,12 +173,17 @@ fn main() {
             }
 
             if interpreter {
-                let result = yavashark_interpreter::Interpreter::run_in(
+                let result =  match yavashark_interpreter::Interpreter::run_in(
                     &script.body,
                     &mut interpreter_realm,
                     &mut interpreter_scope,
-                )
-                .unwrap();
+                ) {
+                    Ok(r) => r,
+                    Err(e) => {
+                        eprintln!("Uncaught {e:?}");
+                        return;
+                    }
+                };
 
                 if bytecode {
                     println!("Interpreter: {}", result.pretty_print());
@@ -188,7 +193,13 @@ fn main() {
             }
 
             if bytecode || instructions {
-                let bc = ByteCodegen::compile(&script.body).unwrap();
+                let bc = match ByteCodegen::compile(&script.body) {
+                    Ok(bc) => bc,
+                    Err(e) => {
+                        eprintln!("Failed to compile code: {e:?}");
+                        return;
+                    }
+                };
 
                 if instructions {
                     println!("{bc:#?}");
@@ -204,7 +215,9 @@ fn main() {
                         vm_scope.clone(),
                     );
 
-                    vm.run().unwrap();
+                    if let Err(e) = vm.run() {
+                        eprintln!("Uncaught: {e:?}");
+                    }
 
                     println!("Bytecode: {:?}", vm.acc());
                 }
