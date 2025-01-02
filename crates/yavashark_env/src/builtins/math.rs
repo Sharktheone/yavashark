@@ -1,4 +1,4 @@
-use crate::{Error, Object, ObjectHandle, Result};
+use crate::{Error, Object, ObjectHandle, Realm, Result, Value};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
@@ -125,11 +125,12 @@ impl Math {
     fn log2(value: f64) -> f64 {
         value.log2()
     }
-
-    fn max(left: f64, right: f64) -> f64 {
-        left.max(right) //TODO: this needs to be variadic
+    
+    fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Result<f64> {
+        args.iter()
+            .try_fold(f64::NEG_INFINITY, |acc, v| Ok(acc.max(v.to_number(realm)?)))
     }
-
+    
     fn min(left: f64, right: f64) -> f64 {
         left.min(right) //TODO: this needs to be variadic
     }
