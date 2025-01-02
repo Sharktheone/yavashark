@@ -210,11 +210,13 @@ struct Method {
     this: Option<usize>,
     realm: Option<usize>,
     variadic: Option<usize>,
+    #[allow(unused)]
     mode: Mode,
     has_receiver: bool,
     rec_mutability: bool,
 }
 
+#[allow(unused)]
 struct Constant {
     name: syn::Ident,
     js_name: Option<syn::Path>,
@@ -226,8 +228,6 @@ impl Method {
         let native_function = &config.native_function;
 
         let name = &self.name;
-
-        let js_name = &self.js_name;
 
         let mut arg_prepare = TokenStream::new();
         let mut call_args = TokenStream::new();
@@ -297,7 +297,7 @@ impl Method {
 }
 
 impl Constant {
-    fn init_tokens(&self, config: &Config) -> TokenStream {
+    fn init_tokens(&self, _config: &Config) -> TokenStream {
         let name = &self.name;
 
         quote! {

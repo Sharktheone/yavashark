@@ -46,7 +46,7 @@ impl ObjectImpl<Realm> for NativeFunction {
         Some(Object::new(realm).into())
     }
 
-    fn get_constructor_proto(&self, realm: &mut Realm) -> Option<Value> {
+    fn get_constructor_proto(&self, _realm: &mut Realm) -> Option<Value> {
         Some(self.constructor.value.copy()) //TODO: this is not correct (i think)
     }
 

@@ -1,8 +1,7 @@
 use crate::{
-    AsAny, BoxedObj, Error, Obj, Object, ObjectProperty, Realm, Value, Variable,
+    AsAny, BoxedObj, Error, Obj, Object, Realm, Value,
 };
 use std::any::type_name;
-use std::fmt::Debug;
 use yavashark_garbage::collectable::{OwningGcMutRefCellGuard, OwningGcRefCellGuard};
 
 impl<C: Realm> From<&str> for Value<C> {
