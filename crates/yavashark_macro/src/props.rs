@@ -244,15 +244,16 @@ impl Method {
                 arg_prepare.extend(quote! {
                     let #argname = realm;
                 });
+                
             } else if Some(i) == self.variadic {
                 arg_prepare.extend(quote! {
                     let #argname = args.get(#i..).unwrap_or_default();
                 });
-                continue;
+                
             } else {
                 arg_prepare.extend(quote! {
-                let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| Error::new("Missing argument"))?.copy())?;
-            });
+                    let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| Error::new("Missing argument"))?.copy())?;
+                });
             }
 
 
