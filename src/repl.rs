@@ -41,7 +41,7 @@ impl Repl {
                     braces_open += 1;
                 }
 
-                if CLOSE_BRACES.contains(&i) {
+                if CLOSE_BRACES.contains(&i) && braces_open != 0 {
                     braces_open -= 1;
                 }
             }
