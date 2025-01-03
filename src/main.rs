@@ -173,7 +173,7 @@ fn main() {
             }
 
             if interpreter {
-                let result =  match yavashark_interpreter::Interpreter::run_in(
+                let result = match yavashark_interpreter::Interpreter::run_in(
                     &script.body,
                     &mut interpreter_realm,
                     &mut interpreter_scope,

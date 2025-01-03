@@ -1,6 +1,4 @@
-use crate::{
-    AsAny, BoxedObj, Error, Obj, Object, Realm, Value,
-};
+use crate::{AsAny, BoxedObj, Error, Obj, Object, Realm, Value};
 use std::any::type_name;
 use yavashark_garbage::collectable::{OwningGcMutRefCellGuard, OwningGcRefCellGuard};
 
@@ -106,7 +104,6 @@ impl<C: Realm> From<f32> for Value<C> {
     }
 }
 
-
 impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
     fn from(value: Value<C>) -> Self {
         Ok(value)
@@ -123,13 +120,9 @@ pub trait FromValue<C: Realm>: Sized {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>>;
 }
 
-
 pub trait IntoValue<C: Realm> {
     fn into_value(self) -> Value<C>;
 }
-
-
-
 
 impl<C: Realm> IntoValue<C> for Value<C> {
     fn into_value(self) -> Value<C> {
@@ -142,7 +135,6 @@ impl<C: Realm> FromValue<C> for Value<C> {
         Ok(value)
     }
 }
-
 
 impl<C: Realm> FromValue<C> for String {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
@@ -188,8 +180,6 @@ impl<C: Realm> FromValue<C> for () {
     }
 }
 
-
-
 impl<C: Realm> IntoValue<C> for String {
     fn into_value(self) -> Value<C> {
         Value::String(self)
@@ -213,7 +203,6 @@ impl<C: Realm> IntoValue<C> for () {
         Value::Undefined
     }
 }
-
 
 macro_rules! impl_from_value {
     ($($t:ty),*) => {

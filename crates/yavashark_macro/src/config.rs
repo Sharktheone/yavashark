@@ -73,7 +73,7 @@ impl Config {
         object_property
             .segments
             .push(PathSegment::from(Ident::new("ObjectProperty", span)));
-        
+
         let mut try_into_value = env_path.clone();
         try_into_value
             .segments

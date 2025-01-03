@@ -1,5 +1,5 @@
-use yavashark_value::IntoValue;
 use crate::{Error, Realm, ValueResult};
+use yavashark_value::IntoValue;
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self) -> ValueResult;
@@ -11,10 +11,8 @@ impl<T: IntoValue<Realm>> TryIntoValue for T {
     }
 }
 
-
 impl<T: TryIntoValue> TryIntoValue for Result<T, Error> {
     fn try_into_value(self) -> ValueResult {
         self?.try_into_value()
     }
 }
-

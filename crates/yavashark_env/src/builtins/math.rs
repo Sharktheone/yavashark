@@ -130,7 +130,7 @@ impl Math {
         args.iter()
             .try_fold(f64::NEG_INFINITY, |acc, v| Ok(acc.max(v.to_number(realm)?)))
     }
-    
+
     fn min(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Result<f64> {
         args.iter()
             .try_fold(f64::INFINITY, |acc, v| Ok(acc.min(v.to_number(realm)?)))

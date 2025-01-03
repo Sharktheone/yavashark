@@ -5,12 +5,12 @@ use std::hash::Hash;
 
 pub use constructor::*;
 pub use context::*;
+pub use conversion::*;
 pub use function::*;
 pub use name::*;
 pub use object::*;
 pub use symbol::*;
 pub use variable::*;
-pub use conversion::*;
 use yavashark_garbage::{Collectable, GcRef};
 
 use crate::Error;

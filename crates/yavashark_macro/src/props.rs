@@ -45,41 +45,45 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut has_receiver = false;
                 let mut rec_mutability = false;
 
-                func.sig.inputs.iter_mut().enumerate().for_each(|(idx, arg)| {
-                    let pat = match arg {
-                        syn::FnArg::Typed(pat) => pat,
-                        syn::FnArg::Receiver(rec) => {
-                            has_receiver = true;
-                            rec_mutability = rec.mutability.is_some();
-                            return;
-                        }
-                    };
-                    
-                    let mut remove = Vec::new();
+                func.sig
+                    .inputs
+                    .iter_mut()
+                    .enumerate()
+                    .for_each(|(idx, arg)| {
+                        let pat = match arg {
+                            syn::FnArg::Typed(pat) => pat,
+                            syn::FnArg::Receiver(rec) => {
+                                has_receiver = true;
+                                rec_mutability = rec.mutability.is_some();
+                                return;
+                            }
+                        };
 
-                    pat.attrs.iter().enumerate().for_each(|(idx_remove, attr)| {
-                        if attr.path().is_ident("this") {
-                            this = Some(idx);
-                            remove.push(idx_remove);
-                        }
+                        let mut remove = Vec::new();
 
-                        if attr.path().is_ident("realm") {
-                            realm = Some(idx);
-                            remove.push(idx_remove);
-                        }
+                        pat.attrs.iter().enumerate().for_each(|(idx_remove, attr)| {
+                            if attr.path().is_ident("this") {
+                                this = Some(idx);
+                                remove.push(idx_remove);
+                            }
 
-                        if attr.path().is_ident("variadic") {
-                            variadic = Some(idx);
-                            remove.push(idx_remove);
+                            if attr.path().is_ident("realm") {
+                                realm = Some(idx);
+                                remove.push(idx_remove);
+                            }
+
+                            if attr.path().is_ident("variadic") {
+                                variadic = Some(idx);
+                                remove.push(idx_remove);
+                            }
+                        });
+
+                        remove.sort();
+
+                        for idx in remove.into_iter().rev() {
+                            pat.attrs.remove(idx);
                         }
                     });
-                    
-                    remove.sort();
-                    
-                    for idx in remove.into_iter().rev() {
-                        pat.attrs.remove(idx);
-                    }
-                });
 
                 func.attrs.iter().for_each(|attr| {
                     if attr.path().is_ident("prototype") {
@@ -169,12 +173,12 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#handle, #error> {
                 use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 use #try_into_value;
-                
+
                 #init
-                
+
                 let obj = obj.into_object();
-                
-                
+
+
                 Ok(obj)
             }
         },
@@ -182,18 +186,17 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
                 use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 use #try_into_value;
-                
+
                 let obj = self;
-                
+
                 #init
-                
+
                 Ok(())
             }
         },
     };
-    
-    item.items.push(ImplItem::Verbatim(init_fn));
 
+    item.items.push(ImplItem::Verbatim(init_fn));
 
     item.to_token_stream().into()
 }
@@ -239,23 +242,19 @@ impl Method {
                 arg_prepare.extend(quote! {
                     let #argname = this.copy();
                 });
-
             } else if Some(i) == self.realm {
                 arg_prepare.extend(quote! {
                     let #argname = realm;
                 });
-                
             } else if Some(i) == self.variadic {
                 arg_prepare.extend(quote! {
                     let #argname = args.get(#i..).unwrap_or_default();
                 });
-                
             } else {
                 arg_prepare.extend(quote! {
                     let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| Error::new("Missing argument"))?.copy())?;
                 });
             }
-
 
             call_args.extend(quote! {
                 #argname,

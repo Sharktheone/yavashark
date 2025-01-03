@@ -88,7 +88,6 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for GcRefCellGuard<'_, T, V> {
     }
 }
 
-
 impl<'a, T: CellCollectable<RefCell<T>>> Deref for GcRefCellGuard<'a, T> {
     type Target = Ref<'a, T>;
 
@@ -147,7 +146,6 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcRefCellGuard<'_, T, V> 
     }
 }
 
-
 impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for OwningGcRefCellGuard<'a, T, V> {
     type Target = V;
 
@@ -193,7 +191,6 @@ impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcRefCellGuard<'a, T, V> {
     }
 }
 
-
 // I hope this doesn't bite me in the ass if so, the person finding it can say "well..."
 pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     /// # Safety
@@ -229,7 +226,6 @@ impl<T: CellCollectable<RefCell<T>>, V> DerefMut for GcMutRefCellGuard<'_, T, V>
     }
 }
 
-
 pub struct OwningGcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
     /// # Safety
     /// This value should only be set None when the guard is dropped
@@ -261,7 +257,10 @@ impl<T: CellCollectable<RefCell<T>>, V> DerefMut for OwningGcMutRefCellGuard<'_,
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> OwningGcMutRefCellGuard<'a, T, V> {
     #[allow(clippy::missing_panics_doc)]
-    pub fn map<R, F: FnOnce(&mut V) -> &mut R>(mut self, f: F) -> OwningGcMutRefCellGuard<'a, T, R> {
+    pub fn map<R, F: FnOnce(&mut V) -> &mut R>(
+        mut self,
+        f: F,
+    ) -> OwningGcMutRefCellGuard<'a, T, R> {
         #[allow(clippy::expect_used)]
         let value = RefMut::map(self.value.take().expect("unreachable"), f);
 
@@ -328,7 +327,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
             })
         }
     }
-    
+
     pub fn own_mut<'b, 'a>(&'a self) -> Result<OwningGcMutRefCellGuard<'b, T>, BorrowMutError> {
         unsafe {
             let value = Some((*(*self.inner.as_ptr()).value.as_ptr()).try_borrow_mut()?);
@@ -340,7 +339,6 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
         }
     }
 }
-
 
 impl<'a, T: CellCollectable<RefCell<T>>, V> GcMutRefCellGuard<'a, T, V> {
     #[allow(clippy::missing_panics_doc)]

@@ -9,11 +9,11 @@ pub mod object;
 pub mod scope;
 
 mod builtins;
+pub mod conversion;
 mod global;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
-pub mod conversion;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
