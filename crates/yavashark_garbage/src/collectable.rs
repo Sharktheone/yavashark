@@ -146,12 +146,12 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcRefCellGuard<'_, T, V> 
     }
 }
 
-impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for OwningGcRefCellGuard<'a, T, V> {
+impl<T: CellCollectable<RefCell<T>>, V> Deref for OwningGcRefCellGuard<'_, T, V> {
     type Target = V;
 
     fn deref(&self) -> &Self::Target {
         #[allow(clippy::expect_used)]
-        &**self.value.as_ref().expect("unreachable")
+        self.value.as_ref().expect("unreachable")
     }
 }
 
@@ -239,7 +239,7 @@ impl<T: CellCollectable<RefCell<T>>, V> Drop for OwningGcMutRefCellGuard<'_, T, 
     }
 }
 
-impl<'a, T: CellCollectable<RefCell<T>>, V> Deref for OwningGcMutRefCellGuard<'a, T, V> {
+impl<T: CellCollectable<RefCell<T>>, V> Deref for OwningGcMutRefCellGuard<'_, T, V> {
     type Target = V;
 
     fn deref(&self) -> &Self::Target {
@@ -306,7 +306,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
         }
     }
 
-    pub fn own<'b, 'a>(&'a self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
+    pub fn own<'b>(&self) -> Result<OwningGcRefCellGuard<'b, T>, BorrowError> {
         unsafe {
             let value = (*(*self.inner.as_ptr()).value.as_ptr()).try_borrow()?;
 
@@ -328,7 +328,7 @@ impl<T: CellCollectable<RefCell<T>>> Gc<RefCell<T>> {
         }
     }
 
-    pub fn own_mut<'b, 'a>(&'a self) -> Result<OwningGcMutRefCellGuard<'b, T>, BorrowMutError> {
+    pub fn own_mut<'b>(&self) -> Result<OwningGcMutRefCellGuard<'b, T>, BorrowMutError> {
         unsafe {
             let value = Some((*(*self.inner.as_ptr()).value.as_ptr()).try_borrow_mut()?);
 

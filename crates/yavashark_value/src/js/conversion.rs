@@ -125,13 +125,13 @@ pub trait IntoValue<C: Realm> {
 }
 
 impl<C: Realm> IntoValue<C> for Value<C> {
-    fn into_value(self) -> Value<C> {
+    fn into_value(self) -> Self {
         self
     }
 }
 
 impl<C: Realm> FromValue<C> for Value<C> {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+    fn from_value(value: Self) -> Result<Self, Error<C>> {
         Ok(value)
     }
 }
@@ -218,6 +218,7 @@ macro_rules! impl_from_value {
 
             impl<C: Realm> IntoValue<C> for $t {
                 fn into_value(self) -> Value<C> {
+                    #[allow(clippy::cast_lossless)]
                     Value::Number(self as f64)
                 }
             }

@@ -67,7 +67,9 @@ impl Interpreter {
     ) -> RuntimeResult {
         let mut last_value = Value::Undefined;
         for stmt in script {
-            last_value = Self::run_statement(realm, stmt, scope)?;
+            let x = Self::run_statement(realm, stmt, scope);
+            
+            let last_value = x?;
         }
 
         Ok(last_value)
