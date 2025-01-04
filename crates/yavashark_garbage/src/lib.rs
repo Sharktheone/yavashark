@@ -48,6 +48,14 @@ pub struct Gc<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
+impl<T: Collectable> Deref for Gc<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe { (*self.inner.as_ptr()).value.as_ref() }
+    }
+}
+
 impl<T: Collectable> PartialEq for Gc<T> {
     fn eq(&self, other: &Self) -> bool {
         self.inner == other.inner
