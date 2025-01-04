@@ -37,7 +37,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
 
     fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
-    fn get_property(&self, name: &Value<R>) -> Result<Option<&Value<R>>, Error<R>>;
+    fn get_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
 
     fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
     fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
@@ -180,9 +180,7 @@ impl<C: Realm> DerefMut for BoxedObj<C> {
 
 unsafe impl<C: Realm> Collectable for BoxedObj<C> {
     fn get_refs(&self) -> Vec<GcRef<Self>> {
-        let properties = self.0.properties();
-
-        let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects
+        let mut refs = Vec::new();
 
         self.0.properties().unwrap_or_default().into_iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
@@ -248,9 +246,9 @@ impl<C: Realm> Deref for Object<C> {
 impl<C: Realm> Display for Object<C> {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self.get() {
-            Ok(s) => write!(f, "{}", s.to_string_internal()),
-            Err(e) => write!(f, "Error displaying object: {e}"),
+        match self.to_string_internal() {
+            Ok(s) => write!(f, "{}", s),
+            Err(_) => write!(f, "Error: error while converting object to string"),
         }
     }
 }
@@ -288,9 +286,7 @@ impl<C: Realm> Object<C> {
         name: &Value<C>,
         realm: &mut C,
     ) -> Result<Option<Value<C>>, Error<C>> {
-        let this = self.get()?;
-
-        let Some(p) = this.resolve_property(name) else {
+        let Some(p) = self.0.resolve_property(name)? else {
             return Ok(None);
         };
 
@@ -300,131 +296,26 @@ impl<C: Realm> Object<C> {
         &self,
         name: &Value<C>,
     ) -> Result<Option<ObjectProperty<C>>, Error<C>> {
-        let this = self.get()?;
-
-        Ok(this.resolve_property(name))
-    }
-
-    pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
-        //TODO: maybe this should be called set_property or something
-        // # Safety:
-        // We attach the values below
-        let mut inner = self.get_mut()?;
-
-        inner.define_property(name, value);
-
-        Ok(())
-    }
-
-    pub fn define_variable(&self, name: Value<C>, value: Variable<C>) -> Result<(), Error<C>> {
-        let mut inner = self.get_mut()?;
-
-        inner.define_variable(name, value);
-
-        Ok(())
+        self.0.resolve_property(name)
     }
 
     pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
-        self.get()?
-            .get_property(name)
-            .map(super::Value::copy)
+        self.0
+            .get_property(name)?
             .ok_or(Error::reference_error(format!(
                 "{name} does not exist on object"
             )))
     }
 
-    pub fn contains_key(&self, name: &Value<C>) -> Result<bool, Error<C>> {
-        Ok(self.get()?.contains_key(name))
-    }
-
     #[must_use]
     pub fn name(&self) -> String {
-        self.get()
-            .map_or_else(|_| "<unknown>".to_string(), |o| o.name())
-    }
-
-    #[allow(clippy::type_complexity)]
-    pub fn properties(&self) -> Result<Vec<(Value<C>, Value<C>)>, Error<C>> {
-        Ok(self.get()?.properties())
-    }
-
-    pub fn keys(&self) -> Result<Vec<Value<C>>, Error<C>> {
-        Ok(self.get()?.keys())
-    }
-
-    pub fn values(&self) -> Result<Vec<Value<C>>, Error<C>> {
-        Ok(self.get()?.values())
-    }
-
-    pub fn call(
-        &self,
-        realm: &mut C,
-        args: Vec<Value<C>>,
-        this: Value<C>,
-    ) -> Result<Value<C>, Error<C>> {
-        // # Safety:
-        // Since we are not changing the object, we can safely get a mutable reference
-        let mut inner = self.get_mut()?;
-
-        inner.call(realm, args, this)
-    }
-
-    #[must_use]
-    pub fn is_function(&self) -> bool {
-        self.get().map_or(false, |o| o.is_function())
-    }
-
-    pub fn clear_values(&self) -> Result<(), Error<C>> {
-        let mut inner = self.get_mut()?;
-
-        inner.clear_values();
-        Ok(())
-    }
-
-    #[must_use]
-    pub fn gc_get_ref(&self) -> GcRef<BoxedObj<C>> {
-        self.0.get_ref()
-    }
-
-    #[must_use]
-    pub fn gc_get_untyped_ref<U: Collectable>(&self) -> GcRef<U> {
-        self.0.get_untyped_ref()
+        self.0.name()
     }
 
     #[must_use]
     pub fn custom_refs(&self) -> Vec<GcRef<BoxedObj<C>>> {
-        self.get()
-            .map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
-    }
-
-    pub fn get_constructor_value(&self, realm: &mut C) -> Option<Value<C>> {
-        self.get().map_or(None, |o| o.get_constructor_value(realm))
-    }
-
-    #[must_use]
-    pub fn get_constructor(&self) -> ObjectProperty<C> {
-        self.get()
-            .map_or(Value::Undefined.into(), |o| o.constructor())
-    }
-
-    /// I hate JavaScript...
-    pub fn special_constructor(&self) -> Result<bool, Error<C>> {
-        self.get()
-            .map_or(Err(Error::new("failed to get object")), |o| {
-                Ok(o.special_constructor())
-            })
-    }
-
-    pub fn define_setter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
-        let mut inner = self.get_mut()?;
-
-        inner.define_setter(name, value)
-    }
-
-    pub fn define_getter(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
-        let mut inner = self.get_mut()?;
-
-        inner.define_getter(name, value)
+        /// Safety: unsafe is only for the implementer, not for us - we are safe
+        unsafe { self.custom_gc_refs() }
     }
 
     #[must_use]

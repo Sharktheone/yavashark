@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::{Obj, ObjectProperty, Realm, Value};
+use crate::{Error, Obj, ObjectProperty, Realm, Value};
 
 pub trait Constructor<C: Realm>: Debug + Obj<C> {
     /// Gets the constructor function for this object.
@@ -12,18 +12,18 @@ pub trait Constructor<C: Realm>: Debug + Obj<C> {
     }
 
     /// Gets the constructor value for this object (what gets fed into the constructor's this-value)
-    fn value(&self, realm: &mut C) -> Value<C>;
+    fn value(&self, realm: &mut C) -> Result<Value<C>, Error<C>>;
 
     /// Gets the constructor prototype for this object (useful for slightly cheaper `instanceof` checks)
-    fn proto(&self, realm: &mut C) -> Value<C> {
-        if let Value::Object(obj) = self.value(realm) {
-            let p = obj.prototype();
+    fn proto(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
+        Ok(if let Value::Object(obj) = self.value(realm)? {
+            let p = obj.prototype()?;
 
             p.resolve(Value::Object(obj), realm)
                 .unwrap_or(Value::Undefined)
         } else {
             Value::Undefined //TODO: return an error here
-        }
+        })
 
         // if let Value::Object(obj) = self.value(realm) {
         //TODO: this here causes an rust borrow checker bug, but the one above works somehow
