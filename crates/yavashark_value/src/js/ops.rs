@@ -706,9 +706,9 @@ impl<C: Realm> Value<C> {
             ));
         };
 
-        let constructor_proto = constructor.get()?.prototype();
+        let constructor_proto = constructor.prototype()?;
 
-        let mut proto = Some(obj.get()?.prototype());
+        let mut proto = Some(obj.prototype()?);
 
         while let Some(p) = proto {
             if p == constructor_proto {
@@ -716,7 +716,7 @@ impl<C: Realm> Value<C> {
             }
 
             if let Self::Object(o) = p.value {
-                proto = Some(o.get()?.prototype());
+                proto = Some(o.prototype()?);
             } else {
                 break;
             }

@@ -164,7 +164,7 @@ impl<C: Realm> Value<C> {
     #[must_use]
     pub fn gc_ref(&self) -> Option<GcRef<BoxedObj<C>>> {
         match self {
-            Self::Object(o) => Some(o.gc_get_ref()),
+            Self::Object(o) => Some(o.get_ref()),
             _ => None,
         }
     }
@@ -172,11 +172,7 @@ impl<C: Realm> Value<C> {
     pub fn prototype(&self, realm: &mut C) -> Result<Self, Error<C>> {
         let obj = self.as_object()?;
 
-        let obj = obj.get()?;
-
-        let proto = obj.prototype();
-
-        drop(obj);
+        let proto = obj.prototype()?;
 
         proto.resolve(self.copy(), realm)
     }
@@ -223,7 +219,7 @@ impl<C: Realm> Display for Value<C> {
 impl<C: Realm> CustomGcRefUntyped for Value<C> {
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         match self {
-            Self::Object(o) => Some(o.gc_get_untyped_ref()),
+            Self::Object(o) => Some(o.get_untyped_ref()),
             _ => None,
         }
     }
@@ -323,14 +319,6 @@ impl<C: Realm> Value<C> {
             Self::Object(o) => o.values(),
             _ => Err(Error::ty("Value is not an object")),
         }
-    }
-
-    pub fn exchange(&self, other: Box<dyn Obj<C>>) -> Result<(), Error<C>> {
-        if let Self::Object(o) = self {
-            o.exchange(other)?;
-        }
-
-        Ok(())
     }
 
     pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {

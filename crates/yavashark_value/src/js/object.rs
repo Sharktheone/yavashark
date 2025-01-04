@@ -373,11 +373,10 @@ impl<C: Realm> Object<C> {
             let to_string = to_string.copy();
 
             let val = to_string.call(realm, vec![], Value::Object(self.clone()))?;
-
+            
             val.to_string(realm)
         } else {
-            let this = self.get()?;
-            this.to_string(realm)
+            self.0.to_string(realm)
         }
     }
 }
