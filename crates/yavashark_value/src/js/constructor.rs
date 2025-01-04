@@ -17,12 +17,7 @@ pub trait Constructor<C: Realm>: Debug + Obj<C> {
     /// Gets the constructor prototype for this object (useful for slightly cheaper `instanceof` checks)
     fn proto(&self, realm: &mut C) -> Value<C> {
         if let Value::Object(obj) = self.value(realm) {
-            let Ok(o) = obj.get() else {
-                return Value::Undefined;
-            };
-
-            let p = o.prototype();
-            drop(o);
+            let p = obj.prototype();
 
             p.resolve(Value::Object(obj), realm)
                 .unwrap_or(Value::Undefined)

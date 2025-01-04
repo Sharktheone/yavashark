@@ -162,7 +162,7 @@ impl<C: Realm> Value<C> {
     }
 
     #[must_use]
-    pub fn gc_ref(&self) -> Option<GcRef<RefCell<BoxedObj<C>>>> {
+    pub fn gc_ref(&self) -> Option<GcRef<BoxedObj<C>>> {
         match self {
             Self::Object(o) => Some(o.gc_get_ref()),
             _ => None,

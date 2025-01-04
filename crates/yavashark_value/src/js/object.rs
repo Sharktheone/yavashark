@@ -1,15 +1,10 @@
 use std::any::Any;
-use std::cell::RefCell;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::collectable::{
-    CellCollectable, GcMutRefCellGuard, GcRefCellGuard, OwningGcMutRefCellGuard,
-    OwningGcRefCellGuard,
-};
 use yavashark_garbage::{Collectable, Gc, GcRef};
 
 use crate::js::context::Realm;
@@ -36,35 +31,35 @@ impl<T: Sized + 'static> AsAny for T {
 }
 
 pub trait Obj<R: Realm>: Debug + AsAny + 'static {
-    fn define_property(&mut self, name: Value<R>, value: Value<R>);
+    fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
 
-    fn define_variable(&mut self, name: Value<R>, value: Variable<R>);
+    fn define_variable(&self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>>;
 
-    fn resolve_property(&self, name: &Value<R>) -> Option<ObjectProperty<R>>;
+    fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
-    fn get_property(&self, name: &Value<R>) -> Option<&Value<R>>;
+    fn get_property(&self, name: &Value<R>) -> Result<Option<&Value<R>>, Error<R>>;
 
-    fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
-    fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
-    fn get_getter(&self, name: &Value<R>) -> Option<Value<R>>;
-    fn get_setter(&self, name: &Value<R>) -> Option<Value<R>>;
+    fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
+    fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
+    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
+    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
 
-    fn delete_property(&mut self, name: &Value<R>) -> Option<Value<R>>;
+    fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
 
-    fn contains_key(&self, name: &Value<R>) -> bool {
-        self.get_property(name).is_some()
+    fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
+        Ok(self.get_property(name)?.is_some())
     }
 
     fn name(&self) -> String;
 
     fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;
-    fn to_string_internal(&self) -> String;
+    fn to_string_internal(&self) -> Result<String, Error<R>>;
 
-    fn properties(&self) -> Vec<(Value<R>, Value<R>)>;
+    fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>>;
 
-    fn keys(&self) -> Vec<Value<R>>;
+    fn keys(&self) -> Result<Vec<Value<R>>, Error<R>>;
 
-    fn values(&self) -> Vec<Value<R>>;
+    fn values(&self) -> Result<Vec<Value<R>>, Error<R>>;
 
     fn into_object(self) -> Object<R>
     where
@@ -84,11 +79,11 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
 
     fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<R>>);
 
-    fn clear_values(&mut self);
+    fn clear_values(&self);
 
     #[allow(unused_variables)]
     fn call(
-        &mut self,
+        &self,
         realm: &mut R,
         args: Vec<Value<R>>,
         this: Value<R>,
@@ -103,20 +98,22 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
         false
     }
 
-    fn prototype(&self) -> ObjectProperty<R> {
-        self.resolve_property(&"__proto__".into())
-            .unwrap_or(Value::Undefined.into())
+    fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
+        Ok(self
+            .resolve_property(&"__proto__".into())?
+            .unwrap_or(Value::Undefined.into()))
     }
 
-    fn constructor(&self) -> ObjectProperty<R> {
-        self.resolve_property(&"constructor".into())
-            .unwrap_or(Value::Undefined.into())
+    fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
+        Ok(self
+            .resolve_property(&"constructor".into())?
+            .unwrap_or(Value::Undefined.into()))
     }
 
     /// # Safety
     /// This function should only return references that are actually in the object!
     /// Else it will leak memory and cause undefined behavior, same for references that are in the object but not known to the gc!
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<R>>>> {
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<R>>> {
         Vec::new()
     }
 
@@ -181,13 +178,13 @@ impl<C: Realm> DerefMut for BoxedObj<C> {
     }
 }
 
-unsafe impl<C: Realm> CellCollectable<RefCell<Self>> for BoxedObj<C> {
-    fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
+unsafe impl<C: Realm> Collectable for BoxedObj<C> {
+    fn get_refs(&self) -> Vec<GcRef<Self>> {
         let properties = self.0.properties();
 
         let mut refs = Vec::with_capacity(properties.len()); //Not all props will be objects, so we speculate that not all names and values are objects
 
-        self.0.properties().into_iter().for_each(|(n, v)| {
+        self.0.properties().unwrap_or_default().into_iter().for_each(|(n, v)| {
             if let Value::Object(o) = n {
                 refs.push(o.0.get_ref());
             }
@@ -197,18 +194,18 @@ unsafe impl<C: Realm> CellCollectable<RefCell<Self>> for BoxedObj<C> {
             }
         });
 
-        let p = self.0.prototype();
+        if let Ok(p) = self.0.prototype() {
+            if let Value::Object(o) = p.value {
+                refs.push(o.0.get_ref());
+            }
 
-        if let Value::Object(o) = p.value {
-            refs.push(o.0.get_ref());
-        }
+            if let Value::Object(o) = p.get {
+                refs.push(o.0.get_ref());
+            }
 
-        if let Value::Object(o) = p.get {
-            refs.push(o.0.get_ref());
-        }
-
-        if let Value::Object(o) = p.set {
-            refs.push(o.0.get_ref());
+            if let Value::Object(o) = p.set {
+                refs.push(o.0.get_ref());
+            }
         }
 
         unsafe {
@@ -237,7 +234,15 @@ impl<C: Realm> BoxedObj<C> {
 }
 
 #[derive(Clone)]
-pub struct Object<C: Realm>(Gc<RefCell<BoxedObj<C>>>);
+pub struct Object<C: Realm>(Gc<BoxedObj<C>>);
+
+impl<C: Realm> Deref for Object<C> {
+    type Target = Gc<BoxedObj<C>>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Realm> Display for Object<C> {
@@ -278,24 +283,6 @@ impl<C: Realm> PartialEq for Object<C> {
 }
 
 impl<C: Realm> Object<C> {
-    pub fn get(&self) -> Result<GcRefCellGuard<BoxedObj<C>>, Error<C>> {
-        self.0
-            .borrow()
-            .map_err(|_| Error::new("failed to borrow object"))
-    }
-
-    pub fn get_owned<'b>(&self) -> Result<OwningGcRefCellGuard<'b, BoxedObj<C>>, Error<C>> {
-        self.0
-            .own()
-            .map_err(|_| Error::new("failed to borrow object"))
-    }
-
-    pub fn get_owned_mut<'b>(&self) -> Result<OwningGcMutRefCellGuard<'b, BoxedObj<C>>, Error<C>> {
-        self.0
-            .own_mut()
-            .map_err(|_| Error::new("failed to borrow object"))
-    }
-
     pub fn resolve_property(
         &self,
         name: &Value<C>,
@@ -316,12 +303,6 @@ impl<C: Realm> Object<C> {
         let this = self.get()?;
 
         Ok(this.resolve_property(name))
-    }
-
-    pub fn get_mut(&self) -> Result<GcMutRefCellGuard<BoxedObj<C>>, Error<C>> {
-        self.0
-            .borrow_mut()
-            .map_err(|_| Error::new("failed to borrow object"))
     }
 
     pub fn define_property(&self, name: Value<C>, value: Value<C>) -> Result<(), Error<C>> {
@@ -375,15 +356,6 @@ impl<C: Realm> Object<C> {
         Ok(self.get()?.values())
     }
 
-    pub fn exchange(&self, other: Box<dyn Obj<C>>) -> Result<(), Error<C>> {
-        **self
-            .0
-            .borrow_mut()
-            .map_err(|_| Error::new("Failed to borrow object"))? = BoxedObj::new(other);
-
-        Ok(())
-    }
-
     pub fn call(
         &self,
         realm: &mut C,
@@ -410,7 +382,7 @@ impl<C: Realm> Object<C> {
     }
 
     #[must_use]
-    pub fn gc_get_ref(&self) -> GcRef<RefCell<BoxedObj<C>>> {
+    pub fn gc_get_ref(&self) -> GcRef<BoxedObj<C>> {
         self.0.get_ref()
     }
 
@@ -420,7 +392,7 @@ impl<C: Realm> Object<C> {
     }
 
     #[must_use]
-    pub fn custom_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<C>>>> {
+    pub fn custom_refs(&self) -> Vec<GcRef<BoxedObj<C>>> {
         self.get()
             .map_or_else(|_| Vec::new(), |o| unsafe { o.custom_gc_refs() })
     }
@@ -460,49 +432,49 @@ impl<C: Realm> Object<C> {
         self.0.ptr_id()
     }
 
-    pub fn downcast<T: Obj<C> + 'static>(
-        &self,
-    ) -> Result<Option<GcRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
-        let obj = self.get()?;
-
-        Ok(obj
-            .maybe_map(|r| {
-                let this = (**r).as_any();
-
-                this.downcast_ref::<T>()
-            })
-            .ok())
-    }
-
-    pub fn downcast_mut<T: Obj<C> + 'static>(
-        &self,
-    ) -> Result<Option<GcMutRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
-        let obj = self.get_mut()?;
-
-        Ok(obj
-            .maybe_map(|r| {
-                let this = (**r).as_any_mut();
-
-                this.downcast_mut::<T>()
-            })
-            .ok())
-    }
+    // pub fn downcast<T: Obj<C> + 'static>(
+    //     &self,
+    // ) -> Result<Option<Gc<BoxedObj<C>, T>>, Error<C>> {
+    //     let obj = self.get()?;
+    //
+    //     Ok(obj
+    //         .maybe_map(|r| {
+    //             let this = (**r).as_any();
+    //
+    //             this.downcast_ref::<T>()
+    //         })
+    //         .ok())
+    // }
+    //
+    // pub fn downcast_mut<T: Obj<C> + 'static>(
+    //     &self,
+    // ) -> Result<Option<GcMutRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
+    //     let obj = self.get_mut()?;
+    //
+    //     Ok(obj
+    //         .maybe_map(|r| {
+    //             let this = (**r).as_any_mut();
+    //
+    //             this.downcast_mut::<T>()
+    //         })
+    //         .ok())
+    // }
 }
 
 impl<C: Realm> From<Box<dyn Obj<C>>> for Object<C> {
     fn from(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new(RefCell::new(BoxedObj::new(obj))))
+        Self(Gc::new(BoxedObj::new(obj)))
     }
 }
 
 impl<C: Realm> Object<C> {
     #[must_use]
     pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new(RefCell::new(BoxedObj::new(obj))))
+        Self(Gc::new((BoxedObj::new(obj))))
     }
 
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
-        Self(Gc::new(RefCell::new(BoxedObj::new(Box::new(obj)))))
+        Self(Gc::new((BoxedObj::new(Box::new(obj)))))
     }
 
     pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {

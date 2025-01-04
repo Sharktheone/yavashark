@@ -1,47 +1,46 @@
 use crate::{AsAny, BoxedObj, Error, Obj, Object, ObjectProperty, Realm, Value, Variable};
-use std::cell::RefCell;
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
 
 pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
     fn get_wrapped_object(&self) -> &impl Obj<R>;
-    fn get_wrapped_object_mut(&mut self) -> &mut impl Obj<R>;
+    fn get_wrapped_object_mut(&self) -> &mut impl Obj<R>;
 
-    fn define_property(&mut self, name: Value<R>, value: Value<R>) {
-        self.get_wrapped_object_mut().define_property(name, value);
+    fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+        self.get_wrapped_object_mut().define_property(name, value)
     }
 
-    fn define_variable(&mut self, name: Value<R>, value: Variable<R>) {
-        self.get_wrapped_object_mut().define_variable(name, value);
+    fn define_variable(&self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>> {
+        self.get_wrapped_object_mut().define_variable(name, value)
     }
 
-    fn resolve_property(&self, name: &Value<R>) -> Option<ObjectProperty<R>> {
+    fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
         self.get_wrapped_object().resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value<R>) -> Option<&Value<R>> {
+    fn get_property(&self, name: &Value<R>) -> Result<Option<&Value<R>>, Error<R>> {
         self.get_wrapped_object().get_property(name)
     }
 
-    fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+    fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         self.get_wrapped_object_mut().define_getter(name, value)
     }
-    fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+    fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         self.get_wrapped_object_mut().define_setter(name, value)
     }
-    fn get_getter(&self, name: &Value<R>) -> Option<Value<R>> {
+    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         self.get_wrapped_object().get_getter(name)
     }
-    fn get_setter(&self, name: &Value<R>) -> Option<Value<R>> {
+    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         self.get_wrapped_object().get_setter(name)
     }
 
-    fn delete_property(&mut self, name: &Value<R>) -> Option<Value<R>> {
+    fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         self.get_wrapped_object_mut().delete_property(name)
     }
 
-    fn contains_key(&self, name: &Value<R>) -> bool {
+    fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
         self.get_wrapped_object().contains_key(name)
     }
 
@@ -52,19 +51,19 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     fn to_string(&self, realm: &mut R) -> Result<String, Error<R>> {
         self.get_wrapped_object().to_string(realm)
     }
-    fn to_string_internal(&self) -> String {
+    fn to_string_internal(&self) -> Result<String, Error<R>> {
         self.get_wrapped_object().to_string_internal()
     }
 
-    fn properties(&self) -> Vec<(Value<R>, Value<R>)> {
+    fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>> {
         self.get_wrapped_object().properties()
     }
 
-    fn keys(&self) -> Vec<Value<R>> {
+    fn keys(&self) -> Result<Vec<Value<R>>, Error<R>> {
         self.get_wrapped_object().keys()
     }
 
-    fn values(&self) -> Vec<Value<R>> {
+    fn values(&self) -> Result<Vec<Value<R>>, Error<R>> {
         self.get_wrapped_object().values()
     }
 
@@ -88,12 +87,12 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().get_array_or_done(index)
     }
 
-    fn clear_values(&mut self) {
+    fn clear_values(&self) {
         self.get_wrapped_object_mut().clear_values();
     }
 
     fn call(
-        &mut self,
+        &self,
         realm: &mut R,
         args: Vec<Value<R>>,
         this: Value<R>,
@@ -105,18 +104,18 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().is_function()
     }
 
-    fn prototype(&self) -> ObjectProperty<R> {
+    fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         self.get_wrapped_object().prototype()
     }
 
-    fn constructor(&self) -> ObjectProperty<R> {
+    fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
         self.get_wrapped_object().constructor()
     }
 
     /// # Safety
     /// This function should only return references that are actually in the object!
     /// Else it will leak memory and cause undefined behavior, same for references that are in the object but not known to the gc!
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<R>>>> {
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<R>>> {
         self.get_wrapped_object().custom_gc_refs()
     }
 
@@ -138,43 +137,43 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
 }
 
 impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
-    fn define_property(&mut self, name: Value<R>, value: Value<R>) {
-        ObjectImpl::define_property(self, name, value);
+    fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+        ObjectImpl::define_property(self, name, value)
     }
 
-    fn define_variable(&mut self, name: Value<R>, value: Variable<R>) {
-        ObjectImpl::define_variable(self, name, value);
+    fn define_variable(&self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>> {
+        ObjectImpl::define_variable(self, name, value)
     }
 
-    fn resolve_property(&self, name: &Value<R>) -> Option<ObjectProperty<R>> {
+    fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
         ObjectImpl::resolve_property(self, name)
     }
 
-    fn get_property(&self, name: &Value<R>) -> Option<&Value<R>> {
+    fn get_property(&self, name: &Value<R>) -> Result<Option<&Value<R>>, Error<R>> {
         ObjectImpl::get_property(self, name)
     }
 
-    fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+    fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         ObjectImpl::define_getter(self, name, value)
     }
 
-    fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+    fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         ObjectImpl::define_setter(self, name, value)
     }
 
-    fn get_getter(&self, name: &Value<R>) -> Option<Value<R>> {
+    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         ObjectImpl::get_getter(self, name)
     }
 
-    fn get_setter(&self, name: &Value<R>) -> Option<Value<R>> {
+    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         ObjectImpl::get_setter(self, name)
     }
 
-    fn delete_property(&mut self, name: &Value<R>) -> Option<Value<R>> {
+    fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         ObjectImpl::delete_property(self, name)
     }
 
-    fn contains_key(&self, name: &Value<R>) -> bool {
+    fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
         ObjectImpl::contains_key(self, name)
     }
 
@@ -186,19 +185,19 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::to_string(self, realm)
     }
 
-    fn to_string_internal(&self) -> String {
+    fn to_string_internal(&self) -> Result<String, Error<R>> {
         ObjectImpl::to_string_internal(self)
     }
 
-    fn properties(&self) -> Vec<(Value<R>, Value<R>)> {
+    fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>> {
         ObjectImpl::properties(self)
     }
 
-    fn keys(&self) -> Vec<Value<R>> {
+    fn keys(&self) -> Result<Vec<Value<R>>, Error<R>> {
         ObjectImpl::keys(self)
     }
 
-    fn values(&self) -> Vec<Value<R>> {
+    fn values(&self) -> Result<Vec<Value<R>>, Error<R>> {
         ObjectImpl::values(self)
     }
 
@@ -220,12 +219,12 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::get_array_or_done(self, index)
     }
 
-    fn clear_values(&mut self) {
+    fn clear_values(&self) {
         ObjectImpl::clear_values(self);
     }
 
     fn call(
-        &mut self,
+        &self,
         realm: &mut R,
         args: Vec<Value<R>>,
         this: Value<R>,
@@ -237,15 +236,15 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::is_function(self)
     }
 
-    fn prototype(&self) -> ObjectProperty<R> {
+    fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         ObjectImpl::prototype(self)
     }
 
-    fn constructor(&self) -> ObjectProperty<R> {
+    fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
         ObjectImpl::constructor(self)
     }
 
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<RefCell<BoxedObj<R>>>> {
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<R>>> {
         ObjectImpl::custom_gc_refs(self)
     }
 
