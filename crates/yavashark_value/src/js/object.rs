@@ -79,7 +79,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
 
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>>;
 
-    fn clear_values(&self);
+    fn clear_values(&self) -> Result<(), Error<R>>;
 
     #[allow(unused_variables)]
     fn call(
@@ -121,12 +121,12 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn get_constructor_value(&self, _realm: &mut R) -> Option<Value<R>> {
-        None
+    fn get_constructor_value(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
+        Ok(None)
     }
 
-    fn get_constructor_proto(&self, _realm: &mut R) -> Option<Value<R>> {
-        None
+    fn get_constructor_proto(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
+        Ok(None)
     }
 
     fn special_constructor(&self) -> bool {
@@ -134,6 +134,109 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
     }
 }
 
+pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
+    fn define_property(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
+
+    fn define_variable(&mut self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>>;
+
+    fn resolve_property(&self, name: &Value<R>) -> Result<Option<&ObjectProperty<R>>, Error<R>>;
+
+    fn get_property(&self, name: &Value<R>) -> Result<Option<&Value<R>>, Error<R>>;
+
+    fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
+    fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
+    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
+    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
+
+    fn delete_property(&mut self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
+
+    fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
+        Ok(self.get_property(name)?.is_some())
+    }
+
+    fn name(&self) -> String;
+
+    fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;
+    fn to_string_internal(&self) -> Result<String, Error<R>>;
+
+    fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>>;
+
+    fn keys(&self) -> Result<Vec<Value<R>>, Error<R>>;
+
+    fn values(&self) -> Result<Vec<Value<R>>, Error<R>>;
+
+    fn into_object(self) -> Object<R>
+    where
+        Self: Sized + 'static,
+    {
+        let boxed: Box<dyn Obj<R>> = Box::new(self);
+
+        Object::from_boxed(boxed)
+    }
+
+    fn into_value(self) -> Value<R>
+    where
+        Self: Sized + 'static,
+    {
+        Value::Object(self.into_object())
+    }
+
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>>;
+
+    fn clear_values(&mut self) -> Result<(), Error<R>>;
+
+    #[allow(unused_variables)]
+    fn call(
+        &mut self,
+        realm: &mut R,
+        args: Vec<Value<R>>,
+        this: Value<R>,
+    ) -> Result<Value<R>, Error<R>> {
+        Err(Error::ty_error(format!(
+            "{} is not a function",
+            self.name()
+        )))
+    }
+
+    fn is_function(&self) -> bool {
+        false
+    }
+
+    fn prototype(&self) -> Result<&ObjectProperty<R>, Error<R>> {
+        Ok(self
+            .resolve_property(&"__proto__".into())?
+            .unwrap_or(Value::Undefined.into()))
+    }
+
+    fn constructor(&self) -> Result<&ObjectProperty<R>, Error<R>> {
+        Ok(self
+            .resolve_property(&"constructor".into())?
+            .unwrap_or(Value::Undefined.into()))
+    }
+
+    /// # Safety
+    /// This function should only return references that are actually in the object!
+    /// Else it will leak memory and cause undefined behavior, same for references that are in the object but not known to the gc!
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<R>>> {
+        Vec::new()
+    }
+
+    fn class_name(&self) -> &'static str {
+        std::any::type_name::<Self>()
+    }
+
+    fn get_constructor_value(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
+        Ok(None)
+    }
+
+    fn get_constructor_proto(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
+        Ok(None)
+    }
+
+    fn special_constructor(&self) -> bool {
+        false
+    }
+}
 #[cfg(feature = "dbg_object_gc")]
 pub struct ObjectCount(AtomicIsize);
 
