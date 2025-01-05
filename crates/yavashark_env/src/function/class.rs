@@ -26,16 +26,17 @@ impl Func<Realm> for Class {
 }
 
 impl Constructor<Realm> for Class {
-    fn get_constructor(&self) -> ObjectProperty {
+    fn get_constructor(&self) -> Result<ObjectProperty, Error> {
         if let Value::Object(o) = self.prototype.value.copy() {
-            o.get_constructor()
+            o.constructor()
         } else {
             self.object.constructor()
         }
+        
     }
 
-    fn value(&self, _realm: &mut Realm) -> Value {
-        Object::raw_with_proto(self.prototype.value.clone()).into_value()
+    fn value(&self, _realm: &mut Realm) -> ValueResult {
+        Ok(Object::raw_with_proto(self.prototype.value.clone()).into_value())
     }
 }
 

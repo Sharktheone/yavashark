@@ -232,7 +232,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .collect::<TokenStream>();
 
         quote! {
-            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<std::cell::RefCell<yavashark_value::BoxedObj<#realm >>>> {
+            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<yavashark_value::BoxedObj<#realm >>> {
                 use yavashark_value::{CustomGcRef, CustomGcRefUntyped};
                 let mut refs = Vec::with_capacity(#len);
 
@@ -285,7 +285,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 Ok(format!("[object {}]", self.name()))
             }
 
-            fn to_string_internal(&self) -> String {
+            fn to_string_internal(&self) -> Result<String, #error> {
                 format!("[object {}]", self.name())
             }
         }
@@ -383,9 +383,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.object.get_array_or_done(index)
             }
 
-            fn clear_values(&self) {
+            fn clear_values(&self) -> Result<(), #error> {
                 #clear
-                self.object.clear_values();
+                self.object.clear_values()
             }
 
             fn prototype(&self) -> Result<#object_property, #error> {

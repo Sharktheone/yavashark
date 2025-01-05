@@ -697,7 +697,7 @@ impl<C: Realm> Value<C> {
             ));
         };
 
-        let Self::Object(constructor) = constructor.get_constructor_value(realm).ok_or(
+        let Self::Object(constructor) = constructor.get_constructor_value(realm)?.ok_or(
             Error::ty("Right-hand side of 'instanceof' is not a constructor"),
         )?
         else {

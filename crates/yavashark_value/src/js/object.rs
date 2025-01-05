@@ -165,22 +165,6 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
 
     fn values(&self) -> Result<Vec<Value<R>>, Error<R>>;
 
-    fn into_object(self) -> Object<R>
-    where
-        Self: Sized + 'static,
-    {
-        let boxed: Box<dyn Obj<R>> = Box::new(self);
-
-        Object::from_boxed(boxed)
-    }
-
-    fn into_value(self) -> Value<R>
-    where
-        Self: Sized + 'static,
-    {
-        Value::Object(self.into_object())
-    }
-
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>>;
 
     fn clear_values(&mut self) -> Result<(), Error<R>>;
@@ -202,15 +186,17 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
         false
     }
 
-    fn prototype(&self) -> Result<&ObjectProperty<R>, Error<R>> {
+    fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
             .resolve_property(&"__proto__".into())?
+            .cloned()
             .unwrap_or(Value::Undefined.into()))
     }
 
-    fn constructor(&self) -> Result<&ObjectProperty<R>, Error<R>> {
+    fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
             .resolve_property(&"constructor".into())?
+            .cloned()
             .unwrap_or(Value::Undefined.into()))
     }
 

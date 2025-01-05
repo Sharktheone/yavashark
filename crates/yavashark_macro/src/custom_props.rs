@@ -38,10 +38,10 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_define = match_prop(&direct, Act::Set, value);
 
     item.items.push(syn::parse_quote! {
-        fn define_property(&self, name: Value, value: Value) {
+        fn define_property(&self, name: Value, value: Value) -> Result<(), #error> {
             #properties_define
 
-            self.get_wrapped_object_mut().define_property(name, value);
+            self.get_wrapped_object().define_property(name, value);
         }
     });
 
@@ -51,7 +51,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn define_variable(&self, name: Value, value: #variable) -> Result<(), #error> {
             #properties_variable_define
 
-            self.get_wrapped_object_mut().define_variable(name, value);
+            self.get_wrapped_object().define_variable(name, value);
         }
     });
 
@@ -68,7 +68,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_get = match_prop(&direct, Act::Ref, value);
 
     item.items.push(syn::parse_quote! {
-        fn get_property(&self, name: & #value) -> Result<Option<& #value>, #error> {
+        fn get_property(&self, name: & #value) -> Result<Option<#value>, #error> {
             #properties_get
 
             self.get_wrapped_object().get_property(name)
@@ -81,7 +81,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn delete_property(&self, name: &Value) -> Result<Option<Value>, #error> {
             #properties_delete
 
-            self.get_wrapped_object_mut().delete_property(name)
+            self.get_wrapped_object().delete_property(name)
         }
     });
 
@@ -134,8 +134,8 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let clear = match_list(&direct, List::Clear, value);
 
     item.items.push(syn::parse_quote! {
-        fn clear_values(&self) -> Result<(), #error>{
-            self.get_wrapped_object_mut().clear_values();
+        fn clear_values(&self) -> Result<(), #error> {
+            self.get_wrapped_object().clear_values();
 
             #clear
         }

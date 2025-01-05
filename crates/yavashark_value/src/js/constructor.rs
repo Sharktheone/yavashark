@@ -4,7 +4,7 @@ use crate::{Error, Obj, ObjectProperty, Realm, Value};
 
 pub trait Constructor<C: Realm>: Debug + Obj<C> {
     /// Gets the constructor function for this object.
-    fn get_constructor(&self) -> ObjectProperty<C>;
+    fn get_constructor(&self) -> Result<ObjectProperty<C>, Error<C>>;
 
     /// Is this a special constructor? (we can call it without `new`)
     fn special_constructor(&self) -> bool {

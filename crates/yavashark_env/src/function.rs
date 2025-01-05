@@ -8,14 +8,14 @@ use yavashark_value::{Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{Error, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 mod bound;
 mod class;
 mod constructor;
 mod prototype;
 
-type NativeFn = Box<dyn FnMut(Vec<Value>, Value, &mut Realm) -> ValueResult>;
+type NativeFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction, bool);
 
@@ -34,16 +34,16 @@ impl ObjectImpl<Realm> for NativeFunction {
         &self.object
     }
 
-    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         (self.f)(args, this, realm)
     }
 
-    fn get_constructor_value(&self, realm: &mut Realm) -> Option<yavashark_value::Value<Realm>> {
-        Some(Object::new(realm).into())
+    fn get_constructor_value(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
+        Ok(Some(Object::new(realm).into()))
     }
 
-    fn get_constructor_proto(&self, _realm: &mut Realm) -> Option<Value> {
-        Some(self.constructor.value.copy()) //TODO: this is not correct (i think)
+    fn get_constructor_proto(&self, _realm: &mut Realm) -> Result<Option<Value>, Error> {
+        Ok(Some(self.constructor.value.copy())) //TODO: this is not correct (i think)
     }
 
     fn special_constructor(&self) -> bool {
