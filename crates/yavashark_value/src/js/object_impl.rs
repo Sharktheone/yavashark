@@ -5,14 +5,13 @@ use yavashark_garbage::GcRef;
 pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
     fn get_wrapped_object(&self) -> &impl Obj<R>;
-    fn get_wrapped_object_mut(&self) -> &mut impl Obj<R>;
 
     fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
-        self.get_wrapped_object_mut().define_property(name, value)
+        self.get_wrapped_object().define_property(name, value)
     }
 
     fn define_variable(&self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>> {
-        self.get_wrapped_object_mut().define_variable(name, value)
+        self.get_wrapped_object().define_variable(name, value)
     }
 
     fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
@@ -24,10 +23,10 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     }
 
     fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
-        self.get_wrapped_object_mut().define_getter(name, value)
+        self.get_wrapped_object().define_getter(name, value)
     }
     fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
-        self.get_wrapped_object_mut().define_setter(name, value)
+        self.get_wrapped_object().define_setter(name, value)
     }
     fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         self.get_wrapped_object().get_getter(name)
@@ -37,7 +36,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     }
 
     fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
-        self.get_wrapped_object_mut().delete_property(name)
+        self.get_wrapped_object().delete_property(name)
     }
 
     fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
@@ -83,12 +82,12 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         Value::Object(self.into_object())
     }
 
-    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<R>>) {
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>> {
         self.get_wrapped_object().get_array_or_done(index)
     }
 
     fn clear_values(&self) {
-        self.get_wrapped_object_mut().clear_values();
+        self.get_wrapped_object().clear_values();
     }
 
     fn call(
@@ -97,7 +96,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         args: Vec<Value<R>>,
         this: Value<R>,
     ) -> Result<Value<R>, Error<R>> {
-        self.get_wrapped_object_mut().call(realm, args, this)
+        self.get_wrapped_object().call(realm, args, this)
     }
 
     fn is_function(&self) -> bool {
@@ -215,7 +214,7 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::into_value(self)
     }
 
-    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<R>>) {
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>> {
         ObjectImpl::get_array_or_done(self, index)
     }
 

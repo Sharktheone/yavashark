@@ -34,10 +34,6 @@ impl ObjectImpl<Realm> for NativeFunction {
         &self.object
     }
 
-    fn get_wrapped_object_mut(&mut self) -> &mut impl Obj<Realm> {
-        &mut self.object
-    }
-
     fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         (self.f)(args, this, realm)
     }

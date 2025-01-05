@@ -6,6 +6,7 @@ use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());
+    let error = &conf.error;
 
     let mut direct = Vec::new();
 
@@ -37,7 +38,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_define = match_prop(&direct, Act::Set, value);
 
     item.items.push(syn::parse_quote! {
-        fn define_property(&mut self, name: Value, value: Value) {
+        fn define_property(&self, name: Value, value: Value) {
             #properties_define
 
             self.get_wrapped_object_mut().define_property(name, value);
@@ -47,7 +48,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_variable_define = match_prop(&direct, Act::SetVar, value);
 
     item.items.push(syn::parse_quote! {
-        fn define_variable(&mut self, name: Value, value: #variable) {
+        fn define_variable(&self, name: Value, value: #variable) -> Result<(), #error> {
             #properties_variable_define
 
             self.get_wrapped_object_mut().define_variable(name, value);
@@ -57,7 +58,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_resolve = match_prop(&direct, Act::None, value);
 
     item.items.push(syn::parse_quote! {
-        fn resolve_property(&self, name: & #value) -> Option<#obj_prop> {
+        fn resolve_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
             #properties_resolve
 
             self.get_wrapped_object().resolve_property(name)
@@ -67,7 +68,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_get = match_prop(&direct, Act::Ref, value);
 
     item.items.push(syn::parse_quote! {
-        fn get_property(&self, name: & #value) -> Option<& #value> {
+        fn get_property(&self, name: & #value) -> Result<Option<& #value>, #error> {
             #properties_get
 
             self.get_wrapped_object().get_property(name)
@@ -77,7 +78,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_delete = match_prop(&direct, Act::Delete, value);
 
     item.items.push(syn::parse_quote! {
-        fn delete_property(&mut self, name: &Value) -> Option<Value> {
+        fn delete_property(&self, name: &Value) -> Result<Option<Value>, #error> {
             #properties_delete
 
             self.get_wrapped_object_mut().delete_property(name)
@@ -87,7 +88,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_contains = match_prop(&direct, Act::Contains, value);
 
     item.items.push(syn::parse_quote! {
-        fn contains_key(&self, name: & #value) -> bool {
+        fn contains_key(&self, name: & #value) -> Result<bool, #error> {
             #properties_contains
 
             self.get_wrapped_object().contains_key(name)
@@ -97,7 +98,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties = match_list(&direct, List::Properties, value);
 
     item.items.push(syn::parse_quote! {
-        fn properties(&self) -> Vec<(#value, #value)> {
+        fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
             let mut props = self.get_wrapped_object().properties();
 
             #properties
@@ -109,7 +110,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let keys = match_list(&direct, List::Keys, value);
 
     item.items.push(syn::parse_quote! {
-        fn keys(&self) -> Vec<#value> {
+        fn keys(&self) -> Result<Vec<#value>, #error> {
             let mut keys = self.get_wrapped_object().keys();
 
             #keys
@@ -121,7 +122,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let values = match_list(&direct, List::Values, value);
 
     item.items.push(syn::parse_quote! {
-        fn values(&self) -> Vec<#value> {
+        fn values(&self) -> Result<Vec<#value>, #error> {
             let mut values = self.get_wrapped_object().values();
 
             #values
@@ -133,7 +134,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let clear = match_list(&direct, List::Clear, value);
 
     item.items.push(syn::parse_quote! {
-        fn clear_values(&mut self) {
+        fn clear_values(&self) -> Result<(), #error>{
             self.get_wrapped_object_mut().clear_values();
 
             #clear

@@ -77,7 +77,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
         Value::Object(self.into_object())
     }
 
-    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value<R>>);
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>>;
 
     fn clear_values(&self);
 

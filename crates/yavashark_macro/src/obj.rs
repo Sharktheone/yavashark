@@ -185,7 +185,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let function = if function {
         quote! {
-            fn call(&mut self, realm: &mut #realm, args: Vec< #value>, this: #value) -> #value_result {
+            fn call(&self, realm: &mut #realm, args: Vec< #value>, this: #value) -> #value_result {
                 yavashark_value::Func::call(self, realm, args, this)
             }
 
@@ -245,11 +245,11 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let constructor = if constructor {
         quote! {
-            fn constructor(&self) -> #object_property {
+            fn constructor(&self) -> Result<#object_property, #error> {
                 yavashark_value::Constructor::get_constructor(self)
             }
 
-            fn get_constructor_proto(&self, realm: &mut #realm) -> Option<#value> {
+            fn get_constructor_proto(&self, realm: &mut #realm) -> Result<Option<#value>, #error> {
                 Some(yavashark_value::Constructor::proto(self, realm))
             }
 
@@ -257,13 +257,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 yavashark_value::Constructor::special_constructor(self)
             }
 
-            fn get_constructor_value(&self, realm: &mut #realm) -> Option<#value> {
+            fn get_constructor_value(&self, realm: &mut #realm) -> Result<Option<#value>, #error> {
                 Some(yavashark_value::Constructor::value(self, realm))
             }
         }
     } else {
         quote! {
-            fn constructor(&self) -> #object_property {
+            fn constructor(&self) -> Result<#object_property, #error> {
                 self.object.constructor()
             }
         }
@@ -275,7 +275,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 self.override_to_string(realm)
             }
 
-            fn to_string_internal(&self) -> String {
+            fn to_string_internal(&self) -> Result<String, #error> {
                 self.override_to_string_internal()
             }
         }
@@ -310,50 +310,50 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         #input
 
         impl yavashark_value::Obj<#realm> for #struct_name {
-            fn define_property(&mut self, name: #value, value: #value) {
+            fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 #properties_define
                 self.object.define_property(name, value);
             }
 
-            fn define_variable(&mut self, name: #value, value: #variable) {
+            fn define_variable(&self, name: #value, value: #variable) -> Result<(), #error> {
                 #properties_variable_define
 
                 self.object.define_variable(name, value);
             }
 
-            fn resolve_property(&self, name: &#value) -> Option<#object_property> {
+            fn resolve_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
                 #properties_resolve
                 self.object.resolve_property(name)
             }
 
-            fn get_property(&self, name: &#value) -> Option<&#value> {
+            fn get_property(&self, name: &#value) -> Result<Option<#value>, #error> {
                 #properties_get
                 self.object.get_property(name)
             }
 
-            fn define_getter(&mut self, name: #value, value: #value) -> Result<(), #error> {
+            fn define_getter(&self, name: #value, value: #value) -> Result<(), #error> {
                 self.object.define_getter(name, value)
             }
 
-            fn define_setter(&mut self, name: #value, value: #value) -> Result<(), #error> {
+            fn define_setter(&self, name: #value, value: #value) -> Result<(), #error> {
                 self.object.define_setter(name, value)
             }
 
-            fn get_getter(&self, name: &#value) -> Option<#value> {
+            fn get_getter(&self, name: &#value) -> Result<Option<#value>, #error> {
                 self.object.get_getter(name)
             }
 
-            fn get_setter(&self, name: &#value) -> Option<#value> {
+            fn get_setter(&self, name: &#value) -> Result<Option<#value>, #error> {
                 self.object.get_setter(name)
             }
 
-            fn delete_property(&mut self, name: &#value) -> Option<#value> {
+            fn delete_property(&self, name: &#value) -> Result<Option<#value>, #error> {
                 #properties_delete
                 self.object.delete_property(name)
             }
 
 
-            fn contains_key(&self, name: &#value) -> bool {
+            fn contains_key(&self, name: &#value) -> Result<bool, #error> {
                 #properties_contains
                 self.object.contains_key(name)
             }
@@ -362,33 +362,33 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #to_string
             #name
 
-            fn properties(&self) -> Vec<(#value, #value)> {
+            fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
                 let mut props = self.object.properties();
                 #properties
                 props
             }
 
-            fn keys(&self) -> Vec<#value> {
+            fn keys(&self) -> Result<Vec<#value>, #error> {
                 let mut keys = self.object.keys();
                 #keys
                 keys
             }
 
-            fn values(&self) -> Vec<#value> {
+            fn values(&self) -> Result<Vec<#value>, #error> {
                 let mut values = self.object.values();
                 #values
                 values
             }
-            fn get_array_or_done(&self, index: usize) -> (bool, Option<#value>) {
+            fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<#value>), #error> {
                 self.object.get_array_or_done(index)
             }
 
-            fn clear_values(&mut self) {
+            fn clear_values(&self) {
                 #clear
                 self.object.clear_values();
             }
 
-            fn prototype(&self) -> #object_property {
+            fn prototype(&self) -> Result<#object_property, #error> {
                 self.object.prototype()
             }
             #constructor
