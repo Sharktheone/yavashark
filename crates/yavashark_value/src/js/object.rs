@@ -139,7 +139,7 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
 
     fn define_variable(&mut self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>>;
 
-    fn resolve_property(&self, name: &Value<R>) -> Result<Option<&ObjectProperty<R>>, Error<R>>;
+    fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
     fn get_property(&self, name: &Value<R>) -> Result<Option<&Value<R>>, Error<R>>;
 
@@ -189,14 +189,12 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
     fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
             .resolve_property(&"__proto__".into())?
-            .cloned()
             .unwrap_or(Value::Undefined.into()))
     }
 
     fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
             .resolve_property(&"constructor".into())?
-            .cloned()
             .unwrap_or(Value::Undefined.into()))
     }
 
