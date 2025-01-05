@@ -86,8 +86,8 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().get_array_or_done(index)
     }
 
-    fn clear_values(&self) {
-        self.get_wrapped_object().clear_values();
+    fn clear_values(&self) -> Result<(), Error<R>> {
+        self.get_wrapped_object().clear_values()
     }
 
     fn call(
@@ -122,12 +122,12 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn get_constructor_value(&self, _realm: &mut R) -> Option<Value<R>> {
-        None
+    fn get_constructor_value(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
+        Ok(None)
     }
 
-    fn get_constructor_proto(&self, _realm: &mut R) -> Option<Value<R>> {
-        None
+    fn get_constructor_proto(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
+        Ok(None)
     }
 
     fn special_constructor(&self) -> bool {
@@ -218,8 +218,8 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::get_array_or_done(self, index)
     }
 
-    fn clear_values(&self) {
-        ObjectImpl::clear_values(self);
+    fn clear_values(&self) -> Result<(), Error<R>> {
+        ObjectImpl::clear_values(self)
     }
 
     fn call(
@@ -251,11 +251,11 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::class_name(self)
     }
 
-    fn get_constructor_value(&self, realm: &mut R) -> Option<Value<R>> {
+    fn get_constructor_value(&self, realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
         ObjectImpl::get_constructor_value(self, realm)
     }
 
-    fn get_constructor_proto(&self, realm: &mut R) -> Option<Value<R>> {
+    fn get_constructor_proto(&self, realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
         ObjectImpl::get_constructor_proto(self, realm)
     }
 
