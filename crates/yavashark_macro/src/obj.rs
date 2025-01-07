@@ -286,7 +286,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
             fn to_string_internal(&self) -> Result<String, #error> {
-                format!("[object {}]", self.name())
+                Ok(format!("[object {}]", self.name()))
             }
         }
     };
@@ -312,13 +312,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         impl yavashark_value::Obj<#realm> for #struct_name {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 #properties_define
-                self.object.define_property(name, value);
+                self.object.define_property(name, value)
             }
 
             fn define_variable(&self, name: #value, value: #variable) -> Result<(), #error> {
                 #properties_variable_define
 
-                self.object.define_variable(name, value);
+                self.object.define_variable(name, value)
             }
 
             fn resolve_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
@@ -363,21 +363,24 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #name
 
             fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
-                let mut props = self.object.properties();
+                let mut props = self.object.properties()?;
                 #properties
-                props
+                
+                Ok(props)
             }
 
             fn keys(&self) -> Result<Vec<#value>, #error> {
-                let mut keys = self.object.keys();
+                let mut keys = self.object.keys()?;
                 #keys
-                keys
+                
+                Ok(keys)
             }
 
             fn values(&self) -> Result<Vec<#value>, #error> {
-                let mut values = self.object.values();
+                let mut values = self.object.values()?;
                 #values
-                values
+                
+                Ok(values)
             }
             fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<#value>), #error> {
                 self.object.get_array_or_done(index)
