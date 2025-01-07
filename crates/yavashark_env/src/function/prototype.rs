@@ -1,15 +1,15 @@
 #![allow(clippy::needless_pass_by_value)]
 
-use yavashark_value::Obj;
+use std::cell::RefCell;
+use yavashark_value::{MutObj, Obj};
 
 use crate::function::bound::BoundFunction;
-use crate::object::Object;
 use crate::realm::Realm;
-use crate::{Error, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable, Result};
 
 #[derive(Debug)]
-pub struct FunctionPrototype {
-    pub object: Object,
+struct MutableFunctionPrototype {
+    pub object: MutObject,
     pub apply: ObjectProperty,
     pub bind: ObjectProperty,
     pub call: ObjectProperty,
@@ -18,27 +18,36 @@ pub struct FunctionPrototype {
     pub name: ObjectProperty,
 }
 
+#[derive(Debug)]
+pub struct FunctionPrototype {
+    inner: RefCell<MutableFunctionPrototype>,
+}
+
 impl FunctionPrototype {
     #[must_use]
     pub fn new(obj: Value) -> Self {
         Self {
-            object: Object::raw_with_proto(obj),
-            apply: Value::Undefined.into(),
-            bind: Value::Undefined.into(),
-            call: Value::Undefined.into(),
-            constructor: Value::Undefined.into(),
-            length: Value::Number(0.0).into(),
-            name: Value::String("Function".to_string()).into(),
+            inner: RefCell::new(MutableFunctionPrototype {
+                object: MutObject::with_proto(obj),
+                apply: Value::Undefined.into(),
+                bind: Value::Undefined.into(),
+                call: Value::Undefined.into(),
+                constructor: Value::Undefined.into(),
+                length: Value::Number(0.0).into(),
+                name: Value::String("Function".to_string()).into(),
+            }),
         }
     }
 
-    pub fn initialize(&mut self, func: Value) -> Res {
-        self.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
-        self.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
-        self.call = NativeFunction::with_proto("call", call, func.copy()).into();
-        self.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
+    pub fn initialize(&self, func: Value) -> Res {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
+        this.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
+        this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
+        this.call = NativeFunction::with_proto("call", call, func.copy()).into();
+        this.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
 
-        self.constructor
+        this.constructor
             .value
             .define_property("prototype".into(), func)
     }
@@ -67,171 +76,192 @@ fn constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult 
 }
 
 impl Obj<Realm> for FunctionPrototype {
-    fn define_property(&mut self, name: Value, value: Value) {
+    fn define_property(&self, name: Value, value: Value) -> Res {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
+        
         if let Value::String(name) = &name {
             match name.as_str() {
                 "apply" => {
-                    self.apply = value.into();
-                    return;
+                    this.apply = value.into();
+                    return Ok(());
                 }
                 "bind" => {
-                    self.bind = value.into();
-                    return;
+                    this.bind = value.into();
+                    return Ok(());
                 }
                 "call" => {
-                    self.call = value.into();
-                    return;
+                    this.call = value.into();
+                    return Ok(());
                 }
                 "constructor" => {
-                    self.constructor = value.into();
-                    return;
+                    this.constructor = value.into();
+                    return Ok(());
                 }
                 "length" => {
-                    self.length = value.into();
-                    return;
+                    this.length = value.into();
+                    return Ok(());
                 }
                 "name" => {
-                    self.name = value.into();
-                    return;
+                    this.name = value.into();
+                    return Ok(());
                 }
                 _ => {}
             }
         }
 
-        self.object.define_property(name, value);
+        this.object.define_property(name, value)
     }
 
-    fn define_variable(&mut self, name: Value, value: Variable) {
+    fn define_variable(&self, name: Value, value: Variable) -> Res {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
         if let Value::String(name) = &name {
             match name.as_str() {
                 "apply" => {
-                    self.apply = value.into();
-                    return;
+                    this.apply = value.into();
+                    return Ok(());
                 }
                 "bind" => {
-                    self.bind = value.into();
-                    return;
+                    this.bind = value.into();
+                    return Ok(());
                 }
                 "call" => {
-                    self.call = value.into();
-                    return;
+                    this.call = value.into();
+                    return Ok(());
                 }
                 "constructor" => {
-                    self.constructor = value.into();
-                    return;
+                    this.constructor = value.into();
+                    return Ok(());
                 }
                 "length" => {
-                    self.length = value.into();
-                    return;
+                    this.length = value.into();
+                    return Ok(());
                 }
                 "name" => {
-                    self.name = value.into();
-                    return;
+                    this.name = value.into();
+                    return Ok(());
                 }
                 _ => {}
             }
         }
 
-        self.object.define_variable(name, value);
+        this.object.define_variable(name, value)
     }
 
-    fn resolve_property(&self, name: &Value) -> Option<ObjectProperty> {
+    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return Some(self.apply.clone()),
-                "bind" => return Some(self.bind.clone()),
-                "call" => return Some(self.call.clone()),
-                "constructor" => return Some(self.constructor.clone()),
-                "length" => return Some(self.length.clone()),
-                "name" => return Some(self.name.clone()),
+                "apply" => return Ok(Some(this.apply.clone())),
+                "bind" => return Ok(Some(this.bind.clone())),
+                "call" => return Ok(Some(this.call.clone())),
+                "constructor" => return Ok(Some(this.constructor.clone())),
+                "length" => return Ok(Some(this.length.clone())),
+                "name" => return Ok(Some(this.name.clone())),
                 _ => {}
             }
         }
 
-        self.object.resolve_property(name)
+        this.object.resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value) -> Option<&Value> {
+    fn get_property(&self, name: &Value) -> Result<Option<Value>> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return Some(&self.apply.value),
-                "bind" => return Some(&self.bind.value),
-                "call" => return Some(&self.call.value),
-                "constructor" => return Some(&self.constructor.value),
-                "length" => return Some(&self.length.value),
-                "name" => return Some(&self.name.value),
+                "apply" => return Ok(Some(this.apply.value.copy())),
+                "bind" => return Ok(Some(this.bind.value.copy())),
+                "call" => return Ok(Some(this.call.value.copy())),
+                "constructor" => return Ok(Some(this.constructor.value.copy())),
+                "length" => return Ok(Some(this.length.value.copy())),
+                "name" => return Ok(Some(this.name.value.copy())),
                 _ => {}
             }
         }
 
-        self.object.get_property(name)
+        this.object.get_property(name)
+            .map(|v| v.map(|v| v.copy()))
     }
 
-    fn define_getter(&mut self, name: Value, value: Value) -> Res {
-        self.object.define_getter(name, value)
+    fn define_getter(&self, name: Value, value: Value) -> Res {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
+        this.object.define_getter(name, value)
     }
 
-    fn define_setter(&mut self, name: Value, value: Value) -> Res {
-        self.object.define_setter(name, value)
+    fn define_setter(&self, name: Value, value: Value) -> Res {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        this.object.define_setter(name, value)
     }
 
-    fn get_getter(&self, name: &Value) -> Option<Value> {
-        self.object.get_getter(name)
+    fn get_getter(&self, name: &Value) -> Result<Option<Value>, Error> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        this.object.get_getter(name)
     }
 
-    fn get_setter(&self, name: &Value) -> Option<Value> {
-        self.object.get_setter(name)
+    fn get_setter(&self, name: &Value) -> Result<Option<Value>> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        this.object.get_setter(name)
     }
 
-    fn delete_property(&mut self, name: &Value) -> Option<Value> {
+    fn delete_property(&self, name: &Value) -> Result<Option<Value>> {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
         if let Value::String(name) = name {
             match name.as_str() {
                 "apply" => {
-                    let old = self.apply.value.copy();
-                    self.apply = Value::Undefined.into();
-                    return Some(old);
+                    let old = this.apply.value.copy();
+                    this.apply = Value::Undefined.into();
+                    return Ok(Some(old));
                 }
                 "bind" => {
-                    let old = self.bind.value.copy();
-                    self.bind = Value::Undefined.into();
-                    return Some(old);
+                    let old = this.bind.value.copy();
+                    this.bind = Value::Undefined.into();
+                    return Ok(Some(old));
                 }
                 "call" => {
-                    let old = self.call.value.copy();
-                    self.call = Value::Undefined.into();
-                    return Some(old);
+                    let old = this.call.value.copy();
+                    this.call = Value::Undefined.into();
+                    return Ok(Some(old));
                 }
                 "constructor" => {
-                    let old = self.constructor.value.copy();
-                    self.constructor = Value::Undefined.into();
-                    return Some(old);
+                    let old = this.constructor.value.copy();
+                    this.constructor = Value::Undefined.into();
+                    return Ok(Some(old));
                 }
                 "length" => {
-                    let old = self.length.value.copy();
-                    self.length = Value::Undefined.into();
-                    return Some(old);
+                    let old = this.length.value.copy();
+                    this.length = Value::Undefined.into();
+                    return Ok(Some(old));
                 }
                 "name" => {
-                    let old = self.name.value.copy();
-                    self.name = Value::Undefined.into();
-                    return Some(old);
+                    let old = this.name.value.copy();
+                    this.name = Value::Undefined.into();
+                    return Ok(Some(old));
                 }
                 _ => {}
             }
         }
 
-        self.object.delete_property(name)
+        this.object.delete_property(name)
     }
 
-    fn contains_key(&self, name: &Value) -> bool {
+    fn contains_key(&self, name: &Value) -> Result<bool> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" => return true,
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" => return Ok(true),
                 _ => {}
             }
         }
 
-        self.object.contains_key(name)
+
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+
+        this.object.contains_key(name)
     }
 
     fn name(&self) -> String {
@@ -242,64 +272,81 @@ impl Obj<Realm> for FunctionPrototype {
         Ok("function () { [Native code] } ".to_string())
     }
 
-    fn to_string_internal(&self) -> String {
-        "function () { [Native code <Function Prototype>] } ".to_string()
+    fn to_string_internal(&self) -> Result<String> {
+        Ok("function () { [Native code <Function Prototype>] } ".to_string())
     }
 
-    fn properties(&self) -> Vec<(Value, Value)> {
-        let mut props = self.object.properties();
-        props.push((Value::String("apply".to_string()), self.apply.value.copy()));
-        props.push((Value::String("bind".to_string()), self.bind.value.copy()));
-        props.push((Value::String("call".to_string()), self.call.value.copy()));
+    fn properties(&self) -> Result<Vec<(Value, Value)>> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        let mut props = this.object.properties()?;
+        props.push((Value::String("apply".to_string()), this.apply.value.copy()));
+        props.push((Value::String("bind".to_string()), this.bind.value.copy()));
+        props.push((Value::String("call".to_string()), this.call.value.copy()));
         props.push((
             Value::String("constructor".to_string()),
-            self.constructor.value.copy(),
+            this.constructor.value.copy(),
         ));
         props.push((
             Value::String("length".to_string()),
-            self.length.value.copy(),
+            this.length.value.copy(),
         ));
-        props.push((Value::String("name".to_string()), self.name.value.copy()));
-        props
+        props.push((Value::String("name".to_string()), this.name.value.copy()));
+        
+        Ok(props)
     }
 
-    fn keys(&self) -> Vec<Value> {
-        let mut keys = self.object.keys();
+    fn keys(&self) -> Result<Vec<Value>> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        let mut keys = this.object.keys()?;
         keys.push(Value::String("apply".to_string()));
         keys.push(Value::String("bind".to_string()));
         keys.push(Value::String("call".to_string()));
         keys.push(Value::String("constructor".to_string()));
         keys.push(Value::String("length".to_string()));
         keys.push(Value::String("name".to_string()));
-        keys
+        
+        Ok(keys)
     }
 
-    fn values(&self) -> Vec<Value> {
-        let mut values = self.object.values();
-        values.push(self.apply.value.copy());
-        values.push(self.bind.value.copy());
-        values.push(self.call.value.copy());
-        values.push(self.constructor.value.copy());
-        values.push(self.length.value.copy());
-        values.push(self.name.value.copy());
-        values
+    fn values(&self) -> Result<Vec<Value>> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        let mut values = this.object.values()?;
+        values.push(this.apply.value.copy());
+        values.push(this.bind.value.copy());
+        values.push(this.call.value.copy());
+        values.push(this.constructor.value.copy());
+        values.push(this.length.value.copy());
+        values.push(this.name.value.copy());
+        
+        Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize) -> (bool, Option<Value>) {
-        self.object.get_array_or_done(index)
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>)> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        this.object.get_array_or_done(index)
     }
 
-    fn clear_values(&mut self) {
-        self.object.clear_values();
-        self.apply = Value::Undefined.into();
-        self.bind = Value::Undefined.into();
-        self.call = Value::Undefined.into();
-        self.constructor = Value::Undefined.into();
-        self.length = Value::Number(0.0).into();
-        self.name = Value::String("Function".to_string()).into();
+    fn clear_values(&self) -> Res {
+        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
+        this.object.clear_values()?;
+        this.apply = Value::Undefined.into();
+        this.bind = Value::Undefined.into();
+        this.call = Value::Undefined.into();
+        this.constructor = Value::Undefined.into();
+        this.length = Value::Number(0.0).into();
+        this.name = Value::String("Function".to_string()).into();
+        
+        Ok(())
     }
 
-    fn prototype(&self) -> ObjectProperty {
-        self.object.prototype()
+    fn prototype(&self) -> Result<ObjectProperty> {
+        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        this.object.prototype()
     }
 }
