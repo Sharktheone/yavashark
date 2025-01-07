@@ -153,7 +153,7 @@ impl ParentOrGlobal {
     fn get_ref(&self) -> GcRef<RefCell<ScopeInternal>> {
         match self {
             Self::Parent(p) => p.get_ref(),
-            Self::Global(g) => g.gc_get_untyped_ref(),
+            Self::Global(g) => g.get_untyped_ref(),
         }
     }
 }
@@ -175,7 +175,7 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
 
         for v in self.variables.values() {
             if let Value::Object(o) = &v.value {
-                refs.push(o.gc_get_untyped_ref());
+                refs.push(o.get_untyped_ref());
             }
         }
 
