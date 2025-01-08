@@ -7,6 +7,7 @@ mod custom_props;
 mod obj;
 mod properties;
 mod props;
+mod mutable_region;
 
 #[proc_macro_attribute]
 pub fn object(
