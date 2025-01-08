@@ -1,22 +1,30 @@
 use crate::realm::Realm;
-use crate::{Error, NativeFunction, Object, ObjectHandle, Result, Value, ValueResult};
+use crate::{Error, NativeConstructor, NativeFunction, Object, ObjectHandle, Result, Value, ValueResult};
 use yavashark_macro::{object, properties};
 
 #[must_use]
 pub fn get_error(realm: &Realm) -> Value {
-    NativeFunction::special(
-        "error",
-        |args, this, realm| {
-            let message = args
-                .first()
-                .map_or(String::new(), std::string::ToString::to_string);
-
-            let err = ErrorObj::raw_from(message, realm);
-
-            this.exchange(Box::new(err))?;
-
-            Ok(Value::Undefined)
+    NativeConstructor::special(
+        "error".to_string(),
+        || {
+            // let message = args
+            //     .first()
+            //     .map_or(String::new(), std::string::ToString::to_string);
+            // 
+            // let err = ErrorObj::raw_from(message, realm);
+            // 
+            // this.exchange(Box::new(err))?;
+            // 
+            // Ok(Value::Undefined)
+            
+            todo!()
         },
+        Some(Box::new(|realm, _| {
+            let err: Value = ErrorObj::new(Error::new("error not initialized"), realm).into();
+            
+            err
+            
+        })),
         realm,
     )
     .into()

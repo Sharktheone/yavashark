@@ -2,10 +2,10 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Error, Func};
+use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
-use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult, Error};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 
@@ -31,24 +31,24 @@ impl Debug for NativeConstructor {
 }
 
 impl Constructor<Realm> for NativeConstructor {
-    fn get_constructor(&self) -> ObjectProperty {
-        (self.f)().into()
+    fn get_constructor(&self) -> Result<ObjectProperty, Error> {
+        Ok(self.constructor.clone())
     }
 
     fn special_constructor(&self) -> bool {
         self.special
     }
 
-    fn value(&self, realm: &mut Realm) -> Value {
+    fn value(&self, realm: &mut Realm) -> ValueResult {
         if let Some(f) = &self.f_value {
-            return f(realm, &self.proto);
+            return Ok(f(realm, &self.proto));
         }
 
-        Object::with_proto(self.proto.clone()).into()
+        Ok(Object::with_proto(self.proto.clone()).into())
     }
 
-    fn proto(&self, _realm: &mut Realm) -> Value {
-        self.proto.clone()
+    fn proto(&self, _realm: &mut Realm) -> ValueResult {
+        Ok(self.proto.clone())
     }
 }
 
@@ -109,11 +109,11 @@ impl NativeConstructor {
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let mut this = handle.get_mut().expect("unreachable");
+            let mut this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
             this.constructor = constructor.into();
         }
@@ -161,11 +161,11 @@ impl NativeConstructor {
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let mut this = handle.get_mut().expect("unreachable");
+            let mut this = handle.get();
 
             let this = this.as_any_mut();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
             this.constructor = constructor.into();
         }
