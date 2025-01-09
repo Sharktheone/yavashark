@@ -1,10 +1,11 @@
-use crate::{AsAny, BoxedObj, Error, Obj, Object, ObjectProperty, Realm, Value, Variable};
+use crate::{AsAny, BoxedObj, Error, MutObj, Obj, Object, ObjectProperty, Realm, Value, Variable};
 use std::fmt::Debug;
+use std::ops::Deref;
 use yavashark_garbage::GcRef;
 
 pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
-    fn get_wrapped_object(&self) -> &impl Obj<R>;
+    fn get_wrapped_object(&self) -> impl Deref<Target = impl MutObj<R>>;
 
     fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         self.get_wrapped_object().define_property(name, value)
