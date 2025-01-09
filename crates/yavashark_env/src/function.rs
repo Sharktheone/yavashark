@@ -1,14 +1,15 @@
-use std::fmt::Debug;
-
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
+use std::cell::{Ref, RefCell};
+use std::fmt::Debug;
+use std::ops::Deref;
 use yavashark_macro::custom_props;
-use yavashark_value::{Obj, ObjectImpl};
+use yavashark_value::{MutObj, Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{Error, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 mod bound;
 mod class;
@@ -19,19 +20,22 @@ type NativeFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction, bool);
 
+struct MutNativeFunction {
+    pub object: MutObject,
+    pub constructor: ObjectProperty,
+}
+
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
     pub special_constructor: bool,
-    pub constructor: ObjectProperty,
-    pub object: Object,
-    // pub prototype: ConstructorPrototype,
+    inner: RefCell<MutNativeFunction>,
 }
 
 #[custom_props(constructor)]
 impl ObjectImpl<Realm> for NativeFunction {
-    fn get_wrapped_object(&self) -> &impl Obj<Realm> {
-        &self.object
+    fn get_wrapped_object(&self) -> impl Deref<Target = impl MutObj<Realm>> {
+        Ref::map(self.inner.borrow(), |inner| &inner.object)
     }
 
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
@@ -43,7 +47,9 @@ impl ObjectImpl<Realm> for NativeFunction {
     }
 
     fn get_constructor_proto(&self, _realm: &mut Realm) -> Result<Option<Value>, Error> {
-        Ok(Some(self.constructor.value.copy())) //TODO: this is not correct (i think)
+        let inner = self.inner.borrow();
+
+        Ok(Some(inner.constructor.value.copy())) //TODO: this is not correct (i think)
     }
 
     fn special_constructor(&self) -> bool {
@@ -58,9 +64,12 @@ impl NativeFunction {
         let this = Self {
             name,
             f,
-            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             special_constructor: false,
-            constructor: Value::Undefined.into(),
+
+            inner: RefCell::new(MutNativeFunction {
+                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                constructor: ObjectProperty::new(Value::Undefined.into()),
+            }),
         };
 
         let handle = ObjectHandle::new(this);
@@ -69,13 +78,15 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().expect("unreachable");
+            let this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
-            this.constructor = constructor;
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
         }
 
         handle
@@ -90,9 +101,11 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             special_constructor: false,
-            constructor: Value::Undefined.into(),
+            inner: RefCell::new(MutNativeFunction {
+                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                constructor: ObjectProperty::new(Value::Undefined.into()),
+            }),
         };
 
         let handle = ObjectHandle::new(this);
@@ -101,13 +114,15 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().expect("unreachable");
+            let this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
-            this.constructor = constructor;
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
         }
 
         handle
@@ -122,9 +137,11 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
             special_constructor: true,
-            constructor: Value::Undefined.into(),
+            inner: RefCell::new(MutNativeFunction {
+                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                constructor: ObjectProperty::new(Value::Undefined.into()),
+            }),
         };
 
         let handle = ObjectHandle::new(this);
@@ -133,13 +150,15 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().expect("unreachable");
+            let mut this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
-            this.constructor = constructor;
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
         }
 
         handle
@@ -154,9 +173,11 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(proto),
             special_constructor: false,
-            constructor: Value::Undefined.into(),
+            inner: RefCell::new(MutNativeFunction {
+                object: MutObject::with_proto(proto),
+                constructor: ObjectProperty::new(Value::Undefined.into()),
+            }),
         };
 
         let handle = ObjectHandle::new(this);
@@ -165,13 +186,15 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().expect("unreachable");
+            let mut this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
-            this.constructor = constructor;
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
         }
 
         handle
@@ -186,9 +209,11 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            object: Object::raw_with_proto(proto),
             special_constructor: true,
-            constructor: Value::Undefined.into(),
+            inner: RefCell::new(MutNativeFunction {
+                object: MutObject::with_proto(proto),
+                constructor: ObjectProperty::new(Value::Undefined.into()),
+            }),
         };
 
         let handle = ObjectHandle::new(this);
@@ -197,13 +222,15 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().expect("unreachable");
+            let mut this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<Self>().expect("unreachable");
+            let this = this.downcast_ref::<Self>().expect("unreachable");
 
-            this.constructor = constructor;
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
         }
 
         handle
@@ -215,9 +242,11 @@ impl NativeFunction {
             Self {
                 name: String::new(),
                 f: Box::new(|_, _, _| Ok(Value::Undefined)),
-                object: Object::raw_with_proto(Value::Undefined),
                 special_constructor: false,
-                constructor: Value::Undefined.into(),
+                inner: RefCell::new(MutNativeFunction {
+                    object: MutObject::with_proto(Value::Undefined),
+                    constructor: ObjectProperty::new(Value::Undefined.into()),
+                }),
             },
             true,
         )
@@ -248,22 +277,28 @@ impl NativeFunctionBuilder {
 
     /// Note: Overwrites a potential prototype that was previously set
     #[must_use]
-    pub fn object(mut self, object: Object) -> Self {
-        self.0.object = object;
+    pub fn object(mut self, object: MutObject) -> Self {
+        let inner = self.0.inner.borrow_mut();
+        inner.object = object;
         self
     }
 
     /// Note: Overwrites a potential object that was previously set
     #[must_use]
     pub fn proto(mut self, proto: Value) -> Self {
-        self.0.object.prototype = proto.into(); //TODO: this doesn't work when you want to also set an object
+        let inner = self.0.inner.borrow_mut();
+
+        inner.object.prototype = proto.into();
         self
     }
 
     /// Note: Overrides the prototype of the object
     #[must_use]
     pub fn context(mut self, realm: &Realm) -> Self {
-        self.0.object.prototype = realm.intrinsics.func.clone().into();
+        let inner = self.0.inner.borrow_mut();
+
+        inner.object.prototype = realm.intrinsics.func.clone().into();
+
         self
     }
 
@@ -275,7 +310,10 @@ impl NativeFunctionBuilder {
 
     #[must_use]
     pub fn constructor(mut self, constructor: Value) -> Self {
-        self.0.constructor = constructor.into();
+        let inner = self.0.inner.borrow_mut();
+
+        inner.constructor = constructor.into();
+        
         self.1 = false;
         self
     }
@@ -290,13 +328,15 @@ impl NativeFunctionBuilder {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get_mut().expect("unreachable");
+            let mut this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
-            let this = this.downcast_mut::<NativeFunction>().expect("unreachable");
+            let this = this.downcast_ref::<NativeFunction>().expect("unreachable");
 
-            this.constructor = constructor;
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
         }
 
         handle
