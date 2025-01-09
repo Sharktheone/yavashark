@@ -77,8 +77,8 @@ impl Class {
     #[constructor(raw)]
     pub fn construct(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
         if let Value::Object(o) = this.copy() {
-            let deez = o.get()?;
-            let constructor = deez.constructor();
+            let deez = o.get();
+            let constructor = deez.constructor()?;
             drop(deez);
             let constructor = constructor.resolve(Value::Object(o), realm)?;
 

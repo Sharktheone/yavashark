@@ -163,7 +163,7 @@ impl NativeConstructor {
             let constructor = handle.clone();
             let mut this = handle.get();
 
-            let this = this.as_any_mut();
+            let this = this.as_any();
 
             let this = this.downcast_ref::<Self>().expect("unreachable");
 

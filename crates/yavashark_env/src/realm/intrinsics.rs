@@ -54,24 +54,24 @@ impl Intrinsics {
 
         {
             let obj_this = obj_prototype.clone().into();
-            let mut obj = obj_prototype.get_mut()?;
+            let obj = obj_prototype.get();
 
-            let obj = obj.as_any_mut();
+            let obj = obj.as_any();
 
             let proto = obj
-                .downcast_mut::<Prototype>()
+                .downcast_ref::<Prototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
 
             proto.initialize(func_prototype.clone().into(), obj_this)?;
         }
 
         {
-            let mut func = func_prototype.get_mut()?;
+            let func = func_prototype.get();
 
-            let func = func.as_any_mut();
+            let func = func.as_any();
 
             let proto = func
-                .downcast_mut::<FunctionPrototype>()
+                .downcast_ref::<FunctionPrototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
 
             proto.initialize(func_prototype.clone().into())?;

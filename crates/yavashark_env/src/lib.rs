@@ -67,14 +67,13 @@ impl ControlFlow {
     pub fn throw(val: Value) -> Self {
         if let Value::Object(obj) = &val {
             {
-                if let Ok(obj) = obj.get() {
-                    let this = (***obj).as_any();
+                let obj = obj.get();
+                let this = (**obj).as_any();
 
-                    if let Some(err) = this.downcast_ref::<ErrorObj>() {
-                        let e = &err.error;
+                if let Some(err) = this.downcast_ref::<ErrorObj>() {
+                    let e = &err.error;
 
-                        return Self::Error(e.clone());
-                    }
+                    return Self::Error(e.clone());
                 }
             }
         }

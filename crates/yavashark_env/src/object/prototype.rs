@@ -69,7 +69,7 @@ impl Prototype {
         }
     }
 
-    pub(crate) fn initialize(&mut self, func: Value, this: Value) -> Res {
+    pub(crate) fn initialize(&self, func: Value, this: Value) -> Res {
         let mut this_borrow = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
         
         this_borrow.defined_getter =

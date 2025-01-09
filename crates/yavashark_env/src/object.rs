@@ -338,17 +338,17 @@ impl MutObj<Realm> for MutObject {
             }))
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<&Value>, Error> {
+    fn get_property(&self, name: &Value) -> Result<Option<Value>, Error> {
         if name == &Value::String("__proto__".to_string()) {
-            return Ok(Some(&self.prototype.value));
+            return Ok(Some(self.prototype.value.copy()));
         }
 
         if let Value::Number(n) = name {
-            return Ok(self.get_array(*n as usize));
+            return Ok(self.get_array(*n as usize).cloned());
         }
         
         if let Some(prop) = self.properties.get(name) {
-            return Ok(Some(&prop.value));
+            return Ok(Some(prop.value.copy()));
         }
         
         Ok(None)

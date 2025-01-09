@@ -34,8 +34,6 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 
     let key = &args[1];
 
-    let obj = obj.get()?;
-
     Ok(obj.contains_key(key).into())
 }
 
@@ -50,9 +48,7 @@ pub fn get_own_property_descriptor(args: Vec<Value>, this: Value, realm: &Realm)
 
     let key = &args[1];
 
-    let obj = obj.get()?;
-
-    let Some(prop) = obj.resolve_property(key) else {
+    let Some(prop) = obj.get_property(key) else {
         return Ok(Value::Undefined);
     };
 

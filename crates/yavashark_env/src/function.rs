@@ -1,9 +1,9 @@
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
-use std::cell::{Ref, RefCell};
+use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
 use yavashark_value::{MutObj, Obj, ObjectImpl};
 
@@ -34,8 +34,8 @@ pub struct NativeFunction {
 
 #[custom_props(constructor)]
 impl ObjectImpl<Realm> for NativeFunction {
-    fn get_wrapped_object(&self) -> impl Deref<Target = impl MutObj<Realm>> {
-        Ref::map(self.inner.borrow(), |inner| &inner.object)
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+        RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
     }
 
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
@@ -277,27 +277,35 @@ impl NativeFunctionBuilder {
 
     /// Note: Overwrites a potential prototype that was previously set
     #[must_use]
-    pub fn object(mut self, object: MutObject) -> Self {
-        let inner = self.0.inner.borrow_mut();
+    pub fn object(self, object: MutObject) -> Self {
+        let mut inner = self.0.inner.borrow_mut();
         inner.object = object;
+        
+        
+        drop(inner);
+        
         self
     }
 
     /// Note: Overwrites a potential object that was previously set
     #[must_use]
-    pub fn proto(mut self, proto: Value) -> Self {
-        let inner = self.0.inner.borrow_mut();
+    pub fn proto(self, proto: Value) -> Self {
+        let mut inner = self.0.inner.borrow_mut();
 
         inner.object.prototype = proto.into();
+        drop(inner);
+        
         self
     }
 
     /// Note: Overrides the prototype of the object
     #[must_use]
-    pub fn context(mut self, realm: &Realm) -> Self {
-        let inner = self.0.inner.borrow_mut();
+    pub fn context(self, realm: &Realm) -> Self {
+        let mut inner = self.0.inner.borrow_mut();
 
         inner.object.prototype = realm.intrinsics.func.clone().into();
+        drop(inner);
+        
 
         self
     }
@@ -310,9 +318,10 @@ impl NativeFunctionBuilder {
 
     #[must_use]
     pub fn constructor(mut self, constructor: Value) -> Self {
-        let inner = self.0.inner.borrow_mut();
+        let mut inner = self.0.inner.borrow_mut();
 
         inner.constructor = constructor.into();
+        drop(inner);
         
         self.1 = false;
         self
