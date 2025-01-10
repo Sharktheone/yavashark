@@ -32,12 +32,6 @@ impl MutableRegion {
 
         let prop = &config.object_property;
 
-        let direct = self.direct.iter().map(|field| {
-            quote! {
-                #field: ,
-            }
-        });
-
         let custom = self.custom.iter().map(|field| field.to_token_stream());
 
         let direct = self.direct.iter().map(|field| {
