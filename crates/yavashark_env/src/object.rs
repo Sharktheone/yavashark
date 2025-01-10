@@ -346,11 +346,11 @@ impl MutObj<Realm> for MutObject {
         if let Value::Number(n) = name {
             return Ok(self.get_array(*n as usize).cloned());
         }
-        
+
         if let Some(prop) = self.properties.get(name) {
             return Ok(Some(prop.value.copy()));
         }
-        
+
         Ok(None)
     }
 
@@ -423,7 +423,8 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
-        Ok(self.array
+        Ok(self
+            .array
             .iter()
             .map(|(i, v)| (Value::Number(*i as f64), v.value.copy()))
             .chain(
@@ -435,7 +436,8 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn keys(&self) -> Result<Vec<Value>, Error> {
-        Ok(self.array
+        Ok(self
+            .array
             .iter()
             .map(|(i, _)| Value::Number(*i as f64))
             .chain(self.properties.keys().map(Value::copy))
@@ -443,7 +445,8 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn values(&self) -> Result<Vec<Value>, Error> {
-        Ok(self.array
+        Ok(self
+            .array
             .iter()
             .map(|(_, v)| v.value.copy())
             .chain(self.properties.values().map(|v| v.value.copy()))

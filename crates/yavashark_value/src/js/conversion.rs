@@ -228,4 +228,3 @@ macro_rules! impl_from_value {
 }
 
 impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
-

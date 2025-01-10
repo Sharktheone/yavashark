@@ -365,21 +365,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
                 let mut props = self.object.properties()?;
                 #properties
-                
+
                 Ok(props)
             }
 
             fn keys(&self) -> Result<Vec<#value>, #error> {
                 let mut keys = self.object.keys()?;
                 #keys
-                
+
                 Ok(keys)
             }
 
             fn values(&self) -> Result<Vec<#value>, #error> {
                 let mut values = self.object.values()?;
                 #values
-                
+
                 Ok(values)
             }
             fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<#value>), #error> {

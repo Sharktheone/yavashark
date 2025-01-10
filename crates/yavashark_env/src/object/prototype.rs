@@ -1,21 +1,20 @@
-use std::any::Any;
-use std::cell::RefCell;
 use common::{
     define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
     object_constructor, property_is_enumerable, to_locale_string, to_string, value_of,
 };
+use std::any::Any;
+use std::cell::RefCell;
 use yavashark_value::{MutObj, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{Error, NativeFunction, ObjectProperty, Res, Value, Variable, Result, MutObject};
+use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, Variable};
 
 mod common;
 
 pub trait Proto: Obj<Realm> {
     fn as_any(&mut self) -> &mut dyn Any;
 }
-
 
 #[derive(Debug, PartialEq, Eq)]
 struct MutPrototype {
@@ -70,8 +69,11 @@ impl Prototype {
     }
 
     pub(crate) fn initialize(&self, func: Value, this: Value) -> Res {
-        let mut this_borrow = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut this_borrow = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         this_borrow.defined_getter =
             NativeFunction::with_proto("__define_getter__", define_getter, func.copy()).into();
         this_borrow.defined_setter =
@@ -83,7 +85,8 @@ impl Prototype {
         this_borrow.constructor =
             NativeFunction::with_proto("Object", object_constructor, func.copy()).into();
 
-        this_borrow.constructor
+        this_borrow
+            .constructor
             .value
             .define_property("prototype".into(), this)?;
 
@@ -99,7 +102,8 @@ impl Prototype {
                 .into();
         this_borrow.to_locale_string =
             NativeFunction::with_proto("toLocaleString", to_locale_string, func.copy()).into();
-        this_borrow.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
+        this_borrow.to_string =
+            NativeFunction::with_proto("toString", to_string, func.copy()).into();
         this_borrow.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
 
         Ok(())
@@ -122,9 +126,11 @@ impl Prototype {
 
 impl Obj<Realm> for Prototype {
     fn define_property(&self, name: Value, value: Value) -> Res {
-        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
-        
+        let mut this = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         if let Value::String(name) = &name {
             match name.as_str() {
                 "__define_getter__" => {
@@ -194,14 +200,17 @@ impl Obj<Realm> for Prototype {
     }
 
     fn define_variable(&self, name: Value, value: Variable) -> Res {
-        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut this = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         this.object.define_variable(name, value)
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         if let Value::String(name) = name {
             match name.as_str() {
                 "__define_getter__" => return Ok(Some(this.defined_getter.copy())),
@@ -210,7 +219,9 @@ impl Obj<Realm> for Prototype {
                 "__lookup_setter__" => return Ok(Some(this.lookup_setter.copy())),
                 "constructor" => return Ok(Some(this.constructor.copy())),
                 "hasOwnProperty" => return Ok(Some(this.has_own_property.copy())),
-                "getOwnPropertyDescriptor" => return Ok(Some(this.get_own_property_descriptor.copy())),
+                "getOwnPropertyDescriptor" => {
+                    return Ok(Some(this.get_own_property_descriptor.copy()))
+                }
                 "isPrototypeOf" => return Ok(Some(this.is_prototype_of.copy())),
                 "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.copy())),
                 "toLocaleString" => return Ok(Some(this.to_locale_string.copy())),
@@ -224,7 +235,7 @@ impl Obj<Realm> for Prototype {
 
     fn get_property(&self, name: &Value) -> Result<Option<Value>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         if let Value::String(name) = name {
             match name.as_str() {
                 "__define_getter__" => return Ok(Some(this.defined_getter.value.copy())),
@@ -233,9 +244,13 @@ impl Obj<Realm> for Prototype {
                 "__lookup_setter__" => return Ok(Some(this.lookup_setter.value.copy())),
                 "constructor" => return Ok(Some(this.constructor.value.copy())),
                 "hasOwnProperty" => return Ok(Some(this.has_own_property.value.copy())),
-                "getOwnPropertyDescriptor" => return Ok(Some(this.get_own_property_descriptor.value.copy())),
+                "getOwnPropertyDescriptor" => {
+                    return Ok(Some(this.get_own_property_descriptor.value.copy()))
+                }
                 "isPrototypeOf" => return Ok(Some(this.is_prototype_of.value.copy())),
-                "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.value.copy())),
+                "propertyIsEnumerable" => {
+                    return Ok(Some(this.property_is_enumerable.value.copy()))
+                }
                 "toLocaleString" => return Ok(Some(this.to_locale_string.value.copy())),
                 "toString" => return Ok(Some(this.to_string.value.copy())),
                 "valueOf" => return Ok(Some(this.value_of.value.copy())),
@@ -243,31 +258,36 @@ impl Obj<Realm> for Prototype {
             }
         }
 
-        this.object.get_property(name)
-            .map(|v| v.map(|v| v.copy()))
+        this.object.get_property(name).map(|v| v.map(|v| v.copy()))
     }
 
     fn define_getter(&self, name: Value, value: Value) -> Res {
-        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut this = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         this.object.define_getter(name, value)
     }
 
     fn define_setter(&self, name: Value, value: Value) -> Res {
-        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut this = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         this.object.define_setter(name, value)
     }
 
     fn get_getter(&self, name: &Value) -> Result<Option<Value>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         this.object.get_getter(name)
     }
 
     fn get_setter(&self, name: &Value) -> Result<Option<Value>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         this.object.get_setter(name)
     }
 
@@ -277,8 +297,11 @@ impl Obj<Realm> for Prototype {
                 return Ok(None);
             }
         }
-        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut this = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         this.object.delete_property(name)
     }
 
@@ -319,7 +342,7 @@ impl Obj<Realm> for Prototype {
 
     fn properties(&self) -> Result<Vec<(Value, Value)>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         let mut props = this.object.properties()?;
         props.push((
             Value::String("__define_getter__".to_string()),
@@ -369,13 +392,13 @@ impl Obj<Realm> for Prototype {
             Value::String("valueOf".to_string()),
             this.value_of.value.copy(),
         ));
-        
+
         Ok(props)
     }
 
     fn keys(&self) -> Result<Vec<Value>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         let mut keys = this.object.keys()?;
         keys.push(Value::String("__define_getter__".to_string()));
         keys.push(Value::String("__define_setter__".to_string()));
@@ -389,15 +412,15 @@ impl Obj<Realm> for Prototype {
         keys.push(Value::String("toLocaleString".to_string()));
         keys.push(Value::String("toString".to_string()));
         keys.push(Value::String("valueOf".to_string()));
-        
+
         Ok(keys)
     }
 
     fn values(&self) -> Result<Vec<Value>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         let mut values = this.object.values()?;
-        
+
         values.push(this.defined_getter.value.copy());
         values.push(this.defined_setter.value.copy());
         values.push(this.lookup_getter.value.copy());
@@ -410,19 +433,22 @@ impl Obj<Realm> for Prototype {
         values.push(this.to_locale_string.value.copy());
         values.push(this.to_string.value.copy());
         values.push(this.value_of.value.copy());
-        
+
         Ok(values)
     }
 
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>)> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         this.object.get_array_or_done(index)
     }
 
     fn clear_values(&self) -> Res {
-        let mut this = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut this = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         this.object.clear_values()
     }
 
@@ -432,7 +458,7 @@ impl Obj<Realm> for Prototype {
 
     fn constructor(&self) -> Result<ObjectProperty> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         Ok(this.constructor.clone())
     }
 }

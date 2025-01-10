@@ -32,7 +32,6 @@ impl Constructor<Realm> for Class {
         } else {
             self.object.constructor()
         }
-        
     }
 
     fn value(&self, _realm: &mut Realm) -> ValueResult {

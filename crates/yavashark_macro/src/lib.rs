@@ -4,10 +4,10 @@ use std::env;
 
 mod config;
 mod custom_props;
+mod mutable_region;
 mod obj;
 mod properties;
 mod props;
-mod mutable_region;
 
 #[proc_macro_attribute]
 pub fn object(

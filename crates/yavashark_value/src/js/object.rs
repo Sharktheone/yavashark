@@ -269,15 +269,19 @@ unsafe impl<C: Realm> Collectable for BoxedObj<C> {
     fn get_refs(&self) -> Vec<GcRef<Self>> {
         let mut refs = Vec::new();
 
-        self.0.properties().unwrap_or_default().into_iter().for_each(|(n, v)| {
-            if let Value::Object(o) = n {
-                refs.push(o.0.get_ref());
-            }
+        self.0
+            .properties()
+            .unwrap_or_default()
+            .into_iter()
+            .for_each(|(n, v)| {
+                if let Value::Object(o) = n {
+                    refs.push(o.0.get_ref());
+                }
 
-            if let Value::Object(o) = v {
-                refs.push(o.0.get_ref());
-            }
-        });
+                if let Value::Object(o) = v {
+                    refs.push(o.0.get_ref());
+                }
+            });
 
         if let Ok(p) = self.0.prototype() {
             if let Value::Object(o) = p.value {
@@ -402,7 +406,9 @@ impl<C: Realm> Object<C> {
     #[must_use]
     pub fn custom_refs(&self) -> Vec<GcRef<BoxedObj<C>>> {
         /// Safety: unsafe is only for the implementer, not for us - we are safe
-        unsafe { self.custom_gc_refs() }
+        unsafe {
+            self.custom_gc_refs()
+        }
     }
 
     #[must_use]
@@ -460,7 +466,7 @@ impl<C: Realm> Object<C> {
             let to_string = to_string.copy();
 
             let val = to_string.call(realm, vec![], Value::Object(self.clone()))?;
-            
+
             val.to_string(realm)
         } else {
             self.0.to_string(realm)

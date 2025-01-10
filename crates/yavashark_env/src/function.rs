@@ -280,10 +280,9 @@ impl NativeFunctionBuilder {
     pub fn object(self, object: MutObject) -> Self {
         let mut inner = self.0.inner.borrow_mut();
         inner.object = object;
-        
-        
+
         drop(inner);
-        
+
         self
     }
 
@@ -294,7 +293,7 @@ impl NativeFunctionBuilder {
 
         inner.object.prototype = proto.into();
         drop(inner);
-        
+
         self
     }
 
@@ -305,7 +304,6 @@ impl NativeFunctionBuilder {
 
         inner.object.prototype = realm.intrinsics.func.clone().into();
         drop(inner);
-        
 
         self
     }
@@ -322,7 +320,7 @@ impl NativeFunctionBuilder {
 
         inner.constructor = constructor.into();
         drop(inner);
-        
+
         self.1 = false;
         self
     }

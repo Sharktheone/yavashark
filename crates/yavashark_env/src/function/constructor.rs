@@ -5,7 +5,7 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
-use crate::{Object, ObjectHandle, ObjectProperty, Value, ValueResult, Error};
+use crate::{Error, Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 
