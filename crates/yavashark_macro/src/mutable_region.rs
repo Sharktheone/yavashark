@@ -26,7 +26,7 @@ impl MutableRegion {
         self.custom.push(field);
     }
 
-    fn generate(&self, config: &Config) -> proc_macro2::TokenStream {
+    fn generate(&self, config: &Config, object: bool) -> proc_macro2::TokenStream {
         let name = &self.name;
         let full_name = format!("Mutable{}", name);
 
@@ -39,9 +39,20 @@ impl MutableRegion {
                 #field: #prop,
             }
         });
+        
+        let mut_object = &config.mut_object;
+        
+        let object = if object {
+            quote! {
+                pub object: #mut_object,
+            }
+        } else {
+            quote! {}
+        };
 
         quote! {
             pub struct #full_name {
+                #object
                 #(#direct)*
                 #(#custom)*
             }
