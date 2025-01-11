@@ -46,7 +46,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     Ok(())
                 });
 
-                direct.push((meta.path, rename));
+                direct.push((meta.path.get_ident().ok_or(syn::Error::new(meta.path.span(), "Field name needs to be an ident"))?.clone(), rename));
 
                 Ok(())
             })?;
@@ -179,10 +179,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     fields.named = new_fields;
     
     
-    let mutable_region = MutableRegion::with(Vec::new(), custom_mut, input.ident.clone());
+    let mutable_region = MutableRegion::with(direct.clone(), custom_mut, input.ident.clone());
     
     let region_ident = mutable_region.full_name();
-    
+
     let mut inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
     fields.named.push(syn::Field {
         attrs: Vec::new(),
@@ -195,20 +195,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             path: inner_path,
         }),
     });
-
-    for (path, _) in &direct {
-        fields.named.push(syn::Field {
-            attrs: Vec::new(),
-            vis: syn::Visibility::Inherited,
-            mutability: FieldMutability::None,
-            ident: path.get_ident().cloned(),
-            colon_token: None,
-            ty: syn::Type::Path(syn::TypePath {
-                qself: None,
-                path: object_property.clone(),
-            }),
-        });
-    }
 
     let struct_name = &input.ident;
 
