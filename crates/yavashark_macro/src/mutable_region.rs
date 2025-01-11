@@ -3,7 +3,7 @@ use proc_macro2::Ident;
 use quote::{quote, ToTokens};
 use syn::Field;
 
-struct MutableRegion {
+pub struct MutableRegion {
     direct: Vec<Ident>,
     custom: Vec<Field>,
     name: Ident,
@@ -17,6 +17,18 @@ impl MutableRegion {
             name,
         }
     }
+    
+    pub(crate) fn with(direct: Vec<Ident>, custom: Vec<Field>, name: Ident) -> Self {
+        Self {
+            direct,
+            custom,
+            name,
+        }
+    }
+    
+    pub fn full_name(&self) -> Ident {
+        Ident::new(&format!("Mutable{}", self.name), self.name.span())
+    }
 
     fn add_direct(&mut self, field: Ident) {
         self.direct.push(field);
@@ -26,9 +38,9 @@ impl MutableRegion {
         self.custom.push(field);
     }
 
-    fn generate(&self, config: &Config, object: bool) -> proc_macro2::TokenStream {
+    pub fn generate(&self, config: &Config, object: bool) -> proc_macro2::TokenStream {
         let name = &self.name;
-        let full_name = format!("Mutable{}", name);
+        let full_name = self.full_name();
 
         let prop = &config.object_property;
 

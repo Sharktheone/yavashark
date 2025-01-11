@@ -1,10 +1,13 @@
 use crate::config::Config;
 use crate::custom_props::{match_list, match_prop, Act, List};
 use proc_macro::TokenStream as TokenStream1;
+use std::mem;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
 use syn::{FieldMutability, Fields};
+use syn::punctuated::Punctuated;
+use crate::mutable_region::MutableRegion;
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -17,12 +20,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let realm = &conf.realm;
     let error = &conf.error;
     let variable = &conf.variable;
-    let object_path = &conf.object;
     let value = &conf.value;
     let value_result = &conf.value_result;
     let object_property = &conf.object_property;
 
     let mut gc = Vec::new();
+    let mut mutable_region = Vec::new();
 
     let mut function = false;
     let mut to_string = false;
@@ -135,6 +138,17 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 return false;
             }
 
+            
+            if attr.meta.path().is_ident("mutable") {
+                let Ok(ident) = f.ident.clone().ok_or(syn::Error::new(attr.span(), "Expected ident")) else {
+                    err = Some(syn::Error::new(attr.span(), "Expected ident"));
+                    return false;
+                };
+                
+                mutable_region.push(ident);
+                return false;
+            }
+            
             true
         });
 
@@ -142,16 +156,41 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             return e.to_compile_error().into();
         }
     }
+    
+    let mut new_fields= Punctuated::new();
+    
+    let mut custom_mut = Vec::with_capacity(mutable_region.len());
+    
+    for field in mem::take(&mut fields.named) {
+        if let Some(ident) = &field.ident {
+            if !mutable_region.contains(ident) {
+                new_fields.push(field);
+            }  else {
+                custom_mut.push(field);
+                
+            }
+        } else {
+            new_fields.push(field);
+        }
+        
+    }
+    
+    fields.named = new_fields;
+    
+    
+    let mutable_region = MutableRegion::with(Vec::new(), custom_mut, input.ident.clone());
+    
+    let region_ident = mutable_region.full_name();
 
     fields.named.push(syn::Field {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
         mutability: FieldMutability::None,
-        ident: Some(Ident::new("object", Span::call_site())),
+        ident: Some(Ident::new("inner", Span::call_site())),
         colon_token: None,
         ty: syn::Type::Path(syn::TypePath {
             qself: None,
-            path: object_path.clone(),
+            path: region_ident.into(),
         }),
     });
 
@@ -305,9 +344,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
+    
+    let region_code = mutable_region.generate(&conf, true);
 
     let expanded = quote! {
         #input
+        #region_code
 
         impl yavashark_value::Obj<#realm> for #struct_name {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
