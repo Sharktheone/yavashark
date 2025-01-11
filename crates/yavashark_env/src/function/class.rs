@@ -14,7 +14,7 @@ pub struct Class {
 
 impl Func<Realm> for Class {
     fn call(
-        &mut self,
+        &self,
         _realm: &mut Realm,
         _args: Vec<Value>,
         _this: Value,

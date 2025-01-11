@@ -14,7 +14,7 @@ pub struct BoundFunction {
 }
 
 impl Func<Realm> for BoundFunction {
-    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         self.func.call(realm, args, self.bound_this.copy())
     }
 }

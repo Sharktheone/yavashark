@@ -53,7 +53,7 @@ impl Constructor<Realm> for NativeConstructor {
 }
 
 impl Func<Realm> for NativeConstructor {
-    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         if self.special {
             (self.f)().call(realm, args, this.copy())?;
 

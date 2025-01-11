@@ -19,7 +19,7 @@ pub struct ArrowFunction {
 }
 
 impl Func<Realm> for ArrowFunction {
-    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut self.scope.child()?;
         scope.state_set_function()?;
 
