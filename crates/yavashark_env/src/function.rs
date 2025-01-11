@@ -34,8 +34,19 @@ pub struct NativeFunction {
 
 #[custom_props(constructor)]
 impl ObjectImpl<Realm> for NativeFunction {
+    
+    type Inner = MutNativeFunction;
+    
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
         RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
+    }
+    
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
+        self.inner.borrow()
+    }
+    
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
+        self.inner.borrow_mut()
     }
 
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {

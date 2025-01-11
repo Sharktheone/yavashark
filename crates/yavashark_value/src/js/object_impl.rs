@@ -1,11 +1,18 @@
 use crate::{AsAny, BoxedObj, Error, MutObj, Obj, Object, ObjectProperty, Realm, Value, Variable};
 use std::fmt::Debug;
-use std::ops::DerefMut;
+use std::ops::{Deref, DerefMut};
 use yavashark_garbage::GcRef;
 
 pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
+    
+    type Inner;
+    
     /// the returned object should NOT be a reference to self, but a reference to the object that is wrapped by self
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<R>>;
+    
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner>;
+    
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner>;
 
     fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         self.get_wrapped_object().define_property(name, value)
