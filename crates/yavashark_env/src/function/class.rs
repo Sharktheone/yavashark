@@ -1,7 +1,8 @@
+use std::cell::RefCell;
 use std::collections::HashMap;
 
 use crate::realm::Realm;
-use crate::{Error, Object, ObjectProperty, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectProperty, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, CustomName, Func, Obj};
 
@@ -27,15 +28,19 @@ impl Func<Realm> for Class {
 
 impl Constructor<Realm> for Class {
     fn get_constructor(&self) -> Result<ObjectProperty, Error> {
-        if let Value::Object(o) = self.prototype.value.copy() {
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        if let Value::Object(o) = inner.prototype.value.copy() {
             o.constructor()
         } else {
-            self.object.constructor()
+            inner.object.constructor()
         }
     }
 
     fn value(&self, _realm: &mut Realm) -> ValueResult {
-        Ok(Object::raw_with_proto(self.prototype.value.clone()).into_value())
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        Ok(Object::raw_with_proto(inner.prototype.value.clone()).into_value())
     }
 }
 
@@ -47,12 +52,13 @@ impl Class {
 
     #[must_use]
     pub fn new_with_proto(proto: Value, name: String) -> Self {
-        let object = Object::raw_with_proto(proto);
 
         Self {
-            object,
+            inner: RefCell::new(MutableClass {
+                object: MutObject::with_proto(proto),
+                prototype: Value::Undefined.into(),
+            }),
             private_props: HashMap::new(),
-            prototype: Value::Undefined.into(),
             name,
         }
     }
@@ -66,8 +72,11 @@ impl Class {
         self.private_props.get(key)
     }
 
-    pub fn set_proto(&mut self, proto: ObjectProperty) {
-        self.prototype = proto;
+    pub fn set_proto(&mut self, proto: ObjectProperty) -> Result<(), Error> {
+        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        inner.prototype = proto;
+        
+        Ok(())
     }
 }
 
@@ -105,16 +114,20 @@ impl ClassInstance {
     #[must_use]
     pub fn new(realm: &Realm, name: String) -> Self {
         Self {
+            inner: RefCell::new(MutableClassInstance {
+                object: MutObject::new(realm),
+            }),
             private_props: HashMap::new(),
-            object: Object::raw(realm),
             name,
         }
     }
     #[must_use]
     pub fn new_with_proto(proto: Value, name: String) -> Self {
         Self {
+            inner: RefCell::new(MutableClassInstance {
+                object: MutObject::with_proto(proto),
+            }),
             private_props: HashMap::new(),
-            object: Object::raw_with_proto(proto),
             name,
         }
     }
