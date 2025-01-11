@@ -39,6 +39,8 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn define_property(&self, name: Value, value: Value) -> Result<(), #error> {
+            let mut inner = self.get_inner_mut();
+            let inner = self.get_wrapped_object();
             #properties_define
 
             self.get_wrapped_object().define_property(name, value);
@@ -49,6 +51,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn define_variable(&self, name: Value, value: #variable) -> Result<(), #error> {
+            let mut inner = self.get_inner_mut();
             #properties_variable_define
 
             self.get_wrapped_object().define_variable(name, value);
@@ -59,6 +62,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn resolve_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
+            let inner = self.get_inner();
             #properties_resolve
 
             self.get_wrapped_object().resolve_property(name)
@@ -69,6 +73,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn get_property(&self, name: & #value) -> Result<Option<#value>, #error> {
+            let inner = self.get_inner();
             #properties_get
 
             self.get_wrapped_object().get_property(name)
@@ -79,6 +84,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn delete_property(&self, name: &Value) -> Result<Option<Value>, #error> {
+            let mut inner = self.get_inner_mut();
             #properties_delete
 
             self.get_wrapped_object().delete_property(name)
@@ -89,6 +95,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn contains_key(&self, name: & #value) -> Result<bool, #error> {
+            let inner = self.get_inner();
             #properties_contains
 
             self.get_wrapped_object().contains_key(name)
@@ -100,6 +107,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     item.items.push(syn::parse_quote! {
         fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
             let mut props = self.get_wrapped_object().properties();
+            let inner = self.get_inner();
 
             #properties
 
@@ -112,6 +120,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     item.items.push(syn::parse_quote! {
         fn keys(&self) -> Result<Vec<#value>, #error> {
             let mut keys = self.get_wrapped_object().keys();
+            let inner = self.get_inner();
 
             #keys
 
@@ -124,6 +133,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     item.items.push(syn::parse_quote! {
         fn values(&self) -> Result<Vec<#value>, #error> {
             let mut values = self.get_wrapped_object().values();
+            let inner = self.get_inner();
 
             #values
 
@@ -136,6 +146,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     item.items.push(syn::parse_quote! {
         fn clear_values(&self) -> Result<(), #error> {
             self.get_wrapped_object().clear_values();
+            let mut inner = self.get_inner_mut();
 
             #clear
         }
@@ -165,16 +176,16 @@ pub fn match_prop(
 
     for (field, rename) in properties {
         let act = match r {
-            Act::Ref => quote! {Some(& self.#field.value)},
+            Act::Ref => quote! {Some(& inner.#field.value)},
             // Act::RefMut => quote! {Some(&mut self.#field.value)},
-            Act::None => quote! {Some(self.#field.clone())},
-            Act::Set => quote! {self.#field = value.into()},
-            Act::SetVar => quote! {self.#field = value.into()},
+            Act::None => quote! {Some(inner.#field.clone())},
+            Act::Set => quote! {inner.#field = value.into()},
+            Act::SetVar => quote! {inner.#field = value.into()},
             Act::Contains => quote! {true},
             Act::Delete => quote! {
                 {
-                    let old = self.#field.value.copy();
-                    self.#field.value = #value_path::Undefined;
+                    let old = inner.#field.value.copy();
+                    inner.#field.value = #value_path::Undefined;
                     Some(old)
                 }
             },
@@ -254,11 +265,11 @@ pub fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path)
 
         let act = match r {
             List::Properties => {
-                quote! {props.push((#name, self.#field.value.copy()));}
+                quote! {props.push((#name, inner.#field.value.copy()));}
             }
             List::Keys => quote! {keys.push(#name);},
-            List::Values => quote! {values.push(self.#field.value.copy());},
-            List::Clear => quote! {self.#field.value = #value::Undefined;},
+            List::Values => quote! {values.push(inner.#field.value.copy());},
+            List::Clear => quote! {inner.#field.value = #value::Undefined;},
         };
 
         add.extend(act);

@@ -23,6 +23,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let value = &conf.value;
     let value_result = &conf.value_result;
     let object_property = &conf.object_property;
+    let mut_obj = &conf.mut_obj;
 
     let mut gc = Vec::new();
     let mut mutable_region = Vec::new();
@@ -181,7 +182,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mutable_region = MutableRegion::with(Vec::new(), custom_mut, input.ident.clone());
     
     let region_ident = mutable_region.full_name();
-
+    
+    let mut inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
     fields.named.push(syn::Field {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
@@ -190,7 +192,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         colon_token: None,
         ty: syn::Type::Path(syn::TypePath {
             qself: None,
-            path: region_ident.into(),
+            path: inner_path,
         }),
     });
 
@@ -303,7 +305,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     } else {
         quote! {
             fn constructor(&self) -> Result<#object_property, #error> {
-                self.object.constructor()
+                let inner = self.inner.borrow();
+                inner.object.constructor()
             }
         }
     };
@@ -340,7 +343,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         quote! {
 
             fn name(&self) -> String {
-                self.object.name()
+                let inner = self.inner.borrow();
+                inner.object.name()
             }
         }
     };
@@ -348,56 +352,70 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let region_code = mutable_region.generate(&conf, true);
 
     let expanded = quote! {
+        use #mut_obj as _;
         #input
         #region_code
 
         impl yavashark_value::Obj<#realm> for #struct_name {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
+                let mut inner = self.inner.borrow_mut();
                 #properties_define
-                self.object.define_property(name, value)
+                inner.object.define_property(name, value)
             }
 
             fn define_variable(&self, name: #value, value: #variable) -> Result<(), #error> {
+                let mut inner = self.inner.borrow_mut();
                 #properties_variable_define
+                
 
-                self.object.define_variable(name, value)
+                inner.object.define_variable(name, value)
             }
 
             fn resolve_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
+                let inner = self.inner.borrow();
                 #properties_resolve
-                self.object.resolve_property(name)
+                
+                inner.object.resolve_property(name)
             }
 
             fn get_property(&self, name: &#value) -> Result<Option<#value>, #error> {
+                let inner = self.inner.borrow();
                 #properties_get
-                self.object.get_property(name)
+                
+                inner.object.get_property(name)
             }
 
             fn define_getter(&self, name: #value, value: #value) -> Result<(), #error> {
-                self.object.define_getter(name, value)
+                let mut inner = self.inner.borrow_mut();
+                inner.object.define_getter(name, value)
             }
 
             fn define_setter(&self, name: #value, value: #value) -> Result<(), #error> {
-                self.object.define_setter(name, value)
+                let mut inner = self.inner.borrow_mut();
+                inner.object.define_setter(name, value)
             }
 
             fn get_getter(&self, name: &#value) -> Result<Option<#value>, #error> {
-                self.object.get_getter(name)
+                let inner = self.inner.borrow();
+                inner.object.get_getter(name)
             }
 
             fn get_setter(&self, name: &#value) -> Result<Option<#value>, #error> {
-                self.object.get_setter(name)
+                let inner = self.inner.borrow();
+                inner.object.get_setter(name)
             }
 
             fn delete_property(&self, name: &#value) -> Result<Option<#value>, #error> {
+                let mut inner = self.inner.borrow_mut();
                 #properties_delete
-                self.object.delete_property(name)
+                inner.object.delete_property(name)
             }
 
 
             fn contains_key(&self, name: &#value) -> Result<bool, #error> {
+                let mut inner = self.inner.borrow_mut();
                 #properties_contains
-                self.object.contains_key(name)
+                inner.object.contains_key(name)
             }
 
 
@@ -405,36 +423,42 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #name
 
             fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
-                let mut props = self.object.properties()?;
+                let inner = self.inner.borrow();
+                let mut props = inner.object.properties()?;
                 #properties
 
                 Ok(props)
             }
 
             fn keys(&self) -> Result<Vec<#value>, #error> {
-                let mut keys = self.object.keys()?;
+                let inner = self.inner.borrow();
+                let mut keys = inner.object.keys()?;
                 #keys
 
                 Ok(keys)
             }
 
             fn values(&self) -> Result<Vec<#value>, #error> {
-                let mut values = self.object.values()?;
+                let inner = self.inner.borrow();
+                let mut values = inner.object.values()?;
                 #values
 
                 Ok(values)
             }
             fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<#value>), #error> {
-                self.object.get_array_or_done(index)
+                let inner = self.inner.borrow();
+                inner.object.get_array_or_done(index)
             }
 
             fn clear_values(&self) -> Result<(), #error> {
+                let mut inner = self.inner.borrow_mut();
                 #clear
-                self.object.clear_values()
+                inner.object.clear_values()
             }
 
             fn prototype(&self) -> Result<#object_property, #error> {
-                self.object.prototype()
+                let inner = self.inner.borrow();
+                inner.object.prototype()
             }
             #constructor
 
