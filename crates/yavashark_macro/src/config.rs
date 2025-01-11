@@ -4,6 +4,7 @@ use syn::{Path, PathSegment};
 #[allow(unused)]
 pub struct Config {
     pub env_path: Path,
+    pub value_path: Path,
     pub realm: Path,
     pub error: Path,
     pub native_function: Path,
@@ -16,11 +17,13 @@ pub struct Config {
     pub object_property: Path,
     pub try_into_value: Path,
     pub mut_object: Path,
+    pub mut_obj: Path,
 }
 
 impl Config {
     pub fn new(span: Span) -> Self {
         let env_path = crate::env_path();
+        let value_path = crate::value_path();
 
         let mut realm = env_path.clone();
         realm
@@ -88,9 +91,15 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("MutObject", span)));
         
+        
+        let mut mut_obj = value_path.clone();
+        mut_obj
+            .segments
+            .push(PathSegment::from(Ident::new("MutObj", span)));
 
         Self {
             env_path,
+            value_path,
             realm,
             error,
             native_function,
@@ -103,6 +112,7 @@ impl Config {
             object_property,
             try_into_value,
             mut_object,
+            mut_obj,
         }
     }
 }
