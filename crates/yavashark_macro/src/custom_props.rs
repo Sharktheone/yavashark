@@ -1,8 +1,9 @@
 use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::Path;
+use syn::spanned::Spanned;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());
@@ -18,7 +19,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             Ok(())
         });
 
-        direct.push((meta.path, rename));
+        direct.push((meta.path.get_ident().ok_or(syn::Error::new(meta.path.span(), "Field name needs to be an ident"))?.clone(), rename));
 
         Ok(())
     });
@@ -69,7 +70,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties_get = match_prop(&direct, Act::Ref, value);
+    let properties_get = match_prop(&direct, Act::Get, value);
 
     item.items.push(syn::parse_quote! {
         fn get_property(&self, name: & #value) -> Result<Option<#value>, #error> {
@@ -157,7 +158,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Act {
-    Ref,
+    Get,
     // RefMut,
     None,
     Set,
@@ -167,7 +168,7 @@ pub enum Act {
 }
 
 pub fn match_prop(
-    properties: &Vec<(Path, Option<Path>)>,
+    properties: &[(Ident, Option<Path>)],
     r: Act,
     value_path: &Path,
 ) -> TokenStream {
@@ -176,7 +177,7 @@ pub fn match_prop(
 
     for (field, rename) in properties {
         let act = match r {
-            Act::Ref => quote! {Some(& inner.#field.value)},
+            Act::Get => quote! {Some(inner.#field.value)},
             // Act::RefMut => quote! {Some(&mut self.#field.value)},
             Act::None => quote! {Some(inner.#field.clone())},
             Act::Set => quote! {inner.#field = value.into()},
@@ -193,15 +194,15 @@ pub fn match_prop(
         if let Some(rename) = rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
-                    stringify!(#rename) => {
+                    stringifyy!(#rename) => {
                         #act;
-                        return;
+                        return Ok(());
                     }
                 }
             } else {
                 quote! {
-                    stringify!(#rename) => {
-                        return #act;
+                    stringifyyy!(#rename) => {
+                        return Ok(#act);
                     }
                 }
             };
@@ -212,7 +213,7 @@ pub fn match_prop(
 
         let expanded = quote! {
             stringify!(#field) =>  {
-                return #act;
+                return Ok(#act);
             }
         };
 
@@ -251,7 +252,7 @@ pub enum List {
     Clear,
 }
 
-pub fn match_list(properties: &Vec<(Path, Option<Path>)>, r: List, value: &Path) -> TokenStream {
+pub fn match_list(properties: &[(Ident, Option<Path>)], r: List, value: &Path) -> TokenStream {
     let mut add = TokenStream::new();
 
     for (field, rename) in properties {

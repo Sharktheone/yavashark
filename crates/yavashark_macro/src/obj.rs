@@ -201,7 +201,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_define = match_prop(&direct, Act::Set, value);
     let properties_variable_define = match_prop(&direct, Act::SetVar, value);
     let properties_resolve = match_prop(&direct, Act::None, value);
-    let properties_get = match_prop(&direct, Act::Ref, value);
+    let properties_get = match_prop(&direct, Act::Get, value);
     let properties_contains = match_prop(&direct, Act::Contains, value);
     let properties_delete = match_prop(&direct, Act::Delete, value);
 
@@ -277,7 +277,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
             fn get_constructor_proto(&self, realm: &mut #realm) -> Result<Option<#value>, #error> {
-                Some(yavashark_value::Constructor::proto(self, realm))
+                Ok(Some(yavashark_value::Constructor::proto(self, realm)?))
             }
 
             fn special_constructor(&self) -> bool {
@@ -285,7 +285,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
             fn get_constructor_value(&self, realm: &mut #realm) -> Result<Option<#value>, #error> {
-                Some(yavashark_value::Constructor::value(self, realm))
+                Ok(Some(yavashark_value::Constructor::value(self, realm)?))
             }
         }
     } else {
@@ -360,14 +360,14 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn resolve_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
                 let inner = self.inner.borrow();
                 #properties_resolve
-                
+
                 inner.object.resolve_property(name)
             }
 
             fn get_property(&self, name: &#value) -> Result<Option<#value>, #error> {
                 let inner = self.inner.borrow();
                 #properties_get
-                
+
                 inner.object.get_property(name)
             }
 
