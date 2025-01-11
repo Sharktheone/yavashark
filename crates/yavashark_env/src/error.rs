@@ -1,7 +1,6 @@
+use std::cell::RefCell;
 use crate::realm::Realm;
-use crate::{
-    Error, NativeConstructor, NativeFunction, Object, ObjectHandle, Result, Value, ValueResult,
-};
+use crate::{Error, MutObject, NativeConstructor, NativeFunction, Object, ObjectHandle, Result, Value, ValueResult};
 use yavashark_macro::{object, properties};
 
 #[must_use]
@@ -43,7 +42,9 @@ impl ErrorObj {
     #[must_use]
     pub fn new(error: Error, realm: &Realm) -> ObjectHandle {
         let this = Self {
-            object: Object::raw_with_proto(realm.intrinsics.error.clone().into()),
+            inner: RefCell::new(MutableErrorObj {
+                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+            }),
             error,
         };
 
@@ -53,7 +54,9 @@ impl ErrorObj {
     #[must_use]
     pub fn new_from(message: String, realm: &Realm) -> ObjectHandle {
         let this = Self {
-            object: Object::raw_with_proto(realm.intrinsics.error.clone().into()),
+            inner: RefCell::new(MutableErrorObj {
+                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+            }),
             error: Error::unknown_error(message),
         };
 
@@ -63,7 +66,9 @@ impl ErrorObj {
     #[must_use]
     pub fn raw_from(message: String, realm: &Realm) -> Self {
         Self {
-            object: Object::raw_with_proto(realm.intrinsics.error.clone().into()),
+            inner: RefCell::new(MutableErrorObj {
+                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+            }),
             error: Error::unknown_error(message),
         }
     }
@@ -73,8 +78,8 @@ impl ErrorObj {
     }
 
     #[must_use]
-    pub fn override_to_string_internal(&self) -> String {
-        self.error.to_string()
+    pub fn override_to_string_internal(&self) -> Result<String> {
+        Ok(self.error.to_string())
     }
 }
 
