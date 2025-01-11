@@ -11,7 +11,6 @@ struct Item {
     name: Ident,
     attributes: Option<Attributes>,
     rename: Option<Path>,
-    is_mut: bool,
     has_realm: bool,
     has_this: bool,
     get: Option<Ident>,
@@ -120,7 +119,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     name: func.sig.ident.clone(),
                     attributes: Some(attrs),
                     rename: None,
-                    is_mut: false,
                     has_realm: false,
                     has_this: false,
                     get: None,
@@ -228,7 +226,6 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     name: func.sig.ident.clone(),
                     attributes: None,
                     rename,
-                    is_mut: self_mut,
                     has_realm,
                     has_this,
                     span: attr.span(),
@@ -294,22 +291,14 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 stringify!(#name)
             });
 
-        let any_cast = if prop.is_mut {
+        let any_cast = 
             quote! {{
-                let mut x = x.get_mut()?;
-                let mut deez = (***x).as_any_mut().downcast_mut::<Self>()
-                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", #fn_name)))?;
-                deez.#name(args, realm)
-            }}
-        } else {
-            quote! {{
-                let x = x.get()?;
-                let deez = (***x).as_any().downcast_ref::<Self>()
+                let x = x.get();
+                let deez = (**x).as_any().downcast_ref::<Self>()
                     .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?} trace: {}", #fn_name, this, x.class_name())))?;
 
                 deez.#name(args #realm #this)
-            }}
-        };
+            }};
 
         if prop.get.is_some() && prop.set.is_some() {
             return syn::Error::new(prop.span, "cannot have set and get in on the same function")
