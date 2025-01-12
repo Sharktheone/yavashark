@@ -69,7 +69,7 @@ impl Interpreter {
         for stmt in script {
             let x = Self::run_statement(realm, stmt, scope);
 
-            let last_value = x?;
+            last_value = x?;
         }
 
         Ok(last_value)
