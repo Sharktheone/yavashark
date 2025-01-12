@@ -247,9 +247,7 @@ impl Obj<Realm> for Prototype {
                     return Ok(Some(this.get_own_property_descriptor.copy()))
                 }
                 "isPrototypeOf" => return Ok(Some(this.is_prototype_of.copy())),
-                "propertyIsEnumerable" => {
-                    return Ok(Some(this.property_is_enumerable.copy()))
-                }
+                "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.copy())),
                 "toLocaleString" => return Ok(Some(this.to_locale_string.copy())),
                 "toString" => return Ok(Some(this.to_string.copy())),
                 "valueOf" => return Ok(Some(this.value_of.copy())),

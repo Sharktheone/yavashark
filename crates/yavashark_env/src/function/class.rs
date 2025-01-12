@@ -14,12 +14,7 @@ pub struct Class {
 }
 
 impl Func<Realm> for Class {
-    fn call(
-        &self,
-        _realm: &mut Realm,
-        _args: Vec<Value>,
-        _this: Value,
-    ) -> Result<Value, Error> {
+    fn call(&self, _realm: &mut Realm, _args: Vec<Value>, _this: Value) -> Result<Value, Error> {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))
@@ -29,7 +24,7 @@ impl Func<Realm> for Class {
 impl Constructor<Realm> for Class {
     fn get_constructor(&self) -> Result<ObjectProperty, Error> {
         let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         if let Value::Object(o) = inner.prototype.value.copy() {
             o.constructor()
         } else {
@@ -39,7 +34,7 @@ impl Constructor<Realm> for Class {
 
     fn value(&self, _realm: &mut Realm) -> ValueResult {
         let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         Ok(Object::raw_with_proto(inner.prototype.value.clone()).into_value())
     }
 }
@@ -52,7 +47,6 @@ impl Class {
 
     #[must_use]
     pub fn new_with_proto(proto: Value, name: String) -> Self {
-
         Self {
             inner: RefCell::new(MutableClass {
                 object: MutObject::with_proto(proto),
@@ -73,9 +67,12 @@ impl Class {
     }
 
     pub fn set_proto(&mut self, proto: ObjectProperty) -> Result<(), Error> {
-        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        let mut inner = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
         inner.prototype = proto;
-        
+
         Ok(())
     }
 }

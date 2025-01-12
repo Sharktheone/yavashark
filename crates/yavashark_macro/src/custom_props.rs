@@ -2,8 +2,8 @@ use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::Path;
 use syn::spanned::Spanned;
+use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());
@@ -19,7 +19,16 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             Ok(())
         });
 
-        direct.push((meta.path.get_ident().ok_or(syn::Error::new(meta.path.span(), "Field name needs to be an ident"))?.clone(), rename));
+        direct.push((
+            meta.path
+                .get_ident()
+                .ok_or(syn::Error::new(
+                    meta.path.span(),
+                    "Field name needs to be an ident",
+                ))?
+                .clone(),
+            rename,
+        ));
 
         Ok(())
     });
@@ -37,13 +46,12 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let obj_prop = &conf.object_property;
 
     let properties_define = match_prop(&direct, Act::Set, value);
-    
 
     item.items.push(syn::parse_quote! {
         fn define_property(&self, name: Value, value: Value) -> Result<(), #error> {
             let mut inner = self.get_inner_mut();
             #properties_define
-            
+
             drop(inner);
 
             self.get_wrapped_object().define_property(name, value)
@@ -56,7 +64,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn define_variable(&self, name: Value, value: #variable) -> Result<(), #error> {
             let mut inner = self.get_inner_mut();
             #properties_variable_define
-            
+
             drop(inner);
 
             self.get_wrapped_object().define_variable(name, value)
@@ -69,7 +77,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn resolve_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
             let inner = self.get_inner();
             #properties_resolve
-            
+
             drop(inner);
 
             self.get_wrapped_object().resolve_property(name)
@@ -82,7 +90,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn get_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
             let inner = self.get_inner();
             #properties_get
-            
+
             drop(inner);
 
             self.get_wrapped_object().get_property(name)
@@ -95,7 +103,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn delete_property(&self, name: &Value) -> Result<Option<Value>, #error> {
             let mut inner = self.get_inner_mut();
             #properties_delete
-            
+
             drop(inner);
 
             self.get_wrapped_object().delete_property(name)
@@ -108,7 +116,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn contains_key(&self, name: & #value) -> Result<bool, #error> {
             let inner = self.get_inner();
             #properties_contains
-            
+
             drop(inner);
 
             self.get_wrapped_object().contains_key(name)
@@ -123,7 +131,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let inner = self.get_inner();
 
             #properties
-            
+
             drop(inner);
 
             Ok(props)
@@ -138,7 +146,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let inner = self.get_inner();
 
             #keys
-            
+
             drop(inner);
 
             Ok(keys)
@@ -153,7 +161,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let inner = self.get_inner();
 
             #values
-            
+
             drop(inner);
 
             Ok(values)
@@ -168,9 +176,9 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let mut inner = self.get_inner_mut();
 
             #clear
-            
+
             drop(inner);
-            
+
             Ok(())
         }
     });
@@ -189,11 +197,7 @@ pub enum Act {
     Delete,
 }
 
-pub fn match_prop(
-    properties: &[(Ident, Option<Path>)],
-    r: Act,
-    value_path: &Path,
-) -> TokenStream {
+pub fn match_prop(properties: &[(Ident, Option<Path>)], r: Act, value_path: &Path) -> TokenStream {
     let mut match_properties_define = TokenStream::new();
     let match_non_string = TokenStream::new();
 

@@ -6,8 +6,8 @@ use yavashark_value::Obj;
 
 use crate::object::Object;
 use crate::realm::Realm;
+use crate::{Error, ObjectHandle, Result, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
-use crate::{Error, ObjectHandle, Value, ValueResult, Variable, Result};
 
 #[object(direct(length), to_string)]
 #[derive(Debug)]
@@ -16,12 +16,15 @@ pub struct Array {}
 impl Array {
     pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
-        
-        let mut inner = array.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+
+        let mut inner = array
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
 
         inner.object.set_array(elements);
         inner.length.value = Value::Number(inner.object.array.len() as f64);
-        
+
         drop(inner);
 
         Ok(array)
@@ -33,7 +36,7 @@ impl Array {
             inner: RefCell::new(MutableArray {
                 object: MutObject::with_proto(proto),
                 length: ObjectProperty::new(Value::Number(0.0)),
-            })
+            }),
         }
     }
 
@@ -44,7 +47,7 @@ impl Array {
 
     pub fn override_to_string(&self, realm: &mut Realm) -> Result<String> {
         let mut buf = String::new();
-        
+
         let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
 
         for (_, value) in &inner.object.array {
@@ -63,7 +66,7 @@ impl Array {
         use std::fmt::Write as _;
 
         let mut buf = String::new();
-        
+
         let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
 
         for (_, value) in &inner.object.array {
@@ -90,13 +93,19 @@ impl Array {
     }
 
     pub fn push(&self, value: Value) -> ValueResult {
-        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+        let mut inner = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
 
-        inner.object.array.push((index, Variable::new(value).into()));
+        inner
+            .object
+            .array
+            .push((index, Variable::new(value).into()));
         inner.length.value = Value::Number(index as f64 + 1.0);
-        
+
         Ok(Value::Undefined)
     }
 
@@ -110,7 +119,6 @@ impl Array {
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
                 object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
-                
             }),
             array: obj,
             next: Cell::new(0),
@@ -129,9 +137,12 @@ impl Array {
             .map(ObjectProperty::new)
             .enumerate()
             .collect::<Vec<_>>();
-        
-        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-        
+
+        let mut inner = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
+
         inner.object.array = values;
         inner.length.value = Value::Number(inner.object.array.len() as f64);
 

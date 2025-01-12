@@ -47,7 +47,7 @@ pub fn get_own_property_descriptor(args: Vec<Value>, this: Value, realm: &Realm)
     };
 
     let key = &args[1];
-    
+
     let obj = obj.get();
 
     let Some(prop) = obj.get_property(key)? else {

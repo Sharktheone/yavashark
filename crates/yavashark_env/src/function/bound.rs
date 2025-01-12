@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use std::cell::RefCell;
 use yavashark_macro::object;
 use yavashark_value::Func;
 
@@ -31,7 +31,7 @@ impl BoundFunction {
 
         Ok(ObjectHandle::new(Self {
             func,
-            inner: RefCell::new(MutableBoundFunction { 
+            inner: RefCell::new(MutableBoundFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
             }),
             bound_this: this,

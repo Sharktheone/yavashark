@@ -49,11 +49,11 @@ impl Object {
             inner: RefCell::new(MutObject::with_proto(proto)),
         }
     }
-    
+
     pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<ObjectHandle, Error> {
         Ok(ObjectHandle::new(Self::raw_from_values(values, realm)?))
     }
-    
+
     pub fn raw_from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<Self, Error> {
         Ok(Self {
             inner: RefCell::new(MutObject::from_values(values, realm)?),
@@ -71,7 +71,6 @@ impl Object {
             .try_borrow()
             .map_err(|_| Error::new("Failed to borrow object"))
     }
-    
 }
 
 impl Obj<Realm> for Object {

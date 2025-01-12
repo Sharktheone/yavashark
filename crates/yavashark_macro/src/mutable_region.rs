@@ -17,15 +17,19 @@ impl MutableRegion {
             name,
         }
     }
-    
-    pub(crate) fn with(direct: Vec<(Ident, Option<Path>)>, custom: Vec<Field>, name: Ident) -> Self {
+
+    pub(crate) fn with(
+        direct: Vec<(Ident, Option<Path>)>,
+        custom: Vec<Field>,
+        name: Ident,
+    ) -> Self {
         Self {
             direct,
             custom,
             name,
         }
     }
-    
+
     pub fn full_name(&self) -> Ident {
         Ident::new(&format!("Mutable{}", self.name), self.name.span())
     }
@@ -39,7 +43,6 @@ impl MutableRegion {
         let custom = self.custom.iter().map(|field| field.to_token_stream());
 
         let direct = self.direct.iter().map(|(field, ty)| {
-            
             let prop = match ty {
                 Some(ty) => quote! {
                     #ty
@@ -48,16 +51,14 @@ impl MutableRegion {
                     #prop
                 },
             };
-            
-            
+
             quote! {
                 #field: #prop,
             }
         });
-        
-        
+
         let mut_object = &config.mut_object;
-        
+
         let object = if object {
             quote! {
                 pub object: #mut_object,

@@ -85,13 +85,12 @@ impl Config {
         try_into_value
             .segments
             .push(PathSegment::from(Ident::new("TryIntoValue", span)));
-        
+
         let mut mut_object = env_path.clone();
         mut_object
             .segments
             .push(PathSegment::from(Ident::new("MutObject", span)));
-        
-        
+
         let mut mut_obj = value_path.clone();
         mut_obj
             .segments

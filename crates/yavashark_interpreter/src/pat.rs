@@ -1,12 +1,12 @@
 use swc_common::{Span, DUMMY_SP};
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 
+use crate::Interpreter;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_value::IntoValue;
-use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_pat(realm: &mut Realm, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {

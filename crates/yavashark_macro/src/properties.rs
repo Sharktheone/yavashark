@@ -291,14 +291,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 stringify!(#name)
             });
 
-        let any_cast = 
-            quote! {{
-                let x = x.get();
-                let deez = (**x).as_any().downcast_ref::<Self>()
-                    .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?} trace: {}", #fn_name, this, x.class_name())))?;
+        let any_cast = quote! {{
+            let x = x.get();
+            let deez = (**x).as_any().downcast_ref::<Self>()
+                .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?} trace: {}", #fn_name, this, x.class_name())))?;
 
-                deez.#name(args #realm #this)
-            }};
+            deez.#name(args #realm #this)
+        }};
 
         if prop.get.is_some() && prop.set.is_some() {
             return syn::Error::new(prop.span, "cannot have set and get in on the same function")

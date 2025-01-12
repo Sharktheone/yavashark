@@ -34,7 +34,7 @@ impl Debug for NativeConstructor {
 impl Constructor<Realm> for NativeConstructor {
     fn get_constructor(&self) -> Result<ObjectProperty, Error> {
         let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
-        
+
         Ok(inner.constructor.clone())
     }
 
@@ -119,7 +119,7 @@ impl NativeConstructor {
             let this = this.as_any();
 
             let this = this.downcast_ref::<Self>().expect("unreachable");
-            
+
             let mut inner = this.inner.borrow_mut();
 
             inner.constructor = constructor.into();
@@ -175,7 +175,7 @@ impl NativeConstructor {
             let this = this.as_any();
 
             let this = this.downcast_ref::<Self>().expect("unreachable");
-            
+
             let mut inner = this.inner.borrow_mut();
 
             inner.constructor = constructor.into();
