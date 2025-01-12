@@ -514,7 +514,7 @@ mod tests {
         let proto = Value::Number(42.0);
         let object = Object::with_proto(proto.clone());
 
-        assert_eq!(object.get_property(&"__proto__".into()), Ok(proto));
+        assert_eq!(object.get_property(&"__proto__".into()).unwrap().value, proto);
     }
 
     #[test]
@@ -539,9 +539,9 @@ mod tests {
     #[test]
     fn array_position_non_empty_array() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
-            .inner()
+            .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
 
@@ -554,9 +554,9 @@ mod tests {
     #[test]
     fn insert_array() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
-            .inner()
+            .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
 
@@ -569,9 +569,9 @@ mod tests {
     #[test]
     fn resolve_array() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
-            .inner()
+            .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
 
@@ -583,37 +583,41 @@ mod tests {
     #[test]
     fn get_array() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
-            .inner()
+            .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
+        
+        let inner = object.inner().unwrap();
 
-        let value = object.inner().unwrap().get_array(0);
+        let value = inner.get_array(0).unwrap();
 
-        assert_eq!(value, Some(&Value::Number(42.0)));
+        assert_eq!(&value.value, &Value::Number(42.0));
     }
 
     #[test]
     fn get_array_mut() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
-            .inner()
+            .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
 
-        let value = object.inner().unwrap().get_array_mut(0);
+        let mut inner = object.inner_mut().unwrap();
 
-        assert_eq!(value, Some(&mut Value::Number(42.0)));
+        let value = inner.get_array_mut(0).unwrap();
+
+        assert_eq!(value, &mut Value::Number(42.0));
     }
 
     #[test]
     fn contains_array_key() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
-            .inner()
+            .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
 
@@ -625,7 +629,7 @@ mod tests {
     #[test]
     fn define_property() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
             .define_property(Value::String("key".to_string()), Value::Number(42.0))
             .unwrap();
@@ -645,7 +649,7 @@ mod tests {
     #[test]
     fn resolve_property() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
             .define_property(Value::String("key".to_string()), Value::Number(42.0))
             .unwrap();
@@ -660,7 +664,7 @@ mod tests {
     #[test]
     fn get_property() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
             .define_property(Value::String("key".to_string()), Value::Number(42.0))
             .unwrap();
@@ -669,18 +673,18 @@ mod tests {
             .get_property(&Value::String("key".to_string()))
             .unwrap();
 
-        assert_eq!(value, Some(Value::Number(42.0)));
+        assert_eq!(value.unwrap().value, Value::Number(42.0));
     }
 
     #[test]
     fn contains_key() {
         let realm = Realm::new().unwrap();
-        let mut object = Object::raw(&realm);
+        let object = Object::raw(&realm);
         object
             .define_property(Value::String("key".to_string()), Value::Number(42.0))
             .unwrap();
 
-        let contains = object.contains_key(&Value::String("key".to_string()));
+        let contains = object.contains_key(&Value::String("key".to_string())).unwrap();
 
         assert!(contains);
     }

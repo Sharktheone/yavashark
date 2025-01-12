@@ -1,17 +1,17 @@
 use crate::config::Config;
 use proc_macro2::Ident;
 use quote::{quote, ToTokens};
-use syn::{Field, Path};
+use syn::Field;
 
 pub struct MutableRegion {
-    direct: Vec<(Ident, Option<Path>)>,
+    direct: Vec<Ident>,
     custom: Vec<Field>,
     name: Ident,
 }
 
 impl MutableRegion {
     pub(crate) fn with(
-        direct: Vec<(Ident, Option<Path>)>,
+        direct: Vec<Ident>,
         custom: Vec<Field>,
         name: Ident,
     ) -> Self {
@@ -33,16 +33,7 @@ impl MutableRegion {
 
         let custom = self.custom.iter().map(|field| field.to_token_stream());
 
-        let direct = self.direct.iter().map(|(field, ty)| {
-            let prop = match ty {
-                Some(ty) => quote! {
-                    #ty
-                },
-                None => quote! {
-                    #prop
-                },
-            };
-
+        let direct = self.direct.iter().map(|field| {
             quote! {
                 #field: #prop,
             }

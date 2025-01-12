@@ -1,11 +1,11 @@
+use std::cell::RefCell;
 use std::path::PathBuf;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, NativeFunction, Object, ObjectHandle, Realm, Value, ValueResult};
+use yavashark_env::{ControlFlow, MutObject, NativeFunction, ObjectHandle, Realm, Value, ValueResult, Error, ObjectProperty};
 use yavashark_macro::{object, properties};
-use yavashark_value::Error;
 
 pub fn print(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
@@ -27,24 +27,29 @@ pub fn print(realm: &mut Realm) -> ObjectHandle {
 #[derive(Debug)]
 pub struct Test262 {
     #[allow(unused)]
+    #[mutable]
     realm: Option<Realm>,
 }
 
 impl Test262 {
     pub fn new(realm: &Realm) -> Self {
         Self {
-            object: Object::raw(realm),
-            abstract_module_source: Value::Undefined.into(),
-            realm: None,
+            inner: RefCell::new(MutableTest262 {
+                object: MutObject::new(realm),
+                abstract_module_source: ObjectProperty::new(Value::Undefined),
+                realm: None,
+            }),
         }
     }
 
     #[allow(unused)]
     pub fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
         Self {
-            object: Object::raw(realm),
-            abstract_module_source: Value::Undefined.into(),
-            realm: Some(new_realm),
+            inner: RefCell::new(MutableTest262 {
+                object: MutObject::new(realm),
+                abstract_module_source: Value::Undefined.into(),
+                realm: Some(new_realm),
+            }),
         }
     }
 }
@@ -66,12 +71,12 @@ impl Test262 {
     }
 
     #[prop("detachArrayBuffer")]
-    fn detach_array_buffer(&mut self, _args: Vec<Value>, _realm: &mut Realm) -> ValueResult {
+    fn detach_array_buffer(&self, _args: Vec<Value>, _realm: &mut Realm) -> ValueResult {
         Ok(Value::Undefined)
     }
 
     #[prop("evalScript")]
-    fn eval_script(&mut self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
+    fn eval_script(&self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         let input = args.first().ok_or(Error::ty("expected one argument"))?;
 
         let Value::String(input) = input else {
@@ -91,8 +96,10 @@ impl Test262 {
         let script = p
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
+        
+        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
 
-        let realm = self.realm.as_mut().unwrap_or(realm);
+        let realm = inner.realm.as_mut().unwrap_or(realm);
 
         let mut scope = Scope::global(realm, PathBuf::new());
 

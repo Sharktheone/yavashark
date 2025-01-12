@@ -188,7 +188,13 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     fields.named = new_fields;
 
-    let mutable_region = MutableRegion::with(direct.clone(), custom_mut, input.ident.clone());
+    let mut direct_region = Vec::with_capacity(direct.len());
+
+    for (field, _) in &direct {
+        direct_region.push(field.clone());
+    }
+
+    let mutable_region = MutableRegion::with(direct_region, custom_mut, input.ident.clone());
 
     let region_ident = mutable_region.full_name();
 

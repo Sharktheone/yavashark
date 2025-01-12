@@ -740,90 +740,89 @@ impl<C: Realm> SubAssign for Value<C> {
 
 #[cfg(test)]
 mod tests {
-    use crate::variable::Variable;
-    use crate::{Obj, ObjectProperty};
+    use crate::{Obj, ObjectProperty, Variable};
 
     use super::*;
 
     type Value = super::Value<()>;
-    type Error = crate::Error<()>;
 
     #[derive(Debug, PartialEq)]
     struct Object;
 
     impl Realm for () {}
 
+    #[allow(unused)]
     impl Obj<()> for Object {
-        fn define_property(&mut self, _name: Value, _value: Value) {}
-
-        fn define_variable(&mut self, _name: crate::Value<()>, _value: Variable<()>) {}
-
-        fn resolve_property(&self, _name: &Value) -> Option<ObjectProperty<()>> {
-            None
-        }
-
-        fn get_property(&self, _name: &Value) -> Option<&Value> {
-            None
-        }
-
-        fn define_getter(
-            &mut self,
-            _name: crate::Value<()>,
-            _value: crate::Value<()>,
-        ) -> Result<(), crate::Error<()>> {
+        fn define_property(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
             todo!()
         }
 
-        fn define_setter(
-            &mut self,
-            _name: crate::Value<()>,
-            _value: crate::Value<()>,
-        ) -> Result<(), crate::Error<()>> {
+        fn define_variable(&self, name: crate::Value<()>, value: Variable<()>) -> Result<(), crate::Error<()>> {
             todo!()
         }
 
-        fn get_getter(&self, _name: &crate::Value<()>) -> Option<crate::Value<()>> {
+        fn resolve_property(&self, name: &crate::Value<()>) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
             todo!()
         }
 
-        fn get_setter(&self, _name: &crate::Value<()>) -> Option<crate::Value<()>> {
+        fn get_property(&self, name: &crate::Value<()>) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
             todo!()
         }
 
-        fn delete_property(&mut self, _name: &crate::Value<()>) -> Option<crate::Value<()>> {
-            None
+        fn define_getter(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+            todo!()
+        }
+
+        fn define_setter(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+            todo!()
+        }
+
+        fn get_getter(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
+            todo!()
+        }
+
+        fn get_setter(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
+            todo!()
+        }
+
+        fn delete_property(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
+            todo!()
         }
 
         fn name(&self) -> String {
-            "Object".to_string()
+            todo!()
         }
 
-        fn to_string(&self, _realm: &mut ()) -> Result<String, Error> {
-            Ok(format!("[object {}]", self.name()))
+        fn to_string(&self, realm: &mut ()) -> Result<String, crate::Error<()>> {
+            todo!()
         }
 
-        fn to_string_internal(&self) -> String {
-            format!("[object {}]", self.name())
+        fn to_string_internal(&self) -> Result<String, crate::Error<()>> {
+            todo!()
         }
 
-        fn properties(&self) -> Vec<(Value, Value)> {
-            vec![]
+        fn properties(&self) -> Result<Vec<(crate::Value<()>, crate::Value<()>)>, crate::Error<()>> {
+            todo!()
         }
 
-        fn keys(&self) -> Vec<crate::Value<()>> {
-            vec![]
+        fn keys(&self) -> Result<Vec<crate::Value<()>>, crate::Error<()>> {
+            todo!()
         }
 
-        fn values(&self) -> Vec<crate::Value<()>> {
-            vec![]
+        fn values(&self) -> Result<Vec<crate::Value<()>>, crate::Error<()>> {
+            todo!()
         }
 
-        fn get_array_or_done(&self, _index: usize) -> (bool, Option<crate::Value<()>>) {
-            (false, None)
+        fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<crate::Value<()>>), crate::Error<()>> {
+            todo!()
         }
 
-        fn clear_values(&mut self) {}
+        fn clear_values(&self) -> Result<(), crate::Error<()>> {
+            todo!()
+        }
     }
+
+
 
     impl From<Object> for crate::Object<()> {
         fn from(obj: Object) -> Self {
