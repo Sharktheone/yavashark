@@ -754,71 +754,71 @@ mod tests {
     #[allow(unused)]
     impl Obj<()> for Object {
         fn define_property(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
-            todo!()
+            Ok(())
         }
 
         fn define_variable(&self, name: crate::Value<()>, value: Variable<()>) -> Result<(), crate::Error<()>> {
-            todo!()
+            Ok(())
         }
 
         fn resolve_property(&self, name: &crate::Value<()>) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Some(Value::Undefined.into()))
         }
 
         fn get_property(&self, name: &crate::Value<()>) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Some(Value::Undefined.into()))
         }
 
         fn define_getter(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
-            todo!()
+            Ok(())
         }
 
         fn define_setter(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
-            todo!()
+            Ok(())
         }
 
         fn get_getter(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Value::Undefined.into())
         }
 
         fn get_setter(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Value::Undefined.into())
         }
 
         fn delete_property(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Value::Undefined.into())
         }
 
         fn name(&self) -> String {
-            todo!()
+            "Object".to_string()
         }
 
         fn to_string(&self, realm: &mut ()) -> Result<String, crate::Error<()>> {
-            todo!()
+            Ok("[object Object]".to_string())
         }
 
         fn to_string_internal(&self) -> Result<String, crate::Error<()>> {
-            todo!()
+            Ok("[object Object]".to_string())
         }
 
         fn properties(&self) -> Result<Vec<(crate::Value<()>, crate::Value<()>)>, crate::Error<()>> {
-            todo!()
+            Ok(Vec::new())
         }
 
         fn keys(&self) -> Result<Vec<crate::Value<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Vec::new())
         }
 
         fn values(&self) -> Result<Vec<crate::Value<()>>, crate::Error<()>> {
-            todo!()
+            Ok(Vec::new())
         }
 
         fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<crate::Value<()>>), crate::Error<()>> {
-            todo!()
+            Ok((true, None))
         }
 
         fn clear_values(&self) -> Result<(), crate::Error<()>> {
-            todo!()
+            Ok(())
         }
     }
 
