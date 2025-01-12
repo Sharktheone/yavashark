@@ -462,15 +462,7 @@ impl<C: Realm> Object<C> {
     }
 
     pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {
-        if let Some(to_string) = self.resolve_property(&"toString".into(), realm)? {
-            let to_string = to_string.copy();
-
-            let val = to_string.call(realm, vec![], Value::Object(self.clone()))?;
-
-            val.to_string(realm)
-        } else {
-            self.0.to_string(realm)
-        }
+        self.0.to_string(realm)
     }
 }
 
