@@ -74,7 +74,7 @@ pub fn to_locale_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 }
 
 pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    Ok(this.to_string(realm)?.into())
+    Ok("[object Object]".into())
 }
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
