@@ -37,14 +37,16 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let obj_prop = &conf.object_property;
 
     let properties_define = match_prop(&direct, Act::Set, value);
+    
 
     item.items.push(syn::parse_quote! {
         fn define_property(&self, name: Value, value: Value) -> Result<(), #error> {
             let mut inner = self.get_inner_mut();
-            let inner = self.get_wrapped_object();
             #properties_define
+            
+            drop(inner);
 
-            self.get_wrapped_object().define_property(name, value);
+            self.get_wrapped_object().define_property(name, value)
         }
     });
 
@@ -54,8 +56,10 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn define_variable(&self, name: Value, value: #variable) -> Result<(), #error> {
             let mut inner = self.get_inner_mut();
             #properties_variable_define
+            
+            drop(inner);
 
-            self.get_wrapped_object().define_variable(name, value);
+            self.get_wrapped_object().define_variable(name, value)
         }
     });
 
@@ -65,6 +69,8 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn resolve_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
             let inner = self.get_inner();
             #properties_resolve
+            
+            drop(inner);
 
             self.get_wrapped_object().resolve_property(name)
         }
@@ -73,9 +79,11 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let properties_get = match_prop(&direct, Act::Get, value);
 
     item.items.push(syn::parse_quote! {
-        fn get_property(&self, name: & #value) -> Result<Option<#value>, #error> {
+        fn get_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
             let inner = self.get_inner();
             #properties_get
+            
+            drop(inner);
 
             self.get_wrapped_object().get_property(name)
         }
@@ -87,6 +95,8 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn delete_property(&self, name: &Value) -> Result<Option<Value>, #error> {
             let mut inner = self.get_inner_mut();
             #properties_delete
+            
+            drop(inner);
 
             self.get_wrapped_object().delete_property(name)
         }
@@ -98,6 +108,8 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         fn contains_key(&self, name: & #value) -> Result<bool, #error> {
             let inner = self.get_inner();
             #properties_contains
+            
+            drop(inner);
 
             self.get_wrapped_object().contains_key(name)
         }
@@ -107,12 +119,14 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
-            let mut props = self.get_wrapped_object().properties();
+            let mut props = self.get_wrapped_object().properties()?;
             let inner = self.get_inner();
 
             #properties
+            
+            drop(inner);
 
-            props
+            Ok(props)
         }
     });
 
@@ -120,12 +134,14 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn keys(&self) -> Result<Vec<#value>, #error> {
-            let mut keys = self.get_wrapped_object().keys();
+            let mut keys = self.get_wrapped_object().keys()?;
             let inner = self.get_inner();
 
             #keys
+            
+            drop(inner);
 
-            keys
+            Ok(keys)
         }
     });
 
@@ -133,12 +149,14 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn values(&self) -> Result<Vec<#value>, #error> {
-            let mut values = self.get_wrapped_object().values();
+            let mut values = self.get_wrapped_object().values()?;
             let inner = self.get_inner();
 
             #values
+            
+            drop(inner);
 
-            values
+            Ok(values)
         }
     });
 
@@ -146,10 +164,14 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     item.items.push(syn::parse_quote! {
         fn clear_values(&self) -> Result<(), #error> {
-            self.get_wrapped_object().clear_values();
+            self.get_wrapped_object().clear_values()?;
             let mut inner = self.get_inner_mut();
 
             #clear
+            
+            drop(inner);
+            
+            Ok(())
         }
     });
 
@@ -177,7 +199,7 @@ pub fn match_prop(
 
     for (field, rename) in properties {
         let act = match r {
-            Act::Get => quote! {Some(inner.#field.value)},
+            Act::Get => quote! {Some(inner.#field.clone())},
             // Act::RefMut => quote! {Some(&mut self.#field.value)},
             Act::None => quote! {Some(inner.#field.clone())},
             Act::Set => quote! {inner.#field = value.into()},
