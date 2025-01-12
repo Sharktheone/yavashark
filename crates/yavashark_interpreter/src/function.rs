@@ -1,10 +1,11 @@
+use std::cell::RefCell;
 use crate::Interpreter;
 use log::info;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::array::Array;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable};
+use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Value, ValueResult, Variable, Result, MutObject};
 use yavashark_macro::object;
 use yavashark_value::{Constructor, CustomName, Func, Obj, ObjectProperty};
 
@@ -92,19 +93,26 @@ impl Func<Realm> for JSFunction {
 }
 
 impl Constructor<Realm> for JSFunction {
-    fn get_constructor(&self) -> ObjectProperty<Realm> {
-        self.prototype
+    fn get_constructor(&self) -> Result<ObjectProperty<Realm>> {
+        
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        Ok(inner.prototype
             .value
             .get_property_no_get_set(&"constructor".into())
-            .unwrap_or(Value::Undefined.into())
+            .unwrap_or(Value::Undefined.into()))
     }
 
-    fn value(&self, _realm: &mut Realm) -> Value {
-        Object::with_proto(self.prototype.value.clone()).into()
+    fn value(&self, _realm: &mut Realm) -> ValueResult {
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        Ok(Object::with_proto(inner.prototype.value.clone()).into())
     }
 
-    fn proto(&self, realm: &mut Realm) -> yavashark_value::Value<Realm> {
-        self.prototype.value.clone()
+    fn proto(&self, realm: &mut Realm) -> ValueResult {
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        Ok(inner.prototype.value.clone())
     }
 }
 
