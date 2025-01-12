@@ -3,6 +3,7 @@ use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult, Value};
+use yavashark_value::ErrorKind;
 
 impl Interpreter {
     pub fn run_try(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
@@ -24,7 +25,10 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
         if let Some(catch) = &stmt.handler {
             let scope = &mut Scope::with_parent(scope)?;
             if let Some(param) = &catch.param {
-                let err = ErrorObj::new(err, realm).into();
+                let err = match err.kind {
+                    ErrorKind::Throw(throw) => throw,
+                    _ => ErrorObj::new(err, realm).into(),
+                };
 
                 Interpreter::run_pat(realm, param, scope, err);
             }
