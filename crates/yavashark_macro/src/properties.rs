@@ -365,8 +365,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             quote! {
                 let constructor_function: #value = #native_function::#create("constructor", |args, mut this, realm| {
                     if let #value::Object(x) = this {
-                        let mut x = x.get_mut()?;
-                        let mut deez = (***x).as_any_mut().downcast_mut::<Self>()
+                        let mut x = x.get();
+                        let mut deez = (**x).as_any().downcast_ref::<Self>()
                             .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", "constructor")))?;
                         deez.#constructor(args)?;
                     }
