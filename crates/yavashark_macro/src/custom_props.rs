@@ -220,14 +220,14 @@ pub fn match_prop(properties: &[(Ident, Option<Path>)], r: Act, value_path: &Pat
         if let Some(rename) = rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
-                    stringifyy!(#rename) => {
+                    stringify!(#rename) => {
                         #act;
                         return Ok(());
                     }
                 }
             } else {
                 quote! {
-                    stringifyyy!(#rename) => {
+                    stringify!(#rename) => {
                         return Ok(#act);
                     }
                 }
