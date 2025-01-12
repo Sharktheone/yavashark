@@ -1,8 +1,5 @@
 use crate::realm::Realm;
-use crate::{
-    Error, MutObject, NativeConstructor, NativeFunction, Object, ObjectHandle, Result, Value,
-    ValueResult,
-};
+use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Result, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
 
@@ -80,7 +77,6 @@ impl ErrorObj {
         Ok(self.error.to_string())
     }
 
-    #[must_use]
     pub fn override_to_string_internal(&self) -> Result<String> {
         Ok(self.error.to_string())
     }

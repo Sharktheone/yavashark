@@ -61,7 +61,6 @@ impl Array {
         Ok(buf)
     }
 
-    #[must_use]
     pub fn override_to_string_internal(&self) -> Result<String> {
         use std::fmt::Write as _;
 
@@ -182,12 +181,13 @@ impl ArrayIterator {
             return Ok(obj.into());
         }
 
-        let value = if let Some(value) = value {
-            value
-        } else {
-            self.done.set(true);
-            Value::Undefined
-        };
+        let value = value.map_or_else(
+            || {
+                self.done.set(true);
+                Value::Undefined
+            },
+            |value| value,
+        );
 
         let obj = Object::new(realm);
         obj.define_property("value".into(), value)?;

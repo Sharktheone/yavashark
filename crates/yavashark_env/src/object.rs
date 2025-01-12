@@ -27,6 +27,7 @@ pub struct MutObject {
 
 impl Object {
     #[must_use]
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(realm: &Realm) -> ObjectHandle {
         ObjectHandle::new(Self::raw(realm))
     }
@@ -38,14 +39,14 @@ impl Object {
 
     #[must_use]
     pub fn raw(realm: &Realm) -> Self {
-        Object {
+        Self {
             inner: RefCell::new(MutObject::new(realm)),
         }
     }
 
     #[must_use]
     pub fn raw_with_proto(proto: Value) -> Self {
-        Object {
+        Self {
             inner: RefCell::new(MutObject::with_proto(proto)),
         }
     }
@@ -75,13 +76,11 @@ impl Object {
 
 impl Obj<Realm> for Object {
     fn define_property(&self, name: Value, value: Value) -> Result<(), Error> {
-        self.inner_mut()?.define_property(name, value);
-        Ok(())
+        self.inner_mut()?.define_property(name, value)
     }
 
     fn define_variable(&self, name: Value, value: Variable) -> Result<(), Error> {
-        self.inner_mut()?.define_variable(name, value);
-        Ok(())
+        self.inner_mut()?.define_variable(name, value)
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
@@ -118,8 +117,7 @@ impl Obj<Realm> for Object {
 
     fn name(&self) -> String {
         self.inner()
-            .map(|i| i.name())
-            .unwrap_or_else(|_| "Object".to_string())
+            .map_or_else(|_| "Object".to_string(), |i| i.name())
     }
 
     fn to_string(&self, realm: &mut Realm) -> Result<String, Error> {

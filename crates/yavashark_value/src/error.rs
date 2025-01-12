@@ -169,6 +169,7 @@ impl<C: Realm> Error<C> {
         self.stacktrace.attach_function_stack(function, loc);
     }
 
+    #[must_use]
     pub fn borrow_error() -> Self {
         Self::new("Failed to borrow object")
     }

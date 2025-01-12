@@ -55,6 +55,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
     fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;
     fn to_string_internal(&self) -> Result<String, Error<R>>;
 
+    #[allow(clippy::type_complexity)]
     fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>>;
 
     fn keys(&self) -> Result<Vec<Value<R>>, Error<R>>;
@@ -159,6 +160,7 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
     fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;
     fn to_string_internal(&self) -> Result<String, Error<R>>;
 
+    #[allow(clippy::type_complexity)]
     fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>>;
 
     fn keys(&self) -> Result<Vec<Value<R>>, Error<R>>;
@@ -338,7 +340,7 @@ impl<C: Realm> Display for Object<C> {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.to_string_internal() {
-            Ok(s) => write!(f, "{}", s),
+            Ok(s) => write!(f, "{s}"),
             Err(_) => write!(f, "Error: error while converting object to string"),
         }
     }
@@ -405,10 +407,8 @@ impl<C: Realm> Object<C> {
 
     #[must_use]
     pub fn custom_refs(&self) -> Vec<GcRef<BoxedObj<C>>> {
-        /// Safety: unsafe is only for the implementer, not for us - we are safe
-        unsafe {
-            self.custom_gc_refs()
-        }
+        // Safety: unsafe is only for the implementer, not for us - we are safe
+        unsafe { self.custom_gc_refs() }
     }
 
     #[must_use]
@@ -454,11 +454,11 @@ impl<C: Realm> From<Box<dyn Obj<C>>> for Object<C> {
 impl<C: Realm> Object<C> {
     #[must_use]
     pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
-        Self(Gc::new((BoxedObj::new(obj))))
+        Self(Gc::new(BoxedObj::new(obj)))
     }
 
     pub fn new<O: Obj<C> + 'static>(obj: O) -> Self {
-        Self(Gc::new((BoxedObj::new(Box::new(obj)))))
+        Self(Gc::new(BoxedObj::new(Box::new(obj))))
     }
 
     pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {

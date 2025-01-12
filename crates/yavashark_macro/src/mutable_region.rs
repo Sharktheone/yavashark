@@ -10,14 +10,6 @@ pub struct MutableRegion {
 }
 
 impl MutableRegion {
-    fn new(name: Ident) -> Self {
-        Self {
-            direct: vec![],
-            custom: vec![],
-            name,
-        }
-    }
-
     pub(crate) fn with(
         direct: Vec<(Ident, Option<Path>)>,
         custom: Vec<Field>,
@@ -35,7 +27,6 @@ impl MutableRegion {
     }
 
     pub fn generate(&self, config: &Config, object: bool) -> proc_macro2::TokenStream {
-        let name = &self.name;
         let full_name = self.full_name();
 
         let prop = &config.object_property;

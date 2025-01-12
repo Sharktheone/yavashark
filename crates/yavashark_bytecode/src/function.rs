@@ -2,7 +2,7 @@ use crate::data::DataSection;
 use crate::{FunctionBlueprint, Instruction};
 use std::cell::RefCell;
 use yavashark_env::realm::Realm;
-use yavashark_env::{MutObject, Object, ObjectHandle};
+use yavashark_env::{MutObject, ObjectHandle};
 use yavashark_macro::object;
 
 #[derive(Debug)]

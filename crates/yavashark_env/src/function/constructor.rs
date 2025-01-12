@@ -114,7 +114,7 @@ impl NativeConstructor {
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let mut this = handle.get();
+            let this = handle.get();
 
             let this = this.as_any();
 
@@ -170,7 +170,7 @@ impl NativeConstructor {
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let mut this = handle.get();
+            let this = handle.get();
 
             let this = this.as_any();
 

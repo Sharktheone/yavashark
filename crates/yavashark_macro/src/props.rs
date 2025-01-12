@@ -163,7 +163,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             {
                 let prop = #prop;
 
-                obj.define_variable(#name.into(), #variable::new(prop.into()));
+                obj.define_variable(#name.into(), #variable::new(prop.into()))?;
             }
         });
     }

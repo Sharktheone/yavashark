@@ -192,7 +192,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let region_ident = mutable_region.full_name();
 
-    let mut inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
+    let inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
     fields.named.push(syn::Field {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,

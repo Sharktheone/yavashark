@@ -61,6 +61,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().to_string_internal()
     }
 
+    #[allow(clippy::type_complexity)]
     fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>> {
         self.get_wrapped_object().properties()
     }

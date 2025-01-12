@@ -1,4 +1,4 @@
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Result, Value};
+use crate::{Error, MutObject, ObjectHandle, Realm, Result, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;

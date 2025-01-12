@@ -1,6 +1,4 @@
-use crate::{AsAny, BoxedObj, Error, Obj, Object, Realm, Value};
-use std::any::type_name;
-use yavashark_garbage::collectable::{OwningGcMutRefCellGuard, OwningGcRefCellGuard};
+use crate::{Error, Object, Realm, Value};
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {

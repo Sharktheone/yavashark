@@ -1,11 +1,11 @@
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
-use yavashark_value::{MutObj, Obj, ObjectImpl};
+use yavashark_value::{MutObj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -78,7 +78,7 @@ impl NativeFunction {
 
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
-                constructor: ObjectProperty::new(Value::Undefined.into()),
+                constructor: Value::Undefined.into(),
             }),
         };
 
@@ -114,7 +114,7 @@ impl NativeFunction {
             special_constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
-                constructor: ObjectProperty::new(Value::Undefined.into()),
+                constructor: Value::Undefined.into(),
             }),
         };
 
@@ -150,7 +150,7 @@ impl NativeFunction {
             special_constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
-                constructor: ObjectProperty::new(Value::Undefined.into()),
+                constructor: Value::Undefined.into(),
             }),
         };
 
@@ -160,7 +160,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get();
+            let this = handle.get();
 
             let this = this.as_any();
 
@@ -186,7 +186,7 @@ impl NativeFunction {
             special_constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
-                constructor: ObjectProperty::new(Value::Undefined.into()),
+                constructor: Value::Undefined.into(),
             }),
         };
 
@@ -196,7 +196,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get();
+            let this = handle.get();
 
             let this = this.as_any();
 
@@ -222,7 +222,7 @@ impl NativeFunction {
             special_constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
-                constructor: ObjectProperty::new(Value::Undefined.into()),
+                constructor: Value::Undefined.into(),
             }),
         };
 
@@ -232,7 +232,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get();
+            let this = handle.get();
 
             let this = this.as_any();
 
@@ -255,7 +255,7 @@ impl NativeFunction {
                 special_constructor: false,
                 inner: RefCell::new(MutNativeFunction {
                     object: MutObject::with_proto(Value::Undefined),
-                    constructor: ObjectProperty::new(Value::Undefined.into()),
+                    constructor: Value::Undefined.into(),
                 }),
             },
             true,
@@ -345,7 +345,7 @@ impl NativeFunctionBuilder {
 
         #[allow(clippy::expect_used)]
         {
-            let mut this = handle.get();
+            let this = handle.get();
 
             let this = this.as_any();
 
