@@ -177,17 +177,17 @@ impl Obj<Realm> for FunctionPrototype {
         this.object.resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<Value>> {
+    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
 
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" => return Ok(Some(this.apply.value.copy())),
-                "bind" => return Ok(Some(this.bind.value.copy())),
-                "call" => return Ok(Some(this.call.value.copy())),
-                "constructor" => return Ok(Some(this.constructor.value.copy())),
-                "length" => return Ok(Some(this.length.value.copy())),
-                "name" => return Ok(Some(this.name.value.copy())),
+                "apply" => return Ok(Some(this.apply.copy())),
+                "bind" => return Ok(Some(this.bind.copy())),
+                "call" => return Ok(Some(this.call.copy())),
+                "constructor" => return Ok(Some(this.constructor.copy())),
+                "length" => return Ok(Some(this.length.copy())),
+                "name" => return Ok(Some(this.name.copy())),
                 _ => {}
             }
         }

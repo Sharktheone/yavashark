@@ -78,8 +78,8 @@ impl Obj<Realm> for Object {
         self.inner()?.resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<Value>, Error> {
-        Ok(self.inner()?.get_property(name).map(|v| v.copy()))
+    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
+        self.inner()?.get_property(name)
     }
 
     fn define_getter(&self, name: Value, value: Value) -> Result<(), Error> {
@@ -241,11 +241,11 @@ impl MutObject {
     }
 
     #[must_use]
-    pub fn get_array(&self, index: usize) -> Option<&Value> {
+    pub fn get_array(&self, index: usize) -> Option<&ObjectProperty> {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).map(|v| &v.1.value);
+            return self.array.get(i).map(|v| &v.1);
         }
 
         None
@@ -338,9 +338,9 @@ impl MutObj<Realm> for MutObject {
             }))
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<Value>, Error> {
+    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
         if name == &Value::String("__proto__".to_string()) {
-            return Ok(Some(self.prototype.value.copy()));
+            return Ok(Some(self.prototype.copy()));
         }
 
         if let Value::Number(n) = name {
@@ -348,7 +348,7 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let Some(prop) = self.properties.get(name) {
-            return Ok(Some(prop.value.copy()));
+            return Ok(Some(prop.copy()));
         }
 
         Ok(None)

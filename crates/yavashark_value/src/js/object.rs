@@ -37,7 +37,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
 
     fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
-    fn get_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
+    fn get_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
     fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
     fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
@@ -141,7 +141,7 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
 
     fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
-    fn get_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
+    fn get_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>>;
 
     fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
     fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
@@ -390,7 +390,7 @@ impl<C: Realm> Object<C> {
         self.0.resolve_property(name)
     }
 
-    pub fn get_property(&self, name: &Value<C>) -> Result<Value<C>, Error<C>> {
+    pub fn get_property(&self, name: &Value<C>) -> Result<ObjectProperty<C>, Error<C>> {
         self.0
             .get_property(name)?
             .ok_or(Error::reference_error(format!(

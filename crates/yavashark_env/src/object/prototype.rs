@@ -6,7 +6,6 @@ use std::any::Any;
 use std::cell::RefCell;
 use yavashark_value::{MutObj, Obj};
 
-use crate::object::Object;
 use crate::realm::Realm;
 use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, Variable};
 
@@ -233,27 +232,27 @@ impl Obj<Realm> for Prototype {
         this.object.resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<Value>> {
+    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
         let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
 
         if let Value::String(name) = name {
             match name.as_str() {
-                "__define_getter__" => return Ok(Some(this.defined_getter.value.copy())),
-                "__define_setter__" => return Ok(Some(this.defined_setter.value.copy())),
-                "__lookup_getter__" => return Ok(Some(this.lookup_getter.value.copy())),
-                "__lookup_setter__" => return Ok(Some(this.lookup_setter.value.copy())),
-                "constructor" => return Ok(Some(this.constructor.value.copy())),
-                "hasOwnProperty" => return Ok(Some(this.has_own_property.value.copy())),
+                "__define_getter__" => return Ok(Some(this.defined_getter.copy())),
+                "__define_setter__" => return Ok(Some(this.defined_setter.copy())),
+                "__lookup_getter__" => return Ok(Some(this.lookup_getter.copy())),
+                "__lookup_setter__" => return Ok(Some(this.lookup_setter.copy())),
+                "constructor" => return Ok(Some(this.constructor.copy())),
+                "hasOwnProperty" => return Ok(Some(this.has_own_property.copy())),
                 "getOwnPropertyDescriptor" => {
-                    return Ok(Some(this.get_own_property_descriptor.value.copy()))
+                    return Ok(Some(this.get_own_property_descriptor.copy()))
                 }
-                "isPrototypeOf" => return Ok(Some(this.is_prototype_of.value.copy())),
+                "isPrototypeOf" => return Ok(Some(this.is_prototype_of.copy())),
                 "propertyIsEnumerable" => {
-                    return Ok(Some(this.property_is_enumerable.value.copy()))
+                    return Ok(Some(this.property_is_enumerable.copy()))
                 }
-                "toLocaleString" => return Ok(Some(this.to_locale_string.value.copy())),
-                "toString" => return Ok(Some(this.to_string.value.copy())),
-                "valueOf" => return Ok(Some(this.value_of.value.copy())),
+                "toLocaleString" => return Ok(Some(this.to_locale_string.copy())),
+                "toString" => return Ok(Some(this.to_string.copy())),
+                "valueOf" => return Ok(Some(this.value_of.copy())),
                 _ => {}
             }
         }

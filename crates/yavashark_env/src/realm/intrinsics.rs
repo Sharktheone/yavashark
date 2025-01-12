@@ -19,7 +19,8 @@ macro_rules! constructor {
             pub fn [<$name _constructor>] (&self) -> Variable {
                 self.$name
                     .get_property(&"constructor".into())
-                    .unwrap_or(Value::Undefined)
+                    .unwrap_or(Value::Undefined.into())
+                    .value //TODO: theoretically someone could use getters and setters here and then this would be wrong
                     .into()
             }
         }

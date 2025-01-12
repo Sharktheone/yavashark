@@ -26,7 +26,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
+    fn get_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
         self.get_wrapped_object().get_property(name)
     }
 
@@ -156,7 +156,7 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::resolve_property(self, name)
     }
 
-    fn get_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
+    fn get_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
         ObjectImpl::get_property(self, name)
     }
 

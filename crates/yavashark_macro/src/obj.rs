@@ -346,6 +346,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_define
+                
                 inner.object.define_property(name, value)
             }
 
@@ -353,7 +354,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut inner = self.inner.borrow_mut();
                 #properties_variable_define
                 
-
                 inner.object.define_variable(name, value)
             }
 
@@ -364,7 +364,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 inner.object.resolve_property(name)
             }
 
-            fn get_property(&self, name: &#value) -> Result<Option<#value>, #error> {
+            fn get_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
                 let inner = self.inner.borrow();
                 #properties_get
 
