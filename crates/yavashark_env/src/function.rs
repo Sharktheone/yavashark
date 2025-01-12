@@ -20,7 +20,7 @@ type NativeFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction, bool);
 
-struct MutNativeFunction {
+pub struct MutNativeFunction {
     pub object: MutObject,
     pub constructor: ObjectProperty,
 }
@@ -34,17 +34,16 @@ pub struct NativeFunction {
 
 #[custom_props(constructor)]
 impl ObjectImpl<Realm> for NativeFunction {
-    
     type Inner = MutNativeFunction;
-    
+
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
         RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
     }
-    
+
     fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
         self.inner.borrow()
     }
-    
+
     fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }

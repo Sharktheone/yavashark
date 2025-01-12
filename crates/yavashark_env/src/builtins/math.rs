@@ -1,4 +1,5 @@
-use crate::{Error, Object, ObjectHandle, Realm, Result, Value};
+use std::cell::RefCell;
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Result, Value};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
@@ -10,7 +11,9 @@ impl Math {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Result<ObjectHandle> {
         let mut this = Self {
-            object: Object::raw_with_proto(proto.into()),
+            inner: RefCell::new(MutableMath {
+                object: MutObject::with_proto(proto.into()),
+            }),
         };
 
         this.initialize(func.into())?;

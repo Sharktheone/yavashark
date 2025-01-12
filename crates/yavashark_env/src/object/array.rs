@@ -1,23 +1,28 @@
 #![allow(clippy::needless_pass_by_value)]
 
+use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, properties};
 use yavashark_value::Obj;
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::ObjectProperty;
-use crate::{Error, ObjectHandle, Value, ValueResult, Variable};
+use crate::{MutObject, ObjectProperty};
+use crate::{Error, ObjectHandle, Value, ValueResult, Variable, Result};
 
 #[object(direct(length), to_string)]
 #[derive(Debug)]
 pub struct Array {}
 
 impl Array {
-    pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self, Error> {
-        let mut array = Self::new(realm.intrinsics.array.clone().into());
+    pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self> {
+        let array = Self::new(realm.intrinsics.array.clone().into());
+        
+        let mut inner = array.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
 
-        array.object.set_array(elements);
-        array.length.value = Value::Number(array.object.array.len() as f64);
+        inner.object.set_array(elements);
+        inner.length.value = Value::Number(inner.object.array.len() as f64);
+        
+        drop(inner);
 
         Ok(array)
     }
@@ -25,8 +30,10 @@ impl Array {
     #[must_use]
     pub fn new(proto: Value) -> Self {
         Self {
-            object: Object::raw_with_proto(proto),
-            length: ObjectProperty::new(Value::Number(0.0)),
+            inner: RefCell::new(MutableArray {
+                object: MutObject::with_proto(proto),
+                length: ObjectProperty::new(Value::Number(0.0)),
+            })
         }
     }
 
@@ -35,10 +42,12 @@ impl Array {
         Self::new(realm.intrinsics.array.clone().into())
     }
 
-    pub fn override_to_string(&self, realm: &mut Realm) -> Result<String, Error> {
+    pub fn override_to_string(&self, realm: &mut Realm) -> Result<String> {
         let mut buf = String::new();
+        
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
 
-        for (_, value) in &self.object.array {
+        for (_, value) in &inner.object.array {
             buf.push_str(&value.value.to_string(realm)?);
             buf.push_str(", ");
         }
@@ -50,12 +59,14 @@ impl Array {
     }
 
     #[must_use]
-    pub fn override_to_string_internal(&self) -> String {
+    pub fn override_to_string_internal(&self) -> Result<String> {
         use std::fmt::Write as _;
 
         let mut buf = String::new();
+        
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
 
-        for (_, value) in &self.object.array {
+        for (_, value) in &inner.object.array {
             let _ = write!(buf, "{}", value.value);
 
             buf.push_str(", ");
@@ -64,7 +75,7 @@ impl Array {
         buf.pop();
         buf.pop();
 
-        buf
+        Ok(buf)
     }
 }
 
@@ -78,11 +89,15 @@ impl Array {
         ObjectHandle::new(this).into()
     }
 
-    pub fn push(&mut self, value: Value) {
-        let index = self.object.array.last().map_or(0, |(i, _)| *i + 1);
+    pub fn push(&self, value: Value) -> ValueResult {
+        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
+        let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
 
-        self.object.array.push((index, Variable::new(value).into()));
-        self.length.value = Value::Number(index as f64 + 1.0);
+        inner.object.array.push((index, Variable::new(value).into()));
+        inner.length.value = Value::Number(index as f64 + 1.0);
+        
+        Ok(Value::Undefined)
     }
 
     #[prop(crate::Symbol::ITERATOR)]
@@ -93,10 +108,13 @@ impl Array {
         };
 
         let iter = ArrayIterator {
-            object: Object::raw_with_proto(realm.intrinsics.array_iter.clone().into()),
-            inner: obj,
-            next: 0,
-            done: false,
+            inner: RefCell::new(MutableArrayIterator {
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                
+            }),
+            array: obj,
+            next: Cell::new(0),
+            done: Cell::new(false),
         };
 
         let iter: Box<dyn Obj<Realm>> = Box::new(iter);
@@ -105,14 +123,17 @@ impl Array {
     }
 
     #[constructor(special)]
-    fn construct(&mut self, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, args: Vec<Value>) -> ValueResult {
         let values = args
             .into_iter()
             .map(ObjectProperty::new)
             .enumerate()
             .collect::<Vec<_>>();
-        self.object.array = values;
-        self.length.value = Value::Number(self.object.array.len() as f64);
+        
+        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+        
+        inner.object.array = values;
+        inner.length.value = Value::Number(inner.object.array.len() as f64);
 
         Ok(Value::Undefined)
     }
@@ -122,30 +143,28 @@ impl Array {
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub struct ArrayIterator {
-    inner: ObjectHandle,
-    next: usize,
-    done: bool,
+    array: ObjectHandle,
+    next: Cell<usize>,
+    done: Cell<bool>,
 }
 
 #[properties]
 impl ArrayIterator {
     #[prop]
-    pub fn next(&mut self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
-        if self.done {
+    pub fn next(&self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
+        if self.done.get() {
             let obj = Object::new(realm);
             obj.define_property("value".into(), Value::Undefined)?;
             obj.define_property("done".into(), Value::Boolean(true))?;
             return Ok(obj.into());
         }
 
-        let inner = self.inner.get()?;
+        let (done, value) = self.array.get_array_or_done(self.next.get())?;
 
-        let (done, value) = inner.get_array_or_done(self.next);
-
-        self.next += 1;
+        self.next.set(self.next.get() + 1);
 
         if done {
-            self.done = true;
+            self.done.set(true);
             let obj = Object::new(realm);
             obj.define_property("value".into(), Value::Undefined)?;
             obj.define_property("done".into(), Value::Boolean(true))?;
@@ -155,13 +174,13 @@ impl ArrayIterator {
         let value = if let Some(value) = value {
             value
         } else {
-            self.done = true;
+            self.done.set(true);
             Value::Undefined
         };
 
         let obj = Object::new(realm);
         obj.define_property("value".into(), value)?;
-        obj.define_property("done".into(), Value::Boolean(self.done))?;
+        obj.define_property("done".into(), Value::Boolean(self.done.get()))?;
 
         Ok(obj.into())
     }

@@ -1,7 +1,8 @@
+use std::cell::RefCell;
 use crate::data::DataSection;
 use crate::{FunctionBlueprint, Instruction};
 use yavashark_env::realm::Realm;
-use yavashark_env::{Object, ObjectHandle};
+use yavashark_env::{MutObject, Object, ObjectHandle};
 use yavashark_macro::object;
 
 #[derive(Debug)]
@@ -16,10 +17,12 @@ pub struct BytecodeFunction {
 impl BytecodeFunction {
     #[must_use]
     pub fn from_blueprint(b: FunctionBlueprint, realm: &Realm) -> ObjectHandle {
-        let object = Object::raw(realm);
+        let object = MutObject::with_proto(realm.intrinsics.func.clone().into());
 
         let this = Self {
-            object,
+            inner: RefCell::new(MutableBytecodeFunction {
+                object,
+            }),
             name: b.name,
             params: b.params,
             body: b.body,

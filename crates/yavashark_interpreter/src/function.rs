@@ -39,12 +39,14 @@ impl JSFunction {
         scope.copy_path();
 
         let this = Self {
+            inner: RefCell::new(MutableJSFunction {
+                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                prototype: prototype.clone().into(),
+            }),
             name,
             params,
             block,
             scope,
-            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
-            prototype: prototype.clone().into(),
         };
 
         let handle = ObjectHandle::new(this);

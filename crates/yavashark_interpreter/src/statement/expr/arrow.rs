@@ -1,8 +1,9 @@
+use std::cell::RefCell;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Func;
-use yavashark_env::{ControlFlow, Object, ObjectHandle, Realm, RuntimeResult, Value, ValueResult};
+use yavashark_env::{ControlFlow, MutObject, Object, ObjectHandle, Realm, RuntimeResult, Value, ValueResult};
 use yavashark_macro::object;
 
 use crate::Interpreter;
@@ -48,7 +49,10 @@ impl Interpreter {
         let this = scope.this()?.copy();
 
         let arrow = ArrowFunction {
-            object: Object::raw_with_proto(realm.intrinsics.func.clone().into()),
+            inner: RefCell::new(MutableArrowFunction {
+                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                
+            }),
             expr: stmt.clone(),
             this,
             scope: scope.clone(),

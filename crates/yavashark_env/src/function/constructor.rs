@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
@@ -5,7 +6,7 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
-use crate::{Error, Object, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 
@@ -32,7 +33,9 @@ impl Debug for NativeConstructor {
 
 impl Constructor<Realm> for NativeConstructor {
     fn get_constructor(&self) -> Result<ObjectProperty, Error> {
-        Ok(self.constructor.clone())
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        
+        Ok(inner.constructor.clone())
     }
 
     fn special_constructor(&self) -> bool {
@@ -95,13 +98,15 @@ impl NativeConstructor {
         let f_value = value.map(|f| Box::new(f) as ValueFn);
 
         let this = Self {
+            inner: RefCell::new(MutableNativeConstructor {
+                object: MutObject::with_proto(self_proto),
+                constructor: Value::Undefined.into(),
+            }),
             name,
             f: Box::new(f),
             f_value,
             proto,
             special: false,
-            object: Object::raw_with_proto(self_proto),
-            constructor: Value::Undefined.into(),
         };
 
         let handle = ObjectHandle::new(this);
@@ -114,8 +119,10 @@ impl NativeConstructor {
             let this = this.as_any();
 
             let this = this.downcast_ref::<Self>().expect("unreachable");
+            
+            let mut inner = this.inner.borrow_mut();
 
-            this.constructor = constructor.into();
+            inner.constructor = constructor.into();
         }
 
         handle
@@ -147,13 +154,15 @@ impl NativeConstructor {
         let f_value = value.map(|f| Box::new(f) as ValueFn);
 
         let this = Self {
+            inner: RefCell::new(MutableNativeConstructor {
+                object: MutObject::with_proto(self_proto),
+                constructor: Value::Undefined.into(),
+            }),
             name,
             f: Box::new(f),
             f_value,
             proto,
             special: true,
-            object: Object::raw_with_proto(self_proto),
-            constructor: Value::Undefined.into(),
         };
 
         let handle = ObjectHandle::new(this);
@@ -166,8 +175,10 @@ impl NativeConstructor {
             let this = this.as_any();
 
             let this = this.downcast_ref::<Self>().expect("unreachable");
+            
+            let mut inner = this.inner.borrow_mut();
 
-            this.constructor = constructor.into();
+            inner.constructor = constructor.into();
         }
 
         handle
