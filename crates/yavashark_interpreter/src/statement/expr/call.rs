@@ -28,7 +28,7 @@ impl Interpreter {
                 let proto = class.prototype(realm)?;
                 let sup = proto.prototype(realm)?;
 
-                let constructor = sup.as_object()?.get_constructor();
+                let constructor = sup.as_object()?.constructor()?;
 
                 let constructor = constructor.resolve(proto.copy(), realm)?;
 

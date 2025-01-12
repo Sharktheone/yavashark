@@ -9,7 +9,7 @@ impl Interpreter {
         let obj = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
         match obj {
-            Value::Object(obj) => Self::run_for_in_obj(realm, &***obj.get()?, stmt, scope),
+            Value::Object(obj) => Self::run_for_in_obj(realm, &**obj.get(), stmt, scope),
             _ => Err(Error::ty_error(format!("{obj:?} is not an object")).into()),
         }
     }
@@ -46,7 +46,7 @@ impl Interpreter {
             .sym
             .to_string();
 
-        for key in obj.keys() {
+        for key in obj.keys()? {
             scope.declare_var(decl.clone(), key);
 
             let result = Self::run_statement(realm, &stmt.body, scope);

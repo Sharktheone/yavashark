@@ -5,7 +5,7 @@ use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
-
+use yavashark_value::IntoValue;
 use crate::Interpreter;
 
 impl Interpreter {
@@ -98,9 +98,9 @@ impl Interpreter {
                                 }
                             }
 
-                            let rest_obj = Object::from_values(rest_props, realm).into_value();
+                            let rest_obj = Object::from_values(rest_props, realm)?;
 
-                            Self::run_pat(realm, &rest.arg, scope, rest_obj)?;
+                            Self::run_pat(realm, &rest.arg, scope, rest_obj.into_value())?;
                         }
                     }
                 }

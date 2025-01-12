@@ -49,6 +49,16 @@ impl Object {
             inner: RefCell::new(MutObject::with_proto(proto)),
         }
     }
+    
+    pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<ObjectHandle, Error> {
+        Ok(ObjectHandle::new(Self::raw_from_values(values, realm)?))
+    }
+    
+    pub fn raw_from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<Self, Error> {
+        Ok(Self {
+            inner: RefCell::new(MutObject::from_values(values, realm)?),
+        })
+    }
 
     pub fn inner_mut(&self) -> Result<RefMut<MutObject>, Error> {
         self.inner
@@ -61,6 +71,7 @@ impl Object {
             .try_borrow()
             .map_err(|_| Error::new("Failed to borrow object"))
     }
+    
 }
 
 impl Obj<Realm> for Object {
@@ -141,7 +152,7 @@ impl Obj<Realm> for Object {
     }
 
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
-        self.inner()?.call(realm, args, this)
+        self.inner_mut()?.call(realm, args, this)
     }
 
     fn prototype(&self) -> Result<ObjectProperty, Error> {
@@ -285,7 +296,6 @@ impl MutObject {
         found
     }
 
-    #[must_use]
     pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<Self, Error> {
         let mut object = Self::new(realm);
 
@@ -487,14 +497,12 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let Value::Object(proto) = self.prototype()?.value {
-            let Ok(proto) = proto.get() else {
-                return Value::Undefined.into();
-            };
+            let proto = proto.get();
 
             return proto.constructor();
         }
 
-        Value::Undefined.into()
+        Ok(Value::Undefined.into())
     }
 }
 

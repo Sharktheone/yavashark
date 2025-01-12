@@ -17,16 +17,16 @@ impl Interpreter {
         };
 
         let this = constructor
-            .get_constructor_value(realm)
+            .get_constructor_value(realm)?
             .ok_or(ControlFlow::error_type(format!(
                 "{:?} is not a constructor",
                 stmt.callee
             )))?;
 
-        let f = if constructor.special_constructor()? {
+        let f = if constructor.special_constructor() {
             constructor
         } else {
-            let Value::Object(o) = constructor.get_constructor().value else {
+            let Value::Object(o) = constructor.constructor()?.value else {
                 return Err(ControlFlow::error_type(format!(
                     "{:?} is not a constructor",
                     stmt.callee
