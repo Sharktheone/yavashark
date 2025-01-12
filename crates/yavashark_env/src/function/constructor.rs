@@ -15,7 +15,7 @@ pub struct NativeConstructor {
     /// The name of the constructor
     pub name: String,
     /// The function that is called when the constructor is called
-    pub f: Box<dyn Fn() -> Value>,
+    pub f: Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>,
     /// The function that returns the constructor value
     pub f_value: Option<ValueFn>,
     #[gc]
@@ -58,7 +58,7 @@ impl Constructor<Realm> for NativeConstructor {
 impl Func<Realm> for NativeConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         if self.special {
-            (self.f)().call(realm, args, this.copy())?;
+            (self.f)(args, this, realm)?;
 
             Ok(Value::Undefined)
         } else {
@@ -74,7 +74,7 @@ impl NativeConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         name: String,
-        f: impl Fn() -> Value + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         value: Option<ValueFn>,
         realm: &Realm,
     ) -> ObjectHandle {
@@ -90,7 +90,7 @@ impl NativeConstructor {
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: String,
-        f: impl Fn() -> Value + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         value: Option<ValueFn>,
         proto: Value,
         self_proto: Value,
@@ -130,7 +130,7 @@ impl NativeConstructor {
 
     pub fn special(
         name: String,
-        f: impl Fn() -> Value + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         value: Option<ValueFn>,
         realm: &Realm,
     ) -> ObjectHandle {
@@ -146,7 +146,7 @@ impl NativeConstructor {
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: String,
-        f: impl Fn() -> Value + 'static,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         value: Option<ValueFn>,
         proto: Value,
         self_proto: Value,

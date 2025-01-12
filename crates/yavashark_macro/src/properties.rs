@@ -356,13 +356,13 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let constructor_fn = if raw {
             quote! {
-                let constructor_function: #value = #native_function::#create("constructor", |args, this, realm| {
+                |args, this, realm| {
                     Self::#constructor(args, this, realm)
-                }, func_proto.copy()).into();
+                }
             }
         } else {
             quote! {
-                let constructor_function: #value = #native_function::#create("constructor", |args, mut this, realm| {
+                |args, mut this, realm| {
                     if let #value::Object(x) = this {
                         let mut x = x.get();
                         let mut deez = (**x).as_any().downcast_ref::<Self>()
@@ -372,7 +372,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                     Ok(Value::Undefined)
 
-                }, func_proto.copy()).into();
+                }
             }
         };
 
@@ -387,11 +387,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         let prop = quote! {
-            #constructor_fn
-
-            let function: #value = #native_constructor::#create("constructor".to_string(), move || {
-                    constructor_function.copy()
-            }, #new, obj.clone().into(), func_proto.copy()).into();
+            let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, #new, obj.clone().into(), func_proto.copy()).into();
 
 
             function.define_property("prototype".into(), obj.clone().into())?;

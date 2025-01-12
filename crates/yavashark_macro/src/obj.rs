@@ -7,7 +7,7 @@ use quote::quote;
 use std::mem;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{FieldMutability, Fields};
+use syn::{FieldMutability, Fields, Token};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -201,7 +201,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
     fields.named.push(syn::Field {
         attrs: Vec::new(),
-        vis: syn::Visibility::Inherited,
+        vis: syn::Visibility::Public(Token![pub](Span::call_site())),
         mutability: FieldMutability::None,
         ident: Some(Ident::new("inner", Span::call_site())),
         colon_token: None,

@@ -7,18 +7,29 @@ use yavashark_macro::{object, properties};
 pub fn get_error(realm: &Realm) -> Value {
     NativeConstructor::special(
         "error".to_string(),
-        || {
-            // let message = args
-            //     .first()
-            //     .map_or(String::new(), std::string::ToString::to_string);
-            //
-            // let err = ErrorObj::raw_from(message, realm);
-            //
-            // this.exchange(Box::new(err))?;
-            //
-            // Ok(Value::Undefined)
+        |args, this, _| {
+            let message = args
+                .first()
+                .map_or(String::new(), std::string::ToString::to_string);
+            
+            
+            let this = this.as_object()?.get();
+            
+            let any = (**this).as_any();
+            
+            let Some(err) = any.downcast_ref::<ErrorObj>() else {
+                return Err(Error::ty("error is not an Error object"));
+            };
+            
+            let mut inner = err.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+            
+            inner.error = Error::unknown_error(message);
+            
+            
+            
+            
+            Ok(Value::Undefined)
 
-            todo!()
         },
         Some(Box::new(|realm, _| {
             let err: Value = ErrorObj::new(Error::new("error not initialized"), realm).into();
@@ -34,6 +45,7 @@ pub fn get_error(realm: &Realm) -> Value {
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct ErrorObj {
+    #[mutable]
     pub(crate) error: Error,
 }
 
@@ -44,8 +56,8 @@ impl ErrorObj {
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                error,
             }),
-            error,
         };
 
         ObjectHandle::new(this)
@@ -56,8 +68,8 @@ impl ErrorObj {
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                error: Error::unknown_error(message),
             }),
-            error: Error::unknown_error(message),
         };
 
         ObjectHandle::new(this)
@@ -68,17 +80,19 @@ impl ErrorObj {
         Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                error: Error::unknown_error(message),
             }),
-            error: Error::unknown_error(message),
         }
     }
 
     pub fn override_to_string(&self, _: &mut Realm) -> Result<String> {
-        Ok(self.error.to_string())
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        Ok(inner.error.to_string())
     }
 
     pub fn override_to_string_internal(&self) -> Result<String> {
-        Ok(self.error.to_string())
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        Ok(inner.error.to_string())
     }
 }
 
@@ -86,6 +100,7 @@ impl ErrorObj {
 impl ErrorObj {
     #[get(message)]
     pub fn get_message(&self, _: Vec<Value>, realm: &mut Realm) -> ValueResult {
-        Ok(self.error.message(realm)?.into())
+        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        Ok(inner.error.message(realm)?.into())
     }
 }

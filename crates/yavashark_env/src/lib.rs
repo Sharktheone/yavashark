@@ -71,7 +71,10 @@ impl ControlFlow {
                 let this = (**obj).as_any();
 
                 if let Some(err) = this.downcast_ref::<ErrorObj>() {
-                    let e = &err.error;
+                    let Ok(inner) = err.inner.try_borrow() else {
+                        return Self::Error(Error::borrow_error());
+                    };
+                    let e = &inner.error;
 
                     return Self::Error(e.clone());
                 }
