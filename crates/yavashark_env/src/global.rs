@@ -2,8 +2,8 @@ use crate::error::get_error;
 use crate::realm::Realm;
 use crate::{get_console, ObjectHandle, Res, Variable};
 
-pub fn init_global_obj(obj: &ObjectHandle, realm: &Realm) -> Res {
-    let obj = obj.get();
+pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
+    let obj = handle.get();
 
     obj.define_variable(
         "console".into(),
@@ -18,6 +18,9 @@ pub fn init_global_obj(obj: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("Object".into(), realm.intrinsics.obj_constructor())?;
     obj.define_variable("Function".into(), realm.intrinsics.func_constructor())?;
     obj.define_variable("Math".into(), realm.intrinsics.math_obj())?;
+    
+    #[cfg(feature = "out-of-spec-experiments")]
+    crate::experiments::init(handle, realm)?;
 
     Ok(())
 }

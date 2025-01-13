@@ -14,6 +14,8 @@ mod global;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
+#[cfg(feature = "out-of-spec-experiments")]
+pub mod experiments;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;

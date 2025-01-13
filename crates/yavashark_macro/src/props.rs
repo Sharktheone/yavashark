@@ -231,6 +231,7 @@ impl Method {
         let native_function = &config.native_function;
 
         let name = &self.name;
+        let error = &config.error;
 
         let mut arg_prepare = TokenStream::new();
         let mut call_args = TokenStream::new();
@@ -252,7 +253,7 @@ impl Method {
                 });
             } else {
                 arg_prepare.extend(quote! {
-                    let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| Error::new("Missing argument"))?.copy())?;
+                    let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| #error::new("Missing argument"))?.copy())?;
                 });
             }
 

@@ -21,7 +21,7 @@ clap = "4.5.18"
 yavashark_interpreter = { path = "crates/yavashark_interpreter" }
 yavashark_codegen = { path = "crates/yavashark_codegen" }
 yavashark_vm = { path = "crates/yavashark_vm" }
-yavashark_env = { path = "crates/yavashark_env"}
+yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments"]}
 
 
 [profile.release]
