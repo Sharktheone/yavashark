@@ -9,34 +9,14 @@ impl Interpreter {
     pub fn run_new(realm: &mut Realm, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
         let callee = Self::run_expr(realm, &stmt.callee, stmt.span, scope)?;
 
-        let Value::Object(constructor) = callee else {
+        let Value::Object(constructor) = callee.copy() else {
             return Err(ControlFlow::error_type(format!(
                 "{:?} is not a constructor",
                 stmt.callee
             )));
         };
 
-        let this = constructor
-            .get_constructor_value(realm)?
-            .ok_or(ControlFlow::error_type(format!(
-                "{:?} is not a constructor",
-                stmt.callee
-            )))?;
-
-        let f = if constructor.special_constructor() {
-            constructor
-        } else {
-            let Value::Object(o) = constructor.constructor()?.value else {
-                return Err(ControlFlow::error_type(format!(
-                    "{:?} is not a constructor",
-                    stmt.callee
-                )));
-            };
-
-            o
-        };
-
-        let mut call_args = Vec::with_capacity(0);
+        let mut call_args = Vec::new();
 
         if let Some(args) = &stmt.args {
             call_args.reserve(args.len());
@@ -54,8 +34,6 @@ impl Interpreter {
             }
         }
 
-        let _ = f.call(realm, call_args, this.copy())?;
-
-        Ok(this) //This is always an object, so it will also be updated when we copy it
+        Ok(constructor.construct(realm, call_args)?)
     }
 }

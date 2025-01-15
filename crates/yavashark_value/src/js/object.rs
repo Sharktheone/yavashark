@@ -122,16 +122,12 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn get_constructor_value(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        Ok(None)
-    }
-
-    fn get_constructor_proto(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        Ok(None)
-    }
-
-    fn special_constructor(&self) -> bool {
-        false
+    #[allow(unused_variables)]
+    fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
+        Err(Error::ty_error(format!(
+            "{} is not a constructor",
+            self.name()
+        )))
     }
 }
 
@@ -211,16 +207,11 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn get_constructor_value(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        Ok(None)
-    }
-
-    fn get_constructor_proto(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        Ok(None)
-    }
-
-    fn special_constructor(&self) -> bool {
-        false
+    fn construct(&mut self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
+        Err(Error::ty_error(format!(
+            "{} is not a constructor",
+            self.name()
+        )))
     }
 }
 #[cfg(feature = "dbg_object_gc")]

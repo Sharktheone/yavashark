@@ -696,8 +696,9 @@ impl<C: Realm> Value<C> {
                 "Right-hand side of 'instanceof' is not an object",
             ));
         };
-
-        let Self::Object(constructor) = constructor.get_constructor_value(realm)?.ok_or(
+        
+        //TODO: this is kinda a hack, but should always work
+        let Self::Object(constructor) = constructor.resolve_property(&"prototype".into(), realm)?.ok_or(
             Error::ty("Right-hand side of 'instanceof' is not a constructor"),
         )?
         else {

@@ -130,16 +130,8 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn get_constructor_value(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        Ok(None)
-    }
-
-    fn get_constructor_proto(&self, _realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        Ok(None)
-    }
-
-    fn special_constructor(&self) -> bool {
-        false
+    fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
+        self.get_wrapped_object().construct(realm, args)
     }
 }
 
@@ -259,15 +251,7 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::class_name(self)
     }
 
-    fn get_constructor_value(&self, realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        ObjectImpl::get_constructor_value(self, realm)
-    }
-
-    fn get_constructor_proto(&self, realm: &mut R) -> Result<Option<Value<R>>, Error<R>> {
-        ObjectImpl::get_constructor_proto(self, realm)
-    }
-
-    fn special_constructor(&self) -> bool {
-        ObjectImpl::special_constructor(self)
+    fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
+        ObjectImpl::construct(self, realm, args)
     }
 }
