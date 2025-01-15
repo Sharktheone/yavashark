@@ -753,39 +753,70 @@ mod tests {
 
     #[allow(unused)]
     impl Obj<()> for Object {
-        fn define_property(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+        fn define_property(
+            &self,
+            name: crate::Value<()>,
+            value: crate::Value<()>,
+        ) -> Result<(), crate::Error<()>> {
             Ok(())
         }
 
-        fn define_variable(&self, name: crate::Value<()>, value: Variable<()>) -> Result<(), crate::Error<()>> {
+        fn define_variable(
+            &self,
+            name: crate::Value<()>,
+            value: Variable<()>,
+        ) -> Result<(), crate::Error<()>> {
             Ok(())
         }
 
-        fn resolve_property(&self, name: &crate::Value<()>) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
+        fn resolve_property(
+            &self,
+            name: &crate::Value<()>,
+        ) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
             Ok(Some(Value::Undefined.into()))
         }
 
-        fn get_property(&self, name: &crate::Value<()>) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
+        fn get_property(
+            &self,
+            name: &crate::Value<()>,
+        ) -> Result<Option<ObjectProperty<()>>, crate::Error<()>> {
             Ok(Some(Value::Undefined.into()))
         }
 
-        fn define_getter(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+        fn define_getter(
+            &self,
+            name: crate::Value<()>,
+            value: crate::Value<()>,
+        ) -> Result<(), crate::Error<()>> {
             Ok(())
         }
 
-        fn define_setter(&self, name: crate::Value<()>, value: crate::Value<()>) -> Result<(), crate::Error<()>> {
+        fn define_setter(
+            &self,
+            name: crate::Value<()>,
+            value: crate::Value<()>,
+        ) -> Result<(), crate::Error<()>> {
             Ok(())
         }
 
-        fn get_getter(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
+        fn get_getter(
+            &self,
+            name: &crate::Value<()>,
+        ) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
             Ok(Value::Undefined.into())
         }
 
-        fn get_setter(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
+        fn get_setter(
+            &self,
+            name: &crate::Value<()>,
+        ) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
             Ok(Value::Undefined.into())
         }
 
-        fn delete_property(&self, name: &crate::Value<()>) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
+        fn delete_property(
+            &self,
+            name: &crate::Value<()>,
+        ) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
             Ok(Value::Undefined.into())
         }
 
@@ -801,7 +832,9 @@ mod tests {
             Ok("[object Object]".to_string())
         }
 
-        fn properties(&self) -> Result<Vec<(crate::Value<()>, crate::Value<()>)>, crate::Error<()>> {
+        fn properties(
+            &self,
+        ) -> Result<Vec<(crate::Value<()>, crate::Value<()>)>, crate::Error<()>> {
             Ok(Vec::new())
         }
 
@@ -813,7 +846,10 @@ mod tests {
             Ok(Vec::new())
         }
 
-        fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<crate::Value<()>>), crate::Error<()>> {
+        fn get_array_or_done(
+            &self,
+            index: usize,
+        ) -> Result<(bool, Option<crate::Value<()>>), crate::Error<()>> {
             Ok((true, None))
         }
 
@@ -821,8 +857,6 @@ mod tests {
             Ok(())
         }
     }
-
-
 
     impl From<Object> for crate::Object<()> {
         fn from(obj: Object) -> Self {

@@ -11,25 +11,23 @@ pub fn get_error(realm: &Realm) -> Value {
             let message = args
                 .first()
                 .map_or(String::new(), std::string::ToString::to_string);
-            
-            
+
             let this = this.as_object()?.get();
-            
+
             let any = (**this).as_any();
-            
+
             let Some(err) = any.downcast_ref::<ErrorObj>() else {
                 return Err(Error::ty("error is not an Error object"));
             };
-            
-            let mut inner = err.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
-            
-            inner.error = Error::unknown_error(message);
-            
-            
-            
-            
-            Ok(Value::Undefined)
 
+            let mut inner = err
+                .inner
+                .try_borrow_mut()
+                .map_err(|_| Error::borrow_error())?;
+
+            inner.error = Error::unknown_error(message);
+
+            Ok(Value::Undefined)
         },
         Some(Box::new(|realm, _| {
             let err: Value = ErrorObj::new(Error::new("error not initialized"), realm).into();

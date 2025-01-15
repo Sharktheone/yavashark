@@ -1,12 +1,11 @@
+use crate::{MutObject, ObjectHandle, Realm};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::{MutObject, ObjectHandle, Realm};
 
 #[object]
 #[derive(Debug)]
 pub struct Tcp {}
-
 
 impl Tcp {
     #[allow(clippy::new_ret_no_self)]
@@ -23,8 +22,5 @@ impl Tcp {
     }
 }
 
-
 #[properties_new(raw)]
-impl Tcp {
-
-}
+impl Tcp {}

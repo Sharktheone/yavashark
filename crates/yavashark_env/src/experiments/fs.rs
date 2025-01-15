@@ -1,16 +1,12 @@
+use crate::{Error, MutObject, ObjectHandle, Realm, Result};
 use std::cell::RefCell;
 use std::fs;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::{Error, Realm, Result, ObjectHandle, MutObject};
-
-
-
 
 #[object]
 #[derive(Debug)]
 pub struct Fs {}
-
 
 impl Fs {
     #[allow(clippy::new_ret_no_self)]
@@ -27,13 +23,11 @@ impl Fs {
     }
 }
 
-
 #[properties_new(raw)]
 impl Fs {
     fn open(path: String) -> Result<String> {
-        let contents = fs::read_to_string(&path)
-            .map_err(|e| Error::new_error(e.to_string()))?;
-        
+        let contents = fs::read_to_string(&path).map_err(|e| Error::new_error(e.to_string()))?;
+
         Ok(contents)
     }
 }

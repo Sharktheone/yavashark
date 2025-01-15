@@ -10,11 +10,7 @@ pub struct MutableRegion {
 }
 
 impl MutableRegion {
-    pub(crate) fn with(
-        direct: Vec<Ident>,
-        custom: Vec<Field>,
-        name: Ident,
-    ) -> Self {
+    pub(crate) fn with(direct: Vec<Ident>, custom: Vec<Field>, name: Ident) -> Self {
         Self {
             direct,
             custom,

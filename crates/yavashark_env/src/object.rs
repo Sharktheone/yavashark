@@ -514,7 +514,10 @@ mod tests {
         let proto = Value::Number(42.0);
         let object = Object::with_proto(proto.clone());
 
-        assert_eq!(object.get_property(&"__proto__".into()).unwrap().value, proto);
+        assert_eq!(
+            object.get_property(&"__proto__".into()).unwrap().value,
+            proto
+        );
     }
 
     #[test]
@@ -588,7 +591,7 @@ mod tests {
             .inner_mut()
             .unwrap()
             .insert_array(0, Value::Number(42.0).into());
-        
+
         let inner = object.inner().unwrap();
 
         let value = inner.get_array(0).unwrap();
@@ -684,7 +687,9 @@ mod tests {
             .define_property(Value::String("key".to_string()), Value::Number(42.0))
             .unwrap();
 
-        let contains = object.contains_key(&Value::String("key".to_string())).unwrap();
+        let contains = object
+            .contains_key(&Value::String("key".to_string()))
+            .unwrap();
 
         assert!(contains);
     }
