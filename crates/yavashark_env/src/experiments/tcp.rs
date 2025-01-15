@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::experiments::http::{Http, MutableHttp};
 use crate::{MutObject, ObjectHandle, Realm};
 
 #[object]

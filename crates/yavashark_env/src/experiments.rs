@@ -1,4 +1,4 @@
-use crate::{ObjectHandle, Realm, Res, ValueResult};
+use crate::{ObjectHandle, Realm, Res};
 use crate::experiments::fs::Fs;
 use crate::experiments::http::Http;
 use crate::experiments::tcp::Tcp;

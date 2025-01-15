@@ -4,7 +4,10 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, MutObject, NativeFunction, ObjectHandle, Realm, Value, ValueResult, Error, ObjectProperty};
+use yavashark_env::{
+    ControlFlow, Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Realm, Value,
+    ValueResult,
+};
 use yavashark_macro::{object, properties};
 
 pub fn print(realm: &mut Realm) -> ObjectHandle {
@@ -96,8 +99,11 @@ impl Test262 {
         let script = p
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
-        
-        let mut inner = self.inner.try_borrow_mut().map_err(|_| Error::borrow_error())?;
+
+        let mut inner = self
+            .inner
+            .try_borrow_mut()
+            .map_err(|_| Error::borrow_error())?;
 
         let realm = inner.realm.as_mut().unwrap_or(realm);
 

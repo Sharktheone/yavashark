@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::fs;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::{Error, NativeFunction, Realm, ValueResult, Result, ObjectHandle, MutObject};
+use crate::{Error, Realm, Result, ObjectHandle, MutObject};
 
 
 
