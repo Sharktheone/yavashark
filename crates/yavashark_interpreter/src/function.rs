@@ -8,23 +8,29 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Result, Value, ValueResult, Variable,
 };
+use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
-use yavashark_value::{Constructor, CustomName, Func, Obj, ObjectProperty};
+use yavashark_value::{Constructor, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty};
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function, constructor, direct(prototype), name)]
 #[derive(Debug)]
 pub struct JSFunction {
+    #[gc(untyped)]
+    pub raw: RawJSFunction,
+}
+
+#[derive(Debug)]
+pub struct RawJSFunction {
     pub name: String,
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
-    #[gc(untyped)]
     pub scope: Scope,
 }
 
 impl CustomName for JSFunction {
     fn custom_name(&self) -> String {
-        self.name.clone()
+        self.raw.name.clone()
     }
 }
 
@@ -46,10 +52,12 @@ impl JSFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
                 prototype: prototype.clone().into(),
             }),
-            name,
-            params,
-            block,
-            scope,
+            raw: RawJSFunction {
+                name,
+                params,
+                block,
+                scope,
+            }
         };
 
         let handle = ObjectHandle::new(this);
@@ -60,6 +68,12 @@ impl JSFunction {
 }
 
 impl Func<Realm> for JSFunction {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+        self.raw.call(realm, args, this)
+    }
+}
+
+impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         for (i, p) in self.params.iter().enumerate() {
@@ -90,7 +104,15 @@ impl Func<Realm> for JSFunction {
                 };
             }
         }
+        
         Ok(Value::Undefined)
+    }
+}
+
+impl CustomGcRefUntyped for RawJSFunction {
+
+    fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
+        self.scope.gc_untyped_ref()
     }
 }
 
