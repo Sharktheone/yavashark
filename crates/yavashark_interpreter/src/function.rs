@@ -5,12 +5,10 @@ use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::array::Array;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
-use yavashark_env::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, Result, Value, ValueResult, Variable,
-};
+use yavashark_env::{ControlFlow, Error, MutObject, Object, ObjectHandle, Res, Result, Value, ValueResult, Variable};
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
-use yavashark_value::{Constructor, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty};
+use yavashark_value::{BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty};
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function, constructor, direct(prototype), name)]
@@ -138,6 +136,20 @@ impl Constructor<Realm> for JSFunction {
 
         Ok(inner.prototype.value.clone())
     }
+}
+
+
+impl ConstructorFn<Realm> for RawJSFunction {
+    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj<Realm>>> {
+        self.scope.gc_untyped_ref()
+    }
+
+    fn construct(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Res {
+        self.call(realm, args, this)?;
+        
+        Ok(())
+    }
+    
 }
 
 #[cfg(test)]
