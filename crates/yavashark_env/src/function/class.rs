@@ -2,15 +2,19 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, Object, ObjectProperty, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectProperty, Value, ValueResult, Result, Res};
 use yavashark_macro::{object, properties};
-use yavashark_value::{Constructor, CustomName, Func, Obj};
+use yavashark_value::{Constructor, ConstructorFn, CustomName, Func, NoOpConstructorFn, Obj};
+
+
 
 #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
 pub struct Class {
     pub private_props: HashMap<String, Value>,
     pub name: String,
+    #[gc(untyped)]
+    pub constructor: Box<dyn ConstructorFn<Realm>>,
 }
 
 impl Func<Realm> for Class {
@@ -22,20 +26,23 @@ impl Func<Realm> for Class {
 }
 
 impl Constructor<Realm> for Class {
-    fn get_constructor(&self) -> Result<ObjectProperty, Error> {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        let inner = self.inner.try_borrow()?;
 
-        if let Value::Object(o) = inner.prototype.value.copy() {
-            o.constructor()
-        } else {
-            inner.object.constructor()
+        let this = Object::raw_with_proto(inner.prototype.value.clone()).into_value();
+        drop(inner);
+        
+        if let Some(constructor) = &self.constructor {
+            constructor(args, this.copy(), realm)?;
         }
+
+        Ok(this)
     }
 
-    fn value(&self, _realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+    fn construct_proto(&self) -> Result<ObjectProperty> {
+        let inner = self.inner.try_borrow()?;
 
-        Ok(Object::raw_with_proto(inner.prototype.value.clone()).into_value())
+        Ok(inner.prototype.clone())
     }
 }
 
@@ -53,6 +60,7 @@ impl Class {
                 prototype: Value::Undefined.into(),
             }),
             private_props: HashMap::new(),
+            constructor: Box::new(NoOpConstructorFn),
             name,
         }
     }
@@ -74,6 +82,10 @@ impl Class {
         inner.prototype = proto;
 
         Ok(())
+    }
+    
+    pub fn set_constructor(&mut self, constructor: impl ConstructorFn<Realm>) {
+        self.constructor = Box::new(constructor);
     }
 }
 
@@ -97,6 +109,7 @@ impl Class {
 #[object(name)]
 #[derive(Debug)]
 pub struct ClassInstance {
+    #[mutable]
     pub(crate) private_props: HashMap<String, Value>,
     name: String,
 }
@@ -113,8 +126,8 @@ impl ClassInstance {
         Self {
             inner: RefCell::new(MutableClassInstance {
                 object: MutObject::new(realm),
+                private_props: HashMap::new(),
             }),
-            private_props: HashMap::new(),
             name,
         }
     }
@@ -123,18 +136,20 @@ impl ClassInstance {
         Self {
             inner: RefCell::new(MutableClassInstance {
                 object: MutObject::with_proto(proto),
+                private_props: HashMap::new(),
             }),
-            private_props: HashMap::new(),
             name,
         }
     }
 
     pub fn set_private_prop(&mut self, key: String, value: Value) {
-        self.private_props.insert(key, value);
+        self.inner.get_mut().private_props.insert(key, value);
     }
 
     #[must_use]
-    pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
-        self.private_props.get(key)
+    pub fn get_private_prop(&self, key: &str) -> Result<Option<Value>> {
+        let inner = self.inner.try_borrow()?;
+
+        Ok(inner.private_props.get(key).cloned())
     }
 }

@@ -1,7 +1,7 @@
 use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
 
-use crate::function::JSFunction;
+use crate::function::{JSFunction, RawJSFunction};
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
 };
@@ -51,17 +51,15 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
 
                     params.push(param.clone());
                 }
-
-                let (name, func) = create_method(
-                    &PropName::Ident("constructor".into()),
+                
+                let raw_fn = RawJSFunction {
+                    name: "constructor".into(),
                     params,
-                    constructor.body.clone(),
-                    scope,
-                    realm,
-                    stmt.span,
-                )?;
-
-                proto.define_property(name, func);
+                    block: constructor.body.clone(),
+                    scope: scope.clone(),
+                };
+                
+                class.set_constructor(raw_fn)
             }
             ClassMember::PrivateMethod(method) => {
                 let (name, func) = create_method(
