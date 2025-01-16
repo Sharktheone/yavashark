@@ -7,32 +7,15 @@ use yavashark_macro::{object, properties};
 pub fn get_error(realm: &Realm) -> Value {
     NativeConstructor::special(
         "error".to_string(),
-        |args, this, _| {
+        |args, realm| {
             let message = args
                 .first()
                 .map_or(String::new(), std::string::ToString::to_string);
 
-            let this = this.as_object()?.get();
+            let obj: Value = ErrorObj::new(Error::unknown_error(message), realm).into();
 
-            let any = (**this).as_any();
-
-            let Some(err) = any.downcast_ref::<ErrorObj>() else {
-                return Err(Error::ty("error is not an Error object"));
-            };
-
-            let mut inner = err
-                .inner
-                .try_borrow_mut()?;
-
-            inner.error = Error::unknown_error(message);
-
-            Ok(Value::Undefined)
+            Ok(obj)
         },
-        Some(Box::new(|realm, _| {
-            let err: Value = ErrorObj::new(Error::new("error not initialized"), realm).into();
-
-            err
-        })),
         realm,
     )
     .into()
