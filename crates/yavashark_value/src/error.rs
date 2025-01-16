@@ -337,15 +337,15 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
 }
 
 
-impl<R: Realm> Into<Error<R>> for BorrowError {
-    fn into(self) -> Error<R> {
-        Error::new("Failed to borrow object")
+impl<R: Realm> From<BorrowError> for Error<R> {
+    fn from(value: BorrowError) -> Self {
+        Self::new("Failed to borrow object")
     }
 }
 
-impl<R: core> Into<Error<R>> for BorrowMutError {
-    fn into(self) -> Error<R> {
-        Error::new("Failed to borrow object mutably")
+impl<R: Realm> From<BorrowMutError> for Error<R> {
+    fn from(value: BorrowMutError) -> Self {
+        Self::new("Failed to borrow object mutably")
     }
 }
 
