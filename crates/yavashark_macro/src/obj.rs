@@ -287,29 +287,16 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let constructor = if constructor {
         quote! {
-            fn constructor(&self) -> Result<#object_property, #error> {
-                yavashark_value::Constructor::get_constructor(self)
+            fn construct(&self, realm: &mut #realm, args: Vec<#value>) -> Result<#value, #error> {
+                yavashark_value::Constructor::construct(self, realm, args)
             }
-
-            fn get_constructor_proto(&self, realm: &mut #realm) -> Result<Option<#value>, #error> {
-                Ok(Some(yavashark_value::Constructor::proto(self, realm)?))
-            }
-
-            fn special_constructor(&self) -> bool {
-                yavashark_value::Constructor::special_constructor(self)
-            }
-
-            fn get_constructor_value(&self, realm: &mut #realm) -> Result<Option<#value>, #error> {
-                Ok(Some(yavashark_value::Constructor::value(self, realm)?))
-            }
+            
+            // fn construct_proto(&self) -> Result<#object_property, #error> {
+            //     yavashark_value::Constructor::constructor_proto(self)
+            // }
         }
     } else {
-        quote! {
-            fn constructor(&self) -> Result<#object_property, #error> {
-                let inner = self.inner.borrow();
-                inner.object.constructor()
-            }
-        }
+        TokenStream::new()
     };
 
     let to_string = if to_string {
