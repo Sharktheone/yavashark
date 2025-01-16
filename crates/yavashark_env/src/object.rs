@@ -163,18 +163,6 @@ impl Obj<Realm> for Object {
     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
         self.inner().map(|o| o.custom_gc_refs()).unwrap_or_default()
     }
-
-    fn get_constructor_value(&self, _realm: &mut Realm) -> Result<Option<Value>, Error> {
-        Ok(Some(Value::Undefined))
-    }
-
-    fn get_constructor_proto(&self, _realm: &mut Realm) -> Result<Option<Value>, Error> {
-        Ok(Some(self.prototype()?.value.copy()))
-    }
-
-    fn special_constructor(&self) -> bool {
-        false
-    }
 }
 
 impl MutObject {
