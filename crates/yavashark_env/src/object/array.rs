@@ -20,7 +20,7 @@ impl Array {
         let mut inner = array
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         inner.object.set_array(elements);
         inner.length.value = Value::Number(inner.object.array.len() as f64);
@@ -48,7 +48,7 @@ impl Array {
     pub fn override_to_string(&self, realm: &mut Realm) -> Result<String> {
         let mut buf = String::new();
 
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
 
         for (_, value) in &inner.object.array {
             buf.push_str(&value.value.to_string(realm)?);
@@ -66,7 +66,7 @@ impl Array {
 
         let mut buf = String::new();
 
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
 
         for (_, value) in &inner.object.array {
             let _ = write!(buf, "{}", value.value);
@@ -95,7 +95,7 @@ impl Array {
         let mut inner = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
 
@@ -140,7 +140,7 @@ impl Array {
         let mut inner = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         inner.object.array = values;
         inner.length.value = Value::Number(inner.object.array.len() as f64);

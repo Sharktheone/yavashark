@@ -34,7 +34,7 @@ impl Debug for NativeConstructor {
 
 impl Constructor<Realm> for NativeConstructor {
     fn get_constructor(&self) -> Result<ObjectProperty, Error> {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
 
         Ok(inner.constructor.clone())
     }

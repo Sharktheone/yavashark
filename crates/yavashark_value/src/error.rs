@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::cell::{BorrowError, BorrowMutError};
 use crate::{Realm, Value};
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
@@ -168,11 +170,6 @@ impl<C: Realm> Error<C> {
     pub fn attach_function_stack(&mut self, function: String, loc: Location) {
         self.stacktrace.attach_function_stack(function, loc);
     }
-
-    #[must_use]
-    pub fn borrow_error() -> Self {
-        Self::new("Failed to borrow object")
-    }
 }
 
 impl<C: Realm> Display for Error<C> {
@@ -337,6 +334,19 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
     }
 
     0
+}
+
+
+impl<R: Realm> Into<Error<R>> for BorrowError {
+    fn into(self) -> Error<R> {
+        Error::new("Failed to borrow object")
+    }
+}
+
+impl<R: core> Into<Error<R>> for BorrowMutError {
+    fn into(self) -> Error<R> {
+        Error::new("Failed to borrow object mutably")
+    }
 }
 
 #[cfg(feature = "anyhow")]

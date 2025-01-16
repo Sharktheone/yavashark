@@ -96,7 +96,7 @@ impl Func<Realm> for JSFunction {
 
 impl Constructor<Realm> for JSFunction {
     fn get_constructor(&self) -> Result<ObjectProperty<Realm>> {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
 
         Ok(inner
             .prototype
@@ -106,13 +106,13 @@ impl Constructor<Realm> for JSFunction {
     }
 
     fn value(&self, _realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
 
         Ok(Object::with_proto(inner.prototype.value.clone()).into())
     }
 
     fn proto(&self, realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
 
         Ok(inner.prototype.value.clone())
     }

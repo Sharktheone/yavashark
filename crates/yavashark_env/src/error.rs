@@ -22,8 +22,7 @@ pub fn get_error(realm: &Realm) -> Value {
 
             let mut inner = err
                 .inner
-                .try_borrow_mut()
-                .map_err(|_| Error::borrow_error())?;
+                .try_borrow_mut()?;
 
             inner.error = Error::unknown_error(message);
 
@@ -84,12 +83,12 @@ impl ErrorObj {
     }
 
     pub fn override_to_string(&self, _: &mut Realm) -> Result<String> {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
         Ok(inner.error.to_string())
     }
 
     pub fn override_to_string_internal(&self) -> Result<String> {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
         Ok(inner.error.to_string())
     }
 }
@@ -98,7 +97,7 @@ impl ErrorObj {
 impl ErrorObj {
     #[get(message)]
     pub fn get_message(&self, _: Vec<Value>, realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let inner = self.inner.try_borrow()?;
         Ok(inner.error.message(realm)?.into())
     }
 }

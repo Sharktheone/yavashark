@@ -71,7 +71,7 @@ impl Prototype {
         let mut this_borrow = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this_borrow.defined_getter =
             NativeFunction::with_proto("__define_getter__", define_getter, func.copy()).into();
@@ -128,7 +128,7 @@ impl Obj<Realm> for Prototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -202,13 +202,13 @@ impl Obj<Realm> for Prototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.define_variable(name, value)
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         if let Value::String(name) = name {
             match name.as_str() {
@@ -233,7 +233,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         if let Value::String(name) = name {
             match name.as_str() {
@@ -262,7 +262,7 @@ impl Obj<Realm> for Prototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.define_getter(name, value)
     }
@@ -271,19 +271,19 @@ impl Obj<Realm> for Prototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.define_setter(name, value)
     }
 
     fn get_getter(&self, name: &Value) -> Result<Option<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.get_getter(name)
     }
 
     fn get_setter(&self, name: &Value) -> Result<Option<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.get_setter(name)
     }
@@ -297,7 +297,7 @@ impl Obj<Realm> for Prototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.delete_property(name)
     }
@@ -320,7 +320,7 @@ impl Obj<Realm> for Prototype {
                 _ => {}
             }
         }
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.contains_key(name)
     }
@@ -338,7 +338,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         let mut props = this.object.properties()?;
         props.push((
@@ -394,7 +394,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn keys(&self) -> Result<Vec<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
         keys.push(Value::String("__define_getter__".to_string()));
@@ -414,7 +414,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn values(&self) -> Result<Vec<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         let mut values = this.object.values()?;
 
@@ -435,7 +435,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>)> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.get_array_or_done(index)
     }
@@ -444,7 +444,7 @@ impl Obj<Realm> for Prototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.clear_values()
     }
@@ -454,7 +454,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn constructor(&self) -> Result<ObjectProperty> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         Ok(this.constructor.clone())
     }

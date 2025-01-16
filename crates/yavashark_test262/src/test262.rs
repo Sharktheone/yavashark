@@ -103,7 +103,7 @@ impl Test262 {
         let mut inner = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         let realm = inner.realm.as_mut().unwrap_or(realm);
 

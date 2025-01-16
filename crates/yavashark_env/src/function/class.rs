@@ -70,7 +70,7 @@ impl Class {
         let mut inner = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
         inner.prototype = proto;
 
         Ok(())

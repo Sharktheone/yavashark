@@ -45,7 +45,7 @@ impl FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
         this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
@@ -85,7 +85,7 @@ impl Obj<Realm> for FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -124,7 +124,7 @@ impl Obj<Realm> for FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -160,7 +160,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         if let Value::String(name) = name {
             match name.as_str() {
@@ -178,7 +178,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         if let Value::String(name) = name {
             match name.as_str() {
@@ -199,7 +199,7 @@ impl Obj<Realm> for FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.define_getter(name, value)
     }
@@ -208,17 +208,17 @@ impl Obj<Realm> for FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
         this.object.define_setter(name, value)
     }
 
     fn get_getter(&self, name: &Value) -> Result<Option<Value>, Error> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
         this.object.get_getter(name)
     }
 
     fn get_setter(&self, name: &Value) -> Result<Option<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
         this.object.get_setter(name)
     }
 
@@ -226,7 +226,7 @@ impl Obj<Realm> for FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         if let Value::String(name) = name {
             match name.as_str() {
@@ -275,7 +275,7 @@ impl Obj<Realm> for FunctionPrototype {
             }
         }
 
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.contains_key(name)
     }
@@ -293,7 +293,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         let mut props = this.object.properties()?;
         props.push((Value::String("apply".to_string()), this.apply.value.copy()));
@@ -313,7 +313,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn keys(&self) -> Result<Vec<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
         keys.push(Value::String("apply".to_string()));
@@ -327,7 +327,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn values(&self) -> Result<Vec<Value>> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         let mut values = this.object.values()?;
         values.push(this.apply.value.copy());
@@ -341,7 +341,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>)> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.get_array_or_done(index)
     }
@@ -350,7 +350,7 @@ impl Obj<Realm> for FunctionPrototype {
         let mut this = self
             .inner
             .try_borrow_mut()
-            .map_err(|_| Error::borrow_error())?;
+            ?;
 
         this.object.clear_values()?;
         this.apply = Value::Undefined.into();
@@ -364,7 +364,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn prototype(&self) -> Result<ObjectProperty> {
-        let this = self.inner.try_borrow().map_err(|_| Error::borrow_error())?;
+        let this = self.inner.try_borrow()?;
 
         this.object.prototype()
     }
