@@ -5,8 +5,7 @@ use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
-use yavashark_value::{MutObj, ObjectImpl};
-
+use yavashark_value::{MutObj, Obj, ObjectImpl};
 use crate::object::Object;
 use crate::realm::Realm;
 use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
@@ -52,18 +51,15 @@ impl ObjectImpl<Realm> for NativeFunction {
         (self.f)(args, this, realm)
     }
 
-    fn get_constructor_value(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
-        Ok(Some(Object::new(realm).into()))
-    }
-
-    fn get_constructor_proto(&self, _realm: &mut Realm) -> Result<Option<Value>, Error> {
-        let inner = self.inner.borrow();
-
-        Ok(Some(inner.constructor.value.copy())) //TODO: this is not correct (i think)
-    }
-
-    fn special_constructor(&self) -> bool {
-        self.special_constructor
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
+            .map(|p| p.value.clone()) //TODO: this can also be a getter, but we can't execute it here...
+            .unwrap_or_else(|| realm.intrinsics.func.clone().into());
+        
+        let obj = Object::with_proto(proto).into();
+        
+        
+        (self.f)(args, obj, realm)
     }
 }
 
