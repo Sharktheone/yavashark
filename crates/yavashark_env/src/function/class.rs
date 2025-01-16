@@ -31,10 +31,8 @@ impl Constructor<Realm> for Class {
 
         let this = Object::raw_with_proto(inner.prototype.value.clone()).into_value();
         drop(inner);
-        
-        if let Some(constructor) = &self.constructor {
-            constructor(args, this.copy(), realm)?;
-        }
+
+        self.constructor.construct(args, this.copy(), realm)?;
 
         Ok(this)
     }
@@ -83,8 +81,8 @@ impl Class {
 
         Ok(())
     }
-    
-    pub fn set_constructor(&mut self, constructor: impl ConstructorFn<Realm>) {
+
+    pub fn set_constructor(&mut self, constructor: impl ConstructorFn<Realm> + 'static) {
         self.constructor = Box::new(constructor);
     }
 }
