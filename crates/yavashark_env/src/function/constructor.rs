@@ -9,14 +9,14 @@ use crate::realm::Realm;
 use crate::{Error, MutObject, Object, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
-type ConstruuctorFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
+pub type ConstructorFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 #[object(function, constructor, direct(constructor))]
 pub struct NativeConstructor {
     /// The name of the constructor
     pub name: String,
     /// The function that is called when the constructor is called
-    pub f: ConstruuctorFn,
+    pub f: ConstructorFn,
     /// The function that returns the constructor value
     pub f_value: Option<ValueFn>,
     #[gc]
