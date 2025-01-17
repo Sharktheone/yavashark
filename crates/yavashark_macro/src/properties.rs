@@ -356,8 +356,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let constructor_fn = if raw {
             quote! {
-                |args, this, realm| {
-                    Self::#constructor(args, this, realm)
+                |args, realm| {
+                    Self::#constructor(args, realm)
                 }
             }
         } else {
@@ -387,7 +387,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         let prop = quote! {
-            let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, #new, obj.clone().into(), func_proto.copy()).into();
+            let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, obj.clone().into(), func_proto.copy()).into();
 
 
             function.define_property("prototype".into(), obj.clone().into())?;
