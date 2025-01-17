@@ -1,6 +1,6 @@
+use crate::{Realm, Value};
 use std::borrow::Borrow;
 use std::cell::{BorrowError, BorrowMutError};
-use crate::{Realm, Value};
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -336,13 +336,12 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
     0
 }
 
-
 // impl<R: Realm> From<BorrowError> for Error<R> {
 //     fn from(value: BorrowError) -> Self {
 //         Self::new("Failed to borrow object")
 //     }
 // }
-// 
+//
 // impl<R: Realm> From<BorrowMutError> for Error<R> {
 //     fn from(value: BorrowMutError) -> Self {
 //         Self::new("Failed to borrow object mutably")

@@ -6,7 +6,7 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, Object, ObjectHandle, ObjectProperty, Value, ValueResult, Result};
+use crate::{Error, MutObject, Object, ObjectHandle, ObjectProperty, Result, Value, ValueResult};
 
 type ValueFn = Box<dyn Fn(&mut Realm, &Value) -> Value>;
 pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> ValueResult>;

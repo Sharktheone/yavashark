@@ -68,10 +68,7 @@ impl Prototype {
     }
 
     pub(crate) fn initialize(&self, func: Value, this: Value) -> Res {
-        let mut this_borrow = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter =
             NativeFunction::with_proto("__define_getter__", define_getter, func.copy()).into();
@@ -125,10 +122,7 @@ impl Prototype {
 
 impl Obj<Realm> for Prototype {
     fn define_property(&self, name: Value, value: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -199,10 +193,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn define_variable(&self, name: Value, value: Variable) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_variable(name, value)
     }
@@ -259,19 +250,13 @@ impl Obj<Realm> for Prototype {
     }
 
     fn define_getter(&self, name: Value, value: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_getter(name, value)
     }
 
     fn define_setter(&self, name: Value, value: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_setter(name, value)
     }
@@ -294,10 +279,7 @@ impl Obj<Realm> for Prototype {
                 return Ok(None);
             }
         }
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.delete_property(name)
     }
@@ -441,10 +423,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn clear_values(&self) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.clear_values()
     }

@@ -100,10 +100,7 @@ impl Test262 {
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
 
-        let mut inner = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut inner = self.inner.try_borrow_mut()?;
 
         let realm = inner.realm.as_mut().unwrap_or(realm);
 

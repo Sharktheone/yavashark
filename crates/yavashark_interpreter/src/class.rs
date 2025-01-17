@@ -51,14 +51,14 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
 
                     params.push(param.clone());
                 }
-                
+
                 let raw_fn = RawJSFunction {
                     name: "constructor".into(),
                     params,
                     block: constructor.body.clone(),
                     scope: scope.clone(),
                 };
-                
+
                 class.set_constructor(raw_fn)
             }
             ClassMember::PrivateMethod(method) => {

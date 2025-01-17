@@ -2,11 +2,9 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, Object, ObjectProperty, Value, ValueResult, Result, Res};
+use crate::{Error, MutObject, Object, ObjectProperty, Res, Result, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, ConstructorFn, CustomName, Func, NoOpConstructorFn, Obj};
-
-
 
 #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
@@ -73,10 +71,7 @@ impl Class {
     }
 
     pub fn set_proto(&mut self, proto: ObjectProperty) -> Result<(), Error> {
-        let mut inner = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut inner = self.inner.try_borrow_mut()?;
         inner.prototype = proto;
 
         Ok(())

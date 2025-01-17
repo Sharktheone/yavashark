@@ -42,10 +42,7 @@ impl FunctionPrototype {
     }
 
     pub fn initialize(&self, func: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
         this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
@@ -82,10 +79,7 @@ fn constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult 
 
 impl Obj<Realm> for FunctionPrototype {
     fn define_property(&self, name: Value, value: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -121,10 +115,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn define_variable(&self, name: Value, value: Variable) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         if let Value::String(name) = &name {
             match name.as_str() {
@@ -196,19 +187,13 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn define_getter(&self, name: Value, value: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_getter(name, value)
     }
 
     fn define_setter(&self, name: Value, value: Value) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
         this.object.define_setter(name, value)
     }
 
@@ -223,10 +208,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn delete_property(&self, name: &Value) -> Result<Option<Value>> {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         if let Value::String(name) = name {
             match name.as_str() {
@@ -347,10 +329,7 @@ impl Obj<Realm> for FunctionPrototype {
     }
 
     fn clear_values(&self) -> Res {
-        let mut this = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut this = self.inner.try_borrow_mut()?;
 
         this.object.clear_values()?;
         this.apply = Value::Undefined.into();

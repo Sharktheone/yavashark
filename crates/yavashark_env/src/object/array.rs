@@ -17,10 +17,7 @@ impl Array {
     pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
-        let mut inner = array
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut inner = array.inner.try_borrow_mut()?;
 
         inner.object.set_array(elements);
         inner.length.value = Value::Number(inner.object.array.len() as f64);
@@ -92,10 +89,7 @@ impl Array {
     }
 
     pub fn push(&self, value: Value) -> ValueResult {
-        let mut inner = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut inner = self.inner.try_borrow_mut()?;
 
         let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
 
@@ -137,10 +131,7 @@ impl Array {
             .enumerate()
             .collect::<Vec<_>>();
 
-        let mut inner = self
-            .inner
-            .try_borrow_mut()
-            ?;
+        let mut inner = self.inner.try_borrow_mut()?;
 
         inner.object.array = values;
         inner.length.value = Value::Number(inner.object.array.len() as f64);

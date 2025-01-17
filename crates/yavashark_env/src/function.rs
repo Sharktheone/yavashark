@@ -1,3 +1,6 @@
+use crate::object::Object;
+use crate::realm::Realm;
+use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
@@ -6,9 +9,6 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
 use yavashark_value::{MutObj, Obj, ObjectImpl};
-use crate::object::Object;
-use crate::realm::Realm;
-use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
 
 mod bound;
 mod class;
@@ -55,10 +55,9 @@ impl ObjectImpl<Realm> for NativeFunction {
         let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
             .map(|p| p.value.clone()) //TODO: this can also be a getter, but we can't execute it here...
             .unwrap_or_else(|| realm.intrinsics.func.clone().into());
-        
+
         let obj = Object::with_proto(proto).into();
-        
-        
+
         (self.f)(args, obj, realm)
     }
 }

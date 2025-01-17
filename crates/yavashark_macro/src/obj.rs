@@ -290,7 +290,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn construct(&self, realm: &mut #realm, args: Vec<#value>) -> Result<#value, #error> {
                 yavashark_value::Constructor::construct(self, realm, args)
             }
-            
+
             // fn construct_proto(&self) -> Result<#object_property, #error> {
             //     yavashark_value::Constructor::constructor_proto(self)
             // }
