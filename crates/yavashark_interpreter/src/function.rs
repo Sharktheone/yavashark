@@ -118,26 +118,14 @@ impl CustomGcRefUntyped for RawJSFunction {
 }
 
 impl Constructor<Realm> for JSFunction {
-    fn get_constructor(&self) -> Result<ObjectProperty<Realm>> {
-        let inner = self.inner.try_borrow()?;
-
-        Ok(inner
-            .prototype
-            .value
-            .get_property_no_get_set(&"constructor".into())
-            .unwrap_or(Value::Undefined.into()))
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        self.raw.call(realm, args, Value::Undefined)
     }
 
-    fn value(&self, _realm: &mut Realm) -> ValueResult {
+    fn construct_proto(&self) -> Result<ObjectProperty<Realm>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(Object::with_proto(inner.prototype.value.clone()).into())
-    }
-
-    fn proto(&self, realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.try_borrow()?;
-
-        Ok(inner.prototype.value.clone())
+        Ok(inner.prototype.clone())
     }
 }
 
