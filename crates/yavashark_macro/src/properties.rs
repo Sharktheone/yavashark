@@ -54,14 +54,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 }
 
-                let mut raw = false;
                 let mut special = false;
 
                 let _ = attr.parse_nested_meta(|a| {
-                    if a.path.is_ident("raw") {
-                        raw = true;
-                    }
-
                     if a.path.is_ident("special") {
                         special = true;
                     }
@@ -69,7 +64,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     Ok(())
                 });
 
-                constructor = Some((func.sig.ident.clone(), self_mut, raw, special));
+                constructor = Some((func.sig.ident.clone(), self_mut, special));
                 remove.push(idx);
                 continue;
             }
@@ -343,7 +338,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut construct = TokenStream::new();
 
-    if let Some((constructor, mutability, raw, special)) = constructor {
+    if let Some((constructor, mutability, special)) = constructor {
         let create = if special {
             quote! {
                 special_with_proto
@@ -354,37 +349,12 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         };
 
-        let constructor_fn = if raw {
+        let constructor_fn = 
             quote! {
                 |args, realm| {
                     Self::#constructor(args, realm)
                 }
-            }
-        } else {
-            quote! {
-                |args, mut this, realm| {
-                    if let #value::Object(x) = this {
-                        let mut x = x.get();
-                        let mut deez = (**x).as_any().downcast_ref::<Self>()
-                            .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value", "constructor")))?;
-                        deez.#constructor(args)?;
-                    }
-
-                    Ok(Value::Undefined)
-
-                }
-            }
-        };
-
-        let new = if let Some(new) = new {
-            quote! {
-                Some(Box::new(Self::#new))
-            }
-        } else {
-            quote! {
-                None
-            }
-        };
+            };
 
         let prop = quote! {
             let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, obj.clone().into(), func_proto.copy()).into();
