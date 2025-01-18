@@ -18,7 +18,7 @@ use yavashark_value::{
 #[object(function, constructor, direct(prototype), name)]
 #[derive(Debug)]
 pub struct JSFunction {
-    #[gc(untyped)]
+    // #[gc(untyped)] //TODO: this is a memleak!
     pub raw: RawJSFunction,
 }
 
