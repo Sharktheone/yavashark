@@ -15,6 +15,7 @@ enum Mode {
 #[allow(unused)]
 pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut mode = Mode::Prototype;
+    let mut constructor = None;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -22,6 +23,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             Ok(())
         } else if meta.path.is_ident("raw") {
             mode = Mode::Raw;
+            Ok(())
+        } else if meta.path.is_ident("constructor") {
+            meta.parse_nested_meta(|meta| {
+                constructor = Some(meta.path);
+                
+                Ok(())
+            });
             Ok(())
         } else {
             Err(meta.error("Unknown attribute"))
@@ -167,6 +175,15 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         });
     }
+    
+    let constructor = if let Some(constructor) = constructor {
+        quote! {
+            let constructor = #constructor(&obj, &func_proto)?;
+            obj.define_variable("constructor".into(), #variable::new(constructor.into()))?;
+        }
+    } else {
+        TokenStream::new()
+    };
 
     let init_fn = match mode {
         Mode::Prototype => quote! {
@@ -175,6 +192,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 use #try_into_value;
 
                 #init
+                
+                #constructor
 
                 let obj = obj.into_object();
 
