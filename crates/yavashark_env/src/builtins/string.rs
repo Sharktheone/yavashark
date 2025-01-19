@@ -3,12 +3,9 @@ use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Error, Func, Obj};
 
-#[object]
+#[object(direct(string))]
 #[derive(Debug)]
-pub struct StringObj {
-    #[mutable]
-    string: String,
-}
+pub struct StringObj {}
 
 
 #[object(constructor, function)]
@@ -16,6 +13,7 @@ pub struct StringObj {
 pub struct StringConstructor {}
 
 impl StringConstructor {
+    #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
         Ok(Self {
             inner: RefCell::new(MutableStringConstructor {
@@ -52,15 +50,15 @@ impl Func<Realm> for StringConstructor {
 
 impl StringObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
-    pub fn new(realm: &mut Realm) -> crate::Result<ObjectHandle> {
+    pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
         Self::with_string(realm, String::new())
     }
     
-    pub fn with_string(realm: &mut Realm, string: String) -> crate::Result<ObjectHandle> {
+    pub fn with_string(realm: &Realm, string: String) -> crate::Result<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableStringObj {
-                object: MutObject::with_proto(realm.intrinsics.string_proto.clone().into()),
-                string,
+                object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
+                string: string.into(),
             }),
         };
 
