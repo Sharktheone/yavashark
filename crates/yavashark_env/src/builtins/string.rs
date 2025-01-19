@@ -1,4 +1,4 @@
-use crate::{MutObject, ObjectHandle, Realm, ValueResult, Value};
+use crate::{MutObject, ObjectHandle, Realm, ValueResult, Value, Object};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Error, Func, Obj};
@@ -14,6 +14,16 @@ pub struct StringObj {
 #[object(constructor, function)]
 #[derive(Debug)]
 pub struct StringConstructor {}
+
+impl StringConstructor {
+    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+        Ok(Self {
+            inner: RefCell::new(MutableStringConstructor {
+                object: MutObject::with_proto(func.copy()),
+            }),
+        }.into_object())
+    }
+}
 
 impl Constructor<Realm> for StringConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
@@ -58,6 +68,6 @@ impl StringObj {
     }
 }
 
-#[properties_new]
+#[properties_new(constructor(StringConstructor::new))]
 impl StringObj {
 }
