@@ -187,7 +187,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let init_fn = match mode {
         Mode::Prototype => quote! {
-            fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#handle, #error> {
+            pub fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#handle, #error> {
                 use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 use #try_into_value;
 
@@ -202,7 +202,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         },
         Mode::Raw => quote! {
-            fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
+            pub fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
                 use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                 use #try_into_value;
 
