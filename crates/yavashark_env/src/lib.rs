@@ -79,7 +79,7 @@ impl ControlFlow {
                             return Self::Error(e.into());
                         }
                     };
-                    
+
                     let e = &inner.error;
 
                     return Self::Error(e.clone());

@@ -87,8 +87,7 @@ impl Class {
     #[constructor(raw)]
     pub fn construct(args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         let this = Self::new(realm, "Class".to_string()).into_value();
-        
-        
+
         if let Value::Object(o) = this.copy() {
             let deez = o.get();
             let constructor = deez.constructor()?;

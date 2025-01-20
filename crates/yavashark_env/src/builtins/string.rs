@@ -1,4 +1,4 @@
-use crate::{MutObject, ObjectHandle, Realm, ValueResult, Value, Object};
+use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Error, Func, Obj};
@@ -6,7 +6,6 @@ use yavashark_value::{Constructor, Error, Func, Obj};
 #[object(direct(string))]
 #[derive(Debug)]
 pub struct StringObj {}
-
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -19,7 +18,8 @@ impl StringConstructor {
             inner: RefCell::new(MutableStringConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
-        }.into_object())
+        }
+        .into_object())
     }
 }
 
@@ -29,10 +29,9 @@ impl Constructor<Realm> for StringConstructor {
             Some(v) => v.to_string(realm)?,
             None => String::new(),
         };
-        
+
         let obj = StringObj::with_string(realm, str)?;
-        
-        
+
         Ok(obj.into())
     }
 }
@@ -43,7 +42,7 @@ impl Func<Realm> for StringConstructor {
             Some(v) => v.to_string(realm)?,
             None => String::new(),
         };
-        
+
         Ok(str.into())
     }
 }
@@ -53,7 +52,7 @@ impl StringObj {
     pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
         Self::with_string(realm, String::new())
     }
-    
+
     pub fn with_string(realm: &Realm, string: String) -> crate::Result<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableStringObj {
@@ -67,5 +66,4 @@ impl StringObj {
 }
 
 #[properties_new(constructor(StringConstructor::new))]
-impl StringObj {
-}
+impl StringObj {}

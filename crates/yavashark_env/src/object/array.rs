@@ -126,8 +126,7 @@ impl Array {
     #[constructor(special)]
     fn construct(args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         let this = Self::new(realm.intrinsics.array.clone().into());
-        
-        
+
         let values = args
             .into_iter()
             .map(ObjectProperty::new)
@@ -138,9 +137,8 @@ impl Array {
 
         inner.object.array = values;
         inner.length.value = Value::Number(inner.object.array.len() as f64);
-        
-        drop(inner);
 
+        drop(inner);
 
         Ok(this.into_object().into())
     }

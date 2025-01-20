@@ -349,12 +349,11 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         };
 
-        let constructor_fn = 
-            quote! {
-                |args, realm| {
-                    Self::#constructor(args, realm)
-                }
-            };
+        let constructor_fn = quote! {
+            |args, realm| {
+                Self::#constructor(args, realm)
+            }
+        };
 
         let prop = quote! {
             let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, obj.clone().into(), func_proto.copy()).into();

@@ -27,7 +27,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         } else if meta.path.is_ident("constructor") {
             meta.parse_nested_meta(|meta| {
                 constructor = Some(meta.path);
-                
+
                 Ok(())
             });
             Ok(())
@@ -175,7 +175,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         });
     }
-    
+
     let constructor = if let Some(constructor) = constructor {
         quote! {
             let constructor = #constructor(&obj, &func_proto)?;
@@ -192,7 +192,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 use #try_into_value;
 
                 #init
-                
+
                 #constructor
 
                 let obj = obj.into_object();

@@ -96,12 +96,11 @@ impl Intrinsics {
         )?;
 
         let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone())?;
-        
+
         let string_prototype = StringObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
 
         Ok(Self {
             obj: obj_prototype,
