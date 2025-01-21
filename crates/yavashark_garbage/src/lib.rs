@@ -268,13 +268,13 @@ impl<T: Collectable> From<NonNull<GcBox<T>>> for GcRef<T> {
     }
 }
 
-pub struct GcGuard<'a, T: Collectable> {
-    value_ptr: &'a T,
+pub struct GcGuard<'a, T: Collectable, V = T> {
+    value_ptr: &'a V,
     gc: NonNull<GcBox<T>>,
 }
 
 /// Here the magic of gc references happens!
-impl<T: Collectable> Drop for GcGuard<'_, T> {
+impl<T: Collectable, V> Drop for GcGuard<'_, T, V> {
     fn drop(&mut self) {
         //we now need to update the references => look what is still there and what is not
         unsafe {
@@ -283,11 +283,29 @@ impl<T: Collectable> Drop for GcGuard<'_, T> {
     }
 }
 
-impl<'a, T: Collectable> Deref for GcGuard<'a, T> {
-    type Target = T;
+impl<'a, T: Collectable, V> Deref for GcGuard<'a, T, V> {
+    type Target = V;
 
     fn deref(&self) -> &'a Self::Target {
         self.value_ptr
+    }
+}
+
+impl<'a, T: Collectable, V> GcGuard<'a, T, V> {
+    fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> GcGuard<'a, T, U> {
+        let value_ptr = f(self.value_ptr);
+        GcGuard {
+            value_ptr,
+            gc: self.gc,
+        }
+    }
+    
+    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(self, f: F) -> Option<GcGuard<'a, T, U>> {
+        let value_ptr = f(self.value_ptr);
+        value_ptr.map(|value_ptr| GcGuard {
+            value_ptr,
+            gc: self.gc,
+        })
     }
 }
 
