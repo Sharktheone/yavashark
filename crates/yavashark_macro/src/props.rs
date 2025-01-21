@@ -52,12 +52,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut mode = mode;
                 let mut has_receiver = false;
                 let mut rec_mutability = false;
+                
+                let mut args = 0;
 
                 func.sig
                     .inputs
                     .iter_mut()
-                    .enumerate()
-                    .for_each(|(idx, arg)| {
+                    .for_each(|arg| {
                         let pat = match arg {
                             syn::FnArg::Typed(pat) => pat,
                             syn::FnArg::Receiver(rec) => {
@@ -66,22 +67,23 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                                 return;
                             }
                         };
+                        
 
                         let mut remove = Vec::new();
 
                         pat.attrs.iter().enumerate().for_each(|(idx_remove, attr)| {
                             if attr.path().is_ident("this") {
-                                this = Some(idx);
+                                this = Some(args);
                                 remove.push(idx_remove);
                             }
 
                             if attr.path().is_ident("realm") {
-                                realm = Some(idx);
+                                realm = Some(args);
                                 remove.push(idx_remove);
                             }
 
                             if attr.path().is_ident("variadic") {
-                                variadic = Some(idx);
+                                variadic = Some(args);
                                 remove.push(idx_remove);
                             }
                         });
@@ -91,6 +93,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         for idx in remove.into_iter().rev() {
                             pat.attrs.remove(idx);
                         }
+
+                        args += 1;
                     });
 
                 func.attrs.iter().for_each(|attr| {
@@ -108,7 +112,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 props.push(Prop::Method(Method {
                     name: func.sig.ident.clone(),
                     js_name,
-                    args: func.sig.inputs.len(),
+                    args,
                     this,
                     realm,
                     variadic,
