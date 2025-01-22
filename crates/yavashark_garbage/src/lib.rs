@@ -273,6 +273,11 @@ pub struct GcGuard<'a, T: Collectable, V = T> {
     gc: NonNull<GcBox<T>>,
 }
 
+pub struct OwningGcGuard<'a, T: Collectable, V = T> {
+    value_ptr: &'a V,
+    gc: Gc<T>,
+}
+
 /// Here the magic of gc references happens!
 impl<T: Collectable, V> Drop for GcGuard<'_, T, V> {
     fn drop(&mut self) {
@@ -309,6 +314,32 @@ impl<'a, T: Collectable, V> GcGuard<'a, T, V> {
     }
 }
 
+impl<'a, T: Collectable, V> Deref for OwningGcGuard<'a, T, V> {
+    type Target = V;
+
+    fn deref(&self) -> &'a Self::Target {
+        self.value_ptr
+    }
+}
+
+impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
+    fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> OwningGcGuard<'a, T, U> {
+        let value_ptr = f(self.value_ptr);
+        OwningGcGuard {
+            value_ptr,
+            gc: self.gc.clone(),
+        }
+    }
+    
+    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(self, f: F) -> Result<OwningGcGuard<'a, T, U>, Self> {
+        let value_ptr = f(self.value_ptr);
+        value_ptr.map(|value_ptr| OwningGcGuard {
+            value_ptr,
+            gc: self.gc.clone(),
+        }).ok_or(self)
+    }
+}
+
 impl<T: Collectable> Gc<T> {
     #[must_use]
     #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
@@ -317,6 +348,14 @@ impl<T: Collectable> Gc<T> {
         GcGuard {
             value_ptr,
             gc: self.inner,
+        }
+    }
+    
+    pub fn get_owning<'a, 'b>(&'a self) -> OwningGcGuard<'b, T> {
+        let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
+        OwningGcGuard {
+            value_ptr,
+            gc: self.clone(),
         }
     }
 
