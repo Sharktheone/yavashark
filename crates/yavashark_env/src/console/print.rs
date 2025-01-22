@@ -34,13 +34,34 @@ impl PrettyPrint for Object<Realm> {
 
         not.push(id);
 
-        let mut str = String::new();
+        let mut str = if self.is_function() {
+            format!("[Function: {}] ", self.name())
+                .bright_green()
+                .to_string()
+        } else if let Some(prim) = self.primitive() {
+            match prim {
+                Value::Null => "[Null] ".bright_green().to_string(),
+                Value::Undefined => "[Undefined] ".bright_green().to_string(),
+                Value::String(s) => format!("[String: \"{s}\"] ").bright_green().to_string(),
+                Value::Number(n) => format!("[Number: {n}] ").bright_green().to_string(),
+                Value::Boolean(b) => format!("[Boolean: {b}] ").bright_green().to_string(),
+                _ => "[Primitive] ".bright_green().to_string(),
+            }
+        } else {
+            String::new()
+        };
+
         str.push_str("{ ");
 
         if let Ok(properties) = self.properties() {
             if properties.is_empty() {
                 not.pop();
-                return "{}".to_string();
+                if str.len() == 2 {
+                    return "{}".to_string();
+                }
+                str.pop();
+                str.pop();
+                return str;
             }
 
             for (key, value) in properties {
@@ -77,13 +98,11 @@ impl PrettyPrint for Object<Realm> {
             match prim {
                 Value::Null => "[Null]".bright_green().to_string(),
                 Value::Undefined => "[Undefined]".bright_green().to_string(),
-                Value::String(s) => format!("[String: {s}]").bright_green().to_string(),
+                Value::String(s) => format!("[String: \"{s}\"]").bright_green().to_string(),
                 Value::Number(n) => format!("[Number: {n}]").bright_green().to_string(),
                 Value::Boolean(b) => format!("[Boolean: {b}]").bright_green().to_string(),
                 _ => "[Primitive]".bright_green().to_string(),
             }
-            
-            
         } else {
             String::new()
         };
@@ -93,7 +112,12 @@ impl PrettyPrint for Object<Realm> {
         if let Ok(properties) = self.properties() {
             if properties.is_empty() {
                 not.pop();
-                return "{}".to_string();
+                if str.len() == 2 {
+                    return "{}".to_string();
+                }
+                str.pop();
+                str.pop();
+                return str;
             }
 
             for (key, value) in properties {

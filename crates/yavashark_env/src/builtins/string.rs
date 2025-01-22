@@ -3,10 +3,11 @@ use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Error, Func, Obj};
 
-#[object()]
+#[object]
 #[derive(Debug)]
 pub struct StringObj {
     #[mutable]
+    #[primitive]
     string: String,
 }
 
