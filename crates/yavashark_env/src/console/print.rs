@@ -73,6 +73,17 @@ impl PrettyPrint for Object<Realm> {
             format!("[Function: {}] ", self.name())
                 .bright_green()
                 .to_string()
+        } else if let Some(prim) = self.primitive() {
+            match prim {
+                Value::Null => "[Null]".bright_green().to_string(),
+                Value::Undefined => "[Undefined]".bright_green().to_string(),
+                Value::String(s) => format!("[String: {s}]").bright_green().to_string(),
+                Value::Number(n) => format!("[Number: {n}]").bright_green().to_string(),
+                Value::Boolean(b) => format!("[Boolean: {b}]").bright_green().to_string(),
+                _ => "[Primitive]".bright_green().to_string(),
+            }
+            
+            
         } else {
             String::new()
         };
