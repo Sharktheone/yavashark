@@ -3,9 +3,12 @@ use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Error, Func, Obj};
 
-#[object(direct(string))]
+#[object()]
 #[derive(Debug)]
-pub struct StringObj {}
+pub struct StringObj {
+    #[mutable]
+    string: String,
+}
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -66,4 +69,23 @@ impl StringObj {
 }
 
 #[properties_new(constructor(StringConstructor::new))]
-impl StringObj {}
+impl StringObj {
+    pub fn substr(&self, #[realm] realm: &mut Realm, start: isize) -> ValueResult {
+        let inner = self.inner.borrow();
+        
+        // negative numbers are counted from the end of the string
+        let start = if start < 0 {
+            (inner.string.len() as isize + start) as usize
+        } else {
+            start as usize
+        };
+        
+        let string = inner.string.get(start..);
+        
+        if let Some(string) = string {
+            Ok(string.into())
+        } else {
+            Ok("".into())
+        }
+    }
+}
