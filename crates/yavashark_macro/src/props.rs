@@ -52,50 +52,46 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut mode = mode;
                 let mut has_receiver = false;
                 let mut rec_mutability = false;
-                
+
                 let mut args = 0;
 
-                func.sig
-                    .inputs
-                    .iter_mut()
-                    .for_each(|arg| {
-                        let pat = match arg {
-                            syn::FnArg::Typed(pat) => pat,
-                            syn::FnArg::Receiver(rec) => {
-                                has_receiver = true;
-                                rec_mutability = rec.mutability.is_some();
-                                return;
-                            }
-                        };
-                        
+                func.sig.inputs.iter_mut().for_each(|arg| {
+                    let pat = match arg {
+                        syn::FnArg::Typed(pat) => pat,
+                        syn::FnArg::Receiver(rec) => {
+                            has_receiver = true;
+                            rec_mutability = rec.mutability.is_some();
+                            return;
+                        }
+                    };
 
-                        let mut remove = Vec::new();
+                    let mut remove = Vec::new();
 
-                        pat.attrs.iter().enumerate().for_each(|(idx_remove, attr)| {
-                            if attr.path().is_ident("this") {
-                                this = Some(args);
-                                remove.push(idx_remove);
-                            }
-
-                            if attr.path().is_ident("realm") {
-                                realm = Some(args);
-                                remove.push(idx_remove);
-                            }
-
-                            if attr.path().is_ident("variadic") {
-                                variadic = Some(args);
-                                remove.push(idx_remove);
-                            }
-                        });
-
-                        remove.sort();
-
-                        for idx in remove.into_iter().rev() {
-                            pat.attrs.remove(idx);
+                    pat.attrs.iter().enumerate().for_each(|(idx_remove, attr)| {
+                        if attr.path().is_ident("this") {
+                            this = Some(args);
+                            remove.push(idx_remove);
                         }
 
-                        args += 1;
+                        if attr.path().is_ident("realm") {
+                            realm = Some(args);
+                            remove.push(idx_remove);
+                        }
+
+                        if attr.path().is_ident("variadic") {
+                            variadic = Some(args);
+                            remove.push(idx_remove);
+                        }
                     });
+
+                    remove.sort();
+
+                    for idx in remove.into_iter().rev() {
+                        pat.attrs.remove(idx);
+                    }
+
+                    args += 1;
+                });
 
                 func.attrs.iter().for_each(|attr| {
                     if attr.path().is_ident("prototype") {
@@ -296,14 +292,8 @@ impl Method {
         };
 
         let prepare_receiver = if self.has_receiver {
-            if self.rec_mutability {
-                quote! {
-                    let mut this: yavashark_garbage::collectable::OwningGcMutRefCellGuard<_, Self> = FromValue::from_value(this)?;
-                }
-            } else {
-                quote! {
-                    let this: yavashark_garbage::collectable::OwningGcRefCellGuard<_, Self> = FromValue::from_value(this)?;
-                }
+            quote! {
+                let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
             }
         } else {
             TokenStream::new()
