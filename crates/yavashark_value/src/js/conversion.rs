@@ -1,5 +1,5 @@
 use std::any::type_name;
-use yavashark_garbage::GcGuard;
+use yavashark_garbage::OwningGcGuard;
 use crate::{BoxedObj, Error, Obj, Object, Realm, Value};
 
 impl<C: Realm> From<&str> for Value<C> {
@@ -229,20 +229,19 @@ macro_rules! impl_from_value {
 
 impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
 
-impl<C: Realm, T: Obj<C>> FromValue<C> for GcGuard<'_, BoxedObj<C>, T> {
+impl<C: Realm, T: Obj<C>> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, T> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
        let obj = match value {
-            Value::Object(obj) => Ok(obj.get()),
+            Value::Object(obj) => Ok(obj.get_owning()),
             _ => Err(Error::ty_error(format!(
                 "Expected an object, found {value:?}"
             ))),
         }?;
-        
-        obj.maybe_map(|o| (**o).as_any().downcast_ref::<T>()).ok_or(Error::ty_error(format!(
+
+        obj.maybe_map(|o| (**o).as_any().downcast_ref::<T>()).map_err(|obj| Error::ty_error(format!(
             "Expected an object of type {:?}, found {:?}",
             obj.name(),
             type_name::<T>(),
         )))
-        
     }
 }
