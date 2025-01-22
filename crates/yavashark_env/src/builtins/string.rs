@@ -60,7 +60,7 @@ impl StringObj {
         let this = Self {
             inner: RefCell::new(MutableStringObj {
                 object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
-                string: string.into(),
+                string,
             }),
         };
 
@@ -70,7 +70,7 @@ impl StringObj {
 
 #[properties_new(constructor(StringConstructor::new))]
 impl StringObj {
-    pub fn substr(&self, #[realm] realm: &mut Realm, start: isize) -> ValueResult {
+    pub fn substr(&self, start: isize) -> ValueResult {
         let inner = self.inner.borrow();
         
         // negative numbers are counted from the end of the string
@@ -82,10 +82,6 @@ impl StringObj {
         
         let string = inner.string.get(start..);
         
-        if let Some(string) = string {
-            Ok(string.into())
-        } else {
-            Ok("".into())
-        }
+        Ok(string.unwrap_or_default().into())
     }
 }
