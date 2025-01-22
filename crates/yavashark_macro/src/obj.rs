@@ -31,6 +31,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut function = false;
     let mut to_string = false;
     let mut name = false;
+    let mut primitive = None;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -161,7 +162,22 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 mutable_region.push(ident);
                 return false;
             }
-
+            
+            if attr.meta.path().is_ident("primitive") {
+                let Ok(ident) = f
+                    .ident
+                    .clone()
+                    .ok_or(syn::Error::new(attr.span(), "Expected ident"))
+                else {
+                    err = Some(syn::Error::new(attr.span(), "Expected ident"));
+                    return false;
+                };
+                
+                primitive = Some(ident); //TODO: edge case, what when we have a field that is a primitive but not mutable and a field with the same name that is mutable?
+                
+                
+                return false
+            }
             true
         });
 
@@ -336,6 +352,28 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
+    
+    let primitive = if let Some(primitive) = primitive {
+        let is_mutable = mutable_region.contains(&primitive);
+        
+        if is_mutable {
+            quote! {
+                fn primitive(&self) -> ::core::option::Option<#value> {
+                    let inner = self.inner.borrow();
+                    
+                    ::core::option::Option::Some(inner.#primitive.clone().into())
+                }
+            }
+        } else {
+            quote! {
+                fn primitive(&self) -> ::core::option::Option<#value> {
+                    ::core::option::Option::Some(self.#primitive.clone().into())
+                }
+            }
+        }
+    } else {
+        TokenStream::new()
+    };
 
     let region_code = mutable_region.generate(&conf, true);
 
@@ -453,6 +491,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #function
 
             #custom_refs
+            
+            #primitive
         }
     };
 

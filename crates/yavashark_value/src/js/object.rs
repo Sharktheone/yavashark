@@ -98,6 +98,10 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
     fn is_function(&self) -> bool {
         false
     }
+    
+    fn primitive(&self) -> Option<Value<R>> {
+        None
+    }
 
     fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
