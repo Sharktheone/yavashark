@@ -300,12 +300,12 @@ impl<'a, T: Collectable, V> GcGuard<'a, T, V> {
         }
     }
     
-    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(self, f: F) -> Option<GcGuard<'a, T, U>> {
+    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(self, f: F) -> Result<GcGuard<'a, T, U>, Self> {
         let value_ptr = f(self.value_ptr);
         value_ptr.map(|value_ptr| GcGuard {
             value_ptr,
-            gc: self.gc,
-        })
+            gc: self.gc.clone(),
+        }).ok_or(self)
     }
 }
 
