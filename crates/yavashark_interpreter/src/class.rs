@@ -59,7 +59,7 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
                     scope: scope.clone(),
                 };
 
-                class.set_constructor(raw_fn)
+                class.set_constructor(raw_fn);
             }
             ClassMember::PrivateMethod(method) => {
                 let (name, func) = create_method(

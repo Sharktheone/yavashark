@@ -54,7 +54,7 @@ impl Http {
             );
 
             if let Err(err) = res {
-                eprintln!("Error in callback: {:?}", err);
+                eprintln!("Error in callback: {err:?}");
             }
         });
 
@@ -139,7 +139,7 @@ impl HttpResponseWriter {
 
         inner.stream.write_all(response.as_bytes())?;
 
-        println!("Writing response: {:?}", response);
+        println!("Writing response: {response:?}");
 
         let body = mem::take(&mut inner.body);
 

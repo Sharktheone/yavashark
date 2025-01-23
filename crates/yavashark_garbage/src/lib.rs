@@ -313,7 +313,7 @@ impl<'a, T: Collectable, V> GcGuard<'a, T, V> {
         value_ptr
             .map(|value_ptr| GcGuard {
                 value_ptr,
-                gc: self.gc.clone(),
+                gc: self.gc,
             })
             .ok_or(self)
     }
@@ -361,7 +361,7 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
-    pub fn get_owning<'a, 'b>(&'a self) -> OwningGcGuard<'b, T> {
+    #[must_use] pub fn get_owning<'b>(&self) -> OwningGcGuard<'b, T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         OwningGcGuard {
             value_ptr,

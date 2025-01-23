@@ -141,7 +141,6 @@ impl ClassInstance {
         self.inner.get_mut().private_props.insert(key, value);
     }
 
-    #[must_use]
     pub fn get_private_prop(&self, key: &str) -> Result<Option<Value>> {
         let inner = self.inner.try_borrow()?;
 

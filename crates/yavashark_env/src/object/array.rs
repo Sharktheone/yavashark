@@ -124,7 +124,7 @@ impl Array {
     }
 
     #[constructor(special)]
-    fn construct(args: Vec<Value>, realm: &mut Realm) -> ValueResult {
+    fn construct(args: Vec<Value>, realm: &Realm) -> ValueResult {
         let this = Self::new(realm.intrinsics.array.clone().into());
 
         let values = args
