@@ -46,11 +46,11 @@ impl MutableRegion {
         };
 
         quote! {
-            #[derive(Debug, PartialEq, Eq)]
+            #[derive(Debug)]
             pub struct #full_name {
                 #object
                 #(#direct)*
-                #(#custom)*
+                #(#custom ,)*
             }
         }
     }
