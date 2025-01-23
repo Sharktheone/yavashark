@@ -54,8 +54,12 @@ impl MutableRegion {
             }
         }
     }
-    
+
     pub(crate) fn contains(&self, ident: &Ident) -> bool {
-        self.direct.contains(ident) || self.custom.iter().any(|field| field.ident.as_ref().unwrap() == ident)
+        self.direct.contains(ident)
+            || self
+                .custom
+                .iter()
+                .any(|field| field.ident.as_ref().unwrap() == ident)
     }
 }

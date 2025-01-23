@@ -98,7 +98,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + 'static {
     fn is_function(&self) -> bool {
         false
     }
-    
+
     fn primitive(&self) -> Option<Value<R>> {
         None
     }

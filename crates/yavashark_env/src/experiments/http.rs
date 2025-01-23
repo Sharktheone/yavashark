@@ -1,13 +1,13 @@
 mod status;
 
+use crate::experiments::http::status::status_code_to_reason;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result};
 use std::cell::RefCell;
-use std::{io, mem};
-use std::io::{BufRead, BufReader, Write as _};
 use std::fmt::Write;
+use std::io::{BufRead, BufReader, Write as _};
+use std::{io, mem};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{IntoValue, Obj};
-use crate::experiments::http::status::status_code_to_reason;
 
 #[object]
 #[derive(Debug)]
@@ -44,11 +44,15 @@ impl Http {
             let Ok(obj) = request.into_object(realm) else {
                 return;
             };
-            
+
             let res = response.into_object();
 
-            let res = callback.call(realm, vec![obj.into(), res.into()], callback.clone().into_value());
-            
+            let res = callback.call(
+                realm,
+                vec![obj.into(), res.into()],
+                callback.clone().into_value(),
+            );
+
             if let Err(err) = res {
                 eprintln!("Error in callback: {:?}", err);
             }
@@ -77,7 +81,7 @@ struct HttpResponseWriter {
     #[mutable]
     headers: Vec<(String, String)>,
     #[mutable]
-    body: Vec<u8>
+    body: Vec<u8>,
 }
 
 impl HttpResponseWriter {
@@ -91,12 +95,9 @@ impl HttpResponseWriter {
                 body: Vec::new(),
             }),
         };
-        
+
         this.initialize(realm.intrinsics.func.clone().into())?;
-        
-        
-        
-        
+
         Ok(this)
     }
 }
@@ -105,48 +106,50 @@ impl HttpResponseWriter {
 impl HttpResponseWriter {
     fn set_body(&self, body: String) {
         let inner = &mut self.inner.borrow_mut();
-        
+
         inner.body = body.into_bytes();
     }
-    
+
     fn set_header(&self, key: String, value: String) {
         let inner = &mut self.inner.borrow_mut();
-        
+
         inner.headers.push((key, value));
     }
-    
+
     fn set_status(&self, status: u16) {
         let inner = &mut self.inner.borrow_mut();
-        
+
         inner.status = status;
     }
-    
+
     fn finish(&self) -> Res {
         let mut inner = self.inner.borrow_mut();
-        
-        let mut response = format!("HTTP/1.1 {} {}\r\n", inner.status, status_code_to_reason(inner.status));
-        
+
+        let mut response = format!(
+            "HTTP/1.1 {} {}\r\n",
+            inner.status,
+            status_code_to_reason(inner.status)
+        );
+
         for (key, value) in &inner.headers {
             write!(response, "{key}: {value}\r\n")?;
         }
-        
+
         response.push_str("\r\n");
-        
+
         inner.stream.write_all(response.as_bytes())?;
 
         println!("Writing response: {:?}", response);
-        
+
         let body = mem::take(&mut inner.body);
-        
+
         inner.stream.write_all(&body)?;
-        
+
         let _ = mem::replace(&mut inner.body, body);
-        
+
         Ok(())
     }
 }
-
-
 
 impl HttpRequest {
     fn into_object(self, realm: &Realm) -> crate::Result<ObjectHandle> {
@@ -191,7 +194,7 @@ impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer<C> 
                 .lines()
                 .take_while(|line| line.as_ref().map(|l| !l.is_empty()).unwrap_or(false))
                 .collect::<Result<Vec<_>, _>>()?;
-            
+
             let Some(mut request_line) = http_request.first().map(|x| x.split_whitespace()) else {
                 continue;
             };
@@ -221,11 +224,10 @@ impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer<C> 
                 headers,
                 body: String::new(),
             };
-            
+
             let Ok(response) = HttpResponseWriter::new(stream, realm) else {
                 continue;
             };
-            
 
             (self.callback)(realm, request, response);
         }

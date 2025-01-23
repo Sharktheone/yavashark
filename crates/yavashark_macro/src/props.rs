@@ -2,7 +2,7 @@ use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{ImplItem, Lit, Path};
+use syn::{ImplItem, Lit};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -103,12 +103,12 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         panic!("Mixed up modes currently not supported!")
                         // return false;
                     }
-                    
+
                     if attr.path().is_ident("prop") {
                         js_name = attr.parse_args::<Lit>().ok();
                         return false;
                     }
-                    
+
                     false
                 });
 
@@ -138,18 +138,14 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         mode = Mode::Raw;
                         return false;
                     }
-                    
+
                     if attr.path().is_ident("prop") {
                         js_name = attr.parse_args::<Lit>().ok();
                         return false;
                     }
-                    
+
                     true
                 });
-                
-                
-                
-                
 
                 props.push(Prop::Constant(Constant {
                     name: constant.ident.clone(),
@@ -316,8 +312,10 @@ impl Method {
         } else {
             TokenStream::new()
         };
-        
-        let name = self.js_name.clone()
+
+        let name = self
+            .js_name
+            .clone()
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
 

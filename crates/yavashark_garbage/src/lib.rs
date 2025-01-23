@@ -304,13 +304,18 @@ impl<'a, T: Collectable, V> GcGuard<'a, T, V> {
             gc: self.gc,
         }
     }
-    
-    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(self, f: F) -> Result<GcGuard<'a, T, U>, Self> {
+
+    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(
+        self,
+        f: F,
+    ) -> Result<GcGuard<'a, T, U>, Self> {
         let value_ptr = f(self.value_ptr);
-        value_ptr.map(|value_ptr| GcGuard {
-            value_ptr,
-            gc: self.gc.clone(),
-        }).ok_or(self)
+        value_ptr
+            .map(|value_ptr| GcGuard {
+                value_ptr,
+                gc: self.gc.clone(),
+            })
+            .ok_or(self)
     }
 }
 
@@ -330,13 +335,18 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
             gc: self.gc.clone(),
         }
     }
-    
-    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(self, f: F) -> Result<OwningGcGuard<'a, T, U>, Self> {
+
+    pub fn maybe_map<U, F: FnOnce(&V) -> Option<&U>>(
+        self,
+        f: F,
+    ) -> Result<OwningGcGuard<'a, T, U>, Self> {
         let value_ptr = f(self.value_ptr);
-        value_ptr.map(|value_ptr| OwningGcGuard {
-            value_ptr,
-            gc: self.gc.clone(),
-        }).ok_or(self)
+        value_ptr
+            .map(|value_ptr| OwningGcGuard {
+                value_ptr,
+                gc: self.gc.clone(),
+            })
+            .ok_or(self)
     }
 }
 
@@ -350,7 +360,7 @@ impl<T: Collectable> Gc<T> {
             gc: self.inner,
         }
     }
-    
+
     pub fn get_owning<'a, 'b>(&'a self) -> OwningGcGuard<'b, T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         OwningGcGuard {

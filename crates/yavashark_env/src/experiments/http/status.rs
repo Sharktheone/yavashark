@@ -1,7 +1,3 @@
-
-
-
-
 pub const fn status_code_to_reason(status: u16) -> &'static str {
     match status {
         100 => "Continue",

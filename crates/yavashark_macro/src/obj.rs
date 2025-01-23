@@ -162,7 +162,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 mutable_region.push(ident);
                 return false;
             }
-            
+
             if attr.meta.path().is_ident("primitive") {
                 let Ok(ident) = f
                     .ident
@@ -172,11 +172,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     err = Some(syn::Error::new(attr.span(), "Expected ident"));
                     return false;
                 };
-                
+
                 primitive = Some(ident); //TODO: edge case, what when we have a field that is a primitive but not mutable and a field with the same name that is mutable?
-                
-                
-                return false
+
+                return false;
             }
             true
         });
@@ -352,15 +351,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         }
     };
-    
+
     let primitive = if let Some(primitive) = primitive {
         let is_mutable = mutable_region.contains(&primitive);
-        
+
         if is_mutable {
             quote! {
                 fn primitive(&self) -> ::core::option::Option<#value> {
                     let inner = self.inner.borrow();
-                    
+
                     ::core::option::Option::Some(inner.#primitive.clone().into())
                 }
             }
@@ -491,7 +490,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #function
 
             #custom_refs
-            
+
             #primitive
         }
     };

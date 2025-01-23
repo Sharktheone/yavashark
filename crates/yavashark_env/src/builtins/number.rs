@@ -1,7 +1,7 @@
+use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 
 #[object]
 #[derive(Debug)]
@@ -23,13 +23,12 @@ impl NumberConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
         };
-        
+
         this.initialize(func.copy())?;
-        
+
         Ok(this.into_object())
     }
 }
-
 
 #[properties_new(raw)]
 impl NumberConstructor {
@@ -57,9 +56,6 @@ impl NumberConstructor {
     pub fn is_integer(number: f64) -> bool {
         number.fract() == 0.0
     }
-
-
-
 }
 
 impl Constructor<Realm> for NumberConstructor {
@@ -105,6 +101,4 @@ impl NumberObj {
 }
 
 #[properties_new(constructor(NumberConstructor::new))]
-impl NumberObj {
-
-}
+impl NumberObj {}

@@ -1,7 +1,7 @@
 mod math;
-mod string;
 mod number;
+mod string;
 
 pub use math::*;
-pub use string::*;
 pub use number::*;
+pub use string::*;
