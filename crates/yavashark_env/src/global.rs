@@ -19,6 +19,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("Function".into(), realm.intrinsics.func_constructor())?;
     obj.define_variable("Math".into(), realm.intrinsics.math_obj())?;
     obj.define_variable("String".into(), realm.intrinsics.string_constructor())?;
+    obj.define_variable("Number".into(), realm.intrinsics.number_constructor())?;
 
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(handle, realm)?;
