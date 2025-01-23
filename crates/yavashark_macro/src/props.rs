@@ -2,7 +2,7 @@ use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::ImplItem;
+use syn::{ImplItem, Lit, Path};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -91,16 +91,25 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     args += 1;
                 });
 
-                func.attrs.iter().for_each(|attr| {
+                func.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("prototype") {
                         mode = Mode::Prototype;
                         panic!("Mixed up modes currently not supported!")
+                        // return false;
                     }
 
                     if attr.path().is_ident("raw") {
                         mode = Mode::Raw;
                         panic!("Mixed up modes currently not supported!")
+                        // return false;
                     }
+                    
+                    if attr.path().is_ident("prop") {
+                        js_name = attr.parse_args::<Lit>().ok();
+                        return false;
+                    }
+                    
+                    false
                 });
 
                 props.push(Prop::Method(Method {
@@ -119,15 +128,28 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut js_name = None;
                 let mut mode = mode;
 
-                constant.attrs.iter().for_each(|attr| {
+                constant.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("prototype") {
                         mode = Mode::Prototype;
+                        return false;
                     }
 
                     if attr.path().is_ident("raw") {
                         mode = Mode::Raw;
+                        return false;
                     }
+                    
+                    if attr.path().is_ident("prop") {
+                        js_name = attr.parse_args::<Lit>().ok();
+                        return false;
+                    }
+                    
+                    true
                 });
+                
+                
+                
+                
 
                 props.push(Prop::Constant(Constant {
                     name: constant.ident.clone(),
@@ -224,7 +246,7 @@ enum Prop {
 
 struct Method {
     name: syn::Ident,
-    js_name: Option<syn::Path>,
+    js_name: Option<Lit>,
     args: usize,
     this: Option<usize>,
     realm: Option<usize>,
@@ -237,7 +259,7 @@ struct Method {
 #[allow(unused)]
 struct Constant {
     name: syn::Ident,
-    js_name: Option<syn::Path>,
+    js_name: Option<Lit>,
     mode: Mode,
 }
 
@@ -294,6 +316,10 @@ impl Method {
         } else {
             TokenStream::new()
         };
+        
+        let name = self.js_name.clone()
+            .map(|js_name| quote! {#js_name})
+            .unwrap_or_else(|| quote! {stringify!(#name)});
 
         quote! {
             #native_function::with_proto(stringify!(#name), |args, mut this, realm| {
