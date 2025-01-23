@@ -1,7 +1,7 @@
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Error, Func, Obj};
+use yavashark_value::{Constructor, Func, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -41,7 +41,7 @@ impl Constructor<Realm> for StringConstructor {
 }
 
 impl Func<Realm> for StringConstructor {
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,
             None => String::new(),

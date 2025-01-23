@@ -297,7 +297,7 @@ impl<'a, T: Collectable, V> Deref for GcGuard<'a, T, V> {
 }
 
 impl<'a, T: Collectable, V> GcGuard<'a, T, V> {
-    fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> GcGuard<'a, T, U> {
+    pub fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> GcGuard<'a, T, U> {
         let value_ptr = f(self.value_ptr);
         GcGuard {
             value_ptr,
@@ -323,7 +323,7 @@ impl<'a, T: Collectable, V> Deref for OwningGcGuard<'a, T, V> {
 }
 
 impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
-    fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> OwningGcGuard<'a, T, U> {
+    pub fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> OwningGcGuard<'a, T, U> {
         let value_ptr = f(self.value_ptr);
         OwningGcGuard {
             value_ptr,

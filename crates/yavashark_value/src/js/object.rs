@@ -211,7 +211,7 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn construct(&mut self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
+    fn construct(&mut self, _realm: &mut R, _args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
         Err(Error::ty_error(format!(
             "{} is not a constructor",
             self.name()

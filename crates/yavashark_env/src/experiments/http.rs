@@ -30,7 +30,7 @@ impl Http {
 
 #[properties_new(raw)]
 impl Http {
-    fn get(url: String) -> crate::Result<String> {
+    fn get(_url: String) -> crate::Result<String> {
         Ok(String::new()) //TODO
     }
 

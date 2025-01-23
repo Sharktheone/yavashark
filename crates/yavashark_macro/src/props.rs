@@ -51,7 +51,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut variadic = None;
                 let mut mode = mode;
                 let mut has_receiver = false;
-                let mut rec_mutability = false;
 
                 let mut args = 0;
 
@@ -60,7 +59,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         syn::FnArg::Typed(pat) => pat,
                         syn::FnArg::Receiver(rec) => {
                             has_receiver = true;
-                            rec_mutability = rec.mutability.is_some();
                             return;
                         }
                     };
@@ -114,7 +112,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     variadic,
                     mode,
                     has_receiver,
-                    rec_mutability,
                 }))
             }
 
@@ -235,7 +232,6 @@ struct Method {
     #[allow(unused)]
     mode: Mode,
     has_receiver: bool,
-    rec_mutability: bool,
 }
 
 #[allow(unused)]

@@ -1,6 +1,6 @@
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
