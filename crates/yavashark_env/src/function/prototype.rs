@@ -62,12 +62,20 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 
 #[allow(unused)]
 fn bind(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    if args.is_empty() {
+        return BoundFunction::new(this, Value::Undefined, vec![], realm);
+    }
+
     BoundFunction::new(this, args.remove(0), args, realm)
 }
 
 #[allow(unused)]
 fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    let new_this = args.remove(0);
+    let new_this = if args.is_empty() {
+        Value::Undefined
+    } else {
+        args.remove(0)
+    };
 
     this.call(realm, args, new_this)
 }
