@@ -1,9 +1,13 @@
-use crate::{MutObject, Object, ObjectHandle, Realm};
+mod status;
+
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result};
 use std::cell::RefCell;
-use std::io;
-use std::io::{BufRead, BufReader};
+use std::{io, mem};
+use std::io::{BufRead, BufReader, Write as _};
+use std::fmt::Write;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{IntoValue, Obj};
+use crate::experiments::http::status::status_code_to_reason;
 
 #[object]
 #[derive(Debug)]
@@ -36,15 +40,21 @@ impl Http {
         callback: ObjectHandle,
         #[realm] realm: &mut Realm,
     ) -> crate::Result<()> {
-        let mut server = SimpleHttpServer::new(ip, port, move |request| {
+        let mut server = SimpleHttpServer::new(ip, port, move |realm, request, response| {
             let Ok(obj) = request.into_object(realm) else {
                 return;
             };
+            
+            let res = response.into_object();
 
-            _ = callback.call(realm, vec![obj.into()], callback.clone().into_value());
+            let res = callback.call(realm, vec![obj.into(), res.into()], callback.clone().into_value());
+            
+            if let Err(err) = res {
+                eprintln!("Error in callback: {:?}", err);
+            }
         });
 
-        server.start()?;
+        server.start(realm)?;
 
         Ok(())
     }
@@ -56,6 +66,87 @@ struct HttpRequest {
     headers: Vec<(String, String)>,
     body: String,
 }
+
+#[object]
+#[derive(Debug)]
+struct HttpResponseWriter {
+    #[mutable]
+    stream: std::net::TcpStream,
+    #[mutable]
+    status: u16,
+    #[mutable]
+    headers: Vec<(String, String)>,
+    #[mutable]
+    body: Vec<u8>
+}
+
+impl HttpResponseWriter {
+    fn new(stream: std::net::TcpStream, realm: &Realm) -> Result<Self> {
+        let mut this = Self {
+            inner: RefCell::new(MutableHttpResponseWriter {
+                object: MutObject::new(realm),
+                stream,
+                status: 200,
+                headers: Vec::new(),
+                body: Vec::new(),
+            }),
+        };
+        
+        this.initialize(realm.intrinsics.func.clone().into())?;
+        
+        
+        
+        
+        Ok(this)
+    }
+}
+
+#[properties_new(raw)]
+impl HttpResponseWriter {
+    fn set_body(&self, body: String) {
+        let inner = &mut self.inner.borrow_mut();
+        
+        inner.body = body.into_bytes();
+    }
+    
+    fn set_header(&self, key: String, value: String) {
+        let inner = &mut self.inner.borrow_mut();
+        
+        inner.headers.push((key, value));
+    }
+    
+    fn set_status(&self, status: u16) {
+        let inner = &mut self.inner.borrow_mut();
+        
+        inner.status = status;
+    }
+    
+    fn finish(&self) -> Res {
+        let mut inner = self.inner.borrow_mut();
+        
+        let mut response = format!("HTTP/1.1 {} {}\r\n", inner.status, status_code_to_reason(inner.status));
+        
+        for (key, value) in &inner.headers {
+            write!(response, "{key}: {value}\r\n")?;
+        }
+        
+        response.push_str("\r\n");
+        
+        inner.stream.write_all(response.as_bytes())?;
+
+        println!("Writing response: {:?}", response);
+        
+        let body = mem::take(&mut inner.body);
+        
+        inner.stream.write_all(&body)?;
+        
+        let _ = mem::replace(&mut inner.body, body);
+        
+        Ok(())
+    }
+}
+
+
 
 impl HttpRequest {
     fn into_object(self, realm: &Realm) -> crate::Result<ObjectHandle> {
@@ -78,18 +169,18 @@ impl HttpRequest {
     }
 }
 
-struct SimpleHttpServer<C: FnMut(HttpRequest)> {
+struct SimpleHttpServer<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> {
     ip: String,
     port: u16,
     callback: C,
 }
 
-impl<C: FnMut(HttpRequest)> SimpleHttpServer<C> {
+impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer<C> {
     const fn new(ip: String, port: u16, callback: C) -> Self {
         Self { ip, port, callback }
     }
 
-    fn start(&mut self) -> io::Result<()> {
+    fn start(&mut self, realm: &mut Realm) -> io::Result<()> {
         println!("Starting server on {}:{}", self.ip, self.port);
         let listener = std::net::TcpListener::bind(format!("{}:{}", self.ip, self.port))?;
 
@@ -100,9 +191,7 @@ impl<C: FnMut(HttpRequest)> SimpleHttpServer<C> {
                 .lines()
                 .take_while(|line| line.as_ref().map(|l| !l.is_empty()).unwrap_or(false))
                 .collect::<Result<Vec<_>, _>>()?;
-
-            println!("{}", http_request.join("\n"));
-
+            
             let Some(mut request_line) = http_request.first().map(|x| x.split_whitespace()) else {
                 continue;
             };
@@ -132,8 +221,13 @@ impl<C: FnMut(HttpRequest)> SimpleHttpServer<C> {
                 headers,
                 body: String::new(),
             };
+            
+            let Ok(response) = HttpResponseWriter::new(stream, realm) else {
+                continue;
+            };
+            
 
-            (self.callback)(request);
+            (self.callback)(realm, request, response);
         }
 
         Ok(())
