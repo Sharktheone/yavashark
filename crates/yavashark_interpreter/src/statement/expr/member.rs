@@ -3,6 +3,7 @@ use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
+use yavashark_env::builtins::{NumberObj, StringObj};
 
 impl Interpreter {
     pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -38,6 +39,20 @@ impl Interpreter {
             Value::Null => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of null",
             ))),
+            Value::String(s) => {
+                let str =  StringObj::with_string(realm, s)?;
+                
+                Ok(str.resolve_property(&name, realm)?
+                    .unwrap_or(Value::Undefined))
+            }
+            
+            Value::Number(n) => {
+                let num =  NumberObj::with_string(realm, n)?;
+                
+                Ok(num.resolve_property(&name, realm)?
+                    .unwrap_or(Value::Undefined))
+            }
+            
             _ => Ok(Value::Undefined),
         }
     }
