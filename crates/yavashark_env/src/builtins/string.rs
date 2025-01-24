@@ -161,7 +161,7 @@ impl StringObj {
     }
 
     #[prop("concat")]
-    pub fn concat(&self, #[variadic] args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn concat(&self, #[variadic] args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let mut string = inner.string.clone();
 
