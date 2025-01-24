@@ -19,6 +19,16 @@ impl Interpreter {
         span: Span,
         scope: &mut Scope,
     ) -> RuntimeResult {
+        Ok(Self::run_member_on_primitives(realm, value, prop, span, scope)?.0)
+    }
+
+    pub fn run_member_on_primitives(
+        realm: &mut Realm,
+        value: Value,
+        prop: &MemberProp,
+        span: Span,
+        scope: &mut Scope,
+    ) -> Result<(Value, Option<Value>), ControlFlow> {
         let name = match &prop {
             MemberProp::Ident(i) => Value::String(i.sym.to_string()),
             MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
@@ -30,9 +40,9 @@ impl Interpreter {
         };
 
         match value {
-            Value::Object(o) => Ok(o
+            Value::Object(o) => Ok((o
                 .resolve_property(&name, realm)?
-                .unwrap_or(Value::Undefined)),
+                .unwrap_or(Value::Undefined), None)),
             Value::Undefined => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of undefined",
             ))),
@@ -42,18 +52,18 @@ impl Interpreter {
             Value::String(s) => {
                 let str =  StringObj::with_string(realm, s)?;
                 
-                Ok(str.resolve_property(&name, realm)?
-                    .unwrap_or(Value::Undefined))
+                Ok((str.resolve_property(&name, realm)?
+                    .unwrap_or(Value::Undefined), Some(str.into())))
             }
             
             Value::Number(n) => {
                 let num =  NumberObj::with_string(realm, n)?;
                 
-                Ok(num.resolve_property(&name, realm)?
-                    .unwrap_or(Value::Undefined))
+                Ok((num.resolve_property(&name, realm)?
+                    .unwrap_or(Value::Undefined), Some(num.into())))
             }
             
-            _ => Ok(Value::Undefined),
+            _ => Ok((Value::Undefined, None)),
         }
     }
 }
