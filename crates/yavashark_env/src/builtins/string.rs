@@ -11,9 +11,6 @@ pub struct StringObj {
     string: String,
 }
 
-
-
-
 #[object(constructor, function)]
 #[derive(Debug)]
 pub struct StringConstructor {}
@@ -39,7 +36,7 @@ impl StringConstructor {
             .filter_map(std::char::from_u32)
             .collect::<String>()
     }
-    
+
     #[prop("fromCodePoint")]
     fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> String {
         args.iter()
@@ -47,10 +44,9 @@ impl StringConstructor {
             .filter_map(std::char::from_u32)
             .collect::<String>()
     }
-    
+
     //TODO: String.raw
 }
-
 
 impl Constructor<Realm> for StringConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
@@ -92,7 +88,7 @@ impl StringObj {
 
         Ok(this.into_object())
     }
-    
+
     pub fn get(&self, index: isize, to: isize) -> Option<String> {
         let inner = self.inner.borrow();
         let len = inner.string.len() as isize;
@@ -121,32 +117,33 @@ impl StringObj {
 
 #[properties_new(constructor(StringConstructor::new))]
 impl StringObj {
-    
     pub fn anchor(&self, name: String) -> ValueResult {
         Ok(format!("<a name=\"{}\">{}</a>", name, self.inner.borrow().string).into())
     }
-    
+
     pub fn at(&self, index: isize) -> Value {
-        self.get(index, index + 1).map_or(Value::Undefined, Into::into)
+        self.get(index, index + 1)
+            .map_or(Value::Undefined, Into::into)
     }
-    
+
     pub fn big(&self) -> ValueResult {
         Ok(format!("<big>{}</big>", self.inner.borrow().string).into())
     }
-    
+
     pub fn blink(&self) -> ValueResult {
         Ok(format!("<blink>{}</blink>", self.inner.borrow().string).into())
     }
-    
+
     pub fn bold(&self) -> ValueResult {
         Ok(format!("<b>{}</b>", self.inner.borrow().string).into())
     }
-    
+
     #[prop("charAt")]
     pub fn char_at(&self, index: isize) -> Value {
-        self.get(index, index + 1).map_or(Value::Undefined, Into::into)
+        self.get(index, index + 1)
+            .map_or(Value::Undefined, Into::into)
     }
-    
+
     #[prop("charCodeAt")]
     pub fn char_code_at(&self, index: isize) -> Value {
         self.get(index, index + 1)
@@ -154,7 +151,7 @@ impl StringObj {
             .unwrap_or_default()
             .into()
     }
-    
+
     #[prop("codePointAt")]
     pub fn code_point_at(&self, index: isize) -> Value {
         self.get(index, index + 1)
@@ -162,7 +159,7 @@ impl StringObj {
             .unwrap_or_default()
             .into()
     }
-    
+
     #[prop("concat")]
     pub fn concat(&self, #[variadic] args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
@@ -174,17 +171,14 @@ impl StringObj {
 
         Ok(string.into())
     }
-    
+
     #[prop("endsWith")]
     pub fn ends_with(&self, search: String) -> Value {
         let inner = self.inner.borrow();
 
         inner.string.ends_with(&search).into()
     }
-    
-    
-    
-    
+
     pub fn substr(&self, start: isize) -> ValueResult {
         let inner = self.inner.borrow();
 
