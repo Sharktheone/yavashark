@@ -52,7 +52,8 @@ impl ObjectImpl<Realm> for NativeFunction {
     }
 
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?.map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
+        let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
+            .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
 
         let obj = Object::with_proto(proto).into();
 

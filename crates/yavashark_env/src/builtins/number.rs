@@ -58,20 +58,22 @@ impl NumberConstructor {
     pub fn is_integer(number: f64) -> bool {
         number.fract() == 0.0
     }
-    
+
     #[prop("isSafeInteger")]
     pub fn is_safe_integer(number: f64) -> bool {
         number.is_finite() && number.abs() <= Self::MAX_SAFE_INTEGER
     }
-    
+
     #[prop("parseFloat")]
     pub fn parse_float(string: String) -> f64 {
         string.parse().unwrap_or(f64::NAN)
     }
-    
+
     #[prop("parseInt")]
     pub fn parse_int(string: String, radix: u32) -> f64 {
-        i64::from_str_radix(&string, radix).map(|n| n as f64).unwrap_or(f64::NAN)
+        i64::from_str_radix(&string, radix)
+            .map(|n| n as f64)
+            .unwrap_or(f64::NAN)
     }
 }
 

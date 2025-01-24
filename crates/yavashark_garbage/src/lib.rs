@@ -361,7 +361,8 @@ impl<T: Collectable> Gc<T> {
         }
     }
 
-    #[must_use] pub fn get_owning<'b>(&self) -> OwningGcGuard<'b, T> {
+    #[must_use]
+    pub fn get_owning<'b>(&self) -> OwningGcGuard<'b, T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         OwningGcGuard {
             value_ptr,

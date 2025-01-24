@@ -127,12 +127,10 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<(Value, Value), ControlFlow> {
         let (value, par) = Self::run_call_expr(realm, &stmt.obj, stmt.span, scope)?;
-        
-        let (member, this) = Self::run_member_on_primitives(realm, value.copy(), &stmt.prop, stmt.span, scope)?;
 
-        Ok((
-            member,
-            this.or(par).unwrap_or(value),
-        ))
+        let (member, this) =
+            Self::run_member_on_primitives(realm, value.copy(), &stmt.prop, stmt.span, scope)?;
+
+        Ok((member, this.or(par).unwrap_or(value)))
     }
 }

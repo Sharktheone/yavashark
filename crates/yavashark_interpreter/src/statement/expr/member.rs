@@ -1,9 +1,9 @@
 use crate::Interpreter;
 use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
+use yavashark_env::builtins::{NumberObj, StringObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
-use yavashark_env::builtins::{NumberObj, StringObj};
 
 impl Interpreter {
     pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -40,9 +40,11 @@ impl Interpreter {
         };
 
         match value {
-            Value::Object(o) => Ok((o
-                .resolve_property(&name, realm)?
-                .unwrap_or(Value::Undefined), None)),
+            Value::Object(o) => Ok((
+                o.resolve_property(&name, realm)?
+                    .unwrap_or(Value::Undefined),
+                None,
+            )),
             Value::Undefined => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of undefined",
             ))),
@@ -50,19 +52,25 @@ impl Interpreter {
                 "Cannot read property '{name}' of null",
             ))),
             Value::String(s) => {
-                let str =  StringObj::with_string(realm, s)?;
-                
-                Ok((str.resolve_property(&name, realm)?
-                    .unwrap_or(Value::Undefined), Some(str.into())))
+                let str = StringObj::with_string(realm, s)?;
+
+                Ok((
+                    str.resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(str.into()),
+                ))
             }
-            
+
             Value::Number(n) => {
-                let num =  NumberObj::with_string(realm, n)?;
-                
-                Ok((num.resolve_property(&name, realm)?
-                    .unwrap_or(Value::Undefined), Some(num.into())))
+                let num = NumberObj::with_string(realm, n)?;
+
+                Ok((
+                    num.resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(num.into()),
+                ))
             }
-            
+
             _ => Ok((Value::Undefined, None)),
         }
     }

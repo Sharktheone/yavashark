@@ -67,12 +67,12 @@ impl JSFunction {
 
         handle
     }
-    
+
     pub fn new_instance(&self, realm: &mut Realm) -> ValueResult {
         let inner = self.inner.try_borrow()?;
-        
+
         let proto = inner.prototype.value.clone();
-        
+
         let obj = Object::with_proto(proto);
 
         Ok(obj.into())
@@ -130,9 +130,9 @@ impl CustomGcRefUntyped for RawJSFunction {
 impl Constructor<Realm> for JSFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let this = self.new_instance(realm)?;
-        
+
         self.raw.call(realm, args, this.copy())?;
-        
+
         Ok(this)
     }
 
