@@ -58,7 +58,7 @@ impl Interpreter {
             obj.define_property(name, value);
             Ok(())
         } else {
-            Err(Error::ty("Invalid left-hand side in assignment"))
+            Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")))
         }
     }
 
@@ -117,7 +117,7 @@ impl Interpreter {
             obj.define_property(name, value.copy());
             Ok(value)
         } else {
-            Err(Error::ty("Invalid left-hand side in assignment").into())
+            Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")).into())
         }
     }
 
