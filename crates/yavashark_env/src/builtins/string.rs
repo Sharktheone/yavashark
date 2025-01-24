@@ -18,12 +18,15 @@ pub struct StringConstructor {}
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
-        Ok(Self {
+        let mut this = Self {
             inner: RefCell::new(MutableStringConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
-        }
-        .into_object())
+        };
+        
+        this.initialize(func.copy())?;
+
+        Ok(this.into_object())
     }
 }
 
