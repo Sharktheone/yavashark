@@ -11,6 +11,9 @@ pub struct StringObj {
     string: String,
 }
 
+
+
+
 #[object(constructor, function)]
 #[derive(Debug)]
 pub struct StringConstructor {}
@@ -26,6 +29,28 @@ impl StringConstructor {
         .into_object())
     }
 }
+
+#[properties_new(raw)]
+impl StringConstructor {
+    #[prop("fromCharCode")]
+    fn from_char_code(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> String {
+        args.iter()
+            .map(|v| v.to_number(realm).unwrap_or_default() as u32)
+            .filter_map(std::char::from_u32)
+            .collect::<String>()
+    }
+    
+    #[prop("fromCodePoint")]
+    fn from_char_point(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> String {
+        args.iter()
+            .map(|v| v.to_number(realm).unwrap_or_default() as u32)
+            .filter_map(std::char::from_u32)
+            .collect::<String>()
+    }
+    
+    //TODO: String.raw
+}
+
 
 impl Constructor<Realm> for StringConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
