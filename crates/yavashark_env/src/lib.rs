@@ -8,7 +8,7 @@ mod function;
 pub mod object;
 pub mod scope;
 
-mod builtins;
+pub mod builtins;
 pub mod conversion;
 #[cfg(feature = "out-of-spec-experiments")]
 pub mod experiments;
