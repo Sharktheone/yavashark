@@ -62,7 +62,7 @@ impl Interpreter {
             }
 
             Value::Number(n) => {
-                let num = NumberObj::with_string(realm, n)?;
+                let num = NumberObj::new(realm, n)?;
 
                 Ok((
                     num.resolve_property(&name, realm)?
