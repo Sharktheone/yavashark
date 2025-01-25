@@ -23,7 +23,7 @@ impl StringConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
         };
-        
+
         this.initialize(func.copy())?;
 
         Ok(this.into_object())
@@ -114,7 +114,7 @@ impl StringObj {
 
         let string = inner.string.get(start..end);
 
-        string.map(|s| s.to_string())
+        string.map(ToString::to_string)
     }
 }
 
