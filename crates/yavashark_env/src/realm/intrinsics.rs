@@ -1,5 +1,5 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::{Math, NumberObj, StringObj};
+use crate::builtins::{BooleanObj, Math, NumberObj, StringObj};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -13,6 +13,7 @@ pub struct Intrinsics {
     pub(crate) math: ObjectHandle,
     pub(crate) string: ObjectHandle,
     pub(crate) number: ObjectHandle,
+    pub(crate) boolean: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -47,6 +48,7 @@ impl Intrinsics {
     constructor!(error);
     constructor!(string);
     constructor!(number);
+    constructor!(boolean);
     obj!(math);
 }
 
@@ -108,6 +110,11 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+        
+        let boolean_prototype = BooleanObj::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -118,6 +125,7 @@ impl Intrinsics {
             math: math_obj,
             string: string_prototype,
             number: number_prototype,
+            boolean: boolean_prototype,
         })
     }
 }
