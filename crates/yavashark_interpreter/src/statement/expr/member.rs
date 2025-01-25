@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
-use yavashark_env::builtins::{NumberObj, StringObj};
+use yavashark_env::builtins::{BooleanObj, NumberObj, StringObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
@@ -68,6 +68,16 @@ impl Interpreter {
                     num.resolve_property(&name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(num.into()),
+                ))
+            }
+            
+            Value::Boolean(b) => {
+                let boolean = BooleanObj::new(realm, b);
+
+                Ok((
+                    boolean.resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(boolean.into()),
                 ))
             }
 
