@@ -182,6 +182,83 @@ impl StringObj {
         inner.string.ends_with(&search).into()
     }
 
+    #[prop("fixed")]
+    pub fn fixed(&self) -> ValueResult {
+        Ok(format!("<tt>{}</tt>", self.inner.borrow().string).into())
+    }
+
+    #[prop("fontcolor")]
+    pub fn font_color(&self, color: String) -> ValueResult {
+        Ok(format!("<font color=\"{}\">{}</font>", color, self.inner.borrow().string).into())
+    }
+
+    #[prop("fontsize")]
+    pub fn font_size(&self, size: String) -> ValueResult {
+        Ok(format!("<font size=\"{}\">{}</font>", size, self.inner.borrow().string).into())
+    }
+
+    #[prop("includes")]
+    pub fn includes(&self, search: String) -> bool {
+        let inner = self.inner.borrow();
+
+        inner.string.contains(&search)
+    }
+
+    #[prop("indexOf")]
+    pub fn index_of(&self, search: String, from: isize) -> isize {
+        let inner = self.inner.borrow();
+
+        let from = if from < 0 {
+            (inner.string.len() as isize + from) as usize
+        } else {
+            from as usize
+        };
+
+        inner.string[from..].find(&search).map_or(-1, |i| i as isize)
+    }
+
+    #[prop("isWellFormed")]
+    pub fn is_well_formed(&self) -> bool {
+        // check if we have any lone surrogates => between 0xD800-0xDFFF or 0xDC00-0xDFFF
+        self.inner.borrow().string.chars().all(|c| {
+            let c = c as u32;
+            !(0xD800..=0xDFFF).contains(&c) || (0xDC00..=0xDFFF).contains(&c)
+        })
+    }
+
+    #[prop("italics")]
+    pub fn italics(&self) -> ValueResult {
+        Ok(format!("<i>{}</i>", self.inner.borrow().string).into())
+    }
+
+    #[prop("lastIndexOf")]
+    pub fn last_index_of(&self, search: String, from: isize) -> isize {
+        let inner = self.inner.borrow();
+
+        let from = if from < 0 {
+            (inner.string.len() as isize + from) as usize
+        } else {
+            from as usize
+        };
+
+        inner.string[..from].rfind(&search).map_or(-1, |i| i as isize)
+    }
+
+
+    #[prop("link")]
+    pub fn link(&self, url: String) -> ValueResult {
+        Ok(format!("<a href=\"{}\">{}</a>", url, self.inner.borrow().string).into())
+    }
+
+    // #[prop("localeCompare")]
+    // pub fn locale_compare(&self, other: String) -> isize {
+    //TODO: localization
+    // }
+
+
+    //TODO: match, matchAll
+
+    
     pub fn substr(&self, start: isize) -> ValueResult {
         let inner = self.inner.borrow();
 
