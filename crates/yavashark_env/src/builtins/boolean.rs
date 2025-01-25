@@ -34,7 +34,7 @@ impl Constructor<Realm> for BooleanConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let boolean = args.first().map_or(false, Value::is_truthy);
 
-        let obj = BooleanObj::new(realm, boolean)?;
+        let obj = BooleanObj::new(realm, boolean);
 
         Ok(obj.into())
     }
@@ -49,15 +49,13 @@ impl Func<Realm> for BooleanConstructor {
 
 impl BooleanObj {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &mut Realm, boolean: bool) -> ValueResult {
-        let mut this = Self {
+    pub fn new(realm: &mut Realm, boolean: bool) -> ObjectHandle {
+        Self {
             inner: RefCell::new(MutableBooleanObj {
                 object: MutObject::with_proto(realm.intrinsics.boolean.clone().into()),
                 boolean,
             }),
-        };
-
-        Ok(this.into_object().into())
+        }.into_object()
     }
 }
 
