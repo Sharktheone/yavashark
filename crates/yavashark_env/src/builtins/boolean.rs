@@ -3,7 +3,6 @@ use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
-use crate::builtins::{StringConstructor, StringObj};
 
 #[object]
 #[derive(Debug)]
@@ -20,7 +19,7 @@ pub struct BooleanConstructor {}
 impl BooleanConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
-        let mut this = Self {
+        let this = Self {
             inner: RefCell::new(MutableBooleanConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
@@ -40,7 +39,7 @@ impl Constructor<Realm> for BooleanConstructor {
     }
 }
 impl Func<Realm> for BooleanConstructor {
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
+    fn call(&self, _realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let boolean = args.first().map_or(false, Value::is_truthy);
 
         Ok(boolean.into())
