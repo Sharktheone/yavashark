@@ -50,7 +50,7 @@ pub enum Value<C: Realm> {
     String(String),
     Boolean(bool),
     Object(Object<C>),
-    Symbol(ConstString),
+    Symbol(Symbol),
 }
 
 impl<C: Realm> Clone for Value<C> {
@@ -104,7 +104,7 @@ impl<C: Realm> Value<C> {
 
     #[must_use]
     pub const fn symbol(name: &'static str) -> Self {
-        Self::Symbol(ConstString::String(name))
+        Self::Symbol(Symbol::new(name))
     }
 
     #[must_use]
@@ -210,7 +210,7 @@ impl<C: Realm> Display for Value<C> {
             Self::String(s) => write!(f, "{s}"),
             Self::Boolean(b) => write!(f, "{b}"),
             Self::Object(o) => write!(f, "{o}"),
-            Self::Symbol(s) => write!(f, "Symbol({s})"),
+            Self::Symbol(s) => write!(f, "{s}"),
         }
     }
 }
@@ -227,7 +227,7 @@ impl<C: Realm> CustomGcRefUntyped for Value<C> {
 impl<C: Realm> Value<C> {
     #[allow(clippy::iter_not_returning_iterator)]
     pub fn iter<'a>(&self, realm: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
-        let iter = self.get_property(&Symbol::ITERATOR, realm)?;
+        let iter = self.get_property(&Symbol::ITERATOR.into(), realm)?;
         let iter = iter.call(realm, Vec::new(), self.copy())?;
 
         Ok(CtxIter {
@@ -237,7 +237,7 @@ impl<C: Realm> Value<C> {
     }
 
     pub fn iter_no_realm(&self, realm: &mut C) -> Result<Iter<C>, Error<C>> {
-        let iter = self.get_property(&Symbol::ITERATOR, realm)?;
+        let iter = self.get_property(&Symbol::ITERATOR.into(), realm)?;
         let iter = iter.call(realm, Vec::new(), self.copy())?;
 
         Ok(Iter { next_obj: iter })
@@ -332,6 +332,12 @@ impl<C: Realm> Value<C> {
         })
     }
 }
+
+impl<C: Realm> From<Symbol> for Value<C> {
+    fn from(s: Symbol) -> Self {
+        Self::Symbol(s)
+    }
+} 
 
 #[derive(Debug)]
 pub struct Iter<C: Realm> {

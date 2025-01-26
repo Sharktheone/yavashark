@@ -1,16 +1,52 @@
-use crate::{Realm, Value};
+use std::fmt::Display;
+use crate::{ConstString, Realm, Value};
 
 macro_rules! symbol {
     ($name:ident, $symbol:ident) => {
-        pub const $name: Value<C> = Value::symbol(stringify!($symbol));
+        pub const $name: Self = Self::new(stringify!($symbol));
     };
 }
 
-pub struct Symbol<C: Realm> {
-    _marker: std::marker::PhantomData<C>,
+#[derive(Debug, PartialEq, Eq, Clone, Hash)]
+pub struct Symbol {
+    inner: ConstString
 }
 
-impl<C: Realm> Symbol<C> {
+impl Display for Symbol {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Symbol({})", self.inner)
+    }
+}
+
+impl From<&'static str> for Symbol {
+    fn from(s: &'static str) -> Self {
+        Self {
+            inner: ConstString::String(s)
+        }
+    }
+}
+
+impl From<String> for Symbol {
+    fn from(s: String) -> Self {
+        Self {
+            inner: ConstString::Owned(s)
+        }
+    }
+}
+
+impl Symbol {
+    pub const fn new(s: &'static str) -> Self {
+        Self {
+            inner: ConstString::String(s)
+        }
+    }
+}
+
+
+
+
+
+impl Symbol {
     symbol!(ASYNC_ITERATOR, asyncIterator);
     symbol!(HAS_INSTANCE, hasInstance);
     symbol!(IS_CONCAT_SPREADABLE, isConcatSpreadable);

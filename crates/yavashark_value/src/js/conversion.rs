@@ -1,4 +1,4 @@
-use crate::{BoxedObj, Error, Obj, Object, Realm, Value};
+use crate::{BoxedObj, Error, Obj, Object, Realm, Symbol, Value};
 use std::any::type_name;
 use yavashark_garbage::OwningGcGuard;
 
@@ -195,6 +195,12 @@ impl<C: Realm> IntoValue<C> for bool {
 impl<C: Realm> IntoValue<C> for Object<C> {
     fn into_value(self) -> Value<C> {
         Value::Object(self)
+    }
+}
+
+impl<C: Realm> IntoValue<C> for Symbol {
+    fn into_value(self) -> Value<C> {
+        Value::Symbol(self)
     }
 }
 

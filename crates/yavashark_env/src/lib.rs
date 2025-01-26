@@ -26,7 +26,7 @@ pub type Value = yavashark_value::Value<Realm>;
 pub type Error = yavashark_value::Error<Realm>;
 pub type ObjectHandle = yavashark_value::Object<Realm>;
 pub type Variable = yavashark_value::variable::Variable<Realm>;
-pub type Symbol = yavashark_value::Symbol<Realm>;
+pub type Symbol = yavashark_value::Symbol;
 
 pub type ObjectProperty = yavashark_value::ObjectProperty<Realm>;
 
