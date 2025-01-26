@@ -84,7 +84,7 @@ impl Constructor<Realm> for NumberConstructor {
             None => 0.0,
         };
 
-        let obj = NumberObj::new(realm, str)?;
+        let obj = NumberObj::with_number(realm, str)?;
 
         Ok(obj.into())
     }
@@ -104,10 +104,10 @@ impl Func<Realm> for NumberConstructor {
 impl NumberObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
     pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
-        Self::new(realm, 0.0)
+        Self::with_number(realm, 0.0)
     }
 
-    pub fn new(realm: &Realm, number: impl Into<f64>) -> crate::Result<ObjectHandle> {
+    pub fn with_number(realm: &Realm, number: impl Into<f64>) -> crate::Result<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableNumberObj {
                 object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
