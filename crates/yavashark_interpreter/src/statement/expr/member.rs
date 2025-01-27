@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
-use yavashark_env::builtins::{BooleanObj, NumberObj, StringObj};
+use yavashark_env::builtins::{BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
@@ -81,7 +81,15 @@ impl Interpreter {
                 ))
             }
 
-            _ => Ok((Value::Undefined, None)),
+            Value::Symbol(s) => {
+                let symbol = SymbolObj::new(realm, s);
+                
+                Ok((
+                    symbol.resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(symbol.into()),
+                ))
+            }
         }
     }
 }
