@@ -38,7 +38,7 @@ impl Func<Realm> for SymbolConstructor {
 
 impl SymbolObj {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &mut Realm, symbol: Symbol) -> ObjectHandle {
+    pub fn new(realm: &Realm, symbol: Symbol) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableSymbolObj {
                 object: MutObject::with_proto(realm.intrinsics.boolean.clone().into()),
@@ -62,6 +62,18 @@ impl SymbolObj {
         let inner = self.inner.borrow();
 
         inner.symbol.to_string()
+    }
+    
+    #[prop(Symbol::TO_PRIMITIVE)]
+    fn to_primitive(&self) -> Symbol {
+        let inner = self.inner.borrow();
+
+        inner.symbol.clone()
+    }
+    
+    #[prop(Symbol::TO_STRING_TAG)]
+    fn to_string_tag(&self) -> String {
+        "Symbol".to_string()
     }
 }
 
