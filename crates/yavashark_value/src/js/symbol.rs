@@ -34,6 +34,14 @@ impl From<String> for Symbol {
     }
 }
 
+impl From<ConstString> for Symbol {
+    fn from(s: ConstString) -> Self {
+        Self {
+            inner: s
+        }
+    }
+}
+
 impl Symbol {
     pub const fn new(s: &'static str) -> Self {
         Self {

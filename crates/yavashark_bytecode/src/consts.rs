@@ -27,7 +27,7 @@ impl ConstValue {
             Self::String(s) => Value::String(s),
             Self::Boolean(b) => Value::Boolean(b),
             Self::Object(_) => todo!(),
-            Self::Symbol(s) => Value::Symbol(s),
+            Self::Symbol(s) => Value::Symbol(s.into()),
             Self::Function(f) => BytecodeFunction::from_blueprint(f, realm).into(),
         }
     }
