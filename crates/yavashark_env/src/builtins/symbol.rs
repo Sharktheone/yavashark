@@ -18,17 +18,19 @@ pub struct SymbolConstructor {}
 impl SymbolConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
-        let this = Self {
+        let mut this = Self {
             inner: RefCell::new(MutableSymbolConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
         };
+        
+        this.initialize(func.copy())?;
 
         Ok(this.into_object())
     }
 }
 
-#[properties_new]
+#[properties_new(raw)]
 impl SymbolConstructor {
     #[prop("asyncIterator")]
     const ASYNC_ITERATOR: Symbol = Symbol::ASYNC_ITERATOR;
@@ -80,6 +82,7 @@ impl Func<Realm> for SymbolConstructor {
 
 impl SymbolObj {
     #[allow(clippy::new_ret_no_self)]
+    #[must_use] 
     pub fn new(realm: &Realm, symbol: Symbol) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableSymbolObj {
@@ -90,7 +93,7 @@ impl SymbolObj {
     }
 }
 
-#[properties_new]
+#[properties_new(constructor(SymbolConstructor::new))]
 impl SymbolObj {
     #[prop("valueOf")]
     fn value_of(&self) -> Symbol {

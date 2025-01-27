@@ -8,3 +8,4 @@ pub use math::*;
 pub use number::*;
 pub use string::*;
 pub use boolean::*;
+pub use symbol::*;
