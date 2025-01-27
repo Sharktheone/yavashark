@@ -28,6 +28,48 @@ impl SymbolConstructor {
     }
 }
 
+#[properties_new]
+impl SymbolConstructor {
+    #[prop("asyncIterator")]
+    const ASYNC_ITERATOR: Symbol = Symbol::ASYNC_ITERATOR;
+    
+    #[prop("hasInstance")]
+    const HAS_INSTANCE: Symbol = Symbol::HAS_INSTANCE;
+    
+    #[prop("isConcatSpreadable")]
+    const IS_CONCAT_SPREADABLE: Symbol = Symbol::IS_CONCAT_SPREADABLE;
+    
+    #[prop("iterator")]
+    const ITERATOR: Symbol = Symbol::ITERATOR;
+    
+    #[prop("match")]
+    const MATCH: Symbol = Symbol::MATCH;
+    
+    #[prop("matchAll")]
+    const MATCH_ALL: Symbol = Symbol::MATCH_ALL;
+    
+    #[prop("replace")]
+    const REPLACE: Symbol = Symbol::REPLACE;
+    
+    #[prop("search")]
+    const SEARCH: Symbol = Symbol::SEARCH;
+    
+    #[prop("species")]
+    const SPECIES: Symbol = Symbol::SPECIES;
+    
+    #[prop("split")]
+    const SPLIT: Symbol = Symbol::SPLIT;
+    
+    #[prop("toPrimitive")]
+    const TO_PRIMITIVE: Symbol = Symbol::TO_PRIMITIVE;
+    
+    #[prop("toStringTag")]
+    const TO_STRING_TAG: Symbol = Symbol::TO_STRING_TAG;
+    
+    #[prop("unscopables")]
+    const UNSCOPABLES: Symbol = Symbol::UNSCOPABLES;
+}
+
 impl Func<Realm> for SymbolConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let sym = args.first().map_or(Ok(String::new()), |v| v.to_string(realm))?;
