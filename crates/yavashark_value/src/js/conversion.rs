@@ -1,5 +1,6 @@
 use crate::{BoxedObj, Error, Obj, Object, Realm, Symbol, Value};
 use std::any::type_name;
+use num_bigint::BigInt;
 use yavashark_garbage::OwningGcGuard;
 
 impl<C: Realm> From<&str> for Value<C> {
@@ -104,11 +105,18 @@ impl<C: Realm> From<f32> for Value<C> {
     }
 }
 
+impl<C: Realm> From<BigInt> for Value<C> {
+    fn from(n: BigInt) -> Self {
+        Self::BigInt(n)
+    }
+}
+
 impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
     fn from(value: Value<C>) -> Self {
         Ok(value)
     }
 }
+
 
 impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
     fn from(o: O) -> Self {
