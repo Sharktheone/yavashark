@@ -1,9 +1,8 @@
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
-use num_bigint::{BigInt, Sign};
+use num_bigint::BigInt;
 use num_traits::Zero;
-use regex::Regex;
 pub use constructor::*;
 pub use context::*;
 pub use conversion::*;
