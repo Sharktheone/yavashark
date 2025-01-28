@@ -2,7 +2,9 @@
 
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
-
+use std::str::FromStr;
+use num_bigint::BigInt;
+use num_traits::{ToPrimitive, Zero};
 use crate::{Error, Realm};
 
 use super::Value;
@@ -116,6 +118,7 @@ impl<C: Realm> Add for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a + b),
             (a, b) => Self::String(format!("{a}{b}")),
         }
     }
@@ -173,6 +176,10 @@ impl<C: Realm> Sub for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a - b),
+
+            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => todo!("return Result from add (Cannot mix BigInt and other types)"),
         }
     }
 }
@@ -213,6 +220,10 @@ impl<C: Realm> Mul for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a * b),
+            
+            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => todo!("return Result from add (Cannot mix BigInt and other types)"),
         }
     }
 }
@@ -272,6 +283,10 @@ impl<C: Realm> Div for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a / b),
+            
+            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => todo!("return Result from add (Cannot mix BigInt and other types)"),
         }
     }
 }
@@ -317,6 +332,9 @@ impl<C: Realm> Rem for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a % b),
+            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => todo!("return Result from add (Cannot mix BigInt and other types)"),
         }
     }
 }
@@ -382,6 +400,19 @@ impl<C: Realm> PartialOrd for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => a.partial_cmp(b),
+            
+            (Self::Number(a), Self::BigInt(b)) => a.partial_cmp(&b.to_f64().unwrap_or(f64::NAN)),
+            (Self::BigInt(a), Self::Number(b)) => a.to_f64().unwrap_or(f64::NAN).partial_cmp(b),
+
+            (Self::String(a), Self::BigInt(b)) | (Self::BigInt(b), Self::String(a)) => {
+                let a = BigInt::from_str(&a).unwrap_or(BigInt::zero());
+                
+                a.partial_cmp(&b)
+            }
+
+            (_, _ ) => None,
         }
     }
 }
@@ -480,6 +511,13 @@ impl<C: Realm> Shl for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a.shl(b.to_i128().unwrap_or(0))),
+            
+            // (Self::Number(a), Self::BigInt(b)) => Self::BigInt(b.shl(a as i64)),
+            // (Self::BigInt(a), Self::Number(b)) => Self::BigInt(a.shl(b as i64)),
+
+            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => todo!("return Result from add (Cannot mix BigInt and other types)"),
         }
     }
 }
@@ -578,6 +616,13 @@ impl<C: Realm> Shr for Value<C> {
             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
                 todo!("return a Result here.... to throw an TypeError")
             }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a.shr(b.to_i128().unwrap_or(0))),
+            
+            // (Self::Number(a), Self::BigInt(b)) => Self::BigInt(b.shr(a as i64)),
+            // (Self::BigInt(a), Self::Number(b)) => Self::BigInt(a.shr(b as i64)),
+            
+            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => todo!("return Result from add (Cannot mix BigInt and other types)"),
         }
     }
 }
@@ -673,6 +718,16 @@ impl<C: Realm> Value<C> {
 
             (Self::Boolean(a), Self::Object(b)) | (Self::Object(b), Self::Boolean(a)) => {
                 a.num().to_string() == format!("{b}")
+            }
+            
+            (Self::BigInt(a), Self::BigInt(b)) => a == b,
+
+            (Self::BigInt(a), Self::Number(b)) | (Self::Number(b), Self::BigInt(a)) => {
+                a.to_f64().unwrap_or(f64::NAN) == *b
+            }
+            
+            (Self::BigInt(a), Self::String(b)) | (Self::String(b), Self::BigInt(a)) => {
+                a.to_string() == *b
             }
 
             _ => false,

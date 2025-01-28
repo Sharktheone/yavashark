@@ -1,7 +1,9 @@
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
-
+use num_bigint::{BigInt, Sign};
+use num_traits::Zero;
+use regex::Regex;
 pub use constructor::*;
 pub use context::*;
 pub use conversion::*;
@@ -51,7 +53,9 @@ pub enum Value<C: Realm> {
     Boolean(bool),
     Object(Object<C>),
     Symbol(Symbol),
+    BigInt(BigInt),
 }
+
 
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
@@ -71,6 +75,7 @@ pub enum Type {
     Object,
     Function,
     Symbol,
+    BigInt,
 }
 
 impl<C: Realm> Hash for Value<C> {
@@ -84,6 +89,7 @@ impl<C: Realm> Hash for Value<C> {
             Self::Boolean(b) => (Type::Boolean, b).hash(state),
             Self::Object(o) => (Type::Object, o).hash(state),
             Self::Symbol(s) => (Type::Symbol, s).hash(state),
+            Self::BigInt(b) => (Type::BigInt, b).hash(state),
         }
     }
 }
@@ -99,6 +105,7 @@ impl<C: Realm> Value<C> {
             Self::Boolean(b) => Self::Boolean(*b),
             Self::Object(o) => Self::Object(Object::clone(o)),
             Self::Symbol(s) => Self::Symbol(s.clone()),
+            Self::BigInt(b) => Self::BigInt(b.clone()),
         }
     }
 
@@ -128,6 +135,7 @@ impl<C: Realm> Value<C> {
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
             Self::Object(_) | Self::Symbol(_) => false,
+            Self::BigInt(b) => b.is_zero(),
         }
     }
 
@@ -139,6 +147,7 @@ impl<C: Realm> Value<C> {
             Self::String(s) => !s.is_empty(),
             Self::Boolean(b) => *b,
             Self::Object(_) | Self::Symbol(_) => true,
+            Self::BigInt(b) => !b.is_zero(),
         }
     }
 
@@ -157,6 +166,7 @@ impl<C: Realm> Value<C> {
             Self::Boolean(_) => "boolean",
             Self::Object(_) => "object",
             Self::Symbol(_) => "symbol",
+            Self::BigInt(_) => "bigint",
         }
     }
 
@@ -211,6 +221,7 @@ impl<C: Realm> Display for Value<C> {
             Self::Boolean(b) => write!(f, "{b}"),
             Self::Object(o) => write!(f, "{o}"),
             Self::Symbol(s) => write!(f, "{s}"),
+            Self::BigInt(b) => write!(f, "{b}"),
         }
     }
 }
@@ -329,6 +340,7 @@ impl<C: Realm> Value<C> {
             Self::String(s) => s.clone(),
             Self::Boolean(b) => b.to_string(),
             Self::Symbol(s) => s.to_string(),
+            Self::BigInt(b) => b.to_string(),
         })
     }
 }

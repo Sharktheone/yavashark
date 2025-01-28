@@ -151,6 +151,8 @@ impl PrettyPrint for Value<Realm> {
             Self::String(s) => s.to_string(),
             Self::Object(o) => o.pretty_print_key(),
             Self::Symbol(s) => s.to_string(),
+            Self::BigInt(b) => b.to_string(),
+            
         }
     }
 
@@ -163,6 +165,12 @@ impl PrettyPrint for Value<Realm> {
             Self::String(s) => format!("\"{s}\"").green().to_string(),
             Self::Object(o) => o.pretty_print_circular(not),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
+            Self::BigInt(b) => {
+                let mut str = b.to_string();
+                str.push('n');
+                
+                str.bright_yellow().to_string()
+            },
         }
     }
 
@@ -175,6 +183,12 @@ impl PrettyPrint for Value<Realm> {
             Self::String(s) => format!("\"{s}\"").green().to_string(),
             Self::Object(o) => o.pretty_print_circular_nl(not),
             Self::Symbol(s) => s.to_string().cyan().to_string(),
+            Self::BigInt(b) => {
+                let mut str = b.to_string();
+                str.push('n');
+                
+                str.bright_yellow().to_string()
+            },
         }
     }
 }

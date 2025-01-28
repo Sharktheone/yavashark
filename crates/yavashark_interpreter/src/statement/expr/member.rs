@@ -90,6 +90,8 @@ impl Interpreter {
                     Some(symbol.into()),
                 ))
             }
+            
+            _ => todo!()
         }
     }
 }

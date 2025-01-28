@@ -9,7 +9,7 @@ impl Interpreter {
             Lit::Bool(b) => Value::Boolean(b.value),
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),
-            Lit::BigInt(_) => todo!(),
+            Lit::BigInt(b) => Value::BigInt(*b.value.clone()),
             Lit::Regex(_) => todo!(),
             Lit::JSXText(_) => {
                 return Err(ControlFlow::error("JSXText is not supported".to_owned()));

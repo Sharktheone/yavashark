@@ -8,6 +8,9 @@ edition = "2021"
 [dependencies]
 anyhow = { version = "1.0.40", optional = true }
 yavashark_garbage = { path = "../yavashark_garbage" }
+regex = "1.11.1"
+num-bigint = "0.4.6"
+num-traits = "0.2.19"
 
 
 
