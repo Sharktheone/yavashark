@@ -166,6 +166,17 @@ impl<C: Realm> FromValue<C> for bool {
     }
 }
 
+impl<C: Realm> FromValue<C> for BigInt {
+    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+        match value {
+            Value::BigInt(n) => Ok(n),
+            _ => Err(Error::ty_error(format!(
+                "Expected a BigInt, found {value:?}"
+            ))),
+        }
+    }
+}
+
 impl<C: Realm> FromValue<C> for Object<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
