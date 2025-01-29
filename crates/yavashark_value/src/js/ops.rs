@@ -671,6 +671,15 @@ impl<C: Realm> Value<C> {
     }
 
     pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
+        match (self, rhs) {
+            (Self::BigInt(a), Self::BigInt(b)) => {
+                return Ok(Self::BigInt(a.pow(b.to_u32().unwrap_or(0))));
+            }
+            
+            _ => {}
+        }
+        
+        
         Ok(Self::Number(
             self.to_number(realm)?.powf(rhs.to_number(realm)?),
         ))
