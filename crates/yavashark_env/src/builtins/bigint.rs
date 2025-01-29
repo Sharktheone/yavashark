@@ -49,6 +49,7 @@ impl Func<Realm> for BigIntConstructor {
 
 impl BigIntObj {
     #[allow(clippy::new_ret_no_self)]
+    #[must_use]
     pub fn new(realm: &Realm, big_int: BigInt) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableBigIntObj {
@@ -64,4 +65,22 @@ impl BigIntObj {}
 
 
 #[properties_new(raw)]
-impl BigIntConstructor {}
+impl BigIntConstructor {
+    #[prop("asIntN")]
+    pub fn as_int_n(bits: u64, bigint: BigInt) -> ValueResult {
+        let mut mask = BigInt::from(1) << bits;
+        mask -= 1;
+        //TODO: this handles the sign bit incorrectly
+
+
+        Ok((bigint & mask).into())
+    }
+    
+    #[prop("asUintN")]
+    pub fn as_uint_n(bits: u64, bigint: BigInt) -> ValueResult {
+        let mut mask = BigInt::from(1) << bits;
+        mask -= 1;
+        
+        Ok((bigint & mask).into())
+    }
+}
