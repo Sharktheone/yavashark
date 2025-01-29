@@ -67,7 +67,7 @@ impl BigIntObj {}
 #[properties_new(raw)]
 impl BigIntConstructor {
     #[prop("asIntN")]
-    pub fn as_int_n(bits: u64, bigint: BigInt) -> ValueResult {
+    pub fn int_n(bits: u64, bigint: BigInt) -> ValueResult {
         let mut mask = BigInt::from(1) << bits;
         mask -= 1;
         //TODO: this handles the sign bit incorrectly
@@ -77,7 +77,7 @@ impl BigIntConstructor {
     }
     
     #[prop("asUintN")]
-    pub fn as_uint_n(bits: u64, bigint: BigInt) -> ValueResult {
+    pub fn uint_n(bits: u64, bigint: BigInt) -> ValueResult {
         let mut mask = BigInt::from(1) << bits;
         mask -= 1;
         
