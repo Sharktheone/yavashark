@@ -22,6 +22,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("Number".into(), realm.intrinsics.number_constructor())?;
     obj.define_variable("Boolean".into(), realm.intrinsics.boolean_constructor())?;
     obj.define_variable("Symbol".into(), realm.intrinsics.symbol_constructor())?;
+    obj.define_variable("BigInt".into(), realm.intrinsics.bigint_constructor())?;
 
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(handle, realm)?;
