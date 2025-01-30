@@ -4691,6 +4691,7 @@ dependencies = [
  "num-bigint",
  "paste",
  "rand 0.8.5",
+ "regex",
  "yavashark_garbage",
  "yavashark_macro",
  "yavashark_value",
