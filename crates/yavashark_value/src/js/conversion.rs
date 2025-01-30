@@ -273,3 +273,95 @@ impl<C: Realm, V: Obj<C>> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
             })
     }
 }
+
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    
+    #[derive(Debug, PartialEq, Eq, Clone)]
+    struct R;
+    
+    impl Realm for R {}
+    
+    
+    trait FromValue2<C: Realm>: Sized {
+        type Output: IntoValue2;
+        
+        fn from_value(value: Value<C>) -> Result<Self::Output, Error<C>>;
+    }
+    
+    
+    trait IntoValue2 {}
+    
+    impl IntoValue2 for String {}
+    impl IntoValue2 for i32 {}
+    impl IntoValue2 for bool {}
+    impl IntoValue2 for f64 {}
+    
+    
+    impl<T: FromValue<R> + IntoValue2> FromValue2<R> for T {
+        type Output = T;
+        
+        fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
+            T::from_value(value)
+        }
+    }
+    
+    fn extract_value<T: FromValue2<R>>(vals: &mut [Value<R>], idx: usize) -> Result<Option<T::Output>, Error<R>> {
+        let Some(val) = vals.get_mut(idx) else {
+            return Ok(None);
+        };
+        
+        let val = std::mem::replace(val, Value::Undefined);
+        
+        Ok(Some(T::from_value(val)?))
+    }
+    
+    trait OptionalConvert<T>: Sized {
+        fn convert(this: Option<T>) -> Result<Self, Error<R>>;
+    }
+    
+    impl<T: Sized + IntoValue2> OptionalConvert<T> for Option<T> {
+        fn convert(this: Option<T>) -> Result<Self, Error<R>> {
+            Ok(this)
+        }
+    }
+    
+    impl<T: Sized + IntoValue2> OptionalConvert<T> for T {
+        fn convert(this: Option<T>) -> Result<Self, Error<R>> {
+            match this {
+                Some(val) => Ok(val),
+                None => Err(Error::ty_error("Expected a value".to_owned())),
+            }
+        }
+    }
+    
+    #[test]
+    fn test_from_str() {
+        
+        let mut values: Vec<Value<R>> = vec![
+            Value::from("hello"),
+            Value::from(8),
+            Value::from(true),
+        ];
+        
+        let a = extract_value::<String>(&mut values, 0).unwrap();
+        let b = extract_value::<i32>(&mut values, 1).unwrap();
+        let c = extract_value::<bool>(&mut values, 2).unwrap();
+        let d = extract_value::<f64>(&mut values, 3).unwrap();
+        
+        
+        
+        test(OptionalConvert::convert(a).unwrap(), OptionalConvert::convert(b).unwrap(), OptionalConvert::convert(c).unwrap(), OptionalConvert::convert(d).unwrap());
+        
+    }
+    
+    
+    fn test(a: String, b: i32, c: bool, d: Option<f64>) {
+        println!("{} {} {} {:?}", a, b, c, d);
+        
+    }
+}
