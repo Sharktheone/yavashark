@@ -61,7 +61,21 @@ impl BigIntObj {
 }
 
 #[properties_new(constructor(BigIntConstructor::new))]
-impl BigIntObj {}
+impl BigIntObj {
+    #[prop("toString")]
+    fn to_string(&self) -> ValueResult {
+        let inner = self.inner.try_borrow()?;
+        
+        Ok(inner.big_int.to_string().into())
+    }
+    
+    #[prop("valueOf")]
+    fn value_of(&self) -> ValueResult {
+        let inner = self.inner.try_borrow()?;
+
+        Ok(inner.big_int.clone().into())
+    }
+}
 
 
 #[properties_new(raw)]
