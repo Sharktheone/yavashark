@@ -1,8 +1,9 @@
 use std::cell::RefCell;
 use regex::{Regex, RegexBuilder};
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Obj};
+use yavashark_value::{Constructor, IntoValue, Obj};
 use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::array::Array;
 
 #[object]
 #[derive(Debug)]
@@ -79,5 +80,21 @@ impl Constructor<Realm> for RegExpConstructor {
 
 #[properties_new(constructor(RegExpConstructor::new))]
 impl RegExp {
-
+    #[prop("exec")]
+    fn exec(&self, value: String, #[realm] realm: &Realm) -> ValueResult {
+        let matches = self.regex.find_iter(&value)
+            .map(|m| m.as_str().to_string().into_value())
+            .collect::<Vec<Value>>();
+        
+        
+        let array = Array::with_elements(realm, matches)?;
+        
+        Ok(array.into_value())
+        
+    }
+    
+    #[prop("test")]
+    fn test(&self, value: String) -> bool {
+        self.regex.is_match(&value)
+    }
 }
