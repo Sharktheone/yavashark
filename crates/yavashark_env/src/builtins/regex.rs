@@ -28,14 +28,24 @@ impl RegExp {
 #[derive(Debug)]
 pub struct RegExpConstructor {}
 
+
+#[properties_new(raw)]
+impl RegExpConstructor {
+    fn escape(value: String) -> String {
+        regex::escape(&value)
+    }
+}
+
 impl RegExpConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
-        let this = Self {
+        let mut this = Self {
             inner: RefCell::new(MutableRegExpConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
         };
+        
+        this.initialize(func.copy())?;
 
         Ok(this.into_object())
     }
@@ -44,11 +54,11 @@ impl RegExpConstructor {
 impl Constructor<Realm> for RegExpConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let regex = args.first().map_or(Ok(String::new()), |v| v.to_string(realm))?;
-        
+
         let flags = args.get(1).map_or(Ok(String::new()), |v| v.to_string(realm))?;
-        
-        
-        
+
+
+
         let regex = RegexBuilder::new(&regex)
             .case_insensitive(flags.contains('i'))
             .multi_line(flags.contains('m'))
@@ -57,8 +67,8 @@ impl Constructor<Realm> for RegExpConstructor {
             .unicode(flags.contains('u'))
             .build()
             .map_err(|e| ControlFlow::error(e.to_string()))?;
-        
-        
+
+
 
         let obj = RegExp::new(realm, regex);
 
