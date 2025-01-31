@@ -278,58 +278,142 @@ impl<C: Realm, V: Obj<C>> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
 
 #[cfg(test)]
 mod tests {
+    use std::cell::{Cell, UnsafeCell};
+    use std::fmt::{Debug, Formatter};
+    use std::mem;
+    use std::ops::Deref;
+    use crate::{ObjectImpl, ObjectProperty, Variable};
     use super::*;
-    
-    
+
+
     #[derive(Debug, PartialEq, Eq, Clone)]
     struct R;
-    
+
     impl Realm for R {}
-    
-    
+
+
     trait FromValue2<C: Realm>: Sized {
         type Output: IntoValue2;
-        
+
         fn from_value(value: Value<C>) -> Result<Self::Output, Error<C>>;
     }
-    
-    
+
+
     trait IntoValue2 {}
-    
+
     impl IntoValue2 for String {}
     impl IntoValue2 for i32 {}
     impl IntoValue2 for bool {}
     impl IntoValue2 for f64 {}
     
+    impl Conversion for String {
+        type Output = String;
+    }
     
-    impl<T: FromValue<R> + IntoValue2> FromValue2<R> for T {
-        type Output = T;
-        
+    impl Conversion for i32 {
+        type Output = i32;
+    }
+    
+    impl Conversion for f64 {
+        type Output = f64;
+    }
+    
+    impl Conversion for bool {
+        type Output = bool;
+    }
+    
+    impl Conversion for &str {
+        type Output = String;
+    }
+    
+    
+
+    impl FromValue2<R> for String {
+        type Output = String;
+
         fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
-            T::from_value(value)
+            match value {
+                Value::String(s) => Ok(s),
+                _ => Err(Error::ty_error(format!(
+                    "Expected a string, found {value:?}"
+                ))),
+            }
+        }
+    }
+
+    impl FromValue2<R> for i32 {
+        type Output = i32;
+
+        fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
+            match value {
+                Value::Number(n) => Ok(n as i32),
+                _ => Err(Error::ty_error(format!(
+                    "Expected a number, found {value:?}"
+                ))),
+            }
         }
     }
     
+    impl FromValue2<R> for f64 {
+        type Output = f64;
+
+        fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
+            match value {
+                Value::Number(n) => Ok(n),
+                _ => Err(Error::ty_error(format!(
+                    "Expected a number, found {value:?}"
+                ))),
+            }
+        }
+    }
+    
+    impl FromValue2<R> for bool {
+        type Output = bool;
+
+        fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
+            match value {
+                Value::Boolean(b) => Ok(b),
+                _ => Err(Error::ty_error(format!(
+                    "Expected a boolean, found {value:?}"
+                ))),
+            }
+        }
+    }
+
+    impl FromValue2<R> for &str {
+        type Output = String;
+
+        fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
+            match value {
+                Value::String(s) => Ok(s),
+                _ => Err(Error::ty_error(format!(
+                    "Expected a string, found {value:?}"
+                ))),
+            }
+        }
+    }
+
     fn extract_value<T: FromValue2<R>>(vals: &mut [Value<R>], idx: usize) -> Result<Option<T::Output>, Error<R>> {
         let Some(val) = vals.get_mut(idx) else {
             return Ok(None);
         };
-        
+
         let val = std::mem::replace(val, Value::Undefined);
-        
+
         Ok(Some(T::from_value(val)?))
     }
-    
+
     trait OptionalConvert<T>: Sized {
         fn convert(this: Option<T>) -> Result<Self, Error<R>>;
     }
-    
+
     impl<T: Sized + IntoValue2> OptionalConvert<T> for Option<T> {
         fn convert(this: Option<T>) -> Result<Self, Error<R>> {
             Ok(this)
         }
     }
-    
+
+
     impl<T: Sized + IntoValue2> OptionalConvert<T> for T {
         fn convert(this: Option<T>) -> Result<Self, Error<R>> {
             match this {
@@ -338,30 +422,231 @@ mod tests {
             }
         }
     }
+ 
+    impl<T: Obj<R>> IntoValue2 for OwningGcGuard<'_, BoxedObj<R>, T> {}
     
-    #[test]
-    fn test_from_str() {
-        
-        let mut values: Vec<Value<R>> = vec![
-            Value::from("hello"),
-            Value::from(8),
-            Value::from(true),
-        ];
-        
-        let a = extract_value::<String>(&mut values, 0).unwrap();
-        let b = extract_value::<i32>(&mut values, 1).unwrap();
-        let c = extract_value::<bool>(&mut values, 2).unwrap();
-        let d = extract_value::<f64>(&mut values, 3).unwrap();
-        
-        
-        
-        test(OptionalConvert::convert(a).unwrap(), OptionalConvert::convert(b).unwrap(), OptionalConvert::convert(c).unwrap(), OptionalConvert::convert(d).unwrap());
+    
+    impl<T: Obj<R>> FromValue2<R> for T {
+        type Output = OwningGcGuard<'static, BoxedObj<R>, T>;
+    
+        fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
+            let obj = match value {
+                Value::Object(obj) => Ok(obj.get_owning()),
+                _ => Err(Error::ty_error(format!(
+                    "Expected an object, found {value:?}"
+                ))),
+            }?;
+    
+            obj.maybe_map(|o| (**o).as_any().downcast_ref::<T>())
+                .map_err(|obj| {
+                    Error::ty_error(format!(
+                        "Expected an object of type {:?}, found {:?}",
+                        obj.name(),
+                        type_name::<T>(),
+                    ))
+                })
+        }
         
     }
     
+    impl<T: Obj<R>> Conversion for T {
+        type Output = OwningGcGuard<'static, BoxedObj<R>, T>;
+    }
     
-    fn test(a: String, b: i32, c: bool, d: Option<f64>) {
-        println!("{} {} {} {:?}", a, b, c, d);
+
+
+    struct Extractor {
+        values: Vec<UnsafeCell<Value<R>>>,
+        idx: Cell<usize>,
+    }
+
+    impl Extractor {
+        fn new(values: Vec<Value<R>>) -> Self {
+            Self {
+                values: values.into_iter().map(|v| UnsafeCell::new(v)).collect(),
+                idx: Cell::new(0),
+            }
+        }
+    }
+
+    trait Conversion {
+        type Output;
+    }
+
+    impl<T: Conversion> Conversion for Option<T> {
+        type Output = Option<T::Output>;
+    }
+
+
+    trait ExtractValue<T: Conversion>: Sized {
+        fn extract(&self) -> Result<T::Output, Error<R>>;
+    }
+
+    impl<T: FromValue2<R> + Conversion<Output = <T as FromValue2<R>>::Output>> ExtractValue<T> for Extractor {
+        fn extract(&self) -> Result<<T as Conversion>::Output, Error<R>> {
+            let idx = self.idx.get();
+            self.idx.set(idx + 1);
+
+            let val = self.values.get(idx).ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
+
+            let val = unsafe { &mut *val.get() };
+
+            let val = mem::replace(val, Value::Undefined);
+
+
+
+            T::from_value(val)
+        }
+    }
+
+    impl<T: FromValue2<R> + Conversion<Output = <T as FromValue2<R>>::Output>> ExtractValue<Option<T>> for Extractor {
+        fn extract(&self) -> Result<Option<<T as Conversion>::Output>, Error<R>> {
+            let idx = self.idx.get();
+            self.idx.set(idx + 1);
+
+            let Some(val) = self.values.get(idx) else {
+                return Ok(None);
+            };
+
+            let val = unsafe { &mut *val.get() };
+
+            let val = mem::replace(val, Value::Undefined);
+
+            Ok(Some(T::from_value(val)?))
+        }
+    }
+
+
+    #[derive(Debug, PartialEq, Eq, Clone)]
+    struct CustomObj;
+
+    impl Obj<R> for CustomObj {
+        fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+            Ok(())
+        }
+
+        fn define_variable(&self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>> {
+            Ok(())
+        }
+
+        fn resolve_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
+            Ok(None)
+        }
+
+        fn get_property(&self, name: &Value<R>) -> Result<Option<ObjectProperty<R>>, Error<R>> {
+            Ok(None)
+        }
+
+        fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+            Ok(())
+        }
+
+        fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
+            Ok(())
+        }
+
+        fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
+            Ok(None)
+        }
+
+        fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
+            Ok(None)
+        }
+
+        fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
+            Ok(None)
+        }
+
+        fn name(&self) -> String {
+            "CustomObj".to_owned()
+        }
+
+        fn to_string(&self, realm: &mut R) -> Result<String, Error<R>> {
+            Ok("CustomObj".to_owned())
+        }
+
+        fn to_string_internal(&self) -> Result<String, Error<R>> {
+            Ok("CustomObj".to_owned())
+        }
+
+        fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>> {
+            Ok(Vec::new())
+        }
+
+        fn keys(&self) -> Result<Vec<Value<R>>, Error<R>> {
+            Ok(Vec::new())
+        }
+
+        fn values(&self) -> Result<Vec<Value<R>>, Error<R>> {
+            Ok(Vec::new())
+        }
+
+        fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value<R>>), Error<R>> {
+            Ok((false, None))
+        }
+
+        fn clear_values(&self) -> Result<(), Error<R>> {
+            Ok(())
+        }
+    }
+
+
+
+
+    #[test]
+    fn test_extract() {
+
+        let values: Vec<Value<R>> = vec![
+            Value::from("hello"),
+            Value::from(8),
+            Value::from(true),
+            CustomObj.into_value()
+        ];
+
+        let extractor = Extractor::new(values);
+
+        let a = ExtractValue::<String>::extract(&extractor).unwrap();
+        let b = ExtractValue::<i32>::extract(&extractor).unwrap();
+        let c = ExtractValue::<bool>::extract(&extractor).unwrap();
+        let d = ExtractValue::<CustomObj>::extract(&extractor).unwrap();
+        let e = ExtractValue::<Option<CustomObj>>::extract(&extractor).unwrap();
         
+        let e = e.as_ref().map(|e| &**e);
+
+        test(&a, b, c, &d, e);
+
+    }
+
+    // #[test]
+    // fn test_from_str() {
+    // 
+    //     let mut values: Vec<Value<R>> = vec![
+    //         Value::from("hello"),
+    //         Value::from(8),
+    //         Value::from(true),
+    //     ];
+    // 
+    //     let a = extract_value::<&str>(&mut values, 0).unwrap();
+    //     let b = extract_value::<i32>(&mut values, 1).unwrap();
+    //     let c = extract_value::<bool>(&mut values, 2).unwrap();
+    //     let d = extract_value::<f64>(&mut values, 3).unwrap();
+    //     let e = extract_value::<f64>(&mut values, 4).unwrap();
+    // 
+    //     let a: String = OptionalConvert::convert(a).unwrap();
+    //     let b = OptionalConvert::convert(b).unwrap();
+    //     let c = OptionalConvert::convert(c).unwrap();
+    //     let d = OptionalConvert::convert(d).unwrap();
+    //     let e = OptionalConvert::convert(e).unwrap();
+    // 
+    // 
+    // 
+    //     test(&a, b, c, d, e);
+    // 
+    // }
+
+
+    fn test(a: &str, b: i32, c: bool, d: &CustomObj, e: Option<&CustomObj>) {
+        println!("{} {} {} {:?} {:?}", a, b, c, d, e);
+
     }
 }
