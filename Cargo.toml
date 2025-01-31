@@ -22,6 +22,8 @@ yavashark_interpreter = { path = "crates/yavashark_interpreter" }
 yavashark_codegen = { path = "crates/yavashark_codegen" }
 yavashark_vm = { path = "crates/yavashark_vm" }
 yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments"]}
+rustyline = { version = "15.0.0", features = ["derive"] }
+rustyline-derive = "0.11.0"
 
 
 [profile.release]

@@ -1,6 +1,8 @@
+mod simplerepl;
 mod repl;
+mod conf;
 
-use crate::repl::Repl;
+use crate::simplerepl::Repl;
 use std::path::{Path, PathBuf};
 use swc_common::input::StringInput;
 use swc_common::BytePos;
@@ -11,6 +13,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
+use crate::repl::{old_repl, repl};
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -65,6 +68,16 @@ fn main() {
                 .default_value("false")
                 .action(clap::ArgAction::SetTrue),
         )
+        .arg(
+            clap::Arg::new("shellold")
+                .help("Old interactive shell (repl)")
+                .short('S')
+                .short_alias('R')
+                .alias("replold")
+                .required(false)
+                .default_value("false")
+                .action(clap::ArgAction::SetTrue),
+        )
         .get_matches();
 
     let interpreter = matches.get_flag("interpreter");
@@ -72,6 +85,7 @@ fn main() {
     let ast = matches.get_flag("ast");
     let instructions = matches.get_flag("instructions");
     let shell = matches.get_flag("shell");
+    let shellold = matches.get_flag("shellold");
 
     if !(interpreter || bytecode || ast || instructions) {
         println!("No interpreter specified");
@@ -130,100 +144,21 @@ fn main() {
             }
         }
     }
-
-    if shell {
-        let path = Path::new("repl.js");
-
-        let mut interpreter_realm = Realm::new().unwrap();
-        let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
-
-        let vm_realm = Realm::new().unwrap();
-        let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
-
-        let syn = Syntax::Es(EsSyntax::default());
-
-        let mut repl = Repl::new(Box::new(move |input| {
-            if input.is_empty() {
-                return;
-            }
-
-            let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32 - 1));
-
-            let mut p = Parser::new(syn, input, None);
-
-            let script = match p.parse_script() {
-                Ok(s) => s,
-                Err(e) => {
-                    // HANDLER.with(|h| {
-                    //     let mut diagnostic = e.into_diagnostic(h);
-                    //
-                    //     diagnostic.emit();
-                    //
-                    //
-                    // });
-
-                    eprintln!("{e:?}");
-
-                    return;
-                }
-            };
-
-            if ast {
-                println!("AST:\n{script:#?}");
-            }
-
-            if interpreter {
-                let result = match yavashark_interpreter::Interpreter::run_in(
-                    &script.body,
-                    &mut interpreter_realm,
-                    &mut interpreter_scope,
-                ) {
-                    Ok(r) => r,
-                    Err(e) => {
-                        eprintln!("Uncaught {e:?}");
-                        return;
-                    }
-                };
-
-                if bytecode {
-                    println!("Interpreter: {}", result.pretty_print());
-                } else {
-                    println!("{}", result.pretty_print());
-                }
-            }
-
-            if bytecode || instructions {
-                let bc = match ByteCodegen::compile(&script.body) {
-                    Ok(bc) => bc,
-                    Err(e) => {
-                        eprintln!("Failed to compile code: {e:?}");
-                        return;
-                    }
-                };
-
-                if instructions {
-                    println!("{bc:#?}");
-                }
-
-                if bytecode {
-                    let data = DataSection::new(bc.variables, bc.literals);
-
-                    let mut vm = VM::with_realm_scope(
-                        bc.instructions,
-                        data,
-                        vm_realm.clone(),
-                        vm_scope.clone(),
-                    );
-
-                    if let Err(e) = vm.run() {
-                        eprintln!("Uncaught: {e:?}");
-                    }
-
-                    println!("Bytecode: {:?}", vm.acc());
-                }
-            }
-        }));
-
-        repl.run();
+    
+    let config = conf::Conf { ast, interpreter, bytecode, instructions };
+    
+    if shell && shellold {
+        println!("Cannot run both shells");
+        return;
     }
+    
+    if shell {
+        repl(config).unwrap();
+    }
+
+    if shellold {
+        old_repl(config).unwrap();
+    }
+
+    
 }
