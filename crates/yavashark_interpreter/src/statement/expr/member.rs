@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
-use yavashark_env::builtins::{BooleanObj, NumberObj, StringObj, SymbolObj};
+use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
@@ -92,8 +92,17 @@ impl Interpreter {
                     Some(symbol.into()),
                 ))
             }
-
-            _ => todo!(),
+            
+            Value::BigInt(big_int) => {
+                let big_int = BigIntObj::new(realm, big_int);
+                
+                Ok((
+                    big_int
+                        .resolve_property(&name, realm)?
+                        .unwrap_or(Value::Undefined),
+                    Some(big_int.into()),
+                ))
+            }
         }
     }
 }
