@@ -1,6 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::Lit;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
+use yavashark_env::builtins::RegExp;
 
 impl Interpreter {
     pub fn run_lit(realm: &mut Realm, stmt: &Lit) -> RuntimeResult {
@@ -10,7 +11,7 @@ impl Interpreter {
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),
             Lit::BigInt(b) => Value::BigInt(*b.value.clone()),
-            Lit::Regex(_) => todo!(),
+            Lit::Regex(r) => Value::Object(RegExp::new_from_str_with_flags(realm, r.exp.as_str(), r.flags.as_str())?),
             Lit::JSXText(_) => {
                 return Err(ControlFlow::error("JSXText is not supported".to_owned()));
             }
