@@ -279,9 +279,9 @@ impl<C: Realm, V: Obj<C>> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::{Cell, UnsafeCell};
     use std::fmt::Debug;
     use std::mem;
+    use std::slice::IterMut;
     use crate::{ObjectProperty, Variable};
     use super::*;
 
@@ -368,7 +368,7 @@ mod tests {
             return Ok(None);
         };
 
-        let val = std::mem::replace(val, Value::Undefined);
+        let val = mem::replace(val, Value::Undefined);
 
         Ok(Some(T::from_value(val)?))
     }
@@ -396,57 +396,42 @@ mod tests {
 
     }
 
-    struct Extractor {
-        values: Vec<UnsafeCell<Value<R>>>,
-        idx: Cell<usize>,
+    struct Extractor<'a> {
+        values: IterMut<'a, Value<R>>,
     }
 
-    impl Extractor {
-        fn new(values: Vec<Value<R>>) -> Self {
+    impl<'a> Extractor<'a> {
+        fn new(values: &'a mut Vec<Value<R>>) -> Self {
             Self {
-                values: values.into_iter().map(|v| UnsafeCell::new(v)).collect(),
-                idx: Cell::new(0),
+                values: values.iter_mut(),
             }
         }
     }
 
     trait ExtractValue<T>: Sized {
         type Output;
-        fn extract(&self) -> Result<Self::Output, Error<R>>;
+        fn extract(&mut self) -> Result<Self::Output, Error<R>>;
     }
 
-    impl<T: FromValue2<R>> ExtractValue<T> for Extractor {
+    impl<T: FromValue2<R>> ExtractValue<T> for Extractor<'_> {
         type Output = T::Output;
-        fn extract(&self) -> Result<Self::Output, Error<R>> {
-            let idx = self.idx.get();
-            self.idx.set(idx + 1);
-
-            let val = self.values.get(idx).ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
-
-            let val = unsafe { &mut *val.get() };
-
+        fn extract(&mut self) -> Result<Self::Output, Error<R>> {
+            let val = self.values.next().ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
             let val = mem::replace(val, Value::Undefined);
-
-
 
             T::from_value(val)
         }
     }
 
-    impl<T: FromValue2<R>> ExtractValue<Option<T>> for Extractor {
+    impl<T: FromValue2<R>> ExtractValue<Option<T>> for Extractor<'_> {
 
         type Output = Option<T::Output>;
 
-        fn extract(&self) -> Result<Self::Output, Error<R>> {
-            let idx = self.idx.get();
-            self.idx.set(idx + 1);
-
-            let Some(val) = self.values.get(idx) else {
+        fn extract(&mut self) -> Result<Self::Output, Error<R>> {
+            let Some(val) = self.values.next() else {
                 return Ok(None);
             };
-
-            let val = unsafe { &mut *val.get() };
-
+            
             let val = mem::replace(val, Value::Undefined);
 
             Ok(Some(T::from_value(val)?))
@@ -529,20 +514,20 @@ mod tests {
 
     #[test]
     fn test_extract() {
-        let values: Vec<Value<R>> = vec![
+        let mut values: Vec<Value<R>> = vec![
             Value::from("hello"),
             Value::from(8),
             Value::from(true),
             CustomObj.into_value()
         ];
 
-        let extractor = Extractor::new(values);
+        let mut extractor = Extractor::new(&mut values);
 
-        let a = ExtractValue::<&str>::extract(&extractor).unwrap();
-        let b = ExtractValue::<i32>::extract(&extractor).unwrap();
-        let c = ExtractValue::<bool>::extract(&extractor).unwrap();
-        let d = ExtractValue::<CustomObj>::extract(&extractor).unwrap();
-        let e = ExtractValue::<Option<CustomObj>>::extract(&extractor).unwrap();
+        let a = ExtractValue::<&str>::extract(&mut extractor).unwrap();
+        let b = ExtractValue::<i32>::extract(&mut extractor).unwrap();
+        let c = ExtractValue::<bool>::extract(&mut extractor).unwrap();
+        let d = ExtractValue::<CustomObj>::extract(&mut extractor).unwrap();
+        let e = ExtractValue::<Option<CustomObj>>::extract(&mut extractor).unwrap();
 
         let e = e.as_ref().map(|e| &**e);
 
