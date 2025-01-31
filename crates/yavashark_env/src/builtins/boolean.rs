@@ -1,8 +1,7 @@
-
+use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 
 #[object]
 #[derive(Debug)]
@@ -54,7 +53,8 @@ impl BooleanObj {
                 object: MutObject::with_proto(realm.intrinsics.boolean.clone().into()),
                 boolean,
             }),
-        }.into_object()
+        }
+        .into_object()
     }
 }
 
@@ -63,15 +63,14 @@ impl BooleanObj {
     #[prop("valueOf")]
     fn value_of(&self) -> bool {
         let inner = self.inner.borrow();
-        
+
         inner.boolean
     }
 
     #[prop("toString")]
     fn to_js_string(&self) -> String {
         let inner = self.inner.borrow();
-        
+
         inner.boolean.to_string()
     }
 }
-

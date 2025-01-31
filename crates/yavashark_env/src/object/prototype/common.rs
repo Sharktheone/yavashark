@@ -7,14 +7,14 @@ pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     if args.len() < 2 {
         return Ok(Value::Undefined);
     }
-    
+
     let name = args[0].copy();
     let get = args[1].copy();
-    
+
     let this = this.as_object()?;
-    
+
     this.define_getter(name, get)?;
-    
+
     Ok(Value::Undefined)
 }
 
@@ -22,14 +22,14 @@ pub fn define_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     if args.len() < 2 {
         return Ok(Value::Undefined);
     }
-    
+
     let name = args[0].copy();
     let set = args[1].copy();
-    
+
     let this = this.as_object()?;
-    
+
     this.define_setter(name, set)?;
-    
+
     Ok(Value::Undefined)
 }
 
@@ -37,13 +37,13 @@ pub fn lookup_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     if args.is_empty() {
         return Ok(Value::Undefined);
     }
-    
+
     let name = &args[0];
-    
+
     let this = this.as_object()?;
-    
+
     let getter = this.get_getter(name)?;
-    
+
     Ok(getter.unwrap_or(Value::Undefined))
 }
 
@@ -51,13 +51,13 @@ pub fn lookup_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     if args.is_empty() {
         return Ok(Value::Undefined);
     }
-    
+
     let name = &args[0];
-    
+
     let this = this.as_object()?;
-    
+
     let setter = this.get_setter(name)?;
-    
+
     Ok(setter.unwrap_or(Value::Undefined))
 }
 
@@ -107,23 +107,22 @@ pub fn is_prototype_of(args: Vec<Value>, mut this: Value, realm: &mut Realm) -> 
     if args.is_empty() {
         return Ok(Value::Undefined);
     }
-    
+
     let search = &args[0];
-    
-    
+
     loop {
         let mut obj = this.as_object()?;
         let proto = obj.prototype()?;
         let proto = proto.get(this.clone(), realm)?;
-        
+
         if proto.is_nullish() {
             return Ok(false.into());
         }
-        
+
         if &proto == search {
             return Ok(true.into());
         }
-        
+
         this = proto;
     }
 }

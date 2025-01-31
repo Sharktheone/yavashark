@@ -1,5 +1,5 @@
-use std::fmt::Display;
 use crate::ConstString;
+use std::fmt::Display;
 
 macro_rules! symbol {
     ($name:ident, $symbol:ident) => {
@@ -9,7 +9,7 @@ macro_rules! symbol {
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 pub struct Symbol {
-    inner: ConstString
+    inner: ConstString,
 }
 
 impl Display for Symbol {
@@ -21,7 +21,7 @@ impl Display for Symbol {
 impl From<&'static str> for Symbol {
     fn from(s: &'static str) -> Self {
         Self {
-            inner: ConstString::String(s)
+            inner: ConstString::String(s),
         }
     }
 }
@@ -29,30 +29,24 @@ impl From<&'static str> for Symbol {
 impl From<String> for Symbol {
     fn from(s: String) -> Self {
         Self {
-            inner: ConstString::Owned(s)
+            inner: ConstString::Owned(s),
         }
     }
 }
 
 impl From<ConstString> for Symbol {
     fn from(s: ConstString) -> Self {
-        Self {
-            inner: s
-        }
+        Self { inner: s }
     }
 }
 
 impl Symbol {
     pub const fn new(s: &'static str) -> Self {
         Self {
-            inner: ConstString::String(s)
+            inner: ConstString::String(s),
         }
     }
 }
-
-
-
-
 
 impl Symbol {
     symbol!(ASYNC_ITERATOR, asyncIterator);

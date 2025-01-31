@@ -16,7 +16,7 @@ pub struct Intrinsics {
     pub(crate) boolean: ObjectHandle,
     pub(crate) symbol: ObjectHandle,
     pub(crate) bigint: ObjectHandle,
-    pub(crate) regexp: ObjectHandle
+    pub(crate) regexp: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -55,8 +55,7 @@ impl Intrinsics {
     constructor!(symbol);
     constructor!(bigint);
     constructor!(regexp);
-    
-    
+
     obj!(math);
 }
 
@@ -118,28 +117,26 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let boolean_prototype = BooleanObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let symbol_prototype = SymbolObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let bigint_prototype = BigIntObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let regex = RegExp::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
-        
 
         Ok(Self {
             obj: obj_prototype,
@@ -153,7 +150,7 @@ impl Intrinsics {
             boolean: boolean_prototype,
             symbol: symbol_prototype,
             bigint: bigint_prototype,
-            regexp: regex
+            regexp: regex,
         })
     }
 }

@@ -1,15 +1,15 @@
+mod bigint;
+mod boolean;
 mod math;
 mod number;
-mod string;
-mod boolean;
-mod symbol;
-mod bigint;
 mod regex;
+mod string;
+mod symbol;
 
+pub use bigint::*;
+pub use boolean::*;
 pub use math::*;
 pub use number::*;
-pub use string::*;
-pub use boolean::*;
-pub use symbol::*;
-pub use bigint::*;
 pub use regex::*;
+pub use string::*;
+pub use symbol::*;

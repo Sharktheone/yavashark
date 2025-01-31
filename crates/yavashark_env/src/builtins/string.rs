@@ -189,12 +189,22 @@ impl StringObj {
 
     #[prop("fontcolor")]
     pub fn font_color(&self, color: String) -> ValueResult {
-        Ok(format!("<font color=\"{}\">{}</font>", color, self.inner.borrow().string).into())
+        Ok(format!(
+            "<font color=\"{}\">{}</font>",
+            color,
+            self.inner.borrow().string
+        )
+        .into())
     }
 
     #[prop("fontsize")]
     pub fn font_size(&self, size: String) -> ValueResult {
-        Ok(format!("<font size=\"{}\">{}</font>", size, self.inner.borrow().string).into())
+        Ok(format!(
+            "<font size=\"{}\">{}</font>",
+            size,
+            self.inner.borrow().string
+        )
+        .into())
     }
 
     #[prop("includes")]
@@ -214,7 +224,9 @@ impl StringObj {
             from as usize
         };
 
-        inner.string[from..].find(&search).map_or(-1, |i| i as isize)
+        inner.string[from..]
+            .find(&search)
+            .map_or(-1, |i| i as isize)
     }
 
     #[prop("isWellFormed")]
@@ -241,9 +253,10 @@ impl StringObj {
             from as usize
         };
 
-        inner.string[..from].rfind(&search).map_or(-1, |i| i as isize)
+        inner.string[..from]
+            .rfind(&search)
+            .map_or(-1, |i| i as isize)
     }
-
 
     #[prop("link")]
     pub fn link(&self, url: String) -> ValueResult {
@@ -255,10 +268,8 @@ impl StringObj {
     //TODO: localization
     // }
 
-
     //TODO: match, matchAll
 
-    
     pub fn substr(&self, start: isize) -> ValueResult {
         let inner = self.inner.borrow();
 

@@ -70,12 +70,13 @@ impl Interpreter {
                     Some(num.into()),
                 ))
             }
-            
+
             Value::Boolean(b) => {
                 let boolean = BooleanObj::new(realm, b);
 
                 Ok((
-                    boolean.resolve_property(&name, realm)?
+                    boolean
+                        .resolve_property(&name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(boolean.into()),
                 ))
@@ -83,15 +84,16 @@ impl Interpreter {
 
             Value::Symbol(s) => {
                 let symbol = SymbolObj::new(realm, s);
-                
+
                 Ok((
-                    symbol.resolve_property(&name, realm)?
+                    symbol
+                        .resolve_property(&name, realm)?
                         .unwrap_or(Value::Undefined),
                     Some(symbol.into()),
                 ))
             }
-            
-            _ => todo!()
+
+            _ => todo!(),
         }
     }
 }

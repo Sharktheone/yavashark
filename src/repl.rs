@@ -26,8 +26,6 @@ pub fn repl(conf: Conf) -> Res {
     let vm_realm = Realm::new()?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
-    let syn = Syntax::Es(EsSyntax::default());
-
     let config = Config::builder()
         .history_ignore_space(true)
         .completion_type(CompletionType::List)

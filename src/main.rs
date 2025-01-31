@@ -1,7 +1,8 @@
-mod simplerepl;
-mod repl;
 mod conf;
+mod repl;
+mod simplerepl;
 
+use crate::repl::{old_repl, repl};
 use crate::simplerepl::Repl;
 use std::path::{Path, PathBuf};
 use swc_common::input::StringInput;
@@ -13,7 +14,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
-use crate::repl::{old_repl, repl};
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -144,14 +144,19 @@ fn main() {
             }
         }
     }
-    
-    let config = conf::Conf { ast, interpreter, bytecode, instructions };
-    
+
+    let config = conf::Conf {
+        ast,
+        interpreter,
+        bytecode,
+        instructions,
+    };
+
     if shell && shellold {
         println!("Cannot run both shells");
         return;
     }
-    
+
     if shell {
         repl(config).unwrap();
     }
@@ -159,6 +164,4 @@ fn main() {
     if shellold {
         old_repl(config).unwrap();
     }
-
-    
 }

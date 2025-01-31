@@ -1,9 +1,9 @@
+use crate::array::Array;
 use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult};
 use regex::{Regex, RegexBuilder};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
-use crate::array::Array;
 
 #[object(direct(last_index(lastIndex)))]
 #[derive(Debug)]
@@ -107,31 +107,28 @@ impl RegExp {
     fn exec(&self, value: String, #[realm] realm: &mut Realm) -> ValueResult {
         if self.global {
             let mut inner = self.inner.borrow_mut();
-            
-            let  mut last_index = inner.last_index.value.to_number(realm)? as usize;
-            
+
+            let mut last_index = inner.last_index.value.to_number(realm)? as usize;
+
             let value = value.get(last_index..).unwrap_or_default();
-            
-            let value = self
-                .regex
-                .find(value)
-                .map(|m| {
-                    last_index += m.end();
-                    
-                    m.as_str().to_string()
-                });
-            
+
+            let value = self.regex.find(value).map(|m| {
+                last_index += m.end();
+
+                m.as_str().to_string()
+            });
+
             let Some(value) = value else {
                 inner.last_index.value = Value::from(0u8);
-                
+
                 return Ok(Value::Null);
             };
-            
+
             inner.last_index.value = Value::from(last_index);
-            
+
             let array = Array::with_elements(realm, vec![value.into_value()])?;
-            
-            return Ok(array.into_value())
+
+            return Ok(array.into_value());
         }
 
         let value = self

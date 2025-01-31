@@ -1,8 +1,8 @@
 use crate::{BoxedObj, Error, Obj, Object, Realm, Symbol, Value};
-use std::any::type_name;
 use num_bigint::BigInt;
-use yavashark_garbage::OwningGcGuard;
+use std::any::type_name;
 use std::any::Any;
+use yavashark_garbage::OwningGcGuard;
 
 impl<C: Realm> From<&str> for Value<C> {
     fn from(s: &str) -> Self {
@@ -117,7 +117,6 @@ impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
         Ok(value)
     }
 }
-
 
 impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
     fn from(o: O) -> Self {
@@ -275,28 +274,23 @@ impl<C: Realm, V: Obj<C>> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use crate::{ObjectProperty, Variable};
     use std::fmt::Debug;
     use std::mem;
     use std::slice::IterMut;
-    use crate::{ObjectProperty, Variable};
-    use super::*;
-
 
     #[derive(Debug, PartialEq, Eq, Clone)]
     struct R;
 
     impl Realm for R {}
 
-
     trait FromValue2<C: Realm>: Sized {
         type Output;
         fn from_value(value: Value<C>) -> Result<Self::Output, Error<C>>;
     }
-
 
     impl FromValue2<R> for String {
         type Output = String;
@@ -363,7 +357,10 @@ mod tests {
         }
     }
 
-    fn extract_value<T: FromValue2<R>>(vals: &mut [Value<R>], idx: usize) -> Result<Option<T::Output>, Error<R>> {
+    fn extract_value<T: FromValue2<R>>(
+        vals: &mut [Value<R>],
+        idx: usize,
+    ) -> Result<Option<T::Output>, Error<R>> {
         let Some(val) = vals.get_mut(idx) else {
             return Ok(None);
         };
@@ -372,7 +369,7 @@ mod tests {
 
         Ok(Some(T::from_value(val)?))
     }
-    
+
     impl<T: Obj<R>> FromValue2<R> for T {
         type Output = OwningGcGuard<'static, BoxedObj<R>, T>;
 
@@ -393,7 +390,6 @@ mod tests {
                     ))
                 })
         }
-
     }
 
     struct Extractor<'a> {
@@ -416,7 +412,10 @@ mod tests {
     impl<T: FromValue2<R>> ExtractValue<T> for Extractor<'_> {
         type Output = T::Output;
         fn extract(&mut self) -> Result<Self::Output, Error<R>> {
-            let val = self.values.next().ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
+            let val = self
+                .values
+                .next()
+                .ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
             let val = mem::replace(val, Value::Undefined);
 
             T::from_value(val)
@@ -424,14 +423,13 @@ mod tests {
     }
 
     impl<T: FromValue2<R>> ExtractValue<Option<T>> for Extractor<'_> {
-
         type Output = Option<T::Output>;
 
         fn extract(&mut self) -> Result<Self::Output, Error<R>> {
             let Some(val) = self.values.next() else {
                 return Ok(None);
             };
-            
+
             let val = mem::replace(val, Value::Undefined);
 
             Ok(Some(T::from_value(val)?))
@@ -511,14 +509,13 @@ mod tests {
         }
     }
 
-
     #[test]
     fn test_extract() {
         let mut values: Vec<Value<R>> = vec![
             Value::from("hello"),
             Value::from(8),
             Value::from(true),
-            CustomObj.into_value()
+            CustomObj.into_value(),
         ];
 
         let mut extractor = Extractor::new(&mut values);
@@ -532,11 +529,9 @@ mod tests {
         let e = e.as_ref().map(|e| &**e);
 
         test(&a, b, c, &d, e);
-
     }
 
     fn test(a: &str, b: i32, c: bool, d: &CustomObj, e: Option<&CustomObj>) {
         println!("{} {} {} {:?} {:?}", a, b, c, d, e);
-
     }
 }

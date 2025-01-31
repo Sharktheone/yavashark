@@ -1,14 +1,14 @@
-use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
-use std::hash::Hash;
-use num_bigint::BigInt;
-use num_traits::Zero;
 pub use constructor::*;
 pub use context::*;
 pub use conversion::*;
 pub use function::*;
 pub use name::*;
+use num_bigint::BigInt;
+use num_traits::Zero;
 pub use object::*;
+use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
+use std::hash::Hash;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef};
@@ -54,7 +54,6 @@ pub enum Value<C: Realm> {
     Symbol(Symbol),
     BigInt(BigInt),
 }
-
 
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
@@ -348,7 +347,7 @@ impl<C: Realm> From<Symbol> for Value<C> {
     fn from(s: Symbol) -> Self {
         Self::Symbol(s)
     }
-} 
+}
 
 #[derive(Debug)]
 pub struct Iter<C: Realm> {

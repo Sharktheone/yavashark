@@ -3,13 +3,19 @@ use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, Pro
 
 use crate::function::{JSFunction, RawJSFunction};
 use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult, Result,
+    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Result, Value,
+    ValueResult,
 };
 use yavashark_value::Obj;
 
 use crate::Interpreter;
 
-pub fn create_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Result<(JSClass, Vec<BlockStmt>)> {
+pub fn create_class(
+    realm: &mut Realm,
+    stmt: &Class,
+    scope: &mut Scope,
+    name: String,
+) -> Result<(JSClass, Vec<BlockStmt>)> {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
         let p = super_class.get_property(&"prototype".into(), realm)?;
@@ -108,20 +114,14 @@ pub fn create_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: St
 
     class.set_proto(proto.into_value().into());
 
-
     // scope.declare_var(name, this.clone());
 
     Ok((class, statics))
 }
 
-pub fn decl_class(
-    realm: &mut Realm,
-    stmt: &Class,
-    scope: &mut Scope,
-    name: String,
-) -> Res {
+pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let (class, statics) = create_class(realm, stmt, scope, name.clone())?;
-    
+
     let this = class.into_value();
 
     for static_block in statics {

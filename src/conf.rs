@@ -1,7 +1,3 @@
-
-
-
-
 #[derive(Debug, Clone, Copy)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Conf {

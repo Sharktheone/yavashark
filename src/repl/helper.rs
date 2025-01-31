@@ -1,12 +1,12 @@
-use std::borrow::Cow;
+use crate::conf::Conf;
 use rustyline::completion::{Completer, FilenameCompleter};
-use rustyline::Helper;
 use rustyline::highlight::{CmdKind, Highlighter, MatchingBracketHighlighter};
 use rustyline::hint::{Hinter, HistoryHinter};
 use rustyline::validate::{MatchingBracketValidator, Validator};
+use rustyline::Helper;
 use rustyline_derive::{Completer, Hinter, Validator};
+use std::borrow::Cow;
 use yavashark_env::scope::Scope;
-use crate::conf::Conf;
 
 #[derive(Helper, Completer, Hinter, Validator)]
 pub struct ReplHelper {
@@ -19,7 +19,6 @@ pub struct ReplHelper {
     pub hinter: HistoryHinter,
     pub colored_prompt: String,
 }
-
 
 impl ReplHelper {
     pub fn new(int: Scope, vm: Scope, conf: Conf) -> Self {
