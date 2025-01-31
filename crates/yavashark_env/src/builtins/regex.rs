@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use regex::{Regex, RegexBuilder};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, IntoValue, Obj};
-use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Result};
 use crate::array::Array;
 
 #[object]
@@ -22,6 +22,25 @@ impl RegExp {
                 object: MutObject::with_proto(realm.intrinsics.regexp.clone().into()),
             }),
         }.into_object()
+    }
+    
+    pub fn new_from_str(realm: &Realm, regex: &str) -> Result<ObjectHandle> {
+        let regex = Regex::new(regex).map_err(|e| ControlFlow::error(e.to_string()))?;
+        
+        Ok(Self::new(realm, regex))
+    }
+    
+    pub fn new_from_str_with_flags(realm: &Realm, regex: &str, flags: &str) -> Result<ObjectHandle> {
+        let regex = RegexBuilder::new(regex)
+            .case_insensitive(flags.contains('i'))
+            .multi_line(flags.contains('m'))
+            .dot_matches_new_line(flags.contains('s'))
+            .ignore_whitespace(flags.contains('x'))
+            .unicode(flags.contains('u'))
+            .build()
+            .map_err(|e| ControlFlow::error(e.to_string()))?;
+        
+        Ok(Self::new(realm, regex))
     }
 }
 
@@ -58,20 +77,8 @@ impl Constructor<Realm> for RegExpConstructor {
 
         let flags = args.get(1).map_or(Ok(String::new()), |v| v.to_string(realm))?;
 
-
-
-        let regex = RegexBuilder::new(&regex)
-            .case_insensitive(flags.contains('i'))
-            .multi_line(flags.contains('m'))
-            .dot_matches_new_line(flags.contains('s'))
-            .ignore_whitespace(flags.contains('x'))
-            .unicode(flags.contains('u'))
-            .build()
-            .map_err(|e| ControlFlow::error(e.to_string()))?;
-
-
-
-        let obj = RegExp::new(realm, regex);
+        let obj = RegExp::new_from_str_with_flags(realm, &regex, &flags)?;
+        
 
         Ok(obj.into())
     }
