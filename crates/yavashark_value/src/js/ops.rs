@@ -415,9 +415,9 @@ impl<C: Realm> PartialOrd for Value<C> {
             (Self::BigInt(a), Self::Number(b)) => a.to_f64().unwrap_or(f64::NAN).partial_cmp(b),
 
             (Self::String(a), Self::BigInt(b)) | (Self::BigInt(b), Self::String(a)) => {
-                let a = BigInt::from_str(&a).unwrap_or(BigInt::zero());
+                let a = BigInt::from_str(a).unwrap_or(BigInt::zero());
 
-                a.partial_cmp(&b)
+                a.partial_cmp(b)
             }
 
             (_, _) => None,
@@ -681,12 +681,8 @@ impl<C: Realm> Value<C> {
     }
 
     pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
-        match (self, rhs) {
-            (Self::BigInt(a), Self::BigInt(b)) => {
-                return Ok(Self::BigInt(a.pow(b.to_u32().unwrap_or(0))));
-            }
-
-            _ => {}
+        if let (Self::BigInt(a), Self::BigInt(b)) = (self, rhs) {
+            return Ok(Self::BigInt(a.pow(b.to_u32().unwrap_or(0))));
         }
 
         Ok(Self::Number(

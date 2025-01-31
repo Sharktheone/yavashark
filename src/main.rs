@@ -3,15 +3,11 @@ mod repl;
 mod simplerepl;
 
 use crate::repl::{old_repl, repl};
-use crate::simplerepl::Repl;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
-use yavashark_env::print::PrettyPrint;
-use yavashark_env::scope::Scope;
-use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
 

@@ -41,7 +41,7 @@ impl From<ConstString> for Symbol {
 }
 
 impl Symbol {
-    pub const fn new(s: &'static str) -> Self {
+    #[must_use] pub const fn new(s: &'static str) -> Self {
         Self {
             inner: ConstString::String(s),
         }

@@ -1,7 +1,6 @@
 use crate::{BoxedObj, Error, Obj, Object, Realm, Symbol, Value};
 use num_bigint::BigInt;
 use std::any::type_name;
-use std::any::Any;
 use yavashark_garbage::OwningGcGuard;
 
 impl<C: Realm> From<&str> for Value<C> {
@@ -293,7 +292,7 @@ mod tests {
     }
 
     impl FromValue2<R> for String {
-        type Output = String;
+        type Output = Self;
 
         fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
             match value {
@@ -306,11 +305,11 @@ mod tests {
     }
 
     impl FromValue2<R> for i32 {
-        type Output = i32;
+        type Output = Self;
 
         fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
             match value {
-                Value::Number(n) => Ok(n as i32),
+                Value::Number(n) => Ok(n as Self),
                 _ => Err(Error::ty_error(format!(
                     "Expected a number, found {value:?}"
                 ))),
@@ -319,7 +318,7 @@ mod tests {
     }
 
     impl FromValue2<R> for f64 {
-        type Output = f64;
+        type Output = Self;
 
         fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
             match value {
@@ -332,7 +331,7 @@ mod tests {
     }
 
     impl FromValue2<R> for bool {
-        type Output = bool;
+        type Output = Self;
 
         fn from_value(value: Value<R>) -> Result<Self::Output, Error<R>> {
             match value {
@@ -397,7 +396,7 @@ mod tests {
     }
 
     impl<'a> Extractor<'a> {
-        fn new(values: &'a mut Vec<Value<R>>) -> Self {
+        fn new(values: &'a mut [Value<R>]) -> Self {
             Self {
                 values: values.iter_mut(),
             }
@@ -526,12 +525,12 @@ mod tests {
         let d = ExtractValue::<CustomObj>::extract(&mut extractor).unwrap();
         let e = ExtractValue::<Option<CustomObj>>::extract(&mut extractor).unwrap();
 
-        let e = e.as_ref().map(|e| &**e);
+        let e = e.as_deref();
 
         test(&a, b, c, &d, e);
     }
 
     fn test(a: &str, b: i32, c: bool, d: &CustomObj, e: Option<&CustomObj>) {
-        println!("{} {} {} {:?} {:?}", a, b, c, d, e);
+        println!("{a} {b} {c} {d:?} {e:?}");
     }
 }

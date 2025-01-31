@@ -22,7 +22,7 @@ pub fn create_class(
 
         (
             JSClass::new_with_proto(super_class, name.clone()),
-            ClassInstance::new_with_proto(p, name.clone()),
+            ClassInstance::new_with_proto(p, name),
         )
     } else {
         (

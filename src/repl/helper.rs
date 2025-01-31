@@ -1,8 +1,8 @@
 use crate::conf::Conf;
-use rustyline::completion::{Completer, FilenameCompleter};
+use rustyline::completion::FilenameCompleter;
 use rustyline::highlight::{CmdKind, Highlighter, MatchingBracketHighlighter};
-use rustyline::hint::{Hinter, HistoryHinter};
-use rustyline::validate::{MatchingBracketValidator, Validator};
+use rustyline::hint::HistoryHinter;
+use rustyline::validate::MatchingBracketValidator;
 use rustyline::Helper;
 use rustyline_derive::{Completer, Hinter, Validator};
 use std::borrow::Cow;
@@ -21,7 +21,7 @@ pub struct ReplHelper {
 }
 
 impl ReplHelper {
-    pub fn new(int: Scope, vm: Scope, conf: Conf) -> Self {
+    pub fn new(_int: Scope, _vm: Scope, _conf: Conf) -> Self {
         Self {
             completer: FilenameCompleter::new(),
             highlighter: MatchingBracketHighlighter::new(),
@@ -33,6 +33,10 @@ impl ReplHelper {
 }
 
 impl Highlighter for ReplHelper {
+    fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
+        self.highlighter.highlight(line, pos)
+    }
+
     fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
         &'s self,
         prompt: &'p str,
@@ -47,10 +51,6 @@ impl Highlighter for ReplHelper {
 
     fn highlight_hint<'h>(&self, hint: &'h str) -> Cow<'h, str> {
         Cow::Owned("\x1b[1m".to_owned() + hint + "\x1b[m")
-    }
-
-    fn highlight<'l>(&self, line: &'l str, pos: usize) -> Cow<'l, str> {
-        self.highlighter.highlight(line, pos)
     }
 
     fn highlight_char(&self, line: &str, pos: usize, kind: CmdKind) -> bool {

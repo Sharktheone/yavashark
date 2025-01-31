@@ -134,7 +134,7 @@ impl RegExp {
         let value = self
             .regex
             .find(&value)
-            .map_or_else(|| "".to_string(), |m| m.as_str().to_string());
+            .map_or_else(String::new, |m| m.as_str().to_string());
 
         Ok(value.into_value())
     }
