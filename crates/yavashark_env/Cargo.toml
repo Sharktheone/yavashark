@@ -7,9 +7,9 @@ edition = "2021"
 yavashark_value = { path = "../yavashark_value", features = ["js", "dbg_object_gc" , "display_object"], default-features = false }
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_macro = { path = "../yavashark_macro" }
-colored = "2.1.0"
+colored = "3.0.0"
 paste = "1.0.15"
-rand = "0.8.5"
+rand = "0.9.0"
 num-bigint = "0.4.6"
 regex = "1.11.1"
 
