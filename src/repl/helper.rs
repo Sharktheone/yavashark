@@ -1,17 +1,53 @@
 use crate::conf::Conf;
-use rustyline::completion::FilenameCompleter;
+use rustyline::completion::{Completer, FilenameCompleter, Pair};
 use rustyline::highlight::{CmdKind, Highlighter, MatchingBracketHighlighter};
-use rustyline::hint::HistoryHinter;
+use rustyline::hint::{Hinter, HistoryHinter};
 use rustyline::validate::MatchingBracketValidator;
-use rustyline::Helper;
+use rustyline::{Context, Helper};
 use rustyline_derive::{Completer, Hinter, Validator};
 use std::borrow::Cow;
 use yavashark_env::scope::Scope;
 
+pub struct ScopeCompleter {
+    filename: FilenameCompleter,
+    scope: Scope,
+}
+
+impl Completer for ScopeCompleter {
+    type Candidate = Pair;
+
+    fn complete(
+        &self,
+        line: &str,
+        pos: usize,
+        ctx: &Context<'_>,
+    ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
+        if let Some(line) = line.strip_prefix('!') {
+            return self.filename.complete(line, pos - 1, ctx);
+        }
+
+        let Ok(names) = self.scope.get_variable_names() else {
+            return Ok((0, vec![]));
+        };
+
+        let mut completions = vec![];
+        for name in names {
+            if name.starts_with(line) {
+                completions.push(Pair {
+                    display: name.to_string(),
+                    replacement: name.to_string(),
+                });
+            }
+        }
+
+        Ok((0, completions))
+    }
+}
+
 #[derive(Helper, Completer, Hinter, Validator)]
 pub struct ReplHelper {
     #[rustyline(Completer)]
-    pub completer: FilenameCompleter,
+    pub completer: ScopeCompleter,
     pub highlighter: MatchingBracketHighlighter,
     #[rustyline(Validator)]
     pub validator: MatchingBracketValidator,
@@ -21,9 +57,21 @@ pub struct ReplHelper {
 }
 
 impl ReplHelper {
-    pub fn new(_int: Scope, _vm: Scope, _conf: Conf) -> Self {
+    pub fn new(int: Scope, vm: Scope, conf: Conf) -> Self {
+        let completer = if conf.interpreter {
+            ScopeCompleter {
+                filename: FilenameCompleter::new(),
+                scope: vm,
+            }
+        } else {
+            ScopeCompleter {
+                filename: FilenameCompleter::new(),
+                scope: int,
+            }
+        };
+
         Self {
-            completer: FilenameCompleter::new(),
+            completer,
             highlighter: MatchingBracketHighlighter::new(),
             validator: MatchingBracketValidator::new(),
             hinter: HistoryHinter {},
