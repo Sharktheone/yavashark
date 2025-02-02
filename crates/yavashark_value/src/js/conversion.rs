@@ -274,6 +274,7 @@ impl<C: Realm, V: Obj<C>> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
 }
 
 #[cfg(test)]
+#[allow(unused)]
 mod tests {
     use super::*;
     use crate::{ObjectProperty, Variable};
@@ -509,6 +510,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::many_single_char_names)]
     fn test_extract() {
         let mut values: Vec<Value<R>> = vec![
             Value::from("hello"),
@@ -530,6 +532,7 @@ mod tests {
         test(&a, b, c, &d, e);
     }
 
+    #[allow(clippy::many_single_char_names)]
     fn test(a: &str, b: i32, c: bool, d: &CustomObj, e: Option<&CustomObj>) {
         println!("{a} {b} {c} {d:?} {e:?}");
     }
