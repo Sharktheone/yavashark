@@ -24,12 +24,15 @@ impl Completer for ScopeCompleter {
     ) -> rustyline::Result<(usize, Vec<Self::Candidate>)> {
         if let Some(line) = line.strip_prefix('!') {
             let (pos, pairs) = self.filename.complete(line, pos - 1, ctx)?;
-            
-            let pairs = pairs.into_iter().map(|pair| Pair {
-                display: pair.display,
-                replacement: format!("!{}", pair.replacement),
-            }).collect();
-            
+
+            let pairs = pairs
+                .into_iter()
+                .map(|pair| Pair {
+                    display: pair.display,
+                    replacement: format!("!{}", pair.replacement),
+                })
+                .collect();
+
             return Ok((pos, pairs));
         }
 

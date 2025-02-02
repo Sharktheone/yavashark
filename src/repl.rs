@@ -63,16 +63,14 @@ pub fn repl(conf: Conf) -> Res {
                 break;
             }
         };
-        
+
         rl.add_history_entry(input.as_str())?;
         count += 1;
-        
+
         if let Some(file) = input.strip_prefix('!') {
             let file = file.trim();
             input = std::fs::read_to_string(file)?;
         }
-        
-        
 
         run_input(
             &input,

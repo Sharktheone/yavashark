@@ -92,10 +92,10 @@ impl Interpreter {
                     Some(symbol.into()),
                 ))
             }
-            
+
             Value::BigInt(big_int) => {
                 let big_int = BigIntObj::new(realm, big_int);
-                
+
                 Ok((
                     big_int
                         .resolve_property(&name, realm)?

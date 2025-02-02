@@ -531,36 +531,42 @@ impl ScopeInternal {
     pub fn copy_path(&mut self) {
         self.file = self.get_current_file().ok();
     }
-    
+
     pub fn get_variables(&self) -> Result<HashMap<String, Variable>> {
         let mut variables: HashMap<String, Variable> = match &self.parent {
             ParentOrGlobal::Parent(p) => p.borrow()?.get_variables()?,
-            ParentOrGlobal::Global(g) => g.properties()?.iter().filter_map(|(k, v)| match k {
-                Value::String(s) => Some((s.clone(), Variable::new(v.clone()))),
-                _ => None,
-            }).collect(),
+            ParentOrGlobal::Global(g) => g
+                .properties()?
+                .iter()
+                .filter_map(|(k, v)| match k {
+                    Value::String(s) => Some((s.clone(), Variable::new(v.clone()))),
+                    _ => None,
+                })
+                .collect(),
         };
-        
-        
+
         for (name, variable) in &self.variables {
             variables.insert(name.clone(), variable.clone());
         }
-        
+
         Ok(variables)
     }
-    
+
     pub fn get_variable_names(&self) -> Result<HashSet<String>> {
         let mut variables = match &self.parent {
             ParentOrGlobal::Parent(p) => p.borrow()?.get_variable_names()?,
-            ParentOrGlobal::Global(g) => g.properties()?.iter().filter_map(|(k, _)| match k {
-                Value::String(s) => Some(s.clone()),
-                _ => None,
-                
-            }).collect(),
+            ParentOrGlobal::Global(g) => g
+                .properties()?
+                .iter()
+                .filter_map(|(k, _)| match k {
+                    Value::String(s) => Some(s.clone()),
+                    _ => None,
+                })
+                .collect(),
         };
-        
+
         variables.extend(self.variables.keys().cloned());
-        
+
         Ok(variables)
     }
 }
@@ -755,11 +761,11 @@ impl Scope {
 
         Ok(())
     }
-    
+
     pub fn get_variables(&self) -> Result<HashMap<String, Variable>> {
         self.scope.borrow()?.get_variables()
     }
-    
+
     pub fn get_variable_names(&self) -> Result<HashSet<String>> {
         self.scope.borrow()?.get_variable_names()
     }
