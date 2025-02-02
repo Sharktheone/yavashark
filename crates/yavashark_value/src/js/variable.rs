@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use crate::Value;
 use crate::{Error, Realm};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Variable<C: Realm> {
     pub value: Value<C>,
     pub properties: Attributes,
