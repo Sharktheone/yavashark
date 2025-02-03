@@ -70,12 +70,14 @@ impl NumberConstructor {
 
     #[prop("parseFloat")]
     #[must_use]
+    #[allow(clippy::needless_pass_by_value)]
     pub fn parse_float(string: String) -> f64 {
         string.parse().unwrap_or(f64::NAN)
     }
 
     #[prop("parseInt")]
     #[must_use]
+    #[allow(clippy::needless_pass_by_value)]
     pub fn parse_int(string: String, radix: u32) -> f64 {
         i64::from_str_radix(&string, radix)
             .map(|n| n as f64)

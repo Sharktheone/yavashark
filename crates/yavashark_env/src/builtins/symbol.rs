@@ -120,7 +120,7 @@ impl SymbolObj {
     }
 
     #[prop(Symbol::TO_STRING_TAG)]
-    fn to_string_tag(&self) -> String {
+    fn to_string_tag() -> String {
         "Symbol".to_string()
     }
 }

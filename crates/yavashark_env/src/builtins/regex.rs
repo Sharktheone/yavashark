@@ -59,6 +59,7 @@ pub struct RegExpConstructor {}
 
 #[properties_new(raw)]
 impl RegExpConstructor {
+    #[allow(clippy::needless_pass_by_value)]
     fn escape(value: String) -> String {
         regex::escape(&value)
     }
@@ -104,6 +105,7 @@ impl Func<Realm> for RegExpConstructor {
 #[properties_new(constructor(RegExpConstructor::new))]
 impl RegExp {
     #[prop("exec")]
+    #[allow(clippy::needless_pass_by_value)]
     fn exec(&self, value: String, #[realm] realm: &mut Realm) -> ValueResult {
         if self.global {
             let mut inner = self.inner.borrow_mut();
@@ -140,6 +142,7 @@ impl RegExp {
     }
 
     #[prop("test")]
+    #[allow(clippy::needless_pass_by_value)]
     fn test(&self, value: String) -> bool {
         self.regex.is_match(&value)
     }
