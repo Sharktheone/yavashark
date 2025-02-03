@@ -45,31 +45,37 @@ impl NumberConstructor {
     const NAN: f64 = f64::NAN;
 
     #[prop("isFinite")]
+    #[must_use]
     pub const fn is_finite(number: f64) -> bool {
         number.is_finite()
     }
 
     #[prop("isNaN")]
+    #[must_use]
     pub const fn is_nan(number: f64) -> bool {
         number.is_nan()
     }
 
     #[prop("isInteger")]
+    #[must_use]
     pub fn is_integer(number: f64) -> bool {
         number.fract() == 0.0
     }
 
     #[prop("isSafeInteger")]
+    #[must_use]
     pub fn is_safe_integer(number: f64) -> bool {
         number.is_finite() && number.abs() <= Self::MAX_SAFE_INTEGER
     }
 
     #[prop("parseFloat")]
+    #[must_use]
     pub fn parse_float(string: String) -> f64 {
         string.parse().unwrap_or(f64::NAN)
     }
 
     #[prop("parseInt")]
+    #[must_use]
     pub fn parse_int(string: String, radix: u32) -> f64 {
         i64::from_str_radix(&string, radix)
             .map(|n| n as f64)
