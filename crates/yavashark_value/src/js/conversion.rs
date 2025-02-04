@@ -123,9 +123,24 @@ impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
     }
 }
 
-pub trait FromValue<C: Realm>: Sized {
+pub trait FromValue<C: Realm>: Sized + FromValueOutput<C, Output = Self> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>>;
 }
+
+
+pub trait FromValueOutput<C: Realm> {
+    type Output;
+    fn from_value_out(value: Value<C>) -> Result<Self, Error<C>>;
+}
+
+impl<T: FromValue<R>, R: Realm> FromValueOutput<R> for T {
+    type Output = T;
+
+    fn from_value_out(value: Value<R>) -> Result<Self::Output, Error<R>> {
+        T::from_value_out(value)
+    }
+}
+
 
 pub trait IntoValue<C: Realm> {
     fn into_value(self) -> Value<C>;
