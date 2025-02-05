@@ -180,7 +180,7 @@ func main() {
 			}
 		}
 
-		if err := runCI(testResults, overallSummary, *repoPath, !(*historyOnly)); err != nil {
+		if err := runCI(testResults, overallSummary, *repoPath, *historyOnly); err != nil {
 			panic(err)
 		}
 	}
