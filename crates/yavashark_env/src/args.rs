@@ -1,27 +1,29 @@
 use std::mem;
 use std::slice::IterMut;
-use crate::{Error, FromValueOutput, Realm, Value};
+use yavashark_value::{Realm};
+use crate::{Value, Result, Error};
+use crate::conversion::FromValueOutput;
 
-pub struct Extractor<'a, R: Realm> {
-    pub args: IterMut<'a, Value<R>>,
+pub struct Extractor<'a> {
+    pub args: IterMut<'a, Value>,
 }
 
-impl<'a, R: Realm> Extractor<'a, R> {
-    pub fn new(args: &'a mut [Value<R>]) -> Self {
+impl<'a> Extractor<'a> {
+    pub fn new(args: &'a mut [Value]) -> Self {
         Self {
             args: args.iter_mut(),
         }
     }
-} 
-
-trait ExtractValue<T, R: Realm>: Sized {
-    type Output;
-    fn extract(&mut self) -> Result<Self::Output, Error<R>>;
 }
 
-impl<T: FromValueOutput<R>, R: Realm> ExtractValue<T, R> for Extractor<'_, R> {
+trait ExtractValue<T>: Sized {
+    type Output;
+    fn extract(&mut self) -> Result<Self::Output>;
+}
+
+impl<T: FromValueOutput, R: Realm> ExtractValue<T> for Extractor<'_> {
     type Output = T::Output;
-    fn extract(&mut self) -> Result<Self::Output, Error<R>> {
+    fn extract(&mut self) -> Result<Self::Output> {
         let val = self
             .args
             .next()
@@ -32,10 +34,10 @@ impl<T: FromValueOutput<R>, R: Realm> ExtractValue<T, R> for Extractor<'_, R> {
     }
 }
 
-impl<T: FromValueOutput<R>, R: Realm> ExtractValue<Option<T>, R> for Extractor<'_, R> {
+impl<T: FromValueOutput, R: Realm> ExtractValue<Option<T>> for Extractor<'_> {
     type Output = Option<T::Output>;
 
-    fn extract(&mut self) -> Result<Self::Output, Error<R>> {
+    fn extract(&mut self) -> Result<Self::Output> {
         let Some(val) = self.args.next() else {
             return Ok(None);
         };
