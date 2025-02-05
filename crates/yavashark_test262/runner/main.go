@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -55,6 +56,7 @@ type DirectorySummary struct {
 func main() {
 	ciEnabled := flag.Bool("ci", false, "Enable CI mode to commit results")
 	repoPath := flag.String("repo", "", "Path to external repository for CI results")
+	historyOnly := flag.Bool("history-only", false, "Only generate the history file (skip git commit)")
 	flag.Parse()
 
 	jobs := make(chan string, WORKERS*8)
@@ -165,7 +167,20 @@ func main() {
 			overallSummary.CommitHash = strings.TrimSpace(string(commitBytes))
 		}
 
-		if err := runCI(testResults, overallSummary, *repoPath); err != nil {
+		commitTimeBytes, err := exec.Command("git", "show", "-s", "--format=%ct", "HEAD").Output()
+		if err != nil {
+			log.Printf("Failed to get commit time: %v", err)
+		} else {
+			commitEpochStr := strings.TrimSpace(string(commitTimeBytes))
+			commitEpoch, err2 := strconv.ParseInt(commitEpochStr, 10, 64)
+			if err2 != nil {
+				log.Printf("Failed to parse commit timestamp: %v", err2)
+			} else {
+				overallSummary.Timestamp = time.Unix(commitEpoch, 0).Format(time.RFC3339)
+			}
+		}
+
+		if err := runCI(testResults, overallSummary, *repoPath, !(*historyOnly)); err != nil {
 			panic(err)
 		}
 	}
@@ -187,7 +202,15 @@ func countTests(path string) int {
 	return num
 }
 
-func runCI(testResults []Result, overall Summary, repo string) error {
+func runCI(testResults []Result, overall Summary, repo string, historyOnly bool) error {
+	if err := generateHistoryFile(repo, overall); err != nil {
+		return err
+	}
+
+	if historyOnly {
+		return nil
+	}
+
 	resultsDir := filepath.Join(repo, "results")
 	if err := os.MkdirAll(resultsDir, 0755); err != nil {
 		return err
@@ -277,6 +300,22 @@ func runCI(testResults []Result, overall Summary, repo string) error {
 		}
 	}
 
+	cmd := exec.Command("git", "add", ".")
+	cmd.Dir = repo
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("git add failed: %v, output: %s", err, out)
+	}
+	commitMsg := fmt.Sprintf("CI: Updated test results at %s", time.Now().Format(time.RFC3339))
+	cmd = exec.Command("git", "commit", "-m", commitMsg)
+	cmd.Dir = repo
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("git commit failed: %v, output: %s", err, out)
+	}
+
+	return nil
+}
+
+func generateHistoryFile(repo string, overall Summary) error {
 	historyFile := filepath.Join(repo, "history.json")
 	var history History
 	if b, err := os.ReadFile(historyFile); err == nil {
@@ -292,19 +331,6 @@ func runCI(testResults []Result, overall Summary, repo string) error {
 	if err := os.WriteFile(historyFile, historyData, 0644); err != nil {
 		return err
 	}
-
-	cmd := exec.Command("git", "add", ".")
-	cmd.Dir = repo
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("git add failed: %v, output: %s", err, out)
-	}
-	commitMsg := fmt.Sprintf("CI: Updated test results at %s", time.Now().Format(time.RFC3339))
-	cmd = exec.Command("git", "commit", "-m", commitMsg)
-	cmd.Dir = repo
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("git commit failed: %v, output: %s", err, out)
-	}
-
 	return nil
 }
 
