@@ -1,6 +1,5 @@
 use std::mem;
 use std::slice::IterMut;
-use yavashark_value::{Realm};
 use crate::{Value, Result, Error};
 use crate::conversion::FromValueOutput;
 
@@ -21,7 +20,7 @@ trait ExtractValue<T>: Sized {
     fn extract(&mut self) -> Result<Self::Output>;
 }
 
-impl<T: FromValueOutput, R: Realm> ExtractValue<T> for Extractor<'_> {
+impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
     type Output = T::Output;
     fn extract(&mut self) -> Result<Self::Output> {
         let val = self
@@ -34,7 +33,7 @@ impl<T: FromValueOutput, R: Realm> ExtractValue<T> for Extractor<'_> {
     }
 }
 
-impl<T: FromValueOutput, R: Realm> ExtractValue<Option<T>> for Extractor<'_> {
+impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
     type Output = Option<T::Output>;
 
     fn extract(&mut self) -> Result<Self::Output> {
