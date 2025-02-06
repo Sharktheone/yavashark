@@ -190,6 +190,10 @@ func countTests(path string) int {
 	num := 0
 
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if info == nil {
+			log.Printf("Failed to get file info for %s", path)
+		}
+
 		if info.IsDir() {
 			return nil
 		}
