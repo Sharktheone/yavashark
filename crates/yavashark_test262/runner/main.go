@@ -182,7 +182,7 @@ func main() {
 			}
 		}
 
-		if err := runCI(testResults, overallSummary, *repoPath, *historyOnly); err != nil {
+		if err := runCI(testResults, overallSummary, *repoPath, *historyOnly, *testRoot); err != nil {
 			panic(err)
 		}
 	}
@@ -209,7 +209,7 @@ func countTests(path string) int {
 	return num
 }
 
-func runCI(testResults []Result, overall Summary, repo string, historyOnly bool) error {
+func runCI(testResults []Result, overall Summary, repo string, historyOnly bool, root string) error {
 	if err := generateHistoryFile(repo, overall); err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func runCI(testResults []Result, overall Summary, repo string, historyOnly bool)
 	dirSummaries := map[string]*DirectorySummary{}
 
 	for _, res := range testResults {
-		relPath, err := filepath.Rel(TEST_ROOT, res.Path)
+		relPath, err := filepath.Rel(root, res.Path)
 		if err != nil {
 			relPath = res.Path
 		}
