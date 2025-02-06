@@ -307,17 +307,17 @@ func runCI(testResults []Result, overall Summary, repo string, historyOnly bool,
 		}
 	}
 
-	cmd := exec.Command("git", "add", ".")
-	cmd.Dir = repo
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("git add failed: %v, output: %s", err, out)
-	}
-	commitMsg := fmt.Sprintf("CI: Updated test results at %s", time.Now().Format(time.RFC3339))
-	cmd = exec.Command("git", "commit", "-m", commitMsg)
-	cmd.Dir = repo
-	if out, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("git commit failed: %v, output: %s", err, out)
-	}
+	//cmd := exec.Command("git", "add", ".")
+	//cmd.Dir = repo
+	//if out, err := cmd.CombinedOutput(); err != nil {
+	//	return fmt.Errorf("git add failed: %v, output: %s", err, out)
+	//}
+	//commitMsg := fmt.Sprintf("CI: Updated test results at %s", time.Now().Format(time.RFC3339))
+	//cmd = exec.Command("git", "commit", "-m", commitMsg)
+	//cmd.Dir = repo
+	//if out, err := cmd.CombinedOutput(); err != nil {
+	//	return fmt.Errorf("git commit failed: %v, output: %s", err, out)
+	//}
 
 	return nil
 }
