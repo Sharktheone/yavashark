@@ -1,0 +1,53 @@
+name: Update Test262 Results
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-results:
+    if: github.repository == 'Sharktheone/yavashark'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Checkout data repository
+        uses: actions/checkout@v3
+        with:
+          repository: sharktheone/yavashark-data
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: data
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.23'
+
+      - name: Build Go Runner
+        working-directory: crates/yavashark_test262/runner
+        run: |
+          go build
+
+      - name: Build Rust project in release mode
+        working-directory: crates/yavashark_test262
+        run: |
+          cargo build --release
+
+      - name: Run Test262 Runner
+        working-directory: crates/yavashark_test262
+        run: |
+          ./runner/yavashark_test262_runner --ci --repo ../../data
+
+      - name: Commit and push changes to data repository
+        uses: JamesIves/github-pages-deploy-action@v4.7.2
+        with:
+          branch: main
+          folder: data
+
+
