@@ -10,7 +10,7 @@ jobs:
     if: github.repository == 'Sharktheone/yavashark'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main repository with submodules
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: true
@@ -21,6 +21,12 @@ jobs:
           repository: sharktheone/yavashark-data
           token: ${{ secrets.GITHUB_TOKEN }}
           path: data
+
+      - name: Checkout test262 repository
+        uses: actions/checkout@v4
+        with:
+          repository: tc39/test262
+          path: test262
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -42,7 +48,7 @@ jobs:
       - name: Run Test262 Runner
         working-directory: crates/yavashark_test262
         run: |
-          ./runner/yavashark_test262_runner --ci --repo ../../data
+          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test
 
       - name: Commit and push changes to data repository
         uses: JamesIves/github-pages-deploy-action@v4.7.2

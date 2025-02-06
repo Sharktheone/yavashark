@@ -16,9 +16,9 @@ import (
 )
 
 const (
-	TEST_ROOT = "test262/test"
+	DEFAULT_TEST_ROOT = "test262/test"
 
-	WORKERS = 128
+	DEFAULT_WORKERS = 128
 )
 
 // New types for the CI report
@@ -57,21 +57,23 @@ func main() {
 	ciEnabled := flag.Bool("ci", false, "Enable CI mode to commit results")
 	repoPath := flag.String("repo", "", "Path to external repository for CI results")
 	historyOnly := flag.Bool("history-only", false, "Only generate the history file (skip git commit)")
+	workers := *flag.Int("workers", DEFAULT_WORKERS, "Number of workers")
+	testRoot := flag.String("test_root", DEFAULT_TEST_ROOT, "Path to test root directory")
 	flag.Parse()
 
-	jobs := make(chan string, WORKERS*8)
+	jobs := make(chan string, workers*8)
 
-	results := make(chan Result, WORKERS*8)
+	results := make(chan Result, workers*8)
 
 	wg := &sync.WaitGroup{}
 
-	wg.Add(WORKERS)
+	wg.Add(workers)
 
-	for i := range WORKERS {
+	for i := range workers {
 		go worker(i, jobs, results, wg)
 	}
 
-	num := countTests(TEST_ROOT)
+	num := countTests(*testRoot)
 
 	testResults := make([]Result, 0, num)
 
@@ -81,7 +83,7 @@ func main() {
 		}
 	}()
 
-	filepath.Walk(TEST_ROOT, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(*testRoot, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -192,6 +194,7 @@ func countTests(path string) int {
 	filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
 		if info == nil {
 			log.Printf("Failed to get file info for %s", path)
+			return nil
 		}
 
 		if info.IsDir() {
