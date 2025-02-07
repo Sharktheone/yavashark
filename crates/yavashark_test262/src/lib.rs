@@ -17,4 +17,4 @@ pub type NativeFunction = yavashark_env::NativeFunction;
 pub use yavashark_env::object;
 use yavashark_env::Realm;
 
-const TEST262_DIR: &str = "test262";
+const TEST262_DIR: &str = "../../test262";
