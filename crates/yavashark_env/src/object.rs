@@ -72,6 +72,12 @@ impl Object {
             .try_borrow()
             .map_err(|_| Error::new("Failed to borrow object"))
     }
+    
+    pub fn from_mut(inner: MutObject) -> Self {
+        Self {
+            inner: RefCell::new(inner),
+        }
+    }
 }
 
 impl Obj<Realm> for Object {
