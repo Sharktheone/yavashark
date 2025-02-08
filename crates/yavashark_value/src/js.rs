@@ -155,14 +155,14 @@ impl<C: Realm> Value<C> {
     }
 
     #[must_use]
-    pub const fn type_of(&self) -> &'static str {
+    pub fn type_of(&self) -> &'static str {
         match self {
             Self::Null => "null",
             Self::Undefined => "undefined",
             Self::Number(_) => "number",
             Self::String(_) => "string",
             Self::Boolean(_) => "boolean",
-            Self::Object(_) => "object",
+            Self::Object(o) => if o.is_function() { "function" } else { "object" },
             Self::Symbol(_) => "symbol",
             Self::BigInt(_) => "bigint",
         }
