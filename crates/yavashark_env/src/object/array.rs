@@ -1,8 +1,8 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use std::cell::{Cell, RefCell};
-use yavashark_macro::{object, properties};
-use yavashark_value::Obj;
+use yavashark_macro::{object, properties, properties_new};
+use yavashark_value::{Constructor, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -78,16 +78,29 @@ impl Array {
     }
 }
 
-#[properties]
-impl Array {
-    #[new]
-    #[must_use]
-    pub fn create(_: &mut Realm, proto: &Value) -> Value {
-        let this = Self::new(proto.copy());
+impl Constructor<Realm> for Array {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        let this = Self::new(realm.intrinsics.array.clone().into());
 
-        ObjectHandle::new(this).into()
+        let values = args
+            .into_iter()
+            .map(ObjectProperty::new)
+            .enumerate()
+            .collect::<Vec<_>>();
+
+        let mut inner = this.inner.try_borrow_mut()?;
+
+        inner.object.array = values;
+        inner.length.value = Value::Number(inner.object.array.len() as f64);
+
+        drop(inner);
+
+        Ok(this.into_object().into())
     }
+}
 
+#[properties_new]
+impl Array {
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
 
@@ -104,7 +117,7 @@ impl Array {
 
     #[prop(crate::Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
-    fn iterator(&self, _args: Vec<Value>, realm: &Realm, this: Value) -> ValueResult {
+    fn iterator(&self, #[realm] realm: &Realm, #[this] this: Value) -> ValueResult {
         let Value::Object(obj) = this else {
             return Err(Error::ty_error(format!("Expected object, found {this:?}")));
         };
@@ -123,25 +136,6 @@ impl Array {
         Ok(iter.into())
     }
 
-    #[constructor(special)]
-    fn construct(args: Vec<Value>, realm: &Realm) -> ValueResult {
-        let this = Self::new(realm.intrinsics.array.clone().into());
-
-        let values = args
-            .into_iter()
-            .map(ObjectProperty::new)
-            .enumerate()
-            .collect::<Vec<_>>();
-
-        let mut inner = this.inner.try_borrow_mut()?;
-
-        inner.object.array = values;
-        inner.length.value = Value::Number(inner.object.array.len() as f64);
-
-        drop(inner);
-
-        Ok(this.into_object().into())
-    }
 }
 
 #[object]
