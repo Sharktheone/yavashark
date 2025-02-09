@@ -129,7 +129,7 @@ impl<C: Realm> Value<C> {
     pub fn is_falsey(&self) -> bool {
         match self {
             Self::Null | Self::Undefined => true,
-            Self::Number(n) => *n == 0.0,
+            Self::Number(n) => *n == 0.0 || n.is_nan(),
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
             Self::Object(_) | Self::Symbol(_) => false,
@@ -141,7 +141,7 @@ impl<C: Realm> Value<C> {
     pub fn is_truthy(&self) -> bool {
         match self {
             Self::Null | Self::Undefined => false,
-            Self::Number(n) => *n != 0.0,
+            Self::Number(n) => !(*n == 0.0 || n.is_nan()),
             Self::String(s) => !s.is_empty(),
             Self::Boolean(b) => *b,
             Self::Object(_) | Self::Symbol(_) => true,
