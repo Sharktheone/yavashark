@@ -269,7 +269,7 @@ impl MutObject {
             self.array.push((i, ObjectProperty::new(v)));
         }
     }
-
+    
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);
 
