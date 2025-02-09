@@ -3,7 +3,7 @@ use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
-use syn::{ImplItem, Path};
+use syn::{Expr, ImplItem};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -100,7 +100,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
 
                     if attr.path().is_ident("prop") {
-                        js_name = attr.parse_args::<Path>().ok();
+                        js_name = Some(attr.parse_args().unwrap());
                         return false;
                     }
 
@@ -135,7 +135,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
 
                     if attr.path().is_ident("prop") {
-                        js_name = attr.parse_args::<Path>().ok();
+                        js_name = Some(attr.parse_args().unwrap());
                         return false;
                     }
 
@@ -237,7 +237,7 @@ enum Prop {
 
 struct Method {
     name: syn::Ident,
-    js_name: Option<Path>,
+    js_name: Option<Expr>,
     args: usize,
     this: Option<usize>,
     realm: Option<usize>,
@@ -250,7 +250,7 @@ struct Method {
 #[allow(unused)]
 struct Constant {
     name: syn::Ident,
-    js_name: Option<Path>,
+    js_name: Option<Expr>,
     mode: Mode,
 }
 
