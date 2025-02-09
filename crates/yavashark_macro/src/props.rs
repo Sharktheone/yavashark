@@ -263,6 +263,8 @@ impl Method {
 
         let mut arg_prepare = TokenStream::new();
         let mut call_args = TokenStream::new();
+        
+        let mut offset = 0;
 
         for i in 0..self.args {
             let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
@@ -271,17 +273,26 @@ impl Method {
                 arg_prepare.extend(quote! {
                     let #argname = this.copy();
                 });
+                
+                offset += 1;
             } else if Some(i) == self.realm {
                 arg_prepare.extend(quote! {
                     let #argname = realm;
                 });
+                
+                offset += 1;
+                
             } else if Some(i) == self.variadic {
+                let from = i - offset;
+                
                 arg_prepare.extend(quote! {
-                    let #argname = args.get(#i..).unwrap_or_default();
+                    let #argname = args.get(#from..).unwrap_or_default();
                 });
             } else {
+                let from = i - offset;
+                
                 arg_prepare.extend(quote! {
-                    let #argname = FromValue::from_value(args.get(#i).ok_or_else(|| #error::new("Missing argument"))?.copy())?;
+                    let #argname = FromValue::from_value(args.get(#from).ok_or_else(|| #error::new("Missing argument"))?.copy())?;
                 });
             }
 
