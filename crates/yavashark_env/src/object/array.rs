@@ -77,12 +77,12 @@ impl Array {
 
         Ok(buf)
     }
-    
+
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
         let mut inner = self.inner.try_borrow_mut()?;
-        
+
         inner.object.insert_array(idx, val.into());
-        
+
         Ok(())
     }
 }
@@ -147,25 +147,25 @@ impl Array {
 
 
     fn map(#[this] this: Value, #[realm] realm: &mut Realm, func: ObjectHandle) -> ValueResult {
-        let this = this.as_object()?; 
-        
+        let this = this.as_object()?;
+
         let len = this.get_property(&"length".into())?;
-        
+
         let len = len.value.as_number() as usize;
-        
+
         let array = Self::from_realm(realm);
-        
+
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
-            
+
             if let Some(val) = val {
                 let x = func.call(realm, vec![val], realm.global.clone().into())?;
-                
-                
+
+
                 array.insert_array(x, idx)?;
             }
         }
-        
+
         Ok(array.into_value())
     }
 }

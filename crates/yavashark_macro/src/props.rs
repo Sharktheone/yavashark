@@ -2,7 +2,8 @@ use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{ImplItem, Lit};
+use syn::parse::Parse;
+use syn::{ImplItem, Path};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -78,10 +79,9 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                             variadic = Some(args);
                             return false;
                         }
-                        
+
                         true
                     });
-
 
                     args += 1;
                 });
@@ -100,7 +100,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
 
                     if attr.path().is_ident("prop") {
-                        js_name = attr.parse_args::<Lit>().ok();
+                        js_name = attr.parse_args::<Path>().ok();
                         return false;
                     }
 
@@ -135,7 +135,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
 
                     if attr.path().is_ident("prop") {
-                        js_name = attr.parse_args::<Lit>().ok();
+                        js_name = attr.parse_args::<Path>().ok();
                         return false;
                     }
 
@@ -237,7 +237,7 @@ enum Prop {
 
 struct Method {
     name: syn::Ident,
-    js_name: Option<Lit>,
+    js_name: Option<Path>,
     args: usize,
     this: Option<usize>,
     realm: Option<usize>,
@@ -250,7 +250,7 @@ struct Method {
 #[allow(unused)]
 struct Constant {
     name: syn::Ident,
-    js_name: Option<Lit>,
+    js_name: Option<Path>,
     mode: Mode,
 }
 
