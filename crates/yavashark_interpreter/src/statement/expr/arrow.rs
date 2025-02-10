@@ -32,10 +32,10 @@ impl Func<Realm> for ArrowFunction {
 
         let res = match &*self.expr.body {
             BlockStmtOrExpr::BlockStmt(stmt) => Interpreter::run_block(realm, stmt, scope),
-            BlockStmtOrExpr::Expr(expr) => { 
+            BlockStmtOrExpr::Expr(expr) => {
                 match Interpreter::run_expr(realm, expr, self.expr.span, scope) {
-                    Ok(value) => return Ok(value), 
-                    other => other 
+                    Ok(value) => return Ok(value),
+                    other => other,
                 }
             }
         };

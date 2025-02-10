@@ -127,7 +127,6 @@ pub trait FromValue<R: Realm>: Sized {
     fn from_value(value: Value<R>) -> Result<Self, Error<R>>;
 }
 
-
 pub trait FromValueOutput<C: Realm> {
     type Output;
     fn from_value_out(value: Value<C>) -> Result<Self::Output, Error<C>>;
@@ -140,7 +139,6 @@ impl<T: FromValue<R>, R: Realm> FromValueOutput<R> for T {
         T::from_value_out(value)
     }
 }
-
 
 pub trait IntoValue<C: Realm> {
     fn into_value(self) -> Value<C>;

@@ -1,7 +1,7 @@
+use crate::conversion::FromValueOutput;
+use crate::{Error, Result, Value};
 use std::mem;
 use std::slice::IterMut;
-use crate::{Value, Result, Error};
-use crate::conversion::FromValueOutput;
 
 pub struct Extractor<'a> {
     pub args: IterMut<'a, Value>,

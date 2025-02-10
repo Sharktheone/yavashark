@@ -162,7 +162,13 @@ impl<C: Realm> Value<C> {
             Self::Number(_) => "number",
             Self::String(_) => "string",
             Self::Boolean(_) => "boolean",
-            Self::Object(o) => if o.is_function() { "function" } else { "object" },
+            Self::Object(o) => {
+                if o.is_function() {
+                    "function"
+                } else {
+                    "object"
+                }
+            }
             Self::Symbol(_) => "symbol",
             Self::BigInt(_) => "bigint",
         }

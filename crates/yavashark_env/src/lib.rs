@@ -8,6 +8,7 @@ mod function;
 pub mod object;
 pub mod scope;
 
+mod args;
 pub mod builtins;
 pub mod conversion;
 #[cfg(feature = "out-of-spec-experiments")]
@@ -16,7 +17,6 @@ mod global;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
-mod args;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;

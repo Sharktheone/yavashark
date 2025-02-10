@@ -1,11 +1,11 @@
 mod bigint;
 mod boolean;
+mod json;
 mod math;
 mod number;
 mod regex;
 mod string;
 mod symbol;
-mod json;
 
 pub use bigint::*;
 pub use boolean::*;

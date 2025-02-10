@@ -72,7 +72,7 @@ impl Object {
             .try_borrow()
             .map_err(|_| Error::new("Failed to borrow object"))
     }
-    
+
     pub fn from_mut(inner: MutObject) -> Self {
         Self {
             inner: RefCell::new(inner),
@@ -269,7 +269,7 @@ impl MutObject {
             self.array.push((i, ObjectProperty::new(v)));
         }
     }
-    
+
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);
 
