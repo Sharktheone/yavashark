@@ -40,10 +40,10 @@ impl Interpreter {
         };
 
         match value {
-            Value::Object(o) => Ok((
+            Value::Object(ref o) => Ok((
                 o.resolve_property(&name, realm)?
                     .unwrap_or(Value::Undefined),
-                None,
+                Some(value),
             )),
             Value::Undefined => Err(ControlFlow::error_type(format!(
                 "Cannot read property '{name}' of undefined",
