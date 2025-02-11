@@ -215,7 +215,12 @@ func runCI(testResults []Result, overall Summary, repo string, historyOnly bool,
 	}
 
 	if historyOnly {
+		log.Println("History file generated, skipping git commit")
 		return nil
+	}
+
+	if err := writeCIResultsPath(testResults, filepath.Join(repo, "results.json"), root); err != nil {
+		return err
 	}
 
 	resultsDir := filepath.Join(repo, "results")
