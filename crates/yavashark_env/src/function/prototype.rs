@@ -8,6 +8,7 @@ use crate::realm::Realm;
 use crate::{
     Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, ValueResult, Variable,
 };
+use crate::array::Array;
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -57,7 +58,22 @@ impl FunctionPrototype {
 
 #[allow(unused)]
 fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
+    if args.is_empty() {
+        return Err(Error::new("Not enough arguments"));
+    }
+    
+    let new_this = &args[0];
+    
+    let args = if let Some(arr) = args.get(1) {
+        let array = Array::from_array_like(realm, arr.copy())?;
+        
+        array.as_vec()?
+        
+    } else {
+        vec![]
+    };
+    
+    this.call(realm, args, new_this.copy())
 }
 
 #[allow(unused)]
