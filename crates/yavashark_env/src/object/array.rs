@@ -27,6 +27,33 @@ impl Array {
 
         Ok(array)
     }
+    
+    pub fn from_array_like(realm: &Realm, array_like: Value) -> Result<Self> {
+        let Value::Object(array_like) = array_like else {
+            return Err(Error::ty_error(format!("Expected object, found {array_like:?}")));
+        };
+        
+        
+        let array = Self::new(realm.intrinsics.array.clone().into());
+
+        let mut inner = array.inner.try_borrow_mut()?;
+
+        let len = array_like.get_property(&"length".into())?.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = array_like.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                inner.object.array.push((idx, Variable::new(val).into()));
+            }
+        }
+
+        inner.length.value = Value::Number(len as f64);
+
+        drop(inner);
+
+        Ok(array)
+    }
 
     #[must_use]
     pub fn new(proto: Value) -> Self {
@@ -84,6 +111,12 @@ impl Array {
         inner.object.insert_array(idx, val.into());
 
         Ok(())
+    }
+    
+    pub fn as_vec(&self) -> Result<Vec<Value>> {
+        let inner = self.inner.try_borrow()?;
+
+        Ok(inner.object.array.iter().map(|(_, v)| v.value.clone()).collect())
     }
 }
 
