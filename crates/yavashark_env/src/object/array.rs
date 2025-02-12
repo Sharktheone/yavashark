@@ -1,11 +1,11 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use std::cell::{Cell, RefCell};
+use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
-use yavashark_value::{Constructor, Obj};
+use yavashark_value::{BoxedObj, Constructor, Obj};
 
 use crate::object::Object;
-use crate::print::PrettyPrint;
 use crate::realm::Realm;
 use crate::{Error, ObjectHandle, Res, Result, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
@@ -27,13 +27,14 @@ impl Array {
 
         Ok(array)
     }
-    
+
     pub fn from_array_like(realm: &Realm, array_like: Value) -> Result<Self> {
         let Value::Object(array_like) = array_like else {
-            return Err(Error::ty_error(format!("Expected object, found {array_like:?}")));
+            return Err(Error::ty_error(format!(
+                "Expected object, found {array_like:?}"
+            )));
         };
-        
-        
+
         let array = Self::new(realm.intrinsics.array.clone().into());
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -112,11 +113,30 @@ impl Array {
 
         Ok(())
     }
-    
+
     pub fn as_vec(&self) -> Result<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(inner.object.array.iter().map(|(_, v)| v.value.clone()).collect())
+        Ok(inner
+            .object
+            .array
+            .iter()
+            .map(|(_, v)| v.value.clone())
+            .collect())
+    }
+    
+    pub fn push(&self, value: Value) -> ValueResult {
+        let mut inner = self.inner.try_borrow_mut()?;
+
+        let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
+
+        inner
+            .object
+            .array
+            .push((index, Variable::new(value).into()));
+        inner.length.value = Value::Number(index as f64 + 1.0);
+
+        Ok(Value::Undefined)
     }
 }
 
@@ -143,18 +163,42 @@ impl Constructor<Realm> for Array {
 
 #[properties_new(constructor(ArrayConstructor::new))]
 impl Array {
-    pub fn push(&self, value: Value) -> ValueResult {
-        let mut inner = self.inner.try_borrow_mut()?;
+    #[prop("push")]
+    fn push_js(#[this] this: Value, #[variadic] args: &[Value]) -> ValueResult {
+        let this = this.as_object()?;
 
-        let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
+        let mut idx = this.get_property(&"length".into())?.value.as_number() as usize;
 
-        inner
-            .object
-            .array
-            .push((index, Variable::new(value).into()));
-        inner.length.value = Value::Number(index as f64 + 1.0);
+        for arg in args {
+            this.define_property(idx.into(), arg.clone())?;
+            idx += 1;
+        }
 
-        Ok(Value::Undefined)
+        this.define_property("length".into(), idx.into())?;
+
+        Ok(idx.into())
+    }
+
+    fn join(#[this] this: Value, #[realm] realm: &mut Realm, separator: Value) -> ValueResult {
+        let this = this.as_object()?;
+
+        let mut buf = String::new();
+
+        let len = this.get_property(&"length".into())?.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                buf.push_str(&val.to_string(realm)?);
+            }
+
+            if idx < len - 1 {
+                buf.push_str(&separator.to_string(realm)?);
+            }
+        }
+
+        Ok(buf.into())
     }
 
     #[prop(crate::Symbol::ITERATOR)]
