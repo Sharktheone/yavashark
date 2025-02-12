@@ -186,11 +186,17 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         });
     }
 
-    let constructor = if let Some(constructor) = constructor {
-        quote! {
-            let constructor = #constructor(&obj, &func_proto)?;
-            obj.define_variable("constructor".into(), #variable::new(constructor.into()))?;
-        }
+    let (constructor, proto_define) = if let Some(constructor) = constructor {
+        (
+            quote! {
+                let constructor = #constructor(&obj, &func_proto)?;
+                obj.define_variable("constructor".into(), #variable::new(constructor.clone().into()))?;
+
+            },
+            quote! {
+                constructor.define_variable("prototype".into(), #variable::new(obj.clone().into()))?;
+            },
+        )
     } else {
         TokenStream::new()
     };
