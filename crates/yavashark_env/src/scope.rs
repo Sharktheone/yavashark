@@ -263,7 +263,7 @@ impl ScopeInternal {
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::STATE_NONE,
-            this: Value::string("global"),
+            this: realm.global.clone().into(),
             file: Some(path),
         }
     }
