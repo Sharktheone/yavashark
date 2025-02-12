@@ -8,6 +8,7 @@ use yavashark_value::{MutObj, Obj};
 
 use crate::realm::Realm;
 use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, Variable};
+use crate::object::constructor::ObjectConstructor;
 
 mod common;
 
@@ -68,6 +69,8 @@ impl Prototype {
     }
 
     pub(crate) fn initialize(&self, func: Value, this: Value) -> Res {
+        let obj_constructor = ObjectConstructor::new(this.copy(), func.copy())?;
+        
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter =
@@ -78,8 +81,7 @@ impl Prototype {
             NativeFunction::with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
         this_borrow.lookup_setter =
             NativeFunction::with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
-        this_borrow.constructor =
-            NativeFunction::with_proto("Object", object_constructor, func.copy()).into();
+        this_borrow.constructor = obj_constructor.into();
 
         this_borrow
             .constructor
