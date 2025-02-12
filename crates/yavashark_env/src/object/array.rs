@@ -141,7 +141,7 @@ impl Constructor<Realm> for Array {
     }
 }
 
-#[properties_new]
+#[properties_new(constructor(ArrayConstructor::new))]
 impl Array {
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
@@ -198,6 +198,36 @@ impl Array {
         }
 
         Ok(array.into_value())
+    }
+}
+
+#[object]
+#[derive(Debug)]
+pub struct ArrayConstructor {}
+
+impl ArrayConstructor {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(_: &Object, proto: &Value) -> Result<ObjectHandle> {
+        let mut this = Self {
+            inner: RefCell::new(MutableArrayConstructor {
+                object: MutObject::with_proto(proto.copy()),
+            }),
+        };
+
+        this.initialize(proto.copy())?;
+
+        Ok(this.into_object())
+    }
+}
+
+#[properties_new(raw)]
+impl ArrayConstructor {
+    #[prop("isArray")]
+    fn is_array(test: Value) -> bool {
+        let this: Result<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
+            yavashark_value::FromValue::from_value(test);
+
+        this.is_ok()
     }
 }
 
