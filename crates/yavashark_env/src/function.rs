@@ -59,6 +59,10 @@ impl ObjectImpl<Realm> for NativeFunction {
 
         (self.f)(args, obj, realm)
     }
+
+    fn is_function(&self) -> bool {
+        true
+    }
 }
 
 impl NativeFunction {
