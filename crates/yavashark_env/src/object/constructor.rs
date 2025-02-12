@@ -29,6 +29,7 @@ impl ObjectConstructor {
         Object::with_proto(proto.into())
     }
 
+    #[prop("defineProperty")]
     fn define_property(obj: ObjectHandle, key: Value, descriptor: ObjectHandle) -> ValueResult {
 
 
