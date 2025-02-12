@@ -9,6 +9,7 @@ use yavashark_value::{MutObj, Obj};
 use crate::realm::Realm;
 use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, Variable};
 use crate::object::constructor::ObjectConstructor;
+use crate::object::prototype::common::get_own_property_descriptor;
 
 mod common;
 
@@ -91,7 +92,7 @@ impl Prototype {
         this_borrow.has_own_property =
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
         this_borrow.get_own_property_descriptor =
-            NativeFunction::with_proto("getOwnPropertyDescriptor", has_own_property, func.copy())
+            NativeFunction::with_proto("getOwnPropertyDescriptor", get_own_property_descriptor, func.copy())
                 .into();
         this_borrow.is_prototype_of =
             NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
