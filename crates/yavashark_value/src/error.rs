@@ -140,7 +140,7 @@ impl<C: Realm> Error<C> {
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         }
     }
-
+    
     #[must_use]
     pub const fn stack(&self) -> &StackTrace {
         &self.stacktrace

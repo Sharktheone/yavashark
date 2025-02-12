@@ -131,7 +131,7 @@ fn run_input(
         ) {
             Ok(r) => r,
             Err(e) => {
-                eprintln!("Uncaught {e:?}");
+                eprintln!("Uncaught {}", e.pretty_print());
                 return;
             }
         };

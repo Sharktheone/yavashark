@@ -5,6 +5,7 @@ use crate::NativeFunction;
 use crate::Value;
 
 pub mod print;
+mod error;
 
 #[must_use]
 pub fn get_console(realm: &Realm) -> Value {
