@@ -198,7 +198,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             },
         )
     } else {
-        TokenStream::new()
+        (TokenStream::new(), TokenStream::new())
     };
 
     let init_fn = match mode {
@@ -212,6 +212,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #constructor
 
                 let obj = obj.into_object();
+                
+                #proto_define
 
 
                 Ok(obj)
