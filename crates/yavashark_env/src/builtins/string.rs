@@ -221,7 +221,7 @@ impl StringObj {
 
     #[prop("indexOf")]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn index_of(&self, search: String, from: isize) -> f64 {
+    pub fn index_of(&self, search: String, from: isize) -> isize {
         let inner = self.inner.borrow();
 
         let from = if from < 0 {
@@ -232,7 +232,7 @@ impl StringObj {
 
         inner.string.get(from..)
             .and_then(|s| s.find(&search))
-            .map_or(f64::NEG_INFINITY, |i| i as f64 + from as f64)
+            .map_or(-1, |i| i as isize + from as isize)
     }
 
     #[prop("isWellFormed")]
