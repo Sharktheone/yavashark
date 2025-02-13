@@ -14,3 +14,5 @@ pub use number::*;
 pub use regex::*;
 pub use string::*;
 pub use symbol::*;
+pub use json::*;
+

@@ -1,5 +1,5 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::{BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj};
+use crate::builtins::{BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -17,6 +17,7 @@ pub struct Intrinsics {
     pub(crate) symbol: ObjectHandle,
     pub(crate) bigint: ObjectHandle,
     pub(crate) regexp: ObjectHandle,
+    pub(crate) json: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -55,7 +56,8 @@ impl Intrinsics {
     constructor!(symbol);
     constructor!(bigint);
     constructor!(regexp);
-
+    
+    obj!(json);
     obj!(math);
 }
 
@@ -137,6 +139,11 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+        
+        let json = JSON::new(
+            obj_prototype.clone(),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -151,6 +158,7 @@ impl Intrinsics {
             symbol: symbol_prototype,
             bigint: bigint_prototype,
             regexp: regex,
+            json,
         })
     }
 }
