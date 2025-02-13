@@ -41,15 +41,18 @@ macro_rules! error {
 
 
         let constr = NativeConstructor::with_proto(stringify!($name).into(), |args, realm| {
-        let msg = args.first().map_or(Ok(String::new()), |x| x.to_string(realm))?;
+            let msg = args.first().map_or(Ok(String::new()), |x| x.to_string(realm))?;
 
-        let obj = ErrorObj::raw(Error::$create(msg), realm);
+            let obj = ErrorObj::raw(Error::$create(msg), realm);
 
-        Ok($name {
-            error: obj
-        }.into_value())
-
+            Ok($name {
+                error: obj
+            }.into_value())
         }, func.clone(), func);
+        
+        constr.define_property("prototype".into(), proto.clone().into())?;
+        constr.define_property("name".into(), stringify!($name).into())?;
+        
 
         proto.define_property("constructor".into(), constr.into())?;
 
