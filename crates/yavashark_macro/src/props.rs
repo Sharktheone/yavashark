@@ -2,7 +2,7 @@ use crate::config::Config;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::parse::Parse;
+use syn::spanned::Spanned;
 use syn::{Expr, ImplItem};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11,6 +11,13 @@ enum Mode {
     Prototype,
     /// All methods and properties will be put on the class itself => Math.random
     Raw,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Type {
+    Normal,
+    Get,
+    Set,
 }
 
 #[allow(unused)]
@@ -52,6 +59,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut variadic = None;
                 let mut mode = mode;
                 let mut has_receiver = false;
+                let mut ty = Type::Normal;
 
                 let mut args = 0;
 
@@ -86,6 +94,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     args += 1;
                 });
 
+                let mut error = None;
+
                 func.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("prototype") {
                         mode = Mode::Prototype;
@@ -104,8 +114,78 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                         return false;
                     }
 
+                    if attr.path().is_ident("get") {
+                        if ty == Type::Normal {
+                            ty = Type::Get;
+                        } else {
+                            error = Some(syn::Error::new(
+                                attr.span(),
+                                "Cannot have both get and set on the same function",
+                            ));
+                        }
+
+                        if let Err(e) = attr.meta.require_list() {
+                            error = Some(e);
+                        };
+
+                        let name = match attr.parse_args() {
+                            Ok(name) => name,
+                            Err(e) => {
+                                error = Some(e);
+                                return false;
+                            }
+                        };
+
+                        if js_name.is_some() {
+                            error = Some(syn::Error::new(
+                                attr.span(),
+                                "Cannot have both prop and get on the same function",
+                            ));
+                        }
+
+                        js_name = Some(name);
+                        return false;
+                    }
+
+                    if attr.path().is_ident("set") {
+                        if ty == Type::Normal {
+                            ty = Type::Set;
+                        } else {
+                            error = Some(syn::Error::new(
+                                attr.span(),
+                                "Cannot have both get and set on the same function",
+                            ));
+                        }
+
+                        if let Err(e) = attr.meta.require_list() {
+                            error = Some(e);
+                        };
+
+                        let name = match attr.parse_args() {
+                            Ok(name) => name,
+                            Err(e) => {
+                                error = Some(e);
+                                return false;
+                            }
+                        };
+
+                        if js_name.is_some() {
+                            error = Some(syn::Error::new(
+                                attr.span(),
+                                "Cannot have both prop and get on the same function",
+                            ));
+                        }
+
+                        js_name = Some(name);
+                        return false;
+                    }
+
                     true
                 });
+
+                if let Some(error) = error {
+                    return error.to_compile_error().into();
+                }
 
                 props.push(Prop::Method(Method {
                     name: func.sig.ident.clone(),
@@ -116,6 +196,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     variadic,
                     mode,
                     has_receiver,
+                    ty,
                 }))
             }
 
@@ -164,12 +245,18 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut init = TokenStream::new();
 
     for prop in props {
-        let (prop, name, js_name) = match prop {
-            Prop::Method(method) => (method.init_tokens(&config), method.name, method.js_name),
+        let (prop_tokens, name, js_name, ty) = match prop {
+            Prop::Method(method) => (
+                method.init_tokens(&config),
+                method.name,
+                method.js_name,
+                method.ty,
+            ),
             Prop::Constant(constant) => (
                 constant.init_tokens(&config),
                 constant.name,
                 constant.js_name,
+                Type::Normal,
             ),
         };
 
@@ -177,13 +264,36 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
 
-        init.extend(quote! {
-            {
-                let prop = #prop;
+        match ty {
+            Type::Normal => {
+                init.extend(quote! {
+                    {
+                        let prop = #prop_tokens;
 
-                obj.define_variable(#name.into(), #variable::new(prop.into()))?;
+                        obj.define_variable(#name.into(), #variable::new(prop.into()))?;
+                    }
+                });
             }
-        });
+            Type::Get => {
+                init.extend(quote! {
+                    {
+                        let prop = #prop_tokens;
+
+                        obj.define_getter(#name.into(), prop.into())?;
+                    }
+                });
+            }
+            
+            Type::Set => {
+                init.extend(quote! {
+                    {
+                        let prop = #prop_tokens;
+
+                        obj.define_setter(#name.into(), prop.into())?;
+                    }
+                });
+            }
+        }
     }
 
     let (constructor, proto_define) = if let Some(constructor) = constructor {
@@ -212,7 +322,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #constructor
 
                 let obj = obj.into_object();
-                
+
                 #proto_define
 
 
@@ -253,6 +363,7 @@ struct Method {
     #[allow(unused)]
     mode: Mode,
     has_receiver: bool,
+    ty: Type,
 }
 
 #[allow(unused)]
