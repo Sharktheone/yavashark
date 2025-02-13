@@ -2,6 +2,7 @@ use crate::realm::Realm;
 use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Result, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
+use yavashark_value::ErrorKind;
 
 #[must_use]
 pub fn get_error(realm: &Realm) -> Value {
@@ -33,9 +34,18 @@ impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
     pub fn new(error: Error, realm: &Realm) -> ObjectHandle {
+        let proto = match &error.kind {
+            ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),
+            ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
+            ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
+            ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
+            _ => realm.intrinsics.error.clone(),
+        };
+
+
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                object: MutObject::with_proto(proto.into()),
                 error,
             }),
         };
@@ -57,14 +67,23 @@ impl ErrorObj {
 
     #[must_use]
     pub fn raw(error: Error, realm: &Realm) -> Self {
+        let proto = match &error.kind {
+            ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),
+            ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
+            ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
+            ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
+            _ => realm.intrinsics.error.clone(),
+        };
+        
+        
         Self {
             inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                object: MutObject::with_proto(proto.into()),
                 error,
             }),
         }
     }
-
+    
     #[must_use]
     pub fn raw_from(message: String, realm: &Realm) -> Self {
         Self {

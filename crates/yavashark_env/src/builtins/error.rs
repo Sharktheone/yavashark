@@ -8,29 +8,6 @@ use crate::{Realm, Value, Object, NativeConstructor, Error, Result, ObjectHandle
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-    #[derive(Debug)]
-    pub struct $name {
-    error: ErrorObj
-    }
-
-    impl yavashark_value::ObjectImpl<Realm> for $name {
-        type Inner = MutableErrorObj;
-
-        fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
-            RefMut::map(self.error.inner.borrow_mut(), |x| &mut x.object)
-
-        }
-
-        fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
-            self.error.inner.borrow()
-
-        }
-
-        fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
-            self.error.inner.borrow_mut()
-        }
-    }
-
     pub fn $get(error: Value, func: Value) -> Result<ObjectHandle> {
         let proto = Object::with_proto(error);
 
@@ -45,19 +22,19 @@ macro_rules! error {
 
             let obj = ErrorObj::raw(Error::$create(msg), realm);
 
-            Ok($name {
-                error: obj
-            }.into_value())
+            Ok(obj.into_value())
         }, func.clone(), func);
-        
+
         constr.define_property("prototype".into(), proto.clone().into())?;
         constr.define_property("name".into(), stringify!($name).into())?;
-        
+
 
         proto.define_property("constructor".into(), constr.into())?;
 
         Ok(proto.into())
     }
+        
+        
     };
 }
 

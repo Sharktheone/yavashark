@@ -8,7 +8,7 @@ use crate::Interpreter;
 impl Interpreter {
     pub fn run_return(realm: &mut Realm, stmt: &ReturnStmt, scope: &mut Scope) -> RuntimeResult {
         if !scope.state_is_returnable()? {
-            return Err(ControlFlow::error_syntax("Illegal return statement"));
+            return Err(ControlFlow::error_syn("Illegal return statement"));
         }
 
         let value = if let Some(arg) = &stmt.arg {

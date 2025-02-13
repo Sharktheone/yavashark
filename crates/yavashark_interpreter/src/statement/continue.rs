@@ -11,7 +11,7 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         if !scope.state_is_continuable()? {
-            return Err(ControlFlow::error_syntax("Illegal continue statement"));
+            return Err(ControlFlow::error_syn("Illegal continue statement"));
         }
 
         if let Some(label) = &stmt.label {

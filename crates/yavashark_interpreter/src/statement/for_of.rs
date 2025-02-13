@@ -16,11 +16,11 @@ impl Interpreter {
         };
 
         if v.decls.is_empty() {
-            ControlFlow::error_syntax("ForInStmt left is empty");
+            ControlFlow::error_syn("ForInStmt left is empty");
         }
 
         if v.decls.len() > 1 {
-            ControlFlow::error_syntax(
+            ControlFlow::error_syn(
                 "Invalid left-hand side in for-in loop: Must have a single binding.",
             );
         }
@@ -29,7 +29,7 @@ impl Interpreter {
             .name
             .clone()
             .ident()
-            .ok_or_else(|| ControlFlow::error_syntax("ForInStmt left is not an identifier"))?
+            .ok_or_else(|| ControlFlow::error_syn("ForInStmt left is not an identifier"))?
             .sym
             .to_string();
 

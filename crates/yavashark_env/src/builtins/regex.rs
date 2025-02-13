@@ -45,7 +45,7 @@ impl RegExp {
             .ignore_whitespace(flags.contains('x'))
             .unicode(flags.contains('u'))
             .build()
-            .map_err(|e| ControlFlow::error(e.to_string()))?;
+            .map_err(|e| ControlFlow::error_syntax(e.to_string()))?;
 
         let global = flags.contains('g');
 

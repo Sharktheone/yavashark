@@ -51,9 +51,15 @@ impl ControlFlow {
         Self::Error(Error::reference_error(e))
     }
     #[must_use]
-    pub fn error_syntax(e: &str) -> Self {
+    pub fn error_syn(e: &str) -> Self {
         Self::Error(Error::syn(e))
     }
+
+    #[must_use]
+    pub const fn error_syntax(e: String) -> Self {
+        Self::Error(Error::syn_error(e))
+    }
+    
     #[must_use]
     pub const fn error_type(e: String) -> Self {
         Self::Error(Error::ty_error(e))
