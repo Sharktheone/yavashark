@@ -11,7 +11,7 @@ use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
 
-mod common;
+pub mod common;
 
 pub trait Proto: Obj<Realm> {
     fn as_any(&mut self) -> &mut dyn Any;
