@@ -56,6 +56,16 @@ impl ErrorObj {
     }
 
     #[must_use]
+    pub fn raw(error: Error, realm: &Realm) -> Self {
+        Self {
+            inner: RefCell::new(MutableErrorObj {
+                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                error,
+            }),
+        }
+    }
+
+    #[must_use]
     pub fn raw_from(message: String, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableErrorObj {

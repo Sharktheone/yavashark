@@ -1,5 +1,5 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::{BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
+use crate::builtins::{get_range_error, get_reference_error, get_syntax_error, get_type_error, BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -18,6 +18,10 @@ pub struct Intrinsics {
     pub(crate) bigint: ObjectHandle,
     pub(crate) regexp: ObjectHandle,
     pub(crate) json: ObjectHandle,
+    pub(crate) type_error: ObjectHandle,
+    pub(crate) range_error: ObjectHandle,
+    pub(crate) reference_error: ObjectHandle,
+    pub(crate) syntax_error: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -56,6 +60,11 @@ impl Intrinsics {
     constructor!(symbol);
     constructor!(bigint);
     constructor!(regexp);
+    constructor!(type_error);
+    constructor!(range_error);
+    constructor!(reference_error);
+    constructor!(syntax_error);
+    
     
     obj!(json);
     obj!(math);
@@ -142,8 +151,15 @@ impl Intrinsics {
         
         let json = JSON::new(
             obj_prototype.clone(),
-            func_prototype.clone().into(),
+            func_prototype.clone(),
         )?;
+        
+        let type_error = get_type_error(error_prototype.clone().into(), func_prototype.clone().into())?;
+        let range_error = get_range_error(error_prototype.clone().into(), func_prototype.clone().into())?;
+        let reference_error = get_reference_error(error_prototype.clone().into(), func_prototype.clone().into())?;
+        let syntax_error = get_syntax_error(error_prototype.clone().into(), func_prototype.clone().into())?;
+        
+        
 
         Ok(Self {
             obj: obj_prototype,
@@ -159,6 +175,10 @@ impl Intrinsics {
             bigint: bigint_prototype,
             regexp: regex,
             json,
+            type_error,
+            range_error,
+            reference_error,
+            syntax_error,
         })
     }
 }

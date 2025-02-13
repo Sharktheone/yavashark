@@ -25,6 +25,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("BigInt".into(), realm.intrinsics.bigint_constructor())?;
     obj.define_variable("RegExp".into(), realm.intrinsics.regexp_constructor())?;
     obj.define_variable("JSON".into(), realm.intrinsics.json_obj())?;
+    obj.define_variable("TypeError".into(), realm.intrinsics.type_error_constructor())?;
+    obj.define_variable("RangeError".into(), realm.intrinsics.range_error_constructor())?;
+    obj.define_variable("ReferenceError".into(), realm.intrinsics.reference_error_constructor())?;
+    obj.define_variable("SyntaxError".into(), realm.intrinsics.syntax_error_constructor())?;
 
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(handle, realm)?;

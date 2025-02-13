@@ -91,6 +91,22 @@ impl<C: Realm> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
+    
+    #[must_use]
+    pub fn range(error: &str) -> Self {
+        Self {
+            kind: ErrorKind::Range(error.to_string()),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+    
+    #[must_use]
+    pub const fn range_error(error: String) -> Self {
+        Self {
+            kind: ErrorKind::Range(error),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
 
     #[must_use]
     pub const fn throw(val: Value<C>) -> Self {
