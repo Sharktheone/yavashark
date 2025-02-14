@@ -122,8 +122,6 @@ impl ObjectConstructor {
                 continue;
             }
             
-            let value = value.resolve(obj.clone().into(), realm)?;
-            
             let desc = common::get_own_property_descriptor(vec![key.clone()], obj.clone().into(), realm)?;
             
             props.push((key, desc));
@@ -139,8 +137,6 @@ impl ObjectConstructor {
         let mut props = Vec::with_capacity(keys.len());
         
         for key in keys {
-            let value = obj.get_property(&key)?;
-            
             props.push(key);
         }
         
@@ -157,8 +153,6 @@ impl ObjectConstructor {
             if !matches!(key, Value::Symbol(_)) {
                 continue;
             }
-            
-            let value = obj.get_property(&key)?;
             
             // if !value.attributes.is_enumerable() { // TODO: not sure
             //     continue;
@@ -182,7 +176,7 @@ impl ObjectConstructor {
     }
     
     #[prop("groupBy")]
-    fn group_by(items: ObjectHandle, callback: Value, #[realm] realm: &mut Realm) -> ValueResult {
+    fn group_by(_items: ObjectHandle, _callback: Value, #[realm] realm: &mut Realm) -> ValueResult {
         //TODO
         
         Ok(Object::new(realm).into())

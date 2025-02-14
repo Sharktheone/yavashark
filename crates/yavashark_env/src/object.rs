@@ -74,7 +74,9 @@ impl Object {
             .map_err(|_| Error::new("Failed to borrow object"))
     }
 
-    pub fn from_mut(inner: MutObject) -> Self {
+    
+    #[must_use]
+    pub const fn from_mut(inner: MutObject) -> Self {
         Self {
             inner: RefCell::new(inner),
         }

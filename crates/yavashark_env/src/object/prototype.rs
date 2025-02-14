@@ -1,6 +1,6 @@
 use common::{
     define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
-    object_constructor, property_is_enumerable, to_locale_string, to_string, value_of,
+    property_is_enumerable, to_locale_string, to_string, value_of,
 };
 use std::any::Any;
 use std::cell::RefCell;

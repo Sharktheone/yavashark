@@ -1,4 +1,3 @@
-use std::ptr::copy_nonoverlapping;
 use yavashark_value::Value;
 use crate::error::get_error;
 use crate::realm::Realm;

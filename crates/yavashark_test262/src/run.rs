@@ -5,7 +5,6 @@ use std::path::{Path, PathBuf};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
-use yavashark_value::ErrorKind;
 
 pub fn run_file(file: PathBuf) -> Result<String, Error> {
     let (mut realm, mut scope) = setup_global(file.clone())?;

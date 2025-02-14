@@ -40,10 +40,10 @@ impl JSON {
             serde_json::Value::Object(o) => {
                 let mut obj = MutObject::new(realm);
 
-                for (k, v) in o.into_iter() {
+                for (k, v) in o {
                     let val = Self::value_from_serde(v, realm)?;
 
-                    obj.define_property(k.into(), val)?
+                    obj.define_property(k.into(), val)?;
                 }
 
                 Object::from_mut(obj).into_value()
