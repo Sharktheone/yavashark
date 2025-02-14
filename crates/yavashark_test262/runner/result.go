@@ -19,8 +19,8 @@ type Result struct {
 }
 
 type CIResult struct {
-	Status status.CIStatus `json:"status"`
-	Path   string          `json:"path"`
+	Status status.CIStatus `json:"s"`
+	Path   string          `json:"p"`
 }
 
 func writeResults(results []Result) error {
