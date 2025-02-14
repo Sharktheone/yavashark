@@ -11,8 +11,8 @@ use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
 
 pub mod array;
-mod prototype;
 mod constructor;
+mod prototype;
 
 #[derive(Debug)]
 pub struct Object {
@@ -74,7 +74,6 @@ impl Object {
             .map_err(|_| Error::new("Failed to borrow object"))
     }
 
-    
     #[must_use]
     pub const fn from_mut(inner: MutObject) -> Self {
         Self {

@@ -91,7 +91,7 @@ impl<C: Realm> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     #[must_use]
     pub fn range(error: &str) -> Self {
         Self {
@@ -99,7 +99,7 @@ impl<C: Realm> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     #[must_use]
     pub const fn range_error(error: String) -> Self {
         Self {
@@ -156,7 +156,7 @@ impl<C: Realm> Error<C> {
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
         }
     }
-    
+
     #[must_use]
     pub const fn stack(&self) -> &StackTrace {
         &self.stacktrace

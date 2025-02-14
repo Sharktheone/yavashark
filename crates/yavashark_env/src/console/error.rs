@@ -1,7 +1,7 @@
+use crate::print::PrettyPrint;
+use crate::Error;
 use std::fmt::Write;
 use yavashark_value::ErrorKind;
-use crate::Error;
-use crate::print::PrettyPrint;
 
 impl PrettyPrint for Error {
     fn pretty_print_key(&self) -> String {
@@ -10,7 +10,7 @@ impl PrettyPrint for Error {
 
     fn pretty_print_circular(&self, not: &mut Vec<usize>) -> String {
         let msg = error_message_pretty_circular(self, not);
-        
+
         let mut buf = String::new();
 
         if msg.is_empty() {
@@ -19,13 +19,12 @@ impl PrettyPrint for Error {
             _ = write!(buf, "{}: {}\n{}", self.name(), msg, self.stacktrace);
         }
 
-
         buf
     }
 
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String {
         let msg = error_message_pretty_circular_nl(self, not);
-        
+
         let mut buf = String::new();
 
         if msg.is_empty() {
@@ -37,7 +36,6 @@ impl PrettyPrint for Error {
         buf
     }
 }
-
 
 fn error_message_pretty_circular(error: &Error, not: &mut Vec<usize>) -> String {
     match &error.kind {

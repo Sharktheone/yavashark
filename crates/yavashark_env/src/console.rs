@@ -4,8 +4,8 @@ use crate::realm::Realm;
 use crate::NativeFunction;
 use crate::Value;
 
-pub mod print;
 mod error;
+pub mod print;
 
 #[must_use]
 pub fn get_console(realm: &Realm) -> Value {

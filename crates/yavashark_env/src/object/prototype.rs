@@ -6,10 +6,10 @@ use std::any::Any;
 use std::cell::RefCell;
 use yavashark_value::{MutObj, Obj};
 
-use crate::realm::Realm;
-use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, Variable};
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
+use crate::realm::Realm;
+use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, Variable};
 
 pub mod common;
 
@@ -71,7 +71,7 @@ impl Prototype {
 
     pub(crate) fn initialize(&self, func: Value, this: Value) -> Res {
         let obj_constructor = ObjectConstructor::new(this.copy(), func.copy())?;
-        
+
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter =
@@ -91,9 +91,12 @@ impl Prototype {
 
         this_borrow.has_own_property =
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
-        this_borrow.get_own_property_descriptor =
-            NativeFunction::with_proto("getOwnPropertyDescriptor", get_own_property_descriptor, func.copy())
-                .into();
+        this_borrow.get_own_property_descriptor = NativeFunction::with_proto(
+            "getOwnPropertyDescriptor",
+            get_own_property_descriptor,
+            func.copy(),
+        )
+        .into();
         this_borrow.is_prototype_of =
             NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
         this_borrow.property_is_enumerable =

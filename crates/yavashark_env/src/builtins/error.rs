@@ -1,38 +1,38 @@
-use yavashark_value::Obj;
 use crate::error::ErrorObj;
-use crate::{Value, Object, NativeConstructor, Error, Result, ObjectHandle};
-
-
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Result, Value};
+use yavashark_value::Obj;
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-    pub fn $get(error: Value, func: Value) -> Result<ObjectHandle> {
-        let proto = Object::with_proto(error);
+        pub fn $get(error: Value, func: Value) -> Result<ObjectHandle> {
+            let proto = Object::with_proto(error);
 
-        proto.define_property("name".into(), stringify!($name).into())?;
-        proto.define_property("message".into(), "".into())?;
-        proto.define_property("stack".into(), "".into())?;
+            proto.define_property("name".into(), stringify!($name).into())?;
+            proto.define_property("message".into(), "".into())?;
+            proto.define_property("stack".into(), "".into())?;
 
+            let constr = NativeConstructor::with_proto(
+                stringify!($name).into(),
+                |args, realm| {
+                    let msg = args
+                        .first()
+                        .map_or(Ok(String::new()), |x| x.to_string(realm))?;
 
+                    let obj = ErrorObj::raw(Error::$create(msg), realm);
 
-        let constr = NativeConstructor::with_proto(stringify!($name).into(), |args, realm| {
-            let msg = args.first().map_or(Ok(String::new()), |x| x.to_string(realm))?;
+                    Ok(obj.into_value())
+                },
+                func.clone(),
+                func,
+            );
 
-            let obj = ErrorObj::raw(Error::$create(msg), realm);
+            constr.define_property("prototype".into(), proto.clone().into())?;
+            constr.define_property("name".into(), stringify!($name).into())?;
 
-            Ok(obj.into_value())
-        }, func.clone(), func);
+            proto.define_property("constructor".into(), constr.into())?;
 
-        constr.define_property("prototype".into(), proto.clone().into())?;
-        constr.define_property("name".into(), stringify!($name).into())?;
-
-
-        proto.define_property("constructor".into(), constr.into())?;
-
-        Ok(proto.into())
-    }
-        
-        
+            Ok(proto.into())
+        }
     };
 }
 

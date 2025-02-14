@@ -283,7 +283,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     }
                 });
             }
-            
+
             Type::Set => {
                 init.extend(quote! {
                     {

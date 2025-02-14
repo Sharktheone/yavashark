@@ -230,7 +230,9 @@ impl StringObj {
             from as usize
         };
 
-        inner.string.get(from..)
+        inner
+            .string
+            .get(from..)
             .and_then(|s| s.find(&search))
             .map_or(-1, |i| i as isize + from as isize)
     }

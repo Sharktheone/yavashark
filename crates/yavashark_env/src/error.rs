@@ -42,7 +42,6 @@ impl ErrorObj {
             _ => realm.intrinsics.error.clone(),
         };
 
-
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(proto.into()),
@@ -74,8 +73,7 @@ impl ErrorObj {
             ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
             _ => realm.intrinsics.error.clone(),
         };
-        
-        
+
         Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(proto.into()),
@@ -83,7 +81,7 @@ impl ErrorObj {
             }),
         }
     }
-    
+
     #[must_use]
     pub fn raw_from(message: String, realm: &Realm) -> Self {
         Self {

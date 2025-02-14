@@ -1,5 +1,8 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::{get_range_error, get_reference_error, get_syntax_error, get_type_error, BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
+use crate::builtins::{
+    get_range_error, get_reference_error, get_syntax_error, get_type_error, BigIntObj, BooleanObj,
+    Math, NumberObj, RegExp, StringObj, SymbolObj, JSON,
+};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -64,8 +67,7 @@ impl Intrinsics {
     constructor!(range_error);
     constructor!(reference_error);
     constructor!(syntax_error);
-    
-    
+
     obj!(json);
     obj!(math);
 }
@@ -148,18 +150,25 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
-        let json = JSON::new(
-            obj_prototype.clone(),
-            func_prototype.clone(),
+
+        let json = JSON::new(obj_prototype.clone(), func_prototype.clone())?;
+
+        let type_error = get_type_error(
+            error_prototype.clone().into(),
+            func_prototype.clone().into(),
         )?;
-        
-        let type_error = get_type_error(error_prototype.clone().into(), func_prototype.clone().into())?;
-        let range_error = get_range_error(error_prototype.clone().into(), func_prototype.clone().into())?;
-        let reference_error = get_reference_error(error_prototype.clone().into(), func_prototype.clone().into())?;
-        let syntax_error = get_syntax_error(error_prototype.clone().into(), func_prototype.clone().into())?;
-        
-        
+        let range_error = get_range_error(
+            error_prototype.clone().into(),
+            func_prototype.clone().into(),
+        )?;
+        let reference_error = get_reference_error(
+            error_prototype.clone().into(),
+            func_prototype.clone().into(),
+        )?;
+        let syntax_error = get_syntax_error(
+            error_prototype.clone().into(),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,

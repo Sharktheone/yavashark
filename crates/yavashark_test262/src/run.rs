@@ -25,6 +25,5 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope) -> Resul
 
     scope.set_path(file)?;
 
-    Interpreter::run_in(&stmt, realm, scope)
-        .and_then(|v| v.to_string(realm))
+    Interpreter::run_in(&stmt, realm, scope).and_then(|v| v.to_string(realm))
 }

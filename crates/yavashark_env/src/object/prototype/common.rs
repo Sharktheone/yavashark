@@ -79,7 +79,11 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
     Ok(obj.contains_key(key)?.into())
 }
 
-pub fn get_own_property_descriptor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+pub fn get_own_property_descriptor(
+    args: Vec<Value>,
+    this: Value,
+    realm: &mut Realm,
+) -> ValueResult {
     if args.len() < 2 {
         return Ok(Value::Undefined);
     }

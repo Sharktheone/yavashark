@@ -3,12 +3,12 @@
 use std::cell::RefCell;
 use yavashark_value::{MutObj, Obj};
 
+use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
 use crate::{
     Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, ValueResult, Variable,
 };
-use crate::array::Array;
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -61,18 +61,17 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.is_empty() {
         return Err(Error::new("Not enough arguments"));
     }
-    
+
     let new_this = &args[0];
-    
+
     let args = if let Some(arr) = args.get(1) {
         let array = Array::from_array_like(realm, arr.copy())?;
-        
+
         array.as_vec()?
-        
     } else {
         vec![]
     };
-    
+
     this.call(realm, args, new_this.copy())
 }
 

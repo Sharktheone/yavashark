@@ -1,14 +1,13 @@
+use crate::array::Array;
+use crate::object::common;
+use crate::{MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::{MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult, Variable};
-use crate::array::Array;
-use crate::object::common;
 
 #[object]
 #[derive(Debug)]
 pub struct ObjectConstructor {}
-
 
 impl ObjectConstructor {
     #[allow(clippy::new_ret_no_self)]
@@ -33,134 +32,153 @@ impl ObjectConstructor {
 
     #[prop("defineProperty")]
     fn define_property(obj: ObjectHandle, key: Value, descriptor: ObjectHandle) -> ValueResult {
-        let value = descriptor.get_property(&"value".into()).map(|v| v.value).unwrap_or(Value::Undefined);
+        let value = descriptor
+            .get_property(&"value".into())
+            .map(|v| v.value)
+            .unwrap_or(Value::Undefined);
 
-        let writable = descriptor.get_property(&"writable".into()).map(|v| v.value.is_truthy()).unwrap_or(false);
-        let enumerable = descriptor.get_property(&"enumerable".into()).map(|v| v.value.is_truthy()).unwrap_or(false);
-        let configurable = descriptor.get_property(&"configurable".into()).map(|v| v.value.is_truthy()).unwrap_or(false);
-        
-        
+        let writable = descriptor
+            .get_property(&"writable".into())
+            .map(|v| v.value.is_truthy())
+            .unwrap_or(false);
+        let enumerable = descriptor
+            .get_property(&"enumerable".into())
+            .map(|v| v.value.is_truthy())
+            .unwrap_or(false);
+        let configurable = descriptor
+            .get_property(&"configurable".into())
+            .map(|v| v.value.is_truthy())
+            .unwrap_or(false);
+
         let var = Variable::new_with_attributes(value, writable, enumerable, configurable);
-        
+
         obj.define_variable(key, var)?;
-        
+
         Ok(obj.into())
     }
-    
-    fn assign(target: ObjectHandle, #[variadic] sources: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
+
+    fn assign(
+        target: ObjectHandle,
+        #[variadic] sources: &[Value],
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         for source in sources {
             let source = source.as_object()?;
-            
+
             for key in source.keys()? {
                 let value = source.get_property(&key)?;
-                
+
                 if !value.attributes.is_enumerable() {
                     continue;
                 }
-                
+
                 let value = value.resolve(source.clone().into(), realm)?;
-                
+
                 target.define_property(key, value)?;
             }
         }
-        
+
         Ok(target.into())
     }
-    
+
     #[prop("defineProperties")]
     fn define_properties(obj: ObjectHandle, props: ObjectHandle) -> ValueResult {
         for (key, value) in props.properties()? {
             let descriptor = value.as_object()?;
-            
+
             Self::define_property(obj.clone(), key, descriptor.clone())?;
         }
-        
+
         Ok(obj.into())
     }
-    
+
     #[prop("entries")]
     fn entries(obj: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let keys = obj.keys()?;
-        
+
         let mut props = Vec::with_capacity(keys.len());
-        
+
         for key in keys {
             let value = obj.get_property(&key)?;
-            
+
             if !value.attributes.is_enumerable() {
                 continue;
             }
-            
+
             let value = value.resolve(obj.clone().into(), realm)?;
-            
+
             let arr = vec![key, value];
-            
+
             let arr = Array::with_elements(realm, arr)?;
-            
+
             props.push(arr.into_value());
         }
-        
+
         Ok(Array::with_elements(realm, props)?.into_value())
     }
 
-    
     #[prop("getOwnPropertyDescriptor")]
-    fn get_own_property_descriptor(#[this] this: Value, #[variadic] args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
+    fn get_own_property_descriptor(
+        #[this] this: Value,
+        #[variadic] args: &[Value],
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         common::get_own_property_descriptor(args.to_vec(), this, realm)
     }
-    
+
     #[prop("getOwnPropertyDescriptors")]
     fn get_own_property_descriptors(obj: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let keys = obj.keys()?;
-        
+
         let mut props = Vec::with_capacity(keys.len());
-        
+
         for key in keys {
             let value = obj.get_property(&key)?;
-            
+
             if !value.attributes.is_enumerable() {
                 continue;
             }
-            
-            let desc = common::get_own_property_descriptor(vec![key.clone()], obj.clone().into(), realm)?;
-            
+
+            let desc =
+                common::get_own_property_descriptor(vec![key.clone()], obj.clone().into(), realm)?;
+
             props.push((key, desc));
         }
-        
+
         Ok(Object::from_values(props, realm)?.into())
     }
-    
+
     #[prop("getOwnPropertyNames")]
     fn get_own_property_names(obj: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
-        
+
         let mut props = Vec::with_capacity(keys.len());
-        
+
         for key in keys {
             props.push(key);
         }
-        
+
         Ok(Array::with_elements(realm, props)?.into_value())
     }
-    
+
     #[prop("getOwnPropertySymbols")]
     fn get_own_property_symbols(obj: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
-        
+
         let mut props = Vec::with_capacity(keys.len());
-        
+
         for key in keys {
             if !matches!(key, Value::Symbol(_)) {
                 continue;
             }
-            
+
             // if !value.attributes.is_enumerable() { // TODO: not sure
             //     continue;
             // }
-            
+
             props.push(key);
         }
-        
+
         Ok(Array::with_elements(realm, props)?.into_value())
     }
 
@@ -174,58 +192,58 @@ impl ObjectConstructor {
 
         prop.resolve(val, realm)
     }
-    
+
     #[prop("groupBy")]
     fn group_by(_items: ObjectHandle, _callback: Value, #[realm] realm: &mut Realm) -> ValueResult {
         //TODO
-        
+
         Ok(Object::new(realm).into())
     }
-    
+
     #[prop("hasOwn")]
     fn has_own(obj: ObjectHandle, key: Value) -> ValueResult {
         Ok(obj.contains_key(&key)?.into())
     }
-    
+
     #[prop("is")]
     fn is(val1: Value, val2: Value) -> ValueResult {
         //TODO: handle things like NaN, -0, etc. BigInt & Numbers
-        
+
         Ok((val1 == val2).into())
     }
-    
+
     #[prop("keys")]
     fn keys(obj: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
-        
+
         Ok(Array::with_elements(realm, keys)?.into_value())
     }
-    
+
     #[prop("values")]
     fn values(obj: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let keys = obj.keys()?;
-        
+
         let mut props = Vec::with_capacity(keys.len());
-        
+
         for key in keys {
             let value = obj.get_property(&key)?;
-            
+
             if !value.attributes.is_enumerable() {
                 continue;
             }
-            
+
             let value = value.resolve(obj.clone().into(), realm)?;
-            
+
             props.push(value);
         }
-        
+
         Ok(Array::with_elements(realm, props)?.into_value())
     }
-    
+
     #[prop("setPrototypeOf")]
     fn set_prototype_of(obj: ObjectHandle, proto: Value) -> ValueResult {
         obj.define_property("__proto__".into(), proto)?;
-        
+
         Ok(obj.into())
     }
 }

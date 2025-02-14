@@ -124,7 +124,7 @@ impl Array {
             .map(|(_, v)| v.value.clone())
             .collect())
     }
-    
+
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
 

@@ -59,7 +59,7 @@ impl ControlFlow {
     pub const fn error_syntax(e: String) -> Self {
         Self::Error(Error::syn_error(e))
     }
-    
+
     #[must_use]
     pub const fn error_type(e: String) -> Self {
         Self::Error(Error::ty_error(e))
