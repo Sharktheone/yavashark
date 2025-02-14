@@ -1,4 +1,5 @@
-use crate::{Error, Realm, Result, Value, ValueResult};
+use crate::{Error, Realm, Result, Symbol, Value, ValueResult};
+use num_bigint::BigInt;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
 
@@ -44,5 +45,97 @@ impl FromValueOutput for Value {
     type Output = Self;
     fn from_value_out(value: Value) -> Result<Self::Output> {
         Ok(value)
+    }
+}
+
+impl FromValueOutput for () {
+    type Output = ();
+    fn from_value_out(_value: Value) -> Result<Self::Output> {
+        Ok(())
+    }
+}
+
+impl FromValueOutput for bool {
+    type Output = bool;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::Boolean(b) => Ok(b),
+            _ => Err(Error::ty_error(format!("Expected boolean, found {:?}", value))),
+        }
+    }
+}
+
+
+impl FromValueOutput for String {
+    type Output = String;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::String(s) => Ok(s),
+            _ => Err(Error::ty_error(format!("Expected string, found {:?}", value))),
+        }
+    }
+}
+
+impl FromValueOutput for Symbol {
+    type Output = Symbol;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::Symbol(s) => Ok(s),
+            _ => Err(Error::ty_error(format!("Expected symbol, found {:?}", value))),
+        }
+    }
+}
+
+
+impl FromValueOutput for BigInt {
+    type Output = BigInt;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::BigInt(n) => Ok(n),
+            _ => Err(Error::ty_error(format!("Expected bigint, found {:?}", value))),
+        }
+    }
+}
+
+
+impl<T: FromValueOutput> FromValueOutput for Option<T> {
+    type Output = Option<T::Output>;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::Null | Value::Undefined => Ok(None),
+            _ => Ok(Some(T::from_value_out(value)?)),
+        }
+    }
+}
+
+
+
+macro_rules! impl_from_value_output {
+    ($($t:ty),*) => {
+        $(
+            impl FromValueOutput for $t {
+                type Output = $t;
+                
+                fn from_value_out(value: Value) -> Result<Self::Output> {
+                    match value {
+                        Value::Number(n) => Ok(n as $t),
+                        _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+                    }
+                }
+            }
+        )*
+    };
+    () => {};
+}
+
+impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
+
+
+
+
+impl<T: FromValueOutput> FromValueOutput for Vec<T> {
+    type Output = Vec<T>;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        todo!()
     }
 }
