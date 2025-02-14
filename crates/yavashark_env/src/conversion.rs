@@ -60,7 +60,7 @@ impl FromValueOutput for bool {
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::Boolean(b) => Ok(b),
-            _ => Err(Error::ty_error(format!("Expected boolean, found {:?}", value))),
+            _ => Err(Error::ty_error(format!("Expected boolean, found {value:?}"))),
         }
     }
 }
@@ -71,7 +71,7 @@ impl FromValueOutput for String {
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::String(s) => Ok(s),
-            _ => Err(Error::ty_error(format!("Expected string, found {:?}", value))),
+            _ => Err(Error::ty_error(format!("Expected string, found {value:?}"))),
         }
     }
 }
@@ -81,7 +81,7 @@ impl FromValueOutput for Symbol {
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::Symbol(s) => Ok(s),
-            _ => Err(Error::ty_error(format!("Expected symbol, found {:?}", value))),
+            _ => Err(Error::ty_error(format!("Expected symbol, found {value:?}"))),
         }
     }
 }
@@ -92,22 +92,10 @@ impl FromValueOutput for BigInt {
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::BigInt(n) => Ok(n),
-            _ => Err(Error::ty_error(format!("Expected bigint, found {:?}", value))),
+            _ => Err(Error::ty_error(format!("Expected bigint, found {value:?}"))),
         }
     }
 }
-
-
-impl<T: FromValueOutput> FromValueOutput for Option<T> {
-    type Output = Option<T::Output>;
-    fn from_value_out(value: Value) -> Result<Self::Output> {
-        match value {
-            Value::Null | Value::Undefined => Ok(None),
-            _ => Ok(Some(T::from_value_out(value)?)),
-        }
-    }
-}
-
 
 
 macro_rules! impl_from_value_output {
@@ -115,11 +103,11 @@ macro_rules! impl_from_value_output {
         $(
             impl FromValueOutput for $t {
                 type Output = $t;
-                
+
                 fn from_value_out(value: Value) -> Result<Self::Output> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
-                        _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
+                        _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
                     }
                 }
             }
