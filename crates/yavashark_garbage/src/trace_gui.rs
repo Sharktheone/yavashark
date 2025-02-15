@@ -39,7 +39,7 @@ impl App {
             return Vec::new();
         }
 
-        let mut graph = VisualGraph::new(Orientation::TopToBottom);
+        let mut graph = VisualGraph::new(Orientation::LeftToRight);
 
         let mut nodes = HashMap::new();
 
@@ -47,7 +47,7 @@ impl App {
             let element = Element::create(
                 ShapeKind::Circle("GcBox".to_string()),
                 StyleAttr::simple(),
-                Orientation::TopToBottom,
+                Orientation::LeftToRight,
                 Point::new(10.0, 10.0),
             );
 
