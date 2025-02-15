@@ -19,7 +19,7 @@ pub(crate) mod spin_lock;
 
 pub mod collectable;
 pub(crate) mod tagged_ptr;
-#[cfg(feature = "easy_debug")]
+#[cfg(any(feature = "easy_debug", feature = "trace"))]
 mod trace;
 #[cfg(feature = "trace")]
 mod trace_gui;
