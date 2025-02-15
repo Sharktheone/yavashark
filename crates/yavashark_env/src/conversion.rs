@@ -2,6 +2,7 @@ use crate::{Error, Realm, Result, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
+use crate::utils::ValueIterator;
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self) -> ValueResult;
@@ -118,12 +119,3 @@ macro_rules! impl_from_value_output {
 
 impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
 
-
-
-
-impl<T: FromValueOutput> FromValueOutput for Vec<T> {
-    type Output = Vec<T>;
-    fn from_value_out(value: Value) -> Result<Self::Output> {
-        todo!()
-    }
-}

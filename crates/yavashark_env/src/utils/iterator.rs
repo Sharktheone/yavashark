@@ -5,7 +5,7 @@ pub struct ValueIterator(Value);
 
 
 impl ValueIterator {
-    fn new(val: Value, realm: &mut Realm) -> Result<Self> {
+    pub fn new(val: Value, realm: &mut Realm) -> Result<Self> {
         let iter = val.call_method(&Symbol::ITERATOR.into(), realm, Vec::new())?;
         
         Ok(Self(iter))
@@ -13,7 +13,7 @@ impl ValueIterator {
     
     
     
-    fn next(&self, realm: &mut Realm) -> Result<Option<Value>> {
+    pub fn next(&self, realm: &mut Realm) -> Result<Option<Value>> {
         let res = self.0.call_method(&"next".into(), realm, Vec::new())?;
         let this = res.clone();
         
