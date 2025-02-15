@@ -29,7 +29,7 @@ impl App {
         }
     }
 
-    pub fn layout(&mut self) -> Vec<u8> {
+    pub fn layout(&self) -> Vec<u8> {
         let mut trace = self.tracer.lock().unwrap();
         if let Some(ref svg_content) = trace.svg_content {
             return svg_content.as_bytes().to_vec();
@@ -77,12 +77,20 @@ impl App {
 }
 
 impl eframe::App for App {
-    fn update(&mut self, realm: &Realm, _frame: &mut Frame) {
-        CentralPanel::default().show(realm, |ui| {
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+        CentralPanel::default().show(ctx, |ui| {
             ui.heading("Garbage Collector Trace");
+            
+            let layout = self.layout();
+            
+            if ui.button("Save").clicked() {
+                _ = std::fs::write("graph.svg", &layout);
+            }
 
-            let img = egui::Image::from_bytes("bytes://graph.svg", self.layout())
+            let img = egui::Image::from_bytes("bytes://graph.svg", layout)
                 .fit_to_original_size(1.0);
+            
+            
 
             let (id, rect) = ui.allocate_space(ui.available_size());
             let response = ui.interact(rect, id, egui::Sense::click_and_drag());
@@ -99,12 +107,12 @@ impl eframe::App for App {
             let transform =
                 TSTransform::from_translation(ui.min_rect().left_top().to_vec2()) * self.transform;
 
-            if let Some(pointer) = ui.realm().input(|i| i.pointer.hover_pos()) {
+            if let Some(pointer) = ui.ctx().input(|i| i.pointer.hover_pos()) {
                 // Note: doesn't catch zooming / panning if a button in this PanZoom container is hovered.
                 if response.hovered() {
                     let pointer_in_layer = transform.inverse() * pointer;
-                    let zoom_delta = ui.realm().input(egui::InputState::zoom_delta);
-                    let pan_delta = ui.realm().input(|i| i.smooth_scroll_delta);
+                    let zoom_delta = ui.ctx().input(egui::InputState::zoom_delta);
+                    let pan_delta = ui.ctx().input(|i| i.smooth_scroll_delta);
 
                     // Zoom in on pointer:
                     self.transform = self.transform
@@ -118,14 +126,14 @@ impl eframe::App for App {
             }
 
             let id = Area::new(Id::new("graph"))
-                .show(realm, |ui| {
+                .show(ctx, |ui| {
                     ui.set_clip_rect(self.transform.inverse() * rect);
                     ui.add(img);
                 })
                 .response
                 .layer_id;
 
-            ui.realm().set_transform_layer(id, transform);
+            ui.ctx().set_transform_layer(id, transform);
         });
     }
 }

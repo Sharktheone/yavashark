@@ -7,7 +7,7 @@ use std::sync::Mutex;
 use std::thread;
 
 use lazy_static::lazy_static;
-use log::warn;
+use log::{error, warn};
 use rand::random;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -71,8 +71,8 @@ impl Tracer {
                 "GC Trace",
                 options,
                 Box::new(move |cc| {
-                    egui_extras::install_image_loaders(&cc.egui_realm);
-                    Box::new(App::new(tracer2))
+                    egui_extras::install_image_loaders(&cc.egui_ctx);
+                    Ok(Box::new(App::new(tracer2)))
                 }),
             );
 
