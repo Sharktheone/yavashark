@@ -10,10 +10,10 @@ yavashark_value = { path = "../yavashark_value", features = ["display_object"] }
 yavashark_interpreter = { path = "../yavashark_interpreter" }
 
 
-swc_common = "5.0.1"
-swc_ecma_parser = "7.0.1"
-swc_ecma_ast = "5.1.0"
-yaml-rust2 = "0.9.0"
+swc_common = "6.1.1"
+swc_ecma_parser = "8.0.2"
+swc_ecma_ast = "6.1.0"
+yaml-rust2 = "0.10.0"
 bitflags = "2.6.0"
 
 
