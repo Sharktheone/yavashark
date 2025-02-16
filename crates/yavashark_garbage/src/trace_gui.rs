@@ -80,17 +80,15 @@ impl eframe::App for App {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         CentralPanel::default().show(ctx, |ui| {
             ui.heading("Garbage Collector Trace");
-            
+
             let layout = self.layout();
-            
+
             if ui.button("Save").clicked() {
                 _ = std::fs::write("graph.svg", &layout);
             }
 
-            let img = egui::Image::from_bytes("bytes://graph.svg", layout)
-                .fit_to_original_size(1.0);
-            
-            
+            let img =
+                egui::Image::from_bytes("bytes://graph.svg", layout).fit_to_original_size(1.0);
 
             let (id, rect) = ui.allocate_space(ui.available_size());
             let response = ui.interact(rect, id, egui::Sense::click_and_drag());

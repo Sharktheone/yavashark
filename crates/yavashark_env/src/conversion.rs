@@ -1,8 +1,8 @@
+use crate::utils::ValueIterator;
 use crate::{Error, Realm, Result, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
-use crate::utils::ValueIterator;
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self) -> ValueResult;
@@ -61,11 +61,12 @@ impl FromValueOutput for bool {
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::Boolean(b) => Ok(b),
-            _ => Err(Error::ty_error(format!("Expected boolean, found {value:?}"))),
+            _ => Err(Error::ty_error(format!(
+                "Expected boolean, found {value:?}"
+            ))),
         }
     }
 }
-
 
 impl FromValueOutput for String {
     type Output = String;
@@ -87,7 +88,6 @@ impl FromValueOutput for Symbol {
     }
 }
 
-
 impl FromValueOutput for BigInt {
     type Output = BigInt;
     fn from_value_out(value: Value) -> Result<Self::Output> {
@@ -97,7 +97,6 @@ impl FromValueOutput for BigInt {
         }
     }
 }
-
 
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
@@ -118,4 +117,3 @@ macro_rules! impl_from_value_output {
 }
 
 impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
-

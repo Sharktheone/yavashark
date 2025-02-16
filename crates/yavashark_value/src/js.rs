@@ -197,7 +197,7 @@ impl<C: Realm> Value<C> {
 
         Ok(obj)
     }
-    
+
     pub fn to_object(self) -> Result<Object<C>, Error<C>> {
         match self {
             Self::Object(o) => Ok(o),
