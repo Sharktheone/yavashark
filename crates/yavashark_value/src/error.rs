@@ -143,6 +143,8 @@ impl<C: Realm> Error<C> {
             ErrorKind::Syntax(_) => "SyntaxError",
             ErrorKind::Error(_) => "Error",
             ErrorKind::Throw(_) => "Uncaught",
+            ErrorKind::EvalError(_) => "EvalError",
+            ErrorKind::URIError(_) => "URIError",
         }
     }
 
@@ -156,6 +158,8 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(realm)?,
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+            ErrorKind::EvalError(msg) => msg.clone(),
+            ErrorKind::URIError(msg) => msg.clone(),
         })
     }
 
@@ -170,6 +174,8 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => format!("{val}"),
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+            ErrorKind::EvalError(msg) => msg.clone(),
+            ErrorKind::URIError(msg) => msg.clone(),
         }
     }
 
