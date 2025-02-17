@@ -61,7 +61,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let mut has_receiver = false;
                 let mut ty = Type::Normal;
 
-                let mut args = 0;
+                let mut args = Vec::new();
 
                 func.sig.inputs.iter_mut().for_each(|arg| {
                     let pat = match arg {
@@ -74,24 +74,24 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                     pat.attrs.retain_mut(|attr| {
                         if attr.path().is_ident("this") {
-                            this = Some(args);
+                            this = Some(args.len());
                             return false;
                         }
 
                         if attr.path().is_ident("realm") {
-                            realm = Some(args);
+                            realm = Some(args.len());
                             return false;
                         }
 
                         if attr.path().is_ident("variadic") {
-                            variadic = Some(args);
+                            variadic = Some(args.len());
                             return false;
                         }
 
                         true
                     });
 
-                    args += 1;
+                    args.push((*pat.ty).clone());
                 });
 
                 let mut error = None;
@@ -356,7 +356,7 @@ enum Prop {
 struct Method {
     name: syn::Ident,
     js_name: Option<Expr>,
-    args: usize,
+    args: Vec<syn::Type>,
     this: Option<usize>,
     realm: Option<usize>,
     variadic: Option<usize>,
@@ -379,43 +379,39 @@ impl Method {
 
         let name = &self.name;
         let error = &config.error;
+        let extractor = &config.extractor;
+        let extract_value = &config.extract_value;
 
-        let mut arg_prepare = TokenStream::new();
+        let mut arg_prepare = quote! {
+            let mut extractor = #extractor::new(&mut args);
+        };
         let mut call_args = TokenStream::new();
 
-        let mut offset = 0;
-
-        for i in 0..self.args {
+        for (i, ty) in self.args.iter().enumerate() {
             let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
 
             if Some(i) == self.this {
                 arg_prepare.extend(quote! {
                     let #argname = this.copy();
                 });
-
-                offset += 1;
             } else if Some(i) == self.realm {
                 arg_prepare.extend(quote! {
                     let #argname = realm;
                 });
-
-                offset += 1;
-            } else if Some(i) == self.variadic {
-                let from = i - offset;
-
-                arg_prepare.extend(quote! {
-                    let #argname = args.get(#from..).unwrap_or_default();
-                });
             } else {
-                let from = i - offset;
-
                 arg_prepare.extend(quote! {
-                    let #argname = FromValue::from_value(args.get(#from).ok_or_else(|| #error::new("Missing argument"))?.copy())?;
+                    let #argname = #extract_value::<#ty>::extract(&mut extractor)?;
                 });
             }
+            
+            let refs = if matches!(ty, syn::Type::Reference(_)) && Some(i) != self.realm {
+                quote! {&}
+            } else {
+                TokenStream::new()
+            };
 
             call_args.extend(quote! {
-                #argname,
+                #refs #argname,
             });
         }
 
@@ -444,7 +440,7 @@ impl Method {
             .unwrap_or_else(|| quote! {stringify!(#name)});
 
         quote! {
-            #native_function::with_proto(stringify!(#name), |args, mut this, realm| {
+            #native_function::with_proto(stringify!(#name), |mut args, mut this, realm| {
                 #arg_prepare
                 #prepare_receiver
                 #call.try_into_value()

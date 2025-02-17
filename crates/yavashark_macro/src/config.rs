@@ -18,6 +18,8 @@ pub struct Config {
     pub try_into_value: Path,
     pub mut_object: Path,
     pub mut_obj: Path,
+    pub extractor: Path,
+    pub extract_value: Path,
 }
 
 impl Config {
@@ -95,6 +97,22 @@ impl Config {
         mut_obj
             .segments
             .push(PathSegment::from(Ident::new("MutObj", span)));
+        
+        let mut extractor = env_path.clone();
+        extractor
+            .segments
+            .push(PathSegment::from(Ident::new("conversion", span)));
+        extractor
+            .segments
+            .push(PathSegment::from(Ident::new("Extractor", span)));
+        
+        let mut extract_value = env_path.clone();
+        extract_value
+            .segments
+            .push(PathSegment::from(Ident::new("conversion", span)));
+        extract_value
+            .segments
+            .push(PathSegment::from(Ident::new("ExtractValue", span)));
 
         Self {
             env_path,
@@ -112,6 +130,8 @@ impl Config {
             try_into_value,
             mut_object,
             mut_obj,
+            extractor,
+            extract_value,
         }
     }
 }
