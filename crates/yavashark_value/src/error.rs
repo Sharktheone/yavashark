@@ -59,6 +59,22 @@ impl<C: Realm> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
+    
+    #[must_use]
+    pub const fn eval_error(error: String) -> Self {
+        Self {
+            kind: ErrorKind::EvalError(error),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+    
+    #[must_use]
+    pub const fn uri_error(error: String) -> Self {
+        Self {
+            kind: ErrorKind::URIError(error),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
 
     #[must_use]
     pub const fn unknown(error: Option<String>) -> Self {
@@ -206,6 +222,8 @@ pub enum ErrorKind<C: Realm> {
     Internal(String),
     Runtime(String),
     Syntax(String),
+    EvalError(String),
+    URIError(String),
     Throw(Value<C>),
     Error(Option<String>),
 }

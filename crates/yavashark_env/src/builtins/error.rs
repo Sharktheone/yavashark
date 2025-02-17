@@ -40,3 +40,5 @@ error!(TypeError, ty_error, get_type_error);
 error!(ReferenceError, reference_error, get_reference_error);
 error!(RangeError, range_error, get_range_error);
 error!(SyntaxError, syn_error, get_syntax_error);
+error!(EvalError, eval_error, get_eval_error);
+error!(URIError, uri_error, get_uri_error);

@@ -42,6 +42,14 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "SyntaxError".into(),
         realm.intrinsics.syntax_error_constructor(),
     )?;
+    obj.define_variable(
+        "EvalError".into(),
+        realm.intrinsics.eval_error_constructor(),
+    )?;
+    obj.define_variable(
+        "URIError".into(),
+        realm.intrinsics.uri_error_constructor()
+    )?;
 
     macro_rules! copy_from {
         ($prop:ident, $name:ident) => {
@@ -56,7 +64,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
                     .into(),
             )?;
         };
-        
+
         (c, $prop:ident, $name:ident) => {
             obj.define_variable(
                 stringify!($name).into(),

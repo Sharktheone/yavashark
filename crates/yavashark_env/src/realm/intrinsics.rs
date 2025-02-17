@@ -1,8 +1,5 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::{
-    get_range_error, get_reference_error, get_syntax_error, get_type_error, BigIntObj, BooleanObj,
-    Math, NumberObj, RegExp, StringObj, SymbolObj, JSON,
-};
+use crate::builtins::{get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_type_error, get_uri_error, BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -25,6 +22,8 @@ pub struct Intrinsics {
     pub(crate) range_error: ObjectHandle,
     pub(crate) reference_error: ObjectHandle,
     pub(crate) syntax_error: ObjectHandle,
+    pub(crate) eval_error: ObjectHandle,
+    pub(crate) uri_error: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -67,6 +66,8 @@ impl Intrinsics {
     constructor!(range_error);
     constructor!(reference_error);
     constructor!(syntax_error);
+    constructor!(eval_error);
+    constructor!(uri_error);
 
     obj!(json);
     obj!(math);
@@ -169,6 +170,16 @@ impl Intrinsics {
             error_prototype.clone().into(),
             func_prototype.clone().into(),
         )?;
+        
+        let eval_error = get_eval_error(
+            error_prototype.clone().into(),
+            func_prototype.clone().into(),
+        )?;
+        
+        let uri_error = get_uri_error(
+            error_prototype.clone().into(),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -188,6 +199,8 @@ impl Intrinsics {
             range_error,
             reference_error,
             syntax_error,
+            eval_error,
+            uri_error,
         })
     }
 }
