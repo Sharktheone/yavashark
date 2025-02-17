@@ -1,5 +1,6 @@
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
+use std::cmp;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
 
@@ -221,7 +222,8 @@ impl StringObj {
 
     #[prop("indexOf")]
     #[allow(clippy::needless_pass_by_value)]
-    pub fn index_of(&self, search: String, from: isize) -> isize {
+    pub fn index_of(&self, search: String, from: Option<isize>) -> isize {
+        let from = from.unwrap_or(0);
         let inner = self.inner.borrow();
 
         let from = if from < 0 {
@@ -280,7 +282,7 @@ impl StringObj {
 
     //TODO: match, matchAll
 
-    pub fn substr(&self, start: isize) -> ValueResult {
+    pub fn substr(&self, start: isize, len: Option<isize>) -> ValueResult {
         let inner = self.inner.borrow();
 
         // negative numbers are counted from the end of the string
@@ -289,8 +291,12 @@ impl StringObj {
         } else {
             start as usize
         };
+        
+        let end = len.map_or(inner.string.len(), |len| start + len as usize);
+        
+        let end = cmp::min(start, end);
 
-        let string = inner.string.get(start..);
+        let string = inner.string.get(start..end);
 
         Ok(string.unwrap_or_default().into())
     }
