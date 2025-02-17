@@ -294,7 +294,7 @@ impl StringObj {
         
         let end = len.map_or(inner.string.len(), |len| start + len as usize);
         
-        let end = cmp::min(start, end);
+        let end = cmp::min(end, inner.string.len());
 
         let string = inner.string.get(start..end);
 
