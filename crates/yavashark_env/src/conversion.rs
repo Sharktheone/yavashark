@@ -1,6 +1,6 @@
 use std::mem;
 use std::slice::IterMut;
-use crate::{Error, Realm, Result, Symbol, Value, ValueResult};
+use crate::{Error, ObjectHandle, Realm, Result, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
@@ -40,6 +40,17 @@ impl<O: Obj<Realm>> FromValueOutput for O {
 
     fn from_value_out(value: Value) -> Result<Self::Output> {
         FromValue::from_value(value)
+    }
+}
+
+impl FromValueOutput for ObjectHandle {
+    type Output = Self;
+
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::Object(obj) => Ok(obj),
+            _ => Err(Error::ty_error(format!("Expected object, found {value:?}"))),
+        }
     }
 }
 
@@ -123,8 +134,8 @@ pub struct Extractor<'a> {
 }
 
 impl<'a> Extractor<'a> {
-    fn new(values: &'a mut [Value]) -> Self {
-        Self { 
+    pub fn new(values: &'a mut [Value]) -> Self {
+        Self {
             values: values.iter_mut()
         }
     }
@@ -163,6 +174,19 @@ impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
 }
 
 impl<T: FromValueOutput> ExtractValue<Vec<T>> for Extractor<'_> {
+    type Output = Vec<T::Output>;
+
+    fn extract(&mut self) -> Result<Self::Output> {
+        let mut vec = Vec::new();
+        for val in &mut self.values {
+            let val = mem::replace(val, Value::Undefined);
+            vec.push(T::from_value_out(val)?);
+        }
+
+        Ok(vec)
+    }
+}
+impl<T: FromValueOutput> ExtractValue<&'_ [T]> for Extractor<'_> {
     type Output = Vec<T::Output>;
 
     fn extract(&mut self) -> Result<Self::Output> {
