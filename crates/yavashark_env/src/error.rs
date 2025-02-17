@@ -37,12 +37,15 @@ pub struct ErrorObj {
 
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
+    #[must_use] 
     pub fn new(error: Error, realm: &Realm) -> ObjectHandle {
         let proto = match &error.kind {
             ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),
             ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
             ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
             ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
+            ErrorKind::EvalError(_) => realm.intrinsics.eval_error.clone(),
+            ErrorKind::URIError(_) => realm.intrinsics.uri_error.clone(),
             _ => realm.intrinsics.error.clone(),
         };
 
@@ -75,6 +78,8 @@ impl ErrorObj {
             ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
             ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
             ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
+            ErrorKind::EvalError(_) => realm.intrinsics.eval_error.clone(),
+            ErrorKind::URIError(_) => realm.intrinsics.uri_error.clone(),
             _ => realm.intrinsics.error.clone(),
         };
 
