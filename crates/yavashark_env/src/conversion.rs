@@ -1,4 +1,5 @@
-use crate::utils::ValueIterator;
+use std::mem;
+use std::slice::IterMut;
 use crate::{Error, Realm, Result, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use yavashark_garbage::OwningGcGuard;
@@ -97,7 +98,6 @@ impl FromValueOutput for BigInt {
         }
     }
 }
-
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
         $(
@@ -117,3 +117,61 @@ macro_rules! impl_from_value_output {
 }
 
 impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
+
+pub struct Extractor<'a> {
+    values: IterMut<'a, Value>,
+}
+
+impl<'a> Extractor<'a> {
+    fn new(values: &'a mut [Value]) -> Self {
+        Self { 
+            values: values.iter_mut()
+        }
+    }
+}
+
+pub trait ExtractValue<T>: Sized {
+    type Output;
+    fn extract(&mut self) -> Result<Self::Output>;
+}
+
+impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
+    type Output = T::Output;
+    fn extract(&mut self) -> Result<Self::Output> {
+        let val = self
+            .values
+            .next()
+            .ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
+        let val = mem::replace(val, Value::Undefined);
+
+        T::from_value_out(val)
+    }
+}
+
+impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
+    type Output = Option<T::Output>;
+
+    fn extract(&mut self) -> Result<Self::Output> {
+        let Some(val) = self.values.next() else {
+            return Ok(None);
+        };
+
+        let val = mem::replace(val, Value::Undefined);
+
+        Ok(Some(T::from_value_out(val)?))
+    }
+}
+
+impl<T: FromValueOutput> ExtractValue<Vec<T>> for Extractor<'_> {
+    type Output = Vec<T::Output>;
+
+    fn extract(&mut self) -> Result<Self::Output> {
+        let mut vec = Vec::new();
+        for val in &mut self.values {
+            let val = mem::replace(val, Value::Undefined);
+            vec.push(T::from_value_out(val)?);
+        }
+
+        Ok(vec)
+    }
+}
