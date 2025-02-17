@@ -2,11 +2,10 @@ use crate::realm::Realm;
 use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Result, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
-use yavashark_value::ErrorKind;
+use yavashark_value::{ErrorKind, Obj};
 
-#[must_use]
-pub fn get_error(realm: &Realm) -> Value {
-    NativeConstructor::special(
+pub fn get_error(realm: &Realm) -> ValueResult {
+    let constr = NativeConstructor::special(
         "error".to_string(),
         |args, realm| {
             let message = args
@@ -18,8 +17,14 @@ pub fn get_error(realm: &Realm) -> Value {
             Ok(obj)
         },
         realm,
-    )
-    .into()
+    );
+    
+    realm.intrinsics.error.define_property("constructor".into(), constr.clone().into())?;
+    
+    constr.define_property("prototype".into(), realm.intrinsics.error.clone().into())?;
+    
+    
+    Ok(constr.into())
 }
 
 #[object(to_string)]
@@ -32,7 +37,6 @@ pub struct ErrorObj {
 
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
-    #[must_use]
     pub fn new(error: Error, realm: &Realm) -> ObjectHandle {
         let proto = match &error.kind {
             ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),
