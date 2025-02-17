@@ -56,12 +56,27 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
                     .into(),
             )?;
         };
+        
+        (c, $prop:ident, $name:ident) => {
+            obj.define_variable(
+                stringify!($name).into(),
+                realm
+                    .intrinsics
+                    .$prop()
+                    .value
+                    .as_object()?
+                    .resolve_property_no_get_set(&stringify!($name).into())?
+                    .map(|x| x.value)
+                    .unwrap_or(Value::Undefined)
+                    .into(),
+            )?;
+        };
     }
 
-    copy_from!(math, isNaN);
-    copy_from!(math, isFinite);
-    copy_from!(math, parseInt);
-    copy_from!(math, parseFloat);
+    copy_from!(c, number_constructor, isNaN);
+    copy_from!(c, number_constructor, isFinite);
+    copy_from!(c, number_constructor, parseInt);
+    copy_from!(c, number_constructor, parseFloat);
 
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(handle, realm)?;
