@@ -1082,9 +1082,17 @@ impl Array {
    
 }
 
-#[object]
+#[object(constructor)]
 #[derive(Debug)]
 pub struct ArrayConstructor {}
+
+impl Constructor<Realm> for ArrayConstructor {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        let array = Array::with_elements(realm, args)?;
+
+        Ok(array.into_value())
+    }
+}
 
 impl ArrayConstructor {
     #[allow(clippy::new_ret_no_self)]
