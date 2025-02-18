@@ -5,6 +5,7 @@ use yavashark_value::{BoxedObj, Constructor, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
+use crate::utils::ValueIterator;
 use crate::{Error, ObjectHandle, Res, Result, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 
@@ -159,10 +160,446 @@ impl Constructor<Realm> for Array {
     }
 }
 
-
-
+fn convert_index(idx: isize, len: usize) -> usize {
+    if idx < 0 {
+        (len as isize + idx).max(0) as usize
+    } else {
+        idx as usize
+    }
+}
 #[properties_new(constructor(ArrayConstructor::new))]
 impl Array {
+    fn at(#[this] this: &Value, idx: usize) -> ValueResult {
+        let this = this.as_object()?;
+
+        let (_, val) = this.get_array_or_done(idx)?;
+
+        Ok(val.map_or(Value::Undefined, |v| v))
+    }
+
+    fn concat(#[this] this: Value, #[realm] realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        let array = Self::from_realm(realm);
+
+        let mut push_to = |val: Value| -> Res {
+            if let Value::Object(obj) = &val {
+                if obj.contains_key(&"length".into())? {
+                    let iter = ValueIterator::new(&val, realm)?;
+
+                    while let Some(val) = iter.next(realm)? {
+                        array.push(val)?;
+                    }
+                    return Ok(());
+                }
+            }
+
+            array.push(val)?;
+
+            Ok(())
+        };
+
+        push_to(this)?;
+
+        for arg in args {
+            push_to(arg)?;
+        }
+
+        Ok(array.into_value())
+    }
+
+    #[prop("copyWithin")]
+    fn copy_within(
+        #[this] this_val: Value,
+        target: isize,
+        start: isize,
+        end: Option<isize>,
+    ) -> ValueResult {
+        let this = this_val.as_object()?;
+
+        let len = this.get_property(&"length".into())?.value.as_number() as usize;
+
+        let target = convert_index(target, len);
+        let start = convert_index(start, len);
+        let end = end.map_or(len, |end| convert_index(end, len));
+
+        for (count, idx) in (start..end).enumerate() {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                this.define_property((target + count).into(), val)?;
+            }
+        }
+
+        Ok(this_val)
+    }
+
+    fn entries(#[this] this: Value, #[realm] realm: &Realm) -> ValueResult {
+        let this = this.to_object()?;
+
+        let iter = ArrayIterator {
+            inner: RefCell::new(MutableArrayIterator {
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+            }),
+            array: this,
+            next: Cell::new(0),
+            done: Cell::new(false),
+        };
+
+        Ok(iter.into_value())
+    }
+
+    fn every(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val, idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if x.is_falsey() {
+                    return Ok(Value::Boolean(false));
+                }
+            }
+        }
+
+        Ok(Value::Boolean(true))
+    }
+
+    fn fill(
+        #[this] this_val: Value,
+        value: &Value,
+        start: Option<isize>,
+        end: Option<isize>,
+    ) -> ValueResult {
+        let this = this_val.as_object()?;
+
+        let len = this.get_property(&"length".into())?.value.as_number() as usize;
+
+        let start = start.map_or(0, |start| convert_index(start, len));
+        let end = end.map_or(len, |end| convert_index(end, len));
+
+        for idx in start..end {
+            this.define_property(idx.into(), value.clone())?;
+        }
+
+        Ok(this_val)
+    }
+
+    fn filter(
+        #[this] this: &Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+    ) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        let array = Self::from_realm(realm);
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if x.is_truthy() {
+                    array.push(val)?;
+                }
+            }
+        }
+
+        Ok(array.into_value())
+    }
+
+    fn find(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if x.is_truthy() {
+                    return Ok(val);
+                }
+            }
+        }
+
+        Ok(Value::Undefined)
+    }
+
+    fn find_index(
+        #[this] this: &Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+    ) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if x.is_truthy() {
+                    return Ok(idx.into());
+                }
+            }
+        }
+
+        Ok(Value::Number(-1.0))
+    }
+
+    #[prop("findLast")]
+    fn find_last(
+        #[this] this: &Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+    ) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in (0..len).rev() {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if x.is_truthy() {
+                    return Ok(val);
+                }
+            }
+        }
+
+        Ok(Value::Undefined)
+    }
+
+    #[prop("findLastIndex")]
+    fn find_last_index(
+        #[this] this: &Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+    ) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in (0..len).rev() {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if x.is_truthy() {
+                    return Ok(idx.into());
+                }
+            }
+        }
+
+        Ok(Value::Number(-1.0))
+    }
+
+    fn flat(#[this] this: &Value, #[realm] realm: &mut Realm, depth: Option<isize>) -> ValueResult {
+        fn flatten(array: &Array, realm: &mut Realm, val: Value, depth: isize) -> Res {
+            if depth == 0 {
+                array.push(val)?;
+                return Ok(());
+            }
+
+            if let Value::Object(obj) = &val {
+                if obj.contains_key(&"length".into())? {
+                    let iter = ValueIterator::new(&val, realm)?;
+
+                    while let Some(val) = iter.next(realm)? {
+                        flatten(array, realm, val, depth - 1)?;
+                    }
+                    return Ok(());
+                }
+            }
+
+            array.push(val)?;
+
+            Ok(())
+        }
+        let this = this.as_object()?;
+
+        let array = Self::from_realm(realm);
+
+        let depth = depth.unwrap_or(1);
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                flatten(&array, realm, val, depth)?;
+            }
+        }
+
+        Ok(array.into_value())
+    }
+    
+    #[prop("flatMap")]
+    fn flat_map(
+        #[this] this: &Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+    ) -> ValueResult {
+        let this = this.as_object()?;
+
+        let array = Self::from_realm(realm);
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                let x = func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+
+                if let Value::Object(obj) = &x {
+                    if obj.contains_key(&"length".into())? {
+                        let iter = ValueIterator::new(&x, realm)?;
+
+                        while let Some(val) = iter.next(realm)? {
+                            array.push(val)?;
+                        }
+                        continue;
+                    }
+                }
+
+                array.push(x)?;
+            }
+        }
+
+        Ok(array.into_value())
+    }
+    
+    #[prop("forEach")]
+    fn for_each(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                func.call(
+                    realm,
+                    vec![val.clone(), idx.into(), this.clone().into()],
+                    realm.global.clone().into(),
+                )?;
+            }
+        }
+
+        Ok(Value::Undefined)
+    }
+    
+    fn includes(#[this] this: &Value, search_element: &Value, from_index: Option<isize>) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        let from_index = from_index.unwrap_or(0);
+
+        let from_index = convert_index(from_index, len);
+
+        for idx in from_index..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                if val.eq(search_element) {
+                    return Ok(Value::Boolean(true));
+                }
+            }
+        }
+
+        Ok(Value::Boolean(false))
+    }
+    
+    #[prop("indexOf")]
+    fn index_of(#[this] this: &Value, search_element: &Value, from_index: Option<isize>) -> ValueResult {
+        let this = this.as_object()?;
+
+        let len = this.get_property(&"length".into())?;
+
+        let len = len.value.as_number() as usize;
+
+        let from_index = from_index.unwrap_or(0);
+
+        let from_index = convert_index(from_index, len);
+
+        for idx in from_index..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                if val.eq(search_element) {
+                    return Ok(idx.into());
+                }
+            }
+        }
+
+        Ok(Value::Number(-1.0))
+    }
+
     #[prop("push")]
     fn push_js(#[this] this: &Value, #[variadic] args: &[Value]) -> ValueResult {
         let this = this.as_object()?;
@@ -272,6 +709,12 @@ impl ArrayConstructor {
             yavashark_value::FromValue::from_value(test);
 
         this.is_ok()
+    }
+
+    fn of(#[realm] realm: &Realm, args: Vec<Value>) -> ValueResult {
+        let array = Array::with_elements(realm, args)?;
+
+        Ok(array.into_value())
     }
 }
 
