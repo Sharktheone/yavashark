@@ -25,9 +25,8 @@ impl Fs {
 
 #[properties_new(raw)]
 impl Fs {
-    #[allow(clippy::needless_pass_by_value)]
-    fn open(path: String) -> Result<String> {
-        let contents = fs::read_to_string(&path).map_err(|e| Error::new_error(e.to_string()))?;
+    fn open(path: &str) -> Result<String> {
+        let contents = fs::read_to_string(path).map_err(|e| Error::new_error(e.to_string()))?;
 
         Ok(contents)
     }

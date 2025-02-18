@@ -1,5 +1,3 @@
-#![allow(clippy::needless_pass_by_value)]
-
 use std::cell::{Cell, RefCell};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
@@ -166,7 +164,7 @@ impl Constructor<Realm> for Array {
 #[properties_new(constructor(ArrayConstructor::new))]
 impl Array {
     #[prop("push")]
-    fn push_js(#[this] this: Value, #[variadic] args: &[Value]) -> ValueResult {
+    fn push_js(#[this] this: &Value, #[variadic] args: &[Value]) -> ValueResult {
         let this = this.as_object()?;
 
         let mut idx = this.get_property(&"length".into())?.value.as_number() as usize;
@@ -181,7 +179,7 @@ impl Array {
         Ok(idx.into())
     }
 
-    fn join(#[this] this: Value, #[realm] realm: &mut Realm, separator: Value) -> ValueResult {
+    fn join(#[this] this: &Value, #[realm] realm: &mut Realm, separator: &Value) -> ValueResult {
         let this = this.as_object()?;
 
         let mut buf = String::new();
@@ -224,7 +222,7 @@ impl Array {
         Ok(iter.into())
     }
 
-    fn map(#[this] this: Value, #[realm] realm: &mut Realm, func: ObjectHandle) -> ValueResult {
+    fn map(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;

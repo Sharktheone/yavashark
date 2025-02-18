@@ -1,6 +1,8 @@
 mod conf;
 mod repl;
 mod simplerepl;
+#[cfg(target_arch = "wasm32")]
+mod wasm;
 
 use crate::repl::{old_repl, repl};
 use std::path::PathBuf;

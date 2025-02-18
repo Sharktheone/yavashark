@@ -193,7 +193,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     args,
                     this,
                     realm,
-                    variadic,
                     mode,
                     has_receiver,
                     ty,
@@ -359,7 +358,6 @@ struct Method {
     args: Vec<syn::Type>,
     this: Option<usize>,
     realm: Option<usize>,
-    variadic: Option<usize>,
     #[allow(unused)]
     mode: Mode,
     has_receiver: bool,
@@ -378,7 +376,6 @@ impl Method {
         let native_function = &config.native_function;
 
         let name = &self.name;
-        let error = &config.error;
         let extractor = &config.extractor;
         let extract_value = &config.extract_value;
 

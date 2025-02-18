@@ -1,9 +1,9 @@
-use crate::{ObjectHandle, Realm, Result, Symbol, Value};
+use crate::{Realm, Result, Symbol, Value};
 
 pub struct ValueIterator(Value);
 
 impl ValueIterator {
-    pub fn new(val: Value, realm: &mut Realm) -> Result<Self> {
+    pub fn new(val: &Value, realm: &mut Realm) -> Result<Self> {
         let iter = val.call_method(&Symbol::ITERATOR.into(), realm, Vec::new())?;
 
         Ok(Self(iter))

@@ -54,8 +54,26 @@ impl FromValueOutput for ObjectHandle {
     }
 }
 
+impl FromValueOutput for &ObjectHandle {
+    type Output = ObjectHandle;
+
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::Object(obj) => Ok(obj),
+            _ => Err(Error::ty_error(format!("Expected object, found {value:?}"))),
+        }
+    }
+}
+
 impl FromValueOutput for Value {
     type Output = Self;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        Ok(value)
+    }
+}
+
+impl FromValueOutput for &Value {
+    type Output = Value;
     fn from_value_out(value: Value) -> Result<Self::Output> {
         Ok(value)
     }
@@ -69,7 +87,7 @@ impl FromValueOutput for () {
 }
 
 impl FromValueOutput for bool {
-    type Output = bool;
+    type Output = Self;
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::Boolean(b) => Ok(b),
@@ -81,6 +99,16 @@ impl FromValueOutput for bool {
 }
 
 impl FromValueOutput for String {
+    type Output = Self;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        match value {
+            Value::String(s) => Ok(s),
+            _ => Err(Error::ty_error(format!("Expected string, found {value:?}"))),
+        }
+    }
+}
+
+impl FromValueOutput for &str {
     type Output = String;
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
@@ -91,7 +119,7 @@ impl FromValueOutput for String {
 }
 
 impl FromValueOutput for Symbol {
-    type Output = Symbol;
+    type Output = Self;
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::Symbol(s) => Ok(s),
@@ -101,7 +129,7 @@ impl FromValueOutput for Symbol {
 }
 
 impl FromValueOutput for BigInt {
-    type Output = BigInt;
+    type Output = Self;
     fn from_value_out(value: Value) -> Result<Self::Output> {
         match value {
             Value::BigInt(n) => Ok(n),
@@ -109,6 +137,8 @@ impl FromValueOutput for BigInt {
         }
     }
 }
+
+
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
         $(

@@ -26,6 +26,16 @@ rustyline = { version = "15.0.0", features = ["derive"] }
 rustyline-derive = "0.11.0"
 
 
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.73"
+console_error_panic_hook = "0.1.7"
+console_log = "1.0.0"
+js-sys = "0.3.77"
+swc_ecma_ast = "6.1.0"
+
+
+
 [profile.release]
 lto = "fat"
 opt-level = 3

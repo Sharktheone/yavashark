@@ -2,7 +2,7 @@ use crate::realm::Realm;
 use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Result, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
-use yavashark_value::{ErrorKind, Obj};
+use yavashark_value::ErrorKind;
 
 pub fn get_error(realm: &Realm) -> ValueResult {
     let constr = NativeConstructor::special(
@@ -44,8 +44,8 @@ impl ErrorObj {
             ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
             ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
             ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
-            ErrorKind::EvalError(_) => realm.intrinsics.eval_error.clone(),
-            ErrorKind::URIError(_) => realm.intrinsics.uri_error.clone(),
+            ErrorKind::Eval(_) => realm.intrinsics.eval_error.clone(),
+            ErrorKind::URI(_) => realm.intrinsics.uri_error.clone(),
             _ => realm.intrinsics.error.clone(),
         };
 
@@ -78,8 +78,8 @@ impl ErrorObj {
             ErrorKind::Reference(_) => realm.intrinsics.reference_error.clone(),
             ErrorKind::Range(_) => realm.intrinsics.range_error.clone(),
             ErrorKind::Syntax(_) => realm.intrinsics.syntax_error.clone(),
-            ErrorKind::EvalError(_) => realm.intrinsics.eval_error.clone(),
-            ErrorKind::URIError(_) => realm.intrinsics.uri_error.clone(),
+            ErrorKind::Eval(_) => realm.intrinsics.eval_error.clone(),
+            ErrorKind::URI(_) => realm.intrinsics.uri_error.clone(),
             _ => realm.intrinsics.error.clone(),
         };
 

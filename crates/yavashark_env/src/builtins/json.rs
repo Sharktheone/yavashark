@@ -115,8 +115,8 @@ impl JSON {
 
 #[properties_new(raw)]
 impl JSON {
-    fn parse(str: String, #[realm] realm: &Realm) -> Result<Value> {
-        let value: serde_json::Value = match serde_json::from_str(&str) {
+    fn parse(str: &str, #[realm] realm: &Realm) -> Result<Value> {
+        let value: serde_json::Value = match serde_json::from_str(str) {
             Ok(value) => value,
             Err(error) => return Err(Error::syn_error(error.to_string())),
         };

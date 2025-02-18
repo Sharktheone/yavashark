@@ -31,7 +31,7 @@ impl ObjectConstructor {
     }
 
     #[prop("defineProperty")]
-    fn define_property(obj: ObjectHandle, key: Value, descriptor: ObjectHandle) -> ValueResult {
+    fn define_property(obj: ObjectHandle, key: Value, descriptor: &ObjectHandle) -> ValueResult {
         let value = descriptor
             .get_property(&"value".into())
             .map(|v| v.value)
@@ -82,18 +82,18 @@ impl ObjectConstructor {
     }
 
     #[prop("defineProperties")]
-    fn define_properties(obj: ObjectHandle, props: ObjectHandle) -> ValueResult {
+    fn define_properties(obj: ObjectHandle, props: &ObjectHandle) -> ValueResult {
         for (key, value) in props.properties()? {
             let descriptor = value.as_object()?;
 
-            Self::define_property(obj.clone(), key, descriptor.clone())?;
+            Self::define_property(obj.clone(), key, descriptor)?;
         }
 
         Ok(obj.into())
     }
 
     #[prop("entries")]
-    fn entries(obj: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+    fn entries(obj: &ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let keys = obj.keys()?;
 
         let mut props = Vec::with_capacity(keys.len());
@@ -127,7 +127,7 @@ impl ObjectConstructor {
     }
 
     #[prop("getOwnPropertyDescriptors")]
-    fn get_own_property_descriptors(obj: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+    fn get_own_property_descriptors(obj: &ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let keys = obj.keys()?;
 
         let mut props = Vec::with_capacity(keys.len());
@@ -149,7 +149,7 @@ impl ObjectConstructor {
     }
 
     #[prop("getOwnPropertyNames")]
-    fn get_own_property_names(obj: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
+    fn get_own_property_names(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
 
         let mut props = Vec::with_capacity(keys.len());
@@ -162,7 +162,7 @@ impl ObjectConstructor {
     }
 
     #[prop("getOwnPropertySymbols")]
-    fn get_own_property_symbols(obj: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
+    fn get_own_property_symbols(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
 
         let mut props = Vec::with_capacity(keys.len());
@@ -194,33 +194,33 @@ impl ObjectConstructor {
     }
 
     #[prop("groupBy")]
-    fn group_by(_items: ObjectHandle, _callback: Value, #[realm] realm: &mut Realm) -> ValueResult {
+    fn group_by(_items: ObjectHandle, _callback: Value, #[realm] realm: &Realm) -> ValueResult {
         //TODO
 
         Ok(Object::new(realm).into())
     }
 
     #[prop("hasOwn")]
-    fn has_own(obj: ObjectHandle, key: Value) -> ValueResult {
-        Ok(obj.contains_key(&key)?.into())
+    fn has_own(obj: &ObjectHandle, key: &Value) -> ValueResult {
+        Ok(obj.contains_key(key)?.into())
     }
 
     #[prop("is")]
-    fn is(val1: Value, val2: Value) -> ValueResult {
+    fn is(val1: &Value, val2: &Value) -> ValueResult {
         //TODO: handle things like NaN, -0, etc. BigInt & Numbers
 
         Ok((val1 == val2).into())
     }
 
     #[prop("keys")]
-    fn keys(obj: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
+    fn keys(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
 
         Ok(Array::with_elements(realm, keys)?.into_value())
     }
 
     #[prop("values")]
-    fn values(obj: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+    fn values(obj: &ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let keys = obj.keys()?;
 
         let mut props = Vec::with_capacity(keys.len());

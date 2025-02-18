@@ -63,7 +63,7 @@ impl<C: Realm> Error<C> {
     #[must_use]
     pub const fn eval_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::EvalError(error),
+            kind: ErrorKind::Eval(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
@@ -71,7 +71,7 @@ impl<C: Realm> Error<C> {
     #[must_use]
     pub const fn uri_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::URIError(error),
+            kind: ErrorKind::URI(error),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
@@ -143,8 +143,8 @@ impl<C: Realm> Error<C> {
             ErrorKind::Syntax(_) => "SyntaxError",
             ErrorKind::Error(_) => "Error",
             ErrorKind::Throw(_) => "Uncaught",
-            ErrorKind::EvalError(_) => "EvalError",
-            ErrorKind::URIError(_) => "URIError",
+            ErrorKind::Eval(_) => "EvalError",
+            ErrorKind::URI(_) => "URIError",
         }
     }
 
@@ -155,11 +155,11 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Range(msg)
             | ErrorKind::Internal(msg)
             | ErrorKind::Runtime(msg)
+            | ErrorKind::Eval(msg)
+            | ErrorKind::URI(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(realm)?,
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
-            ErrorKind::EvalError(msg) => msg.clone(),
-            ErrorKind::URIError(msg) => msg.clone(),
         })
     }
 
@@ -171,11 +171,11 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Range(msg)
             | ErrorKind::Internal(msg)
             | ErrorKind::Runtime(msg)
+            | ErrorKind::Eval(msg)
+            | ErrorKind::URI(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => format!("{val}"),
             ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
-            ErrorKind::EvalError(msg) => msg.clone(),
-            ErrorKind::URIError(msg) => msg.clone(),
         }
     }
 
@@ -228,8 +228,8 @@ pub enum ErrorKind<C: Realm> {
     Internal(String),
     Runtime(String),
     Syntax(String),
-    EvalError(String),
-    URIError(String),
+    Eval(String),
+    URI(String),
     Throw(Value<C>),
     Error(Option<String>),
 }

@@ -121,8 +121,7 @@ impl StringObj {
 
 #[properties_new(constructor(StringConstructor::new))]
 impl StringObj {
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn anchor(&self, name: String) -> ValueResult {
+    pub fn anchor(&self, name: &str) -> ValueResult {
         Ok(format!("<a name=\"{}\">{}</a>", name, self.inner.borrow().string).into())
     }
 
@@ -166,7 +165,7 @@ impl StringObj {
     }
 
     #[prop("concat")]
-    pub fn concat(&self, #[variadic] args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn concat(&self, args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let mut string = inner.string.clone();
 
@@ -178,8 +177,7 @@ impl StringObj {
     }
 
     #[prop("endsWith")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn ends_with(&self, search: String) -> Value {
+    pub fn ends_with(&self, search: &str) -> Value {
         let inner = self.inner.borrow();
 
         inner.string.ends_with(&search).into()
@@ -191,8 +189,7 @@ impl StringObj {
     }
 
     #[prop("fontcolor")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn font_color(&self, color: String) -> ValueResult {
+    pub fn font_color(&self, color: &str) -> ValueResult {
         Ok(format!(
             "<font color=\"{}\">{}</font>",
             color,
@@ -202,8 +199,7 @@ impl StringObj {
     }
 
     #[prop("fontsize")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn font_size(&self, size: String) -> ValueResult {
+    pub fn font_size(&self, size: &str) -> ValueResult {
         Ok(format!(
             "<font size=\"{}\">{}</font>",
             size,
@@ -213,16 +209,14 @@ impl StringObj {
     }
 
     #[prop("includes")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn includes(&self, search: String) -> bool {
+    pub fn includes(&self, search: &str) -> bool {
         let inner = self.inner.borrow();
 
-        inner.string.contains(&search)
+        inner.string.contains(search)
     }
 
     #[prop("indexOf")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn index_of(&self, search: String, from: Option<isize>) -> isize {
+    pub fn index_of(&self, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(0);
         let inner = self.inner.borrow();
 
@@ -235,7 +229,7 @@ impl StringObj {
         inner
             .string
             .get(from..)
-            .and_then(|s| s.find(&search))
+            .and_then(|s| s.find(search))
             .map_or(-1, |i| i as isize + from as isize)
     }
 
@@ -254,9 +248,10 @@ impl StringObj {
     }
 
     #[prop("lastIndexOf")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn last_index_of(&self, search: String, from: isize) -> isize {
+    pub fn last_index_of(&self, search: &str, from: Option<isize>) -> isize {
         let inner = self.inner.borrow();
+        
+        let from = from.unwrap_or(-1);
 
         let from = if from < 0 {
             (inner.string.len() as isize + from) as usize
@@ -270,8 +265,7 @@ impl StringObj {
     }
 
     #[prop("link")]
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn link(&self, url: String) -> ValueResult {
+    pub fn link(&self, url: &str) -> ValueResult {
         Ok(format!("<a href=\"{}\">{}</a>", url, self.inner.borrow().string).into())
     }
 

@@ -15,7 +15,7 @@ impl<'a> Extractor<'a> {
     }
 }
 
-trait ExtractValue<T>: Sized {
+pub trait ExtractValue<T>: Sized {
     type Output;
     fn extract(&mut self) -> Result<Self::Output>;
 }
