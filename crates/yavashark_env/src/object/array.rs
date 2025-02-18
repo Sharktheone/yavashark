@@ -1,4 +1,5 @@
 use std::cell::{Cell, RefCell};
+use std::cmp::Ordering;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_value::{BoxedObj, Constructor, Obj};
@@ -977,11 +978,17 @@ impl Array {
         
         if let Some(func) = func {
             values.sort_by(|a, b| {
-                let x = func.call(realm, vec![a.clone(), b.clone()], realm.global.clone().into()).unwrap();
-                x.as_number().partial_cmp(&0.0).unwrap()
+                let Ok(x) = func.call(realm, vec![a.clone(), b.clone()], realm.global.clone().into()) else {
+                    //TODO: this is NOT good, we can't throw the error here
+                    return Ordering::Equal;
+                };
+                
+                
+                
+                x.as_number().partial_cmp(&0.0).unwrap_or(Ordering::Equal)
             });
         } else {
-            values.sort_by(|a, b| a.to_string(realm).unwrap().cmp(&b.to_string(realm).unwrap()));
+            values.sort_by_key(|a| a.to_string(realm).unwrap_or_default());
         }
 
         Ok(Self::with_elements(realm, values)?.into_value())
