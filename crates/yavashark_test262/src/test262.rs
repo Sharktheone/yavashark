@@ -8,7 +8,7 @@ use yavashark_env::{
     ControlFlow, Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Realm, Value,
     ValueResult,
 };
-use yavashark_macro::{object, properties};
+use yavashark_macro::{object, properties_new};
 
 pub fn print(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
@@ -36,32 +36,40 @@ pub struct Test262 {
 
 impl Test262 {
     pub fn new(realm: &Realm) -> Self {
-        Self {
+        let mut this = Self {
             inner: RefCell::new(MutableTest262 {
                 object: MutObject::new(realm),
                 abstract_module_source: ObjectProperty::new(Value::Undefined),
                 realm: None,
             }),
-        }
+        };
+        
+        this.initialize(realm.intrinsics.func.clone().into()).unwrap();
+        
+        this
     }
 
     #[allow(unused)]
     pub fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
-        Self {
+        let mut this = Self {
             inner: RefCell::new(MutableTest262 {
                 object: MutObject::new(realm),
                 abstract_module_source: Value::Undefined.into(),
                 realm: Some(new_realm),
             }),
-        }
+        };
+        
+        this.initialize(realm.intrinsics.func.clone().into()).unwrap();
+        
+        this
     }
 }
 
-#[properties]
+#[properties_new(raw)]
 #[allow(clippy::needless_pass_by_value)]
 impl Test262 {
     #[prop("createRealm")]
-    fn create_realm(&self, _args: Vec<Value>, realm: &Realm) -> ValueResult {
+    fn create_realm(&self, #[realm] realm: &Realm) -> ValueResult {
         let new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
 
         let global = new_realm.global.clone();
@@ -69,17 +77,19 @@ impl Test262 {
         let this: Value = ObjectHandle::new(Self::with_realm(realm, new_realm)).into();
 
         global.define_property("$262".into(), this.copy())?;
+        
+        this.define_property("global".into(), global.into())?;
 
         Ok(this)
     }
 
     #[prop("detachArrayBuffer")]
-    fn detach_array_buffer(&self, _args: Vec<Value>, _realm: &mut Realm) -> ValueResult {
+    fn detach_array_buffer() -> ValueResult {
         Ok(Value::Undefined)
     }
 
     #[prop("evalScript")]
-    fn eval_script(&self, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
+    fn eval_script(&self, args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
         let input = args.first().ok_or(Error::ty("expected one argument"))?;
 
         let Value::String(input) = input else {
@@ -118,7 +128,7 @@ impl Test262 {
     }
 
     #[allow(clippy::unused_self)]
-    fn gc(&self, _args: Vec<Value>, _realm: &Realm) -> ValueResult {
+    fn gc() -> ValueResult {
         // gc is always handled automatically when something goes out of scope. We don't need an extra function for that.
 
         Ok(Value::Undefined)

@@ -4770,6 +4770,7 @@ dependencies = [
  "swc_ecma_parser",
  "yaml-rust2",
  "yavashark_env",
+ "yavashark_garbage",
  "yavashark_interpreter",
  "yavashark_macro",
  "yavashark_value",
