@@ -2,12 +2,40 @@ use crate::array::Array;
 use crate::object::common;
 use crate::{MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult, Variable};
 use std::cell::RefCell;
+use std::mem;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::Obj;
+use yavashark_value::{Constructor, Func, Obj};
+use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 
-#[object]
+#[object(constructor, function)]
 #[derive(Debug)]
 pub struct ObjectConstructor {}
+
+impl Constructor<Realm> for ObjectConstructor {
+    fn construct(&self, realm: &mut Realm, mut args: Vec<Value>) -> ValueResult {
+        let Some(value) = args.first_mut() else {
+            return Ok(Object::new(realm).into());
+        };
+        
+        let value = mem::replace(value, Value::Undefined);
+        
+        Ok(match value {
+            Value::Object(obj) => obj.into(),
+            Value::Number(num) => NumberObj::with_number(realm, num)?.into(),
+            Value::String(string) => StringObj::with_string(realm, string)?.into(),
+            Value::Boolean(boolean) => BooleanObj::new(realm, boolean).into(),
+            Value::Symbol(symbol) => SymbolObj::new(realm, symbol).into(),
+            Value::BigInt(bigint) => BigIntObj::new(realm, bigint).into(),
+            Value::Undefined | Value::Null => Object::new(realm).into(),
+        })
+    }
+}
+
+impl Func<Realm> for ObjectConstructor {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
+        Constructor::construct(self, realm, args)
+    }
+}
 
 impl ObjectConstructor {
     #[allow(clippy::new_ret_no_self)]
