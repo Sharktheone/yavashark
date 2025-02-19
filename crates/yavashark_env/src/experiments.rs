@@ -6,6 +6,8 @@ use crate::{ObjectHandle, Realm, Res};
 mod fs;
 mod http;
 mod tcp;
+mod io;
+mod time;
 
 pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
     let obj = obj.get();
@@ -13,6 +15,8 @@ pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("fs".into(), Fs::new(realm)?.into())?;
     obj.define_variable("http".into(), Http::new(realm)?.into())?;
     obj.define_variable("tcp".into(), Tcp::new(realm)?.into())?;
+    obj.define_variable("io".into(), io::Io::new(realm)?.into())?;
+    obj.define_variable("time".into(), time::Timer::new(realm)?.into())?;
 
     Ok(())
 }
