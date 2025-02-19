@@ -397,6 +397,7 @@ impl StringObj {
         Ok(Array::with_elements(realm, array)?.into_value())
     }
 
+    #[prop("startsWith")]
     pub fn starts_with(&self, search: &str) -> bool {
         let inner = self.inner.borrow();
 
