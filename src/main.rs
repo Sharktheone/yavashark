@@ -10,6 +10,7 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
+use yavashark_env::print::PrettyPrint;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
 
@@ -119,8 +120,14 @@ fn main() {
         }
 
         if interpreter {
-            let result =
-                yavashark_interpreter::Interpreter::run(&script.body, path.clone()).unwrap();
+            let result = match 
+                yavashark_interpreter::Interpreter::run(&script.body, path.clone()) {
+                Ok(v) => v,
+                Err(e) => {
+                    println!("Error: {}", e.pretty_print());
+                    return;
+                }
+            };
             println!("Interpreter: {result:?}");
         }
 
