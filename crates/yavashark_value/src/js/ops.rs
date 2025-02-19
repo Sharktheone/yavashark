@@ -767,7 +767,7 @@ impl<C: Realm> Value<C> {
         };
 
         //TODO: this is kinda a hack, but should always work
-        let Self::Object(constructor) = constructor
+        let Self::Object(constructor_proto) = constructor
             .resolve_property(&"prototype".into(), realm)?
             .ok_or(Error::ty(
             "Right-hand side of 'instanceof' is not a constructor",
@@ -777,13 +777,13 @@ impl<C: Realm> Value<C> {
                 "Right-hand side of 'instanceof' has not an object as constructor",
             ));
         };
-
-        let constructor_proto = constructor.prototype()?;
+        
+        let constructor_proto = constructor_proto.into();
 
         let mut proto = Some(obj.prototype()?);
 
         while let Some(p) = proto {
-            if p == constructor_proto {
+            if p.value == constructor_proto {
                 return Ok(true);
             }
 
