@@ -4,7 +4,7 @@ use crate::experiments::http::status::status_code_to_reason;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result};
 use std::cell::RefCell;
 use std::fmt::Write;
-use std::io::{BufRead, BufReader, Write as _};
+use std::io::{BufRead, BufReader, Read, Write as _};
 use std::{io, mem};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{IntoValue, Obj};
@@ -189,40 +189,60 @@ impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer<C> 
 
         for stream in listener.incoming() {
             let stream = stream?;
-            let buf_reader = BufReader::new(&stream);
-            let http_request = buf_reader
-                .lines()
-                .take_while(|line| line.as_ref().map(|l| !l.is_empty()).unwrap_or(false))
-                .collect::<Result<Vec<_>, _>>()?;
+            let mut buf_reader = BufReader::new(&stream);
 
-            let Some(mut request_line) = http_request.first().map(|x| x.split_whitespace()) else {
-                continue;
+            let mut header_lines = Vec::new();
+            loop {
+                let mut line = String::new();
+                let bytes_read = buf_reader.read_line(&mut line)?;
+                if bytes_read == 0 || line.trim().is_empty() {
+                    break;
+                }
+                header_lines.push(line.trim_end().to_string());
+            }
+
+            let mut header_iter = header_lines.iter();
+            let Some(request_line) = header_iter.next() else { continue };
+
+            let mut parts = request_line.split_whitespace();
+            let method = match parts.next() {
+                Some(m) => m.to_string(),
+                None => continue,
+            };
+            let url = match parts.next() {
+                Some(u) => u.to_string(),
+                None => continue,
             };
 
-            let Some(method) = request_line.next() else {
-                continue;
-            };
-            let Some(url) = request_line.next() else {
-                continue;
-            };
-            let headers = http_request
-                .iter()
-                .skip(1)
-                .map(|x| {
-                    let mut parts = x.split(':');
-                    let key = parts.next().unwrap_or("").trim().to_string();
-                    let value = parts.next().unwrap_or("").trim().to_string();
-                    (key, value)
+            let headers: Vec<(String, String)> = header_iter
+                .filter_map(|line| {
+                    let mut parts = line.splitn(2, ':');
+                    let key = parts.next()?.trim().to_string();
+                    let value = parts.next()?.trim().to_string();
+                    Some((key, value))
                 })
-                .collect::<Vec<_>>();
+                .collect();
 
-            //TODO: Parse body
+            let mut content_length: usize = 0;
+            for (key, value) in &headers {
+                if key.eq_ignore_ascii_case("Content-Length") {
+                    if let Ok(val) = value.parse() {
+                        content_length = val;
+                    }
+                }
+            }
+
+            let mut body = String::new();
+            if content_length > 0 {
+                let mut limited_reader = buf_reader.take(content_length as u64);
+                limited_reader.read_to_string(&mut body)?;
+            }
 
             let request = HttpRequest {
-                method: method.to_string(),
-                url: url.to_string(),
+                method,
+                url,
                 headers,
-                body: String::new(),
+                body,
             };
 
             let Ok(response) = HttpResponseWriter::new(stream, realm) else {
