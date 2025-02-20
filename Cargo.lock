@@ -4690,6 +4690,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "swc_ecma_ast",
  "unicode-normalization",
  "yavashark_garbage",
  "yavashark_macro",
@@ -4790,6 +4791,7 @@ dependencies = [
 name = "yavashark_vm"
 version = "0.1.0"
 dependencies = [
+ "log",
  "yavashark_bytecode",
  "yavashark_env",
 ]

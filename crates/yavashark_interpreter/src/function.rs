@@ -1,3 +1,4 @@
+use std::any::Any;
 use crate::Interpreter;
 use log::info;
 use std::cell::RefCell;
@@ -5,9 +6,8 @@ use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::array::Array;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
-use yavashark_env::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, Res, Result, Value, ValueResult, Variable,
-};
+use yavashark_env::{ControlFlow, Error, MutObject, Object, ObjectHandle, Res, Result, RuntimeResult, Value, ValueResult, Variable};
+use yavashark_env::optimizer::FunctionCode;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_value::{
@@ -28,6 +28,22 @@ pub struct RawJSFunction {
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
     pub scope: Scope,
+}
+
+
+#[derive(Debug)]
+pub struct OptimizedJSFunction {
+    pub block: BlockStmt
+}
+
+impl FunctionCode for OptimizedJSFunction {
+    fn call(&self, realm: &mut Realm, scope: &mut Scope, this: Value) -> RuntimeResult {
+        Interpreter::run_block_this(realm, &self.block, scope, this)
+    }
+    
+    fn function_any(&self) -> &dyn Any {
+        self
+    }
 }
 
 impl CustomName for JSFunction {

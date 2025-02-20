@@ -12,7 +12,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{scope, ControlFlow, Realm, Result, Value, ValueResult};
 
 mod class;
-mod function;
+pub mod function;
 mod location;
 mod pat;
 pub mod statement;

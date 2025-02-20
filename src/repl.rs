@@ -16,12 +16,14 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::VM;
+use yavashark_vm::OwnedVM;
+use crate::optimizer::define_optimizer;
 
 pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
 
     let mut interpreter_realm = Realm::new()?;
+    define_optimizer(&mut interpreter_realm)?;
     interpreter_realm.set_eval(InterpreterEval)?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
@@ -163,7 +165,7 @@ fn run_input(
             let data = DataSection::new(bc.variables, bc.literals);
 
             let mut vm =
-                VM::with_realm_scope(bc.instructions, data, vm_realm.clone(), vm_scope.clone());
+                OwnedVM::with_realm_scope(bc.instructions, data, vm_realm.clone(), vm_scope.clone());
 
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");

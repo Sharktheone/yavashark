@@ -3,6 +3,7 @@ mod repl;
 mod simplerepl;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
+mod optimizer;
 
 use crate::repl::{old_repl, repl};
 use std::path::PathBuf;
@@ -11,8 +12,8 @@ use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
+use yavashark_vm::{OwnedVM, VM};
 use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::VM;
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -141,7 +142,7 @@ fn main() {
             if bytecode {
                 let data = DataSection::new(bc.variables, bc.literals);
 
-                let mut vm = VM::new(bc.instructions, data, path).unwrap();
+                let mut vm = OwnedVM::new(bc.instructions, data, path).unwrap();
 
                 vm.run().unwrap();
 

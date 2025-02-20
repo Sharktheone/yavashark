@@ -2,7 +2,7 @@ use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::Res;
 
-pub fn not_eq_eq(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
+pub fn not_eq_eq(lhs: VarName, rhs: VarName, vm: &mut impl VM) -> Res {
     let lhs = vm.get_variable(lhs)?;
     let rhs = vm.get_variable(rhs)?;
 
@@ -11,7 +11,7 @@ pub fn not_eq_eq(lhs: VarName, rhs: VarName, vm: &mut VM) -> Res {
     Ok(())
 }
 
-pub fn not_eq_eq_acc(reg: Reg, vm: &mut VM) -> Res {
+pub fn not_eq_eq_acc(reg: Reg, vm: &mut impl VM) -> Res {
     let rhs = vm.get_register(reg)?;
     let lhs = vm.acc();
 
@@ -20,7 +20,7 @@ pub fn not_eq_eq_acc(reg: Reg, vm: &mut VM) -> Res {
     Ok(())
 }
 
-pub fn not_eq_eq_reg(rhs: Reg, lhs: Reg, vm: &mut VM) -> Res {
+pub fn not_eq_eq_reg(rhs: Reg, lhs: Reg, vm: &mut impl VM) -> Res {
     let rhs = vm.get_register(rhs)?;
     let lhs = vm.get_register(lhs)?;
 

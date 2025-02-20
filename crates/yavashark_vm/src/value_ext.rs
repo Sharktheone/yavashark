@@ -3,13 +3,13 @@ use yavashark_bytecode::VarName;
 use yavashark_env::{Error, Value};
 
 pub trait ValueExt {
-    fn get_member(&self, member: VarName, vm: &mut VM) -> Result<Self, Error>
+    fn get_member(&self, member: VarName, vm: &mut impl VM) -> Result<Self, Error>
     where
         Self: Sized;
 }
 
 impl ValueExt for Value {
-    fn get_member(&self, member: VarName, vm: &mut VM) -> Result<Self, Error> {
+    fn get_member(&self, member: VarName, vm: &mut impl VM) -> Result<Self, Error> {
         let member = Self::String(
             vm.var_name(member)
                 .ok_or(Error::reference("member name not found"))?

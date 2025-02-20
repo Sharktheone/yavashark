@@ -1,0 +1,72 @@
+use std::any::{type_name, Any, TypeId};
+use std::mem;
+use yavashark_codegen::ByteCodegen;
+use yavashark_env::{NativeFunction, ObjectHandle, Realm, Value, conversion::FromValueOutput, Res, Error};
+use yavashark_env::optimizer::{FunctionCode, OptimFunction, RawOptimFunction};
+use yavashark_env::value::AsAny;
+use yavashark_interpreter::function::OptimizedJSFunction;
+use yavashark_vm::function_code::BytecodeFunction;
+use yavashark_vm::yavashark_bytecode::data::DataSection;
+
+
+
+pub fn define_optimizer(realm: &mut Realm) -> Res {
+    let optimizer = get_optimizer(realm);
+
+    realm.global.define_variable("optimize".into(), optimizer.into())?;
+
+    Ok(())
+
+
+}
+
+fn get_optimizer(realm: &Realm) -> ObjectHandle {
+    NativeFunction::new(
+        "optimizer",
+        |args, _, _| {
+
+            let Some(func) = args.first() else {
+                return Err(Error::ty("optimizer expects a function as its first argument"));
+            };
+
+
+            let func =  OptimFunction::from_value_out(func.copy())?;
+            println!("Optimizing function: {}", func.raw.name);
+
+            let Some(code) = &func.raw.block else {
+                return Ok(Value::Undefined);
+            };
+
+            let mut code = code.borrow_mut();
+            let func = {
+                let code_any = code.function_any();
+
+                let Some(opt_code) = code_any.downcast_ref::<OptimizedJSFunction>() else {
+                    // Already optimized
+                    return Ok(Value::Undefined);
+                };
+
+                let bc = match ByteCodegen::compile(&opt_code.block.stmts) {
+                    Ok(bc) => bc,
+                    Err(e) => {
+                        return Err(Error::syn_error(format!("Failed to compile code: {e:?}")));
+                    }
+                };
+
+                let data = DataSection::new(bc.variables, bc.literals);
+
+                BytecodeFunction {
+                    instructions: bc.instructions,
+                    ds: data,
+                }
+            };
+
+
+            *code = Box::new(func);
+
+            Ok(Value::Undefined)
+        },
+        realm,
+    )
+
+}

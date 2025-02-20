@@ -3,11 +3,11 @@ use yavashark_bytecode::Instruction;
 use yavashark_env::ControlResult;
 
 pub trait Execute {
-    fn execute(&self, vm: &mut VM) -> ControlResult;
+    fn execute(&self, vm: &mut impl VM) -> ControlResult;
 }
 
 impl Execute for Instruction {
-    fn execute(&self, vm: &mut VM) -> ControlResult {
+    fn execute(&self, vm: &mut impl VM) -> ControlResult {
         match self {
             Self::Add(lhs, rhs) => instructions::add(*lhs, *rhs, vm)?,
             Self::AddAccReg(reg) => instructions::add_acc_reg(*reg, vm)?,

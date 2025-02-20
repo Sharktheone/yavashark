@@ -19,6 +19,7 @@ pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
+pub mod optimizer;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
