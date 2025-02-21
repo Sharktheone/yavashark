@@ -5,8 +5,8 @@ use crate::{ObjectHandle, Realm, Res};
 
 mod fs;
 mod http;
-mod tcp;
 mod io;
+mod tcp;
 mod time;
 
 pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {

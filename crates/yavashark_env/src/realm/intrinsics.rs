@@ -1,5 +1,8 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::{get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_type_error, get_uri_error, BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
+use crate::builtins::{
+    get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_type_error,
+    get_uri_error, BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON,
+};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -170,12 +173,12 @@ impl Intrinsics {
             error_prototype.clone().into(),
             func_prototype.clone().into(),
         )?;
-        
+
         let eval_error = get_eval_error(
             error_prototype.clone().into(),
             func_prototype.clone().into(),
         )?;
-        
+
         let uri_error = get_uri_error(
             error_prototype.clone().into(),
             func_prototype.clone().into(),

@@ -49,7 +49,6 @@ fn error_message_pretty_circular(error: &Error, not: &mut Vec<usize>) -> String 
         | ErrorKind::Syntax(msg) => msg.clone(),
         ErrorKind::Throw(val) => val.pretty_print_circular(not),
         ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
-        
     }
 }
 

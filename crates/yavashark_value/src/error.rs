@@ -59,7 +59,7 @@ impl<C: Realm> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     #[must_use]
     pub const fn eval_error(error: String) -> Self {
         Self {
@@ -67,7 +67,7 @@ impl<C: Realm> Error<C> {
             stacktrace: StackTrace { frames: vec![] },
         }
     }
-    
+
     #[must_use]
     pub const fn uri_error(error: String) -> Self {
         Self {

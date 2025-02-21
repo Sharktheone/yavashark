@@ -400,7 +400,7 @@ impl Method {
                     let #argname = #extract_value::<#ty>::extract(&mut extractor)?;
                 });
             }
-            
+
             let refs = if matches!(ty, syn::Type::Reference(_)) && Some(i) != self.realm {
                 quote! {&}
             } else {

@@ -43,9 +43,10 @@ impl Test262 {
                 realm: None,
             }),
         };
-        
-        this.initialize(realm.intrinsics.func.clone().into()).unwrap();
-        
+
+        this.initialize(realm.intrinsics.func.clone().into())
+            .unwrap();
+
         this
     }
 
@@ -58,9 +59,10 @@ impl Test262 {
                 realm: Some(new_realm),
             }),
         };
-        
-        this.initialize(realm.intrinsics.func.clone().into()).unwrap();
-        
+
+        this.initialize(realm.intrinsics.func.clone().into())
+            .unwrap();
+
         this
     }
 }
@@ -77,7 +79,7 @@ impl Test262 {
         let this: Value = ObjectHandle::new(Self::with_realm(realm, new_realm)).into();
 
         global.define_property("$262".into(), this.copy())?;
-        
+
         this.define_property("global".into(), global.into())?;
 
         Ok(this)

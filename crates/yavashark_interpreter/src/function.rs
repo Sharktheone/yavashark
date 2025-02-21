@@ -89,7 +89,7 @@ impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         scope.state_set_returnable();
-        
+
         for (i, p) in self.params.iter().enumerate() {
             let Pat::Ident(name) = &p.pat else {
                 return Err(Error::syn("Invalid function parameter"));

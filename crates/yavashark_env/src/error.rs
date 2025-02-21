@@ -18,12 +18,14 @@ pub fn get_error(realm: &Realm) -> ValueResult {
         },
         realm,
     );
-    
-    realm.intrinsics.error.define_property("constructor".into(), constr.clone().into())?;
-    
+
+    realm
+        .intrinsics
+        .error
+        .define_property("constructor".into(), constr.clone().into())?;
+
     constr.define_property("prototype".into(), realm.intrinsics.error.clone().into())?;
-    
-    
+
     Ok(constr.into())
 }
 
@@ -37,7 +39,7 @@ pub struct ErrorObj {
 
 impl ErrorObj {
     #[allow(clippy::new_ret_no_self)]
-    #[must_use] 
+    #[must_use]
     pub fn new(error: Error, realm: &Realm) -> ObjectHandle {
         let proto = match &error.kind {
             ErrorKind::Type(_) => realm.intrinsics.type_error.clone(),

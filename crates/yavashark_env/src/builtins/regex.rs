@@ -104,7 +104,7 @@ impl Func<Realm> for RegExpConstructor {
 #[properties_new(constructor(RegExpConstructor::new))]
 impl RegExp {
     #[prop("exec")]
-    fn exec(&self, value: &str, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn exec(&self, value: &str, #[realm] realm: &mut Realm) -> ValueResult {
         if self.global {
             let mut inner = self.inner.borrow_mut();
 
@@ -140,7 +140,7 @@ impl RegExp {
     }
 
     #[prop("test")]
-    fn test(&self, value: &str) -> bool {
+    pub fn test(&self, value: &str) -> bool {
         self.regex.is_match(value)
     }
 }

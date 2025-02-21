@@ -46,14 +46,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "EvalError".into(),
         realm.intrinsics.eval_error_constructor(),
     )?;
-    obj.define_variable(
-        "URIError".into(),
-        realm.intrinsics.uri_error_constructor()
-    )?;
-    
+    obj.define_variable("URIError".into(), realm.intrinsics.uri_error_constructor())?;
+
     obj.define_variable("globalThis".into(), realm.global.clone().into())?;
     obj.define_variable("global".into(), realm.global.clone().into())?;
-
 
     macro_rules! copy_from {
         ($prop:ident, $name:ident) => {

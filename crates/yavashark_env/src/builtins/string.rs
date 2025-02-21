@@ -1,10 +1,10 @@
+use crate::array::Array;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use std::cmp;
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
-use crate::array::Array;
 
 #[object]
 #[derive(Debug)]
@@ -197,7 +197,7 @@ impl StringObj {
             color,
             self.inner.borrow().string
         )
-            .into())
+        .into())
     }
 
     #[prop("fontsize")]
@@ -207,7 +207,7 @@ impl StringObj {
             size,
             self.inner.borrow().string
         )
-            .into())
+        .into())
     }
 
     #[prop("includes")]
@@ -238,9 +238,11 @@ impl StringObj {
     #[prop("isWellFormed")]
     pub fn is_well_formed(&self) -> bool {
         // check if we have any lone surrogates => between 0xD800-0xDFFF or 0xDC00-0xDFFF
-        self.inner.borrow().string.chars().all(|c| {
-            !is_lone_surrogate(c)
-        })
+        self.inner
+            .borrow()
+            .string
+            .chars()
+            .all(|c| !is_lone_surrogate(c))
     }
 
     #[prop("italics")]
@@ -298,7 +300,6 @@ impl StringObj {
             "NFKD" => inner.string.nfkd().to_string(),
             _ => return Err(Error::range("Invalid normalization form")),
         };
-
 
         Ok(form.into())
     }
@@ -381,7 +382,12 @@ impl StringObj {
         Ok(format!("<small>{}</small>", self.inner.borrow().string).into())
     }
 
-    pub fn split(&self, separator: &str, limit: Option<usize>, #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn split(
+        &self,
+        separator: &str,
+        limit: Option<usize>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         let inner = self.inner.borrow();
 
         let limit = limit.unwrap_or(usize::MAX);
@@ -483,13 +489,11 @@ impl StringObj {
     pub fn to_well_formed(&self) -> ValueResult {
         let inner = self.inner.borrow();
 
-        let well_formed = inner.string.chars().map(|c| {
-            if is_lone_surrogate(c) {
-                '\u{FFFD}'
-            } else {
-                c
-            }
-        }).collect::<String>();
+        let well_formed = inner
+            .string
+            .chars()
+            .map(|c| if is_lone_surrogate(c) { '\u{FFFD}' } else { c })
+            .collect::<String>();
 
         Ok(well_formed.into())
     }
@@ -519,7 +523,6 @@ impl StringObj {
         self.inner.borrow().string.clone().into()
     }
 }
-
 
 fn is_lone_surrogate(c: char) -> bool {
     let c = c as u32;

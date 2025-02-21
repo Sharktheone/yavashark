@@ -97,7 +97,7 @@ impl Config {
         mut_obj
             .segments
             .push(PathSegment::from(Ident::new("MutObj", span)));
-        
+
         let mut extractor = env_path.clone();
         extractor
             .segments
@@ -105,7 +105,7 @@ impl Config {
         extractor
             .segments
             .push(PathSegment::from(Ident::new("Extractor", span)));
-        
+
         let mut extract_value = env_path.clone();
         extract_value
             .segments

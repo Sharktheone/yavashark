@@ -1,7 +1,7 @@
-use std::mem;
-use std::slice::IterMut;
 use crate::{Error, ObjectHandle, Realm, Result, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
+use std::mem;
+use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
 
@@ -138,7 +138,6 @@ impl FromValueOutput for BigInt {
     }
 }
 
-
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
         $(
@@ -166,7 +165,7 @@ pub struct Extractor<'a> {
 impl<'a> Extractor<'a> {
     pub fn new(values: &'a mut [Value]) -> Self {
         Self {
-            values: values.iter_mut()
+            values: values.iter_mut(),
         }
     }
 }

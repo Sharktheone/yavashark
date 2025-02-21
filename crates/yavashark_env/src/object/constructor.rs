@@ -1,11 +1,11 @@
 use crate::array::Array;
+use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
 use crate::{MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
-use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -16,9 +16,9 @@ impl Constructor<Realm> for ObjectConstructor {
         let Some(value) = args.first_mut() else {
             return Ok(Object::new(realm).into());
         };
-        
+
         let value = mem::replace(value, Value::Undefined);
-        
+
         Ok(match value {
             Value::Object(obj) => obj.into(),
             Value::Number(num) => NumberObj::with_number(realm, num)?.into(),

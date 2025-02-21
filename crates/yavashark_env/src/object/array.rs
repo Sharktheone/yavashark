@@ -486,7 +486,7 @@ impl Array {
 
         Ok(array.into_value())
     }
-    
+
     #[prop("flatMap")]
     fn flat_map(
         #[this] this: &Value,
@@ -528,9 +528,13 @@ impl Array {
 
         Ok(array.into_value())
     }
-    
+
     #[prop("forEach")]
-    fn for_each(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+    fn for_each(
+        #[this] this: &Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+    ) -> ValueResult {
         let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;
@@ -551,8 +555,12 @@ impl Array {
 
         Ok(Value::Undefined)
     }
-    
-    fn includes(#[this] this: &Value, search_element: &Value, from_index: Option<isize>) -> ValueResult {
+
+    fn includes(
+        #[this] this: &Value,
+        search_element: &Value,
+        from_index: Option<isize>,
+    ) -> ValueResult {
         let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;
@@ -575,9 +583,13 @@ impl Array {
 
         Ok(Value::Boolean(false))
     }
-    
+
     #[prop("indexOf")]
-    fn index_of(#[this] this: &Value, search_element: &Value, from_index: Option<isize>) -> ValueResult {
+    fn index_of(
+        #[this] this: &Value,
+        search_element: &Value,
+        from_index: Option<isize>,
+    ) -> ValueResult {
         let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;
@@ -637,9 +649,13 @@ impl Array {
 
         Ok(iter.into_value())
     }
-    
+
     #[prop("lastIndexOf")]
-    fn last_index_of(#[this] this: &Value, search_element: &Value, from_index: Option<isize>) -> ValueResult {
+    fn last_index_of(
+        #[this] this: &Value,
+        search_element: &Value,
+        from_index: Option<isize>,
+    ) -> ValueResult {
         let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;
@@ -662,7 +678,7 @@ impl Array {
 
         Ok(Value::Number(-1.0))
     }
-    
+
     fn map(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
@@ -684,7 +700,7 @@ impl Array {
 
         Ok(array.into_value())
     }
-    
+
     fn pop(#[this] this: &Value) -> ValueResult {
         let this = this.as_object()?;
 
@@ -722,7 +738,7 @@ impl Array {
 
         Ok(idx.into())
     }
-    
+
     fn reduce(
         #[this] this: &Value,
         #[realm] realm: &mut Realm,
@@ -751,7 +767,7 @@ impl Array {
 
         Ok(acc)
     }
-    
+
     #[prop("reduceRight")]
     fn reduce_right(
         #[this] this: &Value,
@@ -781,7 +797,7 @@ impl Array {
 
         Ok(acc)
     }
-    
+
     fn reverse(#[this] this_val: Value) -> ValueResult {
         let this = this_val.as_object()?;
 
@@ -808,7 +824,7 @@ impl Array {
 
         Ok(this_val)
     }
-    
+
     fn shift(#[this] this: &Value) -> ValueResult {
         let this = this.as_object()?;
 
@@ -833,8 +849,13 @@ impl Array {
 
         Ok(val.unwrap_or(Value::Undefined))
     }
-    
-    fn slice(#[this] this: &Value, start: isize, end: Option<isize>, #[realm] realm: &Realm) -> ValueResult {
+
+    fn slice(
+        #[this] this: &Value,
+        start: isize,
+        end: Option<isize>,
+        #[realm] realm: &Realm,
+    ) -> ValueResult {
         let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;
@@ -856,7 +877,7 @@ impl Array {
 
         Ok(array.into_value())
     }
-    
+
     fn some(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
@@ -882,9 +903,9 @@ impl Array {
 
         Ok(Value::Boolean(false))
     }
-    
+
     // fn sort(#[this] this_val: Value, #[realm] realm: &mut Realm, func: &Value) -> ValueResult {} // TODO
-    
+
     fn splice(
         #[this] this: &Value,
         start: isize,
@@ -935,7 +956,7 @@ impl Array {
 
         Ok(Self::with_elements(realm, deleted)?.into_value())
     }
-    
+
     #[prop("toReversed")]
     fn js_to_reversed(#[this] this: &Value, #[realm] realm: &Realm) -> ValueResult {
         let this = this.as_object()?;
@@ -956,11 +977,14 @@ impl Array {
 
         Ok(array.into_value())
     }
-    
-    #[prop("toSorted")]
-    fn js_to_sorted(#[this] this: &Value, func: Option<Value>, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = this.as_object()?;
 
+    #[prop("toSorted")]
+    fn js_to_sorted(
+        #[this] this: &Value,
+        func: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        let this = this.as_object()?;
 
         let len = this.get_property(&"length".into())?;
 
@@ -975,16 +999,18 @@ impl Array {
                 values.push(val);
             }
         }
-        
+
         if let Some(func) = func {
             values.sort_by(|a, b| {
-                let Ok(x) = func.call(realm, vec![a.clone(), b.clone()], realm.global.clone().into()) else {
+                let Ok(x) = func.call(
+                    realm,
+                    vec![a.clone(), b.clone()],
+                    realm.global.clone().into(),
+                ) else {
                     //TODO: this is NOT good, we can't throw the error here
                     return Ordering::Equal;
                 };
-                
-                
-                
+
                 x.as_number().partial_cmp(&0.0).unwrap_or(Ordering::Equal)
             });
         } else {
@@ -993,7 +1019,7 @@ impl Array {
 
         Ok(Self::with_elements(realm, values)?.into_value())
     }
-    
+
     fn unshift(#[this] this: &Value, args: Vec<Value>) -> ValueResult {
         let this = this.as_object()?;
 
@@ -1019,7 +1045,7 @@ impl Array {
 
         Ok(idx.into())
     }
-    
+
     fn values(#[this] this: Value, #[realm] realm: &Realm) -> ValueResult {
         let this = this.to_object()?;
 
@@ -1034,16 +1060,21 @@ impl Array {
 
         Ok(iter.into_value())
     }
-    
-    
-    fn with(#[this] this: &Value, idx: isize, val: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        
-        let len = this.get_property(&"length".into(), realm)?.to_number(realm)? as usize;
-        
+
+    fn with(
+        #[this] this: &Value,
+        idx: isize,
+        val: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        let len = this
+            .get_property(&"length".into(), realm)?
+            .to_number(realm)? as usize;
+
         let mut vals = Vec::with_capacity(len);
-        
+
         let idx = convert_index(idx, len);
-        
+
         for i in 0..len {
             if i == idx {
                 vals.push(val.clone());
@@ -1051,12 +1082,9 @@ impl Array {
                 vals.push(this.get_property(&i.into(), realm)?.clone());
             }
         }
-        
+
         Ok(Self::with_elements(realm, vals)?.into_value())
     }
-    
-    
-
 
     #[prop(crate::Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
@@ -1078,8 +1106,6 @@ impl Array {
 
         Ok(iter.into())
     }
-
-   
 }
 
 #[object(constructor)]

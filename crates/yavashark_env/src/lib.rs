@@ -13,12 +13,12 @@ pub mod builtins;
 pub mod conversion;
 #[cfg(feature = "out-of-spec-experiments")]
 pub mod experiments;
+mod function_conversion;
 mod global;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-mod function_conversion;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;

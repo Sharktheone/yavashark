@@ -202,7 +202,9 @@ impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer<C> 
             }
 
             let mut header_iter = header_lines.iter();
-            let Some(request_line) = header_iter.next() else { continue };
+            let Some(request_line) = header_iter.next() else {
+                continue;
+            };
 
             let mut parts = request_line.split_whitespace();
             let method = match parts.next() {
