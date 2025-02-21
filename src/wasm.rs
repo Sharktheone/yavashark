@@ -37,13 +37,13 @@ fn parse(input: &str) -> Vec<Stmt> {
 #[wasm_bindgen]
 pub fn run_standalone(code: &str) -> String {
     
-    let realm = Realm::new().unwrap();
-    let scope = Scope::global()
+    let mut realm = Realm::new().unwrap();
+    let mut scope = Scope::global(&realm, PathBuf::new());
     
-    let res = Interpreter::run_in(&parse(code), PathBuf::new());
+    let res = Interpreter::run_in(&parse(code), &mut realm, &mut scope);
     
     match res { 
-        Ok(v) => v.to_string().unwrap(),
+        Ok(v) => v.to_string(&mut realm).unwrap(),
         Err(e) => e.to_string()
     }
     
