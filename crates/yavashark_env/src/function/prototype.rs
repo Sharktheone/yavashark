@@ -96,8 +96,36 @@ fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 }
 
 #[allow(unused)]
-fn constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!()
+fn constructor(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    let Some(body) = args.pop() else {
+        return Ok(NativeFunction::new("anonymous", |_, _, _| Ok(Value::Undefined), realm).into());
+    };
+    
+    let mut buf = "function anonymous(".to_owned();
+    
+    for (i, arg) in args.iter().enumerate() {
+        if i != 0 {
+            buf.push(',');
+        }
+        
+        buf.push_str(&arg.to_string(realm)?);
+    }
+    
+    buf.push_str(") { ");
+    
+    buf.push_str(&body.to_string(realm)?);
+    
+    buf.push_str(" }");
+    
+    
+    buf.push_str("anonymous");
+    
+    
+    let Some(eval) = realm.intrinsics.eval.clone() else {
+        return Err(Error::new("eval is not defined"));
+    };
+    
+    eval.call(realm, vec![Value::String(buf)], Value::Undefined)
 }
 
 impl Obj<Realm> for FunctionPrototype {
