@@ -14,6 +14,7 @@ use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
+use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::VM;
 
@@ -21,9 +22,11 @@ pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
 
     let mut interpreter_realm = Realm::new()?;
+    interpreter_realm.set_eval(InterpreterEval)?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
-    let vm_realm = Realm::new()?;
+    let mut vm_realm = Realm::new()?;
+    vm_realm.set_eval(InterpreterEval)?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
     let config = Config::builder()

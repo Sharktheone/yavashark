@@ -4,9 +4,11 @@ mod intrinsics;
 use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
-use crate::{Object, ObjectHandle, Result};
+use crate::{NativeFunction, Object, ObjectHandle, Res, Result, Value, ValueResult};
 use std::fmt::Debug;
+use std::path::PathBuf;
 use yavashark_value::Realm as RealmT;
+use crate::scope::Scope;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Realm {
@@ -31,6 +33,27 @@ impl Realm {
 
         Ok(realm)
     }
+    
+    pub fn set_eval(&mut self, eval: impl Eval + 'static) -> Res {
+        let eval_func = NativeFunction::new("eval", move |args, _, realm| {
+            let Some(code) = args.first() else {
+                return Ok(Value::Undefined);
+            };
+            
+            let code = code.to_string(realm)?;
+            
+            let mut scope = Scope::global(realm, PathBuf::from("eval")); //TODO: the scope should be the caller's scope
+
+            eval.eval(&code, realm, &mut scope)
+        }, self);
+
+        self.intrinsics.eval = Some(eval_func.clone());
+        self.global.define_property("eval".into(), eval_func.into())
+    }
+}
+
+pub trait Eval {
+    fn eval(&self, code: &str, realm: &mut Realm, scope: &mut Scope) -> ValueResult;
 }
 
 impl Eq for Realm {}

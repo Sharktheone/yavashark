@@ -27,6 +27,7 @@ pub struct Intrinsics {
     pub(crate) syntax_error: ObjectHandle,
     pub(crate) eval_error: ObjectHandle,
     pub(crate) uri_error: ObjectHandle,
+    pub(crate) eval: Option<ObjectHandle>,
 }
 
 macro_rules! constructor {
@@ -204,6 +205,7 @@ impl Intrinsics {
             syntax_error,
             eval_error,
             uri_error,
+            eval: None,
         })
     }
 }

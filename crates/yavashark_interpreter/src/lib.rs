@@ -18,6 +18,7 @@ mod pat;
 pub mod statement;
 #[cfg(test)]
 mod tests;
+pub mod eval;
 
 pub struct Interpreter;
 
