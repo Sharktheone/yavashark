@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
 
-#[object(direct(last_index(lastIndex)))]
+#[object(direct(last_index(lastIndex), global))]
 #[derive(Debug)]
 pub struct RegExp {
     regex: Regex,
@@ -21,6 +21,7 @@ impl RegExp {
             inner: RefCell::new(MutableRegExp {
                 object: MutObject::with_proto(realm.intrinsics.regexp.clone().into()),
                 last_index: Value::from(0u8).into(),
+                global: global.into(),
             }),
             global,
         }
