@@ -4753,6 +4753,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_string"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_swc"
 version = "0.1.0"
 dependencies = [
