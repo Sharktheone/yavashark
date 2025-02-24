@@ -1,9 +1,11 @@
-use std::mem;
+use std::fmt::{Debug, Formatter};
+use std::{fmt, mem};
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
 
+/// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
 #[repr(packed)]
 pub struct SmallVec<T> {
     pub(crate) len_cap: SmallVecLenCap,
@@ -16,7 +18,23 @@ impl<T> Drop for SmallVec<T> {
             let mut vec = self.to_vec_ref();
             ManuallyDrop::drop(&mut vec);
         }
-        
+
+    }
+}
+
+
+impl Clone for SmallVec<u8> {
+    fn clone(&self) -> Self {
+        let vec = self.slice().to_vec();
+
+        #[allow(clippy::expect_used)]
+        Self::new(vec).expect("unreachable")
+    }
+}
+
+impl Debug for SmallVec<u8> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Debug::fmt(self.slice(), f)
     }
 }
 
@@ -54,7 +72,7 @@ impl<T> SmallVec<T> {
         let len_cap = SmallVecLenCap::new(len, cap)?;
 
         let ptr = NonNull::new(vec.as_mut_ptr())?;
-        
+
         mem::forget(vec);
 
         Some(Self {
@@ -62,7 +80,7 @@ impl<T> SmallVec<T> {
             ptr
         })
     }
-    
+
     unsafe fn to_vec_ref(&self) -> ManuallyDrop<Vec<T>> {
         let len = self.len_cap.len();
         let cap = self.len_cap.cap();
@@ -71,14 +89,14 @@ impl<T> SmallVec<T> {
 
         ManuallyDrop::new(Vec::from_raw_parts(ptr, len, cap))
     }
-    
+
     pub fn into_vec(self) -> Vec<T> {
         unsafe {
             let vec = self.to_vec_ref();
             ManuallyDrop::into_inner(vec)
         }
     }
-    
+
     pub fn slice(&self) -> &[T] {
         unsafe {
             let len = self.len_cap.len();

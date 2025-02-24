@@ -1,6 +1,7 @@
 use crate::smallvec::SmallVec;
 use std::mem;
 
+#[derive(Debug, Clone, Default)]
 pub struct SmallString {
     inner: SmallVec<u8>,
 }
