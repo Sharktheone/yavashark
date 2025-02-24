@@ -22,20 +22,10 @@ pub struct YSString {
 
 enum InnerString {
     Inline(InlineString),
-    Static(StaticStr),
+    Static(&'static str),
     Owned(SmallString),
-    Rc(RcStr),
+    Rc(Rc<str>),
     Rope(RopeStr),
-}
-
-#[repr(packed)]
-struct StaticStr {
-    str: &'static str,
-    begin: [u8; UZ_BYTES],
-}
-
-struct RcStr {
-    rc: Rc<str>,
 }
 
 #[repr(packed)]
@@ -78,39 +68,6 @@ struct RopeStr {
     right: Rc<YSString>,
 }
 
-
-
-impl StaticStr {
-    const fn begin(&self) -> [u8; UZ_BYTES] {
-        self.begin
-    }
-    
-    const fn len(&self) -> usize {
-        self.str.len()
-    }
-    
-    const fn as_str(&self) -> &str {
-        self.str
-    }
-}
-
-impl RcStr {
-    fn begin(&self) -> [u8; UZ_BYTES] {
-        let mut begin = [0; UZ_BYTES];
-        
-        begin.copy_from_slice(&self.rc.as_bytes()[0..min(UZ_BYTES, self.rc.len())]);
-        
-        begin
-    }
-    
-    fn len(&self) -> usize {
-        self.rc.len()
-    }
-    
-    fn as_str(&self) -> &str {
-        &self.rc
-    }
-}
 
 impl InlineString {
     const fn begin(&self) -> [u8; UZ_BYTES] {
@@ -238,9 +195,9 @@ impl YSString {
     pub fn as_str(&self) -> &str {
         match self.inner() {
             InnerString::Inline(inline) => inline.as_str(),
-            InnerString::Static(static_str) => static_str.as_str(),
+            InnerString::Static(static_str) => static_str,
             InnerString::Owned(owned) => owned,
-            InnerString::Rc(rc) => rc.as_str(),
+            InnerString::Rc(rc) => rc,
             InnerString::Rope(rope) => {
                 let str = rope.as_string_opt_rope(); // since we drop the RopeStr afterward we don't need to fix the rope
                 
@@ -262,9 +219,9 @@ impl YSString {
     fn as_str_no_rope_fix(&self) -> Cow<str> {
         Cow::Borrowed(match self.inner() {
             InnerString::Inline(inline) => inline.as_str(),
-            InnerString::Static(static_str) => static_str.as_str(),
+            InnerString::Static(static_str) => static_str,
             InnerString::Owned(owned) => owned,
-            InnerString::Rc(rc) => rc.as_str(),
+            InnerString::Rc(rc) => rc,
             InnerString::Rope(rope) => return Cow::Owned(rope.as_string_opt_rope()) // we don't need to fix the rope here
         })
     }
