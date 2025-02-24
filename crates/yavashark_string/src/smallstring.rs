@@ -29,13 +29,13 @@ impl SmallString {
 
     pub fn into_string(self) -> String {
         unsafe {
+            let (ptr, len, cap) = self.inner.into_raw_parts();
+            
             let str = String::from_raw_parts(
-                self.inner.ptr.as_ptr(),
-                self.inner.len_cap.len(),
-                self.inner.len_cap.cap(),
+                ptr.as_ptr(),
+                len,
+                cap,
             );
-
-            mem::forget(self.inner); // we transferred ownership to the String
 
             str
         }

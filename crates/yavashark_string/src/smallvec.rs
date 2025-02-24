@@ -65,15 +65,15 @@ impl Default for SmallVec<u8> {
 
 
 impl<T> SmallVec<T> {
-    pub fn new(mut vec: Vec<T>) -> Option<Self> {
+    pub fn new(vec: Vec<T>) -> Option<Self> {
+        let mut vec = ManuallyDrop::new(vec);
+        
         let len = vec.len();
         let cap = vec.capacity();
 
         let len_cap = SmallVecLenCap::new(len, cap)?;
 
         let ptr = NonNull::new(vec.as_mut_ptr())?;
-
-        mem::forget(vec);
 
         Some(Self {
             len_cap,
@@ -103,6 +103,16 @@ impl<T> SmallVec<T> {
             let ptr = self.ptr.as_ptr();
             std::slice::from_raw_parts(ptr, len)
         }
+    }
+    
+    pub fn into_raw_parts(self) -> (NonNull<T>, usize, usize) {
+        let this = ManuallyDrop::new(self);
+        
+        let ptr = this.ptr;
+        let len = this.len_cap.len();
+        let cap = this.len_cap.cap();
+
+        (ptr, len, cap)
     }
 }
 
