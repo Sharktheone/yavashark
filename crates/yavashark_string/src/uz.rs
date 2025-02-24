@@ -1,5 +1,7 @@
 pub const UZ_BYTES: usize = size_of::<usize>() - 1;
 
+#[repr(packed)]
+#[derive(Copy, Clone)]
 pub struct UsizeSmall {
     bytes: [u8; UZ_BYTES],
 }
@@ -46,6 +48,8 @@ impl UsizeSmall {
     }
 }
 
+#[repr(packed)]
+#[derive(Copy, Clone)]
 pub struct DoubleU4(u8);
 
 impl DoubleU4 {

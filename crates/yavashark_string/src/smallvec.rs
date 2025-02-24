@@ -1,5 +1,95 @@
+use std::mem;
+use std::mem::ManuallyDrop;
+use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
 
+#[repr(packed)]
+pub struct SmallVec<T> {
+    pub(crate) len_cap: SmallVecLenCap,
+    pub(crate) ptr: NonNull<T>
+}
+
+impl<T> Drop for SmallVec<T> {
+    fn drop(&mut self) {
+        unsafe {
+            let mut vec = self.to_vec_ref();
+            ManuallyDrop::drop(&mut vec);
+        }
+        
+    }
+}
+
+impl<T> Deref for SmallVec<T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
+        self.slice()
+    }
+}
+
+impl DerefMut for SmallVec<u8> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe {
+            let len = self.len_cap.len();
+            let ptr = self.ptr.as_ptr();
+            std::slice::from_raw_parts_mut(ptr, len)
+        }
+    }
+}
+
+impl Default for SmallVec<u8> {
+    fn default() -> Self {
+        #[allow(clippy::expect_used)]
+        Self::new(Vec::new()).expect("unreachable")
+    }
+}
+
+
+impl<T> SmallVec<T> {
+    pub fn new(mut vec: Vec<T>) -> Option<Self> {
+        let len = vec.len();
+        let cap = vec.capacity();
+
+        let len_cap = SmallVecLenCap::new(len, cap)?;
+
+        let ptr = NonNull::new(vec.as_mut_ptr())?;
+        
+        mem::forget(vec);
+
+        Some(Self {
+            len_cap,
+            ptr
+        })
+    }
+    
+    unsafe fn to_vec_ref(&self) -> ManuallyDrop<Vec<T>> {
+        let len = self.len_cap.len();
+        let cap = self.len_cap.cap();
+
+        let ptr = self.ptr.as_ptr();
+
+        ManuallyDrop::new(Vec::from_raw_parts(ptr, len, cap))
+    }
+    
+    pub fn into_vec(self) -> Vec<T> {
+        unsafe {
+            let vec = self.to_vec_ref();
+            ManuallyDrop::into_inner(vec)
+        }
+    }
+    
+    pub fn slice(&self) -> &[T] {
+        unsafe {
+            let len = self.len_cap.len();
+            let ptr = self.ptr.as_ptr();
+            std::slice::from_raw_parts(ptr, len)
+        }
+    }
+}
+
+
+#[repr(packed)]
 pub struct SmallVecLenCap {
     len: UsizeSmall,
     shared: DoubleU4,
