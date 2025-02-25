@@ -30,7 +30,7 @@ impl SmallString {
     pub fn into_string(self) -> String {
         unsafe {
             let (ptr, len, cap) = self.inner.into_raw_parts();
-            
+
             let str = String::from_raw_parts(
                 ptr.as_ptr(),
                 len,
@@ -46,18 +46,18 @@ impl SmallString {
 
         Rc::from(vec)
     }
-    
+
     pub fn into_rc_if_fit(self) -> Result<Rc<str>, Self> {
         let vec = self.into_string();
-        
+
         if vec.capacity() != vec.len() {
             #[allow(clippy::expect_used)]
             return Err(Self::from_string(vec).expect("unreachable"));
         }
-        
+
         Ok(Rc::from(vec.into_boxed_str()))
     }
-    
+
     pub fn copy_rc(&self) -> Rc<str> {
         let vec = self.as_str().to_string().into_boxed_str();
 

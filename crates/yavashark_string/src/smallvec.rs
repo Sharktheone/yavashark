@@ -7,6 +7,7 @@ use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
 
 /// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
 #[repr(packed)]
+//TODO: this should be Rc-able, but we can only do this once UniqueRc is stable
 pub struct SmallVec<T> {
     pub(crate) len_cap: SmallVecLenCap,
     pub(crate) ptr: NonNull<T>

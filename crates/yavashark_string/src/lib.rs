@@ -4,6 +4,7 @@ mod smallstring;
 pub(crate) mod smallvec;
 pub(crate) mod uz;
 
+use std::alloc::Layout;
 use crate::smallstring::SmallString;
 use crate::smallvec::SmallVecLenCap;
 use crate::uz::UZ_BYTES;
@@ -305,58 +306,6 @@ impl YSString {
         })
     }
 
-    /// This will clone the string without actually cloning it
-    fn clone_no_copy(&mut self) -> Self {
-        match self.inner_mut() {
-            InnerString::Inline(ref inline) => Self::from_inline(*inline),
-            InnerString::Static(static_str) => Self::new_static(static_str),
-            InnerString::Owned(owned) => {
-                let owned = mem::take(owned);
-
-                let rc = owned.into_rc();
-
-                *self.inner_mut() = InnerString::Rc(Rc::clone(&rc));
-
-                Self::from_rc(rc)
-            }
-            InnerString::Rc(ref rc) => Self::from_rc(Rc::clone(rc)),
-            InnerString::Rope(ref rope) => Self::from_rope_str(rope.clone()),
-        }
-    }
-
-    ///try to use `clone_no_copy` if possible!
-    fn clone_ref(&self) -> Self {
-        match unsafe { self.inner_mut_ref() } {
-            InnerString::Inline(ref inline) => Self::from_inline(*inline),
-            InnerString::Static(static_str) => Self::new_static(static_str),
-            InnerString::Owned(owned) => {
-                // let owned_str = mem::take(owned);
-                // 
-                // unsafe {
-                //     let rc = match owned_str.into_rc_if_fit() {
-                //         // we need to use the into_rc_fit method as the into_rc would create UB!
-                //         Ok(rc) => rc, // we don't need to shrink, which means potential references will still be valid
-                //         Err(str) => {
-                //             *owned = str;
-                // 
-                //             let rc = owned.copy_rc();
-                // 
-                //             return Self::from_rc(rc);
-                //         }
-                //     };
-                //     *self.inner_mut_ref() = InnerString::Rc(Rc::clone(&rc));
-                //     Self::from_rc(rc)
-                // }
-                
-                
-                
-                todo!("this was UB!") // Rc::from moves the box, which means the references are invalid
-            }
-            InnerString::Rc(ref rc) => Self::from_rc(Rc::clone(rc)),
-            InnerString::Rope(ref rope) => Self::from_rope_str(rope.clone()),
-        }
-    }
-
     fn as_mut_str(&mut self) -> &mut str {
         let inner = self.inner_mut();
 
@@ -388,6 +337,18 @@ impl Deref for YSString {
 
     fn deref(&self) -> &Self::Target {
         self.as_str()
+    }
+}
+
+impl Clone for YSString {
+    fn clone(&self) -> Self {
+        match self.inner() {
+            InnerString::Inline(ref inline) => Self::from_inline(*inline),
+            InnerString::Static(static_str) => Self::new_static(static_str),
+            InnerString::Owned(owned) => Self::from_rc(Rc::from(owned.as_str())), //TODO: once UniqueRc is stable, we can actually clone the string without copying it
+            InnerString::Rc(ref rc) => Self::from_rc(Rc::clone(rc)),
+            InnerString::Rope(ref rope) => Self::from_rope_str(rope.clone()),
+        }
     }
 }
 
