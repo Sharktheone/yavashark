@@ -330,23 +330,27 @@ impl YSString {
             InnerString::Inline(ref inline) => Self::from_inline(*inline),
             InnerString::Static(static_str) => Self::new_static(static_str),
             InnerString::Owned(owned) => {
-                let owned_str = mem::take(owned);
-
-                unsafe {
-                    let rc = match owned_str.into_rc_if_fit() {
-                        // we need to use the into_rc_fit method as the into_rc would create UB!
-                        Ok(rc) => rc, // we don't need to shrink, which means potential references will still be valid
-                        Err(str) => {
-                            *owned = str;
-
-                            let rc = owned.copy_rc();
-
-                            return Self::from_rc(rc);
-                        }
-                    };
-                    *self.inner_mut_ref() = InnerString::Rc(Rc::clone(&rc));
-                    Self::from_rc(rc)
-                }
+                // let owned_str = mem::take(owned);
+                // 
+                // unsafe {
+                //     let rc = match owned_str.into_rc_if_fit() {
+                //         // we need to use the into_rc_fit method as the into_rc would create UB!
+                //         Ok(rc) => rc, // we don't need to shrink, which means potential references will still be valid
+                //         Err(str) => {
+                //             *owned = str;
+                // 
+                //             let rc = owned.copy_rc();
+                // 
+                //             return Self::from_rc(rc);
+                //         }
+                //     };
+                //     *self.inner_mut_ref() = InnerString::Rc(Rc::clone(&rc));
+                //     Self::from_rc(rc)
+                // }
+                
+                
+                
+                todo!("this was UB!") // Rc::from moves the box, which means the references are invalid
             }
             InnerString::Rc(ref rc) => Self::from_rc(Rc::clone(rc)),
             InnerString::Rope(ref rope) => Self::from_rope_str(rope.clone()),
@@ -359,7 +363,7 @@ impl YSString {
         let owned = match inner {
             InnerString::Inline(inline) => return inline.as_mut_str(),
             InnerString::Static(static_str) => {
-                SmallString::from_string(static_str.to_string()).unwrap_or_default()
+                SmallString::from_string((**static_str).to_string()).unwrap_or_default()
             }
             InnerString::Owned(owned) => owned.clone(),
             InnerString::Rc(rc) => SmallString::from_string(rc.to_string()).unwrap_or_default(),
@@ -375,6 +379,8 @@ impl YSString {
 
         owned
     }
+
+    fn push(&mut self, ch: char) {}
 }
 
 impl Deref for YSString {
