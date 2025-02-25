@@ -1,9 +1,9 @@
 mod conf;
+mod optimizer;
 mod repl;
 mod simplerepl;
 #[cfg(target_arch = "wasm32")]
 mod wasm;
-mod optimizer;
 
 use crate::repl::{old_repl, repl};
 use std::path::PathBuf;
@@ -12,8 +12,8 @@ use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
-use yavashark_vm::{OwnedVM, VM};
 use yavashark_vm::yavashark_bytecode::data::DataSection;
+use yavashark_vm::{OwnedVM, VM};
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -121,8 +121,7 @@ fn main() {
         }
 
         if interpreter {
-            let result = match 
-                yavashark_interpreter::Interpreter::run(&script.body, path.clone()) {
+            let result = match yavashark_interpreter::Interpreter::run(&script.body, path.clone()) {
                 Ok(v) => v,
                 Err(e) => {
                     println!("Error: {}", e.pretty_print());

@@ -1,8 +1,8 @@
-use yavashark_bytecode::{ConstIdx, Reg, VarName};
-use yavashark_env::{Res, Value};
-use yavashark_env::value::Error;
 use crate::vm::borrowed::BorrowedVM;
 use crate::vm::owned::OwnedVM;
+use yavashark_bytecode::{ConstIdx, Reg, VarName};
+use yavashark_env::value::Error;
+use yavashark_env::{Res, Value};
 
 #[allow(unused)]
 impl BorrowedVM<'_> {

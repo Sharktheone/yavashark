@@ -45,7 +45,12 @@ pub fn call_acc(num_args: u16, vm: &mut impl VM) -> ControlResult {
     Ok(())
 }
 
-pub fn call_member(num_args: u16, target: VarName, member: VarName, vm: &mut impl VM) -> ControlResult {
+pub fn call_member(
+    num_args: u16,
+    target: VarName,
+    member: VarName,
+    vm: &mut impl VM,
+) -> ControlResult {
     let value = vm.get_variable(target)?;
     let func = value.get_member(member, vm)?;
 
@@ -60,7 +65,12 @@ pub fn call_member(num_args: u16, target: VarName, member: VarName, vm: &mut imp
     Ok(())
 }
 
-pub fn call_member_reg(num_args: u16, target: Reg, member: VarName, vm: &mut impl VM) -> ControlResult {
+pub fn call_member_reg(
+    num_args: u16,
+    target: Reg,
+    member: VarName,
+    vm: &mut impl VM,
+) -> ControlResult {
     let value = vm.get_register(target)?;
     let func = value.get_member(member, vm)?;
 

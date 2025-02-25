@@ -2,6 +2,7 @@ mod helper;
 
 use crate::conf;
 use crate::conf::Conf;
+use crate::optimizer::define_optimizer;
 use crate::repl::helper::ReplHelper;
 use crate::simplerepl::Repl;
 use rustyline::error::ReadlineError;
@@ -17,7 +18,6 @@ use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::OwnedVM;
-use crate::optimizer::define_optimizer;
 
 pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
@@ -164,8 +164,12 @@ fn run_input(
         if conf.bytecode {
             let data = DataSection::new(bc.variables, bc.literals);
 
-            let mut vm =
-                OwnedVM::with_realm_scope(bc.instructions, data, vm_realm.clone(), vm_scope.clone());
+            let mut vm = OwnedVM::with_realm_scope(
+                bc.instructions,
+                data,
+                vm_realm.clone(),
+                vm_scope.clone(),
+            );
 
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");

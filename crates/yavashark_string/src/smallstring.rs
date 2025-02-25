@@ -31,11 +31,7 @@ impl SmallString {
         unsafe {
             let (ptr, len, cap) = self.inner.into_raw_parts();
 
-            let str = String::from_raw_parts(
-                ptr.as_ptr(),
-                len,
-                cap,
-            );
+            let str = String::from_raw_parts(ptr.as_ptr(), len, cap);
 
             str
         }

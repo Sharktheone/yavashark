@@ -1,10 +1,10 @@
-use swc_common::BytePos;
+use crate::Interpreter;
 use swc_common::input::StringInput;
+use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
-use yavashark_env::{Error, Realm, Value, ValueResult};
 use yavashark_env::realm::Eval;
 use yavashark_env::scope::Scope;
-use crate::Interpreter;
+use yavashark_env::{Error, Realm, Value, ValueResult};
 
 pub struct InterpreterEval;
 
@@ -18,14 +18,14 @@ impl Eval for InterpreterEval {
         let syn = Syntax::Es(EsSyntax::default());
 
         let mut p = Parser::new(syn, input, None);
-        
+
         let script = match p.parse_script() {
             Ok(s) => s,
             Err(e) => {
                 return Err(Error::syn_error(format!("{e:?}")));
             }
         };
-        
+
         Interpreter::run_in(&script.body, realm, scope)
     }
 }

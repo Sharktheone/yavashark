@@ -1,13 +1,13 @@
 mod storage;
 
+use crate::execute::Execute;
+use crate::vm::borrowed::BorrowedVM;
+use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::scope::{ParentOrGlobal, Scope};
 use yavashark_env::{Error, Realm, Res, Value};
-use crate::{Registers, Stack, VM};
-use crate::execute::Execute;
-use crate::vm::borrowed::BorrowedVM;
 
 pub struct OwnedVM {
     regs: Registers,
@@ -24,9 +24,12 @@ pub struct OwnedVM {
     realm: Realm,
 }
 
-
 impl OwnedVM {
-    pub fn new(code: Vec<Instruction>, data: DataSection, file: PathBuf) -> yavashark_env::Result<Self> {
+    pub fn new(
+        code: Vec<Instruction>,
+        data: DataSection,
+        file: PathBuf,
+    ) -> yavashark_env::Result<Self> {
         let realm = Realm::new()?;
 
         Ok(Self {
@@ -121,7 +124,6 @@ impl OwnedVM {
     }
 }
 
-
 impl VM for OwnedVM {
     fn acc(&self) -> Value {
         self.acc()
@@ -131,7 +133,7 @@ impl VM for OwnedVM {
         self.set_acc(value);
     }
 
-    fn get_variable(&mut self, name: VarName) -> yavashark_env::Result<Value> { 
+    fn get_variable(&mut self, name: VarName) -> yavashark_env::Result<Value> {
         self.get_variable(name)
     }
 
@@ -182,19 +184,19 @@ impl VM for OwnedVM {
     fn get_realm(&mut self) -> &mut Realm {
         self.get_realm()
     }
-    
+
     fn set_pc(&mut self, pc: usize) {
         self.set_pc(pc);
     }
-    
+
     fn offset_pc(&mut self, offset: isize) {
         self.offset_pc(offset);
     }
-    
+
     fn push_scope(&mut self) -> Res {
         self.push_scope()
     }
-    
+
     fn pop_scope(&mut self) -> Res {
         self.pop_scope()
     }

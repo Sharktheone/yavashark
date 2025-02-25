@@ -7,16 +7,18 @@ impl Interpreter {
     pub fn run_unary(realm: &mut Realm, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
         if stmt.op == UnaryOp::Delete {
             match &*stmt.arg {
-                Expr::Ident(i) => {
-                    return Ok(false.into())
-                }
+                Expr::Ident(i) => return Ok(false.into()),
                 Expr::Member(m) => {
                     let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
                     if let Value::Object(obj) = obj {
                         let name = match &m.prop {
                             swc_ecma_ast::MemberProp::Ident(i) => Value::String(i.sym.to_string()),
-                            swc_ecma_ast::MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
-                            swc_ecma_ast::MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
+                            swc_ecma_ast::MemberProp::PrivateName(p) => {
+                                Value::String(p.name.to_string())
+                            }
+                            swc_ecma_ast::MemberProp::Computed(c) => {
+                                Self::run_expr(realm, &c.expr, c.span, scope)?
+                            }
                         };
 
                         obj.delete_property(&name);
@@ -26,8 +28,7 @@ impl Interpreter {
                 _ => {}
             }
         }
-        
-        
+
         let value = Self::run_expr(realm, &stmt.arg, stmt.span, scope).or_else(|v| {
             if stmt.op == UnaryOp::TypeOf {
                 Ok(Value::String("undefined".to_string()))

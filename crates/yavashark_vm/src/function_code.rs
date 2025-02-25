@@ -1,12 +1,12 @@
+use crate::{BorrowedVM, VM};
+use log::info;
 use std::any::Any;
 use std::path::{Path, PathBuf};
-use log::info;
-use yavashark_bytecode::{Bytecode, Instruction};
 use yavashark_bytecode::data::DataSection;
+use yavashark_bytecode::{Bytecode, Instruction};
 use yavashark_env::optimizer::FunctionCode;
-use yavashark_env::{Realm, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
-use crate::{BorrowedVM, VM};
+use yavashark_env::{Realm, RuntimeResult, Value};
 
 #[derive(Debug)]
 pub struct BytecodeFunction {

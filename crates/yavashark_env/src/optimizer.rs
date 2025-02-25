@@ -1,13 +1,16 @@
+use crate::array::Array;
+use crate::scope::Scope;
+use crate::{
+    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Result,
+    RuntimeResult, Value, ValueResult,
+};
 use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
+use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_value::{BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func};
-use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Result, RuntimeResult};
-use crate::scope::Scope;
-use yavashark_garbage::{Collectable, GcRef};
-use crate::array::Array;
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function, constructor, direct(prototype), name)]
@@ -25,11 +28,9 @@ pub struct RawOptimFunction {
     pub scope: Scope,
 }
 
-
-
 pub trait FunctionCode: Debug {
     fn call(&self, realm: &mut Realm, scope: &mut Scope, this: Value) -> RuntimeResult;
-    
+
     fn function_any(&self) -> &dyn Any;
 }
 
@@ -112,7 +113,7 @@ impl RawOptimFunction {
 
         if let Some(block) = &self.block {
             let func = block.borrow();
-            
+
             if let Err(e) = func.call(realm, scope, this) {
                 return match e {
                     ControlFlow::Error(e) => Err(e),
@@ -161,4 +162,3 @@ impl ConstructorFn<Realm> for RawOptimFunction {
         Ok(())
     }
 }
-

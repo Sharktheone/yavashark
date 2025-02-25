@@ -1,8 +1,8 @@
-mod owned;
 mod borrowed;
+mod owned;
 
-pub use owned::*;
 pub use borrowed::*;
+pub use owned::*;
 
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::{Res, Value};
@@ -23,14 +23,14 @@ pub trait VM {
     #[must_use]
     fn get_stack(&self, idx: u32) -> Option<Value>;
     fn get_args(&mut self, num: u16) -> Vec<Value>;
-    
+
     fn get_realm(&mut self) -> &mut yavashark_env::Realm;
-    
+
     fn set_pc(&mut self, pc: usize);
-    
+
     fn offset_pc(&mut self, offset: isize);
-    
+
     fn push_scope(&mut self) -> Res;
-    
+
     fn pop_scope(&mut self) -> Res;
 }

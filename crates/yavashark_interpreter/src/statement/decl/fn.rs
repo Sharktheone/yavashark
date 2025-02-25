@@ -1,12 +1,12 @@
+use crate::function::{JSFunction, OptimizedJSFunction};
+use crate::Interpreter;
 use std::any::{type_name_of_val, Any, TypeId};
 use std::cell::RefCell;
 use std::mem;
-use crate::function::{JSFunction, OptimizedJSFunction};
-use crate::Interpreter;
 use swc_ecma_ast::FnDecl;
-use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Res, optimizer::OptimFunction};
 use yavashark_env::optimizer::FunctionCode;
+use yavashark_env::scope::Scope;
+use yavashark_env::{optimizer::OptimFunction, Realm, Res};
 use yavashark_value::AsAny;
 
 impl Interpreter {
@@ -14,12 +14,12 @@ impl Interpreter {
         let mut fn_scope = Scope::with_parent(scope)?;
 
         fn_scope.state_set_function()?;
-        
+
         let block = stmt.function.body.as_ref().map(|block| {
             let boxed: Box<dyn FunctionCode> = Box::new(OptimizedJSFunction {
-                block: block.clone()
+                block: block.clone(),
             });
-            
+
             RefCell::new(boxed)
         });
 

@@ -4,10 +4,10 @@ mod smallstring;
 pub(crate) mod smallvec;
 pub(crate) mod uz;
 
-use std::alloc::Layout;
 use crate::smallstring::SmallString;
 use crate::smallvec::SmallVecLenCap;
 use crate::uz::UZ_BYTES;
+use std::alloc::Layout;
 use std::borrow::Cow;
 use std::cell::UnsafeCell;
 use std::cmp::Ordering;
@@ -49,12 +49,12 @@ impl InlineString {
         let Some(len) = InlineLen::from_usize(prev_len + 1) else {
             let mut string = self.as_str().to_string();
             string.push(ch);
-            
+
             return Some(SmallString::from_string(string)?);
         };
 
         self.data[prev_len] = ch as u8;
-        
+
         None
     }
 }
@@ -345,8 +345,6 @@ impl YSString {
 
         owned
     }
-
-    fn push(&mut self, ch: char) {}
 }
 
 impl Deref for YSString {

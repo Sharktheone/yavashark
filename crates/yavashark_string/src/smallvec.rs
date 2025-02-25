@@ -1,16 +1,16 @@
+use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
 use std::fmt::{Debug, Formatter};
-use std::{fmt, mem};
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
-use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
+use std::{fmt, mem};
 
 /// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
 #[repr(packed)]
 //TODO: this should be Rc-able, but we can only do this once UniqueRc is stable
 pub struct SmallVec<T> {
     pub(crate) len_cap: SmallVecLenCap,
-    pub(crate) ptr: NonNull<T>
+    pub(crate) ptr: NonNull<T>,
 }
 
 impl<T> Drop for SmallVec<T> {
@@ -19,10 +19,8 @@ impl<T> Drop for SmallVec<T> {
             let mut vec = self.to_vec_ref();
             ManuallyDrop::drop(&mut vec);
         }
-
     }
 }
-
 
 impl Clone for SmallVec<u8> {
     fn clone(&self) -> Self {
@@ -64,11 +62,10 @@ impl Default for SmallVec<u8> {
     }
 }
 
-
 impl<T> SmallVec<T> {
     pub fn new(vec: Vec<T>) -> Option<Self> {
         let mut vec = ManuallyDrop::new(vec);
-        
+
         let len = vec.len();
         let cap = vec.capacity();
 
@@ -76,10 +73,7 @@ impl<T> SmallVec<T> {
 
         let ptr = NonNull::new(vec.as_mut_ptr())?;
 
-        Some(Self {
-            len_cap,
-            ptr
-        })
+        Some(Self { len_cap, ptr })
     }
 
     unsafe fn to_vec_ref(&self) -> ManuallyDrop<Vec<T>> {
@@ -105,10 +99,10 @@ impl<T> SmallVec<T> {
             std::slice::from_raw_parts(ptr, len)
         }
     }
-    
+
     pub fn into_raw_parts(self) -> (NonNull<T>, usize, usize) {
         let this = ManuallyDrop::new(self);
-        
+
         let ptr = this.ptr;
         let len = this.len_cap.len();
         let cap = this.len_cap.cap();
@@ -116,7 +110,6 @@ impl<T> SmallVec<T> {
         (ptr, len, cap)
     }
 }
-
 
 #[repr(packed)]
 pub struct SmallVecLenCap {

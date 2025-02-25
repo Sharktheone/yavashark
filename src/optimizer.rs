@@ -1,36 +1,36 @@
 use std::any::{type_name, Any, TypeId};
 use std::mem;
 use yavashark_codegen::ByteCodegen;
-use yavashark_env::{NativeFunction, ObjectHandle, Realm, Value, conversion::FromValueOutput, Res, Error};
 use yavashark_env::optimizer::{FunctionCode, OptimFunction, RawOptimFunction};
 use yavashark_env::value::AsAny;
+use yavashark_env::{
+    conversion::FromValueOutput, Error, NativeFunction, ObjectHandle, Realm, Res, Value,
+};
 use yavashark_interpreter::function::OptimizedJSFunction;
 use yavashark_vm::function_code::BytecodeFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
-
-
 pub fn define_optimizer(realm: &mut Realm) -> Res {
     let optimizer = get_optimizer(realm);
 
-    realm.global.define_variable("optimize".into(), optimizer.into())?;
+    realm
+        .global
+        .define_variable("optimize".into(), optimizer.into())?;
 
     Ok(())
-
-
 }
 
 fn get_optimizer(realm: &Realm) -> ObjectHandle {
     NativeFunction::new(
         "optimizer",
         |args, _, _| {
-
             let Some(func) = args.first() else {
-                return Err(Error::ty("optimizer expects a function as its first argument"));
+                return Err(Error::ty(
+                    "optimizer expects a function as its first argument",
+                ));
             };
 
-
-            let func =  OptimFunction::from_value_out(func.copy())?;
+            let func = OptimFunction::from_value_out(func.copy())?;
             println!("Optimizing function: {}", func.raw.name);
 
             let Some(code) = &func.raw.block else {
@@ -61,12 +61,10 @@ fn get_optimizer(realm: &Realm) -> ObjectHandle {
                 }
             };
 
-
             *code = Box::new(func);
 
             Ok(Value::Undefined)
         },
         realm,
     )
-
 }

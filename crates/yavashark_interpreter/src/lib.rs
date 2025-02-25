@@ -12,13 +12,13 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{scope, ControlFlow, Realm, Result, Value, ValueResult};
 
 mod class;
+pub mod eval;
 pub mod function;
 mod location;
 mod pat;
 pub mod statement;
 #[cfg(test)]
 mod tests;
-pub mod eval;
 
 pub struct Interpreter;
 

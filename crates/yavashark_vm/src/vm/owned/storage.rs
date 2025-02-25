@@ -1,8 +1,8 @@
+use crate::vm::owned::OwnedVM;
 use crate::VM;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
 use yavashark_env::{Res, Result, Value};
-use crate::vm::owned::OwnedVM;
 
 #[allow(unused)]
 impl OwnedVM {

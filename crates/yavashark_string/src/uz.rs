@@ -13,26 +13,23 @@ impl UsizeSmall {
         if last != 0 {
             return None;
         }
-        
-        
-        
+
         let mut res = [0; UZ_BYTES];
-        
+
         res.copy_from_slice(&bytes[..UZ_BYTES]);
-        
-        
+
         Some(Self { bytes: res })
     }
-    
+
     pub fn from_le_slice(slice: &[u8]) -> Option<Self> {
         if slice.len() != UZ_BYTES {
             return None;
         }
-        
+
         let mut res = [0; UZ_BYTES];
-        
+
         res.copy_from_slice(slice);
-        
+
         Some(Self { bytes: res })
     }
 

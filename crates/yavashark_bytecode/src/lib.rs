@@ -7,8 +7,8 @@
 pub use consts::*;
 pub use instructions::*;
 use yavashark_env::optimizer::FunctionCode;
-use yavashark_env::{Realm, RuntimeResult, Value};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Realm, RuntimeResult, Value};
 
 mod consts;
 pub mod data;

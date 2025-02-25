@@ -1,10 +1,10 @@
 mod execute;
+pub mod function_code;
 mod instructions;
 mod regs;
 mod stack;
 mod storage;
 mod value_ext;
-pub mod function_code;
 mod vm;
 
 use crate::execute::Execute;

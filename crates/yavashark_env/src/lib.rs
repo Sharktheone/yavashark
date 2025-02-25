@@ -15,11 +15,11 @@ pub mod conversion;
 pub mod experiments;
 mod function_conversion;
 mod global;
+pub mod optimizer;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-pub mod optimizer;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
