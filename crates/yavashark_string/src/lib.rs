@@ -42,23 +42,6 @@ impl PartialEq for InlineString {
 
 impl Eq for InlineString {}
 
-impl InlineString {
-    pub fn push(&mut self, ch: char) -> Option<SmallString> {
-        let prev_len = self.len();
-
-        let Some(len) = InlineLen::from_usize(prev_len + 1) else {
-            let mut string = self.as_str().to_string();
-            string.push(ch);
-
-            return Some(SmallString::from_string(string)?);
-        };
-
-        self.data[prev_len] = ch as u8;
-
-        None
-    }
-}
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum InlineLen {
@@ -129,6 +112,36 @@ impl InlineString {
         }
 
         Ok(Self { len, data })
+    }
+    pub fn push(&mut self, ch: char) -> Option<SmallString> {
+        let prev_len = self.len();
+
+        let Some(len) = InlineLen::from_usize(prev_len + 1) else {
+            let mut string = self.as_str().to_string();
+            string.push(ch);
+
+            return SmallString::from_string(string);
+        };
+
+        self.data[prev_len] = ch as u8;
+
+        None
+    }
+    
+    pub fn push_str(&mut self, str: &str) -> Option<SmallString> {
+        let prev_len = self.len();
+        let new_len = prev_len + str.len();
+
+        let Some(len) = InlineLen::from_usize(new_len) else {
+            let mut string = self.as_str().to_string();
+            string.push_str(str);
+
+            return SmallString::from_string(string);
+        };
+
+        self.data[prev_len..new_len].copy_from_slice(str.as_bytes());
+
+        None
     }
 }
 
