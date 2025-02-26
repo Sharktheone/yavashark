@@ -91,11 +91,9 @@ impl<T> SmallVec<T> {
             ManuallyDrop::into_inner(vec)
         }
     }
-    
+
     fn vec_wrapper(&mut self) -> VecWrapper<T> {
-        unsafe {
-            VecWrapper(self.to_vec_ref(), self)
-        }
+        unsafe { VecWrapper(self.to_vec_ref(), self) }
     }
 
     pub fn slice(&self) -> &[T] {
@@ -115,19 +113,18 @@ impl<T> SmallVec<T> {
 
         (ptr, len, cap)
     }
-    
+
     pub fn push(&mut self, val: T) {
         let mut wrap = self.vec_wrapper();
-        
+
         wrap.push(val);
     }
-    
 }
 
 impl<T: Clone> SmallVec<T> {
     pub fn extend_from_slice(&mut self, slice: &[T]) {
         let mut wrap = self.vec_wrapper();
-        
+
         wrap.extend_from_slice(slice);
     }
 }

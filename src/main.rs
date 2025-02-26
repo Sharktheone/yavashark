@@ -13,7 +13,7 @@ use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::print::PrettyPrint;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::{OwnedVM};
+use yavashark_vm::OwnedVM;
 
 #[allow(clippy::unwrap_used)]
 fn main() {

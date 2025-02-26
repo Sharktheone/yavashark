@@ -1,4 +1,3 @@
-
 // #[allow(unused)]
 // impl VM {
 //     pub fn get_variable(&mut self, name: VarName) -> Result<Value> {

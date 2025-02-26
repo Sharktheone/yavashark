@@ -303,8 +303,8 @@ impl YSString {
 
     // #[must_use]
     // pub fn rc(str: &str) -> Self {
-    //     
-    //     
+    //
+    //
     // }
 
     #[must_use]
@@ -456,9 +456,9 @@ impl YSString {
             }
             InnerString::Owned(owned) => {
                 let rc = owned.clone().into_rc();
-                
+
                 let left = Self::from_rc(rc);
-                
+
                 Some(RopeStr::from_elems(left, str))
             }
             InnerString::Rc(rc) => {

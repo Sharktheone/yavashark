@@ -57,11 +57,11 @@ impl SmallString {
 
         Rc::from(vec)
     }
-    
+
     pub fn push(&mut self, c: char) {
         self.inner.push(c as u8);
     }
-    
+
     pub fn push_str(&mut self, s: &str) {
         self.inner.extend_from_slice(s.as_bytes());
     }

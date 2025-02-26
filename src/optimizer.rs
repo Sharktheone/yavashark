@@ -1,5 +1,5 @@
 use yavashark_codegen::ByteCodegen;
-use yavashark_env::optimizer::{OptimFunction};
+use yavashark_env::optimizer::OptimFunction;
 use yavashark_env::{
     conversion::FromValueOutput, Error, NativeFunction, ObjectHandle, Realm, Res, Value,
 };
