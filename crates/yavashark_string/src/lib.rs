@@ -227,6 +227,29 @@ impl RopeStr {
 
         str
     }
+    
+    fn as_ysstring(&self) -> YSString {
+        YSString::from_rope_str(self.clone())
+    }
+
+    fn push(&self, ch: char) -> Option<SmallString> {
+        let mut str = self.as_string();
+
+        str.push(ch);
+
+        SmallString::from_string(str)
+    }
+    
+    fn push_str(&self, str: YSString) -> Self {
+        let rope = self.as_ysstring();
+        
+        Self {
+            inner: Rc::new(RopeStrInner {
+                left: rope,
+                right: str,
+            }),
+        }
+    }
 }
 
 impl Default for YSString {
@@ -274,9 +297,11 @@ impl YSString {
     }
 
     #[must_use]
-    pub const fn from_rope(left: Rc<Self>, right: Rc<Self>) -> Self {
+    pub fn from_rope(left: Self, right: Self) -> Self {
         Self {
-            inner: UnsafeCell::new(InnerString::Rope(RopeStr { left, right })),
+            inner: UnsafeCell::new(InnerString::Rope(RopeStr {
+                inner: Rc::new(RopeStrInner { left, right }),
+            })),
         }
     }
 
