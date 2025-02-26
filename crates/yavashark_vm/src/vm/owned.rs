@@ -1,7 +1,6 @@
 mod storage;
 
 use crate::execute::Execute;
-use crate::vm::borrowed::BorrowedVM;
 use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
@@ -154,7 +153,7 @@ impl VM for OwnedVM {
     }
 
     fn push(&mut self, value: Value) {
-        self.push(value)
+        self.push(value);
     }
 
     fn pop(&mut self) -> Option<Value> {
@@ -162,7 +161,7 @@ impl VM for OwnedVM {
     }
 
     fn set_accb(&mut self, value: bool) {
-        self.set_accb(value)
+        self.set_accb(value);
     }
 
     fn get_this(&self) -> yavashark_env::Result<Value> {

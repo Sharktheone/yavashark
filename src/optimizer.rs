@@ -1,8 +1,5 @@
-use std::any::{type_name, Any, TypeId};
-use std::mem;
 use yavashark_codegen::ByteCodegen;
-use yavashark_env::optimizer::{FunctionCode, OptimFunction, RawOptimFunction};
-use yavashark_env::value::AsAny;
+use yavashark_env::optimizer::{OptimFunction};
 use yavashark_env::{
     conversion::FromValueOutput, Error, NativeFunction, ObjectHandle, Realm, Res, Value,
 };
@@ -10,7 +7,7 @@ use yavashark_interpreter::function::OptimizedJSFunction;
 use yavashark_vm::function_code::BytecodeFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
-pub fn define_optimizer(realm: &mut Realm) -> Res {
+pub fn define_optimizer(realm: &Realm) -> Res {
     let optimizer = get_optimizer(realm);
 
     realm

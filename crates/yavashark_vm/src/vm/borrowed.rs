@@ -133,7 +133,7 @@ impl VM for BorrowedVM<'_> {
     }
 
     fn push(&mut self, value: Value) {
-        self.push(value)
+        self.push(value);
     }
 
     fn pop(&mut self) -> Option<Value> {
@@ -141,7 +141,7 @@ impl VM for BorrowedVM<'_> {
     }
 
     fn set_accb(&mut self, value: bool) {
-        self.set_accb(value)
+        self.set_accb(value);
     }
 
     fn get_this(&self) -> yavashark_env::Result<Value> {

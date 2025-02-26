@@ -1,9 +1,7 @@
-use crate::{BorrowedVM, VM};
-use log::info;
+use crate::BorrowedVM;
 use std::any::Any;
-use std::path::{Path, PathBuf};
 use yavashark_bytecode::data::DataSection;
-use yavashark_bytecode::{Bytecode, Instruction};
+use yavashark_bytecode::Instruction;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult, Value};

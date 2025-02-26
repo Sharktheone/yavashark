@@ -1,5 +1,4 @@
 use crate::vm::borrowed::BorrowedVM;
-use crate::vm::owned::OwnedVM;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
 use yavashark_env::{Res, Value};
@@ -12,7 +11,7 @@ impl BorrowedVM<'_> {
         };
 
         self.current_scope
-            .resolve(name, &mut self.realm)?
+            .resolve(name, self.realm)?
             .ok_or(Error::reference("Variable not found"))
     }
 
@@ -73,7 +72,7 @@ impl BorrowedVM<'_> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        Ok(val.clone().into_value(&self.realm))
+        Ok(val.clone().into_value(self.realm))
     }
 
     #[must_use]
