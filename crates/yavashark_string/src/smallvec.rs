@@ -91,6 +91,12 @@ impl<T> SmallVec<T> {
             ManuallyDrop::into_inner(vec)
         }
     }
+    
+    fn vec_wrapper(&mut self) -> VecWrapper<T> {
+        unsafe {
+            VecWrapper(self.to_vec_ref(), self)
+        }
+    }
 
     pub fn slice(&self) -> &[T] {
         unsafe {
@@ -108,6 +114,53 @@ impl<T> SmallVec<T> {
         let cap = this.len_cap.cap();
 
         (ptr, len, cap)
+    }
+    
+    pub fn push(&mut self, val: T) {
+        let mut wrap = self.vec_wrapper();
+        
+        wrap.push(val);
+    }
+    
+}
+
+impl<T: Clone> SmallVec<T> {
+    pub fn extend_from_slice(&mut self, slice: &[T]) {
+        let mut wrap = self.vec_wrapper();
+        
+        wrap.extend_from_slice(slice);
+    }
+}
+
+struct VecWrapper<'a, T>(ManuallyDrop<Vec<T>>, &'a mut SmallVec<T>);
+
+impl<T> Deref for VecWrapper<'_, T> {
+    type Target = Vec<T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for VecWrapper<'_, T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<T> Drop for VecWrapper<'_, T> {
+    fn drop(&mut self) {
+        let len = self.0.len();
+        let cap = self.0.capacity();
+
+        #[allow(clippy::expect_used)]
+        let len_cap = SmallVecLenCap::new(len, cap).expect("too many items in vec!");
+
+        #[allow(clippy::expect_used)]
+        let ptr = NonNull::new(self.0.as_mut_ptr()).expect("unreachable");
+
+        self.1.len_cap = len_cap;
+        self.1.ptr = ptr;
     }
 }
 
