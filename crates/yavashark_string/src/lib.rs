@@ -73,8 +73,12 @@ pub enum InlineLen {
 
 #[derive(Clone)]
 struct RopeStr {
-    left: Rc<YSString>,
-    right: Rc<YSString>,
+    inner: Rc<RopeStrInner>,
+}
+
+pub struct RopeStrInner {
+    left: YSString,
+    right: YSString,
 }
 
 impl InlineString {
@@ -178,22 +182,38 @@ impl InlineLen {
 
 impl RopeStr {
     fn len(&self) -> usize {
-        self.left.len() + self.right.len()
+        self.inner.left.len() + self.inner.right.len()
+    }
+    
+    fn left_rc(&self) -> usize {
+        match &self.inner.left.inner() {
+            InnerString::Rc(rc) => Rc::strong_count(rc),
+            InnerString::Rope(rope) => Rc::strong_count(&rope.inner),
+            _ => 1,
+        }
+    }
+    
+    fn right_rc(&self) -> usize {
+        match &self.inner.right.inner() {
+            InnerString::Rc(rc) => Rc::strong_count(rc),
+            InnerString::Rope(rope) => Rc::strong_count(&rope.inner),
+            _ => 1,
+        }
     }
 
     fn as_string_opt_rope(&self) -> String {
         let mut str = String::with_capacity(self.len());
 
-        if Rc::strong_count(&self.left) == 1 {
-            str.push_str(&self.left.as_str_no_rope_fix()); // if we only have one reference, we can avoid cloning
+        if self.left_rc() == 1 {
+            str.push_str(&self.inner.left.as_str_no_rope_fix()); // if we only have one reference, we can avoid cloning
         } else {
-            str.push_str(self.left.as_str());
+            str.push_str(self.inner.left.as_str());
         }
 
-        if Rc::strong_count(&self.right) == 1 {
-            str.push_str(&self.right.as_str_no_rope_fix()); // if we only have one reference, we can avoid cloning
+        if self.right_rc() == 1 {
+            str.push_str(&self.inner.right.as_str_no_rope_fix()); // if we only have one reference, we can avoid cloning
         } else {
-            str.push_str(self.right.as_str());
+            str.push_str(self.inner.right.as_str());
         }
 
         str
@@ -202,8 +222,8 @@ impl RopeStr {
     fn as_string(&self) -> String {
         let mut str = String::with_capacity(self.len());
 
-        str.push_str(self.left.as_str());
-        str.push_str(self.right.as_str());
+        str.push_str(self.inner.left.as_str());
+        str.push_str(self.inner.right.as_str());
 
         str
     }
