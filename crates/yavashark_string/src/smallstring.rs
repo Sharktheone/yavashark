@@ -31,9 +31,7 @@ impl SmallString {
         unsafe {
             let (ptr, len, cap) = self.inner.into_raw_parts();
 
-            let str = String::from_raw_parts(ptr.as_ptr(), len, cap);
-
-            str
+            String::from_raw_parts(ptr.as_ptr(), len, cap)
         }
     }
 
@@ -58,6 +56,14 @@ impl SmallString {
         let vec = self.as_str().to_string().into_boxed_str();
 
         Rc::from(vec)
+    }
+    
+    pub fn push(&mut self, c: char) {
+        self.inner.push(c as u8);
+    }
+    
+    pub fn push_str(&mut self, s: &str) {
+        self.inner.extend_from_slice(s.as_bytes());
     }
 }
 
