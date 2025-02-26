@@ -100,10 +100,8 @@ impl InlineString {
         unsafe { std::str::from_utf8_unchecked_mut(&mut self.data[0..len]) }
     }
 
-    fn try_from_string(str: String) -> Result<Self, String> {
-        let Some(len) = InlineLen::from_usize(str.len()) else {
-            return Err(str);
-        };
+    fn try_from_string(str: &str) -> Option<Self> {
+        let len = InlineLen::from_usize(str.len())?;
 
         let mut data = [0; 23];
 
@@ -111,7 +109,7 @@ impl InlineString {
             data[0..len as usize].copy_from_slice(str.as_bytes());
         }
 
-        Ok(Self { len, data })
+        Some(Self { len, data })
     }
     pub fn push(&mut self, ch: char) -> Option<SmallString> {
         let prev_len = self.len();
@@ -237,10 +235,11 @@ impl YSString {
 
     #[must_use]
     pub fn from_string(str: String) -> Self {
-        let str = match InlineString::try_from_string(str) {
-            Ok(inline) => InnerString::Inline(inline),
-            Err(str) => InnerString::Owned(SmallString::from_string(str).unwrap_or_default()),
-        };
+        let str = InlineString::try_from_string(&str)
+            .map_or_else(
+                || InnerString::Owned(SmallString::from_string(str).unwrap_or_default()), 
+                InnerString::Inline,
+            );
 
         Self {
             inner: UnsafeCell::new(str),
