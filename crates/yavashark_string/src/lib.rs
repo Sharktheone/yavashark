@@ -129,16 +129,18 @@ impl InlineString {
 
         None
     }
-    
-    pub fn push_str(&mut self, str: &str) -> Option<SmallString> {
+
+    fn push_str(&mut self, str: YSString) -> Option<RopeStr> {
         let prev_len = self.len();
         let new_len = prev_len + str.len();
 
         let Some(len) = InlineLen::from_usize(new_len) else {
-            let mut string = self.as_str().to_string();
-            string.push_str(str);
-
-            return SmallString::from_string(string);
+            return Some(RopeStr {
+                inner: Rc::new(RopeStrInner {
+                    left: YSString::from_inline(*self),
+                    right: str,
+                }),
+            });
         };
 
         self.data[prev_len..new_len].copy_from_slice(str.as_bytes());
@@ -248,6 +250,12 @@ impl RopeStr {
                 left: rope,
                 right: str,
             }),
+        }
+    }
+
+    pub fn from_elems(left: YSString, right: YSString) -> RopeStr {
+        RopeStr {
+            inner: Rc::new(RopeStrInner { left, right }),
         }
     }
 }
