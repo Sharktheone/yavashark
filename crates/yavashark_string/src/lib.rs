@@ -7,11 +7,9 @@ pub(crate) mod uz;
 use crate::smallstring::SmallString;
 use crate::smallvec::SmallVecLenCap;
 use crate::uz::UZ_BYTES;
-use std::alloc::Layout;
 use std::borrow::Cow;
 use std::cell::UnsafeCell;
 use std::cmp::Ordering;
-use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
@@ -186,7 +184,7 @@ impl RopeStr {
     fn len(&self) -> usize {
         self.inner.left.len() + self.inner.right.len()
     }
-    
+
     fn left_rc(&self) -> usize {
         match &self.inner.left.inner() {
             InnerString::Rc(rc) => Rc::strong_count(rc),
@@ -194,7 +192,7 @@ impl RopeStr {
             _ => 1,
         }
     }
-    
+
     fn right_rc(&self) -> usize {
         match &self.inner.right.inner() {
             InnerString::Rc(rc) => Rc::strong_count(rc),
@@ -229,7 +227,7 @@ impl RopeStr {
 
         str
     }
-    
+
     fn as_ysstring(&self) -> YSString {
         YSString::from_rope_str(self.clone())
     }
@@ -241,10 +239,10 @@ impl RopeStr {
 
         SmallString::from_string(str)
     }
-    
+
     fn push_str(&self, str: YSString) -> Self {
         let rope = self.as_ysstring();
-        
+
         Self {
             inner: Rc::new(RopeStrInner {
                 left: rope,
@@ -286,11 +284,10 @@ impl YSString {
 
     #[must_use]
     pub fn from_string(str: String) -> Self {
-        let str = InlineString::try_from_string(&str)
-            .map_or_else(
-                || InnerString::Owned(SmallString::from_string(str).unwrap_or_default()), 
-                InnerString::Inline,
-            );
+        let str = InlineString::try_from_string(&str).map_or_else(
+            || InnerString::Owned(SmallString::from_string(str).unwrap_or_default()),
+            InnerString::Inline,
+        );
 
         Self {
             inner: UnsafeCell::new(str),
@@ -303,6 +300,12 @@ impl YSString {
             inner: UnsafeCell::new(InnerString::Rc(rc)),
         }
     }
+
+    // #[must_use]
+    // pub fn rc(str: &str) -> Self {
+    //     
+    //     
+    // }
 
     #[must_use]
     pub fn from_rope(left: Self, right: Self) -> Self {
@@ -409,6 +412,65 @@ impl YSString {
         };
 
         owned
+    }
+
+    pub fn push(&mut self, ch: char) {
+        let inner = self.inner_mut();
+
+        let new = match inner {
+            InnerString::Inline(inline) => inline.push(ch),
+            InnerString::Static(static_str) => {
+                let mut string = String::with_capacity(static_str.len() + 1);
+                string.push_str(static_str);
+
+                string.push(ch);
+
+                SmallString::from_string(string)
+            }
+            InnerString::Owned(owned) => {
+                owned.push(ch);
+                None
+            }
+            InnerString::Rc(rc) => {
+                let mut string = rc.to_string();
+                string.push(ch);
+
+                SmallString::from_string(string)
+            }
+            InnerString::Rope(rope) => rope.push(ch),
+        };
+
+        if let Some(new) = new {
+            *inner = InnerString::Owned(new);
+        }
+    }
+
+    pub fn push_str(&mut self, str: Self) {
+        let inner = self.inner_mut();
+
+        let new = match inner {
+            InnerString::Inline(inline) => inline.push_str(str),
+            InnerString::Static(static_str) => {
+                let left = Self::new_static(static_str);
+                Some(RopeStr::from_elems(left, str))
+            }
+            InnerString::Owned(owned) => {
+                let rc = owned.clone().into_rc();
+                
+                let left = Self::from_rc(rc);
+                
+                Some(RopeStr::from_elems(left, str))
+            }
+            InnerString::Rc(rc) => {
+                let left = Self::from_rc(Rc::clone(rc));
+                Some(RopeStr::from_elems(left, str))
+            }
+            InnerString::Rope(rope) => Some(rope.push_str(str)),
+        };
+
+        if let Some(new) = new {
+            *inner = InnerString::Rope(new);
+        }
     }
 }
 
