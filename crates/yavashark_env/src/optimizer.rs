@@ -7,7 +7,7 @@ use crate::{
 use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::Debug;
-use swc_ecma_ast::{BlockStmt, Param, Pat};
+use swc_ecma_ast::{Param, Pat};
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_value::{BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func};
@@ -48,10 +48,10 @@ impl OptimFunction {
         block: Option<RefCell<Box<dyn FunctionCode>>>,
         scope: Scope,
         realm: &mut Realm,
-    ) -> ObjectHandle {
+    ) -> Result<ObjectHandle> {
         let prototype = Object::new(realm);
 
-        scope.copy_path();
+        scope.copy_path()?;
 
         let this = Self {
             inner: RefCell::new(MutableOptimFunction {
@@ -67,12 +67,12 @@ impl OptimFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        prototype.define_property("constructor".into(), handle.clone().into());
+        prototype.define_property("constructor".into(), handle.clone().into())?;
 
-        handle
+        Ok(handle)
     }
 
-    pub fn new_instance(&self, realm: &mut Realm) -> ValueResult {
+    pub fn new_instance(&self) -> ValueResult {
         let inner = self.inner.try_borrow()?;
 
         let proto = inner.prototype.value.clone();
@@ -137,7 +137,7 @@ impl CustomGcRefUntyped for RawOptimFunction {
 
 impl Constructor<Realm> for OptimFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let this = self.new_instance(realm)?;
+        let this = self.new_instance()?;
 
         self.raw.call(realm, args, this.copy())?;
 

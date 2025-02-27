@@ -23,7 +23,7 @@ pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
 
     let mut interpreter_realm = Realm::new()?;
-    define_optimizer(interpreter_realm)?;
+    define_optimizer(&interpreter_realm)?;
     interpreter_realm.set_eval(InterpreterEval)?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 

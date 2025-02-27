@@ -1064,7 +1064,7 @@ impl Array {
     fn with(
         #[this] this: &Value,
         idx: isize,
-        val: Value,
+        val: &Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let len = this

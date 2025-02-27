@@ -30,7 +30,7 @@ impl Interpreter {
             block,
             fn_scope,
             realm,
-        );
+        )?;
         scope.declare_var(name, function.into());
 
         Ok(())
