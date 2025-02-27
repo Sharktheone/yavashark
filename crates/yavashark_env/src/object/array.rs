@@ -2,7 +2,7 @@ use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
-use yavashark_value::{BoxedObj, Constructor, Obj};
+use yavashark_value::{BoxedObj, Constructor, Func, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -22,6 +22,18 @@ impl Array {
 
         inner.object.set_array(elements);
         inner.length.value = Value::Number(inner.object.array.len() as f64);
+
+        drop(inner);
+
+        Ok(array)
+    }
+    
+    pub fn with_len(realm: &Realm, len: usize) -> Result<Self> {
+        let array = Self::new(realm.intrinsics.array.clone().into());
+
+        let mut inner = array.inner.try_borrow_mut()?;
+
+        inner.length.value = Value::Number(len as f64);
 
         drop(inner);
 
@@ -140,26 +152,6 @@ impl Array {
     }
 }
 
-impl Constructor<Realm> for Array {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let this = Self::new(realm.intrinsics.array.clone().into());
-
-        let values = args
-            .into_iter()
-            .map(ObjectProperty::new)
-            .enumerate()
-            .collect::<Vec<_>>();
-
-        let mut inner = this.inner.try_borrow_mut()?;
-
-        inner.object.array = values;
-        inner.length.value = Value::Number(inner.object.array.len() as f64);
-
-        drop(inner);
-
-        Ok(this.into_object().into())
-    }
-}
 
 fn convert_index(idx: isize, len: usize) -> usize {
     if idx < 0 {
@@ -1108,17 +1100,47 @@ impl Array {
     }
 }
 
-#[object(constructor)]
+#[object(constructor, function)]
 #[derive(Debug)]
 pub struct ArrayConstructor {}
 
+
 impl Constructor<Realm> for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let array = Array::with_elements(realm, args)?;
+        if args.len() == 1 {
+            if let Value::Number(num) =  &args[0] {
+                return Ok(Array::with_len(realm, *num as usize)?.into_value());
+            }
+        }
 
-        Ok(array.into_value())
+
+
+        let this = Array::new(realm.intrinsics.array.clone().into());
+
+        let values = args
+            .into_iter()
+            .map(ObjectProperty::new)
+            .enumerate()
+            .collect::<Vec<_>>();
+
+        let mut inner = this.inner.try_borrow_mut()?;
+
+        inner.object.array = values;
+        inner.length.value = Value::Number(inner.object.array.len() as f64);
+
+        drop(inner);
+
+        Ok(this.into_object().into())
     }
 }
+
+
+impl Func<Realm> for ArrayConstructor {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
+        Constructor::construct(self, realm, args)
+    }
+}
+
 
 impl ArrayConstructor {
     #[allow(clippy::new_ret_no_self)]
