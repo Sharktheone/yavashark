@@ -202,6 +202,14 @@ impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
     }
 }
 
+impl<T: FromValueOutput> ExtractValue<&Option<T>> for Extractor<'_> {
+    type Output = Option<T::Output>;
+
+    fn extract(&mut self) -> Result<Self::Output> {
+        ExtractValue::<Option<T>>::extract(self)
+    }
+}
+
 impl<T: FromValueOutput> ExtractValue<Vec<T>> for Extractor<'_> {
     type Output = Vec<T::Output>;
 

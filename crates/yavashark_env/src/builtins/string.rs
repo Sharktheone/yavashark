@@ -305,7 +305,7 @@ impl StringObj {
     }
 
     #[prop("padEnd")]
-    pub fn pad_end(&self, target_length: usize, pad_string: Option<String>) -> ValueResult {
+    pub fn pad_end(&self, target_length: usize, pad_string: &Option<String>) -> ValueResult {
         let inner = self.inner.borrow();
 
         let pad_string = pad_string.as_deref().unwrap_or(" ");
@@ -318,7 +318,7 @@ impl StringObj {
     }
 
     #[prop("padStart")]
-    pub fn pad_start(&self, target_length: usize, pad_string: Option<String>) -> ValueResult {
+    pub fn pad_start(&self, target_length: usize, pad_string: &Option<String>) -> ValueResult {
         let inner = self.inner.borrow();
 
         let pad_string = pad_string.as_deref().unwrap_or(" ");
@@ -392,11 +392,11 @@ impl StringObj {
 
         let limit = limit.unwrap_or(usize::MAX);
 
-        let mut parts = inner.string.splitn(limit, separator);
+        let parts = inner.string.splitn(limit, separator);
 
         let mut array = Vec::new();
 
-        while let Some(part) = parts.next() {
+        for part in parts {
             array.push(part.into());
         }
 
