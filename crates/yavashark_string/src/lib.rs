@@ -301,12 +301,6 @@ impl YSString {
         }
     }
 
-    // #[must_use]
-    // pub fn rc(str: &str) -> Self {
-    //
-    //
-    // }
-
     #[must_use]
     pub fn from_rope(left: Self, right: Self) -> Self {
         Self {
@@ -518,27 +512,4 @@ impl Ord for YSString {
     fn cmp(&self, other: &Self) -> Ordering {
         self.as_str().cmp(other.as_str())
     }
-}
-
-#[test]
-fn str_size() {
-    dbg!(size_of::<InnerString>());
-    dbg!(align_of::<InnerString>());
-    dbg!(size_of::<SmallVecLenCap>());
-    dbg!(size_of::<SmallString>());
-
-    dbg!(size_of::<String>());
-    dbg!(size_of::<Option<String>>());
-
-    let str = "Hello, World!".to_owned();
-
-    let str = str.into_boxed_str();
-
-    let rcd: Rc<str> = Rc::from(str);
-
-    let rcd2 = rcd.clone();
-
-    dbg!(rcd, rcd2);
-
-    // assert_eq!(std::mem::size_of::<InnerString>(), std::mem::size_of::<String>());
 }
