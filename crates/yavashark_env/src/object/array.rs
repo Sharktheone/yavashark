@@ -27,7 +27,7 @@ impl Array {
 
         Ok(array)
     }
-    
+
     pub fn with_len(realm: &Realm, len: usize) -> Result<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
@@ -151,7 +151,6 @@ impl Array {
         Ok(Value::Undefined)
     }
 }
-
 
 fn convert_index(idx: isize, len: usize) -> usize {
     if idx < 0 {
@@ -1104,16 +1103,13 @@ impl Array {
 #[derive(Debug)]
 pub struct ArrayConstructor {}
 
-
 impl Constructor<Realm> for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         if args.len() == 1 {
-            if let Value::Number(num) =  &args[0] {
+            if let Value::Number(num) = &args[0] {
                 return Ok(Array::with_len(realm, *num as usize)?.into_value());
             }
         }
-
-
 
         let this = Array::new(realm.intrinsics.array.clone().into());
 
@@ -1134,13 +1130,11 @@ impl Constructor<Realm> for ArrayConstructor {
     }
 }
 
-
 impl Func<Realm> for ArrayConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
         Constructor::construct(self, realm, args)
     }
 }
-
 
 impl ArrayConstructor {
     #[allow(clippy::new_ret_no_self)]
