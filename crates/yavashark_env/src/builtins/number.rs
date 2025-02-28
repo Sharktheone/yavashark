@@ -32,17 +32,17 @@ impl NumberConstructor {
 
 #[properties_new(raw)]
 impl NumberConstructor {
-    const EPSILON: f64 = f64::EPSILON;
-    const MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
-    const MIN_SAFE_INTEGER: f64 = -9_007_199_254_740_991.0;
+    pub const EPSILON: f64 = f64::EPSILON;
+    pub const MAX_SAFE_INTEGER: f64 = 9_007_199_254_740_991.0;
+    pub const MIN_SAFE_INTEGER: f64 = -9_007_199_254_740_991.0;
 
-    const MAX_VALUE: f64 = f64::MAX;
-    const MIN_VALUE: f64 = f64::MIN;
+    pub const MAX_VALUE: f64 = f64::MAX;
+    pub const MIN_VALUE: f64 = f64::MIN;
 
-    const NEGATIVE_INFINITY: f64 = f64::NEG_INFINITY;
-    const POSITIVE_INFINITY: f64 = f64::INFINITY;
+    pub const NEGATIVE_INFINITY: f64 = f64::NEG_INFINITY;
+    pub const POSITIVE_INFINITY: f64 = f64::INFINITY;
     #[prop("NaN")]
-    const NAN: f64 = f64::NAN;
+    pub const NAN: f64 = f64::NAN;
 
     #[prop("isFinite")]
     #[must_use]

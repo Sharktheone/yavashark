@@ -50,6 +50,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
 
     obj.define_variable("globalThis".into(), realm.global.clone().into())?;
     obj.define_variable("global".into(), realm.global.clone().into())?;
+    obj.define_variable("ArrayBuffer".into(), realm.intrinsics.arraybuffer_constructor())?;
 
     macro_rules! copy_from {
         ($prop:ident, $name:ident) => {

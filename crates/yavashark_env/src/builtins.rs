@@ -1,3 +1,4 @@
+mod arraybuffer;
 mod bigint;
 mod boolean;
 mod error;
@@ -17,3 +18,4 @@ pub use number::*;
 pub use regex::*;
 pub use string::*;
 pub use symbol::*;
+pub use arraybuffer::*;
