@@ -8,7 +8,6 @@ pub struct NativeFunctionWrapper {
     func: Callback,
 }
 
-
 impl<F: Fn(i32) + 'static> From<F> for NativeFunctionWrapper {
     fn from(func: F) -> Self {
         Self {

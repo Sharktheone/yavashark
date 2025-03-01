@@ -145,7 +145,6 @@ impl FromValueOutput for &BigInt {
     }
 }
 
-
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
         $(

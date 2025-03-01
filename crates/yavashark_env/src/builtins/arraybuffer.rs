@@ -90,7 +90,6 @@ impl ArrayBufferConstructor {
     }
 }
 
-
 impl ArrayBufferConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {

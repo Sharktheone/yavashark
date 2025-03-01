@@ -152,7 +152,7 @@ impl Array {
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn convert_index(idx: isize, len: usize) -> usize {
     if idx < 0 {
         (len as isize + idx).max(0) as usize

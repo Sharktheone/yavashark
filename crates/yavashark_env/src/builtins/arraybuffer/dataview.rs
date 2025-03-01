@@ -1,15 +1,15 @@
 mod from_bytes;
 
+use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result, Value, ValueResult};
-use std::cell::RefCell;
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
+use std::cell::RefCell;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{BoxedObj, Constructor, Error, Obj};
-use crate::builtins::dataview::from_bytes::FromBytes;
 
 #[object(direct(buffer, byte_offset, byte_length))]
 #[derive(Debug)]
@@ -69,46 +69,45 @@ impl DataView {
 
         let slice = buffer.buffer.as_slice();
         let offset = self.byte_offset + offset;
-        
-        let value = &slice.get(offset..offset + T::N_BYTES)
+
+        let value = &slice
+            .get(offset..offset + T::N_BYTES)
             .ok_or(Error::range("Out of bounds"))?;
 
-        let bytes = T::Bytes::try_from(value)
-            .map_err(|_| Error::range("Out of bounds"))?;
+        let bytes = T::Bytes::try_from(value).map_err(|_| Error::range("Out of bounds"))?;
 
         Ok(T::from_bytes(bytes, le))
     }
-    
+
     pub fn set<T: FromBytes>(&self, offset: usize, value: T, le: bool) -> Res {
         let buffer = self.get_buffer()?;
         let mut buffer = buffer.inner.borrow_mut();
         let slice = buffer.buffer.as_mut_slice();
-        
+
         let offset = self.byte_offset + offset;
-        
+
         let bytes = T::to_bytes(value, le);
         let Some(slice) = slice.get_mut(offset..offset + T::N_BYTES) else {
             return Err(Error::range("Out of bounds"));
         };
-        
+
         slice.copy_from_slice(bytes.as_ref());
-        
+
         Ok(())
     }
 }
-
 
 #[properties_new(constructor(DataViewConstructor::new))]
 impl DataView {
     #[prop("getFloat32")]
     pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         let value = self.extract::<f32>(offset, le)?;
 
         Ok(value.into())
     }
-    
+
     #[prop("getFloat64")]
     pub fn get_float64(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -116,7 +115,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getInt8")]
     pub fn get_int8(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -124,7 +123,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getInt16")]
     pub fn get_int16(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -132,7 +131,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getInt32")]
     pub fn get_int32(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -140,7 +139,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getBigInt64")]
     pub fn get_big_int64(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -148,7 +147,7 @@ impl DataView {
 
         Ok(BigInt::from(value).into())
     }
-    
+
     #[prop("getUint8")]
     pub fn get_uint8(&self, offset: usize, le: Option<bool>) -> ValueResult {
         let le = le.unwrap_or(false);
@@ -156,7 +155,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getUint16")]
     pub fn get_uint16(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -164,7 +163,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getUint32")]
     pub fn get_uint32(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -172,7 +171,7 @@ impl DataView {
 
         Ok(value.into())
     }
-    
+
     #[prop("getBigUint64")]
     pub fn get_big_uint64(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -180,98 +179,108 @@ impl DataView {
 
         Ok(BigInt::from(value).into())
     }
-    
+
     #[prop("setFloat32")]
     pub fn set_float32(&self, offset: usize, value: f64, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setFloat64")]
     pub fn set_float64(&self, offset: usize, value: f64, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setInt8")]
     pub fn set_int8(&self, offset: usize, value: i8, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setInt16")]
     pub fn set_int16(&self, offset: usize, value: i16, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setInt32")]
     pub fn set_int32(&self, offset: usize, value: i32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setBigInt64")]
-    pub fn set_big_int64(&self, offset: usize, value: &BigInt, little: Option<bool>) -> ValueResult {
+    pub fn set_big_int64(
+        &self,
+        offset: usize,
+        value: &BigInt,
+        little: Option<bool>,
+    ) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         let value = value.to_i64().ok_or(Error::range("Out of bounds"))?;
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setUint8")]
     pub fn set_uint8(&self, offset: usize, value: u8, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setUint16")]
     pub fn set_uint16(&self, offset: usize, value: u16, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setUint32")]
     pub fn set_uint32(&self, offset: usize, value: u32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
-    
+
     #[prop("setBigUint64")]
-    pub fn set_big_uint64(&self, offset: usize, value: &BigInt, little: Option<bool>) -> ValueResult {
+    pub fn set_big_uint64(
+        &self,
+        offset: usize,
+        value: &BigInt,
+        little: Option<bool>,
+    ) -> ValueResult {
         let le = little.unwrap_or(false);
-        
+
         let value = value.to_u64().ok_or(Error::range("Out of bounds"))?;
-        
+
         self.set(offset, value, le)?;
-        
+
         Ok(Value::Undefined)
     }
 }

@@ -72,7 +72,6 @@ impl<T> SmallVec<T> {
         };
         let mut vec = ManuallyDrop::new(vec);
 
-
         let Some(ptr) = NonNull::new(vec.as_mut_ptr()) else {
             return Err(ManuallyDrop::into_inner(vec));
         };

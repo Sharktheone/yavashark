@@ -22,7 +22,8 @@ enum InnerString {
     Static(&'static str),
     Owned(SmallString),
     #[cold]
-    #[allow(clippy::box_collection)] // we can't use just String here, as the InnerString would not be 24 bytes anymore (size_of::<InnerString> != size_of::<String>)
+    #[allow(clippy::box_collection)]
+    // we can't use just String here, as the InnerString would not be 24 bytes anymore (size_of::<InnerString> != size_of::<String>)
     BoxedOwned(Box<String>), //This is because SmallString can "only" hold up to 2^60 bytes
     Rc(Rc<str>),
     Rope(RopeStr),
@@ -45,7 +46,8 @@ impl Eq for InlineString {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum InlineLen { //TODO: we can theoretically also have the last byte here if the length is 24
+pub enum InlineLen {
+    //TODO: we can theoretically also have the last byte here if the length is 24
     Empty = 0,
     Len1,
     Len2,
@@ -289,9 +291,9 @@ impl YSString {
     pub fn from_string(str: String) -> Self {
         let str = InlineString::try_from_string(&str).map_or_else(
             || match SmallString::from_string(str) {
-                    Ok(str) => InnerString::Owned(str),
-                    Err(str) => InnerString::BoxedOwned(Box::new(str)),
-                },
+                Ok(str) => InnerString::Owned(str),
+                Err(str) => InnerString::BoxedOwned(Box::new(str)),
+            },
             InnerString::Inline,
         );
 
@@ -430,15 +432,15 @@ impl YSString {
                 string.push(ch);
 
                 Some(SmallString::from_string(string))
-            },
+            }
             InnerString::Owned(owned) => {
                 owned.push(ch);
                 None
-            },
+            }
             InnerString::BoxedOwned(boxed) => {
                 boxed.push(ch);
                 None
-            },
+            }
             InnerString::Rc(rc) => {
                 let mut string = rc.to_string();
                 string.push(ch);
