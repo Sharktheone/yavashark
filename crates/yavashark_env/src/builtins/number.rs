@@ -71,7 +71,7 @@ impl NumberConstructor {
     #[prop("parseFloat")]
     #[must_use]
     pub fn parse_float(string: &str) -> f64 {
-        string.parse().unwrap_or(f64::NAN)
+        string.trim().parse().unwrap_or(f64::NAN)
     }
 
     #[prop("parseInt")]
