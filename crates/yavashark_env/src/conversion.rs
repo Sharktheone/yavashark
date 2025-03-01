@@ -138,6 +138,14 @@ impl FromValueOutput for BigInt {
     }
 }
 
+impl FromValueOutput for &BigInt {
+    type Output = BigInt;
+    fn from_value_out(value: Value) -> Result<Self::Output> {
+        BigInt::from_value_out(value)
+    }
+}
+
+
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
         $(
