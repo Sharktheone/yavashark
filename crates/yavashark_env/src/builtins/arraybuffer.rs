@@ -1,5 +1,5 @@
 use crate::array::convert_index;
-use crate::{Error, MutObject, Realm, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Obj};
@@ -48,7 +48,7 @@ impl ArrayBuffer {
     }
 }
 
-#[properties_new]
+#[properties_new(constructor(ArrayBufferConstructor::new))]
 impl ArrayBuffer {
     fn resize(&self, len: usize) {
         self.inner.borrow_mut().byte_length = len.into();
@@ -80,6 +80,29 @@ impl ArrayBuffer {
 #[object]
 #[derive(Debug)]
 pub struct ArrayBufferConstructor {}
+
+#[properties_new(raw)]
+impl ArrayBufferConstructor {
+    pub fn is_view(&self, _: &Value) -> bool {
+        false //TODO
+    }
+}
+
+
+impl ArrayBufferConstructor {
+    #[allow(clippy::new_ret_no_self)]
+    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+        let mut this = Self {
+            inner: RefCell::new(MutableArrayBufferConstructor {
+                object: MutObject::with_proto(func.copy()),
+            }),
+        };
+
+        this.initialize(func.copy())?;
+
+        Ok(this.into_object())
+    }
+}
 
 impl Constructor<Realm> for ArrayBufferConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
