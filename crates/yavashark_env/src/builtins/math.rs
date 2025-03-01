@@ -33,7 +33,7 @@ impl Math {
     const SQRT1_2: f64 = std::f64::consts::FRAC_1_SQRT_2;
     const SQRT2: f64 = std::f64::consts::SQRT_2;
 
-    fn abs(value: f64) -> f64 {
+    const fn abs(value: f64) -> f64 {
         value.abs()
     }
 
@@ -151,7 +151,7 @@ impl Math {
         value.round()
     }
 
-    fn sign(value: f64) -> f64 {
+    const fn sign(value: f64) -> f64 {
         value.signum()
     }
 

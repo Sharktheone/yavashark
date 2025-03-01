@@ -90,7 +90,7 @@ impl Constructor<Realm> for ArrayBufferConstructor {
             x.ok().map(|x| x.to_int_or_null())
         });
 
-        if max_len.map_or(false, i64::is_negative) {
+        if max_len.is_some_and(i64::is_negative) {
             return Err(Error::range("maxByteLength must be positive"));
         }
 

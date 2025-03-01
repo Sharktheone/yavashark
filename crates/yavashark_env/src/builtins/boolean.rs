@@ -30,7 +30,7 @@ impl BooleanConstructor {
 
 impl Constructor<Realm> for BooleanConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let boolean = args.first().map_or(false, Value::is_truthy);
+        let boolean = args.first().is_some_and(Value::is_truthy);
 
         let obj = BooleanObj::new(realm, boolean);
 
@@ -39,7 +39,7 @@ impl Constructor<Realm> for BooleanConstructor {
 }
 impl Func<Realm> for BooleanConstructor {
     fn call(&self, _realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        let boolean = args.first().map_or(false, Value::is_truthy);
+        let boolean = args.first().is_some_and(Value::is_truthy);
 
         Ok(boolean.into())
     }

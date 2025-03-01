@@ -2,6 +2,7 @@ use crate::{Realm, RuntimeResult, Value};
 
 pub type Callback = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> RuntimeResult>;
 
+#[allow(unused)]
 pub struct NativeFunctionWrapper {
     args: usize,
     func: Callback,
