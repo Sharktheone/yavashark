@@ -32,6 +32,7 @@ pub struct Intrinsics {
     pub(crate) eval: Option<ObjectHandle>,
     pub(crate) arraybuffer: ObjectHandle,
     pub(crate) data_view: ObjectHandle,
+    pub(crate) typed_array: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -78,6 +79,7 @@ impl Intrinsics {
     constructor!(uri_error);
     constructor!(arraybuffer);
     constructor!(data_view);
+    constructor!(typed_array);
 
     obj!(json);
     obj!(math);
@@ -200,6 +202,11 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+        
+        let typed_array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -224,6 +231,7 @@ impl Intrinsics {
             eval: None,
             arraybuffer,
             data_view,
+            typed_array,
         })
     }
 }

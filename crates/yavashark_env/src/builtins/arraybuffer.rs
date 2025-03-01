@@ -1,4 +1,5 @@
 pub mod dataview;
+pub mod typed_array;
 
 use crate::array::convert_index;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
