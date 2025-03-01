@@ -6,6 +6,7 @@ use std::sync::LazyLock;
 use swc_ecma_ast::Stmt;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res, Result};
+use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_interpreter::Interpreter;
 
 const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
@@ -49,6 +50,8 @@ pub fn setup_global(file: PathBuf) -> Result<(Realm, Scope)> {
     r.global.define_property("print".into(), print)?;
 
     run_harness_in_realm(&mut r, &mut s)?;
+    
+    r.set_eval(InterpreterEval)?;
 
     Ok((r, s))
 }
