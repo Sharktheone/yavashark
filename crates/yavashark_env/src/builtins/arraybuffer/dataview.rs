@@ -4,6 +4,8 @@ use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result, Value, ValueResult};
 use std::cell::RefCell;
+use num_bigint::BigInt;
+use num_traits::ToPrimitive;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{BoxedObj, Constructor, Error, Obj};
@@ -139,6 +141,14 @@ impl DataView {
         Ok(value.into())
     }
     
+    #[prop("getBigInt64")]
+    pub fn get_big_int64(&self, offset: usize, little: Option<bool>) -> ValueResult {
+        let le = little.unwrap_or(false);
+        let value = self.extract::<i64>(offset, le)?;
+
+        Ok(BigInt::from(value).into())
+    }
+    
     #[prop("getUint8")]
     pub fn get_uint8(&self, offset: usize, le: Option<bool>) -> ValueResult {
         let le = le.unwrap_or(false);
@@ -161,6 +171,14 @@ impl DataView {
         let value = self.extract::<u32>(offset, le)?;
 
         Ok(value.into())
+    }
+    
+    #[prop("getBigUint64")]
+    pub fn get_big_uint64(&self, offset: usize, little: Option<bool>) -> ValueResult {
+        let le = little.unwrap_or(false);
+        let value = self.extract::<u64>(offset, le)?;
+
+        Ok(BigInt::from(value).into())
     }
     
     #[prop("setFloat32")]
@@ -208,6 +226,17 @@ impl DataView {
         Ok(Value::Undefined)
     }
     
+    #[prop("setBigInt64")]
+    pub fn set_big_int64(&self, offset: usize, value: &BigInt, little: Option<bool>) -> ValueResult {
+        let le = little.unwrap_or(false);
+        
+        let value = value.to_i64().ok_or(Error::range("Out of bounds"))?;
+        
+        self.set(offset, value, le)?;
+        
+        Ok(Value::Undefined)
+    }
+    
     #[prop("setUint8")]
     pub fn set_uint8(&self, offset: usize, value: u8, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -229,6 +258,17 @@ impl DataView {
     #[prop("setUint32")]
     pub fn set_uint32(&self, offset: usize, value: u32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
+        
+        self.set(offset, value, le)?;
+        
+        Ok(Value::Undefined)
+    }
+    
+    #[prop("setBigUint64")]
+    pub fn set_big_uint64(&self, offset: usize, value: &BigInt, little: Option<bool>) -> ValueResult {
+        let le = little.unwrap_or(false);
+        
+        let value = value.to_u64().ok_or(Error::range("Out of bounds"))?;
         
         self.set(offset, value, le)?;
         

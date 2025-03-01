@@ -4685,6 +4685,7 @@ version = "0.1.0"
 dependencies = [
  "colored",
  "num-bigint",
+ "num-traits",
  "paste",
  "rand 0.9.0",
  "regex",
