@@ -1,10 +1,8 @@
-use swc_ecma_ast::{
-    AssignExpr, AssignOp, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget,
-};
+use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget, SuperProp, SuperPropExpr};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
-
+use yavashark_value::Obj;
 use crate::Interpreter;
 
 impl Interpreter {
@@ -33,6 +31,7 @@ impl Interpreter {
                     scope.update_or_define(name, value)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
+                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super(super_prop, value, scope, realm),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -63,6 +62,29 @@ impl Interpreter {
             )))
         }
     }
+    
+    pub fn assign_super(super_prop: &SuperPropExpr, value: Value, scope: &mut Scope, realm: &mut Realm) -> Res {
+        let this = scope.this()?;
+        
+        let obj = this.as_object()?;
+        
+        let proto = obj.prototype()?;
+        let sup = proto.resolve(this, realm)?;
+        
+        
+        match &super_prop.prop {
+            SuperProp::Ident(i) => {
+                let name = i.sym.to_string();
+                
+                sup.define_property(name.into(), value)
+            }
+            SuperProp::Computed(p) => {
+                let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
+                
+                sup.define_property(name, value)
+            }
+        }
+    }
 
     pub fn assign_target_op(
         realm: &mut Realm,
@@ -87,6 +109,7 @@ impl Interpreter {
                     Ok(value)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, left, scope),
+                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, left, scope),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -120,6 +143,46 @@ impl Interpreter {
             Ok(value)
         } else {
             Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")).into())
+        }
+    }
+    
+    pub fn assign_super_op(
+        realm: &mut Realm,
+        op: AssignOp,
+        super_prop: &SuperPropExpr,
+        left: Value,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
+        let this = scope.this()?;
+        
+        let obj = this.as_object()?;
+        
+        let proto = obj.prototype()?;
+        let sup = proto.resolve(this, realm)?;
+        
+        match &super_prop.prop {
+            SuperProp::Ident(i) => {
+                let name = i.sym.to_string().into();
+                
+                let right = sup
+                    .get_property(&name, realm)?;
+                
+                let value = Self::run_assign_op(op, left, right, realm)?;
+                
+                sup.define_property(name.into(), value.copy());
+                Ok(value)
+            }
+            SuperProp::Computed(p) => {
+                let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
+                
+                let right = sup
+                    .get_property(&name, realm)?;
+                
+                let value = Self::run_assign_op(op, left, right, realm)?;
+                
+                sup.define_property(name, value.copy());
+                Ok(value)
+            }
         }
     }
 
