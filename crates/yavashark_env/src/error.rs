@@ -60,6 +60,14 @@ impl ErrorObj {
 
         ObjectHandle::new(this)
     }
+    
+    #[must_use]
+    pub fn error_to_value(err: Error, realm: &Realm) -> Value {
+        match err.kind {
+            ErrorKind::Throw(throw) => throw,
+            _ => Self::new(err, realm).into(),
+        }
+    }
 
     #[must_use]
     pub fn new_from(message: String, realm: &Realm) -> ObjectHandle {
