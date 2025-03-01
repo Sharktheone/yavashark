@@ -2,6 +2,7 @@ use crate::array::{Array, ArrayIterator};
 use crate::builtins::{get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
+use crate::builtins::dataview::DataView;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -26,6 +27,7 @@ pub struct Intrinsics {
     pub(crate) uri_error: ObjectHandle,
     pub(crate) eval: Option<ObjectHandle>,
     pub(crate) arraybuffer: ObjectHandle,
+    pub(crate) data_view: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -71,6 +73,7 @@ impl Intrinsics {
     constructor!(eval_error);
     constructor!(uri_error);
     constructor!(arraybuffer);
+    constructor!(data_view);
 
     obj!(json);
     obj!(math);
@@ -188,6 +191,11 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+        
+        let data_view = DataView::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -211,6 +219,7 @@ impl Intrinsics {
             uri_error,
             eval: None,
             arraybuffer,
+            data_view,
         })
     }
 }

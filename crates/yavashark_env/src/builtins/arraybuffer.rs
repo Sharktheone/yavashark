@@ -1,3 +1,5 @@
+pub mod dataview;
+
 use crate::array::convert_index;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
@@ -77,7 +79,7 @@ impl ArrayBuffer {
     }
 }
 
-#[object]
+#[object(constructor)]
 #[derive(Debug)]
 pub struct ArrayBufferConstructor {}
 

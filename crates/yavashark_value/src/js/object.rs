@@ -30,7 +30,7 @@ impl<T: Sized + 'static> AsAny for T {
     }
 }
 
-pub trait Obj<R: Realm>: Debug + AsAny + 'static {
+pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
     fn define_property(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
 
     fn define_variable(&self, name: Value<R>, value: Variable<R>) -> Result<(), Error<R>>;
