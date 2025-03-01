@@ -8,15 +8,21 @@ pub struct SmallString {
 }
 
 impl SmallString {
-    pub fn new() -> Option<Self> {
-        Some(Self {
-            inner: SmallVec::new(Vec::new())?,
-        })
+    pub fn new() -> Self {
+        #[allow(clippy::expect_used)]
+        Self {
+            inner: SmallVec::new(Vec::new()).expect("unreachable"),
+        }
     }
 
-    pub fn from_string(mut string: String) -> Option<Self> {
-        Some(Self {
-            inner: SmallVec::new(string.into_bytes())?,
+    pub fn from_string(mut string: String) -> Result<Self, String> {
+        Ok(Self {
+            inner: SmallVec::new(string.into_bytes()).map_err(|vec| {
+                unsafe {
+                    // SAFETY: `vec` is a valid Vec<u8> since it was created from a String
+                    String::from_utf8_unchecked(vec)
+                }
+            })?,
         })
     }
 

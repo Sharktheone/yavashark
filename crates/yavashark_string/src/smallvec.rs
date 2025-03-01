@@ -63,17 +63,21 @@ impl Default for SmallVec<u8> {
 }
 
 impl<T> SmallVec<T> {
-    pub fn new(vec: Vec<T>) -> Option<Self> {
-        let mut vec = ManuallyDrop::new(vec);
-
+    pub fn new(vec: Vec<T>) -> Result<Self, Vec<T>> {
         let len = vec.len();
         let cap = vec.capacity();
 
-        let len_cap = SmallVecLenCap::new(len, cap)?;
+        let Some(len_cap) = SmallVecLenCap::new(len, cap) else {
+            return Err(vec);
+        };
+        let mut vec = ManuallyDrop::new(vec);
 
-        let ptr = NonNull::new(vec.as_mut_ptr())?;
 
-        Some(Self { len_cap, ptr })
+        let Some(ptr) = NonNull::new(vec.as_mut_ptr()) else {
+            return Err(ManuallyDrop::into_inner(vec));
+        };
+
+        Ok(Self { len_cap, ptr })
     }
 
     unsafe fn to_vec_ref(&self) -> ManuallyDrop<Vec<T>> {

@@ -21,6 +21,9 @@ enum InnerString {
     Inline(InlineString),
     Static(&'static str),
     Owned(SmallString),
+    #[cold]
+    #[allow(clippy::box_collection)] // we can't use just String here, as the InnerString would not be 24 bytes anymore (size_of::<InnerString> != size_of::<String>)
+    BoxedOwned(Box<String>), //This is because SmallString can "only" hold up to 2^60 bytes
     Rc(Rc<str>),
     Rope(RopeStr),
 }
@@ -42,7 +45,7 @@ impl Eq for InlineString {}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum InlineLen {
+pub enum InlineLen { //TODO: we can theoretically also have the last byte here if the length is 24
     Empty = 0,
     Len1,
     Len2,
@@ -75,7 +78,7 @@ struct RopeStr {
 }
 
 pub struct RopeStrInner {
-    left: YSString,
+    left: YSString, //TODO: it would be better to have another enum here, where we don't have the 24 byte limit (so we can use the std String)
     right: YSString,
 }
 
@@ -113,14 +116,14 @@ impl InlineString {
 
         Some(Self { len, data })
     }
-    pub fn push(&mut self, ch: char) -> Option<SmallString> {
+    pub fn push(&mut self, ch: char) -> Option<Result<SmallString, String>> {
         let prev_len = self.len();
 
         let Some(len) = InlineLen::from_usize(prev_len + 1) else {
             let mut string = self.as_str().to_string();
             string.push(ch);
 
-            return SmallString::from_string(string);
+            return Some(SmallString::from_string(string));
         };
 
         self.data[prev_len] = ch as u8;
@@ -232,7 +235,7 @@ impl RopeStr {
         YSString::from_rope_str(self.clone())
     }
 
-    fn push(&self, ch: char) -> Option<SmallString> {
+    fn push(&self, ch: char) -> Result<SmallString, String> {
         let mut str = self.as_string();
 
         str.push(ch);
@@ -285,7 +288,10 @@ impl YSString {
     #[must_use]
     pub fn from_string(str: String) -> Self {
         let str = InlineString::try_from_string(&str).map_or_else(
-            || InnerString::Owned(SmallString::from_string(str).unwrap_or_default()),
+            || match SmallString::from_string(str) {
+                    Ok(str) => InnerString::Owned(str),
+                    Err(str) => InnerString::BoxedOwned(Box::new(str)),
+                },
             InnerString::Inline,
         );
 
@@ -342,6 +348,7 @@ impl YSString {
             InnerString::Inline(inline) => inline.len(),
             InnerString::Static(static_str) => static_str.len(),
             InnerString::Owned(owned) => owned.len(),
+            InnerString::BoxedOwned(boxed) => boxed.len(),
             InnerString::Rc(rc) => rc.len(),
             InnerString::Rope(rope) => rope.len(),
         }
@@ -356,6 +363,7 @@ impl YSString {
             InnerString::Inline(inline) => inline.as_str(),
             InnerString::Static(static_str) => static_str,
             InnerString::Owned(owned) => owned,
+            InnerString::BoxedOwned(boxed) => boxed,
             InnerString::Rc(rc) => rc,
             InnerString::Rope(rope) => {
                 let str = rope.as_string_opt_rope(); // since we drop the RopeStr afterward we don't need to fix the rope
@@ -380,6 +388,7 @@ impl YSString {
             InnerString::Inline(inline) => inline.as_str(),
             InnerString::Static(static_str) => static_str,
             InnerString::Owned(owned) => owned,
+            InnerString::BoxedOwned(boxed) => boxed,
             InnerString::Rc(rc) => rc,
             InnerString::Rope(rope) => return Cow::Owned(rope.as_string_opt_rope()), // we don't need to fix the rope here
         })
@@ -394,6 +403,7 @@ impl YSString {
                 SmallString::from_string((**static_str).to_string()).unwrap_or_default()
             }
             InnerString::Owned(owned) => owned.clone(),
+            InnerString::BoxedOwned(boxed) => return boxed.as_mut_str(),
             InnerString::Rc(rc) => SmallString::from_string(rc.to_string()).unwrap_or_default(),
             InnerString::Rope(rope) => {
                 SmallString::from_string(rope.as_string_opt_rope()).unwrap_or_default()
@@ -419,23 +429,30 @@ impl YSString {
 
                 string.push(ch);
 
-                SmallString::from_string(string)
-            }
+                Some(SmallString::from_string(string))
+            },
             InnerString::Owned(owned) => {
                 owned.push(ch);
                 None
-            }
+            },
+            InnerString::BoxedOwned(boxed) => {
+                boxed.push(ch);
+                None
+            },
             InnerString::Rc(rc) => {
                 let mut string = rc.to_string();
                 string.push(ch);
 
-                SmallString::from_string(string)
+                Some(SmallString::from_string(string))
             }
-            InnerString::Rope(rope) => rope.push(ch),
+            InnerString::Rope(rope) => Some(rope.push(ch)),
         };
 
         if let Some(new) = new {
-            *inner = InnerString::Owned(new);
+            match new {
+                Ok(new) => *inner = InnerString::Owned(new),
+                Err(new) => *inner = InnerString::BoxedOwned(Box::new(new)),
+            }
         }
     }
 
@@ -453,6 +470,10 @@ impl YSString {
 
                 let left = Self::from_rc(rc);
 
+                Some(RopeStr::from_elems(left, str))
+            }
+            InnerString::BoxedOwned(boxed) => {
+                let left = Self::from_string((**boxed).clone());
                 Some(RopeStr::from_elems(left, str))
             }
             InnerString::Rc(rc) => {
@@ -482,6 +503,7 @@ impl Clone for YSString {
             InnerString::Inline(ref inline) => Self::from_inline(*inline),
             InnerString::Static(static_str) => Self::new_static(static_str),
             InnerString::Owned(owned) => Self::from_rc(Rc::from(owned.as_str())), //TODO: once UniqueRc is stable, we can actually clone the string without copying it
+            InnerString::BoxedOwned(boxed) => Self::from_string((**boxed).clone()), //TODO: make this non-clone, TODO: we need a second method where we DON'T move the string into a inline string
             InnerString::Rc(ref rc) => Self::from_rc(Rc::clone(rc)),
             InnerString::Rope(ref rope) => Self::from_rope_str(rope.clone()),
         }
