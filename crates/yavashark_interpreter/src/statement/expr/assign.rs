@@ -1,4 +1,5 @@
-use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, MemberExpr, MemberProp, OptChainBase, OptChainExpr, SimpleAssignTarget, SuperProp, SuperPropExpr};
+use swc_common::Spanned;
+use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, ExportDefaultExpr, Expr, MemberExpr, MemberProp, OptChainBase, OptChainExpr, ParenExpr, SimpleAssignTarget, SuperProp, SuperPropExpr};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
@@ -31,8 +32,9 @@ impl Interpreter {
                     scope.update_or_define(name, value)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
-                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super(super_prop, value, scope, realm),
+                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super(realm, super_prop, value, scope),
                 SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain(realm, opt, value, scope),
+                SimpleAssignTarget::Paren(paren) => Self::assign_paren(realm, paren, value, scope),
                 
                 _ => todo!("assign targets"),
             },
@@ -75,7 +77,7 @@ impl Interpreter {
         }
     }
     
-    pub fn assign_super(super_prop: &SuperPropExpr, value: Value, scope: &mut Scope, realm: &mut Realm) -> Res {
+    pub fn assign_super(realm: &mut Realm, super_prop: &SuperPropExpr, value: Value, scope: &mut Scope) -> Res {
         let this = scope.this()?;
         
         let obj = this.as_object()?;
@@ -132,6 +134,34 @@ impl Interpreter {
             }
         }
     }
+    
+    fn assign_paren(
+        realm: &mut Realm,
+        paren: &ParenExpr,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
+        match &*paren.expr {
+            Expr::Member(m) => {
+                let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
+                Self::assign_member_on(realm, obj, &m.prop, value, scope)?;
+            }
+            Expr::SuperProp(super_prop) => {
+                Self::assign_super(realm, super_prop, value, scope)?;
+            }
+            Expr::OptChain(opt) => {
+                Self::assign_opt_chain(realm, opt, value, scope)?;
+            }
+            Expr::Paren(paren) => Self::assign_paren(realm, paren, value, scope)?,
+            
+            
+            epxr => {
+                Self::run_expr(realm, epxr, paren.span, scope)?;
+            },
+        }
+        
+        Ok(())
+    }
 
     pub fn assign_target_op(
         realm: &mut Realm,
@@ -158,6 +188,7 @@ impl Interpreter {
                 SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, left, scope),
                 SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, left, scope),
                 SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, left, scope),
+                SimpleAssignTarget::Paren(paren) => Self::assign_paren_op(realm, op, paren, left, scope),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -282,6 +313,28 @@ impl Interpreter {
                 Ok(value)
             }
         }
+    }
+    
+    fn assign_paren_op(
+        realm: &mut Realm,
+        op: AssignOp,
+        paren: &ParenExpr,
+        left: Value,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
+        Ok(match &*paren.expr {
+            Expr::Member(m) => {
+                let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
+                Self::assign_member_op_on(realm, obj, op, &m.prop, left, scope)?
+            },
+            Expr::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, left, scope)?,
+            Expr::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, left, scope)?,
+            Expr::Paren(paren) => Self::assign_paren_op(realm, op, paren, left, scope)?,
+            
+            epxr => {
+                Self::run_expr(realm, epxr, paren.span, scope)?
+            },
+        })
     }
 
     pub fn run_assign_op(
