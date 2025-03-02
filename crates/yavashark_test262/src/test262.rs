@@ -135,4 +135,9 @@ impl Test262 {
 
         Ok(Value::Undefined)
     }
+    
+    #[prop("IsHTMLDDA")]
+    fn is_html_dda() -> ValueResult {
+        Ok(Value::Boolean(false))
+    }
 }
