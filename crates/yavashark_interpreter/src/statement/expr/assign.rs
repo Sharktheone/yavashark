@@ -12,7 +12,7 @@ impl Interpreter {
 
         if stmt.op == AssignOp::Assign {
             return Ok(
-                Self::assign_target(realm, &stmt.left, value, scope).map(|()| Value::Undefined)?
+                Self::assign_target(realm, &stmt.left, value.copy(), scope).map(|()| value)?
             );
         }
 
