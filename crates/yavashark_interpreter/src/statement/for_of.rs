@@ -11,32 +11,10 @@ impl Interpreter {
         let label = scope.last_label()?;
         scope.state_set_loop()?;
 
-        let ForHead::VarDecl(v) = &stmt.left else {
-            todo!("ForInStmt left is not VarDecl");
-        };
-
-        if v.decls.is_empty() {
-            ControlFlow::error_syn("ForInStmt left is empty");
-        }
-
-        if v.decls.len() > 1 {
-            ControlFlow::error_syn(
-                "Invalid left-hand side in for-in loop: Must have a single binding.",
-            );
-        }
-
-        let decl = v.decls[0]
-            .name
-            .clone()
-            .ident()
-            .ok_or_else(|| ControlFlow::error_syn("ForInStmt left is not an identifier"))?
-            .sym
-            .to_string();
-
         let iter = obj.iter_no_realm(realm)?;
 
         while let Some(key) = iter.next(realm)? {
-            scope.declare_var(decl.clone(), key);
+            Self::run_for_head(realm, stmt.left.clone(), scope, &key)?;
 
             let result = Self::run_statement(realm, &stmt.body, scope);
             match result {

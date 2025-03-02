@@ -2,7 +2,7 @@ use crate::Interpreter;
 use swc_ecma_ast::{ForHead, ForInStmt};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{ControlFlow, Error, Realm, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Error, Realm, Res, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for_in(realm: &mut Realm, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
@@ -24,30 +24,8 @@ impl Interpreter {
         let label = scope.last_label()?;
         scope.state_set_loop()?;
 
-        let ForHead::VarDecl(v) = &stmt.left else {
-            todo!("ForInStmt left is not VarDecl");
-        };
-
-        if v.decls.is_empty() {
-            ControlFlow::error_syn("ForInStmt left is empty");
-        }
-
-        if v.decls.len() > 1 {
-            ControlFlow::error_syn(
-                "Invalid left-hand side in for-in loop: Must have a single binding.",
-            );
-        }
-
-        let decl = v.decls[0]
-            .name
-            .clone()
-            .ident()
-            .ok_or_else(|| ControlFlow::error_syn("ForInStmt left is not an identifier"))?
-            .sym
-            .to_string();
-
         for key in obj.keys()? {
-            scope.declare_var(decl.clone(), key);
+            Self::run_for_head(realm, stmt.left.clone(), scope, &key)?;
 
             let result = Self::run_statement(realm, &stmt.body, scope);
             match result {
@@ -63,6 +41,47 @@ impl Interpreter {
             }
         }
         Ok(Value::Undefined)
+    }
+
+    pub fn run_for_head(
+        realm: &mut Realm,
+        decl: ForHead,
+        scope: &mut Scope,
+        value: &Value,
+    ) -> Res {
+        match decl {
+            ForHead::VarDecl(decl) => {
+                //TODO: respect var decl kind
+                for decl in decl.decls {
+                    let value = if value.is_truthy() {
+                        value.clone()
+                    } else if let Some(init) = &decl.init {
+                        Self::run_expr(realm, init, decl.span, scope)?
+                    } else {
+                        value.clone()
+                    };
+
+                    Self::run_pat(realm, &decl.name, scope, value.clone())?;
+                }
+            }
+            ForHead::UsingDecl(decl) => {
+                for decl in decl.decls {
+                    let value = if value.is_truthy() {
+                        value.clone()
+                    } else if let Some(init) = &decl.init {
+                        Self::run_expr(realm, init, decl.span, scope)?
+                    } else {
+                        value.clone()
+                    };
+
+                    Self::run_pat(realm, &decl.name, scope, value.clone())?;
+                }
+            }
+            ForHead::Pat(pat) => {
+                Self::run_pat(realm, &pat, scope, value.clone())?;
+            }
+        }
+        Ok(())
     }
 }
 
