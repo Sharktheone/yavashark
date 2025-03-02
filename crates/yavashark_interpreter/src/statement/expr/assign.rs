@@ -1,4 +1,4 @@
-use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, MemberExpr, MemberProp, SimpleAssignTarget, SuperProp, SuperPropExpr};
+use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, MemberExpr, MemberProp, OptChainBase, OptChainExpr, SimpleAssignTarget, SuperProp, SuperPropExpr};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
@@ -32,6 +32,8 @@ impl Interpreter {
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
                 SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super(super_prop, value, scope, realm),
+                SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain(realm, opt, value, scope),
+                
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -47,8 +49,18 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Res {
         let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
+        Self::assign_member_on(realm, obj, &m.prop, value, scope)
+    }
+    
+    pub fn assign_member_on(
+        realm: &mut Realm,
+        obj: Value,
+        m: &MemberProp,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
         if let Value::Object(obj) = obj {
-            let name = match &m.prop {
+            let name = match m {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
@@ -85,6 +97,41 @@ impl Interpreter {
             }
         }
     }
+    
+    pub fn assign_opt_chain(
+        realm: &mut Realm,
+        opt: &OptChainExpr,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
+        match &*opt.base {
+            OptChainBase::Member(member) => {
+                let obj = Self::run_expr(realm, &member.obj, member.span, scope)?;
+
+                if (obj == Value::Undefined || obj == Value::Null) && opt.optional {
+                    return Ok(());
+                }
+
+                Self::assign_member_on(realm, obj, &member.prop, value, scope)
+            }
+            OptChainBase::Call(call) => {
+                let (callee, this) = Self::run_call_expr(realm, &call.callee, call.span, scope)?;
+
+                if (callee == Value::Undefined || callee == Value::Null) && opt.optional {
+                    return Ok(());
+                }
+
+                let this = this.unwrap_or(scope.this()?);
+
+                Self::run_call_on(
+                    realm, &callee, this, &call.args, call.span, scope,
+                )?; 
+                //TODO: maybe we should throw an error here?
+                
+                Ok(())
+            }
+        }
+    }
 
     pub fn assign_target_op(
         realm: &mut Realm,
@@ -110,6 +157,7 @@ impl Interpreter {
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, left, scope),
                 SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, left, scope),
+                SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, left, scope),
                 _ => todo!("assign targets"),
             },
             AssignTarget::Pat(_) => {
@@ -126,8 +174,20 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
+        
+        Self::assign_member_op_on(realm, obj, op, &m.prop, left, scope)
+    }
+    
+    pub fn assign_member_op_on(
+        realm: &mut Realm,
+        obj: Value,
+        op: AssignOp,
+        m: &MemberProp,
+        left: Value,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
         if let Value::Object(obj) = obj {
-            let name = match &m.prop {
+            let name = match m {
                 MemberProp::Ident(i) => Value::String(i.sym.to_string()),
                 MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
@@ -169,7 +229,7 @@ impl Interpreter {
                 
                 let value = Self::run_assign_op(op, left, right, realm)?;
                 
-                sup.define_property(name.into(), value.copy());
+                sup.define_property(name, value.copy());
                 Ok(value)
             }
             SuperProp::Computed(p) => {
@@ -181,6 +241,44 @@ impl Interpreter {
                 let value = Self::run_assign_op(op, left, right, realm)?;
                 
                 sup.define_property(name, value.copy());
+                Ok(value)
+            }
+        }
+    }
+    
+    pub fn assign_opt_chain_op(
+        realm: &mut Realm,
+        op: AssignOp,
+        opt: &OptChainExpr,
+        left: Value,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
+        match &*opt.base {
+            OptChainBase::Member(member) => {
+                let obj = Self::run_expr(realm, &member.obj, member.span, scope)?;
+
+                if (obj == Value::Undefined || obj == Value::Null) && opt.optional {
+                    return Ok(left);
+                }
+
+                Self::assign_member_op_on(realm, obj, op, &member.prop, left, scope)
+            }
+            OptChainBase::Call(call) => {
+                let (callee, this) = Self::run_call_expr(realm, &call.callee, call.span, scope)?;
+
+                if (callee == Value::Undefined || callee == Value::Null) && opt.optional {
+                    return Ok(left);
+                }
+
+                let this = this.unwrap_or(scope.this()?);
+
+                let right = Self::run_call_on(
+                    realm, &callee, this, &call.args, call.span, scope,
+                )?;
+                //TODO: maybe we should throw an error here?
+                
+                let value = Self::run_assign_op(op, left, right, realm)?;
+                
                 Ok(value)
             }
         }
