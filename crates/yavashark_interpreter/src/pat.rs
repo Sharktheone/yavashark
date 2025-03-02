@@ -10,7 +10,7 @@ use yavashark_value::IntoValue;
 
 impl Interpreter {
     pub fn run_pat(realm: &mut Realm, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
-        Self::run_pat_internal(realm, stmt, scope, value, false, DUMMY_SP)
+        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP)
     }
 
     #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
@@ -19,7 +19,6 @@ impl Interpreter {
         stmt: &Pat,
         scope: &mut Scope,
         value: Value,
-        for_in_of: bool,
         span: Span,
     ) -> Res {
         match stmt {
@@ -106,16 +105,16 @@ impl Interpreter {
                 }
             }
             Pat::Assign(assign) => {
-                let value = Self::run_expr(realm, &assign.right, assign.span, scope)?;
+                let value = if value.is_truthy() {
+                    value
+                } else {
+                    Self::run_expr(realm, &assign.right, assign.span, scope)?
+                };
 
                 Self::run_pat(realm, &assign.left, scope, value)?;
             }
             Pat::Expr(expr) => {
-                if !for_in_of {
-                    return Err(Error::syn("Invalid pattern"));
-                }
-
-                Self::run_expr(realm, expr, span, scope)?;
+                Self::assign_expr(realm, expr, value, scope)?;
             }
             Pat::Invalid(i) => {
                 return Err(Error::syn("Invalid pattern"));
