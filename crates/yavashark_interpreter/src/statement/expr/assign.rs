@@ -38,9 +38,7 @@ impl Interpreter {
                 
                 _ => todo!("assign targets"),
             },
-            AssignTarget::Pat(_) => {
-                todo!("Pattern assignment")
-            }
+            AssignTarget::Pat(pat) => Self::assign_pat(realm, pat, value, scope),
         }
     }
 
@@ -162,6 +160,29 @@ impl Interpreter {
         
         Ok(())
     }
+    
+    fn assign_pat(
+        realm: &mut Realm,
+        pat: &AssignTargetPat,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
+        match pat {
+            AssignTargetPat::Array(arr) => {
+                let pat = Pat::Array(arr.clone());
+                
+                Self::run_pat(realm, &pat, scope, value)?;
+            }
+            AssignTargetPat::Object(expr) => {
+                let pat = Pat::Object(expr.clone());
+                
+                Self::run_pat(realm, &pat, scope, value)?;
+            }
+            AssignTargetPat::Invalid(_) => return Err(Error::syn("Invalid left-hand side in assignment")),
+        }
+        
+        Ok(())
+    }
 
     pub fn assign_target_op(
         realm: &mut Realm,
@@ -191,9 +212,7 @@ impl Interpreter {
                 SimpleAssignTarget::Paren(paren) => Self::assign_paren_op(realm, op, paren, left, scope),
                 _ => todo!("assign targets"),
             },
-            AssignTarget::Pat(_) => {
-                todo!("Pattern assignment")
-            }
+            AssignTarget::Pat(pat) => Self::assign_pat_op(realm, op, pat, left, scope),
         }
     }
 
@@ -335,6 +354,34 @@ impl Interpreter {
                 Self::run_expr(realm, epxr, paren.span, scope)?
             },
         })
+    }
+    
+    fn assign_pat_op(
+        realm: &mut Realm,
+        op: AssignOp,
+        pat: &AssignTargetPat,
+        left: Value,
+        scope: &mut Scope,
+    ) -> RuntimeResult {
+        if op != AssignOp::Assign {
+            return Err(Error::syn("Invalid left-hand side in assignment").into());
+        }
+        
+        match pat {
+            AssignTargetPat::Array(arr) => {
+                let pat = Pat::Array(arr.clone());
+                
+                Self::run_pat(realm, &pat, scope, left.copy())?;
+            }
+            AssignTargetPat::Object(expr) => {
+                let pat = Pat::Object(expr.clone());
+                
+                Self::run_pat(realm, &pat, scope, left.copy())?;
+            }
+            AssignTargetPat::Invalid(_) => return Err(Error::syn("Invalid left-hand side in assignment").into()),
+        }
+        
+        Ok(left)
     }
 
     pub fn run_assign_op(
