@@ -5,8 +5,8 @@ use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for(realm: &mut Realm, stmt: &ForStmt, scope: &mut Scope) -> RuntimeResult {
-        let scope = &mut Scope::with_parent(scope)?;
         let label = scope.last_label()?;
+        let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_loop()?;
 
         if let Some(init) = &stmt.init {
