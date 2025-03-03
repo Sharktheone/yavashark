@@ -131,6 +131,10 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
     for static_block in statics {
         Interpreter::run_block_this(realm, &static_block, &mut static_scope, this.copy())?;
     }
+    
+    let proto = this.get_property(&"prototype".into(), realm)?;
+    
+    proto.define_property("constructor".into(), this.copy());
 
     scope.declare_var(name, this);
 
