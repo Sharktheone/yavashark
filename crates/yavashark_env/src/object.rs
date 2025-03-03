@@ -356,7 +356,9 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let Value::Number(n) = name {
-            return Ok(self.resolve_array(*n as usize));
+            if let Some(value) = self.resolve_array(*n as usize) {
+                return Ok(Some(value));
+            }
         }
 
         Ok(self
