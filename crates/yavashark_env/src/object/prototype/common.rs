@@ -107,27 +107,27 @@ pub fn get_own_property_descriptor(
     Ok(desc.into())
 }
 
-pub fn is_prototype_of(args: Vec<Value>, mut this: Value, realm: &mut Realm) -> ValueResult {
+pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.is_empty() {
         return Ok(Value::Undefined);
     }
 
-    let search = &args[0];
+    let mut search = args[0].copy();
 
     loop {
-        let mut obj = this.as_object()?;
+        let mut obj = search.as_object()?;
         let proto = obj.prototype()?;
-        let proto = proto.get(this.clone(), realm)?;
+        let proto = proto.get(search.clone(), realm)?;
 
         if proto.is_nullish() {
             return Ok(false.into());
         }
 
-        if &proto == search {
+        if proto == this {
             return Ok(true.into());
         }
 
-        this = proto;
+        search = proto;
     }
 }
 
