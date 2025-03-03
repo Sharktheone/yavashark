@@ -19,6 +19,14 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
+    pub const fn with_attributes(value: Value<C>, attributes: Attributes) -> Self {
+        Self {
+            value,
+            properties: attributes,
+        }
+    }
+
+    #[must_use]
     pub const fn new_read_only(value: Value<C>) -> Self {
         Self {
             value,
@@ -85,6 +93,8 @@ impl<C: Realm> Variable<C> {
         self.properties.make_configurable();
     }
 }
+
+
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub struct Attributes(u8);

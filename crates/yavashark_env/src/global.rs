@@ -1,11 +1,33 @@
 use crate::error::get_error;
 use crate::realm::Realm;
 use crate::{get_console, ObjectHandle, Res, Variable};
-use yavashark_value::Value;
+use crate::Value;
 use crate::builtins::{get_encode_uri, get_encode_uri_component, get_escape};
 
 pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
-    let obj = handle.get();
+    let obj = handle.get(); 
+    
+    obj.define_variable(
+        "undefined".into(),
+        Variable::new_read_only(Value::Undefined),
+    )?;
+    obj.define_variable(
+        "NaN".into(),
+        Variable::new_read_only(Value::Number(f64::NAN)),
+    )?;
+    obj.define_variable(
+        "Infinity".into(),
+        Variable::new_read_only(Value::Number(f64::INFINITY)),
+    )?;
+    obj.define_variable("null".into(), Variable::new_read_only(Value::Null))?;
+    obj.define_variable(
+        "true".into(),
+        Variable::new_read_only(Value::Boolean(true)),
+    )?;
+    obj.define_variable(
+        "false".into(),
+        Variable::new_read_only(Value::Boolean(false)),
+    )?;
 
     obj.define_variable(
         "console".into(),

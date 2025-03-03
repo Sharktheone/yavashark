@@ -7,7 +7,6 @@ use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
 
-use crate::console::get_console;
 use crate::realm::Realm;
 use crate::{Error, ObjectHandle, Res, Result, Value, Variable};
 
@@ -135,33 +134,66 @@ pub struct Scope {
 }
 
 #[derive(Debug)]
-pub enum ParentOrGlobal {
-    Parent(Gc<RefCell<ScopeInternal>>),
-    Global(ObjectHandle),
+pub enum ObjectOrVariables {
+    Object(ObjectHandle),
+    Variables(HashMap<String, Variable>),
 }
 
-impl Clone for ParentOrGlobal {
-    fn clone(&self) -> Self {
+impl ObjectOrVariables {
+    fn insert(&mut self, name: String, variable: Variable) -> Res {
         match self {
-            Self::Parent(p) => Self::Parent(p.clone()),
-            Self::Global(g) => Self::Global(g.clone()),
+            Self::Object(o) => o.define_variable(name.into(), variable)?,
+            Self::Variables(v) => {
+                v.insert(name, variable);
+            }
+        }
+        
+        Ok(())
+    }
+
+    fn get(&self, name: &str) -> Option<Variable> {
+        match self {
+            Self::Object(o) => o
+                .resolve_property_no_get_set(&name.into())
+                .ok()
+                .flatten()
+                .map(|x| Variable::with_attributes(x.value, x.attributes)),
+            Self::Variables(v) => v.get(name).cloned(),
         }
     }
-}
 
-impl ParentOrGlobal {
-    fn get_ref(&self) -> GcRef<RefCell<ScopeInternal>> {
+    fn contains_key(&self, name: &str) -> bool {
         match self {
-            Self::Parent(p) => p.get_ref(),
-            Self::Global(g) => g.get_untyped_ref(),
+            Self::Object(o) => o.contains_key(&name.into()).unwrap_or_default(),
+            Self::Variables(v) => v.contains_key(name),
+        }
+    }
+
+    fn keys(&self) -> Vec<String> {
+        match self {
+            Self::Object(o) => o
+                .keys()
+                .map(|x| {
+                    x.iter()
+                        .filter_map(|v| {
+                            if let Value::String(s) = v {
+                                Some(s.clone())
+                            } else {
+                                None
+                            }
+                        })
+                        .collect()
+                })
+                .unwrap_or_default(),
+            Self::Variables(v) => v.keys().cloned().collect(),
         }
     }
 }
 
 #[derive(Debug)]
 pub struct ScopeInternal {
-    parent: ParentOrGlobal,
-    variables: HashMap<String, Variable>,
+    parent: Option<Gc<RefCell<ScopeInternal>>>,
+    variables: ObjectOrVariables,
     pub available_labels: Vec<String>,
     pub last_label_is_current: bool,
     pub state: ScopeState,
@@ -171,18 +203,27 @@ pub struct ScopeInternal {
 
 unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
     fn get_refs(&self) -> Vec<GcRef<RefCell<Self>>> {
-        let mut refs = Vec::with_capacity(self.variables.len());
+        let mut refs = match &self.variables {
+            ObjectOrVariables::Object(o) => vec![o.get_untyped_ref()],
+            ObjectOrVariables::Variables(v) => {
+                let mut refs = Vec::with_capacity(v.len());
 
-        for v in self.variables.values() {
-            if let Value::Object(o) = &v.value {
-                refs.push(o.get_untyped_ref());
+                for v in v.values() {
+                    if let Value::Object(o) = &v.value {
+                        refs.push(o.get_untyped_ref());
+                    }
+                }
+
+                if let Some(this) = self.this.gc_untyped_ref() {
+                    refs.push(this);
+                }
+
+                refs
             }
-        }
+        };
 
-        refs.push(self.parent.get_ref());
-
-        if let Some(this) = self.this.gc_untyped_ref() {
-            refs.push(this);
+        if let Some(p) = &self.parent {
+            refs.push(p.get_ref());
         }
 
         refs
@@ -192,36 +233,11 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
 impl ScopeInternal {
     #[must_use]
     pub fn new(realm: &Realm, path: PathBuf) -> Self {
-        let mut variables = HashMap::with_capacity(8);
+        let global = realm.global.clone();
 
-        variables.insert(
-            "undefined".to_string(),
-            Variable::new_read_only(Value::Undefined),
-        );
-        variables.insert(
-            "NaN".to_string(),
-            Variable::new_read_only(Value::Number(f64::NAN)),
-        );
-        variables.insert(
-            "Infinity".to_string(),
-            Variable::new_read_only(Value::Number(f64::INFINITY)),
-        );
-        variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
-        variables.insert(
-            "true".to_string(),
-            Variable::new_read_only(Value::Boolean(true)),
-        );
-        variables.insert(
-            "false".to_string(),
-            Variable::new_read_only(Value::Boolean(false)),
-        );
-        variables.insert(
-            "console".to_string(),
-            Variable::new_read_only(get_console(realm)),
-        );
         Self {
-            parent: ParentOrGlobal::Global(realm.global.clone()),
-            variables,
+            parent: None,
+            variables: ObjectOrVariables::Object(global),
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::new(),
@@ -233,33 +249,9 @@ impl ScopeInternal {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
     pub fn global(realm: &Realm, path: PathBuf) -> Self {
-        let mut variables = HashMap::with_capacity(8);
-
-        variables.insert(
-            "undefined".to_string(),
-            Variable::new_read_only(Value::Undefined),
-        );
-        variables.insert(
-            "NaN".to_string(),
-            Variable::new_read_only(Value::Number(f64::NAN)),
-        );
-        variables.insert(
-            "Infinity".to_string(),
-            Variable::new_read_only(Value::Number(f64::INFINITY)),
-        );
-        variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
-        variables.insert(
-            "true".to_string(),
-            Variable::new_read_only(Value::Boolean(true)),
-        );
-        variables.insert(
-            "false".to_string(),
-            Variable::new_read_only(Value::Boolean(false)),
-        );
-
         Self {
-            parent: ParentOrGlobal::Global(realm.global.clone()),
-            variables,
+            parent: None,
+            variables: ObjectOrVariables::Object(realm.global.clone()),
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::STATE_NONE,
@@ -302,8 +294,8 @@ impl ScopeInternal {
         let this = parent.borrow()?.this.copy();
 
         Ok(Self {
-            parent: ParentOrGlobal::Parent(parent),
-            variables,
+            parent: Some(parent),
+            variables: ObjectOrVariables::Variables(variables),
             available_labels,
             last_label_is_current: false,
             state,
@@ -320,8 +312,8 @@ impl ScopeInternal {
         Ok(new)
     }
 
-    pub fn declare_var(&mut self, name: String, value: Value) {
-        self.variables.insert(name, Variable::new(value));
+    pub fn declare_var(&mut self, name: String, value: Value) -> Res {
+        self.variables.insert(name, Variable::new(value))
     }
 
     pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
@@ -329,22 +321,24 @@ impl ScopeInternal {
             return Err(Error::new("Variable already declared"));
         }
 
-        self.variables.insert(name, Variable::new_read_only(value));
+        self.variables.insert(name, Variable::new_read_only(value))?;
 
         Ok(())
     }
 
     pub fn declare_global_var(&mut self, name: String, value: Value) -> Res {
         #[allow(clippy::if_same_then_else)]
-        if self.state.is_function() {
-            self.variables.insert(name, Variable::new(value));
+        if let ObjectOrVariables::Object(obj) = &mut self.variables {
+            obj.define_property(name.into(), value)?;
+        } else if self.state.is_function() {
+            self.variables.insert(name, Variable::new(value))?;
         } else {
             match &self.parent {
-                ParentOrGlobal::Global(global) => {
-                    global.define_variable(name.into(), Variable::new(value))?;
-                }
-                ParentOrGlobal::Parent(p) => {
+                Some(p) => {
                     p.borrow_mut()?.declare_global_var(name, value.copy())?;
+                }
+                None => {
+                    self.variables.insert(name, Variable::new(value))?;
                 }
             }
         }
@@ -358,8 +352,8 @@ impl ScopeInternal {
         }
 
         match &self.parent {
-            ParentOrGlobal::Parent(parent) => parent.borrow()?.resolve(name, realm),
-            ParentOrGlobal::Global(global) => global.resolve_property(&name.into(), realm),
+            Some(parent) => parent.borrow()?.resolve(name, realm),
+            None => Ok(None),
         }
     }
 
@@ -368,8 +362,8 @@ impl ScopeInternal {
             Ok(true)
         } else {
             match &self.parent {
-                ParentOrGlobal::Parent(parent) => parent.borrow()?.has_value(name),
-                ParentOrGlobal::Global(global) => global.contains_key(&name.into()),
+                Some(parent) => parent.borrow()?.has_value(name),
+                None => Ok(false),
             }
         }
     }
@@ -455,60 +449,72 @@ impl ScopeInternal {
     }
 
     pub fn update(&mut self, name: &str, value: Value) -> Result<bool> {
-        if let Some(v) = self.variables.get_mut(name) {
-            if !v.properties.is_writable() {
-                return Ok(false);
-            }
-            v.value = value;
-            return Ok(true);
-        }
-
-        match &self.parent {
-            ParentOrGlobal::Parent(p) => {
-                return p.borrow_mut()?.update(name, value);
-            }
-            ParentOrGlobal::Global(global) => {
+        match &mut self.variables {
+            ObjectOrVariables::Object(obj) => {
                 let name = name.into();
+                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(&name) {
+                    if !prop.attributes.is_writable() {
+                        return Ok(false);
+                    }
 
-                if global.contains_key(&name)? {
-                    global.define_property(name, value)?;
-
+                    obj.define_variable(name, Variable::with_attributes(value, prop.attributes))?;
                     return Ok(true);
                 }
             }
+            ObjectOrVariables::Variables(ref mut v) => {
+                if let Some(var) = v.get_mut(name) {
+                    if !var.properties.is_writable() {
+                        return Ok(false);
+                    }
+
+                    var.value = value;
+                    return Ok(true);
+                }
+            }
+        }
+        
+        match &self.parent {
+            Some(p) => {
+                return p.borrow_mut()?.update(name, value);
+            }
+            None => {}
         }
 
         Ok(false)
     }
 
     pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
-        if let Some(v) = self.variables.get_mut(&name) {
-            if !v.properties.is_writable() {
-                return Err(Error::ty("Assignment to constant variable"));
-            }
-
-            v.value = value;
-            return Ok(());
-        }
-
-        match &self.parent {
-            ParentOrGlobal::Parent(p) => {
-                if p.borrow_mut()?.update(&name, value.copy())? {
-                    return Ok(());
-                }
-            }
-            ParentOrGlobal::Global(global) => {
+        match &mut self.variables {
+            ObjectOrVariables::Object(obj) => {
                 let name = name.clone().into();
+                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(&name) {
+                    if !prop.attributes.is_writable() {
+                        return Err(Error::ty("Assignment to constant variable"));
+                    }
 
-                if global.contains_key(&name)? {
-                    global.define_property(name, value)?;
+                    obj.define_variable(name, Variable::with_attributes(value, prop.attributes))?;
+                    return Ok(());
+                }
+            }
+            ObjectOrVariables::Variables(v) => {
+                if let Some(var) = v.get_mut(&name) {
+                    if !var.properties.is_writable() {
+                        return Err(Error::ty("Assignment to constant variable"));
+                    }
 
+                    var.value = value;
                     return Ok(());
                 }
             }
         }
 
-        self.declare_var(name, value);
+        if let Some(p) = &self.parent {
+            if p.borrow_mut()?.update(&name, value.copy())? {
+                return Ok(());
+            }
+        }
+
+        self.declare_var(name, value)?;
 
         Ok(())
     }
@@ -523,8 +529,8 @@ impl ScopeInternal {
         }
 
         match &self.parent {
-            ParentOrGlobal::Parent(p) => p.borrow()?.get_current_file(),
-            ParentOrGlobal::Global(_) => Ok(PathBuf::new()),
+            Some(p) => p.borrow()?.get_current_file(),
+            None => Ok(PathBuf::new()),
         }
     }
 
@@ -534,19 +540,23 @@ impl ScopeInternal {
 
     pub fn get_variables(&self) -> Result<HashMap<String, Variable>> {
         let mut variables: HashMap<String, Variable> = match &self.parent {
-            ParentOrGlobal::Parent(p) => p.borrow()?.get_variables()?,
-            ParentOrGlobal::Global(g) => g
-                .properties()?
-                .iter()
-                .filter_map(|(k, v)| match k {
-                    Value::String(s) => Some((s.clone(), Variable::new(v.clone()))),
-                    _ => None,
-                })
-                .collect(),
+            Some(p) => p.borrow()?.get_variables()?,
+            None => HashMap::new(),
         };
 
-        for (name, variable) in &self.variables {
-            variables.insert(name.clone(), variable.clone());
+        match &self.variables {
+            ObjectOrVariables::Object(o) => {
+                for (k, v) in o.properties()?.iter() {
+                    if let Value::String(s) = k {
+                        variables.insert(s.clone(), v.clone().into());
+                    }
+                }
+            }
+            ObjectOrVariables::Variables(v) => {
+                for (name, variable) in v {
+                    variables.insert(name.clone(), variable.clone());
+                }
+            }
         }
 
         Ok(variables)
@@ -554,18 +564,11 @@ impl ScopeInternal {
 
     pub fn get_variable_names(&self) -> Result<HashSet<String>> {
         let mut variables = match &self.parent {
-            ParentOrGlobal::Parent(p) => p.borrow()?.get_variable_names()?,
-            ParentOrGlobal::Global(g) => g
-                .properties()?
-                .iter()
-                .filter_map(|(k, _)| match k {
-                    Value::String(s) => Some(s.clone()),
-                    _ => None,
-                })
-                .collect(),
+            Some(p) => p.borrow()?.get_variable_names()?,
+            None => HashSet::new(),
         };
 
-        variables.extend(self.variables.keys().cloned());
+        variables.extend(self.variables.keys());
 
         Ok(variables)
     }
@@ -593,6 +596,20 @@ impl Scope {
             ))?)),
         })
     }
+    
+    pub fn object_with_parent(parent: &Self, object: ObjectHandle) -> Result<Self> {
+        Ok(Self {
+            scope: Gc::new(RefCell::new(ScopeInternal {
+                parent: Some(Gc::clone(&parent.scope)),
+                variables: ObjectOrVariables::Object(object),
+                available_labels: Vec::new(),
+                last_label_is_current: false,
+                state: ScopeState::new(),
+                this: Value::Undefined,
+                file: None,
+            })),
+        })
+    }
 
     pub fn with_parent_this(parent: &Self, this: Value) -> Result<Self> {
         Ok(Self {
@@ -604,9 +621,7 @@ impl Scope {
     }
 
     pub fn declare_var(&mut self, name: String, value: Value) -> Res {
-        self.scope.borrow_mut()?.declare_var(name, value);
-
-        Ok(())
+        self.scope.borrow_mut()?.declare_var(name, value)
     }
 
     pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
@@ -630,7 +645,7 @@ impl Scope {
         if scope.has_label(label) {
             Ok(true)
         } else {
-            if let ParentOrGlobal::Parent(p) = &scope.parent {
+            if let Some(p) = &scope.parent {
                 return Ok(p.borrow()?.has_label(label));
             }
             Ok(false)
@@ -694,10 +709,6 @@ impl Scope {
         Ok(self.scope.borrow()?.state_is_function())
     }
 
-    pub fn is_global(&self) -> Result<bool> {
-        Ok(matches!(self.parent()?, ParentOrGlobal::Global(_)))
-    }
-
     pub fn state_is_iteration(&self) -> Result<bool> {
         Ok(self.scope.borrow()?.state_is_iteration())
     }
@@ -737,12 +748,15 @@ impl Scope {
     pub fn child(&self) -> Result<Self> {
         Self::with_parent(self)
     }
+    pub fn child_object(&self, object: ObjectHandle) -> Result<Self> {
+        Self::object_with_parent(self, object)
+    }
 
     pub fn this(&self) -> Result<Value> {
         Ok(self.scope.borrow()?.this.copy())
     }
 
-    pub fn parent(&self) -> Result<ParentOrGlobal> {
+    pub fn parent(&self) -> Result<Option<Gc<RefCell<ScopeInternal>>>> {
         Ok(self.scope.borrow()?.parent.clone())
     }
 
@@ -769,6 +783,7 @@ impl Scope {
     pub fn get_variable_names(&self) -> Result<HashSet<String>> {
         self.scope.borrow()?.get_variable_names()
     }
+    
 }
 
 impl CustomGcRefUntyped for Scope {
@@ -840,7 +855,7 @@ mod tests {
     fn scope_internal_declare_var_and_resolve() {
         let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
-        scope.declare_var("test".to_string(), Value::Number(42.0));
+        scope.declare_var("test".to_string(), Value::Number(42.0)).unwrap();
         let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }

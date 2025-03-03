@@ -5,7 +5,7 @@ use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
-use yavashark_env::scope::{ParentOrGlobal, Scope};
+use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
 
 pub struct OwnedVM {
@@ -93,7 +93,7 @@ impl OwnedVM {
     pub fn pop_scope(&mut self) -> Res {
         let scope = self.current_scope.parent()?;
 
-        if let ParentOrGlobal::Parent(p) = scope {
+        if let Some(p) = scope {
             self.current_scope = p.into();
         } else {
             return Err(Error::new("No parent scope"));
