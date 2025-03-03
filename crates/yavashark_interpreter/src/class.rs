@@ -121,11 +121,15 @@ pub fn create_class(
 
 pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let (class, statics) = create_class(realm, stmt, scope, name.clone())?;
-
-    let this = class.into_value();
+    
+    let this = class.into_object();
+    
+    let mut static_scope = scope.child_object(this.clone())?;
+    
+    let this: Value = this.into();
 
     for static_block in statics {
-        Interpreter::run_block_this(realm, &static_block, scope, this.copy())?;
+        Interpreter::run_block_this(realm, &static_block, &mut static_scope, this.copy())?;
     }
 
     scope.declare_var(name, this);
