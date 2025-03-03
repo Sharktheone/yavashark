@@ -8,12 +8,12 @@ impl Interpreter {
         fn update(value: Value, op: UpdateOp) -> (Value, Value) {
             match op {
                 UpdateOp::PlusPlus => (
-                    value.copy() + Value::Number(1.0),
-                    value + Value::Number(0.0),
+                    value.copy() - Value::Number(-1.0),
+                    value - Value::Number(0.0),
                 ),
                 UpdateOp::MinusMinus => (
                     value.copy() - Value::Number(1.0),
-                    value + Value::Number(0.0),
+                    value - Value::Number(0.0),
                 ),
             }
         }
@@ -25,16 +25,32 @@ impl Interpreter {
                     .resolve(&name, realm)?
                     .ok_or(Error::reference_error(format!("{name} is not defined")))?;
                 let up = update(value, stmt.op);
+                
+                let ret = if stmt.prefix {
+                    up.0.copy()
+                } else {
+                    up.1
+                };
+                
                 scope.update_or_define(name, up.0);
-                Ok(up.1)
+                
+                
+                
+                Ok(ret)
             }
             Expr::Member(m) => {
                 let value = Self::run_member(realm, m, scope)?;
 
                 let up = update(value, stmt.op);
+                
+                let ret = if stmt.prefix {
+                    up.0.copy()
+                } else {
+                    up.1
+                };
 
                 Self::assign_member(realm, m, up.0, scope);
-                Ok(up.1)
+                Ok(ret)
             }
 
             e => {
@@ -42,11 +58,11 @@ impl Interpreter {
                 //TODO: this isn't correct
                 match stmt.op {
                     UpdateOp::PlusPlus => {
-                        let value = value + Value::Number(1.0);
+                        let value = value - Value::Number(if stmt.prefix { -1.0 } else { 0.0 });
                         Ok(value)
                     }
                     UpdateOp::MinusMinus => {
-                        let value = value - Value::Number(1.0);
+                        let value = value - Value::Number(if stmt.prefix { 1.0 } else { 0.0 });
                         Ok(value)
                     }
                 }
