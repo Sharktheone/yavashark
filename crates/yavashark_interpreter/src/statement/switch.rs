@@ -10,14 +10,19 @@ impl Interpreter {
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_breakable()?;
 
+        let mut had_pass = false;
         for case in &stmt.cases {
-            if let Some(test) = &case.test {
-                let test = Self::run_expr(realm, test, case.span, scope)?;
-                if discriminant == test {
-                } else {
-                    continue;
+            if !had_pass {
+                if let Some(test) = &case.test {
+                    let test = Self::run_expr(realm, test, case.span, scope)?;
+                    if discriminant == test {
+                    } else {
+                        continue;
+                    }
                 }
             }
+
+            had_pass = true;
 
             if let Err(e) = Self::run_statements(realm, &case.cons, scope) {
                 return match &e {
