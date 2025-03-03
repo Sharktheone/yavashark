@@ -527,11 +527,13 @@ impl<C: Realm> ObjectProperty<C> {
     }
 
     pub fn descriptor(self, obj: &Object<C>) -> Result<(), Error<C>> {
-        if self.set.is_undefined() || self.get.is_undefined() {
+        if !self.set.is_undefined() || !self.get.is_undefined() {
+            obj.define_property("get".into(), self.get)?;
+            obj.define_property("set".into(), self.set)?;
         } else {
             obj.define_property("value".into(), self.value)?;
         }
-
+        
         obj.define_property("writable".into(), self.attributes.is_writable().into())?;
         obj.define_property("enumerable".into(), self.attributes.is_enumerable().into())?;
         obj.define_property(

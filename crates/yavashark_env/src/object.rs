@@ -1,4 +1,5 @@
 use std::cell::{Ref, RefCell, RefMut};
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::fmt::Debug;
 
@@ -225,7 +226,9 @@ impl MutObject {
 
         if found {
             if let Some(v) = self.array.get_mut(i) {
-                v.1 = value.into();
+                if v.1.attributes.is_writable() {
+                    v.1 = value.into();
+                }
                 return;
             };
         }
@@ -306,9 +309,21 @@ impl MutObj<Realm> for MutObject {
             self.insert_array(*n as usize, value.into());
             return Ok(());
         }
-
-        self.properties.insert(name, value.into());
-
+        
+        match self.properties.entry(name) {
+            Entry::Occupied(mut entry) => {
+                let e = entry.get();
+                
+                if e.attributes.is_writable() {
+                    entry.insert(value.into());
+                    return Ok(());
+                }
+                
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(value.into());
+            }
+        }
         Ok(())
     }
 
@@ -317,7 +332,20 @@ impl MutObj<Realm> for MutObject {
             self.insert_array(*n as usize, value);
             return Ok(());
         }
-        self.properties.insert(name, value.into());
+        match self.properties.entry(name) {
+            Entry::Occupied(mut entry) => {
+                let e = entry.get();
+
+                if e.attributes.is_writable() {
+                    entry.insert(value.into());
+                    return Ok(());
+                }
+
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(value.into());
+            }
+        }
 
         Ok(())
     }
