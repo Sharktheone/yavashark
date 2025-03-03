@@ -121,7 +121,7 @@ impl NumberObj {
     pub fn with_number(realm: &Realm, number: impl Into<f64>) -> crate::Result<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.number.clone().into()),
                 number: number.into(),
             }),
         };
