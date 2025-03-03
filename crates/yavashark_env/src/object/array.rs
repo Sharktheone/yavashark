@@ -122,6 +122,12 @@ impl Array {
         let mut inner = self.inner.try_borrow_mut()?;
 
         inner.object.insert_array(idx, val.into());
+        let len = inner.length.value.to_number_or_null();
+        
+        if idx >= len as usize {
+            inner.length.value = Value::Number(idx as f64 + 1.0);
+        }
+        
 
         Ok(())
     }
