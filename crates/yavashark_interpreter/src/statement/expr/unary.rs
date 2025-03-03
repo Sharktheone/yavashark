@@ -31,7 +31,7 @@ impl Interpreter {
 
         let value = Self::run_expr(realm, &stmt.arg, stmt.span, scope).or_else(|v| {
             if stmt.op == UnaryOp::TypeOf {
-                Ok(Value::String("undefined".to_string()))
+                Ok(Value::Undefined)
             } else {
                 Err(v)
             }
