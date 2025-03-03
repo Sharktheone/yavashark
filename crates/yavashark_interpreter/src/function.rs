@@ -109,14 +109,7 @@ impl RawJSFunction {
         scope.state_set_returnable();
 
         for (i, p) in self.params.iter().enumerate() {
-            let Pat::Ident(name) = &p.pat else {
-                return Err(Error::syn("Invalid function parameter"));
-            };
-
-            scope.declare_var(
-                name.sym.to_string(),
-                args.get(i).unwrap_or(&Value::Undefined).copy(),
-            );
+            Interpreter::run_pat(realm, &p.pat, scope, args.get(i).unwrap_or(&Value::Undefined).copy())?;
         }
 
         let args = Array::with_elements(realm, args)?;
@@ -151,7 +144,9 @@ impl Constructor<Realm> for JSFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let this = self.new_instance(realm)?;
 
-        self.raw.call(realm, args, this.copy())?;
+        if let Value::Object(obj) = self.raw.call(realm, args, this.copy())? {
+            return Ok(obj.into());
+        }
 
         Ok(this)
     }

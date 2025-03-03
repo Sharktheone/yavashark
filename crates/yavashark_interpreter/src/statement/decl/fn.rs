@@ -15,22 +15,22 @@ impl Interpreter {
 
         fn_scope.state_set_function()?;
 
-        let block = stmt.function.body.as_ref().map(|block| {
-            let boxed: Box<dyn FunctionCode> = Box::new(OptimizedJSFunction {
-                block: block.clone(),
-            });
-
-            RefCell::new(boxed)
-        });
+        // let block = stmt.function.body.as_ref().map(|block| {
+        //     let boxed: Box<dyn FunctionCode> = Box::new(OptimizedJSFunction {
+        //         block: block.clone(),
+        //     });
+        // 
+        //     RefCell::new(boxed)
+        // });
 
         let name = stmt.ident.sym.to_string();
-        let function = OptimFunction::new(
+        let function = JSFunction::new(
             name.clone(),
             stmt.function.params.clone(),
-            block,
+            stmt.function.body.clone(),
             fn_scope,
             realm,
-        )?;
+        );
         scope.declare_var(name, function.into());
 
         Ok(())
