@@ -84,6 +84,8 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("decodeURI".into(), get_encode_uri(realm).into())?;
     obj.define_variable("encodeURIComponent".into(), get_encode_uri_component(realm).into())?;
     obj.define_variable("decodeURIComponent".into(), get_encode_uri_component(realm).into())?;
+    obj.define_variable("Map".into(), realm.intrinsics.map_constructor())?;
+    obj.define_variable("Set".into(), realm.intrinsics.set_constructor())?;
     
     
 

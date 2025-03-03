@@ -27,7 +27,7 @@ fn get_optimizer(realm: &Realm) -> ObjectHandle {
                 ));
             };
 
-            let func = OptimFunction::from_value_out(func.copy())?;
+            let func = <&OptimFunction>::from_value_out(func.copy())?;
             println!("Optimizing function: {}", func.raw.name);
 
             let Some(code) = &func.raw.block else {

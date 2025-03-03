@@ -24,7 +24,7 @@ impl DataView {
         byte_offset: Option<usize>,
         byte_length: Option<usize>,
     ) -> Result<Self> {
-        let buf = ArrayBuffer::from_value_out(buffer.copy())?;
+        let buf = <&ArrayBuffer>::from_value_out(buffer.copy())?;
         let buf_len = buf.inner.borrow().buffer.len();
         let byte_offset = byte_offset.unwrap_or(0);
 
@@ -59,7 +59,7 @@ impl DataView {
 
         let buf = inner.buffer.value.clone();
 
-        ArrayBuffer::from_value_out(buf)
+        <&ArrayBuffer>::from_value_out(buf)
     }
 
     pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Result<T> {

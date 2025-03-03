@@ -35,7 +35,7 @@ pub trait FromValueOutput {
 //     }
 // }
 
-impl<O: Obj<Realm>> FromValueOutput for O {
+impl<O: Obj<Realm>> FromValueOutput for &O {
     type Output = OwningGcGuard<'static, BoxedObj<Realm>, O>;
 
     fn from_value_out(value: Value) -> Result<Self::Output> {

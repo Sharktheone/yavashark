@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{BoxedObj, Type};
+use yavashark_value::{BoxedObj};
 use crate::{MutObject, Realm, Value, Result, Error};
 use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
@@ -21,7 +21,7 @@ impl TypedArray {
         byte_offset: Option<usize>,
         byte_length: Option<usize>,
     ) -> Result<Self> {
-        let buf = ArrayBuffer::from_value_out(buffer.copy())?;
+        let buf = <&ArrayBuffer>::from_value_out(buffer.copy())?;
         let buf_len = buf.inner.borrow().buffer.len();
         let byte_offset = byte_offset.unwrap_or(0);
 
@@ -56,7 +56,7 @@ impl TypedArray {
 
         let buf = inner.buffer.value.clone();
 
-        ArrayBuffer::from_value_out(buf)
+        <&ArrayBuffer>::from_value_out(buf)
     }
 }
 

@@ -9,6 +9,8 @@ mod regex;
 mod string;
 mod symbol;
 mod escape;
+mod map;
+mod set;
 
 pub use arraybuffer::*;
 pub use bigint::*;
@@ -21,3 +23,5 @@ pub use regex::*;
 pub use string::*;
 pub use symbol::*;
 pub use escape::*;
+pub use map::*;
+pub use set::*;
