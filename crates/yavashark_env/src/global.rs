@@ -5,8 +5,8 @@ use crate::Value;
 use crate::builtins::{get_encode_uri, get_encode_uri_component, get_escape};
 
 pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
-    let obj = handle.get(); 
-    
+    let obj = handle.get();
+
     obj.define_variable(
         "undefined".into(),
         Variable::new_read_only(Value::Undefined),
@@ -86,8 +86,9 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("decodeURIComponent".into(), get_encode_uri_component(realm).into())?;
     obj.define_variable("Map".into(), realm.intrinsics.map_constructor())?;
     obj.define_variable("Set".into(), realm.intrinsics.set_constructor())?;
-    
-    
+    obj.define_variable("Date".into(), realm.intrinsics.date_constructor())?;
+
+
 
     macro_rules! copy_from {
         ($prop:ident, $name:ident) => {

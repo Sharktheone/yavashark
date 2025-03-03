@@ -11,6 +11,7 @@ mod symbol;
 mod escape;
 mod map;
 mod set;
+mod date;
 
 pub use arraybuffer::*;
 pub use bigint::*;
@@ -25,3 +26,4 @@ pub use symbol::*;
 pub use escape::*;
 pub use map::*;
 pub use set::*;
+pub use date::*;
