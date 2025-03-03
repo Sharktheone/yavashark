@@ -1,9 +1,9 @@
-use swc_common::Span;
+use swc_common::{Span, Spanned};
 use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, Realm, Value, ValueResult};
-
+use yavashark_env::utils::ValueIterator;
 use crate::location::get_location;
 use crate::Interpreter;
 
@@ -31,8 +31,34 @@ impl Interpreter {
                 let constructor = sup.as_object()?.constructor()?;
 
                 let constructor = constructor.resolve(proto.copy(), realm)?;
+                
+                let constructor = constructor.as_object()?;
+                
+                let mut values = Vec::with_capacity(stmt.args.len());
 
-                Self::run_call_on(realm, &constructor, proto, &stmt.args, stmt.span, scope)
+                for arg in &stmt.args {
+                    let value = Self::run_expr(realm, &arg.expr, arg.span(), scope)?;
+
+                    if arg.spread.is_some() {
+                        let iter = ValueIterator::new(&value, realm)?;
+
+                        while let Some(value) = iter.next(realm)? {
+                            values.push(value);
+                        }
+
+                    } else {
+                        values.push(value);
+                    }
+
+                }
+
+                //TODO: we somehow need to run the constructor ON the super class
+                constructor.construct(realm, values) //In strict mode, this is undefined
+                    .map_err(|mut e| {
+                        e.attach_function_stack(constructor.name(), get_location(stmt.span, scope));
+
+                        e
+                    })
             }
 
             Callee::Import(import) => {
@@ -50,12 +76,26 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> ValueResult {
         if let Value::Object(f) = callee.copy() {
-            let args = args
-                .iter()
-                .map(|arg| Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(span), scope))
-                .collect::<Result<Vec<Value>, ControlFlow>>()?;
-
-            f.call(realm, args, this) //In strict mode, this is undefined
+            let mut values = Vec::with_capacity(args.len());
+            
+            for arg in args {
+                let value = Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(span), scope)?;
+                
+                if arg.spread.is_some() {
+                    let iter = ValueIterator::new(&value, realm)?;
+                    
+                    while let Some(value) = iter.next(realm)? {
+                        values.push(value);
+                    }
+                    
+                } else {
+                    values.push(value);
+                }
+                
+            }
+            
+            
+            f.call(realm, values, this) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, scope));
 
