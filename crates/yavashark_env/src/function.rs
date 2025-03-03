@@ -1,6 +1,6 @@
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{MutObject, ObjectHandle, ObjectProperty, Value, ValueResult};
+use crate::{MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
@@ -70,7 +70,7 @@ impl NativeFunction {
     #[allow(clippy::missing_panics_doc)]
     pub fn new_boxed(name: String, f: NativeFn, realm: &Realm) -> ObjectHandle {
         let this = Self {
-            name,
+            name: name.clone(),
             f,
             special_constructor: false,
 
@@ -79,8 +79,11 @@ impl NativeFunction {
                 constructor: Value::Undefined.into(),
             }),
         };
+        
 
         let handle = ObjectHandle::new(this);
+
+        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -118,6 +121,8 @@ impl NativeFunction {
 
         let handle = ObjectHandle::new(this);
 
+        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
@@ -153,6 +158,7 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
+        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -189,6 +195,7 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
+        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -225,6 +232,7 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
+        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -337,9 +345,11 @@ impl NativeFunctionBuilder {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
     pub fn build(self) -> ObjectHandle {
+        let name = self.0.name.clone();
         let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());
+        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
 
         #[allow(clippy::expect_used)]
         {

@@ -434,7 +434,7 @@ impl Method {
             .js_name
             .clone()
             .map(|js_name| quote! {#js_name})
-            .unwrap_or_else(|| quote! {stringify!(#name)});
+            .unwrap_or_else(|| quote! {#name});
 
         quote! {
             #native_function::with_proto(stringify!(#name), |mut args, mut this, realm| {
