@@ -2,6 +2,7 @@ use crate::error::get_error;
 use crate::realm::Realm;
 use crate::{get_console, ObjectHandle, Res, Variable};
 use yavashark_value::Value;
+use crate::builtins::{get_encode_uri, get_encode_uri_component, get_escape};
 
 pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     let obj = handle.get();
@@ -55,6 +56,14 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         realm.intrinsics.arraybuffer_constructor(),
     )?;
     obj.define_variable("DataView".into(), realm.intrinsics.data_view_constructor())?;
+    obj.define_variable("escape".into(), get_escape(realm).into())?;
+    obj.define_variable("unescape".into(), get_escape(realm).into())?;
+    obj.define_variable("encodeURI".into(), get_encode_uri(realm).into())?;
+    obj.define_variable("decodeURI".into(), get_encode_uri(realm).into())?;
+    obj.define_variable("encodeURIComponent".into(), get_encode_uri_component(realm).into())?;
+    obj.define_variable("decodeURIComponent".into(), get_encode_uri_component(realm).into())?;
+    
+    
 
     macro_rules! copy_from {
         ($prop:ident, $name:ident) => {

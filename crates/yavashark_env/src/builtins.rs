@@ -8,6 +8,7 @@ mod number;
 mod regex;
 mod string;
 mod symbol;
+mod escape;
 
 pub use arraybuffer::*;
 pub use bigint::*;
@@ -19,3 +20,4 @@ pub use number::*;
 pub use regex::*;
 pub use string::*;
 pub use symbol::*;
+pub use escape::*;
