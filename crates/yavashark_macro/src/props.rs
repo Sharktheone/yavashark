@@ -269,7 +269,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     {
                         let prop = #prop_tokens;
 
-                        obj.define_variable(#name.into(), #variable::new(prop.into()))?;
+                        obj.define_variable(#name.into(), #variable::write_config(prop.into()))?;
                     }
                 });
             }
@@ -434,14 +434,16 @@ impl Method {
             .js_name
             .clone()
             .map(|js_name| quote! {#js_name})
-            .unwrap_or_else(|| quote! {#name});
+            .unwrap_or_else(|| quote! {stringify!(#name)});
+        
+        let length = self.args.len();
 
         quote! {
-            #native_function::with_proto(stringify!(#name), |mut args, mut this, realm| {
+            #native_function::with_proto_and_len(#name.as_ref(), |mut args, mut this, realm| {
                 #arg_prepare
                 #prepare_receiver
                 #call.try_into_value()
-            }, func_proto.copy())
+            }, func_proto.copy(), #length)
         }
     }
 }

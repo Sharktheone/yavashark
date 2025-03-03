@@ -247,9 +247,9 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     for prop in properties {
         let name = &prop.name;
         let attrs = prop.attributes.as_ref().unwrap_or(&Attributes {
-            writable: true,
+            writable: false,
             enumerable: false,
-            configurable: false,
+            configurable: true,
         });
 
         let writable = attrs.writable;

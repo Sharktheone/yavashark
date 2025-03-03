@@ -17,6 +17,22 @@ impl<C: Realm> Variable<C> {
             properties: Attributes::new(),
         }
     }
+    
+    #[must_use]
+    pub const fn config(value: Value<C>) -> Self {
+        Self {
+            value,
+            properties: Attributes::config(),
+        }
+    }
+    
+    #[must_use]
+    pub const fn write_config(value: Value<C>) -> Self {
+        Self {
+            value,
+            properties: Attributes::write_config(),
+        }
+    }
 
     #[must_use]
     pub const fn with_attributes(value: Value<C>, attributes: Attributes) -> Self {
@@ -127,6 +143,16 @@ impl Attributes {
     #[must_use]
     pub const fn new() -> Self {
         Self(Self::WRITABLE)
+    }
+    
+    #[must_use]
+    pub const fn config() -> Self {
+        Self(Self::CONFIGURABLE)
+    }
+    
+    #[must_use]
+    pub const fn write_config() -> Self {
+        Self(Self::WRITABLE | Self::CONFIGURABLE)
     }
 
     #[must_use]

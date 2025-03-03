@@ -79,11 +79,13 @@ impl NativeFunction {
                 constructor: Value::Undefined.into(),
             }),
         };
-        
 
         let handle = ObjectHandle::new(this);
 
-        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+        let _ = handle.define_variable(
+            "name".into(),
+            Variable::new_with_attributes(name.into(), false, false, true),
+        );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -121,7 +123,10 @@ impl NativeFunction {
 
         let handle = ObjectHandle::new(this);
 
-        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+        let _ = handle.define_variable(
+            "name".into(),
+            Variable::new_with_attributes(name.into(), false, false, true),
+        );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -158,7 +163,10 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+        let _ = handle.define_variable(
+            "name".into(),
+            Variable::new_with_attributes(name.into(), false, false, true),
+        );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -195,7 +203,46 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+        let _ = handle.define_variable("name".into(), Variable::config(name.into()));
+
+        let constructor = ObjectProperty::new(handle.clone().into());
+
+        #[allow(clippy::expect_used)]
+        {
+            let this = handle.get();
+
+            let this = this.as_any();
+
+            let this = this.downcast_ref::<Self>().expect("unreachable");
+
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor;
+        }
+
+        handle
+    }
+
+    #[allow(clippy::missing_panics_doc)]
+    pub fn with_proto_and_len(
+        name: &str,
+        f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
+        proto: Value,
+        len: usize,
+    ) -> ObjectHandle {
+        let this = Self {
+            name: name.to_string(),
+            f: Box::new(f),
+            special_constructor: false,
+            inner: RefCell::new(MutNativeFunction {
+                object: MutObject::with_proto(proto),
+                constructor: Value::Undefined.into(),
+            }),
+        };
+
+        let handle = ObjectHandle::new(this);
+        let _ = handle.define_variable("name".into(), Variable::config(name.into()));
+        let _ = handle.define_variable("length".into(), Variable::config(Value::from(len)));
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -232,7 +279,10 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+        let _ = handle.define_variable(
+            "name".into(),
+            Variable::new_with_attributes(name.into(), false, false, true),
+        );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -349,7 +399,10 @@ impl NativeFunctionBuilder {
         let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());
-        let _ = handle.define_variable("name".into(), Variable::new_with_attributes(name.into(), false, false, true));
+        let _ = handle.define_variable(
+            "name".into(),
+            Variable::new_with_attributes(name.into(), false, false, true),
+        );
 
         #[allow(clippy::expect_used)]
         {

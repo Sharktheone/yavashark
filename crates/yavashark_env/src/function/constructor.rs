@@ -6,7 +6,7 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Result, Value, ValueResult};
+use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Result, Value, ValueResult, Variable};
 
 pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> ValueResult>;
 
@@ -88,6 +88,46 @@ impl NativeConstructor {
         };
 
         let handle = ObjectHandle::new(this);
+
+        #[allow(clippy::expect_used)]
+        {
+            let constructor = handle.clone();
+            let this = handle.get();
+
+            let this = this.as_any();
+
+            let this = this.downcast_ref::<Self>().expect("unreachable");
+
+            let mut inner = this.inner.borrow_mut();
+
+            inner.constructor = constructor.into();
+        }
+
+        handle
+    }
+
+    #[allow(clippy::missing_panics_doc)]
+    pub fn with_proto_and_len(
+        name: String,
+        f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
+        proto: Value,
+        self_proto: Value,
+        len: usize,
+    ) -> ObjectHandle {
+        let this = Self {
+            inner: RefCell::new(MutableNativeConstructor {
+                object: MutObject::with_proto(self_proto),
+                constructor: Value::Undefined.into(),
+            }),
+            name,
+            f: Box::new(f),
+            proto,
+            special: false,
+        };
+
+        let handle = ObjectHandle::new(this);
+        
+        let _ = handle.define_variable("length".into(), Variable::config(Value::Number(len as f64)));
 
         #[allow(clippy::expect_used)]
         {

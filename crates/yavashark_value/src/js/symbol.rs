@@ -12,6 +12,12 @@ pub struct Symbol {
     inner: ConstString,
 }
 
+impl AsRef<str> for Symbol {
+    fn as_ref(&self) -> &str {
+        self.inner.as_ref()
+    }
+}
+
 impl Display for Symbol {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Symbol({})", self.inner)

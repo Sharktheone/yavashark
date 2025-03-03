@@ -32,6 +32,15 @@ pub enum ConstString {
     Owned(String),
 }
 
+impl AsRef<str> for ConstString {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::String(s) => *s,
+            Self::Owned(s) => s,
+        }
+    }
+}
+
 impl Display for ConstString {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
