@@ -1,8 +1,8 @@
 use crate::conversion::FromValueOutput;
 use crate::{MutObject, Object, ObjectHandle, Realm, Result, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike};
-use num_traits::Euclid;
 use std::cell::RefCell;
+use std::ops::Rem;
 use std::str::FromStr;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
@@ -63,7 +63,7 @@ impl Date {
 
     #[prop("getTimezoneOffset")]
     pub fn get_timezone_offset(&self) -> f64 {
-        let secs = self.date().offset().fix().local_minus_utc();
+        let secs = self.date().offset().fix().utc_minus_local();
 
         f64::from(secs) / 60.0
     }
@@ -500,23 +500,28 @@ impl Date {
                 }
             }
             _ => {
-                let year = args
-                    .first()
-                    .map_or(0.0, |v| v.to_number(realm).unwrap_or(0.0))
-                    as i32;
-
-                let mut get = |idx: usize| -> u32 {
+                let mut get = |idx: usize, def: i32| -> i32 {
                     args.get(idx)
-                        .map_or(0.0, |v| v.to_number(realm).unwrap_or(0.0))
-                        as u32
+                        .map_or(def, |v| v.to_number(realm).map(|x| x as i32).unwrap_or(def))
                 };
 
-                let month = get(1);
-                let day = get(2);
-                let hour = get(3);
-                let minute = get(4);
-                let second = get(5);
-                let ms = get(6); //TODO
+                let year = get(0, 0);
+                let month = get(1, 0);
+                let day = get(2, 1) - 1;
+                let hour = get(3, 0);
+                let minute = get(4, 0);
+                let second = get(5, 0);
+                let ms = get(6, 0);
+
+                let (ms, second) = fixup(ms, 1000, second);
+                let (second, minute) = fixup(second, 60, minute);
+                let (minute, hour) = fixup(minute, 60, hour);
+                let (hour, day) = fixup(hour, 24, day);
+                let (day, month) = fixup(day, 31, month);
+                let (month, year) = fixup(month, 12, year);
+
+                let month = month + 1;
+                let day = day + 1;
 
                 let time = match Local.with_ymd_and_hms(year, month, day, hour, minute, second) {
                     LocalResult::Single(date) => date,
@@ -580,23 +585,33 @@ impl DateConstructor {
 
     #[prop("UTC")]
     pub fn utc(&self, args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
-        let Some(year) = args.first() else {
+        if args.is_empty() {
             return Ok(f64::NAN.into());
-        };
-
-        let year = year.to_number(realm).unwrap_or(0.0) as i32;
-
-        let mut get = |idx: usize| -> u32 {
+        }
+        
+        
+        let mut get = |idx: usize, def: i32| -> i32 {
             args.get(idx)
-                .map_or(0.0, |v| v.to_number(realm).unwrap_or(0.0)) as u32
+                .map_or(def, |v| v.to_number(realm).map(|x| x as i32).unwrap_or(def))
         };
 
-        let month = get(1);
-        let day = get(2);
-        let hour = get(3);
-        let minute = get(4);
-        let second = get(5);
-        let ms = get(6);
+        let year = get(0, 0);
+        let month = get(1, 0);
+        let day = get(2, 1) - 1;
+        let hour = get(3, 0);
+        let minute = get(4, 0);
+        let second = get(5, 0);
+        let ms = get(6, 0);
+
+        let (ms, second) = fixup(ms, 1000, second);
+        let (second, minute) = fixup(second, 60, minute);
+        let (minute, hour) = fixup(minute, 60, hour);
+        let (hour, day) = fixup(hour, 24, day);
+        let (day, month) = fixup(day, 31, month);
+        let (month, year) = fixup(month, 12, year);
+
+        let month = month + 1;
+        let day = day + 1;
 
         let time = match Local.with_ymd_and_hms(year, month, day, hour, minute, second) {
             LocalResult::Single(date) => date,
@@ -608,4 +623,18 @@ impl DateConstructor {
 
         Ok(time.timestamp_millis().into())
     }
+}
+
+fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
+    let val = if val.is_negative() {
+        larger -= 1;
+        max + val
+    } else {
+        val
+    };
+
+    let larger_diff = val / max;
+    let val = val.rem(max);
+
+    (val as u32, larger - larger_diff)
 }
