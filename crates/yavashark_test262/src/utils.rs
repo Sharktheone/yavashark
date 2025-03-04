@@ -65,7 +65,16 @@ pub(crate) fn parse_file(f: &Path) -> (Vec<Stmt>, Metadata) {
     let mut p = Parser::new(Syntax::Es(c), input, None);
 
     let s = match p.parse_script() {
-        Ok(s) => s,
+        Ok(s) => {
+            if let Some(neg) = &metadata.negative {
+                if neg.phase == NegativePhase::Parse {
+                    println!("PARSE_ERROR: Expected error but parsed successfully");
+                    panic!()
+                }
+            }
+
+            s
+        },
         Err(e) => {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
