@@ -132,7 +132,17 @@ pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> Valu
 }
 
 pub fn property_is_enumerable(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    Ok(false.into())
+    let Some(prop) = args.first() else {
+        return Ok(false.into());
+    };
+
+    let Value::Object(obj) = this else {
+        return Ok(false.into());
+    };
+
+    let prop = obj.get_property(prop)?;
+
+    Ok(prop.attributes.is_enumerable().into())
 }
 
 pub fn to_locale_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
