@@ -1,8 +1,7 @@
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
 use std::fmt::Debug;
-
+use indexmap::IndexMap;
+use indexmap::map::Entry;
 pub use prototype::*;
 use yavashark_garbage::GcRef;
 use yavashark_value::{BoxedObj, MutObj, Obj};
@@ -22,7 +21,7 @@ pub struct Object {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MutObject {
-    pub properties: HashMap<Value, ObjectProperty>,
+    pub properties: IndexMap<Value, ObjectProperty>,
     pub array: Vec<(usize, ObjectProperty)>,
     pub prototype: ObjectProperty,
 }
@@ -180,7 +179,7 @@ impl MutObject {
         let prototype = realm.intrinsics.obj.clone().into();
 
         Self {
-            properties: HashMap::new(),
+            properties: IndexMap::new(),
             prototype,
             array: Vec::new(),
         }
@@ -189,7 +188,7 @@ impl MutObject {
     #[must_use]
     pub fn with_proto(proto: Value) -> Self {
         Self {
-            properties: HashMap::new(),
+            properties: IndexMap::new(),
             prototype: proto.into(),
             array: Vec::new(),
         }
