@@ -87,6 +87,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("Map".into(), realm.intrinsics.map_constructor())?;
     obj.define_variable("Set".into(), realm.intrinsics.set_constructor())?;
     obj.define_variable("Date".into(), realm.intrinsics.date_constructor())?;
+    obj.define_variable("Reflect".into(), realm.intrinsics.reflect_obj())?;
 
 
 

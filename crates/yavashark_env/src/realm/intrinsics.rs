@@ -1,6 +1,6 @@
 use crate::array::{Array, ArrayIterator};
 use crate::builtins::dataview::DataView;
-use crate::builtins::{get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, RegExp, StringObj, SymbolObj, JSON};
+use crate::builtins::{get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Reflect, RegExp, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -32,6 +32,7 @@ pub struct Intrinsics {
     pub(crate) map: ObjectHandle,
     pub(crate) set: ObjectHandle,
     pub(crate) date: ObjectHandle,
+    pub(crate) reflect: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -85,6 +86,7 @@ impl Intrinsics {
 
     obj!(json);
     obj!(math);
+    obj!(reflect);
 }
 
 impl Intrinsics {
@@ -224,6 +226,9 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+        
+        let reflect = Reflect::new(obj_prototype.clone().into(), func_prototype.clone().into())?;
+        
 
         Ok(Self {
             obj: obj_prototype,
@@ -252,6 +257,7 @@ impl Intrinsics {
             map,
             set,
             date,
+            reflect,
         })
     }
 }

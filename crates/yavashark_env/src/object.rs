@@ -11,8 +11,9 @@ use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
 
 pub mod array;
-mod constructor;
-mod prototype;
+pub mod constructor;
+
+pub mod prototype;
 
 #[derive(Debug)]
 pub struct Object {
@@ -427,7 +428,7 @@ impl MutObj<Realm> for MutObject {
             return Ok(self.delete_array(*n as usize));
         }
 
-        Ok(self.properties.remove(name).map(|e| e.value))
+        Ok(self.properties.shift_remove(name).map(|e| e.value))
     }
 
     fn contains_key(&self, name: &Value) -> Result<bool, Error> {

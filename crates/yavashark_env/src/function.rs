@@ -1,6 +1,6 @@
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::{MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
+use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
@@ -27,7 +27,7 @@ pub struct MutNativeFunction {
 pub struct NativeFunction {
     pub name: String,
     pub f: NativeFn,
-    pub special_constructor: bool,
+    pub constructor: bool,
     inner: RefCell<MutNativeFunction>,
 }
 
@@ -52,6 +52,10 @@ impl ObjectImpl<Realm> for NativeFunction {
     }
 
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        if !self.constructor {
+            return Err(Error::ty_error(format!("{} is not a constructor", self.name)));
+        }
+        
         let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
             .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
 
@@ -72,7 +76,7 @@ impl NativeFunction {
         let this = Self {
             name: name.clone(),
             f,
-            special_constructor: false,
+            constructor: false,
 
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
@@ -114,7 +118,7 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            special_constructor: false,
+            constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
                 constructor: Value::Undefined.into(),
@@ -155,7 +159,7 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            special_constructor: true,
+            constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
                 constructor: Value::Undefined.into(),
@@ -195,7 +199,7 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            special_constructor: false,
+            constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
                 constructor: Value::Undefined.into(),
@@ -233,7 +237,7 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            special_constructor: false,
+            constructor: false,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
                 constructor: Value::Undefined.into(),
@@ -271,7 +275,7 @@ impl NativeFunction {
         let this = Self {
             name: name.to_string(),
             f: Box::new(f),
-            special_constructor: true,
+            constructor: true,
             inner: RefCell::new(MutNativeFunction {
                 object: MutObject::with_proto(proto),
                 constructor: Value::Undefined.into(),
@@ -308,7 +312,7 @@ impl NativeFunction {
             Self {
                 name: String::new(),
                 f: Box::new(|_, _, _| Ok(Value::Undefined)),
-                special_constructor: false,
+                constructor: false,
                 inner: RefCell::new(MutNativeFunction {
                     object: MutObject::with_proto(Value::Undefined),
                     constructor: Value::Undefined.into(),
@@ -376,7 +380,7 @@ impl NativeFunctionBuilder {
 
     #[must_use]
     pub const fn special_constructor(mut self, special: bool) -> Self {
-        self.0.special_constructor = special;
+        self.0.constructor = special;
         self
     }
 

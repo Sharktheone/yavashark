@@ -133,6 +133,10 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
             self.name()
         )))
     }
+    
+    fn is_constructor(&self) -> bool {
+        false
+    }
 }
 
 pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
@@ -216,6 +220,10 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
             "{} is not a constructor",
             self.name()
         )))
+    }
+    
+    fn is_constructor(&self) -> bool {
+        false
     }
 }
 #[cfg(feature = "dbg_object_gc")]

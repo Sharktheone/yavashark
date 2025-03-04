@@ -133,6 +133,10 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
         self.get_wrapped_object().construct(realm, args)
     }
+    
+    fn is_constructor(&self) -> bool {
+        self.get_wrapped_object().is_constructor()
+    }
 }
 
 impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
@@ -253,5 +257,9 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
 
     fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
         ObjectImpl::construct(self, realm, args)
+    }
+
+    fn is_constructor(&self) -> bool {
+        ObjectImpl::is_constructor(self)
     }
 }
