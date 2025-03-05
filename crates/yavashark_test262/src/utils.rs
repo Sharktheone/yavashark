@@ -1,10 +1,11 @@
 use crate::metadata::{Metadata, NegativePhase};
 use std::path::Path;
-use swc_common::comments::{CommentKind, SingleThreadedComments};
+use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCommentsMap};
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_ast::Stmt;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+use yaml_rust2::Yaml;
 use yaml_rust2::yaml::YamlDecoder;
 
 pub(crate) fn parse_file(f: &Path) -> (Vec<Stmt>, Metadata) {
@@ -35,28 +36,21 @@ pub(crate) fn parse_file(f: &Path) -> (Vec<Stmt>, Metadata) {
 
         _ = p.parse_script();
 
-        let (leading, _) = comments.take_all();
-
-        let meta = leading
-            .borrow()
-            .iter()
-            .flat_map(|(_, x)| x)
-            .filter(|comment| {
-                if comment.kind != CommentKind::Block {
-                    return false;
-                }
-
-                comment.text.starts_with("---\n")
-            })
-            .filter_map(|c| YamlDecoder::read(c.text.as_bytes()).decode().ok())
-            .flatten()
-            .collect::<Vec<_>>();
+        let (leading, trailing) = comments.take_all();
+        
+        
+        let mut meta = process_comments(leading);
+        let mut trailing = process_comments(trailing);
+        
+        meta.append(&mut trailing);
+        
 
         metadata = meta
             .first()
             .map(Metadata::parse)
-            .unwrap_or(Metadata::default());
+            .unwrap_or_default();
     };
+    
 
     let end = BytePos(input.len() as u32 - 1);
 
@@ -86,5 +80,25 @@ pub(crate) fn parse_file(f: &Path) -> (Vec<Stmt>, Metadata) {
             panic!()
         }
     };
+    
+    
     (s.body, metadata)
+}
+
+
+fn process_comments(map: SingleThreadedCommentsMap) -> Vec<Yaml> {
+    map
+        .borrow()
+        .iter()
+        .flat_map(|(_, x)| x)
+        .filter(|comment| {
+            if comment.kind != CommentKind::Block {
+                return false;
+            }
+
+            comment.text.starts_with("---\n")
+        })
+        .filter_map(|c| YamlDecoder::read(c.text.as_bytes()).decode().ok())
+        .flatten()
+        .collect()
 }

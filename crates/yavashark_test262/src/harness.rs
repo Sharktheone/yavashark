@@ -38,7 +38,7 @@ pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
     Ok(())
 }
 
-pub fn setup_global(file: PathBuf) -> Result<(Realm, Scope)> {
+pub fn setup_global(file: PathBuf, raw: bool) -> Result<(Realm, Scope)> {
     let mut r = Realm::new()?;
     let mut s = Scope::global(&r, file);
 
@@ -49,7 +49,9 @@ pub fn setup_global(file: PathBuf) -> Result<(Realm, Scope)> {
     let print = print(&mut r).into();
     r.global.define_property("print".into(), print)?;
 
-    run_harness_in_realm(&mut r, &mut s)?;
+    if !raw {
+        run_harness_in_realm(&mut r, &mut s)?;
+    }
     
     r.set_eval(InterpreterEval)?;
 
@@ -63,7 +65,7 @@ mod tests {
 
     #[test]
     fn new_harness() {
-        let (_global, _scope) = match setup_global(PathBuf::new()) {
+        let (_global, _scope) = match setup_global(PathBuf::new(), false) {
             Ok(v) => v,
             Err(e) => {
                 panic!("Failed to create new harness: {e}")

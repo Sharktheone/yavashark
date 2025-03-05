@@ -88,6 +88,10 @@ func main() {
 			return nil
 		}
 
+		if strings.Contains(path, "_FIXTURE") {
+			return nil
+		}
+
 		jobs <- path
 
 		return nil
@@ -137,6 +141,10 @@ func main() {
 	fmt.Printf("Crashed: %d, %f%%\n", crashed, float64(crashed)/float64(num)*100)
 	fmt.Printf("Timeout: %d, %f%%\n", timeout, float64(timeout)/float64(num)*100)
 	fmt.Printf("Parse Error: %d, %f%%\n", parse, float64(parse)/float64(num)*100)
+	fmt.Printf("Total: %d\n", num)
+
+	fmt.Printf("Passed (no parse): %d, %f%%\n", passed, float64(passed)/float64(num-parse)*100)
+	fmt.Printf("Total (no parse): %d\n", num-parse)
 
 	err := writeResults(testResults)
 	if err != nil {
@@ -201,6 +209,10 @@ func countTests(path string) int {
 			return nil
 		}
 
+		if strings.Contains(path, "_FIXTURE") {
+			return nil
+		}
+
 		num++
 
 		return nil
@@ -224,6 +236,11 @@ func runCI(testResults []Result, overall Summary, repo string, historyOnly bool,
 	}
 
 	resultsDir := filepath.Join(repo, "results")
+
+	if err := os.RemoveAll(resultsDir); err != nil {
+		return err
+	}
+
 	if err := os.MkdirAll(resultsDir, 0755); err != nil {
 		return err
 	}

@@ -1,28 +1,30 @@
 use crate::harness::setup_global;
-use crate::metadata::NegativePhase;
+use crate::metadata::{Flags, Metadata, NegativePhase};
 use crate::utils::parse_file;
 use crate::TEST262_DIR;
 use std::path::{Path, PathBuf};
+use swc_ecma_ast::Stmt;
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
 
 pub fn run_file(file: PathBuf) -> Result<String, Error> {
-    let (mut realm, mut scope) = setup_global(file.clone())?;
+    let (stmt, metadata) = parse_file(&file);
+    let (mut realm, mut scope) = setup_global(file.clone(), metadata.flags.contains(Flags::RAW))?;
 
-    run_file_in(file, &mut realm, &mut scope)
+    run_file_in(file, &mut realm, &mut scope, stmt, metadata)
 }
 
-pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope) -> Result<String, Error> {
-    let (stmt, metadata) = parse_file(&file);
+pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, stmt: Vec<Stmt>, metadata: Metadata) -> Result<String, Error> {
 
     for inc in metadata.includes {
         let path = Path::new(TEST262_DIR).join("harness").join(inc);
 
         scope.set_path(path.clone())?;
+        let (stmt, metadata) = parse_file(&path);
 
-        run_file_in(path, realm, scope)?;
+        run_file_in(path, realm, scope, stmt, metadata)?;
     }
 
     scope.set_path(file)?;
