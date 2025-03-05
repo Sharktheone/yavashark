@@ -142,7 +142,7 @@ impl Attributes {
 
     #[must_use]
     pub const fn new() -> Self {
-        Self(Self::WRITABLE)
+        Self(Self::WRITABLE | Self::ENUMERABLE | Self::CONFIGURABLE)
     }
     
     #[must_use]
