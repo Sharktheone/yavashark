@@ -11,10 +11,6 @@ impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
         match &stmt.callee {
             Callee::Expr(callee_expr) => {
-                let Callee::Expr(callee_expr) = &stmt.callee else {
-                    return Err(Error::ty_error("Unsupported callee".to_string()));
-                };
-
                 let (callee, this) = Self::run_call_expr(realm, callee_expr, stmt.span, scope)?;
 
                 let this = this.unwrap_or(scope.this()?);
