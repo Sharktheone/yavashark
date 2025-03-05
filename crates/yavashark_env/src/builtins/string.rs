@@ -1,18 +1,84 @@
 use crate::array::Array;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
-use std::cell::RefCell;
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Result, ObjectProperty};
+use std::cell::{RefCell, RefMut};
 use std::cmp;
+use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, Obj};
+use yavashark_value::{Constructor, Func, MutObj, Obj};
 
-#[object]
 #[derive(Debug)]
 pub struct StringObj {
-    #[mutable]
-    #[primitive]
+    pub inner: RefCell<MutableStringObj>,
+}
+
+
+#[derive(Debug)]
+pub struct MutableStringObj {
+    pub object: MutObject,
     string: String,
 }
+
+impl Deref for MutableStringObj {
+    type Target = MutObject;
+
+    fn deref(&self) -> &Self::Target {
+        &self.object
+    }
+}
+
+impl DerefMut for MutableStringObj {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.object
+    }
+}
+
+impl yavashark_value::ObjectImpl<Realm> for StringObj {
+    type Inner = MutableStringObj;
+
+    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+        RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
+    }
+
+    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+        self.inner.borrow()
+    }
+
+    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+        self.inner.borrow_mut()
+    }
+
+    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+        if let Value::Number(n) = name {
+            let index = *n as isize;
+
+            return Ok(Some(self.at(index).into()));
+        }
+
+
+        self.get_wrapped_object().resolve_property(name)
+    }
+
+    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+        if let Value::Number(n) = name {
+            let index = *n as isize;
+            
+            return Ok(Some(self.at(index).into()));
+        }
+        
+        
+        self.get_wrapped_object().get_property(name)
+    }
+
+    fn name(&self) -> String {
+        "String".to_string()
+    }
+
+    fn primitive(&self) -> Option<yavashark_value::Value<Realm>> {
+        Some(self.inner.borrow().string.clone().into())
+    }
+}
+
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -123,6 +189,11 @@ impl StringObj {
 
 #[properties_new(constructor(StringConstructor::new))]
 impl StringObj {
+    #[get("length")]
+    fn get_length(&self) -> usize {
+        self.inner.borrow().string.len()
+    }
+    
     pub fn anchor(&self, name: &str) -> ValueResult {
         Ok(format!("<a name=\"{}\">{}</a>", name, self.inner.borrow().string).into())
     }
