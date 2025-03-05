@@ -8,6 +8,7 @@ use yavashark_env::{
     ControlFlow, Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Realm, Value,
     ValueResult,
 };
+use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_macro::{object, properties_new};
 
 pub fn print(realm: &mut Realm) -> ObjectHandle {
@@ -72,7 +73,9 @@ impl Test262 {
 impl Test262 {
     #[prop("createRealm")]
     fn create_realm(&self, #[realm] realm: &Realm) -> ValueResult {
-        let new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
+        let mut new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
+        
+        new_realm.set_eval(InterpreterEval)?;
 
         let global = new_realm.global.clone();
 
