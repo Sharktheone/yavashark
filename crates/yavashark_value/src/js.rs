@@ -131,7 +131,7 @@ impl<C: Realm> Value<C> {
             Self::BigInt(b) => Self::BigInt(b.clone()),
         }
     }
-    
+
     pub fn ty(&self) -> Type {
         match self {
             Self::Null => Type::Null,
@@ -261,6 +261,120 @@ impl<C: Realm> Value<C> {
     #[must_use]
     pub const fn is_undefined(&self) -> bool {
         matches!(self, Self::Undefined)
+    }
+    
+    #[must_use]
+    pub const fn is_number(&self) -> bool {
+        matches!(self, Self::Number(_))
+    }
+    
+    #[must_use]
+    pub const fn is_string(&self) -> bool {
+        matches!(self, Self::String(_))
+    }
+    
+    #[must_use]
+    pub const fn is_boolean(&self) -> bool {
+        matches!(self, Self::Boolean(_))
+    }
+    
+    #[must_use]
+    pub const fn is_object(&self) -> bool {
+        matches!(self, Self::Object(_))
+    }
+    
+    #[must_use]
+    pub const fn is_symbol(&self) -> bool {
+        matches!(self, Self::Symbol(_))
+    }
+    
+    #[must_use]
+    pub const fn is_bigint(&self) -> bool {
+        matches!(self, Self::BigInt(_))
+    }
+
+    pub fn assert_no_object(self) -> Result<Self, Error<C>> {
+        match self {
+            Self::Object(_) => Err(Error::ty("expected primitive, got object")),
+            _ => Ok(self),
+        }
+    }
+
+    pub fn to_primitive(&self, mut hint: Option<String>, realm: &mut C) -> Result<Self, Error<C>> {
+        match self {
+            Self::Object(o) => {
+                if let Some(prim) = o.primitive() {
+                    return prim.assert_no_object();
+                }
+
+                let to_prim = o.resolve_property(&Symbol::TO_PRIMITIVE.into(), realm)?;
+
+                if let Some(to_prim) = to_prim {
+                    return to_prim
+                        .call(
+                            realm,
+                            vec![Value::String(
+                                hint.take().unwrap_or_else(|| "default".to_string()),
+                            )],
+                            self.copy()
+                        )?
+                        .assert_no_object();
+                }
+
+                if hint.as_deref() == Some("string") {
+                    let to_string = o.resolve_property(&"toString".into(), realm)?;
+
+                    if let Some(to_string) = to_string {
+                        if let Value::Object(to_string) = to_string {
+                            if to_string.is_function() {
+                                return to_string
+                                    .call(realm, Vec::new(), self.copy())?
+                                    .assert_no_object();
+                            }
+                        }
+                    }
+
+                    let to_value = o.resolve_property(&"valueOf".into(), realm)?;
+
+                    if let Some(to_value) = to_value {
+                        if let Value::Object(to_value) = to_value {
+                            if to_value.is_function() {
+                                return to_value
+                                    .call(realm, Vec::new(), self.copy())?
+                                    .assert_no_object();
+                            }
+                        }
+                    }
+                }
+                
+                let to_value = o.resolve_property(&"valueOf".into(), realm)?;
+
+                if let Some(to_value) = to_value {
+                    if let Value::Object(to_value) = to_value {
+                        if to_value.is_function() {
+                            return to_value
+                                .call(realm, Vec::new(), self.copy())?
+                                .assert_no_object();
+                        }
+                    }
+                }
+
+                let to_string = o.resolve_property(&"toString".into(), realm)?;
+
+                if let Some(to_string) = to_string {
+                    if let Value::Object(to_string) = to_string {
+                        if to_string.is_function() {
+                            return to_string
+                                .call(realm, Vec::new(), self.copy())?
+                                .assert_no_object();
+                        }
+                    }
+                }
+
+                Err(Error::ty("Cannot convert object to primitive"))
+            }
+            _ => Ok(self.copy()),
+        }
     }
 }
 
@@ -393,6 +507,19 @@ impl<C: Realm> Value<C> {
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => n.to_string(),
             Self::String(s) => s.clone(),
+            Self::Boolean(b) => b.to_string(),
+            Self::Symbol(s) => s.to_string(),
+            Self::BigInt(b) => b.to_string(),
+        })
+    }
+
+    pub fn into_string(self, realm: &mut C) -> Result<String, Error<C>> {
+        Ok(match self {
+            Self::Object(o) => o.to_string(realm)?,
+            Self::Null => "null".to_string(),
+            Self::Undefined => "undefined".to_string(),
+            Self::Number(n) => n.to_string(),
+            Self::String(s) => s,
             Self::Boolean(b) => b.to_string(),
             Self::Symbol(s) => s.to_string(),
             Self::BigInt(b) => b.to_string(),

@@ -58,57 +58,57 @@ impl Interpreter {
             BinaryOp::LShift => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left << right
+                left.shl(&right, realm)?
             }
             BinaryOp::RShift => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left >> right
+                left.shr(&right, realm)?
             }
             BinaryOp::ZeroFillRShift => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left.zero_fill_rshift(&right)
+                left.ushr(&right, realm)?
             }
             BinaryOp::Add => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left + right
+                left.add(&right, realm)?
             }
             BinaryOp::Sub => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left - right
+                left.sub(&right, realm)?
             }
             BinaryOp::Mul => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left * right
+                left.mul(&right, realm)?
             }
             BinaryOp::Div => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left / right
+                left.div(&right, realm)?
             }
             BinaryOp::Mod => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left % right
+                left.rem(&right, realm)?
             }
             BinaryOp::BitOr => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left | right
+                left.or(&right, realm)?
             }
             BinaryOp::BitXor => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left ^ right
+                left.xor(&right, realm)?
             }
             BinaryOp::BitAnd => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left & right
+                left.and(&right, realm)?
             }
             BinaryOp::LogicalOr => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
@@ -144,7 +144,7 @@ impl Interpreter {
             BinaryOp::Exp => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                left.pow(&right, realm)?
+                left.exp(&right, realm)?
             }
             BinaryOp::NullishCoalescing => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;

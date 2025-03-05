@@ -1,21 +1,21 @@
 use crate::Interpreter;
 use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, RuntimeResult, Value};
+use yavashark_env::{Error, Realm, RuntimeResult, Value, Result};
 
 impl Interpreter {
     pub fn run_update(realm: &mut Realm, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {
-        fn update(value: Value, op: UpdateOp) -> (Value, Value) {
-            match op {
+        fn update(value: &Value, op: UpdateOp, realm: &mut Realm) -> Result<(Value, Value)> {
+           Ok(match op {
                 UpdateOp::PlusPlus => (
-                    value.copy() - Value::Number(-1.0),
-                    value - Value::Number(0.0),
+                    value.sub(&Value::Number(-1.0), realm)?,
+                    value.sub(&Value::Number(0.0), realm)?,
                 ),
                 UpdateOp::MinusMinus => (
-                    value.copy() - Value::Number(1.0),
-                    value - Value::Number(0.0),
+                    value.sub(&Value::Number(1.0), realm)?,
+                    value.sub(&Value::Number(0.0), realm)?,
                 ),
-            }
+            })
         }
 
         match &*stmt.arg {
@@ -24,7 +24,7 @@ impl Interpreter {
                 let value = scope
                     .resolve(&name, realm)?
                     .ok_or(Error::reference_error(format!("{name} is not defined")))?;
-                let up = update(value, stmt.op);
+                let up = update(&value, stmt.op, realm)?;
                 
                 let ret = if stmt.prefix {
                     up.0.copy()
@@ -41,7 +41,7 @@ impl Interpreter {
             Expr::Member(m) => {
                 let value = Self::run_member(realm, m, scope)?;
 
-                let up = update(value, stmt.op);
+                let up = update(&value, stmt.op, realm)?;
                 
                 let ret = if stmt.prefix {
                     up.0.copy()
@@ -58,11 +58,11 @@ impl Interpreter {
                 //TODO: this isn't correct
                 match stmt.op {
                     UpdateOp::PlusPlus => {
-                        let value = value - Value::Number(if stmt.prefix { -1.0 } else { 0.0 });
+                        let value = value.sub(&Value::Number(if stmt.prefix { -1.0 } else { 0.0 }), realm)?;
                         Ok(value)
                     }
                     UpdateOp::MinusMinus => {
-                        let value = value - Value::Number(if stmt.prefix { 1.0 } else { 0.0 });
+                        let value = value.sub(&Value::Number(if stmt.prefix { 1.0 } else { 0.0 }), realm)?;
                         Ok(value)
                     }
                 }

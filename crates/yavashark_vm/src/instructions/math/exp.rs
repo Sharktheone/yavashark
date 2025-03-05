@@ -10,7 +10,7 @@ pub fn exp(lhs: VarName, rhs: VarName, vm: &mut impl VM) -> Res {
 
     let realm = vm.get_realm();
 
-    let res = lhs.pow(&rhs, realm)?;
+    let res = lhs.exp(&rhs, realm)?;
 
     vm.set_acc(res);
 
@@ -23,7 +23,7 @@ pub fn exp_acc(reg: Reg, vm: &mut impl VM) -> Res {
 
     let realm = vm.get_realm();
 
-    let res = acc.pow(&reg, realm)?;
+    let res = acc.exp(&reg, realm)?;
 
     vm.set_acc(res);
 
@@ -36,7 +36,7 @@ pub fn exp_reg(reg1: Reg, reg2: Reg, vm: &mut impl VM) -> Res {
 
     let realm = vm.get_realm();
 
-    let res = reg1.pow(&reg2, realm)?;
+    let res = reg1.exp(&reg2, realm)?;
 
     vm.set_acc(res);
 

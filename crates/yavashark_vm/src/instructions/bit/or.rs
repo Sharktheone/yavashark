@@ -6,7 +6,9 @@ pub fn bitwise_or(lhs: VarName, rhs: VarName, vm: &mut impl VM) -> Res {
     let lhs = vm.get_variable(lhs)?;
     let rhs = vm.get_variable(rhs)?;
 
-    vm.set_acc(lhs | rhs);
+    let result = lhs.or(&rhs, vm.get_realm())?;
+    
+    vm.set_acc(result);
 
     Ok(())
 }
@@ -15,7 +17,9 @@ pub fn bitwise_or_acc(reg: Reg, vm: &mut impl VM) -> Res {
     let rhs = vm.get_register(reg)?;
     let lhs = vm.acc();
 
-    vm.set_acc(lhs | rhs);
+    let result = lhs.or(&rhs, vm.get_realm())?;
+    
+    vm.set_acc(result);
 
     Ok(())
 }
@@ -24,7 +28,9 @@ pub fn bitwise_or_reg(rhs: Reg, lhs: Reg, vm: &mut impl VM) -> Res {
     let rhs = vm.get_register(rhs)?;
     let lhs = vm.get_register(lhs)?;
 
-    vm.set_acc(lhs | rhs);
+    let result = lhs.or(&rhs, vm.get_realm())?;
+    
+    vm.set_acc(result);
 
     Ok(())
 }

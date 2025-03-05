@@ -188,7 +188,7 @@ impl Interpreter {
         realm: &mut Realm,
         op: AssignOp,
         target: &AssignTarget,
-        left: Value,
+        right: Value,
         scope: &mut Scope,
     ) -> RuntimeResult {
         match target {
@@ -196,7 +196,7 @@ impl Interpreter {
                 SimpleAssignTarget::Ident(i) => {
                     let name = i.sym.to_string();
 
-                    let right = scope
+                    let left = scope
                         .resolve(&name, realm)?
                         .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
 
@@ -206,13 +206,13 @@ impl Interpreter {
 
                     Ok(value)
                 }
-                SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, left, scope),
-                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, left, scope),
-                SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, left, scope),
-                SimpleAssignTarget::Paren(paren) => Self::assign_expr_op(realm, op, &paren.expr, left, scope),
+                SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, right, scope),
+                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, right, scope),
+                SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, right, scope),
+                SimpleAssignTarget::Paren(paren) => Self::assign_expr_op(realm, op, &paren.expr, right, scope),
                 _ => Err(Error::syn("Invalid left-hand side in assignment").into()),
             },
-            AssignTarget::Pat(pat) => Self::assign_pat_op(realm, op, pat, left, scope),
+            AssignTarget::Pat(pat) => Self::assign_pat_op(realm, op, pat, right, scope),
         }
     }
 
@@ -220,12 +220,12 @@ impl Interpreter {
         realm: &mut Realm,
         op: AssignOp,
         m: &MemberExpr,
-        left: Value,
+        right: Value,
         scope: &mut Scope,
     ) -> RuntimeResult {
         let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
         
-        Self::assign_member_op_on(realm, obj, op, &m.prop, left, scope)
+        Self::assign_member_op_on(realm, obj, op, &m.prop, right, scope)
     }
     
     pub fn assign_member_op_on(
@@ -233,7 +233,7 @@ impl Interpreter {
         obj: Value,
         op: AssignOp,
         m: &MemberProp,
-        left: Value,
+        right: Value,
         scope: &mut Scope,
     ) -> RuntimeResult {
         if let Value::Object(obj) = obj {
@@ -243,7 +243,7 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
-            let right = obj
+            let left = obj
                 .resolve_property(&name, realm)?
                 .unwrap_or(Value::Undefined);
 
@@ -260,7 +260,7 @@ impl Interpreter {
         realm: &mut Realm,
         op: AssignOp,
         super_prop: &SuperPropExpr,
-        left: Value,
+        right: Value,
         scope: &mut Scope,
     ) -> RuntimeResult {
         let this = scope.this()?;
@@ -274,7 +274,7 @@ impl Interpreter {
             SuperProp::Ident(i) => {
                 let name = i.sym.to_string().into();
                 
-                let right = sup
+                let left = sup
                     .get_property(&name, realm)?;
                 
                 let value = Self::run_assign_op(op, left, right, realm)?;
@@ -285,7 +285,7 @@ impl Interpreter {
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
                 
-                let right = sup
+                let left = sup
                     .get_property(&name, realm)?;
                 
                 let value = Self::run_assign_op(op, left, right, realm)?;
@@ -300,7 +300,7 @@ impl Interpreter {
         realm: &mut Realm,
         op: AssignOp,
         opt: &OptChainExpr,
-        left: Value,
+        right: Value,
         scope: &mut Scope,
     ) -> RuntimeResult {
         match &*opt.base {
@@ -308,21 +308,21 @@ impl Interpreter {
                 let obj = Self::run_expr(realm, &member.obj, member.span, scope)?;
 
                 if (obj == Value::Undefined || obj == Value::Null) && opt.optional {
-                    return Ok(left);
+                    return Ok(right);
                 }
 
-                Self::assign_member_op_on(realm, obj, op, &member.prop, left, scope)
+                Self::assign_member_op_on(realm, obj, op, &member.prop, right, scope)
             }
             OptChainBase::Call(call) => {
                 let (callee, this) = Self::run_call_expr(realm, &call.callee, call.span, scope)?;
 
                 if (callee == Value::Undefined || callee == Value::Null) && opt.optional {
-                    return Ok(left);
+                    return Ok(right);
                 }
 
                 let this = this.unwrap_or(scope.this()?);
 
-                let right = Self::run_call_on(
+                let left = Self::run_call_on(
                     realm, &callee, this, &call.args, call.span, scope,
                 )?;
                 //TODO: maybe we should throw an error here?
@@ -392,18 +392,18 @@ impl Interpreter {
     ) -> RuntimeResult {
         Ok(match op {
             AssignOp::Assign => right,
-            AssignOp::AddAssign => left + right,
-            AssignOp::SubAssign => left - right,
-            AssignOp::MulAssign => left * right,
-            AssignOp::DivAssign => left / right,
-            AssignOp::ModAssign => left % right,
-            AssignOp::LShiftAssign => left << right,
-            AssignOp::RShiftAssign => left >> right,
-            AssignOp::ZeroFillRShiftAssign => left.zero_fill_rshift(&right),
-            AssignOp::BitOrAssign => left | right,
-            AssignOp::BitXorAssign => left ^ right,
-            AssignOp::BitAndAssign => left & right,
-            AssignOp::ExpAssign => left.pow(&right, realm)?,
+            AssignOp::AddAssign => left.add(&right, realm)?,
+            AssignOp::SubAssign => left.sub(&right, realm)?,
+            AssignOp::MulAssign => left.mul(&right, realm)?,
+            AssignOp::DivAssign => left.div(&right, realm)?,
+            AssignOp::ModAssign => left.rem(&right, realm)?,
+            AssignOp::LShiftAssign => left.shl(&right, realm)?,
+            AssignOp::RShiftAssign => left.shr(&right, realm)?,
+            AssignOp::ZeroFillRShiftAssign => left.ushr(&right, realm)?,
+            AssignOp::BitOrAssign => left.or(&right, realm)?,
+            AssignOp::BitXorAssign => left.xor(&right, realm)?,
+            AssignOp::BitAndAssign => left.and(&right, realm)?,
+            AssignOp::ExpAssign => left.exp(&right, realm)?,
             AssignOp::AndAssign => left.log_and(right),
             AssignOp::OrAssign => left.log_or(right),
             AssignOp::NullishAssign => {

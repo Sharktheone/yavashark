@@ -1,5 +1,18 @@
 #![allow(clippy::match_same_arms)]
 
+mod add;
+mod mul;
+mod sub;
+mod shl;
+mod div;
+mod rem;
+mod exp;
+mod shr;
+mod ushr;
+mod and;
+mod xor;
+mod or;
+
 use crate::{Error, Realm};
 use num_bigint::BigInt;
 use num_traits::{ToPrimitive, Zero};
@@ -23,6 +36,21 @@ impl ToNumber for bool {
     }
 }
 
+impl ToNumber for String {
+    fn num(&self) -> f64 {
+        if self.is_empty() {
+            0.0
+        } else {
+            self.parse().unwrap_or(f64::NAN)
+        }
+    }
+}
+
+pub enum BigIntOrNumber {
+    BigInt(BigInt),
+    Number(f64),
+}
+
 impl<C: Realm> Value<C> {
     #[must_use]
     pub fn to_number_or_null(&self) -> f64 {
@@ -34,28 +62,35 @@ impl<C: Realm> Value<C> {
         }
     }
 
+    pub fn to_numeric(&self, realm: &mut C) -> Result<BigIntOrNumber, Error<C>> {
+        Ok(BigIntOrNumber::Number(match self {
+            Self::Number(n) => *n,
+            Self::Undefined => f64::NAN,
+            Self::Null => 0.0,
+            Self::Boolean(b) => b.num(),
+            Self::String(s) => s.num(),
+            Self::Object(_) => {
+                let v = self.to_primitive(Some("number".to_owned()), realm)?.assert_no_object()?;
+
+                return v.to_numeric(realm);
+            }
+            Self::BigInt(b) => return Ok(BigIntOrNumber::BigInt(b.clone())),
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to numeric value")),
+        }))
+    }
     pub fn to_number(&self, realm: &mut C) -> Result<f64, Error<C>> {
         Ok(match self {
             Self::Number(n) => *n,
+            Self::Undefined => f64::NAN,
+            Self::Null => 0.0,
             Self::Boolean(b) => b.num(),
-            Self::String(s) => {
-                if s.is_empty() {
-                    0.0
-                } else {
-                    s.parse().unwrap_or(f64::NAN)
-                }
-            }
-            Self::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
-            Self::Object(o) => {
-                let v = o.to_string(realm)?;
+            Self::String(s) => s.num(),
+            Self::Object(_) => {
+                let v = self.to_primitive(Some("number".to_owned()), realm)?.assert_no_object()?;
 
-                if v.is_empty() {
-                    0.0
-                } else {
-                    v.parse().unwrap_or(f64::NAN)
-                }
+                return v.to_number(realm);
             }
-            _ => f64::NAN,
+            Self::Symbol(_) | Self::BigInt(_) => return Err(Error::ty("Cannot convert BigInt or Symbol to number")),
         })
     }
 
@@ -71,282 +106,282 @@ impl<C: Realm> Value<C> {
     }
 }
 
-impl<C: Realm> Add for Value<C> {
-    // type Output = Result<Value<C>, Error<C>>;
-
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Null, Self::Null) => Self::Number(0.0),
-            (Self::Null, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Null, Self::Number(b)) => Self::Number(b),
-            (Self::Null, Self::String(b)) => Self::String("null".to_string() + &b),
-            (Self::Null, Self::Boolean(b)) => Self::Number(b.num()),
-            (Self::Null, Self::Object(o)) => Self::String(format!("null{o}")),
-
-            (Self::Undefined, Self::Null) => Self::Number(f64::NAN),
-            (Self::Undefined, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Undefined, Self::Number(_)) => Self::Number(f64::NAN),
-            (Self::Undefined, Self::String(b)) => Self::String("undefined".to_string() + &b),
-            (Self::Undefined, Self::Boolean(_)) => Self::Number(f64::NAN),
-            (Self::Undefined, Self::Object(o)) => {
-                Self::String(format!("undefined{o}")) //TODO: this is NOT correct, o.fmt is the wrong method! (but okay for now)
-            }
-
-            (Self::Number(a), Self::Null) => Self::Number(a),
-            (Self::Number(_), Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Number(a), Self::Number(b)) => Self::Number(a + b),
-            (Self::Number(a), Self::String(b)) => Self::String(a.to_string() + &b),
-            (Self::Number(a), Self::Boolean(b)) => Self::Number(a + b.num()),
-            (Self::Number(a), Self::Object(o)) => Self::String(format!("{a}{o}")),
-
-            (Self::String(a), Self::Null) => Self::String(a + "null"),
-            (Self::String(a), Self::Undefined) => Self::String(a + "undefined"),
-            (Self::String(a), Self::Number(b)) => Self::String(a + &b.to_string()),
-            (Self::String(a), Self::String(b)) => Self::String(a + &b),
-            (Self::String(a), Self::Boolean(b)) => Self::String(a + &b.to_string()),
-            (Self::String(a), Self::Object(o)) => Self::String(format!("{a}{o}")),
-
-            (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
-            (Self::Boolean(_), Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() + b),
-            (Self::Boolean(a), Self::String(b)) => Self::String(a.to_string() + &b),
-            (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() + b.num()),
-            (Self::Boolean(a), Self::Object(o)) => Self::String(a.to_string() + &format!("{o}")),
-
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a + b),
-            (a, b) => Self::String(format!("{a}{b}")),
-        }
-    }
-}
-
-impl<C: Realm> Sub for Value<C> {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Null, Self::Null) => Self::Number(0.0),
-            (Self::Null, Self::Number(b)) => Self::Number(-b),
-            (Self::Null, Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(-b)),
-            (Self::Null, Self::Boolean(b)) => Self::Number(-b.num()),
-
-            (Self::Number(a), Self::Null) => Self::Number(a),
-            (Self::Number(a), Self::Number(b)) => Self::Number(a - b),
-            (Self::Number(a), Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a - b)),
-            (Self::Number(a), Self::Boolean(b)) => Self::Number(a - b.num()),
-
-            (Self::String(a), Self::Null) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a)),
-            (Self::String(a), Self::Number(b)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b)),
-            (Self::String(a), Self::Boolean(b)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b.num())),
-
-            (Self::String(a), Self::String(b)) => {
-                if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
-                    Self::Number(a - b)
-                } else {
-                    Self::Number(f64::NAN)
-                }
-            }
-
-            (Self::String(_), _) => Self::Number(f64::NAN),
-
-            (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
-            (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() - b),
-            (Self::Boolean(a), Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() - b)),
-            (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() - b.num()),
-            (Self::Boolean(_), Self::Object(_)) => Self::Number(f64::NAN),
-
-            (Self::Object(_), _) | (_, Self::Object(_)) => Self::Number(f64::NAN),
-            (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a - b),
-
-            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
-                todo!("return Result from add (Cannot mix BigInt and other types)")
-            }
-        }
-    }
-}
-
-impl<C: Realm> Mul for Value<C> {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Null, Self::String(b)) => {
-                if b.parse::<f64>().is_ok() {
-                    Self::Number(0.0)
-                } else {
-                    Self::Number(f64::NAN)
-                }
-            }
-            (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
-            (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
-            (Self::Null, _) | (_, Self::Null) => Self::Number(0.0),
-            (Self::Number(a), Self::Number(b)) => Self::Number(a * b),
-            (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a * b)),
-            (Self::Number(a), Self::Boolean(b)) | (Self::Boolean(b), Self::Number(a)) => {
-                Self::Number(a * b.num())
-            }
-            (Self::String(a), Self::String(b)) => {
-                if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
-                    Self::Number(a * b)
-                } else {
-                    Self::Number(f64::NAN)
-                }
-            }
-            (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a * b.num())),
-            (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() * b.num()),
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a * b),
-
-            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
-                todo!("return Result from add (Cannot mix BigInt and other types)")
-            }
-        }
-    }
-}
-
-impl<C: Realm> Div for Value<C> {
-    type Output = Self;
-
-    //TODO: handle div by zero => return Infinity
-    fn div(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Null, Self::Null | Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Null, Self::Number(_)) => Self::Number(0.0),
-            (Self::Null, Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 / b)),
-            (Self::Null, Self::Boolean(b)) => Self::Number(0.0 / b.num()),
-            (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Number(a), Self::Null) => {
-                if a == 0.0 {
-                    Self::Number(f64::NAN)
-                } else {
-                    Self::Number(f64::INFINITY)
-                }
-            }
-            (Self::Number(a), Self::Number(b)) => Self::Number(a / b),
-            (Self::Number(a), Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a / b)),
-            (Self::Number(a), Self::Boolean(b)) => Self::Number(a / b.num()),
-            (Self::String(a), Self::Null) => {
-                if a == "0" || a == "0.0" || a.parse::<f64>().is_err() {
-                    Self::Number(f64::NAN)
-                } else {
-                    Self::Number(f64::INFINITY)
-                }
-            }
-
-            (Self::String(a), Self::Number(b)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b)),
-
-            (Self::String(a), Self::String(b)) => {
-                if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
-                    Self::Number(a / b)
-                } else {
-                    Self::Number(f64::NAN)
-                }
-            }
-            (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b.num())),
-            (Self::Boolean(true), Self::Null) => Self::Number(f64::INFINITY),
-            (Self::Boolean(false), Self::Null) => Self::Number(f64::NAN),
-            (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() / b),
-            (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() / b.num()),
-            (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a / b),
-
-            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
-                todo!("return Result from add (Cannot mix BigInt and other types)")
-            }
-        }
-    }
-}
-
-impl<C: Realm> Rem for Value<C> {
-    type Output = Self;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (_, Self::Null) => Self::Number(f64::NAN),
-            (Self::Null, Self::Object(_)) => Self::Number(f64::NAN),
-            (Self::Null, Self::Undefined) => Self::Number(f64::NAN),
-            (Self::Null, Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 % b)),
-            (Self::Null, _) => Self::Number(0.0),
-            (_, Self::Undefined) | (Self::Undefined, _) => Self::Number(f64::NAN),
-            (Self::Number(a), Self::Number(b)) => Self::Number(a % b),
-            (Self::Number(a), Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a % b)),
-            (Self::Number(a), Self::Boolean(b)) => Self::Number(a % b.num()),
-            (Self::String(a), Self::Number(b)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b)),
-            (Self::String(a), Self::String(b)) => {
-                if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
-                    Self::Number(a % b)
-                } else {
-                    Self::Number(f64::NAN)
-                }
-            }
-            (Self::String(a), Self::Boolean(b)) => a
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b.num())),
-
-            (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() % b),
-            (Self::Boolean(a), Self::String(b)) => b
-                .parse::<f64>()
-                .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() % b)),
-            (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() % b.num()),
-            (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a % b),
-            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
-                todo!("return Result from add (Cannot mix BigInt and other types)")
-            }
-        }
-    }
-}
-
+// impl<C: Realm> Add for Value<C> {
+//     // type Output = Result<Value<C>, Error<C>>;
+// 
+//     type Output = Self;
+// 
+//     fn add(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (Self::Null, Self::Null) => Self::Number(0.0),
+//             (Self::Null, Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Null, Self::Number(b)) => Self::Number(b),
+//             (Self::Null, Self::String(b)) => Self::String("null".to_string() + &b),
+//             (Self::Null, Self::Boolean(b)) => Self::Number(b.num()),
+//             (Self::Null, Self::Object(o)) => Self::String(format!("null{o}")),
+// 
+//             (Self::Undefined, Self::Null) => Self::Number(f64::NAN),
+//             (Self::Undefined, Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Undefined, Self::Number(_)) => Self::Number(f64::NAN),
+//             (Self::Undefined, Self::String(b)) => Self::String("undefined".to_string() + &b),
+//             (Self::Undefined, Self::Boolean(_)) => Self::Number(f64::NAN),
+//             (Self::Undefined, Self::Object(o)) => {
+//                 Self::String(format!("undefined{o}")) //TODO: this is NOT correct, o.fmt is the wrong method! (but okay for now)
+//             }
+// 
+//             (Self::Number(a), Self::Null) => Self::Number(a),
+//             (Self::Number(_), Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Number(a), Self::Number(b)) => Self::Number(a + b),
+//             (Self::Number(a), Self::String(b)) => Self::String(a.to_string() + &b),
+//             (Self::Number(a), Self::Boolean(b)) => Self::Number(a + b.num()),
+//             (Self::Number(a), Self::Object(o)) => Self::String(format!("{a}{o}")),
+// 
+//             (Self::String(a), Self::Null) => Self::String(a + "null"),
+//             (Self::String(a), Self::Undefined) => Self::String(a + "undefined"),
+//             (Self::String(a), Self::Number(b)) => Self::String(a + &b.to_string()),
+//             (Self::String(a), Self::String(b)) => Self::String(a + &b),
+//             (Self::String(a), Self::Boolean(b)) => Self::String(a + &b.to_string()),
+//             (Self::String(a), Self::Object(o)) => Self::String(format!("{a}{o}")),
+// 
+//             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
+//             (Self::Boolean(_), Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() + b),
+//             (Self::Boolean(a), Self::String(b)) => Self::String(a.to_string() + &b),
+//             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() + b.num()),
+//             (Self::Boolean(a), Self::Object(o)) => Self::String(a.to_string() + &format!("{o}")),
+// 
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a + b),
+//             (a, b) => Self::String(format!("{a}{b}")),
+//         }
+//     }
+// }
+// 
+// impl<C: Realm> Sub for Value<C> {
+//     type Output = Self;
+// 
+//     fn sub(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (Self::Null, Self::Null) => Self::Number(0.0),
+//             (Self::Null, Self::Number(b)) => Self::Number(-b),
+//             (Self::Null, Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(-b)),
+//             (Self::Null, Self::Boolean(b)) => Self::Number(-b.num()),
+// 
+//             (Self::Number(a), Self::Null) => Self::Number(a),
+//             (Self::Number(a), Self::Number(b)) => Self::Number(a - b),
+//             (Self::Number(a), Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a - b)),
+//             (Self::Number(a), Self::Boolean(b)) => Self::Number(a - b.num()),
+// 
+//             (Self::String(a), Self::Null) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a)),
+//             (Self::String(a), Self::Number(b)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b)),
+//             (Self::String(a), Self::Boolean(b)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a - b.num())),
+// 
+//             (Self::String(a), Self::String(b)) => {
+//                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
+//                     Self::Number(a - b)
+//                 } else {
+//                     Self::Number(f64::NAN)
+//                 }
+//             }
+// 
+//             (Self::String(_), _) => Self::Number(f64::NAN),
+// 
+//             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
+//             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() - b),
+//             (Self::Boolean(a), Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() - b)),
+//             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() - b.num()),
+//             (Self::Boolean(_), Self::Object(_)) => Self::Number(f64::NAN),
+// 
+//             (Self::Object(_), _) | (_, Self::Object(_)) => Self::Number(f64::NAN),
+//             (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+// 
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a - b),
+// 
+//             (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
+//                 todo!("return Result from add (Cannot mix BigInt and other types)")
+//             }
+//         }
+//     }
+// }
+// 
+// impl<C: Realm> Mul for Value<C> {
+//     type Output = Self;
+// 
+//     fn mul(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (Self::Null, Self::String(b)) => {
+//                 if b.parse::<f64>().is_ok() {
+//                     Self::Number(0.0)
+//                 } else {
+//                     Self::Number(f64::NAN)
+//                 }
+//             }
+//             (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
+//             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
+//             (Self::Null, _) | (_, Self::Null) => Self::Number(0.0),
+//             (Self::Number(a), Self::Number(b)) => Self::Number(a * b),
+//             (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a * b)),
+//             (Self::Number(a), Self::Boolean(b)) | (Self::Boolean(b), Self::Number(a)) => {
+//                 Self::Number(a * b.num())
+//             }
+//             (Self::String(a), Self::String(b)) => {
+//                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
+//                     Self::Number(a * b)
+//                 } else {
+//                     Self::Number(f64::NAN)
+//                 }
+//             }
+//             (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a * b.num())),
+//             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() * b.num()),
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+// 
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a * b),
+// 
+//             (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
+//                 todo!("return Result from add (Cannot mix BigInt and other types)")
+//             }
+//         }
+//     }
+// }
+// 
+// impl<C: Realm> Div for Value<C> {
+//     type Output = Self;
+// 
+//     //TODO: handle div by zero => return Infinity
+//     fn div(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (Self::Null, Self::Null | Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Null, Self::Number(_)) => Self::Number(0.0),
+//             (Self::Null, Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 / b)),
+//             (Self::Null, Self::Boolean(b)) => Self::Number(0.0 / b.num()),
+//             (Self::Undefined, _) | (_, Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Number(a), Self::Null) => {
+//                 if a == 0.0 {
+//                     Self::Number(f64::NAN)
+//                 } else {
+//                     Self::Number(f64::INFINITY)
+//                 }
+//             }
+//             (Self::Number(a), Self::Number(b)) => Self::Number(a / b),
+//             (Self::Number(a), Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a / b)),
+//             (Self::Number(a), Self::Boolean(b)) => Self::Number(a / b.num()),
+//             (Self::String(a), Self::Null) => {
+//                 if a == "0" || a == "0.0" || a.parse::<f64>().is_err() {
+//                     Self::Number(f64::NAN)
+//                 } else {
+//                     Self::Number(f64::INFINITY)
+//                 }
+//             }
+// 
+//             (Self::String(a), Self::Number(b)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b)),
+// 
+//             (Self::String(a), Self::String(b)) => {
+//                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
+//                     Self::Number(a / b)
+//                 } else {
+//                     Self::Number(f64::NAN)
+//                 }
+//             }
+//             (Self::String(a), Self::Boolean(b)) | (Self::Boolean(b), Self::String(a)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a / b.num())),
+//             (Self::Boolean(true), Self::Null) => Self::Number(f64::INFINITY),
+//             (Self::Boolean(false), Self::Null) => Self::Number(f64::NAN),
+//             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() / b),
+//             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() / b.num()),
+//             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+// 
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a / b),
+// 
+//             (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
+//                 todo!("return Result from add (Cannot mix BigInt and other types)")
+//             }
+//         }
+//     }
+// }
+// 
+// impl<C: Realm> Rem for Value<C> {
+//     type Output = Self;
+// 
+//     fn rem(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (_, Self::Null) => Self::Number(f64::NAN),
+//             (Self::Null, Self::Object(_)) => Self::Number(f64::NAN),
+//             (Self::Null, Self::Undefined) => Self::Number(f64::NAN),
+//             (Self::Null, Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(0.0 % b)),
+//             (Self::Null, _) => Self::Number(0.0),
+//             (_, Self::Undefined) | (Self::Undefined, _) => Self::Number(f64::NAN),
+//             (Self::Number(a), Self::Number(b)) => Self::Number(a % b),
+//             (Self::Number(a), Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a % b)),
+//             (Self::Number(a), Self::Boolean(b)) => Self::Number(a % b.num()),
+//             (Self::String(a), Self::Number(b)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b)),
+//             (Self::String(a), Self::String(b)) => {
+//                 if let (Ok(a), Ok(b)) = (a.parse::<f64>(), b.parse::<f64>()) {
+//                     Self::Number(a % b)
+//                 } else {
+//                     Self::Number(f64::NAN)
+//                 }
+//             }
+//             (Self::String(a), Self::Boolean(b)) => a
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |a| Self::Number(a % b.num())),
+// 
+//             (Self::Boolean(a), Self::Number(b)) => Self::Number(a.num() % b),
+//             (Self::Boolean(a), Self::String(b)) => b
+//                 .parse::<f64>()
+//                 .map_or_else(|_| Self::Number(f64::NAN), |b| Self::Number(a.num() % b)),
+//             (Self::Boolean(a), Self::Boolean(b)) => Self::Number(a.num() % b.num()),
+//             (_, Self::Object(_)) | (Self::Object(_), _) => Self::Number(f64::NAN),
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+// 
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a % b),
+//             (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
+//                 todo!("return Result from add (Cannot mix BigInt and other types)")
+//             }
+//         }
+//     }
+// }
+// 
 impl<C: Realm> PartialOrd for Value<C> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
@@ -424,242 +459,242 @@ impl<C: Realm> PartialOrd for Value<C> {
         }
     }
 }
-
-impl<C: Realm> Shl for Value<C> {
-    type Output = Self;
-
-    fn shl(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Null, _) => Self::Number(0.0),
-            (Self::Undefined, _) => Self::Number(0.0),
-
-            (Self::Number(a), Self::Null) => Self::Number(a as i64 as f64),
-            (Self::Number(a), Self::Undefined) => Self::Number(a as i64 as f64),
-            (Self::Number(a), Self::Number(b)) => Self::Number(((a as i64) << b as i64) as f64),
-            (Self::Number(a), Self::String(b)) => {
-                let Ok(b) = b.parse::<f64>() else {
-                    return Self::Number(a as i64 as f64);
-                };
-
-                Self::Number(((a as i64) << b as i64) as f64)
-            }
-            (Self::Number(a), Self::Boolean(b)) => {
-                Self::Number(((a as i64) << i64::from(b)) as f64)
-            }
-            (Self::Number(a), Self::Object(_)) => Self::Number(a as i64 as f64),
-
-            (Self::String(a), Self::Null) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(a as i64 as f64)
-            }
-
-            (Self::String(a), Self::Undefined) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(a as i64 as f64)
-            }
-
-            (Self::String(a), Self::Number(b)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(((a as i64) << b as i64) as f64)
-            }
-
-            (Self::String(a), Self::String(b)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                let Ok(b) = b.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(((a as i64) << b as i64) as f64)
-            }
-
-            (Self::String(a), Self::Boolean(b)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(((a as i64) << i64::from(b)) as f64)
-            }
-
-            (Self::String(a), Self::Object(_)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(a as i64 as f64)
-            }
-
-            (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
-            (Self::Boolean(a), Self::Undefined) => Self::Number(a.num()),
-            (Self::Boolean(a), Self::Number(b)) => Self::Number((i64::from(a) << b as i64) as f64),
-            (Self::Boolean(a), Self::String(b)) => {
-                let Ok(b) = b.parse::<f64>() else {
-                    return Self::Number(a.num());
-                };
-
-                Self::Number((i64::from(a) << b as i64) as f64)
-            }
-
-            (Self::Boolean(a), Self::Boolean(b)) => {
-                Self::Number((i64::from(a) << i64::from(b)) as f64)
-            }
-            (Self::Boolean(a), Self::Object(_)) => Self::Number(a.num()),
-            (Self::Object(_), _) => Self::Number(0.0),
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a.shl(b.to_i128().unwrap_or(0))),
-
-            // (Self::Number(a), Self::BigInt(b)) => Self::BigInt(b.shl(a as i64)),
-            // (Self::BigInt(a), Self::Number(b)) => Self::BigInt(a.shl(b as i64)),
-            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
-                todo!("return Result from add (Cannot mix BigInt and other types)")
-            }
-        }
-    }
-}
-
-impl<C: Realm> Shr for Value<C> {
-    type Output = Self;
-
-    fn shr(self, rhs: Self) -> Self::Output {
-        match (self, rhs) {
-            (Self::Null, _) => Self::Number(0.0),
-            (Self::Undefined, _) => Self::Number(0.0),
-
-            (Self::Number(a), Self::Null) => Self::Number(a as i64 as f64),
-            (Self::Number(a), Self::Undefined) => Self::Number(a as i64 as f64),
-            (Self::Number(a), Self::Number(b)) => Self::Number(((a as i64) >> b as i64) as f64),
-            (Self::Number(a), Self::String(b)) => {
-                let Ok(b) = b.parse::<f64>() else {
-                    return Self::Number(a as i64 as f64);
-                };
-
-                Self::Number(((a as i64) >> b as i64) as f64)
-            }
-            (Self::Number(a), Self::Boolean(b)) => {
-                Self::Number(((a as i64) >> i64::from(b)) as f64)
-            }
-            (Self::Number(a), Self::Object(_)) => Self::Number(a as i64 as f64),
-
-            (Self::String(a), Self::Null) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(a as i64 as f64)
-            }
-
-            (Self::String(a), Self::Undefined) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(a as i64 as f64)
-            }
-
-            (Self::String(a), Self::Number(b)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(((a as i64) >> b as i64) as f64)
-            }
-
-            (Self::String(a), Self::String(b)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                let Ok(b) = b.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(((a as i64) >> b as i64) as f64)
-            }
-
-            (Self::String(a), Self::Boolean(b)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(((a as i64) >> i64::from(b)) as f64)
-            }
-
-            (Self::String(a), Self::Object(_)) => {
-                let Ok(a) = a.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number(a as i64 as f64)
-            }
-
-            (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
-            (Self::Boolean(a), Self::Undefined) => Self::Number(a.num()),
-            (Self::Boolean(a), Self::Number(b)) => Self::Number((i64::from(a) >> b as i64) as f64),
-            (Self::Boolean(a), Self::String(b)) => {
-                let Ok(b) = b.parse::<f64>() else {
-                    return Self::Number(0.0);
-                };
-
-                Self::Number((i64::from(a) >> b as i64) as f64)
-            }
-
-            (Self::Boolean(a), Self::Boolean(b)) => {
-                Self::Number((i64::from(a) >> i64::from(b)) as f64)
-            }
-            (Self::Boolean(a), Self::Object(_)) => Self::Number(a.num()),
-            (Self::Object(_), _) => Self::Number(0.0),
-            (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
-                todo!("return a Result here.... to throw an TypeError")
-            }
-
-            (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a.shr(b.to_i128().unwrap_or(0))),
-
-            // (Self::Number(a), Self::BigInt(b)) => Self::BigInt(b.shr(a as i64)),
-            // (Self::BigInt(a), Self::Number(b)) => Self::BigInt(a.shr(b as i64)),
-            (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
-                todo!("return Result from add (Cannot mix BigInt and other types)")
-            }
-        }
-    }
-}
-
-impl<C: Realm> BitOr for Value<C> {
-    type Output = Self;
-
-    fn bitor(self, rhs: Self) -> Self::Output {
-        Self::Number((self.to_int_or_null() | rhs.to_int_or_null()) as f64)
-    }
-}
-
-impl<C: Realm> BitAnd for Value<C> {
-    type Output = Self;
-
-    fn bitand(self, rhs: Self) -> Self::Output {
-        Self::Number((self.to_int_or_null() & rhs.to_int_or_null()) as f64)
-    }
-}
-
-impl<C: Realm> BitXor for Value<C> {
-    type Output = Self;
-
-    fn bitxor(self, rhs: Self) -> Self::Output {
-        Self::Number((self.to_int_or_null() ^ rhs.to_int_or_null()) as f64)
-    }
-}
+// 
+// impl<C: Realm> Shl for Value<C> {
+//     type Output = Self;
+// 
+//     fn shl(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (Self::Null, _) => Self::Number(0.0),
+//             (Self::Undefined, _) => Self::Number(0.0),
+// 
+//             (Self::Number(a), Self::Null) => Self::Number(a as i64 as f64),
+//             (Self::Number(a), Self::Undefined) => Self::Number(a as i64 as f64),
+//             (Self::Number(a), Self::Number(b)) => Self::Number(((a as i64) << b as i64) as f64),
+//             (Self::Number(a), Self::String(b)) => {
+//                 let Ok(b) = b.parse::<f64>() else {
+//                     return Self::Number(a as i64 as f64);
+//                 };
+// 
+//                 Self::Number(((a as i64) << b as i64) as f64)
+//             }
+//             (Self::Number(a), Self::Boolean(b)) => {
+//                 Self::Number(((a as i64) << i64::from(b)) as f64)
+//             }
+//             (Self::Number(a), Self::Object(_)) => Self::Number(a as i64 as f64),
+// 
+//             (Self::String(a), Self::Null) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(a as i64 as f64)
+//             }
+// 
+//             (Self::String(a), Self::Undefined) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(a as i64 as f64)
+//             }
+// 
+//             (Self::String(a), Self::Number(b)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(((a as i64) << b as i64) as f64)
+//             }
+// 
+//             (Self::String(a), Self::String(b)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 let Ok(b) = b.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(((a as i64) << b as i64) as f64)
+//             }
+// 
+//             (Self::String(a), Self::Boolean(b)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(((a as i64) << i64::from(b)) as f64)
+//             }
+// 
+//             (Self::String(a), Self::Object(_)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(a as i64 as f64)
+//             }
+// 
+//             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
+//             (Self::Boolean(a), Self::Undefined) => Self::Number(a.num()),
+//             (Self::Boolean(a), Self::Number(b)) => Self::Number((i64::from(a) << b as i64) as f64),
+//             (Self::Boolean(a), Self::String(b)) => {
+//                 let Ok(b) = b.parse::<f64>() else {
+//                     return Self::Number(a.num());
+//                 };
+// 
+//                 Self::Number((i64::from(a) << b as i64) as f64)
+//             }
+// 
+//             (Self::Boolean(a), Self::Boolean(b)) => {
+//                 Self::Number((i64::from(a) << i64::from(b)) as f64)
+//             }
+//             (Self::Boolean(a), Self::Object(_)) => Self::Number(a.num()),
+//             (Self::Object(_), _) => Self::Number(0.0),
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+// 
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a.shl(b.to_i128().unwrap_or(0))),
+// 
+//             // (Self::Number(a), Self::BigInt(b)) => Self::BigInt(b.shl(a as i64)),
+//             // (Self::BigInt(a), Self::Number(b)) => Self::BigInt(a.shl(b as i64)),
+//             (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
+//                 todo!("return Result from add (Cannot mix BigInt and other types)")
+//             }
+//         }
+//     }
+// }
+// 
+// impl<C: Realm> Shr for Value<C> {
+//     type Output = Self;
+// 
+//     fn shr(self, rhs: Self) -> Self::Output {
+//         match (self, rhs) {
+//             (Self::Null, _) => Self::Number(0.0),
+//             (Self::Undefined, _) => Self::Number(0.0),
+// 
+//             (Self::Number(a), Self::Null) => Self::Number(a as i64 as f64),
+//             (Self::Number(a), Self::Undefined) => Self::Number(a as i64 as f64),
+//             (Self::Number(a), Self::Number(b)) => Self::Number(((a as i64) >> b as i64) as f64),
+//             (Self::Number(a), Self::String(b)) => {
+//                 let Ok(b) = b.parse::<f64>() else {
+//                     return Self::Number(a as i64 as f64);
+//                 };
+// 
+//                 Self::Number(((a as i64) >> b as i64) as f64)
+//             }
+//             (Self::Number(a), Self::Boolean(b)) => {
+//                 Self::Number(((a as i64) >> i64::from(b)) as f64)
+//             }
+//             (Self::Number(a), Self::Object(_)) => Self::Number(a as i64 as f64),
+// 
+//             (Self::String(a), Self::Null) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(a as i64 as f64)
+//             }
+// 
+//             (Self::String(a), Self::Undefined) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(a as i64 as f64)
+//             }
+// 
+//             (Self::String(a), Self::Number(b)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(((a as i64) >> b as i64) as f64)
+//             }
+// 
+//             (Self::String(a), Self::String(b)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 let Ok(b) = b.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(((a as i64) >> b as i64) as f64)
+//             }
+// 
+//             (Self::String(a), Self::Boolean(b)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(((a as i64) >> i64::from(b)) as f64)
+//             }
+// 
+//             (Self::String(a), Self::Object(_)) => {
+//                 let Ok(a) = a.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number(a as i64 as f64)
+//             }
+// 
+//             (Self::Boolean(a), Self::Null) => Self::Number(a.num()),
+//             (Self::Boolean(a), Self::Undefined) => Self::Number(a.num()),
+//             (Self::Boolean(a), Self::Number(b)) => Self::Number((i64::from(a) >> b as i64) as f64),
+//             (Self::Boolean(a), Self::String(b)) => {
+//                 let Ok(b) = b.parse::<f64>() else {
+//                     return Self::Number(0.0);
+//                 };
+// 
+//                 Self::Number((i64::from(a) >> b as i64) as f64)
+//             }
+// 
+//             (Self::Boolean(a), Self::Boolean(b)) => {
+//                 Self::Number((i64::from(a) >> i64::from(b)) as f64)
+//             }
+//             (Self::Boolean(a), Self::Object(_)) => Self::Number(a.num()),
+//             (Self::Object(_), _) => Self::Number(0.0),
+//             (Self::Symbol(_), _) | (_, Self::Symbol(_)) => {
+//                 todo!("return a Result here.... to throw an TypeError")
+//             }
+// 
+//             (Self::BigInt(a), Self::BigInt(b)) => Self::BigInt(a.shr(b.to_i128().unwrap_or(0))),
+// 
+//             // (Self::Number(a), Self::BigInt(b)) => Self::BigInt(b.shr(a as i64)),
+//             // (Self::BigInt(a), Self::Number(b)) => Self::BigInt(a.shr(b as i64)),
+//             (_, Self::BigInt(_)) | (Self::BigInt(_), _) => {
+//                 todo!("return Result from add (Cannot mix BigInt and other types)")
+//             }
+//         }
+//     }
+// }
+// 
+// impl<C: Realm> BitOr for Value<C> {
+//     type Output = Self;
+// 
+//     fn bitor(self, rhs: Self) -> Self::Output {
+//         Self::Number((self.to_int_or_null() | rhs.to_int_or_null()) as f64)
+//     }
+// }
+// 
+// impl<C: Realm> BitAnd for Value<C> {
+//     type Output = Self;
+// 
+//     fn bitand(self, rhs: Self) -> Self::Output {
+//         Self::Number((self.to_int_or_null() & rhs.to_int_or_null()) as f64)
+//     }
+// }
+// 
+// impl<C: Realm> BitXor for Value<C> {
+//     type Output = Self;
+// 
+//     fn bitxor(self, rhs: Self) -> Self::Output {
+//         Self::Number((self.to_int_or_null() ^ rhs.to_int_or_null()) as f64)
+//     }
+// }
 
 impl<C: Realm> Value<C> {
     #[must_use]
@@ -680,15 +715,15 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
-        if let (Self::BigInt(a), Self::BigInt(b)) = (self, rhs) {
-            return Ok(Self::BigInt(a.pow(b.to_u32().unwrap_or(0))));
-        }
-
-        Ok(Self::Number(
-            self.to_number(realm)?.powf(rhs.to_number(realm)?),
-        ))
-    }
+    // pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
+    //     if let (Self::BigInt(a), Self::BigInt(b)) = (self, rhs) {
+    //         return Ok(Self::BigInt(a.pow(b.to_u32().unwrap_or(0))));
+    //     }
+    // 
+    //     Ok(Self::Number(
+    //         self.to_number(realm)?.powf(rhs.to_number(realm)?),
+    //     ))
+    // }
 
     #[must_use]
     pub fn normal_eq(&self, rhs: &Self) -> bool {
@@ -748,13 +783,6 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    #[must_use]
-    pub fn zero_fill_rshift(&self, rhs: &Self) -> Self {
-        Self::Number(f64::from(
-            self.to_int_or_null() as u32 >> (rhs.to_int_or_null() as u32 % 32),
-        ))
-    }
-
     pub fn instance_of(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
         let Self::Object(obj) = self else {
             return Ok(false);
@@ -798,18 +826,20 @@ impl<C: Realm> Value<C> {
     }
 }
 
-impl<C: Realm> AddAssign for Value<C> {
-    fn add_assign(&mut self, rhs: Self) {
-        *self = self.copy() + rhs; //TODO: don't copy the value
-    }
-}
+// impl<C: Realm> AddAssign for Value<C> {
+//     fn add_assign(&mut self, rhs: Self) {
+//         *self = self.copy() + rhs; //TODO: don't copy the value
+//     }
+// }
+// 
+// impl<C: Realm> SubAssign for Value<C> {
+//     fn sub_assign(&mut self, rhs: Self) {
+//         *self = self.copy() - rhs; //TODO: don't copy the value
+//     }
+// }
 
-impl<C: Realm> SubAssign for Value<C> {
-    fn sub_assign(&mut self, rhs: Self) {
-        *self = self.copy() - rhs; //TODO: don't copy the value
-    }
-}
 
+/*
 #[cfg(test)]
 mod tests {
     use crate::{Obj, ObjectProperty, Variable};
@@ -2543,3 +2573,4 @@ mod tests {
         );
     }
 }
+*/
