@@ -109,6 +109,10 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
             .unwrap_or(Value::Undefined.into()))
     }
 
+    fn set_prototype(&self, proto: ObjectProperty<R>) -> Result<(), Error<R>> {
+        self.define_property("__proto__".into(), proto.value)
+    }
+
     fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
             .resolve_property(&"constructor".into())?
@@ -192,10 +196,18 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
         false
     }
 
+    fn primitive(&self) -> Option<Value<R>> {
+        None
+    }
+
     fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         Ok(self
             .resolve_property(&"__proto__".into())?
             .unwrap_or(Value::Undefined.into()))
+    }
+
+    fn set_prototype(&mut self, proto: ObjectProperty<R>) -> Result<(), Error<R>> {
+        self.define_property("__proto__".into(), proto.value)
     }
 
     fn constructor(&self) -> Result<ObjectProperty<R>, Error<R>> {
@@ -221,7 +233,7 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
             self.name()
         )))
     }
-    
+
     fn is_constructor(&self) -> bool {
         false
     }
@@ -541,7 +553,7 @@ impl<C: Realm> ObjectProperty<C> {
         } else {
             obj.define_property("value".into(), self.value)?;
         }
-        
+
         obj.define_property("writable".into(), self.attributes.is_writable().into())?;
         obj.define_property("enumerable".into(), self.attributes.is_enumerable().into())?;
         obj.define_property(

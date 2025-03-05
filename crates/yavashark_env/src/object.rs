@@ -310,6 +310,13 @@ impl MutObj<Realm> for MutObject {
             return Ok(());
         }
         
+        if let Value::String(s) = &name {
+            if s == "__proto__" {
+                self.prototype = value.into();
+                return Ok(());
+            }
+        }
+        
         match self.properties.entry(name) {
             Entry::Occupied(mut entry) => {
                 let e = entry.get();
@@ -332,6 +339,15 @@ impl MutObj<Realm> for MutObject {
             self.insert_array(*n as usize, value);
             return Ok(());
         }
+        
+        if let Value::String(s) = &name {
+            if s == "__proto__" {
+                self.prototype = value.into();
+                return Ok(());
+            }
+        }
+        
+        
         match self.properties.entry(name) {
             Entry::Occupied(mut entry) => {
                 let e = entry.get();
@@ -509,6 +525,11 @@ impl MutObj<Realm> for MutObject {
 
     fn prototype(&self) -> Result<ObjectProperty, Error> {
         Ok(self.prototype.clone())
+    }
+
+    fn set_prototype(&mut self, proto: ObjectProperty) -> Res {
+        self.prototype = proto;
+        Ok(())
     }
 
     fn constructor(&self) -> Result<ObjectProperty, Error> {

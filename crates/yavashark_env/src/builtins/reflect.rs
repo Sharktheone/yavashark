@@ -121,6 +121,6 @@ impl Reflect {
     #[prop("setPrototypeOf")]
     #[must_use]
     pub fn set_prototype_of(target: &ObjectHandle, proto: Value) -> bool {
-        target.define_property("__proto__".into(), proto).is_ok()
+        target.set_prototype(proto.into()).is_ok()
     }
 }
