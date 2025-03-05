@@ -85,6 +85,22 @@ pub enum Type {
     BigInt,
 }
 
+impl Display for Type {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        match self {
+            Self::Null => write!(f, "Null"),
+            Self::Undefined => write!(f, "Undefined"),
+            Self::Number => write!(f, "Number"),
+            Self::String => write!(f, "String"),
+            Self::Boolean => write!(f, "Boolean"),
+            Self::Object => write!(f, "Object"),
+            Self::Function => write!(f, "Function"),
+            Self::Symbol => write!(f, "Symbol"),
+            Self::BigInt => write!(f, "Bigint"),
+        }
+    }
+}
+
 impl<C: Realm> Hash for Value<C> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         //Hash the type and the value to minimize collisions
@@ -113,6 +129,25 @@ impl<C: Realm> Value<C> {
             Self::Object(o) => Self::Object(Object::clone(o)),
             Self::Symbol(s) => Self::Symbol(s.clone()),
             Self::BigInt(b) => Self::BigInt(b.clone()),
+        }
+    }
+    
+    pub fn ty(&self) -> Type {
+        match self {
+            Self::Null => Type::Null,
+            Self::Undefined => Type::Undefined,
+            Self::Number(_) => Type::Number,
+            Self::String(_) => Type::String,
+            Self::Boolean(_) => Type::Boolean,
+            Self::Object(o) => {
+                if o.is_function() {
+                    Type::Function
+                } else {
+                    Type::Object
+                }
+            }
+            Self::Symbol(_) => Type::Symbol,
+            Self::BigInt(_) => Type::BigInt,
         }
     }
 
