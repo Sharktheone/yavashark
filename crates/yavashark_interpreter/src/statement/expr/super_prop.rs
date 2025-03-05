@@ -2,6 +2,8 @@ use crate::Interpreter;
 use swc_ecma_ast::{SuperProp, SuperPropExpr};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult};
+use yavashark_env::print::PrettyPrint;
+use yavashark_value::Obj;
 
 impl Interpreter {
     pub fn run_super_prop(
@@ -10,11 +12,7 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         let this = scope.this()?;
-
-        let obj = this.as_object()?;
-
-        let proto = obj.prototype()?;
-        let sup = proto.resolve(this, realm)?;
+        let sup = this.prototype(realm)?;
         
         match &stmt.prop {
             SuperProp::Ident(i) => {
