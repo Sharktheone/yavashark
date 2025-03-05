@@ -10,7 +10,7 @@ impl<R: Realm> Value<R> {
 
         Ok(match (left_num, right_num) {
             (BigIntOrNumber::Number(left), BigIntOrNumber::Number(right)) => {
-                Value::from(left % right)
+                Self::from(left % right)
             }
             (BigIntOrNumber::BigInt(left), BigIntOrNumber::BigInt(right)) => {
                 if right.is_zero() {
@@ -18,7 +18,7 @@ impl<R: Realm> Value<R> {
                 }
                 
                 
-                Value::from(left % right)
+                Self::from(left % right)
             }
 
             _ => return Err(Error::ty("cannot mix BigInt and Number")),

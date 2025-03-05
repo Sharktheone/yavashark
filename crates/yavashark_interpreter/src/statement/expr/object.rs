@@ -27,7 +27,7 @@ impl Interpreter {
                     match &**prop {
                         Prop::Shorthand(ident) => {
                             let name = ident.sym.to_string();
-                            let value = scope.resolve(&name, realm)?.ok_or(
+                            let value = scope.resolve(&name)?.ok_or(
                                 ControlFlow::error_reference(format!("{name} is not defined")),
                             )?;
 

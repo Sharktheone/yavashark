@@ -35,7 +35,7 @@ pub enum ConstString {
 impl AsRef<str> for ConstString {
     fn as_ref(&self) -> &str {
         match self {
-            Self::String(s) => *s,
+            Self::String(s) => s,
             Self::Owned(s) => s,
         }
     }
@@ -132,6 +132,7 @@ impl<C: Realm> Value<C> {
         }
     }
 
+    #[must_use]
     pub fn ty(&self) -> Type {
         match self {
             Self::Null => Type::Null,
@@ -262,32 +263,32 @@ impl<C: Realm> Value<C> {
     pub const fn is_undefined(&self) -> bool {
         matches!(self, Self::Undefined)
     }
-    
+
     #[must_use]
     pub const fn is_number(&self) -> bool {
         matches!(self, Self::Number(_))
     }
-    
+
     #[must_use]
     pub const fn is_string(&self) -> bool {
         matches!(self, Self::String(_))
     }
-    
+
     #[must_use]
     pub const fn is_boolean(&self) -> bool {
         matches!(self, Self::Boolean(_))
     }
-    
+
     #[must_use]
     pub const fn is_object(&self) -> bool {
         matches!(self, Self::Object(_))
     }
-    
+
     #[must_use]
     pub const fn is_symbol(&self) -> bool {
         matches!(self, Self::Symbol(_))
     }
-    
+
     #[must_use]
     pub const fn is_bigint(&self) -> bool {
         matches!(self, Self::BigInt(_))
@@ -313,10 +314,10 @@ impl<C: Realm> Value<C> {
                     return to_prim
                         .call(
                             realm,
-                            vec![Value::String(
+                            vec![Self::String(
                                 hint.take().unwrap_or_else(|| "default".to_string()),
                             )],
-                            self.copy()
+                            self.copy(),
                         )?
                         .assert_no_object();
                 }
@@ -324,53 +325,44 @@ impl<C: Realm> Value<C> {
                 if hint.as_deref() == Some("string") {
                     let to_string = o.resolve_property(&"toString".into(), realm)?;
 
-                    if let Some(to_string) = to_string {
-                        if let Value::Object(to_string) = to_string {
-                            if to_string.is_function() {
-                                return to_string
-                                    .call(realm, Vec::new(), self.copy())?
-                                    .assert_no_object();
-                            }
+                    if let Some(Self::Object(to_string)) = to_string {
+                        if to_string.is_function() {
+                            return to_string
+                                .call(realm, Vec::new(), self.copy())?
+                                .assert_no_object();
                         }
                     }
 
                     let to_value = o.resolve_property(&"valueOf".into(), realm)?;
 
-                    if let Some(to_value) = to_value {
-                        if let Value::Object(to_value) = to_value {
-                            if to_value.is_function() {
-                                return to_value
-                                    .call(realm, Vec::new(), self.copy())?
-                                    .assert_no_object();
-                            }
+                    if let Some(Self::Object(to_value)) = to_value {
+                        if to_value.is_function() {
+                            return to_value
+                                .call(realm, Vec::new(), self.copy())?
+                                .assert_no_object();
                         }
                     }
                 }
-                
+
                 let to_value = o.resolve_property(&"valueOf".into(), realm)?;
 
-                if let Some(to_value) = to_value {
-                    if let Value::Object(to_value) = to_value {
-                        if to_value.is_function() {
-                            let val = to_value
-                                .call(realm, Vec::new(), self.copy())?;
-                            
-                            if !val.is_object() {
-                                return Ok(val);
-                            }
+                if let Some(Self::Object(to_value)) = to_value {
+                    if to_value.is_function() {
+                        let val = to_value.call(realm, Vec::new(), self.copy())?;
+
+                        if !val.is_object() {
+                            return Ok(val);
                         }
                     }
                 }
 
                 let to_string = o.resolve_property(&"toString".into(), realm)?;
 
-                if let Some(to_string) = to_string {
-                    if let Value::Object(to_string) = to_string {
-                        if to_string.is_function() {
-                            return to_string
-                                .call(realm, Vec::new(), self.copy())?
-                                .assert_no_object();
-                        }
+                if let Some(Self::Object(to_string)) = to_string {
+                    if to_string.is_function() {
+                        return to_string
+                            .call(realm, Vec::new(), self.copy())?
+                            .assert_no_object();
                     }
                 }
 

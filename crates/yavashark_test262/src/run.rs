@@ -44,7 +44,7 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, stmt: Ve
             if negative.ty.is_empty() {
                 res = Ok("".to_string());
             } else {
-                let Some(err) = scope.resolve(&negative.ty, realm)? else {
+                let Some(err) = scope.resolve(&negative.ty)? else {
                     return Err(Error::ty("Error type not found"));
                 };
 

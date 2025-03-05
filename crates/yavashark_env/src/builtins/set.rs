@@ -90,10 +90,10 @@ impl Set {
     fn delete(&self, key: &Value) -> bool {
         let mut inner = self.inner.borrow_mut();
 
-        inner.set.shift_remove(key).into()
+        inner.set.shift_remove(key)
     }
     
-    fn difference(&self, other: &Set, #[realm] realm: &mut Realm) -> ValueResult {
+    fn difference(&self, other: &Self, #[realm] realm: &Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -111,7 +111,7 @@ impl Set {
         }
         
         
-        Ok(Set::with_set(realm, set).into_value())
+        Ok(Self::with_set(realm, set).into_value())
     }
 
     fn has(&self, key: &Value) -> bool {
@@ -131,29 +131,29 @@ impl Set {
         Ok(Value::Undefined)
     }
     
-    fn intersection(&self, other: &Set, #[realm] realm: &mut Realm) -> ValueResult {
+    fn intersection(&self, other: &Self, #[realm] realm: &Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
         let right = &inner.set;
         
         
-        let inter = left.intersection(right);
+        let intersection = left.intersection(right);
         
-        let (low, up) = inter.size_hint();
+        let (low, up) = intersection.size_hint();
         
         let mut set = IndexSet::with_capacity(up.unwrap_or(low));
         
-        for val in inter {
+        for val in intersection {
             set.insert(val.clone());
         }
         
         
-        Ok(Set::with_set(realm, set).into_value())
+        Ok(Self::with_set(realm, set).into_value())
     }
     
     #[prop("isDisjointFrom")]
-    fn is_disjoint_from(&self, other: &Set) -> bool {
+    fn is_disjoint_from(&self, other: &Self) -> bool {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -163,7 +163,7 @@ impl Set {
     }
     
     #[prop("isSubsetOf")]
-    fn is_subset_of(&self, other: &Set) -> bool {
+    fn is_subset_of(&self, other: &Self) -> bool {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -173,7 +173,7 @@ impl Set {
     }
     
     #[prop("isSupersetOf")]
-    fn is_superset_of(&self, other: &Set) -> bool {
+    fn is_superset_of(&self, other: &Self) -> bool {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -183,7 +183,7 @@ impl Set {
     }
     
     #[prop("symmetricDifference")]
-    fn symmetric_difference(&self, other: &Set, #[realm] realm: &mut Realm) -> ValueResult {
+    fn symmetric_difference(&self, other: &Self, #[realm] realm: &Realm) -> ValueResult {
         let inner = self.inner.borrow();
         let left = &inner.set;
         let inner = other.inner.borrow();
@@ -201,7 +201,7 @@ impl Set {
         }
         
         
-        Ok(Set::with_set(realm, set).into_value())
+        Ok(Self::with_set(realm, set).into_value())
     }
     
     

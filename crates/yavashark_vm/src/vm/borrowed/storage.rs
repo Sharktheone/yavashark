@@ -11,7 +11,7 @@ impl BorrowedVM<'_> {
         };
 
         self.current_scope
-            .resolve(name, self.realm)?
+            .resolve(name)?
             .ok_or(Error::reference("Variable not found"))
     }
 

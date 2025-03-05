@@ -29,7 +29,7 @@ enum InnerString {
     Rope(RopeStr),
 }
 
-#[repr(packed)]
+#[repr(Rust, packed)]
 #[derive(Debug, Clone, Copy)]
 pub struct InlineString {
     len: InlineLen,
@@ -256,8 +256,8 @@ impl RopeStr {
         }
     }
 
-    pub fn from_elems(left: YSString, right: YSString) -> RopeStr {
-        RopeStr {
+    pub fn from_elems(left: YSString, right: YSString) -> Self {
+        Self {
             inner: Rc::new(RopeStrInner { left, right }),
         }
     }

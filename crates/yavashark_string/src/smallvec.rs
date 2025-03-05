@@ -6,7 +6,7 @@ use std::ptr::NonNull;
 use std::{fmt, mem};
 
 /// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
-#[repr(packed)]
+#[repr(Rust, packed)]
 //TODO: this should be Rc-able, but we can only do this once UniqueRc is stable
 pub struct SmallVec<T> {
     pub(crate) len_cap: SmallVecLenCap,
@@ -164,7 +164,7 @@ impl<T> Drop for VecWrapper<'_, T> {
     }
 }
 
-#[repr(packed)]
+#[repr(Rust, packed)]
 pub struct SmallVecLenCap {
     len: UsizeSmall,
     shared: DoubleU4,
@@ -194,7 +194,7 @@ impl SmallVecLenCap {
 
         let shared = self.shared.first();
 
-        without_shared | (shared as usize) << (8 * UZ_BYTES)
+        without_shared | ((shared as usize) << (8 * UZ_BYTES))
     }
 
     pub fn cap(&self) -> usize {
@@ -202,7 +202,7 @@ impl SmallVecLenCap {
 
         let shared = self.shared.second();
 
-        without_shared | (shared as usize) << (8 * UZ_BYTES)
+        without_shared | ((shared as usize) << (8 * UZ_BYTES))
     }
 }
 

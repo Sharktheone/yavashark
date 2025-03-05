@@ -197,7 +197,7 @@ impl Interpreter {
                     let name = i.sym.to_string();
 
                     let left = scope
-                        .resolve(&name, realm)?
+                        .resolve(&name)?
                         .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
 
                     let value = Self::run_assign_op(op, left, right, realm)?;

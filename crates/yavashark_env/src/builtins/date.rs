@@ -425,7 +425,7 @@ impl Date {
     // }
 
     #[prop("toString")]
-    pub fn to_string(&self) -> String {
+    pub fn to_string_js(&self) -> String {
         self.date().to_string()
     }
 
@@ -448,7 +448,7 @@ impl Date {
     pub fn to_primitive(&self, hint: &str) -> ValueResult {
         match hint {
             "number" => Ok(self.value_of().into()),
-            _ => Ok(self.to_string().into()),
+            _ => Ok(self.to_string_js().into()),
         }
     }
 }

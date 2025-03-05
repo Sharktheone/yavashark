@@ -22,7 +22,7 @@ impl Interpreter {
             Expr::Ident(i) => {
                 let name = i.sym.to_string();
                 let value = scope
-                    .resolve(&name, realm)?
+                    .resolve(&name)?
                     .ok_or(Error::reference_error(format!("{name} is not defined")))?;
                 let up = update(&value, stmt.op, realm)?;
                 

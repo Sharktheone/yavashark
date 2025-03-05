@@ -10,7 +10,7 @@ impl<R: Realm> Value<R> {
 
         Ok(match (left_num, right_num) {
             (BigIntOrNumber::Number(left), BigIntOrNumber::Number(right)) => {
-                Value::from((left as i64) >> (right as i64))
+                Self::from((left as i64) >> (right as i64))
             }
             (BigIntOrNumber::BigInt(left), BigIntOrNumber::BigInt(right)) => {
                 
@@ -19,10 +19,10 @@ impl<R: Realm> Value<R> {
                 };
                 
                 if right.is_negative() {
-                    Value::from(left >> (-right) as usize)
+                    Self::from(left >> (-right) as usize)
                     
                 } else {
-                    Value::from(left << right as usize)
+                    Self::from(left << right as usize)
                 }
                 
             }

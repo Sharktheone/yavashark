@@ -351,13 +351,13 @@ impl ScopeInternal {
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str, realm: &mut Realm) -> Result<Option<Value>> {
+    pub fn resolve(&self, name: &str) -> Result<Option<Value>> {
         if let Some(v) = self.variables.get(name) {
             return Ok(Some(v.copy()));
         }
 
         match &self.parent {
-            Some(parent) => parent.borrow()?.resolve(name, realm),
+            Some(parent) => parent.borrow()?.resolve(name),
             None => Ok(None),
         }
     }
@@ -478,11 +478,8 @@ impl ScopeInternal {
             }
         }
         
-        match &self.parent {
-            Some(p) => {
-                return p.borrow_mut()?.update(name, value);
-            }
-            None => {}
+        if let Some(p) = &self.parent {
+            return p.borrow_mut()?.update(name, value);
         }
 
         Ok(false)
@@ -551,7 +548,7 @@ impl ScopeInternal {
 
         match &self.variables {
             ObjectOrVariables::Object(o) => {
-                for (k, v) in o.properties()?.iter() {
+                for (k, v) in &o.properties()? {
                     if let Value::String(s) = k {
                         variables.insert(s.clone(), v.clone().into());
                     }
@@ -645,8 +642,8 @@ impl Scope {
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str, realm: &mut Realm) -> Result<Option<Value>> {
-        self.scope.borrow()?.resolve(name, realm)
+    pub fn resolve(&self, name: &str) -> Result<Option<Value>> {
+        self.scope.borrow()?.resolve(name)
     }
 
     pub fn has_label(&self, label: &str) -> Result<bool> {
@@ -874,10 +871,10 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_var_and_resolve() {
-        let mut realm = Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope.declare_var("test".to_string(), Value::Number(42.0)).unwrap();
-        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
+        let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
@@ -894,23 +891,23 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
-        let mut realm = Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
             .declare_global_var("test".to_string(), Value::Number(42.0))
             .unwrap();
-        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
+        let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
-        let mut realm = Realm::new().unwrap();
+        let realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
             .update_or_define("test".to_string(), Value::Number(42.0))
             .unwrap();
-        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
+        let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 }

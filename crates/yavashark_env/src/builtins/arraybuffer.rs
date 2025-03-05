@@ -86,7 +86,7 @@ pub struct ArrayBufferConstructor {}
 
 #[properties_new(raw)]
 impl ArrayBufferConstructor {
-    pub fn is_view(&self, _: &Value) -> bool {
+    pub const fn is_view(&self, _: &Value) -> bool {
         false //TODO
     }
 }

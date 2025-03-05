@@ -9,7 +9,7 @@ impl<R: Realm> Value<R> {
 
         Ok(match (left_num, right_num) {
             (BigIntOrNumber::Number(left), BigIntOrNumber::Number(right)) => {
-                Value::from((left as u64) >> (right as u64 % 64))
+                Self::from((left as u64) >> (right as u64 % 64))
             }
             (BigIntOrNumber::BigInt(_), BigIntOrNumber::BigInt(_)) => {
                 return Err(Error::ty("cannot perform unsigned right shift on BigInt"));

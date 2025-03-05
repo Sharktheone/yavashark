@@ -11,7 +11,7 @@ impl OwnedVM {
         };
 
         self.current_scope
-            .resolve(name, &mut self.realm)?
+            .resolve(name)?
             .ok_or(Error::reference("Variable not found"))
     }
 

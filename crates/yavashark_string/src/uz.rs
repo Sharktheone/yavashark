@@ -1,6 +1,6 @@
 pub const UZ_BYTES: usize = size_of::<usize>() - 1;
 
-#[repr(packed)]
+#[repr(Rust, packed)]
 #[derive(Copy, Clone)]
 pub struct UsizeSmall {
     bytes: [u8; UZ_BYTES],
@@ -37,18 +37,18 @@ impl UsizeSmall {
         Self { bytes }
     }
 
-    pub fn to_usize(&self) -> usize {
+    pub fn to_usize(self) -> usize {
         let mut buf = [0; size_of::<usize>()];
         buf.copy_from_slice(&self.bytes);
 
         usize::from_le_bytes(buf)
     }
 
-    pub const fn to_le_bytes_small(&self) -> [u8; UZ_BYTES] {
+    pub const fn to_le_bytes_small(self) -> [u8; UZ_BYTES] {
         self.bytes
     }
 
-    pub fn to_le_bytes(&self) -> [u8; size_of::<usize>()] {
+    pub fn to_le_bytes(self) -> [u8; size_of::<usize>()] {
         let mut res = [0; size_of::<usize>()];
 
         res[..UZ_BYTES].copy_from_slice(&self.bytes[..UZ_BYTES]);
@@ -57,7 +57,7 @@ impl UsizeSmall {
     }
 }
 
-#[repr(packed)]
+#[repr(Rust, packed)]
 #[derive(Copy, Clone)]
 pub struct DoubleU4(u8);
 
@@ -66,27 +66,27 @@ impl DoubleU4 {
         if first > 0xF || second > 0xF {
             return None;
         }
-        Some(Self(first << 4 | second))
+        Some(Self((first << 4) | second))
     }
 
     pub const fn from_u8(val: u8) -> Self {
         Self(val)
     }
 
-    pub const fn to_u8(&self) -> u8 {
+    pub const fn to_u8(self) -> u8 {
         self.0
     }
 
-    pub const fn to_u4(&self) -> (u8, u8) {
+    pub const fn to_u4(self) -> (u8, u8) {
         let val = self.0;
         (val >> 4, val & 0xF)
     }
 
-    pub const fn first(&self) -> u8 {
+    pub const fn first(self) -> u8 {
         self.0 >> 4
     }
 
-    pub const fn second(&self) -> u8 {
+    pub const fn second(self) -> u8 {
         self.0 & 0xF
     }
 }
