@@ -21,8 +21,7 @@ impl Interpreter {
                             }
                         };
 
-                        obj.delete_property(&name);
-                        return Ok(Value::Boolean(true));
+                        return Ok(obj.delete_property(&name)?.is_some().into());
                     }
                 }
                 _ => {}
@@ -44,7 +43,7 @@ impl Interpreter {
             UnaryOp::Tilde => Value::Number((!(value.to_int_or_null())) as f64),
             UnaryOp::TypeOf => Value::String(value.type_of().into()),
             UnaryOp::Void => Value::Undefined,
-            UnaryOp::Delete => Value::Boolean(false),
+            UnaryOp::Delete => Value::Boolean(false), // unreachable
         })
     }
 }

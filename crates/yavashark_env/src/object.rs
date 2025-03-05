@@ -261,7 +261,7 @@ impl MutObject {
     pub fn delete_array(&mut self, index: usize) -> Option<Value> {
         let (i, found) = self.array_position(index);
 
-        if found {
+        if found && self.array.get(i).is_some_and(|v| v.1.attributes.is_configurable()) {
             return Some(self.array.remove(i).1.value);
         }
 
@@ -319,10 +319,10 @@ impl MutObj<Realm> for MutObject {
         
         match self.properties.entry(name) {
             Entry::Occupied(mut entry) => {
-                let e = entry.get();
+                let e = entry.get_mut();
                 
                 if e.attributes.is_writable() {
-                    entry.insert(value.into());
+                    e.value = value;
                     return Ok(());
                 }
                 
@@ -437,14 +437,21 @@ impl MutObj<Realm> for MutObject {
 
     fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {
         if name == &Value::String("__proto__".to_string()) {
-            return Ok(Some(self.prototype.value.clone()));
+            return Ok(None)
         }
 
         if let Value::Number(n) = name {
             return Ok(self.delete_array(*n as usize));
         }
 
-        Ok(self.properties.shift_remove(name).map(|e| e.value))
+
+        if let Entry::Occupied(occ) = self.properties.entry(name.clone()) {
+            if occ.get().attributes.is_configurable() {
+                return Ok(Some(occ.shift_remove().value))
+            }
+        }
+
+        Ok(None)
     }
 
     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
