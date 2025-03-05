@@ -350,8 +350,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         quote! {
 
             fn name(&self) -> String {
-                let inner = self.inner.borrow();
-                inner.object.name()
+                stringify!(#struct_name).to_owned()
             }
         }
     };
