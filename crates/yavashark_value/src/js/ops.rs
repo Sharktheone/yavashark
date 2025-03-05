@@ -17,7 +17,6 @@ use crate::{Error, Realm};
 use num_bigint::BigInt;
 use num_traits::{ToPrimitive, Zero};
 use std::cmp::Ordering;
-use std::ops::{Add, AddAssign, BitAnd, BitOr, BitXor, Div, Mul, Rem, Shl, Shr, Sub, SubAssign};
 use std::str::FromStr;
 
 use super::Value;
@@ -728,7 +727,11 @@ impl<C: Realm> Value<C> {
     #[must_use]
     pub fn normal_eq(&self, rhs: &Self) -> bool {
         match (self, rhs) {
-            (Self::Null, Self::Null) | (Self::Undefined, Self::Undefined) => true,
+            (Self::Null, Self::Null) 
+            | (Self::Undefined, Self::Undefined)
+            | (Self::Undefined, Self::Null)
+            | (Self::Null, Self::Undefined)
+            => true,
             (Self::Number(a), Self::Number(b)) => a == b,
             (Self::String(a), Self::String(b)) => a == b,
             (Self::Boolean(a), Self::Boolean(b)) => a == b,

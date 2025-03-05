@@ -7,12 +7,6 @@ use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_bin(realm: &mut Realm, stmt: &BinExpr, scope: &mut Scope) -> RuntimeResult {
-        
-        
-        
-        
-        
-        
         Ok(match stmt.op {
             BinaryOp::EqEq => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
