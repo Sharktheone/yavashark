@@ -352,9 +352,12 @@ impl<C: Realm> Value<C> {
                 if let Some(to_value) = to_value {
                     if let Value::Object(to_value) = to_value {
                         if to_value.is_function() {
-                            return to_value
-                                .call(realm, Vec::new(), self.copy())?
-                                .assert_no_object();
+                            let val = to_value
+                                .call(realm, Vec::new(), self.copy())?;
+                            
+                            if !val.is_object() {
+                                return Ok(val);
+                            }
                         }
                     }
                 }
