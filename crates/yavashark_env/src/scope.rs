@@ -198,6 +198,7 @@ pub struct ScopeInternal {
     pub last_label_is_current: bool,
     pub state: ScopeState,
     pub this: Value,
+    pub new_target: Value,
     pub file: Option<PathBuf>,
 }
 
@@ -242,6 +243,7 @@ impl ScopeInternal {
             last_label_is_current: false,
             state: ScopeState::new(),
             this: Value::Undefined,
+            new_target: Value::Undefined,
             file: Some(path),
         }
     }
@@ -256,6 +258,7 @@ impl ScopeInternal {
             last_label_is_current: false,
             state: ScopeState::STATE_NONE,
             this: realm.global.clone().into(),
+            new_target: Value::Undefined,
             file: Some(path),
         }
     }
@@ -289,9 +292,10 @@ impl ScopeInternal {
 
         let par_scope = parent.borrow()?;
         let available_labels = par_scope.available_labels.clone();
-        drop(par_scope);
 
-        let this = parent.borrow()?.this.copy();
+        let this = par_scope.this.copy();
+        let new_target = par_scope.new_target.copy();
+        drop(par_scope);
 
         Ok(Self {
             parent: Some(parent),
@@ -300,6 +304,7 @@ impl ScopeInternal {
             last_label_is_current: false,
             state,
             this,
+            new_target,
             file: None,
         })
     }
@@ -598,6 +603,12 @@ impl Scope {
     }
     
     pub fn object_with_parent(parent: &Self, object: ObjectHandle) -> Result<Self> {
+        let borrow = parent.scope.borrow()?;
+        
+        let this = borrow.this.copy();
+        let new_target = borrow.new_target.copy();
+        
+        
         Ok(Self {
             scope: Gc::new(RefCell::new(ScopeInternal {
                 parent: Some(Gc::clone(&parent.scope)),
@@ -605,7 +616,8 @@ impl Scope {
                 available_labels: Vec::new(),
                 last_label_is_current: false,
                 state: ScopeState::new(),
-                this: Value::Undefined,
+                this,
+                new_target,
                 file: None,
             })),
         })
@@ -693,6 +705,15 @@ impl Scope {
     pub fn state_set_returnable(&mut self) -> Res {
         self.scope.borrow_mut()?.state_set_returnable();
         Ok(())
+    }
+    
+    pub fn set_target(&mut self, target: Value) -> Res {
+        self.scope.borrow_mut()?.new_target = target;
+        Ok(())
+    }
+    
+    pub fn get_target(&self) -> Result<Value> {
+        Ok(self.scope.borrow()?.new_target.copy())
     }
 
     pub fn state_set_loop(&mut self) -> Res {
