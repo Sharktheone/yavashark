@@ -6,7 +6,7 @@ use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, Res, Value};
+use yavashark_env::{Error, Realm, Res, Value, ValueResult};
 
 pub struct BorrowedVM<'a> {
     regs: Registers,
@@ -100,6 +100,12 @@ impl<'a> BorrowedVM<'a> {
         }
 
         Ok(())
+    }
+    
+    pub fn run_ret(&mut self) -> ValueResult {
+        self.run()?;
+        
+        Ok(self.acc())
     }
 }
 

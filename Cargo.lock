@@ -4726,6 +4726,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_bytecode_interpreter"
+version = "0.1.0"
+dependencies = [
+ "swc_ecma_ast",
+ "yavashark_bytecode",
+ "yavashark_codegen",
+ "yavashark_env",
+ "yavashark_vm",
+]
+
+[[package]]
 name = "yavashark_codegen"
 version = "0.1.0"
 dependencies = [
