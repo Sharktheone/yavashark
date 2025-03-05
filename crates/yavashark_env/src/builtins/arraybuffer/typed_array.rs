@@ -9,6 +9,7 @@ use crate::conversion::FromValueOutput;
 #[object(direct(buffer, byte_offset, byte_length))]
 #[derive(Debug)]
 pub struct TypedArray {
+    #[allow(unused)]
     byte_offset: usize,
     
 }

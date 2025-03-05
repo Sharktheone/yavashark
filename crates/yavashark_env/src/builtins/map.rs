@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use indexmap::IndexMap;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, MutObj, Obj, ObjectImpl};
+use yavashark_value::{Constructor, MutObj, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use crate::utils::ValueIterator;
 

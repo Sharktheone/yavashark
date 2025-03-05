@@ -119,7 +119,7 @@ impl Interpreter {
             PropName::Str(str_) => Value::String(str_.value.to_string()),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
-            PropName::BigInt(_) => todo!(),
+            PropName::BigInt(b) => Value::BigInt((*b.value).clone()),
         })
     }
 }

@@ -1,8 +1,7 @@
 use std::cell::RefCell;
 use indexmap::IndexSet;
-use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{BoxedObj, Constructor, MutObj, Obj, ObjectImpl};
+use yavashark_value::{Constructor, MutObj, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use crate::utils::ValueIterator;
 
@@ -16,11 +15,12 @@ pub struct Set {
 
 
 impl Set {
-    fn new(realm: &mut Realm) -> Self {
+    #[allow(unused)]
+    fn new(realm: &Realm) -> Self {
         Self::with_set(realm, IndexSet::new())
     }
     
-    fn with_set(realm: &mut Realm, set: IndexSet<Value>) -> Self {
+    fn with_set(realm: &Realm, set: IndexSet<Value>) -> Self {
         Self {
             inner: RefCell::new(MutableSet {
                 object: MutObject::with_proto(realm.intrinsics.set.clone().into()),
@@ -39,7 +39,7 @@ impl Constructor<Realm> for SetConstructor {
         let mut set = IndexSet::new();
 
         if let Some(iter) = args.first() {
-            let mut iter = ValueIterator::new(iter, realm)?;
+            let iter = ValueIterator::new(iter, realm)?;
 
             while let Some(val) =  iter.next(realm)? {
                 set.insert(val);
