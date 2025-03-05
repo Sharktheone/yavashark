@@ -244,18 +244,20 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut init = TokenStream::new();
 
     for prop in props {
-        let (prop_tokens, name, js_name, ty) = match prop {
+        let (prop_tokens, name, js_name, ty, variable_fn) = match prop {
             Prop::Method(method) => (
                 method.init_tokens(&config),
                 method.name,
                 method.js_name,
                 method.ty,
+                quote! {#variable::write_config},
             ),
             Prop::Constant(constant) => (
                 constant.init_tokens(&config),
                 constant.name,
                 constant.js_name,
                 Type::Normal,
+                quote! {#variable::new_read_only},
             ),
         };
 
@@ -269,7 +271,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     {
                         let prop = #prop_tokens;
 
-                        obj.define_variable(#name.into(), #variable::write_config(prop.into()))?;
+                        obj.define_variable(#name.into(), #variable_fn(prop.into()))?;
                     }
                 });
             }
