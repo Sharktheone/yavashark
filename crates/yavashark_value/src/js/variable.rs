@@ -27,6 +27,14 @@ impl<C: Realm> Variable<C> {
     }
     
     #[must_use]
+    pub const fn enumerable(value: Value<C>) -> Self {
+        Self {
+            value,
+            properties: Attributes::enumerable(),
+        }
+    }
+    
+    #[must_use]
     pub const fn write_config(value: Value<C>) -> Self {
         Self {
             value,
@@ -148,6 +156,11 @@ impl Attributes {
     #[must_use]
     pub const fn config() -> Self {
         Self(Self::CONFIGURABLE)
+    }
+    
+    #[must_use]
+    pub const fn enumerable() -> Self {
+        Self(Self::ENUMERABLE)
     }
     
     #[must_use]

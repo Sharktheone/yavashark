@@ -5,7 +5,7 @@ use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
-use crate::{NativeFunction, Object, ObjectHandle, Res, Result, Value, ValueResult};
+use crate::{NativeFunction, Object, ObjectHandle, Res, Result, Value, ValueResult, Variable};
 use std::fmt::Debug;
 use std::path::PathBuf;
 use yavashark_value::Realm as RealmT;
@@ -35,7 +35,7 @@ impl Realm {
     }
 
     pub fn set_eval(&mut self, eval: impl Eval + 'static) -> Res {
-        let eval_func = NativeFunction::new(
+        let eval_func = NativeFunction::with_len(
             "eval",
             move |args, _, realm| {
                 let Some(code) = args.first() else {
@@ -49,10 +49,11 @@ impl Realm {
                 eval.eval(&code, realm, &mut scope)
             },
             self,
+            1
         );
 
         self.intrinsics.eval = Some(eval_func.clone());
-        self.global.define_property("eval".into(), eval_func.into())
+        self.global.define_variable("eval".into(), Variable::write_config(eval_func.into()))
     }
 }
 
