@@ -1,5 +1,6 @@
 use swc_common::Spanned;
-use swc_ecma_ast::{DefaultDecl, ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, NamedExport};
+use swc_ecma_ast::{DefaultDecl, ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, ExportSpecifier, ImportSpecifier, ModuleExportName, NamedExport};
+use swc_ecma_parser::token::Keyword::Export;
 use yavashark_env::{Error, Realm, RuntimeResult, Value, Variable};
 use yavashark_env::scope::{ModuleScope, Scope};
 use yavashark_value::IntoValue;
@@ -40,7 +41,64 @@ impl Interpreter {
     }
 
     pub fn run_export_named(realm: &mut Realm, stmt: &NamedExport, scope: &mut ModuleScope) -> RuntimeResult {
-        todo!()
+        let Some(src) = &stmt.src else {
+            return Err(Error::syn("Export source is required").into());
+        };
+        
+        
+        let module = Self::resolve_module(&src.value, stmt.with.as_deref(), &scope.scope.get_current_path()?, realm)?;
+        
+        for spec in &stmt.specifiers {
+            match spec {
+                ExportSpecifier::Named(named) => {
+                    let name = match &named.orig {
+                        ModuleExportName::Ident(id) => id.sym.to_string(),
+                        ModuleExportName::Str(str) => str.value.to_string(),
+                    };
+                    let export = match &named.exported {
+                        Some(ModuleExportName::Ident(id)) => id.sym.to_string(),
+                        Some(ModuleExportName::Str(str)) => str.value.to_string(),
+                        None => name.clone(),
+                    };
+                    
+                    
+                    
+                    let val = module
+                        .exports
+                        .get_property(&name.clone().into())
+                        .map_err(|_| {
+                            Error::reference_error(format!("Export `{name}` not found in module"))
+                        })?;
+                    
+                    scope.scope.declare_var(export.clone(), val.value.copy())?;
+                    scope.module.exports.define_property(export.into(), val.value.copy().into()); //TODO: if the value changes, the export should change too
+                }
+                
+                ExportSpecifier::Default(default) => {
+                    let Some(val) = &module.default else {
+                        return Err(Error::reference("Module has no default export").into());
+                    };
+                    
+                    let name = default.exported.to_string();
+                    
+                    scope.scope.declare_var(name.clone(), val.copy())?;
+                    scope.module.exports.define_property(name.into(), val.copy().into()); //TODO: if the value changes, the export should change too
+                }
+                
+                ExportSpecifier::Namespace(ns) => {
+                    let name = match &ns.name {
+                        ModuleExportName::Ident(id) => id.sym.to_string(),
+                        ModuleExportName::Str(str) => str.value.to_string(),
+                    };
+                    
+                    scope.scope.declare_var(name.clone(), module.exports.clone().into())?;
+                    scope.module.exports.define_property(name.into(), module.exports.clone().into()); //TODO: if the value changes, the export should change too
+                }
+            }
+        }
+        
+        
+        Ok(Value::Undefined)
     }
 
     pub fn run_export_default_expr(realm: &mut Realm, stmt: &ExportDefaultExpr, scope: &mut ModuleScope) -> RuntimeResult {

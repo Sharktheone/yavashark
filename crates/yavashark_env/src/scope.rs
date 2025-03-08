@@ -137,13 +137,15 @@ pub struct Scope {
 pub struct Module {
     pub default: Option<Value>,
     pub exports: ObjectHandle,
+    pub path: PathBuf,
 }
 
 impl Default for Module {
     fn default() -> Self {
         Self {
             default: None,
-            exports: Object::null()
+            exports: Object::null(),
+            path: PathBuf::new(),
         }
     }
 }
