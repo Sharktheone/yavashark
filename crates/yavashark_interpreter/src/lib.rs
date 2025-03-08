@@ -8,7 +8,7 @@ use std::rc::Rc;
 
 use swc_ecma_ast::{ModuleItem, Program, Stmt};
 
-use yavashark_env::scope::Scope;
+use yavashark_env::scope::{ModuleScope, Scope};
 use yavashark_env::{scope, ControlFlow, Realm, Result, Value, ValueResult};
 
 mod class;
@@ -45,13 +45,13 @@ impl Interpreter {
     
     pub fn run_program_in(program: &Program, realm: &mut Realm, scope: &mut Scope) -> Result<Value> {
         match program {
-            Program::Module(module) => Self::run_module_in(&module.body, realm, scope),
+            Program::Module(module) => Self::run_module_in(&module.body, realm, &mut scope.clone().into_module()),
             Program::Script(script) => Self::run_in(&script.body, realm, scope)
         }
         
     }
     
-    pub fn run_module_in(script: &Vec<ModuleItem>, realm: &mut Realm, scope: &mut Scope) -> Result<Value> {
+    pub fn run_module_in(script: &Vec<ModuleItem>, realm: &mut Realm, scope: &mut ModuleScope) -> Result<Value> {
         Self::run_module_items(realm, script, scope).or_else(|e| match e {
             ControlFlow::Error(e) => Err(e),
             ControlFlow::Return(v) => Ok(v),

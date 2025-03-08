@@ -33,6 +33,11 @@ impl Object {
     pub fn new(realm: &Realm) -> ObjectHandle {
         ObjectHandle::new(Self::raw(realm))
     }
+    
+    #[must_use] 
+    pub fn null() -> ObjectHandle {
+        Self::with_proto(Value::Null)
+    }
 
     #[must_use]
     pub fn with_proto(proto: Value) -> ObjectHandle {

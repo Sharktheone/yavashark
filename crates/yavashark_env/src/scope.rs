@@ -8,7 +8,7 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
 
 use crate::realm::Realm;
-use crate::{Error, ObjectHandle, Res, Result, Value, Variable};
+use crate::{Error, Object, ObjectHandle, Res, Result, Value, Variable};
 
 pub struct MutValue {
     pub name: String,
@@ -132,6 +132,14 @@ impl ScopeState {
 pub struct Scope {
     scope: Gc<RefCell<ScopeInternal>>,
 }
+
+#[derive(Debug, Clone)]
+pub struct ModuleScope {
+    pub scope: Scope,
+    pub default: Option<Value>,
+    pub exports: ObjectHandle,
+}
+
 
 #[derive(Debug)]
 pub enum ObjectOrVariables {
@@ -802,6 +810,15 @@ impl Scope {
         self.scope.borrow()?.get_variable_names()
     }
     
+    
+    #[must_use] 
+    pub fn into_module(self) -> ModuleScope {
+        ModuleScope {
+            scope: self,
+            default: None,
+            exports: Object::null(),
+        }
+    }
 }
 
 impl CustomGcRefUntyped for Scope {

@@ -3,14 +3,14 @@ mod export;
 
 use swc_ecma_ast::{ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, ImportDecl, ModuleDecl, ModuleItem, NamedExport};
 use yavashark_env::{Error, Realm, RuntimeResult, Value};
-use yavashark_env::scope::Scope;
+use yavashark_env::scope::{ModuleScope, Scope};
 use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_module_items(
         realm: &mut Realm,
         script: &Vec<ModuleItem>,
-        scope: &mut Scope,
+        scope: &mut ModuleScope,
     ) -> RuntimeResult {
         let mut last_value = Value::Undefined;
         for stmt in script {
@@ -20,7 +20,7 @@ impl Interpreter {
                     Self::run_module_decl(realm, decl, scope)?;
                 }
                 ModuleItem::Stmt(stmt) => {
-                    last_value = Self::run_statement(realm, stmt, scope)?;
+                    last_value = Self::run_statement(realm, stmt, &mut scope.scope)?;
                 }
             }
         }
@@ -31,11 +31,11 @@ impl Interpreter {
     pub fn run_module_decl(
         realm: &mut Realm,
         decl: &ModuleDecl,
-        scope: &mut Scope,
+        scope: &mut ModuleScope,
     ) -> RuntimeResult {
         match decl {
             ModuleDecl::Import(import) => {
-                Self::run_import(realm, import, scope)
+                Self::run_import(realm, import, &mut scope.scope)
             }
             ModuleDecl::ExportDecl(export) => {
                 Self::run_export_decl(realm, export, scope)
