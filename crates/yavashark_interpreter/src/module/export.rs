@@ -25,11 +25,11 @@ impl Interpreter {
                         }
                         var::Variable::Let(name, value) => {
                             scope.scope.declare_var(name.clone(), value.copy());
-                            scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                            scope.module.exports.define_property(name.into(), value); //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Const(name, value) => {
                             scope.scope.declare_read_only_var(name.clone(), value.copy());
-                            scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                            scope.module.exports.define_property(name.into(), value); //TODO: if the value changes, the export should change too
                         }
                     }
                 }
@@ -130,6 +130,12 @@ impl Interpreter {
     }
 
     pub fn run_export_all(realm: &mut Realm, stmt: &ExportAll, scope: &mut ModuleScope) -> RuntimeResult {
-        todo!()
+        let module = Self::resolve_module(stmt.src.value.as_str(), stmt.with.as_deref(), &scope.scope.get_current_path()?, realm)?;
+        
+        for (name, val) in module.exports.properties()? {
+            scope.module.exports.define_property(name, val); //TODO: if the value changes, the export should change too
+        }
+        
+        Ok(Value::Undefined)
     }
 }
