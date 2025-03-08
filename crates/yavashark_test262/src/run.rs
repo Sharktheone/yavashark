@@ -3,7 +3,7 @@ use crate::metadata::{Flags, Metadata, NegativePhase};
 use crate::utils::parse_file;
 use crate::TEST262_DIR;
 use std::path::{Path, PathBuf};
-use swc_ecma_ast::Stmt;
+use swc_ecma_ast::Program;
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
@@ -16,7 +16,7 @@ pub fn run_file(file: PathBuf) -> Result<String, Error> {
     run_file_in(file, &mut realm, &mut scope, stmt, metadata)
 }
 
-pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, stmt: Vec<Stmt>, metadata: Metadata) -> Result<String, Error> {
+pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, prog: Program, metadata: Metadata) -> Result<String, Error> {
 
     for inc in metadata.includes {
         let path = Path::new(TEST262_DIR).join("harness").join(inc);
@@ -29,7 +29,7 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, stmt: Ve
 
     scope.set_path(file)?;
 
-    let mut res = Interpreter::run_in(&stmt, realm, scope).and_then(|v| v.to_string(realm));
+    let mut res = Interpreter::run_program_in(&prog, realm, scope).and_then(|v| v.to_string(realm));
 
 
     if let Some(negative) = metadata.negative {
