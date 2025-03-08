@@ -62,7 +62,7 @@ impl Interpreter {
         let module = crate::parse::parse_module(source)
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
         
-        let scope = Scope::global(&realm, path);
+        let scope = Scope::global(realm, path);
         
         let mut scope = ModuleScope {
             scope,

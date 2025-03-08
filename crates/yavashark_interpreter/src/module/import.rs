@@ -47,12 +47,10 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 
-    pub fn resolve_module(src: &str, with: Option<&ObjectLit>, path: &Path, realm: &mut Realm) -> Result<Module> {
+    pub fn resolve_module<'a>(src: &str, with: Option<&ObjectLit>, path: &Path, realm: &'a mut Realm) -> Result<&'a Module> {
         //TODO: handle `with`
-        let (source, path) = realm
-            .resolve_module(src, path)
-            .map_err(|e| ControlFlow::Error(Error::reference_error(e.to_string())))?;
-
-        Self::run_module_source(&source, path, realm)
+        realm.get_module(src, path, |source, path, realm| {
+            Self::run_module_source(&source, path, realm)
+        })
     }
 }

@@ -2,6 +2,7 @@ mod env;
 mod intrinsics;
 mod resolve;
 
+use std::collections::HashMap;
 use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
@@ -25,7 +26,9 @@ impl Realm {
         let global = Object::with_proto(intrinsics.obj.clone().into());
 
         let realm = Self {
-            env: Environment {},
+            env: Environment {
+                modules: HashMap::new(),
+            },
             intrinsics,
             global: global.clone(),
         };

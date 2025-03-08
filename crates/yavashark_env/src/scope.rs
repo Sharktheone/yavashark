@@ -133,7 +133,7 @@ pub struct Scope {
     scope: Gc<RefCell<ScopeInternal>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Module {
     pub default: Option<Value>,
     pub exports: ObjectHandle,
