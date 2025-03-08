@@ -6,11 +6,11 @@ use std::mem;
 use swc_ecma_ast::FnDecl;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
-use yavashark_env::{optimizer::OptimFunction, Realm, Res};
+use yavashark_env::{optimizer::OptimFunction, Realm, Res, Result, Value};
 use yavashark_value::AsAny;
 
 impl Interpreter {
-    pub fn decl_fn(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Res {
+    pub fn decl_fn_ret(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Result<(String, Value)> {
         let mut fn_scope = Scope::with_parent(scope)?;
 
         fn_scope.state_set_function()?;
@@ -31,8 +31,15 @@ impl Interpreter {
             fn_scope,
             realm,
         );
-        scope.declare_var(name, function.into());
 
+        Ok((name, function.into()))
+    }
+
+    pub fn decl_fn(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Res {
+        let (name, function) = Self::decl_fn_ret(realm, stmt, scope)?;
+
+        scope.declare_var(name, function.into());
+        
         Ok(())
     }
 }

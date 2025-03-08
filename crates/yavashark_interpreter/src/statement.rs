@@ -10,7 +10,7 @@ mod block;
 mod r#break;
 mod r#continue;
 mod debugger;
-mod decl;
+pub mod decl;
 mod do_while;
 pub mod expr;
 mod r#for;

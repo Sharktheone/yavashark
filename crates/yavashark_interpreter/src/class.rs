@@ -119,8 +119,8 @@ pub fn create_class(
     Ok((class, statics))
 }
 
-pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
-    let (class, statics) = create_class(realm, stmt, scope, name.clone())?;
+pub fn decl_class_ret(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> ValueResult {
+    let (class, statics) = create_class(realm, stmt, scope, name)?;
     
     let this = class.into_object();
     
@@ -136,8 +136,12 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
     
     proto.define_property("constructor".into(), this.copy());
 
-    scope.declare_var(name, this);
+    Ok(this)
+}
+pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
+    let class = decl_class_ret(realm, stmt, scope, name.clone())?;
 
+    scope.declare_var(name, class);
     Ok(())
 }
 
