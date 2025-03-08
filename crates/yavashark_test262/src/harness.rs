@@ -3,7 +3,7 @@ use crate::utils::parse_file;
 use crate::{ObjectHandle, TEST262_DIR};
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
-use swc_ecma_ast::Stmt;
+use swc_ecma_ast::Program;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res, Result};
 use yavashark_interpreter::eval::InterpreterEval;
@@ -11,7 +11,7 @@ use yavashark_interpreter::Interpreter;
 
 const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
 
-static COMPILED: LazyLock<Vec<(Vec<Stmt>, PathBuf)>> = LazyLock::new(|| {
+static COMPILED: LazyLock<Vec<(Program, PathBuf)>> = LazyLock::new(|| {
     let p = Path::new(TEST262_DIR);
 
     NON_RAW_HARNESS
@@ -30,7 +30,7 @@ pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
     for (s, path) in &*COMPILED {
         scope.set_path(path.to_path_buf())?;
 
-        Interpreter::run_in(s, realm, scope)?;
+        Interpreter::run_program_in(s, realm, scope)?;
     }
 
     scope.set_path(path)?;

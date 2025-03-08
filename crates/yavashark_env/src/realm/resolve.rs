@@ -6,10 +6,14 @@ impl Realm {
     pub fn get_module(
         &mut self,
         spec: &str,
-        path: &Path,
+        cur_path: &Path,
         mut cb: impl FnMut(String, PathBuf, &mut Self) -> Result<Module>,
     ) -> Result<&Module> {
-        let path = resolve_path(spec, path)?;
+        let path = resolve_path(spec, cur_path)?;
+        
+        if path == cur_path {
+            return Err(Error::new("TODO: handle circular dependencies"));
+        }
 
         if !self.env.modules.contains_key(&path) {
             let source =
