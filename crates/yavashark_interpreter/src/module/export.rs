@@ -1,5 +1,6 @@
-use swc_ecma_ast::{ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, NamedExport};
-use yavashark_env::{Realm, RuntimeResult, Value, Variable};
+use swc_common::Spanned;
+use swc_ecma_ast::{DefaultDecl, ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, NamedExport};
+use yavashark_env::{Error, Realm, RuntimeResult, Value, Variable};
 use yavashark_env::scope::{ModuleScope, Scope};
 use yavashark_value::IntoValue;
 use crate::Interpreter;
@@ -43,11 +44,31 @@ impl Interpreter {
     }
 
     pub fn run_export_default_expr(realm: &mut Realm, stmt: &ExportDefaultExpr, scope: &mut ModuleScope) -> RuntimeResult {
-        todo!()
+        let val = Self::run_expr(realm, &stmt.expr, stmt.expr.span(), &mut scope.scope)?;
+        
+        scope.default = Some(val);
+        
+        Ok(Value::Undefined)
     }
     
     pub fn run_export_default_decl(realm: &mut Realm, stmt: &ExportDefaultDecl, scope: &mut ModuleScope) -> RuntimeResult {
-        todo!()
+        match &stmt.decl {
+            DefaultDecl::Class(c) => {
+                let class = Self::run_class(realm, &c, &mut scope.scope)?;
+                
+                scope.default = Some(class);
+            }
+            
+            DefaultDecl::Fn(f) => {
+                let func = Self::run_fn(realm, &f, &mut scope.scope)?;
+                
+                scope.default = Some(func);
+            }
+            
+            _ => return Err(Error::syn("TypeScript is not supported").into()),
+        }
+        
+        Ok(Value::Undefined)
     }
 
     pub fn run_export_all(realm: &mut Realm, stmt: &ExportAll, scope: &mut ModuleScope) -> RuntimeResult {
