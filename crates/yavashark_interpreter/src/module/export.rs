@@ -13,22 +13,22 @@ impl Interpreter {
         match val {
             DeclRet::Single(name, value) => {
                 scope.scope.declare_var(name.clone(), value.copy());
-                scope.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
             },
             DeclRet::Var(vars) => {
                 for var in vars {
                     match var {
                         var::Variable::Var(name, value) => {
                             scope.scope.declare_global_var(name.clone(), value.copy());
-                            scope.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                            scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Let(name, value) => {
                             scope.scope.declare_var(name.clone(), value.copy());
-                            scope.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                            scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Const(name, value) => {
                             scope.scope.declare_read_only_var(name.clone(), value.copy());
-                            scope.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                            scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
                         }
                     }
                 }
@@ -46,7 +46,7 @@ impl Interpreter {
     pub fn run_export_default_expr(realm: &mut Realm, stmt: &ExportDefaultExpr, scope: &mut ModuleScope) -> RuntimeResult {
         let val = Self::run_expr(realm, &stmt.expr, stmt.expr.span(), &mut scope.scope)?;
         
-        scope.default = Some(val);
+        scope.module.default = Some(val);
         
         Ok(Value::Undefined)
     }
@@ -56,13 +56,13 @@ impl Interpreter {
             DefaultDecl::Class(c) => {
                 let class = Self::run_class(realm, &c, &mut scope.scope)?;
                 
-                scope.default = Some(class);
+                scope.module.default = Some(class);
             }
             
             DefaultDecl::Fn(f) => {
                 let func = Self::run_fn(realm, &f, &mut scope.scope)?;
                 
-                scope.default = Some(func);
+                scope.module.default = Some(func);
             }
             
             _ => return Err(Error::syn("TypeScript is not supported").into()),

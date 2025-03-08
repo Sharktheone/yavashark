@@ -1,9 +1,10 @@
 mod import;
 mod export;
 
+use std::path::{Path, PathBuf};
 use swc_ecma_ast::{ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, ImportDecl, ModuleDecl, ModuleItem, NamedExport};
-use yavashark_env::{Error, Realm, RuntimeResult, Value};
-use yavashark_env::scope::{ModuleScope, Scope};
+use yavashark_env::{Error, Realm, RuntimeResult, Value, Result};
+use yavashark_env::scope::{Module, ModuleScope, Scope};
 use crate::Interpreter;
 
 impl Interpreter {
@@ -55,5 +56,21 @@ impl Interpreter {
             
             _ => Err(Error::syn("TypesScript not supported yet").into()),
         }
+    }
+    
+    pub fn run_module_source(source: &str, path: PathBuf,  realm: &mut Realm) -> Result<Module> {
+        let module = crate::parse::parse_module(source)
+            .map_err(|e| Error::syn_error(format!("{e:?}")))?;
+        
+        let scope = Scope::global(&realm, path);
+        
+        let mut scope = ModuleScope {
+            scope,
+            module: Module::default()
+        };
+        
+        Self::run_module_in(&module.body, realm, &mut scope)?;
+        
+        Ok(scope.module)
     }
 }

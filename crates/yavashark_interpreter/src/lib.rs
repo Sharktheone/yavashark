@@ -20,6 +20,7 @@ pub mod statement;
 #[cfg(test)]
 mod tests;
 pub mod module;
+mod parse;
 
 pub struct Interpreter;
 

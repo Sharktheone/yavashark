@@ -1,5 +1,6 @@
 mod env;
 mod intrinsics;
+mod resolve;
 
 use crate::global::init_global_obj;
 use crate::realm::env::Environment;

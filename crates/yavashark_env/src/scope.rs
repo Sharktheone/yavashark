@@ -134,11 +134,27 @@ pub struct Scope {
 }
 
 #[derive(Debug, Clone)]
-pub struct ModuleScope {
-    pub scope: Scope,
+pub struct Module {
     pub default: Option<Value>,
     pub exports: ObjectHandle,
 }
+
+impl Default for Module {
+    fn default() -> Self {
+        Self {
+            default: None,
+            exports: Object::null()
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ModuleScope {
+    pub scope: Scope,
+    pub module: Module,
+}
+
+
 
 
 #[derive(Debug)]
@@ -815,8 +831,7 @@ impl Scope {
     pub fn into_module(self) -> ModuleScope {
         ModuleScope {
             scope: self,
-            default: None,
-            exports: Object::null(),
+            module: Module::default()
         }
     }
 }
