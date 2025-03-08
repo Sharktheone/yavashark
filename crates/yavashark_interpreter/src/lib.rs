@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use swc_ecma_ast::Stmt;
+use swc_ecma_ast::{ModuleItem, Program, Stmt};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{scope, ControlFlow, Realm, Result, Value, ValueResult};
@@ -19,6 +19,7 @@ mod pat;
 pub mod statement;
 #[cfg(test)]
 mod tests;
+pub mod module;
 
 pub struct Interpreter;
 
@@ -36,6 +37,22 @@ impl Interpreter {
 
     pub fn run_in(script: &Vec<Stmt>, realm: &mut Realm, scope: &mut Scope) -> Result<Value> {
         Self::run_statements(realm, script, scope).or_else(|e| match e {
+            ControlFlow::Error(e) => Err(e),
+            ControlFlow::Return(v) => Ok(v),
+            _ => Ok(Value::Undefined),
+        })
+    }
+    
+    pub fn run_program_in(program: &Program, realm: &mut Realm, scope: &mut Scope) -> Result<Value> {
+        match program {
+            Program::Module(module) => Self::run_module_in(&module.body, realm, scope),
+            Program::Script(script) => Self::run_in(&script.body, realm, scope)
+        }
+        
+    }
+    
+    pub fn run_module_in(script: &Vec<ModuleItem>, realm: &mut Realm, scope: &mut Scope) -> Result<Value> {
+        Self::run_module_items(realm, script, scope).or_else(|e| match e {
             ControlFlow::Error(e) => Err(e),
             ControlFlow::Return(v) => Ok(v),
             _ => Ok(Value::Undefined),
