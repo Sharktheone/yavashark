@@ -186,7 +186,7 @@ func main() {
 			if err2 != nil {
 				log.Printf("Failed to parse commit timestamp: %v", err2)
 			} else {
-				overallSummary.Timestamp = time.Unix(commitEpoch, 0).Format(time.RFC3339)
+				overallSummary.Timestamp = time.Unix(commitEpoch, 0).Unix()
 			}
 		}
 
