@@ -88,6 +88,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("Set".into(), Variable::write_config(realm.intrinsics.set_constructor().value))?;
     obj.define_variable("Date".into(), Variable::write_config(realm.intrinsics.date_constructor().value))?;
     obj.define_variable("Reflect".into(), Variable::write_config(realm.intrinsics.reflect_obj().value))?;
+    obj.define_variable("Temporal".into(), Variable::write_config(realm.intrinsics.temporal_obj().value))?;
 
 
 

@@ -141,6 +141,14 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
     fn is_constructor(&self) -> bool {
         false
     }
+    
+    // unsafe fn downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+    //     if ty == TypeId::of::<Self>() {
+    //         NonNull::new(self as *mut ())
+    //     } else {
+    //         None
+    //     }
+    // }
 }
 
 pub trait MutObj<R: Realm>: Debug + AsAny + 'static {

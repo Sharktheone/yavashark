@@ -13,6 +13,7 @@ mod map;
 mod set;
 mod date;
 mod reflect;
+mod temporal;
 
 pub use arraybuffer::*;
 pub use bigint::*;
@@ -29,3 +30,4 @@ pub use map::*;
 pub use set::*;
 pub use date::*;
 pub use reflect::*;
+pub use temporal::*;
