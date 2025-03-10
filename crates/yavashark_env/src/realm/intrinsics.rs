@@ -263,6 +263,7 @@ impl Intrinsics {
             set,
             date,
             reflect,
+            temporal,
         })
     }
 }
