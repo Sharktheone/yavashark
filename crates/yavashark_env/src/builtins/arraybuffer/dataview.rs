@@ -3,7 +3,7 @@ mod from_bytes;
 use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
@@ -23,7 +23,7 @@ impl DataView {
         buffer: Value,
         byte_offset: Option<usize>,
         byte_length: Option<usize>,
-    ) -> Result<Self> {
+    ) -> Res<Self> {
         let buf = <&ArrayBuffer>::from_value_out(buffer.copy())?;
         let buf_len = buf.inner.borrow().buffer.len();
         let byte_offset = byte_offset.unwrap_or(0);
@@ -54,7 +54,7 @@ impl DataView {
         })
     }
 
-    pub fn get_buffer(&self) -> Result<OwningGcGuard<BoxedObj<Realm>, ArrayBuffer>> {
+    pub fn get_buffer(&self) -> Res<OwningGcGuard<BoxedObj<Realm>, ArrayBuffer>> {
         let inner = self.inner.borrow();
 
         let buf = inner.buffer.value.clone();
@@ -62,7 +62,7 @@ impl DataView {
         <&ArrayBuffer>::from_value_out(buf)
     }
 
-    pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Result<T> {
+    pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Res<T> {
         let buffer = self.get_buffer()?;
 
         let buffer = buffer.inner.borrow();
@@ -290,7 +290,7 @@ pub struct DataViewConstructor {}
 
 impl DataViewConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableDataViewConstructor {
                 object: MutObject::with_proto(func.copy()),

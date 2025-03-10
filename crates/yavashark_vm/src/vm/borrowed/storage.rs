@@ -5,7 +5,7 @@ use yavashark_env::{Res, Value};
 
 #[allow(unused)]
 impl BorrowedVM<'_> {
-    pub fn get_variable(&mut self, name: VarName) -> yavashark_env::Result<Value> {
+    pub fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
@@ -23,7 +23,7 @@ impl BorrowedVM<'_> {
             .map(std::string::String::as_str)
     }
 
-    pub fn get_register(&self, reg: Reg) -> yavashark_env::Result<Value> {
+    pub fn get_register(&self, reg: Reg) -> yavashark_env::Res<Value> {
         self.regs
             .get(reg)
             .ok_or(Error::reference("Invalid register"))
@@ -61,11 +61,11 @@ impl BorrowedVM<'_> {
         self.acc = Value::Boolean(value);
     }
 
-    pub fn get_this(&self) -> yavashark_env::Result<Value> {
+    pub fn get_this(&self) -> yavashark_env::Res<Value> {
         self.current_scope.this()
     }
 
-    pub fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Result<Value> {
+    pub fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
         let val = self
             .data
             .constants

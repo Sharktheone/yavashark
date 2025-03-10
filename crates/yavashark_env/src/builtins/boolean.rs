@@ -17,7 +17,7 @@ pub struct BooleanConstructor {}
 
 impl BooleanConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableBooleanConstructor {
                 object: MutObject::with_proto(func.copy()),

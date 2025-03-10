@@ -1,5 +1,5 @@
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Result, Value, ValueResult};
+use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
 use yavashark_value::ErrorKind;
@@ -111,12 +111,12 @@ impl ErrorObj {
         }
     }
 
-    pub fn override_to_string(&self, _: &mut Realm) -> Result<String> {
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
         let inner = self.inner.try_borrow()?;
         Ok(inner.error.to_string())
     }
 
-    pub fn override_to_string_internal(&self) -> Result<String> {
+    pub fn override_to_string_internal(&self) -> Res<String> {
         let inner = self.inner.try_borrow()?;
         Ok(inner.error.to_string())
     }

@@ -1,11 +1,11 @@
 use crate::Interpreter;
 use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, RuntimeResult, Value, Result};
+use yavashark_env::{Error, Realm, RuntimeResult, Value, Res};
 
 impl Interpreter {
     pub fn run_update(realm: &mut Realm, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {
-        fn update(value: &Value, op: UpdateOp, realm: &mut Realm) -> Result<(Value, Value)> {
+        fn update(value: &Value, op: UpdateOp, realm: &mut Realm) -> Res<(Value, Value)> {
            Ok(match op {
                 UpdateOp::PlusPlus => (
                     value.sub(&Value::Number(-1.0), realm)?,

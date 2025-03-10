@@ -17,7 +17,7 @@ pub struct NumberConstructor {}
 
 impl NumberConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableNumberConstructor {
                 object: MutObject::with_proto(func.copy()),
@@ -114,11 +114,11 @@ impl Func<Realm> for NumberConstructor {
 
 impl NumberObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
-    pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
+    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
         Self::with_number(realm, 0.0)
     }
 
-    pub fn with_number(realm: &Realm, number: impl Into<f64>) -> crate::Result<ObjectHandle> {
+    pub fn with_number(realm: &Realm, number: impl Into<f64>) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableNumberObj {
                 object: MutObject::with_proto(realm.intrinsics.number.clone().into()),

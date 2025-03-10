@@ -1,7 +1,7 @@
 use crate::class::{decl_class, decl_class_ret};
 use swc_ecma_ast::ClassDecl;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Res, Result, Value};
+use yavashark_env::{Realm, Res, Value};
 
 use crate::Interpreter;
 
@@ -12,7 +12,7 @@ impl Interpreter {
         decl_class(realm, &stmt.class, scope, name)
     }
     
-    pub fn decl_class_ret(realm: &mut Realm, stmt: &ClassDecl, scope: &mut Scope) -> Result<(String, Value)> {
+    pub fn decl_class_ret(realm: &mut Realm, stmt: &ClassDecl, scope: &mut Scope) -> Res<(String, Value)> {
         let name = stmt.ident.sym.to_string();
 
         let class = decl_class_ret(realm, &stmt.class, scope, name.clone())?;

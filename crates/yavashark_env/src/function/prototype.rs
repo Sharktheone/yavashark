@@ -7,7 +7,7 @@ use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
 use crate::{
-    Error, MutObject, NativeFunction, ObjectProperty, Res, Result, Value, ValueResult, Variable,
+    Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable,
 };
 
 #[derive(Debug)]
@@ -199,7 +199,7 @@ impl Obj<Realm> for FunctionPrototype {
         this.object.define_variable(name, value)
     }
 
-    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         let this = self.inner.try_borrow()?;
 
         if let Value::String(name) = name {
@@ -217,7 +217,7 @@ impl Obj<Realm> for FunctionPrototype {
         this.object.resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         let this = self.inner.try_borrow()?;
 
         if let Value::String(name) = name {
@@ -246,17 +246,17 @@ impl Obj<Realm> for FunctionPrototype {
         this.object.define_setter(name, value)
     }
 
-    fn get_getter(&self, name: &Value) -> Result<Option<Value>, Error> {
+    fn get_getter(&self, name: &Value) -> Res<Option<Value>, Error> {
         let this = self.inner.try_borrow()?;
         this.object.get_getter(name)
     }
 
-    fn get_setter(&self, name: &Value) -> Result<Option<Value>> {
+    fn get_setter(&self, name: &Value) -> Res<Option<Value>> {
         let this = self.inner.try_borrow()?;
         this.object.get_setter(name)
     }
 
-    fn delete_property(&self, name: &Value) -> Result<Option<Value>> {
+    fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
         let mut this = self.inner.try_borrow_mut()?;
 
         if let Value::String(name) = name {
@@ -298,7 +298,7 @@ impl Obj<Realm> for FunctionPrototype {
         this.object.delete_property(name)
     }
 
-    fn contains_key(&self, name: &Value) -> Result<bool> {
+    fn contains_key(&self, name: &Value) -> Res<bool> {
         if let Value::String(name) = name {
             match name.as_str() {
                 "apply" | "bind" | "call" | "constructor" | "length" | "name" => return Ok(true),
@@ -315,15 +315,15 @@ impl Obj<Realm> for FunctionPrototype {
         "FunctionPrototype".to_string()
     }
 
-    fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
+    fn to_string(&self, _realm: &mut Realm) -> Res<String, Error> {
         Ok("function () { [Native code] } ".to_string())
     }
 
-    fn to_string_internal(&self) -> Result<String> {
+    fn to_string_internal(&self) -> Res<String> {
         Ok("function () { [Native code <Function Prototype>] } ".to_string())
     }
 
-    fn properties(&self) -> Result<Vec<(Value, Value)>> {
+    fn properties(&self) -> Res<Vec<(Value, Value)>> {
         let this = self.inner.try_borrow()?;
 
         let mut props = this.object.properties()?;
@@ -343,7 +343,7 @@ impl Obj<Realm> for FunctionPrototype {
         Ok(props)
     }
 
-    fn keys(&self) -> Result<Vec<Value>> {
+    fn keys(&self) -> Res<Vec<Value>> {
         let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
@@ -357,7 +357,7 @@ impl Obj<Realm> for FunctionPrototype {
         Ok(keys)
     }
 
-    fn values(&self) -> Result<Vec<Value>> {
+    fn values(&self) -> Res<Vec<Value>> {
         let this = self.inner.try_borrow()?;
 
         let mut values = this.object.values()?;
@@ -371,7 +371,7 @@ impl Obj<Realm> for FunctionPrototype {
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>)> {
+    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
         let this = self.inner.try_borrow()?;
 
         this.object.get_array_or_done(index)
@@ -391,7 +391,7 @@ impl Obj<Realm> for FunctionPrototype {
         Ok(())
     }
 
-    fn prototype(&self) -> Result<ObjectProperty> {
+    fn prototype(&self) -> Res<ObjectProperty> {
         let this = self.inner.try_borrow()?;
 
         this.object.prototype()

@@ -8,7 +8,7 @@ use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
 use yavashark_env::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, Res, Result, RuntimeResult, Value,
+    ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value,
     ValueResult, Variable,
 };
 use yavashark_garbage::{Collectable, GcRef};
@@ -151,7 +151,7 @@ impl Constructor<Realm> for JSFunction {
         Ok(this)
     }
 
-    fn construct_proto(&self) -> Result<ObjectProperty<Realm>> {
+    fn construct_proto(&self) -> Res<ObjectProperty<Realm>> {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner.prototype.clone())

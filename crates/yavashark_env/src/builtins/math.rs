@@ -1,4 +1,4 @@
-use crate::{MutObject, ObjectHandle, Realm, Result, Value};
+use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
@@ -10,7 +10,7 @@ pub struct Math {}
 
 impl Math {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Result<ObjectHandle> {
+    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMath {
                 object: MutObject::with_proto(proto.into()),
@@ -130,12 +130,12 @@ impl Math {
         value.log2()
     }
 
-    fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Result<f64> {
+    fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
         args.iter()
             .try_fold(f64::NEG_INFINITY, |acc, v| Ok(acc.max(v.to_number(realm)?)))
     }
 
-    fn min(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Result<f64> {
+    fn min(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
         args.iter()
             .try_fold(f64::INFINITY, |acc, v| Ok(acc.min(v.to_number(realm)?)))
     }
@@ -169,7 +169,7 @@ impl Math {
     }
     
     #[prop("sumPrecise")]
-    fn sum_precise(iter: &Value, #[realm] realm: &mut Realm) -> Result<f64> {
+    fn sum_precise(iter: &Value, #[realm] realm: &mut Realm) -> Res<f64> {
         let mut sum = 0.0;
         
         let iter = ValueIterator::new(iter, realm)?;

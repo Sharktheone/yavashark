@@ -8,7 +8,7 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
 
 use crate::realm::Realm;
-use crate::{Error, Object, ObjectHandle, Res, Result, Value, Variable};
+use crate::{Error, Object, ObjectHandle, Res, Value, Variable};
 
 pub struct MutValue {
     pub name: String,
@@ -289,7 +289,7 @@ impl ScopeInternal {
         }
     }
 
-    pub fn with_parent(parent: Gc<RefCell<Self>>) -> Result<Self> {
+    pub fn with_parent(parent: Gc<RefCell<Self>>) -> Res<Self> {
         let mut variables = HashMap::with_capacity(8);
 
         variables.insert(
@@ -335,7 +335,7 @@ impl ScopeInternal {
         })
     }
 
-    pub fn with_parent_this(parent: Gc<RefCell<Self>>, this: Value) -> Result<Self> {
+    pub fn with_parent_this(parent: Gc<RefCell<Self>>, this: Value) -> Res<Self> {
         let mut new = Self::with_parent(parent)?;
 
         new.this = this;
@@ -377,7 +377,7 @@ impl ScopeInternal {
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str) -> Result<Option<Value>> {
+    pub fn resolve(&self, name: &str) -> Res<Option<Value>> {
         if let Some(v) = self.variables.get(name) {
             return Ok(Some(v.copy()));
         }
@@ -388,7 +388,7 @@ impl ScopeInternal {
         }
     }
 
-    pub fn has_value(&self, name: &str) -> Result<bool> {
+    pub fn has_value(&self, name: &str) -> Res<bool> {
         if self.variables.contains_key(name) {
             Ok(true)
         } else {
@@ -479,7 +479,7 @@ impl ScopeInternal {
         self.state.is_opt_chain()
     }
 
-    pub fn update(&mut self, name: &str, value: Value) -> Result<bool> {
+    pub fn update(&mut self, name: &str, value: Value) -> Res<bool> {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name = name.into();
@@ -551,7 +551,7 @@ impl ScopeInternal {
         self.file = Some(file);
     }
 
-    pub fn get_current_file(&self) -> Result<PathBuf> {
+    pub fn get_current_file(&self) -> Res<PathBuf> {
         if let Some(f) = self.file.clone() {
             return Ok(f);
         }
@@ -566,7 +566,7 @@ impl ScopeInternal {
         self.file = self.get_current_file().ok();
     }
 
-    pub fn get_variables(&self) -> Result<HashMap<String, Variable>> {
+    pub fn get_variables(&self) -> Res<HashMap<String, Variable>> {
         let mut variables: HashMap<String, Variable> = match &self.parent {
             Some(p) => p.borrow()?.get_variables()?,
             None => HashMap::new(),
@@ -590,7 +590,7 @@ impl ScopeInternal {
         Ok(variables)
     }
 
-    pub fn get_variable_names(&self) -> Result<HashSet<String>> {
+    pub fn get_variable_names(&self) -> Res<HashSet<String>> {
         let mut variables = match &self.parent {
             Some(p) => p.borrow()?.get_variable_names()?,
             None => HashSet::new(),
@@ -617,7 +617,7 @@ impl Scope {
         }
     }
 
-    pub fn with_parent(parent: &Self) -> Result<Self> {
+    pub fn with_parent(parent: &Self) -> Res<Self> {
         Ok(Self {
             scope: Gc::new(RefCell::new(ScopeInternal::with_parent(Gc::clone(
                 &parent.scope,
@@ -625,7 +625,7 @@ impl Scope {
         })
     }
     
-    pub fn object_with_parent(parent: &Self, object: ObjectHandle) -> Result<Self> {
+    pub fn object_with_parent(parent: &Self, object: ObjectHandle) -> Res<Self> {
         let borrow = parent.scope.borrow()?;
         
         let this = borrow.this.copy();
@@ -646,7 +646,7 @@ impl Scope {
         })
     }
 
-    pub fn with_parent_this(parent: &Self, this: Value) -> Result<Self> {
+    pub fn with_parent_this(parent: &Self, this: Value) -> Res<Self> {
         Ok(Self {
             scope: Gc::new(RefCell::new(ScopeInternal::with_parent_this(
                 Gc::clone(&parent.scope),
@@ -668,11 +668,11 @@ impl Scope {
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str) -> Result<Option<Value>> {
+    pub fn resolve(&self, name: &str) -> Res<Option<Value>> {
         self.scope.borrow()?.resolve(name)
     }
 
-    pub fn has_label(&self, label: &str) -> Result<bool> {
+    pub fn has_label(&self, label: &str) -> Res<bool> {
         let Ok(scope) = self.scope.borrow() else {
             return Ok(false);
         };
@@ -692,7 +692,7 @@ impl Scope {
         Ok(())
     }
 
-    pub fn last_label(&self) -> Result<Option<String>> {
+    pub fn last_label(&self) -> Res<Option<String>> {
         Ok(self.scope.borrow_mut()?.last_label().cloned())
     }
 
@@ -735,7 +735,7 @@ impl Scope {
         Ok(())
     }
     
-    pub fn get_target(&self) -> Result<Value> {
+    pub fn get_target(&self) -> Res<Value> {
         Ok(self.scope.borrow()?.new_target.copy())
     }
 
@@ -749,39 +749,39 @@ impl Scope {
         Ok(())
     }
 
-    pub fn state_is_function(&self) -> Result<bool> {
+    pub fn state_is_function(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_function())
     }
 
-    pub fn state_is_iteration(&self) -> Result<bool> {
+    pub fn state_is_iteration(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_iteration())
     }
 
-    pub fn state_is_breakable(&self) -> Result<bool> {
+    pub fn state_is_breakable(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_breakable())
     }
 
-    pub fn state_is_returnable(&self) -> Result<bool> {
+    pub fn state_is_returnable(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_returnable())
     }
 
-    pub fn state_is_none(&self) -> Result<bool> {
+    pub fn state_is_none(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_none())
     }
 
-    pub fn state_is_continuable(&self) -> Result<bool> {
+    pub fn state_is_continuable(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_continuable())
     }
 
-    pub fn state_is_opt_chain(&self) -> Result<bool> {
+    pub fn state_is_opt_chain(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_opt_chain())
     }
 
-    pub fn has_value(&self, name: &str) -> Result<bool> {
+    pub fn has_value(&self, name: &str) -> Res<bool> {
         self.scope.borrow()?.has_value(name)
     }
 
-    pub fn update(&mut self, name: &str, value: Value) -> Result<bool> {
+    pub fn update(&mut self, name: &str, value: Value) -> Res<bool> {
         self.scope.borrow_mut()?.update(name, value)
     }
 
@@ -789,18 +789,18 @@ impl Scope {
         self.scope.borrow_mut()?.update_or_define(name, value)
     }
 
-    pub fn child(&self) -> Result<Self> {
+    pub fn child(&self) -> Res<Self> {
         Self::with_parent(self)
     }
-    pub fn child_object(&self, object: ObjectHandle) -> Result<Self> {
+    pub fn child_object(&self, object: ObjectHandle) -> Res<Self> {
         Self::object_with_parent(self, object)
     }
 
-    pub fn this(&self) -> Result<Value> {
+    pub fn this(&self) -> Res<Value> {
         Ok(self.scope.borrow()?.this.copy())
     }
 
-    pub fn parent(&self) -> Result<Option<Gc<RefCell<ScopeInternal>>>> {
+    pub fn parent(&self) -> Res<Option<Gc<RefCell<ScopeInternal>>>> {
         Ok(self.scope.borrow()?.parent.clone())
     }
 
@@ -810,7 +810,7 @@ impl Scope {
         Ok(())
     }
 
-    pub fn get_current_path(&self) -> Result<PathBuf> {
+    pub fn get_current_path(&self) -> Res<PathBuf> {
         self.scope.borrow()?.get_current_file()
     }
 
@@ -820,11 +820,11 @@ impl Scope {
         Ok(())
     }
 
-    pub fn get_variables(&self) -> Result<HashMap<String, Variable>> {
+    pub fn get_variables(&self) -> Res<HashMap<String, Variable>> {
         self.scope.borrow()?.get_variables()
     }
 
-    pub fn get_variable_names(&self) -> Result<HashSet<String>> {
+    pub fn get_variable_names(&self) -> Res<HashSet<String>> {
         self.scope.borrow()?.get_variable_names()
     }
     

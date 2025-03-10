@@ -1,7 +1,7 @@
 use crate::array::Array;
 use crate::scope::Scope;
 use crate::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Result,
+    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res,
     RuntimeResult, Value, ValueResult,
 };
 use std::any::Any;
@@ -48,7 +48,7 @@ impl OptimFunction {
         block: Option<RefCell<Box<dyn FunctionCode>>>,
         scope: Scope,
         realm: &mut Realm,
-    ) -> Result<ObjectHandle> {
+    ) -> Res<ObjectHandle> {
         let prototype = Object::new(realm);
 
         scope.copy_path()?;
@@ -144,7 +144,7 @@ impl Constructor<Realm> for OptimFunction {
         Ok(this)
     }
 
-    fn construct_proto(&self) -> Result<ObjectProperty> {
+    fn construct_proto(&self) -> Res<ObjectProperty> {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner.prototype.clone())

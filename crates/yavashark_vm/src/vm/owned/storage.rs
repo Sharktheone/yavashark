@@ -1,11 +1,11 @@
 use crate::vm::owned::OwnedVM;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
-use yavashark_env::{Res, Result, Value};
+use yavashark_env::{Res, Value};
 
 #[allow(unused)]
 impl OwnedVM {
-    pub fn get_variable(&mut self, name: VarName) -> Result<Value> {
+    pub fn get_variable(&mut self, name: VarName) -> Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
@@ -23,7 +23,7 @@ impl OwnedVM {
             .map(std::string::String::as_str)
     }
 
-    pub fn get_register(&self, reg: Reg) -> Result<Value> {
+    pub fn get_register(&self, reg: Reg) -> Res<Value> {
         self.regs
             .get(reg)
             .ok_or(Error::reference("Invalid register"))
@@ -61,11 +61,11 @@ impl OwnedVM {
         self.acc = Value::Boolean(value);
     }
 
-    pub fn get_this(&self) -> Result<Value> {
+    pub fn get_this(&self) -> Res<Value> {
         self.current_scope.this()
     }
 
-    pub fn get_constant(&self, const_idx: ConstIdx) -> Result<Value> {
+    pub fn get_constant(&self, const_idx: ConstIdx) -> Res<Value> {
         let val = self
             .data
             .constants

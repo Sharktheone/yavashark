@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use swc_ecma_ast::Program;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Res, Result};
+use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_interpreter::Interpreter;
 
@@ -38,7 +38,7 @@ pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
     Ok(())
 }
 
-pub fn setup_global(file: PathBuf, raw: bool) -> Result<(Realm, Scope)> {
+pub fn setup_global(file: PathBuf, raw: bool) -> Res<(Realm, Scope)> {
     let mut r = Realm::new()?;
     let mut s = Scope::global(&r, file);
 

@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::Decl;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, Res, Result, Value};
+use yavashark_env::{Error, Realm, Res, Value};
 use crate::statement::decl::var::Variable;
 
 pub mod class;
@@ -26,7 +26,7 @@ impl Interpreter {
         }
     }
 
-    pub fn run_decl_ret(realm: &mut Realm, stmt: &Decl, scope: &mut Scope) -> Result<DeclRet> {
+    pub fn run_decl_ret(realm: &mut Realm, stmt: &Decl, scope: &mut Scope) -> Res<DeclRet> {
         let (name, value) = match stmt {
             Decl::Class(c) => Self::decl_class_ret(realm, c, scope)?,
             Decl::Fn(f) => Self::decl_fn_ret(realm, f, scope)?,

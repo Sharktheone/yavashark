@@ -1,16 +1,16 @@
 use std::cell::Cell;
-use crate::{Realm, Result, Symbol, Value};
+use crate::{Realm, Res, Symbol, Value};
 
 pub struct ValueIterator(Value);
 
 impl ValueIterator {
-    pub fn new(val: &Value, realm: &mut Realm) -> Result<Self> {
+    pub fn new(val: &Value, realm: &mut Realm) -> Res<Self> {
         let iter = val.call_method(&Symbol::ITERATOR.into(), realm, Vec::new())?;
 
         Ok(Self(iter))
     }
 
-    pub fn next(&self, realm: &mut Realm) -> Result<Option<Value>> {
+    pub fn next(&self, realm: &mut Realm) -> Res<Option<Value>> {
         let res = self.0.call_method(&"next".into(), realm, Vec::new())?;
         let this = res.clone();
 
@@ -39,7 +39,7 @@ pub struct ArrayLike {
 }
 
 impl ArrayLike {
-    pub fn new(val: Value, realm: &mut Realm) -> Result<Self> {
+    pub fn new(val: Value, realm: &mut Realm) -> Res<Self> {
         let len = val.get_property(&"length".into(), realm)?.to_number(realm)?;
 
         Ok(Self {
@@ -49,7 +49,7 @@ impl ArrayLike {
         })
     }
     
-    pub fn next(&self, realm: &mut Realm) -> Result<Option<Value>> {
+    pub fn next(&self, realm: &mut Realm) -> Res<Option<Value>> {
         let idx = self.idx();
         let len = self.len();
         
@@ -76,7 +76,7 @@ impl ArrayLike {
         self.idx.get()
     }
     
-    pub fn to_vec(&self, realm: &mut Realm) -> Result<Vec<Value>> {
+    pub fn to_vec(&self, realm: &mut Realm) -> Res<Vec<Value>> {
         let mut res = Vec::with_capacity(self.len());
         let idx = self.idx();
         self.idx.set(0);

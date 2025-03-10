@@ -6,7 +6,7 @@ use yavashark_macro::object;
 use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Result, Value, ValueResult, Variable};
+use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
 
 pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> ValueResult>;
 
@@ -34,7 +34,7 @@ impl Constructor<Realm> for NativeConstructor {
         (self.f)(args, realm)
     }
 
-    fn construct_proto(&self) -> Result<ObjectProperty> {
+    fn construct_proto(&self) -> Res<ObjectProperty> {
         Ok(self.proto.clone().into())
     }
 }

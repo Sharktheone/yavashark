@@ -107,15 +107,14 @@ impl ControlFlow {
     }
 }
 
-pub type ValueResult = std::result::Result<Value, Error>;
+pub type ValueResult = Result<Value, Error>;
 
-pub type Result<T, E = Error> = std::result::Result<T, E>;
 
-pub type Res<T = ()> = Result<T>;
+pub type Res<T = (), E = Error> = Result<T, E>;
 
-pub type RuntimeResult = std::result::Result<Value, ControlFlow>;
+pub type RuntimeResult = Result<Value, ControlFlow>;
 
-pub type ControlResult = std::result::Result<(), ControlFlow>;
+pub type ControlResult = Result<(), ControlFlow>;
 
 impl From<Error> for ControlFlow {
     fn from(e: Error) -> Self {

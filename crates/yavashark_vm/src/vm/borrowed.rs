@@ -29,7 +29,7 @@ impl<'a> BorrowedVM<'a> {
         data: &'a DataSection,
         realm: &'a mut Realm,
         file: PathBuf,
-    ) -> yavashark_env::Result<Self> {
+    ) -> yavashark_env::Res<Self> {
         Ok(Self {
             regs: Registers::new(),
             stack: Stack::new(),
@@ -118,7 +118,7 @@ impl VM for BorrowedVM<'_> {
         self.set_acc(value);
     }
 
-    fn get_variable(&mut self, name: VarName) -> yavashark_env::Result<Value> {
+    fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
         self.get_variable(name)
     }
 
@@ -126,7 +126,7 @@ impl VM for BorrowedVM<'_> {
         self.var_name(name)
     }
 
-    fn get_register(&self, reg: Reg) -> yavashark_env::Result<Value> {
+    fn get_register(&self, reg: Reg) -> yavashark_env::Res<Value> {
         self.get_register(reg)
     }
 
@@ -150,11 +150,11 @@ impl VM for BorrowedVM<'_> {
         self.set_accb(value);
     }
 
-    fn get_this(&self) -> yavashark_env::Result<Value> {
+    fn get_this(&self) -> yavashark_env::Res<Value> {
         self.get_this()
     }
 
-    fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Result<Value> {
+    fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
         self.get_constant(const_idx)
     }
 

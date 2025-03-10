@@ -2,7 +2,7 @@ use crate::Interpreter;
 use std::path::Path;
 use swc_ecma_ast::{ImportDecl, ImportSpecifier, ModuleExportName, ObjectLit};
 use yavashark_env::scope::{Module, Scope};
-use yavashark_env::{ControlFlow, Error, Realm, Result, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Error, Realm, Res, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_import(realm: &mut Realm, stmt: &ImportDecl, scope: &mut Scope) -> RuntimeResult {
@@ -47,7 +47,7 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 
-    pub fn resolve_module<'a>(src: &str, with: Option<&ObjectLit>, path: &Path, realm: &'a mut Realm) -> Result<&'a Module> {
+    pub fn resolve_module<'a>(src: &str, with: Option<&ObjectLit>, path: &Path, realm: &'a mut Realm) -> Res<&'a Module> {
         //TODO: handle `with`
         realm.get_module(src, path, |source, path, realm| {
             Self::run_module_source(&source, path, realm)

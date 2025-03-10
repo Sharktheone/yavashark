@@ -1,7 +1,7 @@
 mod status;
 
 use crate::experiments::http::status::status_code_to_reason;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Result};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use std::fmt::Write;
 use std::io::{BufRead, BufReader, Read, Write as _};
@@ -15,7 +15,7 @@ pub struct Http {}
 
 impl Http {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
+    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableHttp {
                 object: MutObject::new(realm),
@@ -30,7 +30,7 @@ impl Http {
 
 #[properties_new(raw)]
 impl Http {
-    fn get(_url: String) -> crate::Result<String> {
+    fn get(_url: String) -> crate::Res<String> {
         Ok(String::new()) //TODO
     }
 
@@ -39,7 +39,7 @@ impl Http {
         port: u16,
         callback: ObjectHandle,
         #[realm] realm: &mut Realm,
-    ) -> crate::Result<()> {
+    ) -> crate::Res<()> {
         let mut server = SimpleHttpServer::new(ip, port, move |realm, request, response| {
             let Ok(obj) = request.into_object(realm) else {
                 return;
@@ -85,7 +85,7 @@ struct HttpResponseWriter {
 }
 
 impl HttpResponseWriter {
-    fn new(stream: std::net::TcpStream, realm: &Realm) -> Result<Self> {
+    fn new(stream: std::net::TcpStream, realm: &Realm) -> Res<Self> {
         let mut this = Self {
             inner: RefCell::new(MutableHttpResponseWriter {
                 object: MutObject::new(realm),
@@ -152,7 +152,7 @@ impl HttpResponseWriter {
 }
 
 impl HttpRequest {
-    fn into_object(self, realm: &Realm) -> crate::Result<ObjectHandle> {
+    fn into_object(self, realm: &Realm) -> crate::Res<ObjectHandle> {
         let obj = Object::new(realm);
         obj.define_property("method".into(), self.method.into_value())?;
         obj.define_property("url".into(), self.url.into_value())?;

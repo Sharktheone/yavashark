@@ -1,5 +1,5 @@
 use crate::array::Array;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Result, Value};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
@@ -11,7 +11,7 @@ pub struct JSON {}
 
 impl JSON {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Result<ObjectHandle> {
+    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableJSON {
                 object: MutObject::with_proto(proto.into()),
@@ -23,7 +23,7 @@ impl JSON {
         Ok(this.into_object())
     }
 
-    fn value_from_serde(value: serde_json::Value, realm: &Realm) -> Result<Value> {
+    fn value_from_serde(value: serde_json::Value, realm: &Realm) -> Res<Value> {
         Ok(match value {
             serde_json::Value::Null => Value::Null,
             serde_json::Value::Bool(b) => Value::Boolean(b),
@@ -33,7 +33,7 @@ impl JSON {
                 let values = a
                     .into_iter()
                     .map(|v| Self::value_from_serde(v, realm))
-                    .collect::<Result<Vec<_>>>()?;
+                    .collect::<Res<Vec<_>>>()?;
 
                 Array::with_elements(realm, values)?.into_value()
             }
@@ -51,7 +51,7 @@ impl JSON {
         })
     }
 
-    fn value_to_serde(value: Value, realm: &mut Realm) -> Result<Option<serde_json::Value>> {
+    fn value_to_serde(value: Value, realm: &mut Realm) -> Res<Option<serde_json::Value>> {
         //TODO: handle circular items
         Ok(Some(match value {
             Value::Null => serde_json::Value::Null,
@@ -115,7 +115,7 @@ impl JSON {
 
 #[properties_new(raw)]
 impl JSON {
-    fn parse(str: &str, #[realm] realm: &Realm) -> Result<Value> {
+    fn parse(str: &str, #[realm] realm: &Realm) -> Res<Value> {
         let value: serde_json::Value = match serde_json::from_str(str) {
             Ok(value) => value,
             Err(error) => return Err(Error::syn_error(error.to_string())),
@@ -124,7 +124,7 @@ impl JSON {
         Self::value_from_serde(value, realm)
     }
 
-    fn stringify(value: Value, #[realm] realm: &mut Realm) -> Result<Value> {
+    fn stringify(value: Value, #[realm] realm: &mut Realm) -> Res<Value> {
         let value = Self::value_to_serde(value, realm)?;
 
         value.map_or_else(

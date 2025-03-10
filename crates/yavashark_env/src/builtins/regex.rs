@@ -1,5 +1,5 @@
 use crate::array::Array;
-use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult};
+use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use regex::{Regex, RegexBuilder};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
@@ -28,7 +28,7 @@ impl RegExp {
         .into_object()
     }
 
-    pub fn new_from_str(realm: &Realm, regex: &str) -> Result<ObjectHandle> {
+    pub fn new_from_str(realm: &Realm, regex: &str) -> Res<ObjectHandle> {
         let regex = Regex::new(regex).map_err(|e| ControlFlow::error(e.to_string()))?;
 
         Ok(Self::new(realm, regex, false))
@@ -38,7 +38,7 @@ impl RegExp {
         realm: &Realm,
         regex: &str,
         flags: &str,
-    ) -> Result<ObjectHandle> {
+    ) -> Res<ObjectHandle> {
         let regex = RegexBuilder::new(regex)
             .case_insensitive(flags.contains('i'))
             .multi_line(flags.contains('m'))
@@ -67,7 +67,7 @@ impl RegExpConstructor {
 
 impl RegExpConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableRegExpConstructor {
                 object: MutObject::with_proto(func.copy()),

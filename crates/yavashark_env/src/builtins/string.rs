@@ -1,5 +1,5 @@
 use crate::array::Array;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Result, ObjectProperty};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Res, ObjectProperty};
 use std::cell::{RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
@@ -48,7 +48,7 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
         self.inner.borrow_mut()
     }
 
-    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         if let Value::Number(n) = name {
             let index = *n as isize;
 
@@ -59,7 +59,7 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
         self.get_wrapped_object().resolve_property(name)
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>> {
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         if let Value::Number(n) = name {
             let index = *n as isize;
             
@@ -86,7 +86,7 @@ pub struct StringConstructor {}
 
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableStringConstructor {
                 object: MutObject::with_proto(func.copy()),
@@ -146,11 +146,11 @@ impl Func<Realm> for StringConstructor {
 
 impl StringObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
-    pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
+    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
         Self::with_string(realm, String::new())
     }
 
-    pub fn with_string(realm: &Realm, string: String) -> crate::Result<ObjectHandle> {
+    pub fn with_string(realm: &Realm, string: String) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableStringObj {
                 object: MutObject::with_proto(realm.intrinsics.string.clone().into()),

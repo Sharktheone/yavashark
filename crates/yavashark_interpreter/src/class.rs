@@ -3,7 +3,7 @@ use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, Pro
 
 use crate::function::{JSFunction, RawJSFunction};
 use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Result, Value,
+    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value,
     ValueResult,
 };
 use yavashark_value::Obj;
@@ -15,7 +15,7 @@ pub fn create_class(
     stmt: &Class,
     scope: &mut Scope,
     name: String,
-) -> Result<(JSClass, Vec<BlockStmt>)> {
+) -> Res<(JSClass, Vec<BlockStmt>)> {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
         let p = super_class.get_property(&"prototype".into(), realm)?;
@@ -152,7 +152,7 @@ fn create_method(
     scope: &mut Scope,
     realm: &mut Realm,
     span: Span,
-) -> Result<(Value, Value), Error> {
+) -> Res<(Value, Value), Error> {
     let name = prop_name_to_value(name, realm, span, scope)?;
 
     let func = JSFunction::new(name.to_string(realm)?, params, body, scope.clone(), realm);

@@ -9,7 +9,7 @@ pub struct Tcp {}
 
 impl Tcp {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &Realm) -> crate::Result<ObjectHandle> {
+    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableTcp {
                 object: MutObject::new(realm),

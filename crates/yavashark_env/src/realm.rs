@@ -7,7 +7,7 @@ use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
-use crate::{NativeFunction, Object, ObjectHandle, Res, Result, Value, ValueResult, Variable};
+use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::fmt::Debug;
 use std::path::PathBuf;
 use yavashark_value::Realm as RealmT;
@@ -20,7 +20,7 @@ pub struct Realm {
 }
 
 impl Realm {
-    pub fn new() -> Result<Self> {
+    pub fn new() -> Res<Self> {
         let intrinsics = Intrinsics::new()?;
 
         let global = Object::with_proto(intrinsics.obj.clone().into());

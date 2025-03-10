@@ -1,10 +1,10 @@
 use crate::error::ErrorObj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Result, Value};
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Value};
 use yavashark_value::Obj;
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-        pub fn $get(error: Value, func: Value) -> Result<ObjectHandle> {
+        pub fn $get(error: Value, func: Value) -> Res<ObjectHandle> {
             let proto = Object::with_proto(error);
 
             proto.define_property("name".into(), stringify!($name).into())?;

@@ -3,7 +3,7 @@ mod export;
 
 use std::path::{Path, PathBuf};
 use swc_ecma_ast::{ExportAll, ExportDecl, ExportDefaultDecl, ExportDefaultExpr, ImportDecl, ModuleDecl, ModuleItem, NamedExport};
-use yavashark_env::{Error, Realm, RuntimeResult, Value, Result};
+use yavashark_env::{Error, Realm, RuntimeResult, Value, Res};
 use yavashark_env::scope::{Module, ModuleScope, Scope};
 use crate::Interpreter;
 
@@ -58,7 +58,7 @@ impl Interpreter {
         }
     }
     
-    pub fn run_module_source(source: &str, path: PathBuf,  realm: &mut Realm) -> Result<Module> {
+    pub fn run_module_source(source: &str, path: PathBuf,  realm: &mut Realm) -> Res<Module> {
         let module = crate::parse::parse_module(source)
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
         

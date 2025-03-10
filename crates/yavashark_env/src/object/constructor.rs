@@ -1,7 +1,7 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
-use crate::{MutObject, Object, ObjectHandle, Realm, Result, Value, ValueResult, Variable};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
@@ -39,7 +39,7 @@ impl Func<Realm> for ObjectConstructor {
 
 impl ObjectConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: Value, func: Value) -> Result<ObjectHandle> {
+    pub fn new(proto: Value, func: Value) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableObjectConstructor {
                 object: MutObject::with_proto(proto),

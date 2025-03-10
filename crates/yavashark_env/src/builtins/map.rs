@@ -47,7 +47,7 @@ impl Constructor<Realm> for MapConstructor {
 
 impl MapConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMapConstructor {
                 object: MutObject::with_proto(func.copy()),

@@ -1,5 +1,5 @@
 use crate::scope::Module;
-use crate::{Error, Realm, Result};
+use crate::{Error, Realm, Res};
 use std::path::{Path, PathBuf};
 
 impl Realm {
@@ -7,8 +7,8 @@ impl Realm {
         &mut self,
         spec: &str,
         cur_path: &Path,
-        mut cb: impl FnMut(String, PathBuf, &mut Self) -> Result<Module>,
-    ) -> Result<&Module> {
+        mut cb: impl FnMut(String, PathBuf, &mut Self) -> Res<Module>,
+    ) -> Res<&Module> {
         let path = resolve_path(spec, cur_path)?;
         
         if path == cur_path {
@@ -31,7 +31,7 @@ impl Realm {
     }
 }
 
-pub fn resolve_path(spec: &str, path: &Path) -> Result<PathBuf> {
+pub fn resolve_path(spec: &str, path: &Path) -> Res<PathBuf> {
     Ok(if path.is_dir() {
         path.join(spec) //TODO: handle http/https, data urls, etc.
     } else {

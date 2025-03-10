@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::{Object, ObjectHandle, Realm, Value, ValueResult, Result, MutObject, Error};
+use crate::{Object, ObjectHandle, Realm, Value, ValueResult, Res, MutObject, Error};
 use crate::array::Array;
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
@@ -13,7 +13,7 @@ pub struct Reflect {}
 
 impl Reflect {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: Value, func_proto: Value) -> Result<ObjectHandle> {
+    pub fn new(proto: Value, func_proto: Value) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableReflect {
                 object: MutObject::with_proto(proto),
@@ -90,7 +90,7 @@ impl Reflect {
         target.prototype()?.resolve(target.into(), realm)
     }
     
-    pub fn has(target: &ObjectHandle, prop: &Value) -> Result<bool> {
+    pub fn has(target: &ObjectHandle, prop: &Value) -> Res<bool> {
         target.contains_key(prop)
     }
     

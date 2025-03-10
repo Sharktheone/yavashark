@@ -7,7 +7,7 @@ use yavashark_value::{BoxedObj, Constructor, Func, Obj};
 use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::ValueIterator;
-use crate::{Error, ObjectHandle, Res, Result, Value, ValueResult, Variable};
+use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 
 #[object(direct(length), to_string)]
@@ -15,7 +15,7 @@ use crate::{MutObject, ObjectProperty};
 pub struct Array {}
 
 impl Array {
-    pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Result<Self> {
+    pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -28,7 +28,7 @@ impl Array {
         Ok(array)
     }
 
-    pub fn with_len(realm: &Realm, len: usize) -> Result<Self> {
+    pub fn with_len(realm: &Realm, len: usize) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -40,7 +40,7 @@ impl Array {
         Ok(array)
     }
 
-    pub fn from_array_like(realm: &Realm, array_like: Value) -> Result<Self> {
+    pub fn from_array_like(realm: &Realm, array_like: Value) -> Res<Self> {
         let Value::Object(array_like) = array_like else {
             return Err(Error::ty_error(format!(
                 "Expected object, found {array_like:?}"
@@ -83,7 +83,7 @@ impl Array {
         Self::new(realm.intrinsics.array.clone().into())
     }
 
-    pub fn override_to_string(&self, realm: &mut Realm) -> Result<String> {
+    pub fn override_to_string(&self, realm: &mut Realm) -> Res<String> {
         let mut buf = String::new();
 
         let inner = self.inner.try_borrow()?;
@@ -99,7 +99,7 @@ impl Array {
         Ok(buf)
     }
 
-    pub fn override_to_string_internal(&self) -> Result<String> {
+    pub fn override_to_string_internal(&self) -> Res<String> {
         use std::fmt::Write as _;
 
         let mut buf = String::new();
@@ -132,7 +132,7 @@ impl Array {
         Ok(())
     }
 
-    pub fn as_vec(&self) -> Result<Vec<Value>> {
+    pub fn as_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner
@@ -1145,7 +1145,7 @@ impl Func<Realm> for ArrayConstructor {
 
 impl ArrayConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, proto: &Value) -> Result<ObjectHandle> {
+    pub fn new(_: &Object, proto: &Value) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableArrayConstructor {
                 object: MutObject::with_proto(proto.copy()),
@@ -1162,7 +1162,7 @@ impl ArrayConstructor {
 impl ArrayConstructor {
     #[prop("isArray")]
     fn is_array(test: Value) -> bool {
-        let this: Result<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
+        let this: Res<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
             yavashark_value::FromValue::from_value(test);
 
         this.is_ok()

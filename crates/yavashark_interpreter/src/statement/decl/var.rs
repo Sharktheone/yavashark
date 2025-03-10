@@ -1,6 +1,6 @@
 use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, Res, Value, Result};
+use yavashark_env::{Error, Realm, Res, Value};
 
 use crate::Interpreter;
 
@@ -33,7 +33,7 @@ impl Interpreter {
         Self::decl_var_cb(realm, stmt, scope, cb)
     }
 
-    pub fn decl_var_ret(realm: &mut Realm, stmt: &VarDecl, scope: &mut Scope) -> Result<Vec<Variable>> {
+    pub fn decl_var_ret(realm: &mut Realm, stmt: &VarDecl, scope: &mut Scope) -> Res<Vec<Variable>> {
         let mut vars = Vec::with_capacity(stmt.decls.len());
 
         let cb = |scope: &mut Scope, var| {

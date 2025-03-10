@@ -1,6 +1,6 @@
 use swc_common::Span;
 use yavashark_env::scope::Scope;
-use yavashark_env::Result;
+use yavashark_env::Res;
 use yavashark_value::Location;
 
 pub fn get_location(span: Span, scope: &Scope) -> Location {

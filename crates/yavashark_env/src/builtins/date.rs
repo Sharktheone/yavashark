@@ -1,5 +1,5 @@
 use crate::conversion::FromValueOutput;
-use crate::{MutObject, Object, ObjectHandle, Realm, Result, Symbol, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike};
 use std::cell::RefCell;
 use std::ops::Rem;
@@ -468,7 +468,7 @@ impl Date {
         }
     }
 
-    pub fn js_construct(args: &[Value], realm: &mut Realm) -> Result<Self> {
+    pub fn js_construct(args: &[Value], realm: &mut Realm) -> Res<Self> {
         let date = match args.len() {
             0 => Local::now(),
             1 => {
@@ -543,7 +543,7 @@ pub struct DateConstructor {}
 
 impl DateConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableDateConstructor {
                 object: MutObject::with_proto(func.copy()),

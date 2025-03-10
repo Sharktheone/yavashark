@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, Object, ObjectProperty, Result, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectProperty, Res, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, ConstructorFn, CustomName, Func, NoOpConstructorFn, Obj};
 
@@ -16,7 +16,7 @@ pub struct Class {
 }
 
 impl Func<Realm> for Class {
-    fn call(&self, _realm: &mut Realm, _args: Vec<Value>, _this: Value) -> Result<Value, Error> {
+    fn call(&self, _realm: &mut Realm, _args: Vec<Value>, _this: Value) -> Res<Value, Error> {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))
@@ -35,7 +35,7 @@ impl Constructor<Realm> for Class {
         Ok(this)
     }
 
-    fn construct_proto(&self) -> Result<ObjectProperty> {
+    fn construct_proto(&self) -> Res<ObjectProperty> {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner.prototype.clone())
@@ -70,7 +70,7 @@ impl Class {
         self.private_props.get(key)
     }
 
-    pub fn set_proto(&mut self, proto: ObjectProperty) -> Result<(), Error> {
+    pub fn set_proto(&mut self, proto: ObjectProperty) -> Res<(), Error> {
         let mut inner = self.inner.try_borrow_mut()?;
         inner.prototype = proto;
 
@@ -141,7 +141,7 @@ impl ClassInstance {
         self.inner.get_mut().private_props.insert(key, value);
     }
 
-    pub fn get_private_prop(&self, key: &str) -> Result<Option<Value>> {
+    pub fn get_private_prop(&self, key: &str) -> Res<Option<Value>> {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner.private_props.get(key).cloned())

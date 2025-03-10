@@ -18,7 +18,7 @@ pub struct BigIntConstructor {}
 
 impl BigIntConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Result<ObjectHandle> {
+    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableBigIntConstructor {
                 object: MutObject::with_proto(func.copy()),

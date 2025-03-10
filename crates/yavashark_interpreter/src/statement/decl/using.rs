@@ -1,6 +1,6 @@
 use swc_ecma_ast::UsingDecl;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, Res, Value, Result};
+use yavashark_env::{Realm, Res, Value};
 
 use crate::Interpreter;
 
@@ -9,7 +9,7 @@ impl Interpreter {
         todo!()
     }
     
-    pub fn decl_using_ret(realm: &mut Realm, stmt: &UsingDecl, scope: &mut Scope) -> Result<(String, Value)> {
+    pub fn decl_using_ret(realm: &mut Realm, stmt: &UsingDecl, scope: &mut Scope) -> Res<(String, Value)> {
         todo!()
     }
 }

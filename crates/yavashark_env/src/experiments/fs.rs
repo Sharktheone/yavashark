@@ -1,4 +1,4 @@
-use crate::{Error, MutObject, ObjectHandle, Realm, Result};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use std::fs;
 use yavashark_macro::{object, properties_new};
@@ -10,7 +10,7 @@ pub struct Fs {}
 
 impl Fs {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &Realm) -> Result<ObjectHandle> {
+    pub fn new(realm: &Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableFs {
                 object: MutObject::new(realm),
@@ -25,7 +25,7 @@ impl Fs {
 
 #[properties_new(raw)]
 impl Fs {
-    fn open(path: &str) -> Result<String> {
+    fn open(path: &str) -> Res<String> {
         let contents = fs::read_to_string(path).map_err(|e| Error::new_error(e.to_string()))?;
 
         Ok(contents)
