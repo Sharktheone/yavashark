@@ -32,7 +32,7 @@ type Summary struct {
 	Timeout        int    `json:"timeout"`
 	ParseError     int    `json:"parse_error"`
 	Total          int    `json:"total"`
-	Timestamp      string `json:"timestamp"`
+	Timestamp      int    `json:"time"`
 	CommitHash     string `json:"commit_hash"`
 }
 
@@ -167,7 +167,7 @@ func main() {
 			Timeout:        timeout,
 			ParseError:     parse,
 			Total:          num,
-			Timestamp:      time.Now().Format(time.RFC3339),
+			Timestamp:      time.Now().Unix(),
 		}
 		commitBytes, err := exec.Command("git", "rev-parse", "HEAD").Output()
 		if err != nil {
