@@ -32,7 +32,7 @@ type Summary struct {
 	Timeout        int    `json:"timeout"`
 	ParseError     int    `json:"parse_error"`
 	Total          int    `json:"total"`
-	Timestamp      int    `json:"time"`
+	Timestamp      int64    `json:"time"`
 	CommitHash     string `json:"commit_hash"`
 }
 
