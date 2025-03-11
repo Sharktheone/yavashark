@@ -105,7 +105,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let error = &config.error;
 
     let init_fn = quote! {
-        pub fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#object_handle, #error> {
+        pub fn initialize_proto(mut obj: #object, func_proto: #value) -> ::core::result::Result<#object_handle, #error> {
             use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
             use #try_into_value;
 
@@ -122,7 +122,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 
     // Append our generated initialization function to the impl block.
     item_impl.items.push(syn::parse2(init_fn)?);
-    Ok(item_impl.to_token_stream().into())
+
+    let tokens = quote! {
+        #item_impl
+        #constructor_tokens
+    };
+
+    Ok(tokens.into())
 }
 
 fn init_props(props: Vec<Prop>, config: &Config) -> TokenStream {
@@ -156,7 +162,7 @@ fn init_props(props: Vec<Prop>, config: &Config) -> TokenStream {
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_variable(#name.into(), #variable::write_config(prop.into()))?;
+                        obj.define_variable(#name.into(), #variable::write_configig(prop.into()))?;
                     }
                 }
             }
@@ -194,13 +200,21 @@ fn init_constructor(
         return Ok((TokenStream::new(), TokenStream::new()));
     }
 
+
+    let value = &config.value;
+    let error = &config.error;
+    let mut_obj = &config.mut_object;
+    let object_handle = &config.object_handle;
+    let realm = &config.realm;
+    let try_into_value = &config.try_into_value;
+
     let name = ty_to_name(ty)?;
     let name = format_ident!("{}Constructor", name);
     let mut_name = format_ident!("Mutable{}", name);
     let args = match (constructor.is_some(), call_constructor.is_some()) {
-        (true, true) => quote! { (constructor, function) },
-        (true, false) => quote! { (constructor) },
-        (false, true) => quote! { (function) },
+        (true, true) => quote! { constructor, function },
+        (true, false) => quote! { constructor },
+        (false, true) => quote! { function },
         (false, false) => unreachable!(),
     };
 
@@ -212,74 +226,75 @@ fn init_constructor(
 
     if let Some(constructor) = constructor {
         let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
-        
-        
+
+
         constructor_tokens.extend(quote! {
-            impl yavashark_value::Constructor<Realm> for #name {
-                fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+            impl yavashark_value::Constructor<#realm> for #name {
+                fn construct(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>) -> ::core::result::Result<#value, #error> {
+                    use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                    use #try_into_value;
+                    
                     #fn_tok
                 }
             }
         });
     }
-    
+
     if let Some(call_constructor) = call_constructor {
         let fn_tok = call_constructor.init_tokes_direct(config, ty.to_token_stream());
-        
+
         constructor_tokens.extend(quote! {
-            impl yavashark_value::Func<Realm> for #name {
-                pub fn call(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+            impl yavashark_value::Func<#realm> for #name {
+                pub fn call(&self, realm: #realm, args: std::vec::Vec<#value>, this: #value) -> crate::Res<ObjectHandle> {
+                    use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                    use #try_into_value;
+                    
                     #fn_tok
                 }
             }
         });
     }
-    
-    constructor_tokens.extend(quote! {
-        impl #name {
-            #[allow(clippy::new_ret_no_self)]
-            pub fn new(func: &Value) -> crate::Res<ObjectHandle> {
-                let mut this = Self {
-                    inner: RefCell::new(#mut_name {
-                        object: MutObject::with_proto(func.copy()),
-                    }),
-                };
 
-                this.initialize(func.copy())?;
-
-                Ok(this.into_object())
-            }
-        }
-    });
 
     {
-        let value = &config.value;
-        let error = &config.error;
-        let try_into_value = &config.try_into_value;
-        
         let init = init_props(static_props, config);
-        
         constructor_tokens.extend(quote! {
-            pub fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
-                use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
-                use #try_into_value;
+            impl #name {
+                #[allow(clippy::new_ret_no_self)]
+                pub fn new(func: & #value) -> ::core::result::Result<#object_handle, #error> {
+                    use yavashark_value::Obj;
+                    let mut this = Self {
+                        inner: ::core::cell::RefCell::new(#mut_name {
+                            object: #mut_obj::with_proto(func.copy()),
+                        }),
+                    };
 
-                #init
+                    this.initialize(func.copy())?;
 
-                Ok(())
+                    Ok(this.into_object())
+                }
                 
+                pub fn initialize(&mut self, func_proto: #value) -> core::result::Result<(), #error> {
+                    use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                    use #try_into_value;
+
+                    #init
+
+                    Ok(())
+                    
+                }
             }
-        })
+        });
     }
-    
+
     let variable = &config.variable;
-    
+
     let init_tokens = quote! {
-        let constructor = #name::new(func)?;
+        let constructor = #name::new(&func_proto)?;
         
         obj.define_variable("constructor".into(), constructor.clone().into())?;
         
-        constructor.define_variable("prototype".into(), #variable::write_conf(obj.clone().into()))?;
+        constructor.define_variable("prototype".into(), #variable::write_config(obj.clone().into()))?;
         
         
     };

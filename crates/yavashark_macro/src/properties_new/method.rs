@@ -201,12 +201,20 @@ pub fn parse_method(
 
     // Process the function level attributes:
     let mut encountered_error = None;
-    for attr in func.attrs.iter() {
+    func.attrs.retain_mut(|attr| {
         if attr.path().is_ident("prop") {
-            js_name = Some(
-                attr.parse_args()
-                    .map_err(|e| syn::Error::new(e.span(), e))?,
-            );
+            let n = match attr.parse_args()
+                .map_err(|e| syn::Error::new(e.span(), e)) {
+                Ok(n) => n,
+                Err(e) => {
+                    encountered_error = Some(e);
+                    return false;
+                }
+            };
+            
+            
+            js_name = Some(n);
+            return false;
         } else if attr.path().is_ident("get") {
             if ty != Type::Normal {
                 encountered_error = Some(syn::Error::new(
@@ -214,7 +222,7 @@ pub fn parse_method(
                     "Cannot have both get and set on the same function",
                 ));
             }
-            attr.parse_args::<syn::Expr>()
+            attr.parse_args::<Expr>()
                 .map(|name| {
                     if js_name.is_some() {
                         encountered_error = Some(syn::Error::new(
@@ -227,6 +235,8 @@ pub fn parse_method(
                 .map_err(|e| encountered_error = Some(e))
                 .ok();
             ty = Type::Get;
+            
+            return false;
         } else if attr.path().is_ident("set") {
             if ty != Type::Normal {
                 encountered_error = Some(syn::Error::new(
@@ -234,7 +244,7 @@ pub fn parse_method(
                     "Cannot have both get and set on the same function",
                 ));
             }
-            attr.parse_args::<syn::Expr>()
+            attr.parse_args::<Expr>()
                 .map(|name| {
                     if js_name.is_some() {
                         encountered_error = Some(syn::Error::new(
@@ -247,24 +257,36 @@ pub fn parse_method(
                 .map_err(|e| encountered_error = Some(e))
                 .ok();
             ty = Type::Set;
+            
+            return false;
         } else if attr.path().is_ident("static") {
             maybe_static = MethodType::Static;
+            
+            return false;
         } else if attr.path().is_ident("nonstatic") {
             maybe_static = MethodType::Impl;
+            
+            return false;
         } else if attr.path().is_ident("constructor") {
             if maybe_static == MethodType::CallConstructor {
                 maybe_static = MethodType::CallAndConstructor;
             } else {
                 maybe_static = MethodType::Constructor;
             }
+            
+            return false;
         } else if attr.path().is_ident("call_constructor") {
             if maybe_static == MethodType::Constructor {
                 maybe_static = MethodType::CallAndConstructor;
             } else {
                 maybe_static = MethodType::CallConstructor;
             }
+            
+            return false;
         }
-    }
+        
+        true
+    });
 
     if let Some(err) = encountered_error {
         return Err(err);
@@ -282,7 +304,7 @@ pub fn parse_method(
         ));
     }
 
-    if this.is_some() && is_constructor {
+    if this.is_some() && matches!(maybe_static, MethodType::Constructor | MethodType::CallAndConstructor) {
         return Err(syn::Error::new(
             func.sig.ident.span(),
             "Cannot have this on constructor methods",
