@@ -305,7 +305,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn construct(&self, realm: &mut #realm, args: Vec<#value>) -> Result<#value, #error> {
                 yavashark_value::Constructor::construct(self, realm, args)
             }
-            
+
             fn is_constructor(&self) -> bool {
                 yavashark_value::Constructor::is_constructor(self)
             }
@@ -488,12 +488,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 let inner = self.inner.borrow();
                 inner.object.prototype()
             }
-            
+
             fn set_prototype(&self, proto: #object_property) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 inner.object.set_prototype(proto)
             }
-            
+
             #constructor
 
             #function

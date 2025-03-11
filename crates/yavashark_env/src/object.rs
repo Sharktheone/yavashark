@@ -1,8 +1,8 @@
+use indexmap::map::Entry;
+use indexmap::IndexMap;
+pub use prototype::*;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
-use indexmap::IndexMap;
-use indexmap::map::Entry;
-pub use prototype::*;
 use yavashark_garbage::GcRef;
 use yavashark_value::{BoxedObj, MutObj, Obj};
 
@@ -33,8 +33,8 @@ impl Object {
     pub fn new(realm: &Realm) -> ObjectHandle {
         ObjectHandle::new(Self::raw(realm))
     }
-    
-    #[must_use] 
+
+    #[must_use]
     pub fn null() -> ObjectHandle {
         Self::with_proto(Value::Null)
     }
@@ -266,7 +266,12 @@ impl MutObject {
     pub fn delete_array(&mut self, index: usize) -> Option<Value> {
         let (i, found) = self.array_position(index);
 
-        if found && self.array.get(i).is_some_and(|v| v.1.attributes.is_configurable()) {
+        if found
+            && self
+                .array
+                .get(i)
+                .is_some_and(|v| v.1.attributes.is_configurable())
+        {
             return Some(self.array.remove(i).1.value);
         }
 
@@ -314,23 +319,22 @@ impl MutObj<Realm> for MutObject {
             self.insert_array(*n as usize, value.into());
             return Ok(());
         }
-        
+
         if let Value::String(s) = &name {
             if s == "__proto__" {
                 self.prototype = value.into();
                 return Ok(());
             }
         }
-        
+
         match self.properties.entry(name) {
             Entry::Occupied(mut entry) => {
                 let e = entry.get_mut();
-                
+
                 if e.attributes.is_writable() {
                     e.value = value;
                     return Ok(());
                 }
-                
             }
             Entry::Vacant(entry) => {
                 entry.insert(value.into());
@@ -344,15 +348,14 @@ impl MutObj<Realm> for MutObject {
             self.insert_array(*n as usize, value);
             return Ok(());
         }
-        
+
         if let Value::String(s) = &name {
             if s == "__proto__" {
                 self.prototype = value.into();
                 return Ok(());
             }
         }
-        
-        
+
         match self.properties.entry(name) {
             Entry::Occupied(mut entry) => {
                 let e = entry.get();
@@ -361,7 +364,6 @@ impl MutObj<Realm> for MutObject {
                     entry.insert(value.into());
                     return Ok(());
                 }
-
             }
             Entry::Vacant(entry) => {
                 entry.insert(value.into());
@@ -442,17 +444,16 @@ impl MutObj<Realm> for MutObject {
 
     fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {
         if name == &Value::String("__proto__".to_string()) {
-            return Ok(None)
+            return Ok(None);
         }
 
         if let Value::Number(n) = name {
             return Ok(self.delete_array(*n as usize));
         }
 
-
         if let Entry::Occupied(occ) = self.properties.entry(name.clone()) {
             if occ.get().attributes.is_configurable() {
-                return Ok(Some(occ.shift_remove().value))
+                return Ok(Some(occ.shift_remove().value));
             }
         }
 

@@ -74,7 +74,7 @@ impl Test262 {
     #[prop("createRealm")]
     fn create_realm(&self, #[realm] realm: &Realm) -> ValueResult {
         let mut new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
-        
+
         new_realm.set_eval(InterpreterEval)?;
 
         let global = new_realm.global.clone();
@@ -138,7 +138,7 @@ impl Test262 {
 
         Ok(Value::Undefined)
     }
-    
+
     #[prop("IsHTMLDDA")]
     fn is_html_dda() -> ValueResult {
         Ok(Value::Boolean(false))

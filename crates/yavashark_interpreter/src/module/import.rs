@@ -8,7 +8,12 @@ impl Interpreter {
     pub fn run_import(realm: &mut Realm, stmt: &ImportDecl, scope: &mut Scope) -> RuntimeResult {
         let src = stmt.src.value.to_string();
 
-        let module = Self::resolve_module(&src, stmt.with.as_deref(), &scope.get_current_path()?, realm)?;
+        let module = Self::resolve_module(
+            &src,
+            stmt.with.as_deref(),
+            &scope.get_current_path()?,
+            realm,
+        )?;
 
         for spec in &stmt.specifiers {
             match spec {
@@ -47,7 +52,12 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 
-    pub fn resolve_module<'a>(src: &str, with: Option<&ObjectLit>, path: &Path, realm: &'a mut Realm) -> Res<&'a Module> {
+    pub fn resolve_module<'a>(
+        src: &str,
+        with: Option<&ObjectLit>,
+        path: &Path,
+        realm: &'a mut Realm,
+    ) -> Res<&'a Module> {
         //TODO: handle `with`
         realm.get_module(src, path, |source, path, realm| {
             Self::run_module_source(&source, path, realm)

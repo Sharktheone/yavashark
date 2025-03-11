@@ -11,15 +11,16 @@ impl Interpreter {
 
         decl_class(realm, &stmt.class, scope, name)
     }
-    
-    pub fn decl_class_ret(realm: &mut Realm, stmt: &ClassDecl, scope: &mut Scope) -> Res<(String, Value)> {
+
+    pub fn decl_class_ret(
+        realm: &mut Realm,
+        stmt: &ClassDecl,
+        scope: &mut Scope,
+    ) -> Res<(String, Value)> {
         let name = stmt.ident.sym.to_string();
 
         let class = decl_class_ret(realm, &stmt.class, scope, name.clone())?;
-        
-        
+
         Ok((name, class))
     }
-    
-    
 }

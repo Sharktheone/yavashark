@@ -10,7 +10,7 @@ pub trait Constructor<R: Realm>: Debug + Obj<R> {
             .resolve_property(&"prototype".into())?
             .unwrap_or(Value::Undefined.into()))
     }
-    
+
     fn is_constructor(&self) -> bool {
         true
     }

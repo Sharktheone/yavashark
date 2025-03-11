@@ -6,9 +6,7 @@ use yavashark_value::{MutObj, Obj};
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{
-    Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable,
-};
+use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {

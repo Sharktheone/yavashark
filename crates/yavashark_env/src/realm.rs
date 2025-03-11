@@ -2,12 +2,12 @@ mod env;
 mod intrinsics;
 mod resolve;
 
-use std::collections::HashMap;
 use crate::global::init_global_obj;
 use crate::realm::env::Environment;
 use crate::realm::intrinsics::Intrinsics;
 use crate::scope::Scope;
 use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Variable};
+use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use yavashark_value::Realm as RealmT;
@@ -53,11 +53,12 @@ impl Realm {
                 eval.eval(&code, realm, &mut scope)
             },
             self,
-            1
+            1,
         );
 
         self.intrinsics.eval = Some(eval_func.clone());
-        self.global.define_variable("eval".into(), Variable::write_config(eval_func.into()))
+        self.global
+            .define_variable("eval".into(), Variable::write_config(eval_func.into()))
     }
 }
 

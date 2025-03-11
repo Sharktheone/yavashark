@@ -14,7 +14,7 @@ impl Interpreter {
         for static_block in statics {
             Self::run_block_this(realm, &static_block, scope, this.copy())?;
         }
-        
+
         let proto = this.get_property(&"prototype".into(), realm)?;
 
         proto.define_property("constructor".into(), this.copy());

@@ -1,8 +1,8 @@
 use crate::array::Array;
 use crate::scope::Scope;
 use crate::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res,
-    RuntimeResult, Value, ValueResult,
+    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult,
+    Value, ValueResult,
 };
 use std::any::Any;
 use std::cell::RefCell;

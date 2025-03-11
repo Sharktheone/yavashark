@@ -1,19 +1,17 @@
+use crate::builtins::ArrayBuffer;
+use crate::conversion::FromValueOutput;
+use crate::{Error, MutObject, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{BoxedObj};
-use crate::{MutObject, Realm, Value, Res, Error};
-use crate::builtins::ArrayBuffer;
-use crate::conversion::FromValueOutput;
+use yavashark_value::BoxedObj;
 
 #[object(direct(buffer, byte_offset, byte_length))]
 #[derive(Debug)]
 pub struct TypedArray {
     #[allow(unused)]
     byte_offset: usize,
-    
 }
-
 
 impl TypedArray {
     pub fn new(
@@ -51,7 +49,7 @@ impl TypedArray {
             byte_offset,
         })
     }
-    
+
     pub fn get_buffer(&self) -> Res<OwningGcGuard<BoxedObj<Realm>, ArrayBuffer>> {
         let inner = self.inner.borrow();
 
@@ -61,8 +59,5 @@ impl TypedArray {
     }
 }
 
-
 #[properties_new]
-impl TypedArray {
-    
-}
+impl TypedArray {}

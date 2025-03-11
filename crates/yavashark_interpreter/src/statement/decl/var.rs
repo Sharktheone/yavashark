@@ -4,8 +4,6 @@ use yavashark_env::{Error, Realm, Res, Value};
 
 use crate::Interpreter;
 
-
-
 pub enum Variable {
     Var(String, Value),
     Let(String, Value),
@@ -33,7 +31,11 @@ impl Interpreter {
         Self::decl_var_cb(realm, stmt, scope, cb)
     }
 
-    pub fn decl_var_ret(realm: &mut Realm, stmt: &VarDecl, scope: &mut Scope) -> Res<Vec<Variable>> {
+    pub fn decl_var_ret(
+        realm: &mut Realm,
+        stmt: &VarDecl,
+        scope: &mut Scope,
+    ) -> Res<Vec<Variable>> {
         let mut vars = Vec::with_capacity(stmt.decls.len());
 
         let cb = |scope: &mut Scope, var| {
@@ -44,10 +46,14 @@ impl Interpreter {
         Self::decl_var_cb(realm, stmt, scope, cb)?;
 
         Ok(vars)
-
     }
 
-    pub fn decl_var_cb(realm: &mut Realm, stmt: &VarDecl, scope: &mut Scope, mut cb: impl FnMut(&mut Scope, Variable) -> Res) -> Res {
+    pub fn decl_var_cb(
+        realm: &mut Realm,
+        stmt: &VarDecl,
+        scope: &mut Scope,
+        mut cb: impl FnMut(&mut Scope, Variable) -> Res,
+    ) -> Res {
         match stmt.kind {
             VarDeclKind::Var => {
                 for decl in &stmt.decls {

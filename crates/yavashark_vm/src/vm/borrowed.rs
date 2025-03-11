@@ -101,10 +101,10 @@ impl<'a> BorrowedVM<'a> {
 
         Ok(())
     }
-    
+
     pub fn run_ret(&mut self) -> ValueResult {
         self.run()?;
-        
+
         Ok(self.acc())
     }
 }

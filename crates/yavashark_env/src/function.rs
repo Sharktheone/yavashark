@@ -53,9 +53,12 @@ impl ObjectImpl<Realm> for NativeFunction {
 
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         if !self.constructor {
-            return Err(Error::ty_error(format!("{} is not a constructor", self.name)));
+            return Err(Error::ty_error(format!(
+                "{} is not a constructor",
+                self.name
+            )));
         }
-        
+
         let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
             .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
 
@@ -188,7 +191,6 @@ impl NativeFunction {
 
         handle
     }
-    
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn special(

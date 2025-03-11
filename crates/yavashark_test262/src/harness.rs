@@ -52,7 +52,7 @@ pub fn setup_global(file: PathBuf, raw: bool) -> Res<(Realm, Scope)> {
     if !raw {
         run_harness_in_realm(&mut r, &mut s)?;
     }
-    
+
     r.set_eval(InterpreterEval)?;
 
     Ok((r, s))

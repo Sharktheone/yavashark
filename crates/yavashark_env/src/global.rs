@@ -1,8 +1,8 @@
+use crate::builtins::{get_encode_uri, get_encode_uri_component, get_escape};
 use crate::error::get_error;
 use crate::realm::Realm;
-use crate::{get_console, ObjectHandle, Res, Variable};
 use crate::Value;
-use crate::builtins::{get_encode_uri, get_encode_uri_component, get_escape};
+use crate::{get_console, ObjectHandle, Res, Variable};
 
 pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     let obj = handle.get();
@@ -20,35 +20,62 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         Variable::new_read_only(Value::Number(f64::INFINITY)),
     )?;
     obj.define_variable("null".into(), Variable::new_read_only(Value::Null))?;
-    obj.define_variable(
-        "true".into(),
-        Variable::new_read_only(Value::Boolean(true)),
-    )?;
+    obj.define_variable("true".into(), Variable::new_read_only(Value::Boolean(true)))?;
     obj.define_variable(
         "false".into(),
         Variable::new_read_only(Value::Boolean(false)),
     )?;
 
-    obj.define_variable(
-        "console".into(),
-        Variable::write_config(get_console(realm)),
-    )?;
+    obj.define_variable("console".into(), Variable::write_config(get_console(realm)))?;
 
     obj.define_variable("Error".into(), Variable::write_config(get_error(realm)?))?;
 
     #[allow(clippy::expect_used)]
-    obj.define_variable("Array".into(), Variable::write_config(realm.intrinsics.array_constructor().value))?;
+    obj.define_variable(
+        "Array".into(),
+        Variable::write_config(realm.intrinsics.array_constructor().value),
+    )?;
 
-    obj.define_variable("Object".into(), Variable::write_config(realm.intrinsics.obj_constructor().value))?;
-    obj.define_variable("Function".into(), Variable::write_config(realm.intrinsics.func_constructor().value))?;
-    obj.define_variable("Math".into(), Variable::write_config(realm.intrinsics.math_obj().value))?;
-    obj.define_variable("String".into(), Variable::write_config(realm.intrinsics.string_constructor().value))?;
-    obj.define_variable("Number".into(), Variable::write_config(realm.intrinsics.number_constructor().value))?;
-    obj.define_variable("Boolean".into(), Variable::write_config(realm.intrinsics.boolean_constructor().value))?;
-    obj.define_variable("Symbol".into(), Variable::write_config(realm.intrinsics.symbol_constructor().value))?;
-    obj.define_variable("BigInt".into(), Variable::write_config(realm.intrinsics.bigint_constructor().value))?;
-    obj.define_variable("RegExp".into(), Variable::write_config(realm.intrinsics.regexp_constructor().value))?;
-    obj.define_variable("JSON".into(), Variable::write_config(realm.intrinsics.json_obj().value))?;
+    obj.define_variable(
+        "Object".into(),
+        Variable::write_config(realm.intrinsics.obj_constructor().value),
+    )?;
+    obj.define_variable(
+        "Function".into(),
+        Variable::write_config(realm.intrinsics.func_constructor().value),
+    )?;
+    obj.define_variable(
+        "Math".into(),
+        Variable::write_config(realm.intrinsics.math_obj().value),
+    )?;
+    obj.define_variable(
+        "String".into(),
+        Variable::write_config(realm.intrinsics.string_constructor().value),
+    )?;
+    obj.define_variable(
+        "Number".into(),
+        Variable::write_config(realm.intrinsics.number_constructor().value),
+    )?;
+    obj.define_variable(
+        "Boolean".into(),
+        Variable::write_config(realm.intrinsics.boolean_constructor().value),
+    )?;
+    obj.define_variable(
+        "Symbol".into(),
+        Variable::write_config(realm.intrinsics.symbol_constructor().value),
+    )?;
+    obj.define_variable(
+        "BigInt".into(),
+        Variable::write_config(realm.intrinsics.bigint_constructor().value),
+    )?;
+    obj.define_variable(
+        "RegExp".into(),
+        Variable::write_config(realm.intrinsics.regexp_constructor().value),
+    )?;
+    obj.define_variable(
+        "JSON".into(),
+        Variable::write_config(realm.intrinsics.json_obj().value),
+    )?;
     obj.define_variable(
         "TypeError".into(),
         Variable::write_config(realm.intrinsics.type_error_constructor().value),
@@ -69,55 +96,94 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "EvalError".into(),
         Variable::write_config(realm.intrinsics.eval_error_constructor().value),
     )?;
-    obj.define_variable("URIError".into(), Variable::write_config(realm.intrinsics.uri_error_constructor().value))?;
+    obj.define_variable(
+        "URIError".into(),
+        Variable::write_config(realm.intrinsics.uri_error_constructor().value),
+    )?;
 
-    obj.define_variable("globalThis".into(), Variable::write_config(realm.global.clone().into()))?;
-    obj.define_variable("global".into(), Variable::write_config(realm.global.clone().into()))?;
+    obj.define_variable(
+        "globalThis".into(),
+        Variable::write_config(realm.global.clone().into()),
+    )?;
+    obj.define_variable(
+        "global".into(),
+        Variable::write_config(realm.global.clone().into()),
+    )?;
     obj.define_variable(
         "ArrayBuffer".into(),
         Variable::write_config(realm.intrinsics.arraybuffer_constructor().value),
     )?;
-    obj.define_variable("DataView".into(), Variable::write_config(realm.intrinsics.data_view_constructor().value))?;
+    obj.define_variable(
+        "DataView".into(),
+        Variable::write_config(realm.intrinsics.data_view_constructor().value),
+    )?;
     obj.define_variable("escape".into(), Variable::write_config(get_escape(realm)))?;
     obj.define_variable("unescape".into(), Variable::write_config(get_escape(realm)))?;
-    obj.define_variable("encodeURI".into(), Variable::write_config(get_encode_uri(realm)))?;
-    obj.define_variable("decodeURI".into(), Variable::write_config(get_encode_uri(realm)))?;
-    obj.define_variable("encodeURIComponent".into(), Variable::write_config(get_encode_uri_component(realm)))?;
-    obj.define_variable("decodeURIComponent".into(), Variable::write_config(get_encode_uri_component(realm)))?;
-    obj.define_variable("Map".into(), Variable::write_config(realm.intrinsics.map_constructor().value))?;
-    obj.define_variable("Set".into(), Variable::write_config(realm.intrinsics.set_constructor().value))?;
-    obj.define_variable("Date".into(), Variable::write_config(realm.intrinsics.date_constructor().value))?;
-    obj.define_variable("Reflect".into(), Variable::write_config(realm.intrinsics.reflect_obj().value))?;
-    obj.define_variable("Temporal".into(), Variable::write_config(realm.intrinsics.temporal_obj().value))?;
-
-
+    obj.define_variable(
+        "encodeURI".into(),
+        Variable::write_config(get_encode_uri(realm)),
+    )?;
+    obj.define_variable(
+        "decodeURI".into(),
+        Variable::write_config(get_encode_uri(realm)),
+    )?;
+    obj.define_variable(
+        "encodeURIComponent".into(),
+        Variable::write_config(get_encode_uri_component(realm)),
+    )?;
+    obj.define_variable(
+        "decodeURIComponent".into(),
+        Variable::write_config(get_encode_uri_component(realm)),
+    )?;
+    obj.define_variable(
+        "Map".into(),
+        Variable::write_config(realm.intrinsics.map_constructor().value),
+    )?;
+    obj.define_variable(
+        "Set".into(),
+        Variable::write_config(realm.intrinsics.set_constructor().value),
+    )?;
+    obj.define_variable(
+        "Date".into(),
+        Variable::write_config(realm.intrinsics.date_constructor().value),
+    )?;
+    obj.define_variable(
+        "Reflect".into(),
+        Variable::write_config(realm.intrinsics.reflect_obj().value),
+    )?;
+    obj.define_variable(
+        "Temporal".into(),
+        Variable::write_config(realm.intrinsics.temporal_obj().value),
+    )?;
 
     macro_rules! copy_from {
         ($prop:ident, $name:ident) => {
             obj.define_variable(
                 stringify!($name).into(),
-                Variable::write_config(realm
-                    .intrinsics
-                    .$prop
-                    .resolve_property_no_get_set(&stringify!($name).into())?
-                    .map(|x| x.value)
-                    .unwrap_or(Value::Undefined)
-                    ),
+                Variable::write_config(
+                    realm
+                        .intrinsics
+                        .$prop
+                        .resolve_property_no_get_set(&stringify!($name).into())?
+                        .map(|x| x.value)
+                        .unwrap_or(Value::Undefined),
+                ),
             )?;
         };
 
         (c, $prop:ident, $name:ident) => {
             obj.define_variable(
                 stringify!($name).into(),
-                Variable::write_config(realm
-                    .intrinsics
-                    .$prop()
-                    .value
-                    .as_object()?
-                    .resolve_property_no_get_set(&stringify!($name).into())?
-                    .map(|x| x.value)
-                    .unwrap_or(Value::Undefined)
-                    ),
+                Variable::write_config(
+                    realm
+                        .intrinsics
+                        .$prop()
+                        .value
+                        .as_object()?
+                        .resolve_property_no_get_set(&stringify!($name).into())?
+                        .map(|x| x.value)
+                        .unwrap_or(Value::Undefined),
+                ),
             )?;
         };
     }

@@ -437,7 +437,7 @@ impl Method {
             .clone()
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
-        
+
         let length = self.args.len();
 
         quote! {

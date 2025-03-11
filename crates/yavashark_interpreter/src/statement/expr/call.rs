@@ -1,11 +1,11 @@
 use swc_common::{Span, Spanned};
 use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
-use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, Realm, Value, ValueResult};
-use yavashark_env::utils::ValueIterator;
 use crate::location::get_location;
 use crate::Interpreter;
+use yavashark_env::scope::Scope;
+use yavashark_env::utils::ValueIterator;
+use yavashark_env::{ControlFlow, Error, Realm, Value, ValueResult};
 
 impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
@@ -27,9 +27,9 @@ impl Interpreter {
                 let constructor = sup.as_object()?.constructor()?;
 
                 let constructor = constructor.resolve(proto.copy(), realm)?;
-                
+
                 let constructor = constructor.as_object()?;
-                
+
                 let mut values = Vec::with_capacity(stmt.args.len());
 
                 for arg in &stmt.args {
@@ -41,15 +41,14 @@ impl Interpreter {
                         while let Some(value) = iter.next(realm)? {
                             values.push(value);
                         }
-
                     } else {
                         values.push(value);
                     }
-
                 }
 
                 //TODO: we somehow need to run the constructor ON the super class
-                constructor.construct(realm, values) //In strict mode, this is undefined
+                constructor
+                    .construct(realm, values) //In strict mode, this is undefined
                     .map_err(|mut e| {
                         e.attach_function_stack(constructor.name(), get_location(stmt.span, scope));
 
@@ -73,24 +72,21 @@ impl Interpreter {
     ) -> ValueResult {
         if let Value::Object(f) = callee.copy() {
             let mut values = Vec::with_capacity(args.len());
-            
+
             for arg in args {
                 let value = Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(span), scope)?;
-                
+
                 if arg.spread.is_some() {
                     let iter = ValueIterator::new(&value, realm)?;
-                    
+
                     while let Some(value) = iter.next(realm)? {
                         values.push(value);
                     }
-                    
                 } else {
                     values.push(value);
                 }
-                
             }
-            
-            
+
             f.call(realm, values, this) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, scope));

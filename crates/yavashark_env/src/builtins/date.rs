@@ -588,8 +588,7 @@ impl DateConstructor {
         if args.is_empty() {
             return Ok(f64::NAN.into());
         }
-        
-        
+
         let mut get = |idx: usize, def: i32| -> i32 {
             args.get(idx)
                 .map_or(def, |v| v.to_number(realm).map(|x| x as i32).unwrap_or(def))

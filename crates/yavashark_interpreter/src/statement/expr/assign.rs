@@ -1,19 +1,21 @@
 use swc_common::Spanned;
-use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, AssignTargetPat, ExportDefaultExpr, Expr, MemberExpr, MemberProp, OptChainBase, OptChainExpr, ParenExpr, Pat, SimpleAssignTarget, SuperProp, SuperPropExpr};
+use swc_ecma_ast::{
+    AssignExpr, AssignOp, AssignTarget, AssignTargetPat, ExportDefaultExpr, Expr, MemberExpr,
+    MemberProp, OptChainBase, OptChainExpr, ParenExpr, Pat, SimpleAssignTarget, SuperProp,
+    SuperPropExpr,
+};
 
+use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
 use yavashark_value::Obj;
-use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_assign(realm: &mut Realm, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
         let value = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
         if stmt.op == AssignOp::Assign {
-            return Ok(
-                Self::assign_target(realm, &stmt.left, value.copy(), scope).map(|()| value)?
-            );
+            return Ok(Self::assign_target(realm, &stmt.left, value.copy(), scope).map(|()| value)?);
         }
 
         Self::assign_target_op(realm, stmt.op, &stmt.left, value, scope)
@@ -32,10 +34,16 @@ impl Interpreter {
                     scope.update_or_define(name, value)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
-                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super(realm, super_prop, value, scope),
-                SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain(realm, opt, value, scope),
-                SimpleAssignTarget::Paren(paren) => Self::assign_expr(realm, &paren.expr, value, scope),
-                
+                SimpleAssignTarget::SuperProp(super_prop) => {
+                    Self::assign_super(realm, super_prop, value, scope)
+                }
+                SimpleAssignTarget::OptChain(opt) => {
+                    Self::assign_opt_chain(realm, opt, value, scope)
+                }
+                SimpleAssignTarget::Paren(paren) => {
+                    Self::assign_expr(realm, &paren.expr, value, scope)
+                }
+
                 _ => Err(Error::syn("Invalid left-hand side in assignment")),
             },
             AssignTarget::Pat(pat) => Self::assign_pat(realm, pat, value, scope),
@@ -51,7 +59,7 @@ impl Interpreter {
         let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
         Self::assign_member_on(realm, obj, &m.prop, value, scope)
     }
-    
+
     pub fn assign_member_on(
         realm: &mut Realm,
         obj: Value,
@@ -74,30 +82,34 @@ impl Interpreter {
             )))
         }
     }
-    
-    pub fn assign_super(realm: &mut Realm, super_prop: &SuperPropExpr, value: Value, scope: &mut Scope) -> Res {
+
+    pub fn assign_super(
+        realm: &mut Realm,
+        super_prop: &SuperPropExpr,
+        value: Value,
+        scope: &mut Scope,
+    ) -> Res {
         let this = scope.this()?;
-        
+
         let obj = this.as_object()?;
-        
+
         let proto = obj.prototype()?;
         let sup = proto.resolve(this, realm)?;
-        
-        
+
         match &super_prop.prop {
             SuperProp::Ident(i) => {
                 let name = i.sym.to_string();
-                
+
                 sup.define_property(name.into(), value)
             }
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
-                
+
                 sup.define_property(name, value)
             }
         }
     }
-    
+
     pub fn assign_opt_chain(
         realm: &mut Realm,
         opt: &OptChainExpr,
@@ -123,22 +135,15 @@ impl Interpreter {
 
                 let this = this.unwrap_or(scope.this()?);
 
-                Self::run_call_on(
-                    realm, &callee, this, &call.args, call.span, scope,
-                )?; 
+                Self::run_call_on(realm, &callee, this, &call.args, call.span, scope)?;
                 //TODO: maybe we should throw an error here?
-                
+
                 Ok(())
             }
         }
     }
-    
-    pub fn assign_expr(
-        realm: &mut Realm,
-        expr: &Expr,
-        value: Value,
-        scope: &mut Scope,
-    ) -> Res {
+
+    pub fn assign_expr(realm: &mut Realm, expr: &Expr, value: Value, scope: &mut Scope) -> Res {
         match expr {
             Expr::Member(m) => {
                 let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
@@ -151,16 +156,15 @@ impl Interpreter {
                 Self::assign_opt_chain(realm, opt, value, scope)?;
             }
             Expr::Paren(paren) => Self::assign_expr(realm, &paren.expr, value, scope)?,
-            
-            
+
             epxr => {
                 Self::run_expr(realm, epxr, expr.span(), scope)?;
-            },
+            }
         }
-        
+
         Ok(())
     }
-    
+
     fn assign_pat(
         realm: &mut Realm,
         pat: &AssignTargetPat,
@@ -170,17 +174,19 @@ impl Interpreter {
         match pat {
             AssignTargetPat::Array(arr) => {
                 let pat = Pat::Array(arr.clone());
-                
+
                 Self::run_pat(realm, &pat, scope, value)?;
             }
             AssignTargetPat::Object(expr) => {
                 let pat = Pat::Object(expr.clone());
-                
+
                 Self::run_pat(realm, &pat, scope, value)?;
             }
-            AssignTargetPat::Invalid(_) => return Err(Error::syn("Invalid left-hand side in assignment")),
+            AssignTargetPat::Invalid(_) => {
+                return Err(Error::syn("Invalid left-hand side in assignment"))
+            }
         }
-        
+
         Ok(())
     }
 
@@ -207,9 +213,15 @@ impl Interpreter {
                     Ok(value)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member_op(realm, op, m, right, scope),
-                SimpleAssignTarget::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, right, scope),
-                SimpleAssignTarget::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, right, scope),
-                SimpleAssignTarget::Paren(paren) => Self::assign_expr_op(realm, op, &paren.expr, right, scope),
+                SimpleAssignTarget::SuperProp(super_prop) => {
+                    Self::assign_super_op(realm, op, super_prop, right, scope)
+                }
+                SimpleAssignTarget::OptChain(opt) => {
+                    Self::assign_opt_chain_op(realm, op, opt, right, scope)
+                }
+                SimpleAssignTarget::Paren(paren) => {
+                    Self::assign_expr_op(realm, op, &paren.expr, right, scope)
+                }
                 _ => Err(Error::syn("Invalid left-hand side in assignment").into()),
             },
             AssignTarget::Pat(pat) => Self::assign_pat_op(realm, op, pat, right, scope),
@@ -224,10 +236,10 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
-        
+
         Self::assign_member_op_on(realm, obj, op, &m.prop, right, scope)
     }
-    
+
     pub fn assign_member_op_on(
         realm: &mut Realm,
         obj: Value,
@@ -255,7 +267,7 @@ impl Interpreter {
             Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")).into())
         }
     }
-    
+
     pub fn assign_super_op(
         realm: &mut Realm,
         op: AssignOp,
@@ -264,38 +276,36 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         let this = scope.this()?;
-        
+
         let obj = this.as_object()?;
-        
+
         let proto = obj.prototype()?;
         let sup = proto.resolve(this, realm)?;
-        
+
         match &super_prop.prop {
             SuperProp::Ident(i) => {
                 let name = i.sym.to_string().into();
-                
-                let left = sup
-                    .get_property(&name, realm)?;
-                
+
+                let left = sup.get_property(&name, realm)?;
+
                 let value = Self::run_assign_op(op, left, right, realm)?;
-                
+
                 sup.define_property(name, value.copy());
                 Ok(value)
             }
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
-                
-                let left = sup
-                    .get_property(&name, realm)?;
-                
+
+                let left = sup.get_property(&name, realm)?;
+
                 let value = Self::run_assign_op(op, left, right, realm)?;
-                
+
                 sup.define_property(name, value.copy());
                 Ok(value)
             }
         }
     }
-    
+
     pub fn assign_opt_chain_op(
         realm: &mut Realm,
         op: AssignOp,
@@ -322,18 +332,16 @@ impl Interpreter {
 
                 let this = this.unwrap_or(scope.this()?);
 
-                let left = Self::run_call_on(
-                    realm, &callee, this, &call.args, call.span, scope,
-                )?;
+                let left = Self::run_call_on(realm, &callee, this, &call.args, call.span, scope)?;
                 //TODO: maybe we should throw an error here?
-                
+
                 let value = Self::run_assign_op(op, left, right, realm)?;
-                
+
                 Ok(value)
             }
         }
     }
-    
+
     fn assign_expr_op(
         realm: &mut Realm,
         op: AssignOp,
@@ -345,17 +353,17 @@ impl Interpreter {
             Expr::Member(m) => {
                 let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
                 Self::assign_member_op_on(realm, obj, op, &m.prop, left, scope)?
-            },
-            Expr::SuperProp(super_prop) => Self::assign_super_op(realm, op, super_prop, left, scope)?,
+            }
+            Expr::SuperProp(super_prop) => {
+                Self::assign_super_op(realm, op, super_prop, left, scope)?
+            }
             Expr::OptChain(opt) => Self::assign_opt_chain_op(realm, op, opt, left, scope)?,
             Expr::Paren(paren) => Self::assign_expr_op(realm, op, &paren.expr, left, scope)?,
-            
-            epxr => {
-                Self::run_expr(realm, epxr, expr.span(), scope)?
-            },
+
+            epxr => Self::run_expr(realm, epxr, expr.span(), scope)?,
         })
     }
-    
+
     fn assign_pat_op(
         realm: &mut Realm,
         op: AssignOp,
@@ -366,21 +374,23 @@ impl Interpreter {
         if op != AssignOp::Assign {
             return Err(Error::syn("Invalid left-hand side in assignment").into());
         }
-        
+
         match pat {
             AssignTargetPat::Array(arr) => {
                 let pat = Pat::Array(arr.clone());
-                
+
                 Self::run_pat(realm, &pat, scope, left.copy())?;
             }
             AssignTargetPat::Object(expr) => {
                 let pat = Pat::Object(expr.clone());
-                
+
                 Self::run_pat(realm, &pat, scope, left.copy())?;
             }
-            AssignTargetPat::Invalid(_) => return Err(Error::syn("Invalid left-hand side in assignment").into()),
+            AssignTargetPat::Invalid(_) => {
+                return Err(Error::syn("Invalid left-hand side in assignment").into())
+            }
         }
-        
+
         Ok(left)
     }
 

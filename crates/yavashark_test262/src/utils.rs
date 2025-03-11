@@ -2,12 +2,12 @@ use crate::metadata::{Flags, Metadata, NegativePhase};
 use std::path::Path;
 use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCommentsMap};
 use swc_common::input::StringInput;
-use swc_common::BytePos;
 use swc_common::util::take::Take;
+use swc_common::BytePos;
 use swc_ecma_ast::{Program, Script};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
-use yaml_rust2::Yaml;
 use yaml_rust2::yaml::YamlDecoder;
+use yaml_rust2::Yaml;
 
 pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
     let input = std::fs::read_to_string(f).unwrap();
@@ -38,27 +38,21 @@ pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
         _ = p.parse_script();
 
         let (leading, trailing) = comments.take_all();
-        
-        
+
         let mut meta = process_comments(leading);
         let mut trailing = process_comments(trailing);
-        
-        meta.append(&mut trailing);
-        
 
-        metadata = meta
-            .first()
-            .map(Metadata::parse)
-            .unwrap_or_default();
+        meta.append(&mut trailing);
+
+        metadata = meta.first().map(Metadata::parse).unwrap_or_default();
     };
-    
 
     let end = BytePos(input.len() as u32 - 1);
 
     let input = StringInput::new(&input, BytePos(0), end);
 
     let mut p = Parser::new(Syntax::Es(c), input, None);
-    
+
     let s = match p.parse_program() {
         Ok(s) => {
             if let Some(neg) = &metadata.negative {
@@ -67,14 +61,14 @@ pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
                     panic!()
                 }
             }
-            
+
             if s.is_module() && !metadata.flags.contains(Flags::MODULE) {
                 println!("PARSE_ERROR: Expected script but parsed module");
                 panic!()
             }
 
             s
-        },
+        }
         Err(e) => {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
@@ -86,15 +80,12 @@ pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
             panic!()
         }
     };
-    
-    
+
     (s, metadata)
 }
 
-
 fn process_comments(map: SingleThreadedCommentsMap) -> Vec<Yaml> {
-    map
-        .borrow()
+    map.borrow()
         .iter()
         .flat_map(|(_, x)| x)
         .filter(|comment| {

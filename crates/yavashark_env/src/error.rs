@@ -60,7 +60,7 @@ impl ErrorObj {
 
         ObjectHandle::new(this)
     }
-    
+
     #[must_use]
     pub fn error_to_value(err: Error, realm: &Realm) -> Value {
         match err.kind {

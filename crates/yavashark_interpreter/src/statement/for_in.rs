@@ -25,14 +25,15 @@ impl Interpreter {
         scope.state_set_loop()?;
 
         for key in obj.keys()? {
-            let Some(prop) = obj.get_property(&key)? else { //TODO: we should directly return the attributes and so on in `.keys`
-                continue
+            let Some(prop) = obj.get_property(&key)? else {
+                //TODO: we should directly return the attributes and so on in `.keys`
+                continue;
             };
-            
+
             if !prop.attributes.is_enumerable() {
                 continue;
             }
-            
+
             Self::run_for_head(realm, stmt.left.clone(), scope, &key)?;
 
             let result = Self::run_statement(realm, &stmt.body, scope);
@@ -51,12 +52,7 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 
-    pub fn run_for_head(
-        realm: &mut Realm,
-        decl: ForHead,
-        scope: &mut Scope,
-        value: &Value,
-    ) -> Res {
+    pub fn run_for_head(realm: &mut Realm, decl: ForHead, scope: &mut Scope, value: &Value) -> Res {
         match decl {
             ForHead::VarDecl(decl) => {
                 //TODO: respect var decl kind

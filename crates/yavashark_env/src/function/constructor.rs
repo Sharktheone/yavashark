@@ -126,8 +126,9 @@ impl NativeConstructor {
         };
 
         let handle = ObjectHandle::new(this);
-        
-        let _ = handle.define_variable("length".into(), Variable::config(Value::Number(len as f64)));
+
+        let _ =
+            handle.define_variable("length".into(), Variable::config(Value::Number(len as f64)));
 
         #[allow(clippy::expect_used)]
         {

@@ -1,6 +1,6 @@
-use num_traits::ToPrimitive;
 use crate::js::ops::BigIntOrNumber;
 use crate::{Error, Realm, Value};
+use num_traits::ToPrimitive;
 
 impl<R: Realm> Value<R> {
     pub fn shl(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {
@@ -13,18 +13,15 @@ impl<R: Realm> Value<R> {
                 Self::from((left as i64) << (right as i64))
             }
             (BigIntOrNumber::BigInt(left), BigIntOrNumber::BigInt(right)) => {
-                
                 let Some(right) = right.to_isize() else {
                     return Err(Error::range("BigInt shift by too many bits"));
                 };
-                
+
                 if right.is_negative() {
                     Self::from(left >> (-right) as usize)
-                    
                 } else {
                     Self::from(left << right as usize)
                 }
-                
             }
 
             _ => return Err(Error::ty("cannot mix BigInt and Number")),

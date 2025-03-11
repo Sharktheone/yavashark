@@ -1,8 +1,8 @@
+use crate::utils::ValueIterator;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
-use crate::utils::ValueIterator;
 
 #[object]
 #[derive(Debug)]
@@ -167,19 +167,18 @@ impl Math {
     fn sqrt(value: f64) -> f64 {
         value.sqrt()
     }
-    
+
     #[prop("sumPrecise")]
     fn sum_precise(iter: &Value, #[realm] realm: &mut Realm) -> Res<f64> {
         let mut sum = 0.0;
-        
+
         let iter = ValueIterator::new(iter, realm)?;
-        
+
         while let Some(value) = iter.next(realm)? {
             sum += value.to_number(realm).unwrap_or(0.0);
         }
-        
+
         Ok(sum)
-        
     }
 
     fn tan(value: f64) -> f64 {

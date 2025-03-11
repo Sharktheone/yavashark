@@ -59,7 +59,11 @@ impl ObjectConstructor {
     }
 
     #[prop("defineProperty")]
-    pub fn define_property(obj: ObjectHandle, key: Value, descriptor: &ObjectHandle) -> ValueResult {
+    pub fn define_property(
+        obj: ObjectHandle,
+        key: Value,
+        descriptor: &ObjectHandle,
+    ) -> ValueResult {
         let value = descriptor
             .get_property(&"value".into())
             .map(|v| v.value)

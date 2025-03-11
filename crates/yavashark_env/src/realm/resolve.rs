@@ -10,7 +10,7 @@ impl Realm {
         mut cb: impl FnMut(String, PathBuf, &mut Self) -> Res<Module>,
     ) -> Res<&Module> {
         let path = resolve_path(spec, cur_path)?;
-        
+
         if path == cur_path {
             return Err(Error::new("TODO: handle circular dependencies"));
         }
@@ -23,7 +23,7 @@ impl Realm {
 
             self.env.modules.insert(path.clone(), module);
         }
-        
+
         self.env
             .modules
             .get(&path)

@@ -17,7 +17,7 @@ impl<C: Realm> Variable<C> {
             properties: Attributes::new(),
         }
     }
-    
+
     #[must_use]
     pub const fn config(value: Value<C>) -> Self {
         Self {
@@ -25,7 +25,7 @@ impl<C: Realm> Variable<C> {
             properties: Attributes::config(),
         }
     }
-    
+
     #[must_use]
     pub const fn enumerable(value: Value<C>) -> Self {
         Self {
@@ -33,7 +33,7 @@ impl<C: Realm> Variable<C> {
             properties: Attributes::enumerable(),
         }
     }
-    
+
     #[must_use]
     pub const fn write_config(value: Value<C>) -> Self {
         Self {
@@ -118,8 +118,6 @@ impl<C: Realm> Variable<C> {
     }
 }
 
-
-
 #[derive(PartialEq, Eq, Clone, Copy)]
 pub struct Attributes(u8);
 
@@ -152,17 +150,17 @@ impl Attributes {
     pub const fn new() -> Self {
         Self(Self::WRITABLE | Self::ENUMERABLE | Self::CONFIGURABLE)
     }
-    
+
     #[must_use]
     pub const fn config() -> Self {
         Self(Self::CONFIGURABLE)
     }
-    
+
     #[must_use]
     pub const fn enumerable() -> Self {
         Self(Self::ENUMERABLE)
     }
-    
+
     #[must_use]
     pub const fn write_config() -> Self {
         Self(Self::WRITABLE | Self::CONFIGURABLE)

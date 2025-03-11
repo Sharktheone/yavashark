@@ -34,11 +34,7 @@ impl RegExp {
         Ok(Self::new(realm, regex, false))
     }
 
-    pub fn new_from_str_with_flags(
-        realm: &Realm,
-        regex: &str,
-        flags: &str,
-    ) -> Res<ObjectHandle> {
+    pub fn new_from_str_with_flags(realm: &Realm, regex: &str, flags: &str) -> Res<ObjectHandle> {
         let regex = RegexBuilder::new(regex)
             .case_insensitive(flags.contains('i'))
             .multi_line(flags.contains('m'))

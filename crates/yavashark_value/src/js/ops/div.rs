@@ -1,6 +1,6 @@
-use num_traits::Zero;
 use crate::js::ops::BigIntOrNumber;
 use crate::{Error, Realm, Value};
+use num_traits::Zero;
 
 impl<R: Realm> Value<R> {
     pub fn div(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {

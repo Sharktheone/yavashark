@@ -1,6 +1,6 @@
-use num_traits::Zero;
 use crate::js::ops::BigIntOrNumber;
 use crate::{Error, Realm, Value};
+use num_traits::Zero;
 
 impl<R: Realm> Value<R> {
     pub fn rem(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {
@@ -16,8 +16,7 @@ impl<R: Realm> Value<R> {
                 if right.is_zero() {
                     return Err(Error::range("BigInt division by zero"));
                 }
-                
-                
+
                 Self::from(left % right)
             }
 

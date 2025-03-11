@@ -8,8 +8,8 @@ use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
 use yavashark_env::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value,
-    ValueResult, Variable,
+    ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value, ValueResult,
+    Variable,
 };
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
@@ -109,7 +109,12 @@ impl RawJSFunction {
         scope.state_set_returnable();
 
         for (i, p) in self.params.iter().enumerate() {
-            Interpreter::run_pat(realm, &p.pat, scope, args.get(i).unwrap_or(&Value::Undefined).copy())?;
+            Interpreter::run_pat(
+                realm,
+                &p.pat,
+                scope,
+                args.get(i).unwrap_or(&Value::Undefined).copy(),
+            )?;
         }
 
         let args = Array::with_elements(realm, args)?;

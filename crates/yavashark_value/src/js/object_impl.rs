@@ -114,11 +114,10 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().primitive()
     }
 
-
     fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         self.get_wrapped_object().prototype()
     }
-    
+
     fn set_prototype(&self, proto: ObjectProperty<R>) -> Result<(), Error<R>> {
         self.get_wrapped_object().set_prototype(proto)
     }
@@ -141,7 +140,7 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>> {
         self.get_wrapped_object().construct(realm, args)
     }
-    
+
     fn is_constructor(&self) -> bool {
         self.get_wrapped_object().is_constructor()
     }
@@ -246,7 +245,7 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
     fn is_function(&self) -> bool {
         ObjectImpl::is_function(self)
     }
-    
+
     fn primitive(&self) -> Option<Value<R>> {
         ObjectImpl::primitive(self)
     }
@@ -254,7 +253,7 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
     fn prototype(&self) -> Result<ObjectProperty<R>, Error<R>> {
         ObjectImpl::prototype(self)
     }
-    
+
     fn set_prototype(&self, proto: ObjectProperty<R>) -> Result<(), Error<R>> {
         ObjectImpl::set_prototype(self, proto)
     }

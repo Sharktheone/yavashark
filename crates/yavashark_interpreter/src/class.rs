@@ -3,8 +3,7 @@ use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, Pro
 
 use crate::function::{JSFunction, RawJSFunction};
 use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value,
-    ValueResult,
+    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
 };
 use yavashark_value::Obj;
 
@@ -119,21 +118,26 @@ pub fn create_class(
     Ok((class, statics))
 }
 
-pub fn decl_class_ret(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> ValueResult {
+pub fn decl_class_ret(
+    realm: &mut Realm,
+    stmt: &Class,
+    scope: &mut Scope,
+    name: String,
+) -> ValueResult {
     let (class, statics) = create_class(realm, stmt, scope, name)?;
-    
+
     let this = class.into_object();
-    
+
     let mut static_scope = scope.child_object(this.clone())?;
-    
+
     let this: Value = this.into();
 
     for static_block in statics {
         Interpreter::run_block_this(realm, &static_block, &mut static_scope, this.copy())?;
     }
-    
+
     let proto = this.get_property(&"prototype".into(), realm)?;
-    
+
     proto.define_property("constructor".into(), this.copy());
 
     Ok(this)

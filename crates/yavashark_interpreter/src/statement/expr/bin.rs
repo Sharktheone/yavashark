@@ -120,9 +120,9 @@ impl Interpreter {
                 if left.is_falsey() {
                     return Ok(left);
                 }
-                
+
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                
+
                 return Ok(right);
             }
             BinaryOp::In => {

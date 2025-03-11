@@ -79,9 +79,9 @@ impl NumberConstructor {
     pub fn parse_int(string: &str, radix: Option<u32>) -> f64 {
         let radix = radix.unwrap_or(10);
         let radix = if (2..=36).contains(&radix) { radix } else { 10 };
-        
+
         let string = string.trim();
-        
+
         i64::from_str_radix(string, radix)
             .map(|n| n as f64)
             .unwrap_or(f64::NAN)

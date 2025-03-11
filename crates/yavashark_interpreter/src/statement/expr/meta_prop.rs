@@ -1,6 +1,6 @@
 use crate::Interpreter;
-use swc_ecma_ast::{MetaPropExpr, MetaPropKind};
 use swc_ecma_ast::TsKeywordTypeKind::TsObjectKeyword;
+use swc_ecma_ast::{MetaPropExpr, MetaPropKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::{NativeFunction, Object, Realm, RuntimeResult, Value};
 
@@ -14,16 +14,18 @@ impl Interpreter {
             MetaPropKind::NewTarget => scope.get_target()?,
             MetaPropKind::ImportMeta => {
                 let obj = Object::with_proto(Value::Null);
-                
+
                 obj.define_property(
                     "url".into(),
-                    scope.get_current_path()?.to_string_lossy().into_owned().into(),
-                    
+                    scope
+                        .get_current_path()?
+                        .to_string_lossy()
+                        .into_owned()
+                        .into(),
                 )?;
-                
+
                 obj.define_property("resolve".into(), Value::Undefined)?; //TODO
-                
-                
+
                 obj.into()
             }
         })

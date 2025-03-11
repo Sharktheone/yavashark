@@ -156,9 +156,6 @@ pub struct ModuleScope {
     pub module: Module,
 }
 
-
-
-
 #[derive(Debug)]
 pub enum ObjectOrVariables {
     Object(ObjectHandle),
@@ -173,7 +170,7 @@ impl ObjectOrVariables {
                 v.insert(name, variable);
             }
         }
-        
+
         Ok(())
     }
 
@@ -352,7 +349,8 @@ impl ScopeInternal {
             return Err(Error::new("Variable already declared"));
         }
 
-        self.variables.insert(name, Variable::new_read_only(value))?;
+        self.variables
+            .insert(name, Variable::new_read_only(value))?;
 
         Ok(())
     }
@@ -503,7 +501,7 @@ impl ScopeInternal {
                 }
             }
         }
-        
+
         if let Some(p) = &self.parent {
             return p.borrow_mut()?.update(name, value);
         }
@@ -624,14 +622,13 @@ impl Scope {
             ))?)),
         })
     }
-    
+
     pub fn object_with_parent(parent: &Self, object: ObjectHandle) -> Res<Self> {
         let borrow = parent.scope.borrow()?;
-        
+
         let this = borrow.this.copy();
         let new_target = borrow.new_target.copy();
-        
-        
+
         Ok(Self {
             scope: Gc::new(RefCell::new(ScopeInternal {
                 parent: Some(Gc::clone(&parent.scope)),
@@ -729,12 +726,12 @@ impl Scope {
         self.scope.borrow_mut()?.state_set_returnable();
         Ok(())
     }
-    
+
     pub fn set_target(&mut self, target: Value) -> Res {
         self.scope.borrow_mut()?.new_target = target;
         Ok(())
     }
-    
+
     pub fn get_target(&self) -> Res<Value> {
         Ok(self.scope.borrow()?.new_target.copy())
     }
@@ -827,13 +824,12 @@ impl Scope {
     pub fn get_variable_names(&self) -> Res<HashSet<String>> {
         self.scope.borrow()?.get_variable_names()
     }
-    
-    
-    #[must_use] 
+
+    #[must_use]
     pub fn into_module(self) -> ModuleScope {
         ModuleScope {
             scope: self,
-            module: Module::default()
+            module: Module::default(),
         }
     }
 }
@@ -907,7 +903,9 @@ mod tests {
     fn scope_internal_declare_var_and_resolve() {
         let realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
-        scope.declare_var("test".to_string(), Value::Number(42.0)).unwrap();
+        scope
+            .declare_var("test".to_string(), Value::Number(42.0))
+            .unwrap();
         let value = scope.resolve("test").unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }

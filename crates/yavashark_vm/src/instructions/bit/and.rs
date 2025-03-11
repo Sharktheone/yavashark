@@ -6,9 +6,8 @@ pub fn bitwise_and(lhs: VarName, rhs: VarName, vm: &mut impl VM) -> Res {
     let lhs = vm.get_variable(lhs)?;
     let rhs = vm.get_variable(rhs)?;
 
-    
     let result = rhs.and(&lhs, vm.get_realm())?;
-    
+
     vm.set_acc(result);
 
     Ok(())
@@ -18,9 +17,8 @@ pub fn bitwise_and_acc(reg: Reg, vm: &mut impl VM) -> Res {
     let rhs = vm.get_register(reg)?;
     let lhs = vm.acc();
 
-    
     let result = rhs.and(&lhs, vm.get_realm())?;
-    
+
     vm.set_acc(result);
 
     Ok(())
@@ -30,9 +28,8 @@ pub fn bitwise_and_reg(rhs: Reg, lhs: Reg, vm: &mut impl VM) -> Res {
     let rhs = vm.get_register(rhs)?;
     let lhs = vm.get_register(lhs)?;
 
-    
     let result = rhs.and(&lhs, vm.get_realm())?;
-    
+
     vm.set_acc(result);
 
     Ok(())

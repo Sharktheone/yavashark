@@ -1,6 +1,6 @@
+use crate::scope::Module;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use crate::scope::Module;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Environment {

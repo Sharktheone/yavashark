@@ -216,7 +216,8 @@ const fn is_ascii_uri_component(c: char) -> bool {
     c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '!' | '~' | '*' | '\'' | '(' | ')')
 }
 
-fn unescape_char(c: char, chars: &mut std::str::Chars) -> Option<char> { //TODO: we should also handle invalid sequences differently => %ZZ will be %ZZ in the final string
+fn unescape_char(c: char, chars: &mut std::str::Chars) -> Option<char> {
+    //TODO: we should also handle invalid sequences differently => %ZZ will be %ZZ in the final string
     match c {
         '%' => {
             let next = chars.next()?;
@@ -225,8 +226,7 @@ fn unescape_char(c: char, chars: &mut std::str::Chars) -> Option<char> { //TODO:
                 let code = u32::from_str_radix(&code, 16).ok()?;
                 char::from_u32(code)
             } else {
-                let code =
-                    next.to_digit(16)? * 16 + chars.next()?.to_digit(16)?;
+                let code = next.to_digit(16)? * 16 + chars.next()?.to_digit(16)?;
                 char::from_u32(code)
             }
         }
@@ -252,9 +252,7 @@ fn unescape_char(c: char, chars: &mut std::str::Chars) -> Option<char> { //TODO:
                 _ => Some(next),
             }
         }
-        _ => {
-            Some(c)
-        }
+        _ => Some(c),
     }
 }
 

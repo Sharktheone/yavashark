@@ -16,8 +16,13 @@ pub fn run_file(file: PathBuf) -> Result<String, Error> {
     run_file_in(file, &mut realm, &mut scope, stmt, metadata)
 }
 
-pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, prog: Program, metadata: Metadata) -> Result<String, Error> {
-
+pub fn run_file_in(
+    file: PathBuf,
+    realm: &mut Realm,
+    scope: &mut Scope,
+    prog: Program,
+    metadata: Metadata,
+) -> Result<String, Error> {
     for inc in metadata.includes {
         let path = Path::new(TEST262_DIR).join("harness").join(inc);
 
@@ -30,7 +35,6 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, prog: Pr
     scope.set_path(file)?;
 
     let mut res = Interpreter::run_program_in(&prog, realm, scope).and_then(|v| v.to_string(realm));
-
 
     if let Some(negative) = metadata.negative {
         if negative.phase == NegativePhase::Runtime {
@@ -51,14 +55,16 @@ pub fn run_file_in(file: PathBuf, realm: &mut Realm, scope: &mut Scope, prog: Pr
                 let e = ErrorObj::error_to_value(e, realm);
 
                 if !e.instance_of(&err, realm)? {
-                    return Err(Error::new_error(format!("Expected error of type {:?} but got {:?}", err, e)));
+                    return Err(Error::new_error(format!(
+                        "Expected error of type {:?} but got {:?}",
+                        err, e
+                    )));
                 }
 
                 res = Ok("".to_string());
             }
         }
     }
-
 
     res
 }

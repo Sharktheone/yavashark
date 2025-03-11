@@ -13,7 +13,6 @@ impl<R: Realm> Value<R> {
             }
             (BigIntOrNumber::BigInt(_), BigIntOrNumber::BigInt(_)) => {
                 return Err(Error::ty("cannot perform unsigned right shift on BigInt"));
-                
             }
 
             _ => return Err(Error::ty("cannot mix BigInt and Number")),

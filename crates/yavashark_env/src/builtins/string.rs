@@ -1,5 +1,7 @@
 use crate::array::Array;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Res, ObjectProperty};
+use crate::{
+    Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
+};
 use std::cell::{RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
@@ -11,7 +13,6 @@ use yavashark_value::{Constructor, Func, MutObj, Obj};
 pub struct StringObj {
     pub inner: RefCell<MutableStringObj>,
 }
-
 
 #[derive(Debug)]
 pub struct MutableStringObj {
@@ -36,15 +37,15 @@ impl DerefMut for MutableStringObj {
 impl yavashark_value::ObjectImpl<Realm> for StringObj {
     type Inner = MutableStringObj;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
         RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
     }
 
-    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
         self.inner.borrow()
     }
 
-    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }
 
@@ -55,18 +56,16 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
             return Ok(Some(self.at(index).into()));
         }
 
-
         self.get_wrapped_object().resolve_property(name)
     }
 
     fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         if let Value::Number(n) = name {
             let index = *n as isize;
-            
+
             return Ok(Some(self.at(index).into()));
         }
-        
-        
+
         self.get_wrapped_object().get_property(name)
     }
 
@@ -78,7 +77,6 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
         Some(self.inner.borrow().string.clone().into())
     }
 }
-
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -193,7 +191,7 @@ impl StringObj {
     fn get_length(&self) -> usize {
         self.inner.borrow().string.len()
     }
-    
+
     pub fn anchor(&self, name: &str) -> ValueResult {
         Ok(format!("<a name=\"{}\">{}</a>", name, self.inner.borrow().string).into())
     }

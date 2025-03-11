@@ -1,14 +1,13 @@
+use crate::statement::decl::var::Variable;
 use crate::Interpreter;
 use swc_ecma_ast::Decl;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
-use crate::statement::decl::var::Variable;
 
 pub mod class;
 pub mod r#fn;
 pub mod using;
 pub mod var;
-
 
 pub enum DeclRet {
     Single(String, Value),
@@ -32,14 +31,13 @@ impl Interpreter {
             Decl::Fn(f) => Self::decl_fn_ret(realm, f, scope)?,
             Decl::Var(v) => {
                 let values = Self::decl_var_ret(realm, v, scope)?;
-                
+
                 return Ok(DeclRet::Var(values));
-                
-            },
+            }
             Decl::Using(u) => Self::decl_using_ret(realm, u, scope)?,
             _ => return Err(Error::new("Unsupported declaration")),
         };
-        
+
         Ok(DeclRet::Single(name, value))
     }
 }

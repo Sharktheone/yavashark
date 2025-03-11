@@ -109,7 +109,6 @@ impl ControlFlow {
 
 pub type ValueResult = Result<Value, Error>;
 
-
 pub type Res<T = (), E = Error> = Result<T, E>;
 
 pub type RuntimeResult = Result<Value, ControlFlow>;

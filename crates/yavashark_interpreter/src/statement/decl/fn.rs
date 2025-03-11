@@ -10,7 +10,11 @@ use yavashark_env::{optimizer::OptimFunction, Realm, Res, Value};
 use yavashark_value::AsAny;
 
 impl Interpreter {
-    pub fn decl_fn_ret(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Res<(String, Value)> {
+    pub fn decl_fn_ret(
+        realm: &mut Realm,
+        stmt: &FnDecl,
+        scope: &mut Scope,
+    ) -> Res<(String, Value)> {
         let mut fn_scope = Scope::with_parent(scope)?;
 
         fn_scope.state_set_function()?;
@@ -19,7 +23,7 @@ impl Interpreter {
         //     let boxed: Box<dyn FunctionCode> = Box::new(OptimizedJSFunction {
         //         block: block.clone(),
         //     });
-        // 
+        //
         //     RefCell::new(boxed)
         // });
 
@@ -39,7 +43,7 @@ impl Interpreter {
         let (name, function) = Self::decl_fn_ret(realm, stmt, scope)?;
 
         scope.declare_var(name, function);
-        
+
         Ok(())
     }
 }
