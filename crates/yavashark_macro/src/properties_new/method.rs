@@ -18,12 +18,12 @@ pub struct Method {
 impl Method {
     pub fn init_tokens(&self, config: &crate::config::Config) -> TokenStream {
         let self_ty = quote! { Self };
-        
+
         self.init_tokens_self(config, self_ty)
     }
-    
-    
-    
+
+
+
     pub fn init_tokens_self(&self, config: &crate::config::Config, self_ty: TokenStream) -> TokenStream {
         let native_function = &config.native_function;
         let name_ident = &self.name;
@@ -187,13 +187,17 @@ pub fn parse_method(
                 maybe_static = MethodType::Impl;
             }
             syn::FnArg::Typed(pat) => {
-                for attr in &pat.attrs {
+                pat.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("this") {
                         this = Some(args.len());
+                        return false;
                     } else if attr.path().is_ident("realm") {
                         realm = Some(args.len());
+                        return false;
                     }
-                }
+                    
+                    true
+                });
                 args.push((*pat.ty).clone());
             }
         }
@@ -211,8 +215,8 @@ pub fn parse_method(
                     return false;
                 }
             };
-            
-            
+
+
             js_name = Some(n);
             return false;
         } else if attr.path().is_ident("get") {
@@ -235,7 +239,7 @@ pub fn parse_method(
                 .map_err(|e| encountered_error = Some(e))
                 .ok();
             ty = Type::Get;
-            
+
             return false;
         } else if attr.path().is_ident("set") {
             if ty != Type::Normal {
@@ -257,15 +261,15 @@ pub fn parse_method(
                 .map_err(|e| encountered_error = Some(e))
                 .ok();
             ty = Type::Set;
-            
+
             return false;
         } else if attr.path().is_ident("static") {
             maybe_static = MethodType::Static;
-            
+
             return false;
         } else if attr.path().is_ident("nonstatic") {
             maybe_static = MethodType::Impl;
-            
+
             return false;
         } else if attr.path().is_ident("constructor") {
             if maybe_static == MethodType::CallConstructor {
@@ -273,7 +277,7 @@ pub fn parse_method(
             } else {
                 maybe_static = MethodType::Constructor;
             }
-            
+
             return false;
         } else if attr.path().is_ident("call_constructor") {
             if maybe_static == MethodType::Constructor {
@@ -281,10 +285,10 @@ pub fn parse_method(
             } else {
                 maybe_static = MethodType::CallConstructor;
             }
-            
+
             return false;
         }
-        
+
         true
     });
 

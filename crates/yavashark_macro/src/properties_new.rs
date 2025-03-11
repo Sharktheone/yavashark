@@ -89,7 +89,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     // Configuration for code generation:
     let config = crate::config::Config::new(Span::call_site());
 
-    let init = init_props(props, &config);
+    let init = init_props(props, &config, None);
     let (constructor_tokens, init_constructor) = init_constructor(
         &item_impl.self_ty,
         static_props,
@@ -131,14 +131,15 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     Ok(tokens.into())
 }
 
-fn init_props(props: Vec<Prop>, config: &Config) -> TokenStream {
+fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -> TokenStream {
     // Generate initialization code from processed properties:
     let mut init = TokenStream::new();
+    let self_ty = self_ty.unwrap_or_else(|| quote! { Self });
 
     for prop in props {
         let (prop_tokens, name, js_name, prop_type) = match prop {
             Prop::Method(method) => (
-                method.init_tokens(config),
+                method.init_tokens_self(config, self_ty.clone()),
                 method.name,
                 method.js_name,
                 method.ty,
@@ -162,7 +163,7 @@ fn init_props(props: Vec<Prop>, config: &Config) -> TokenStream {
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_variable(#name.into(), #variable::write_configig(prop.into()))?;
+                        obj.define_variable(#name.into(), #variable::write_config(prop.into()))?;
                     }
                 }
             }
@@ -257,7 +258,7 @@ fn init_constructor(
 
 
     {
-        let init = init_props(static_props, config);
+        let init = init_props(static_props, config, Some(ty.to_token_stream()));
         constructor_tokens.extend(quote! {
             impl #name {
                 #[allow(clippy::new_ret_no_self)]
@@ -277,6 +278,8 @@ fn init_constructor(
                 pub fn initialize(&mut self, func_proto: #value) -> core::result::Result<(), #error> {
                     use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
+                    
+                    let obj = self;
 
                     #init
 
