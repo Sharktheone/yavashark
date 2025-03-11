@@ -23,12 +23,11 @@ pub fn parse_constant(
     constant: &mut syn::ImplItemConst,
 ) -> Result<MaybeStatic<Constant>, syn::Error> {
     let mut js_name = None;
-    
+
     let mut is_static = true;
-    
-    
+
     let mut error = None;
-    constant.attrs.retain_mut(|attr|  {
+    constant.attrs.retain_mut(|attr| {
         if attr.path().is_ident("prop") {
             let args = match attr.parse_args() {
                 Ok(args) => args,
@@ -37,22 +36,21 @@ pub fn parse_constant(
                     return false;
                 }
             };
-            
-            
+
             js_name = Some(args);
             return false;
         } else if attr.path().is_ident("nonstatic") {
             is_static = false;
             return false;
         }
-        
+
         true
     });
-    
+
     if let Some(e) = error {
         return Err(e);
     }
-    
+
     Ok(if is_static {
         MaybeStatic::Static
     } else {

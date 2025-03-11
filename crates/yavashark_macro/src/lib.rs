@@ -7,8 +7,8 @@ mod custom_props;
 mod mutable_region;
 mod obj;
 mod properties;
-mod props;
 mod properties_new;
+mod props;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -41,7 +41,6 @@ pub fn props(
 ) -> proc_macro::TokenStream {
     properties_new::properties(attrs, item).unwrap_or_else(|e| e.to_compile_error().into())
 }
-
 
 #[proc_macro_attribute]
 pub fn custom_props(

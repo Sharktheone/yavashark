@@ -16,7 +16,11 @@ pub struct Method {
 }
 
 impl Method {
-    pub fn init_tokens_self(&self, config: &crate::config::Config, self_ty: TokenStream) -> TokenStream {
+    pub fn init_tokens_self(
+        &self,
+        config: &crate::config::Config,
+        self_ty: TokenStream,
+    ) -> TokenStream {
         let native_function = &config.native_function;
         let name_ident = &self.name;
         let extractor = &config.extractor;
@@ -187,7 +191,7 @@ pub fn parse_method(
                         realm = Some(args.len());
                         return false;
                     }
-                    
+
                     true
                 });
                 args.push((*pat.ty).clone());
@@ -199,15 +203,13 @@ pub fn parse_method(
     let mut encountered_error = None;
     func.attrs.retain_mut(|attr| {
         if attr.path().is_ident("prop") {
-            let n = match attr.parse_args()
-                .map_err(|e| syn::Error::new(e.span(), e)) {
+            let n = match attr.parse_args().map_err(|e| syn::Error::new(e.span(), e)) {
                 Ok(n) => n,
                 Err(e) => {
                     encountered_error = Some(e);
                     return false;
                 }
             };
-
 
             js_name = Some(n);
             return false;
@@ -300,7 +302,12 @@ pub fn parse_method(
         ));
     }
 
-    if this.is_some() && matches!(maybe_static, MethodType::Constructor | MethodType::CallAndConstructor) {
+    if this.is_some()
+        && matches!(
+            maybe_static,
+            MethodType::Constructor | MethodType::CallAndConstructor
+        )
+    {
         return Err(syn::Error::new(
             func.sig.ident.span(),
             "Cannot have this on constructor methods",

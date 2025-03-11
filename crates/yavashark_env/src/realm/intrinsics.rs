@@ -243,7 +243,8 @@ impl Intrinsics {
 
         let reflect = Reflect::new(obj_prototype.clone().into(), func_prototype.clone().into())?;
 
-        let (temporal, temporal_protos) = get_temporal(obj_prototype.clone(), func_prototype.clone())?;
+        let (temporal, temporal_protos) =
+            get_temporal(obj_prototype.clone(), func_prototype.clone())?;
 
         Ok(Self {
             obj: obj_prototype,

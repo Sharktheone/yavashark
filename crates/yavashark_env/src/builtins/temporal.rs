@@ -7,8 +7,8 @@ mod plain_time;
 mod plain_year_month;
 mod zoned_date_time;
 
-use crate::{Object, ObjectHandle, Res, Value, Variable};
 use crate::builtins::temporal::duration::Duration;
+use crate::{Object, ObjectHandle, Res, Value, Variable};
 
 pub struct Protos {
     pub duration: ObjectHandle,
@@ -21,21 +21,23 @@ pub struct Protos {
     pub zoned_date_time: ObjectHandle,
 }
 
-
 fn constr(obj: &ObjectHandle) -> Variable {
-    Variable::write_config(obj.get_property(&"constructor".into())
-        .unwrap_or(Value::Undefined.into())
-        .value)
+    Variable::write_config(
+        obj.get_property(&"constructor".into())
+            .unwrap_or(Value::Undefined.into())
+            .value,
+    )
 }
 
-pub fn get_temporal(obj_proto: ObjectHandle, func_proto: ObjectHandle) -> Res<(ObjectHandle, Protos)> {
+pub fn get_temporal(
+    obj_proto: ObjectHandle,
+    func_proto: ObjectHandle,
+) -> Res<(ObjectHandle, Protos)> {
     let obj = Object::with_proto(obj_proto.clone().into());
-    
-    let duration = Duration::initialize_proto(
-        Object::raw_with_proto(obj_proto.into()),
-        func_proto.into(),
-    )?;
-    
+
+    let duration =
+        Duration::initialize_proto(Object::raw_with_proto(obj_proto.into()), func_proto.into())?;
+
     obj.define_variable("Duration".into(), constr(&duration))?;
     obj.define_variable("Instant".into(), Variable::write_config(Value::Undefined))?;
     obj.define_variable("Now".into(), Variable::write_config(Value::Undefined))?;
@@ -68,7 +70,6 @@ pub fn get_temporal(obj_proto: ObjectHandle, func_proto: ObjectHandle) -> Res<(O
             plain_month_day: Object::null(),
             plain_year_month: Object::null(),
             zoned_date_time: Object::null(),
-            
         },
     ))
 }
