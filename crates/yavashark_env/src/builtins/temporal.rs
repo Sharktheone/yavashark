@@ -9,8 +9,10 @@ mod zoned_date_time;
 
 use crate::{Object, ObjectHandle, Res, Value, Variable};
 
-pub fn get_temporal(obj: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
-    let obj = Object::with_proto(obj.clone().into());
+pub fn get_temporal(obj_proto: ObjectHandle, func_proto: ObjectHandle) -> Res<ObjectHandle> {
+    let obj = Object::with_proto(obj_proto.clone().into());
+    _ = obj_proto;
+    _ = func_proto;
     
     obj.define_variable("Duration".into(), Variable::write_config(Value::Undefined))?;
     obj.define_variable("Instant".into(), Variable::write_config(Value::Undefined))?;
@@ -20,6 +22,7 @@ pub fn get_temporal(obj: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> 
     obj.define_variable("PlainMonthDay".into(), Variable::write_config(Value::Undefined))?;
     obj.define_variable("PlainYearMonth".into(), Variable::write_config(Value::Undefined))?;
     obj.define_variable("ZonedDateTime".into(), Variable::write_config(Value::Undefined))?;
+    
     
     
 

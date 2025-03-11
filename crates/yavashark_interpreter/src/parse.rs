@@ -11,7 +11,7 @@ pub fn parse_module(input: &str) -> PResult<Module> {
 
     let end = BytePos(input.len() as u32 - 1);
 
-    let input = StringInput::new(&input, BytePos(0), end);
+    let input = StringInput::new(input, BytePos(0), end);
 
 
     let mut p = Parser::new(Syntax::Es(EsSyntax::default()), input, None);

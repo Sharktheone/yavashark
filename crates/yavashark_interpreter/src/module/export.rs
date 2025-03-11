@@ -14,14 +14,14 @@ impl Interpreter {
         match val {
             DeclRet::Single(name, value) => {
                 scope.scope.declare_var(name.clone(), value.copy());
-                scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                scope.module.exports.define_property(name.into(), value); //TODO: if the value changes, the export should change too
             },
             DeclRet::Var(vars) => {
                 for var in vars {
                     match var {
                         var::Variable::Var(name, value) => {
                             scope.scope.declare_global_var(name.clone(), value.copy());
-                            scope.module.exports.define_property(name.into(), value.into()); //TODO: if the value changes, the export should change too
+                            scope.module.exports.define_property(name.into(), value); //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Let(name, value) => {
                             scope.scope.declare_var(name.clone(), value.copy());
@@ -71,7 +71,7 @@ impl Interpreter {
                         })?;
                     
                     scope.scope.declare_var(export.clone(), val.value.copy())?;
-                    scope.module.exports.define_property(export.into(), val.value.copy().into()); //TODO: if the value changes, the export should change too
+                    scope.module.exports.define_property(export.into(), val.value); //TODO: if the value changes, the export should change too
                 }
                 
                 ExportSpecifier::Default(default) => {
@@ -82,7 +82,7 @@ impl Interpreter {
                     let name = default.exported.to_string();
                     
                     scope.scope.declare_var(name.clone(), val.copy())?;
-                    scope.module.exports.define_property(name.into(), val.copy().into()); //TODO: if the value changes, the export should change too
+                    scope.module.exports.define_property(name.into(), val.copy()); //TODO: if the value changes, the export should change too
                 }
                 
                 ExportSpecifier::Namespace(ns) => {
@@ -112,18 +112,18 @@ impl Interpreter {
     pub fn run_export_default_decl(realm: &mut Realm, stmt: &ExportDefaultDecl, scope: &mut ModuleScope) -> RuntimeResult {
         match &stmt.decl {
             DefaultDecl::Class(c) => {
-                let class = Self::run_class(realm, &c, &mut scope.scope)?;
+                let class = Self::run_class(realm, c, &mut scope.scope)?;
                 
                 scope.module.default = Some(class);
             }
             
             DefaultDecl::Fn(f) => {
-                let func = Self::run_fn(realm, &f, &mut scope.scope)?;
+                let func = Self::run_fn(realm, f, &mut scope.scope)?;
                 
                 scope.module.default = Some(func);
             }
             
-            _ => return Err(Error::syn("TypeScript is not supported").into()),
+            DefaultDecl::TsInterfaceDecl(_) => return Err(Error::syn("TypeScript is not supported").into()),
         }
         
         Ok(Value::Undefined)

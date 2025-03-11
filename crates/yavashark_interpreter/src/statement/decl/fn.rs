@@ -38,7 +38,7 @@ impl Interpreter {
     pub fn decl_fn(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Res {
         let (name, function) = Self::decl_fn_ret(realm, stmt, scope)?;
 
-        scope.declare_var(name, function.into());
+        scope.declare_var(name, function);
         
         Ok(())
     }
