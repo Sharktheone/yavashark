@@ -3,7 +3,7 @@ mod method;
 
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 use syn::{spanned::Spanned, ImplItem, ItemImpl};
 
 use crate::config::Config;
@@ -90,8 +90,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let config = crate::config::Config::new(Span::call_site());
 
     let init = init_props(props, &config);
-    let (constructor_tokens, init_constructor) =
-        init_constructor(&item_impl.self_ty, static_props, constructor, call_constructor, &config)?;
+    let (constructor_tokens, init_constructor) = init_constructor(
+        &item_impl.self_ty,
+        static_props,
+        constructor,
+        call_constructor,
+        &config,
+    )?;
 
     let try_into_value = &config.try_into_value;
     let object = &config.object;
@@ -103,20 +108,20 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         pub fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#object_handle, #error> {
             use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
             use #try_into_value;
-            
+
             #init
-            
+
             let obj = obj.into_object();
-            
+
             #init_constructor
-            
-            
+
+
             Ok(obj)
         }
     };
 
     // Append our generated initialization function to the impl block.
-    item_impl.items.push(syn::parse2(init_fn).unwrap());
+    item_impl.items.push(syn::parse2(init_fn)?);
     Ok(item_impl.to_token_stream().into())
 }
 
@@ -127,13 +132,13 @@ fn init_props(props: Vec<Prop>, config: &Config) -> TokenStream {
     for prop in props {
         let (prop_tokens, name, js_name, prop_type) = match prop {
             Prop::Method(method) => (
-                method.init_tokens(&config),
+                method.init_tokens(config),
                 method.name,
                 method.js_name,
                 method.ty,
             ),
             Prop::Constant(constant) => (
-                constant.init_tokens(&config),
+                constant.init_tokens(config),
                 constant.name,
                 constant.js_name,
                 Type::Normal,
@@ -178,7 +183,6 @@ fn init_props(props: Vec<Prop>, config: &Config) -> TokenStream {
     init
 }
 
-
 fn init_constructor(
     ty: &syn::Type,
     static_props: Vec<Prop>,
@@ -191,18 +195,97 @@ fn init_constructor(
     }
 
     let name = ty_to_name(ty)?;
-    let mut init_constructor = TokenStream::new();
-    
-    //TODO
-    
-    
-    
-    
-    
-    
-    Ok((TokenStream::new(), TokenStream::new()))
-}
+    let name = format_ident!("{}Constructor", name);
+    let mut_name = format_ident!("Mutable{}", name);
+    let args = match (constructor.is_some(), call_constructor.is_some()) {
+        (true, true) => quote! { (constructor, function) },
+        (true, false) => quote! { (constructor) },
+        (false, true) => quote! { (function) },
+        (false, false) => unreachable!(),
+    };
 
+    let mut constructor_tokens = quote! {
+        #[yavashark_macro::object(#args)]
+        #[derive(Debug)]
+        pub struct #name {}
+    };
+
+    if let Some(constructor) = constructor {
+        let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
+        
+        
+        constructor_tokens.extend(quote! {
+            impl yavashark_value::Constructor<Realm> for #name {
+                fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+                    #fn_tok
+                }
+            }
+        });
+    }
+    
+    if let Some(call_constructor) = call_constructor {
+        let fn_tok = call_constructor.init_tokes_direct(config, ty.to_token_stream());
+        
+        constructor_tokens.extend(quote! {
+            impl yavashark_value::Func<Realm> for #name {
+                pub fn call(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+                    #fn_tok
+                }
+            }
+        });
+    }
+    
+    constructor_tokens.extend(quote! {
+        impl #name {
+            #[allow(clippy::new_ret_no_self)]
+            pub fn new(func: &Value) -> crate::Res<ObjectHandle> {
+                let mut this = Self {
+                    inner: RefCell::new(#mut_name {
+                        object: MutObject::with_proto(func.copy()),
+                    }),
+                };
+
+                this.initialize(func.copy())?;
+
+                Ok(this.into_object())
+            }
+        }
+    });
+
+    {
+        let value = &config.value;
+        let error = &config.error;
+        let try_into_value = &config.try_into_value;
+        
+        let init = init_props(static_props, config);
+        
+        constructor_tokens.extend(quote! {
+            pub fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
+                use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                use #try_into_value;
+
+                #init
+
+                Ok(())
+                
+            }
+        })
+    }
+    
+    let variable = &config.variable;
+    
+    let init_tokens = quote! {
+        let constructor = #name::new(func)?;
+        
+        obj.define_variable("constructor".into(), constructor.clone().into())?;
+        
+        constructor.define_variable("prototype".into(), #variable::write_conf(obj.clone().into()))?;
+        
+        
+    };
+
+    Ok((constructor_tokens, init_tokens))
+}
 
 fn ty_to_name(ty: &syn::Type) -> syn::Result<syn::Ident> {
     match ty {

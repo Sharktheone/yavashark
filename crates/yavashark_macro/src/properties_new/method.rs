@@ -1,8 +1,8 @@
+use crate::properties_new::{MaybeConstructor, Type};
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use syn::Expr;
 use syn::spanned::Spanned;
-use crate::properties_new::{MaybeConstructor, Type};
+use syn::Expr;
 
 #[derive(Clone)]
 pub struct Method {
@@ -15,10 +15,16 @@ pub struct Method {
     pub ty: Type,
 }
 
-
 impl Method {
-    /// Generate token stream for method registration.
     pub fn init_tokens(&self, config: &crate::config::Config) -> TokenStream {
+        let self_ty = quote! { Self };
+        
+        self.init_tokens_self(config, self_ty)
+    }
+    
+    
+    
+    pub fn init_tokens_self(&self, config: &crate::config::Config, self_ty: TokenStream) -> TokenStream {
         let native_function = &config.native_function;
         let name_ident = &self.name;
         let extractor = &config.extractor;
@@ -60,7 +66,7 @@ impl Method {
             }
         } else {
             quote! {
-                Self::#name_ident(#call_args)
+                #self_ty::#name_ident(#call_args)
             }
         };
 
@@ -72,7 +78,11 @@ impl Method {
             TokenStream::new()
         };
 
-        let js_name = self.js_name.clone().map(|js| quote! { #js }).unwrap_or_else(|| quote! { stringify!(#name_ident) });
+        let js_name = self
+            .js_name
+            .clone()
+            .map(|js| quote! { #js })
+            .unwrap_or_else(|| quote! { stringify!(#name_ident) });
         let length = self.args.len();
 
         quote! {
@@ -83,8 +93,71 @@ impl Method {
             }, func_proto.copy(), #length)
         }
     }
-}
 
+    pub fn init_tokes_direct(
+        &self,
+        config: &crate::config::Config,
+        self_ty: TokenStream,
+    ) -> TokenStream {
+        let name_ident = &self.name;
+        let extractor = &config.extractor;
+        let extract_value = &config.extract_value;
+
+        let mut arg_prepare = quote! {
+            let mut extractor = #extractor::new(&mut args);
+        };
+        let mut call_args = TokenStream::new();
+
+        for (i, ty) in self.args.iter().enumerate() {
+            let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
+            if Some(i) == self.this {
+                arg_prepare.extend(quote! {
+                    let #argname = this.copy();
+                });
+            } else if Some(i) == self.realm {
+                arg_prepare.extend(quote! {
+                    let #argname = realm;
+                });
+            } else {
+                arg_prepare.extend(quote! {
+                    let #argname = #extract_value::<#ty>::extract(&mut extractor)?;
+                });
+            }
+            let refs = if matches!(ty, syn::Type::Reference(_)) && Some(i) != self.realm {
+                quote! { & }
+            } else {
+                TokenStream::new()
+            };
+            call_args.extend(quote! {
+                #refs #argname,
+            });
+        }
+
+        let call = if self.has_receiver {
+            quote! {
+                self.#name_ident(#call_args)
+            }
+        } else {
+            quote! {
+                #self_ty::#name_ident(#call_args)
+            }
+        };
+
+        let prepare_receiver = if self.has_receiver {
+            quote! {
+                let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
+            }
+        } else {
+            TokenStream::new()
+        };
+
+        quote! {
+                #arg_prepare
+                #prepare_receiver
+                #call.try_into_value()
+        }
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum MethodType {
@@ -95,14 +168,15 @@ enum MethodType {
     CallAndConstructor,
 }
 
-pub fn parse_method(func: &mut syn::ImplItemFn) -> Result<(MaybeConstructor<Method>, bool), syn::Error> {
+pub fn parse_method(
+    func: &mut syn::ImplItemFn,
+) -> Result<(MaybeConstructor<Method>, bool), syn::Error> {
     let mut js_name = None;
     let mut this = None;
     let mut realm = None;
     let mut has_receiver = false;
     let mut ty = Type::Normal;
-    
-    
+
     let mut maybe_static = MethodType::Static;
 
     let mut args = Vec::new();
@@ -129,28 +203,49 @@ pub fn parse_method(func: &mut syn::ImplItemFn) -> Result<(MaybeConstructor<Meth
     let mut encountered_error = None;
     for attr in func.attrs.iter() {
         if attr.path().is_ident("prop") {
-            js_name = Some(attr.parse_args().map_err(|e| syn::Error::new(e.span(), e))?);
+            js_name = Some(
+                attr.parse_args()
+                    .map_err(|e| syn::Error::new(e.span(), e))?,
+            );
         } else if attr.path().is_ident("get") {
             if ty != Type::Normal {
-                encountered_error = Some(syn::Error::new(attr.span(), "Cannot have both get and set on the same function"));
+                encountered_error = Some(syn::Error::new(
+                    attr.span(),
+                    "Cannot have both get and set on the same function",
+                ));
             }
-            attr.parse_args::<syn::Expr>().map(|name| {
-                if js_name.is_some() {
-                    encountered_error = Some(syn::Error::new(attr.span(), "Cannot have both prop and get on the same function"));
-                }
-                js_name = Some(name);
-            }).map_err(|e| encountered_error = Some(e)).ok();
+            attr.parse_args::<syn::Expr>()
+                .map(|name| {
+                    if js_name.is_some() {
+                        encountered_error = Some(syn::Error::new(
+                            attr.span(),
+                            "Cannot have both prop and get on the same function",
+                        ));
+                    }
+                    js_name = Some(name);
+                })
+                .map_err(|e| encountered_error = Some(e))
+                .ok();
             ty = Type::Get;
         } else if attr.path().is_ident("set") {
             if ty != Type::Normal {
-                encountered_error = Some(syn::Error::new(attr.span(), "Cannot have both get and set on the same function"));
+                encountered_error = Some(syn::Error::new(
+                    attr.span(),
+                    "Cannot have both get and set on the same function",
+                ));
             }
-            attr.parse_args::<syn::Expr>().map(|name| {
-                if js_name.is_some() {
-                    encountered_error = Some(syn::Error::new(attr.span(), "Cannot have both prop and set on the same function"));
-                }
-                js_name = Some(name);
-            }).map_err(|e| encountered_error = Some(e)).ok();
+            attr.parse_args::<syn::Expr>()
+                .map(|name| {
+                    if js_name.is_some() {
+                        encountered_error = Some(syn::Error::new(
+                            attr.span(),
+                            "Cannot have both prop and set on the same function",
+                        ));
+                    }
+                    js_name = Some(name);
+                })
+                .map_err(|e| encountered_error = Some(e))
+                .ok();
             ty = Type::Set;
         } else if attr.path().is_ident("static") {
             maybe_static = MethodType::Static;
@@ -162,37 +257,54 @@ pub fn parse_method(func: &mut syn::ImplItemFn) -> Result<(MaybeConstructor<Meth
             } else {
                 maybe_static = MethodType::Constructor;
             }
-            
         } else if attr.path().is_ident("call_constructor") {
             if maybe_static == MethodType::Constructor {
                 maybe_static = MethodType::CallAndConstructor;
             } else {
                 maybe_static = MethodType::CallConstructor;
             }
-        } 
+        }
     }
-    
+
     if let Some(err) = encountered_error {
         return Err(err);
     }
 
-    if ty != Type::Normal && matches!(maybe_static, MethodType::Constructor | MethodType::CallConstructor | MethodType::CallAndConstructor) {
-        return Err(syn::Error::new(func.sig.ident.span(), "Getters and setters must be on non constructor methods"));
+    let is_constructor = matches!(
+        maybe_static,
+        MethodType::Constructor | MethodType::CallConstructor | MethodType::CallAndConstructor
+    );
+
+    if ty != Type::Normal && is_constructor {
+        return Err(syn::Error::new(
+            func.sig.ident.span(),
+            "Getters and setters must be on non constructor methods",
+        ));
     }
 
-    Ok((match maybe_static {
-        MethodType::Impl => MaybeConstructor::Impl,
-        MethodType::Static => MaybeConstructor::Static,
-        MethodType::Constructor => MaybeConstructor::Constructor,
-        MethodType::CallConstructor => MaybeConstructor::CallConstructor,
-        MethodType::CallAndConstructor => MaybeConstructor::CallAndConstructor,
-    }(Method {
-        name: func.sig.ident.clone(),
-        js_name,
-        args,
-        this,
-        realm,
+    if this.is_some() && is_constructor {
+        return Err(syn::Error::new(
+            func.sig.ident.span(),
+            "Cannot have this on constructor methods",
+        ));
+    }
+
+    Ok((
+        match maybe_static {
+            MethodType::Impl => MaybeConstructor::Impl,
+            MethodType::Static => MaybeConstructor::Static,
+            MethodType::Constructor => MaybeConstructor::Constructor,
+            MethodType::CallConstructor => MaybeConstructor::CallConstructor,
+            MethodType::CallAndConstructor => MaybeConstructor::CallAndConstructor,
+        }(Method {
+            name: func.sig.ident.clone(),
+            js_name,
+            args,
+            this,
+            realm,
+            has_receiver,
+            ty,
+        }),
         has_receiver,
-        ty,
-    }), has_receiver))
+    ))
 }
