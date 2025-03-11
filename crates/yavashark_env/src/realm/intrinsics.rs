@@ -38,6 +38,14 @@ pub struct Intrinsics {
     pub(crate) date: ObjectHandle,
     pub(crate) reflect: ObjectHandle,
     pub(crate) temporal: ObjectHandle,
+    pub(crate) temporal_duration: ObjectHandle,
+    pub(crate) temporal_instant: ObjectHandle,
+    pub(crate) temporal_now: ObjectHandle,
+    pub(crate) temporal_plain_date: ObjectHandle,
+    pub(crate) temporal_plain_date_time: ObjectHandle,
+    pub(crate) temporal_plain_month_day: ObjectHandle,
+    pub(crate) temporal_plain_year_month: ObjectHandle,
+    pub(crate) temporal_zoned_date_time: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -235,7 +243,7 @@ impl Intrinsics {
 
         let reflect = Reflect::new(obj_prototype.clone().into(), func_prototype.clone().into())?;
 
-        let temporal = get_temporal(obj_prototype.clone(), func_prototype.clone())?;
+        let (temporal, temporal_protos) = get_temporal(obj_prototype.clone(), func_prototype.clone())?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -266,6 +274,14 @@ impl Intrinsics {
             date,
             reflect,
             temporal,
+            temporal_duration: temporal_protos.duration,
+            temporal_instant: temporal_protos.instant,
+            temporal_now: temporal_protos.now,
+            temporal_plain_date: temporal_protos.plain_date,
+            temporal_plain_date_time: temporal_protos.plain_date_time,
+            temporal_plain_month_day: temporal_protos.plain_month_day,
+            temporal_plain_year_month: temporal_protos.plain_year_month,
+            temporal_zoned_date_time: temporal_protos.zoned_date_time,
         })
     }
 }

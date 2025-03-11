@@ -16,14 +16,6 @@ pub struct Method {
 }
 
 impl Method {
-    pub fn init_tokens(&self, config: &crate::config::Config) -> TokenStream {
-        let self_ty = quote! { Self };
-
-        self.init_tokens_self(config, self_ty)
-    }
-
-
-
     pub fn init_tokens_self(&self, config: &crate::config::Config, self_ty: TokenStream) -> TokenStream {
         let native_function = &config.native_function;
         let name_ident = &self.name;
