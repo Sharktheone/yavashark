@@ -1,4 +1,3 @@
-use crate::array::Array;
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
@@ -124,9 +123,7 @@ impl Reflect {
 
     #[prop("ownKeys")]
     pub fn own_keys(target: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
-        let keys = target.keys()?;
-
-        Ok(Array::with_elements(realm, keys)?.into_value())
+        ObjectConstructor::keys_js(target, realm)
     }
 
     #[prop("preventExtensions")]
