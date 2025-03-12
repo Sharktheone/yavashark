@@ -15,6 +15,7 @@ pub struct Protos {
     pub instant: ObjectHandle,
     pub now: ObjectHandle,
     pub plain_date: ObjectHandle,
+    pub plain_time: ObjectHandle,
     pub plain_date_time: ObjectHandle,
     pub plain_month_day: ObjectHandle,
     pub plain_year_month: ObjectHandle,
@@ -43,6 +44,10 @@ pub fn get_temporal(
     obj.define_variable("Now".into(), Variable::write_config(Value::Undefined))?;
     obj.define_variable("PlainDate".into(), Variable::write_config(Value::Undefined))?;
     obj.define_variable(
+        "PlainTime".into(),
+        Variable::write_config(Value::Undefined),
+    )?;
+    obj.define_variable(
         "PlainDateTime".into(),
         Variable::write_config(Value::Undefined),
     )?;
@@ -66,6 +71,7 @@ pub fn get_temporal(
             instant: Object::null(),
             now: Object::null(),
             plain_date: Object::null(),
+            plain_time: Object::null(),
             plain_date_time: Object::null(),
             plain_month_day: Object::null(),
             plain_year_month: Object::null(),
