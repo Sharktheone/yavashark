@@ -501,8 +501,12 @@ impl MutObj<Realm> for MutObject {
         Ok(self
             .array
             .iter()
-            .map(|(i, _)| Value::Number(*i as f64))
-            .chain(self.properties.keys().map(Value::copy))
+            .filter_map(|(i, v)| {
+                if v.attributes.is_enumerable() { Some(Value::Number(*i as f64)) } else { None }
+            })
+            .chain(self.properties.iter().filter_map(|(k, v)| {
+                if v.attributes.is_enumerable() { Some(k.copy()) } else { None }
+            }))
             .collect())
     }
 
