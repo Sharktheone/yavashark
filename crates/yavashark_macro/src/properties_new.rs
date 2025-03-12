@@ -37,7 +37,6 @@ enum MaybeStatic<T> {
 
 #[allow(unused)]
 pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenStream1> {
-    // Parse top-level attributes with darling:
     let mut item_impl = syn::parse::<ItemImpl>(item)?;
 
     let mut props = Vec::new();
@@ -86,8 +85,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         }
     }
 
-    // Configuration for code generation:
-    let config = crate::config::Config::new(Span::call_site());
+    let config = Config::new(Span::call_site());
 
     let init = init_props(props, &config, None);
     let (constructor_tokens, init_constructor) = init_constructor(
@@ -120,7 +118,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         }
     };
 
-    // Append our generated initialization function to the impl block.
     item_impl.items.push(syn::parse2(init_fn)?);
 
     let tokens = quote! {
@@ -132,7 +129,6 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 }
 
 fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -> TokenStream {
-    // Generate initialization code from processed properties:
     let mut init = TokenStream::new();
     let self_ty = self_ty.unwrap_or_else(|| quote! { Self });
 
