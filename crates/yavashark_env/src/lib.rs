@@ -1,6 +1,8 @@
+use std::ops::Deref;
 pub use console::*;
 pub use function::*;
 pub use object::*;
+use yavashark_garbage::OwningGcGuard;
 
 pub mod console;
 pub mod error;
@@ -24,7 +26,7 @@ pub mod utils;
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
 pub use yavashark_value as value;
-use yavashark_value::Location;
+use yavashark_value::{BoxedObj, Location};
 
 pub type Value = yavashark_value::Value<Realm>;
 pub type Error = yavashark_value::Error<Realm>;
@@ -114,6 +116,22 @@ pub type Res<T = (), E = Error> = Result<T, E>;
 pub type RuntimeResult = Result<Value, ControlFlow>;
 
 pub type ControlResult = Result<(), ControlFlow>;
+
+pub enum RefOrOwned<T: 'static> {
+    Ref(OwningGcGuard<'static, BoxedObj<Realm>, T>),
+    Owned(T),
+}
+
+impl<T> Deref for RefOrOwned<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Ref(r) => r,
+            Self::Owned(o) => o,
+        }
+    }
+}
 
 impl From<Error> for ControlFlow {
     fn from(e: Error) -> Self {
