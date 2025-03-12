@@ -184,13 +184,7 @@ impl ObjectConstructor {
     fn get_own_property_names(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let keys = obj.keys()?;
 
-        let mut props = Vec::with_capacity(keys.len());
-
-        for key in keys {
-            props.push(key);
-        }
-
-        Ok(Array::with_elements(realm, props)?.into_value())
+        Ok(Array::with_elements(realm, keys)?.into_value())
     }
 
     #[prop("getOwnPropertySymbols")]
