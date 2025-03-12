@@ -2,7 +2,7 @@ use swc_ecma_ast::NewExpr;
 
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
-
+use yavashark_env::utils::ValueIterator;
 use crate::Interpreter;
 
 impl Interpreter {
@@ -22,14 +22,20 @@ impl Interpreter {
             call_args.reserve(args.len());
 
             for arg in args {
-                call_args.push(Self::run_expr(
+                let res = Self::run_expr(
                     realm,
                     &arg.expr,
                     arg.spread.unwrap_or(stmt.span),
                     scope,
-                )?);
+                )?;
                 if arg.spread.is_some() {
-                    todo!("spread")
+                    let iter = ValueIterator::new(&res, realm)?;
+
+                    while let Some(value) = iter.next(realm)? {
+                        call_args.push(value);
+                    }
+                } else {
+                    call_args.push(res);
                 }
             }
         }
