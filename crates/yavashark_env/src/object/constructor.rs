@@ -276,7 +276,7 @@ impl ObjectConstructor {
 
     #[prop("setPrototypeOf")]
     fn set_prototype_of(obj: ObjectHandle, proto: Value) -> ValueResult {
-        obj.define_property("__proto__".into(), proto)?;
+        obj.set_prototype(proto.into())?;
 
         Ok(obj.into())
     }

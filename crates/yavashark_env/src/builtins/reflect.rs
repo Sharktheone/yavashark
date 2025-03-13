@@ -56,7 +56,7 @@ impl Reflect {
 
         if let Some(proto) = new_target.resolve_property(&"prototype".into(), realm)? {
             val.as_object()?
-                .define_property("__proto__".into(), proto)?;
+                .set_prototype(proto.into())?;
         }
 
         Ok(val)
