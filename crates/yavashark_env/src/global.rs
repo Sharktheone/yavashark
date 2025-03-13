@@ -1,4 +1,4 @@
-use crate::builtins::{get_encode_uri, get_encode_uri_component, get_escape};
+use crate::builtins::{get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape};
 use crate::error::get_error;
 use crate::realm::Realm;
 use crate::Value;
@@ -125,7 +125,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     )?;
     obj.define_variable(
         "decodeURI".into(),
-        Variable::write_config(get_encode_uri(realm)),
+        Variable::write_config(get_decode_uri(realm)),
     )?;
     obj.define_variable(
         "encodeURIComponent".into(),
@@ -133,7 +133,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
     )?;
     obj.define_variable(
         "decodeURIComponent".into(),
-        Variable::write_config(get_encode_uri_component(realm)),
+        Variable::write_config(get_decode_uri_component(realm)),
     )?;
     obj.define_variable(
         "Map".into(),
