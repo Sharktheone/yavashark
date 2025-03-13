@@ -1,9 +1,9 @@
 use swc_ecma_ast::NewExpr;
 
-use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
-use yavashark_env::utils::ValueIterator;
 use crate::Interpreter;
+use yavashark_env::scope::Scope;
+use yavashark_env::utils::ValueIterator;
+use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_new(realm: &mut Realm, stmt: &NewExpr, scope: &mut Scope) -> RuntimeResult {
@@ -22,12 +22,7 @@ impl Interpreter {
             call_args.reserve(args.len());
 
             for arg in args {
-                let res = Self::run_expr(
-                    realm,
-                    &arg.expr,
-                    arg.spread.unwrap_or(stmt.span),
-                    scope,
-                )?;
+                let res = Self::run_expr(realm, &arg.expr, arg.spread.unwrap_or(stmt.span), scope)?;
                 if arg.spread.is_some() {
                     let iter = ValueIterator::new(&res, realm)?;
 

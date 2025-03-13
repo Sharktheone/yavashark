@@ -1,7 +1,7 @@
-use std::ops::Deref;
 pub use console::*;
 pub use function::*;
 pub use object::*;
+use std::ops::Deref;
 use yavashark_garbage::OwningGcGuard;
 
 pub mod console;

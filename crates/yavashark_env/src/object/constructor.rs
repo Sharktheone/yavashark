@@ -240,15 +240,19 @@ impl ObjectConstructor {
 
     #[prop("keys")]
     pub fn keys_js(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
-        let keys = obj.keys()?.iter().filter_map(|k| {
-            let v = obj.get_property(k).ok()?; //TODO: This is absolutely not how this should be done (performance wise)
+        let keys = obj
+            .keys()?
+            .iter()
+            .filter_map(|k| {
+                let v = obj.get_property(k).ok()?; //TODO: This is absolutely not how this should be done (performance wise)
 
-            if v.attributes.is_enumerable() {
-                Some(k.copy())
-            } else {
-                None
-            }
-        }).collect();
+                if v.attributes.is_enumerable() {
+                    Some(k.copy())
+                } else {
+                    None
+                }
+            })
+            .collect();
 
         Ok(Array::with_elements(realm, keys)?.into_value())
     }

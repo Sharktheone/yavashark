@@ -1,4 +1,6 @@
-use crate::builtins::{get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape};
+use crate::builtins::{
+    get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape,
+};
 use crate::error::get_error;
 use crate::realm::Realm;
 use crate::Value;
