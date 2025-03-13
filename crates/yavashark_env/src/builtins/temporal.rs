@@ -6,9 +6,18 @@ mod plain_month_day;
 mod plain_time;
 mod plain_year_month;
 mod zoned_date_time;
+mod plain_date_time;
 
 use crate::builtins::temporal::duration::Duration;
 use crate::{Object, ObjectHandle, Res, Value, Variable};
+use crate::builtins::temporal::instant::Instant;
+use crate::builtins::temporal::now::Now;
+use crate::builtins::temporal::plain_date::PlainDate;
+use crate::builtins::temporal::plain_date_time::PlainDateTime;
+use crate::builtins::temporal::plain_month_day::PlainMonthDay;
+use crate::builtins::temporal::plain_time::PlainTime;
+use crate::builtins::temporal::plain_year_month::PlainYearMonth;
+use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 
 pub struct Protos {
     pub duration: ObjectHandle,
@@ -37,45 +46,60 @@ pub fn get_temporal(
     let obj = Object::with_proto(obj_proto.clone().into());
 
     let duration =
-        Duration::initialize_proto(Object::raw_with_proto(obj_proto.into()), func_proto.into())?;
-
+        Duration::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
     obj.define_variable("Duration".into(), constr(&duration))?;
-    obj.define_variable("Instant".into(), Variable::write_config(Value::Undefined))?;
-    obj.define_variable("Now".into(), Variable::write_config(Value::Undefined))?;
-    obj.define_variable("PlainDate".into(), Variable::write_config(Value::Undefined))?;
+    
+    let instant = Instant::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
+    obj.define_variable("Instant".into(), constr(&instant))?;
+    
+    let now = Now::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
+    obj.define_variable("Now".into(), constr(&now))?;
+    
+    let plain_date = PlainDate::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
+    obj.define_variable("PlainDate".into(), constr(&plain_date))?;
+    
+    let plain_time = PlainTime::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
     obj.define_variable(
         "PlainTime".into(),
-        Variable::write_config(Value::Undefined),
+        constr(&plain_time),
     )?;
+    
+    let plain_date_time = PlainDateTime::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
     obj.define_variable(
         "PlainDateTime".into(),
-        Variable::write_config(Value::Undefined),
+        constr(&plain_date_time),
     )?;
+    
+    let plain_month_day = PlainMonthDay::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
     obj.define_variable(
         "PlainMonthDay".into(),
-        Variable::write_config(Value::Undefined),
+        constr(&plain_month_day),
     )?;
+    
+    let plain_year_month = PlainYearMonth::initialize_proto(Object::raw_with_proto(obj_proto.clone().into()), func_proto.clone().into())?;
     obj.define_variable(
         "PlainYearMonth".into(),
-        Variable::write_config(Value::Undefined),
+        constr(&plain_year_month),
     )?;
+    
+    let zoned_date_time = ZonedDateTime::initialize_proto(Object::raw_with_proto(obj_proto.into()), func_proto.into())?;
     obj.define_variable(
         "ZonedDateTime".into(),
-        Variable::write_config(Value::Undefined),
+        constr(&zoned_date_time),
     )?;
 
     Ok((
         obj,
         Protos {
             duration,
-            instant: Object::null(),
-            now: Object::null(),
-            plain_date: Object::null(),
-            plain_time: Object::null(),
-            plain_date_time: Object::null(),
-            plain_month_day: Object::null(),
-            plain_year_month: Object::null(),
-            zoned_date_time: Object::null(),
+            instant,
+            now,
+            plain_date,
+            plain_time,
+            plain_date_time,
+            plain_month_day,
+            plain_year_month,
+            zoned_date_time,
         },
     ))
 }
