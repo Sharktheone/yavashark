@@ -7,6 +7,18 @@ use crate::builtins::{
 };
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
+use crate::builtins::bigint64array::BigInt64Array;
+use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::float16array::Float16Array;
+use crate::builtins::float32array::Float32Array;
+use crate::builtins::float64array::Float64Array;
+use crate::builtins::int16array::Int16Array;
+use crate::builtins::int32array::Int32Array;
+use crate::builtins::int8array::Int8Array;
+use crate::builtins::uint16array::Uint16Array;
+use crate::builtins::uint32array::Uint32Array;
+use crate::builtins::uint8clampedarray::Uint8ClampedArray;
+use crate::builtins::unit8array::Uint8Array;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -251,62 +263,62 @@ impl Intrinsics {
             func_prototype.clone().into(),
         )?;
 
-        let int8array = ArrayBuffer::initialize_proto(
+        let int8array = Int8Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let uint8array = ArrayBuffer::initialize_proto(
+        let uint8array = Uint8Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let uint8clampedarray = ArrayBuffer::initialize_proto(
+        let uint8clampedarray = Uint8ClampedArray::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let int16array = ArrayBuffer::initialize_proto(
+        let int16array = Int16Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let uint16array = ArrayBuffer::initialize_proto(
+        let uint16array = Uint16Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let int32array = ArrayBuffer::initialize_proto(
+        let int32array = Int32Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let uint32array = ArrayBuffer::initialize_proto(
+        let uint32array = Uint32Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let float16array = ArrayBuffer::initialize_proto(
+        let float16array = Float16Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let float32array = ArrayBuffer::initialize_proto(
+        let float32array = Float32Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let float64array = ArrayBuffer::initialize_proto(
+        let float64array = Float64Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let bigint64array = ArrayBuffer::initialize_proto(
+        let bigint64array = BigInt64Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
 
-        let biguint64array = ArrayBuffer::initialize_proto(
+        let biguint64array = BigUint64Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
