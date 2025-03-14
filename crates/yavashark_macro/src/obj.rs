@@ -5,11 +5,40 @@ use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use std::mem;
+use darling::ast::NestedMeta;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{FieldMutability, Fields, Token};
+use syn::{Error, FieldMutability, Fields, Token};
+use darling::FromMeta;
+
+
+
+#[derive(Debug, FromMeta)]
+struct ObjArgs {
+    #[darling(default)]
+    function: bool,
+    #[darling(default)]
+    to_string: bool,
+    #[darling(default)]
+    name: bool,
+    #[darling(default)]
+    primitive: Option<Ident>,
+    #[darling(default)]
+    extends: Option<Ident>,
+}
+
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
+    let attr_args = match NestedMeta::parse_meta_list(attrs.clone().into()) {
+        Ok(v) => v,
+        Err(e) => { return TokenStream1::from(darling::Error::from(e).write_errors()); }
+    };
+    
+    let _args = match ObjArgs::from_list(&attr_args) {
+        Ok(args) => args,
+        Err(e) => return e.write_errors().into(),
+    };
+
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
     let mut proto = false;
     let mut direct = Vec::new();
