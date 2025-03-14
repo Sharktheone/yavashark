@@ -105,6 +105,17 @@ impl Intrinsics {
     constructor!(arraybuffer);
     constructor!(data_view);
     constructor!(typed_array);
+    constructor!(int8array);
+    constructor!(uint8array);
+    constructor!(uint8clampedarray);
+    constructor!(int16array);
+    constructor!(uint16array);
+    constructor!(int32array);
+    constructor!(uint32array);
+    constructor!(float32array);
+    constructor!(float64array);
+    constructor!(bigint64array);
+    constructor!(biguint64array);
     constructor!(map);
     constructor!(set);
     constructor!(date);
