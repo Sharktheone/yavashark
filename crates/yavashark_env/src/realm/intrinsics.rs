@@ -40,6 +40,7 @@ pub struct Intrinsics {
     pub(crate) uint16array: ObjectHandle,
     pub(crate) int32array: ObjectHandle,
     pub(crate) uint32array: ObjectHandle,
+    pub(crate) float16array: ObjectHandle,
     pub(crate) float32array: ObjectHandle,
     pub(crate) float64array: ObjectHandle,
     pub(crate) bigint64array: ObjectHandle,
@@ -112,6 +113,7 @@ impl Intrinsics {
     constructor!(uint16array);
     constructor!(int32array);
     constructor!(uint32array);
+    constructor!(float16array);
     constructor!(float32array);
     constructor!(float64array);
     constructor!(bigint64array);
@@ -284,6 +286,11 @@ impl Intrinsics {
             func_prototype.clone().into(),
         )?;
         
+        let float16array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
         let float32array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
@@ -355,6 +362,7 @@ impl Intrinsics {
             uint16array,
             int32array,
             uint32array,
+            float16array,
             float32array,
             float64array,
             bigint64array,
