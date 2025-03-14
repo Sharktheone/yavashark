@@ -33,6 +33,17 @@ pub struct Intrinsics {
     pub(crate) arraybuffer: ObjectHandle,
     pub(crate) data_view: ObjectHandle,
     pub(crate) typed_array: ObjectHandle,
+    pub(crate) int8array: ObjectHandle,
+    pub(crate) uint8array: ObjectHandle,
+    pub(crate) uint8clampedarray: ObjectHandle,
+    pub(crate) int16array: ObjectHandle,
+    pub(crate) uint16array: ObjectHandle,
+    pub(crate) int32array: ObjectHandle,
+    pub(crate) uint32array: ObjectHandle,
+    pub(crate) float32array: ObjectHandle,
+    pub(crate) float64array: ObjectHandle,
+    pub(crate) bigint64array: ObjectHandle,
+    pub(crate) biguint64array: ObjectHandle,
     pub(crate) map: ObjectHandle,
     pub(crate) set: ObjectHandle,
     pub(crate) date: ObjectHandle,
@@ -226,6 +237,61 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+        
+        let int8array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let uint8array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let uint8clampedarray = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let int16array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let uint16array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let int32array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let uint32array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let float32array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let float64array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let bigint64array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+        
+        let biguint64array = ArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
 
         let map = Map::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
@@ -271,6 +337,17 @@ impl Intrinsics {
             arraybuffer,
             data_view,
             typed_array,
+            int8array,
+            uint8array,
+            uint8clampedarray,
+            int16array,
+            uint16array,
+            int32array,
+            uint32array,
+            float32array,
+            float64array,
+            bigint64array,
+            biguint64array,
             map,
             set,
             date,
