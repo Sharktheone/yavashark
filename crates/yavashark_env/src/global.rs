@@ -119,6 +119,63 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "DataView".into(),
         Variable::write_config(realm.intrinsics.data_view_constructor().value),
     )?;
+    
+    obj.define_variable(
+        "Int8Array".into(),
+        Variable::write_config(realm.intrinsics.int8array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Uint8Array".into(),
+        Variable::write_config(realm.intrinsics.uint8array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Uint8ClampedArray".into(),
+        Variable::write_config(realm.intrinsics.uint8clampedarray_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Int16Array".into(),
+        Variable::write_config(realm.intrinsics.int16array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Uint16Array".into(),
+        Variable::write_config(realm.intrinsics.uint16array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Int32Array".into(),
+        Variable::write_config(realm.intrinsics.int32array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Uint32Array".into(),
+        Variable::write_config(realm.intrinsics.uint32array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Float32Array".into(),
+        Variable::write_config(realm.intrinsics.float32array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "Float64Array".into(),
+        Variable::write_config(realm.intrinsics.float64array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "BigInt64Array".into(),
+        Variable::write_config(realm.intrinsics.bigint64array_constructor().value),
+    )?;
+    
+    obj.define_variable(
+        "BigUint64Array".into(),
+        Variable::write_config(realm.intrinsics.biguint64array_constructor().value),
+    )?;
+    
+    
     obj.define_variable("escape".into(), Variable::write_config(get_escape(realm)))?;
     obj.define_variable("unescape".into(), Variable::write_config(get_escape(realm)))?;
     obj.define_variable(
