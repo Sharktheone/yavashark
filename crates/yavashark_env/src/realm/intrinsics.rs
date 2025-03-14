@@ -250,62 +250,62 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let int8array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let uint8array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let uint8clampedarray = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let int16array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let uint16array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let int32array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let uint32array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let float16array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let float32array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let float64array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let bigint64array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let biguint64array = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),

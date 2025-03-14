@@ -4,8 +4,5 @@ use yavashark_macro::{object, props};
 #[derive(Debug)]
 pub struct Uint32Array {}
 
-
 #[props]
-impl Uint32Array {
-
-}
+impl Uint32Array {}

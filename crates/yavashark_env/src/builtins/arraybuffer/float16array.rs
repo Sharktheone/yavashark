@@ -4,8 +4,5 @@ use yavashark_macro::{object, props};
 #[derive(Debug)]
 pub struct Float16Array {}
 
-
 #[props]
-impl Float16Array {
-
-}
+impl Float16Array {}

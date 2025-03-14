@@ -1,7 +1,7 @@
 pub use console::*;
 pub use function::*;
-pub use object::*;
 pub use native_object::*;
+pub use object::*;
 use std::ops::Deref;
 use yavashark_garbage::OwningGcGuard;
 
@@ -18,12 +18,12 @@ pub mod conversion;
 pub mod experiments;
 mod function_conversion;
 mod global;
+mod native_object;
 pub mod optimizer;
 pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-mod native_object;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;

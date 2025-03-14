@@ -4,8 +4,5 @@ use yavashark_macro::{object, props};
 #[derive(Debug)]
 pub struct BigInt64Array {}
 
-
 #[props]
-impl BigInt64Array {
-
-}
+impl BigInt64Array {}

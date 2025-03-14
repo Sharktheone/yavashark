@@ -154,7 +154,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "Uint32Array".into(),
         Variable::write_config(realm.intrinsics.uint32array_constructor().value),
     )?;
-    
+
     obj.define_variable(
         "Float16Array".into(),
         Variable::write_config(realm.intrinsics.float16array_constructor().value),
@@ -179,7 +179,6 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "BigUint64Array".into(),
         Variable::write_config(realm.intrinsics.biguint64array_constructor().value),
     )?;
-
 
     obj.define_variable("escape".into(), Variable::write_config(get_escape(realm)))?;
     obj.define_variable("unescape".into(), Variable::write_config(get_escape(realm)))?;
