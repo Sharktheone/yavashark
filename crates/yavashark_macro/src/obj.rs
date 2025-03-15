@@ -41,10 +41,44 @@ impl FromMeta for Direct {
 }
 
 
-#[derive(Debug, FromMeta)]
-struct DirectItem {
+#[derive(Debug)]
+pub struct DirectItem {
     field: Ident,
     rename: Option<Ident>,
+}
+
+impl FromMeta for DirectItem {
+    fn from_meta(meta: &syn::Meta) -> darling::Result<Self> {
+        let (field, rename) = match meta {
+            syn::Meta::Path(path) => {
+                let field = path.get_ident().ok_or_else(|| {
+                    darling::Error::custom("Expected ident")
+                })?;
+                
+                (field.clone(), None)
+            }
+            syn::Meta::List(list) => {
+                let field = list.path.get_ident().ok_or_else(|| {
+                    darling::Error::custom("Expected ident")
+                })?;
+
+                let ident = syn::parse(list.tokens.clone().into())?;
+                
+                (field.clone(), Some(ident))
+            }
+            syn::Meta::NameValue(name_value) => {
+                let field = name_value.path.get_ident().ok_or_else(|| {
+                    darling::Error::custom("Expected ident")
+                })?;
+                
+                let ident = syn::parse(name_value.value.to_token_stream().into())?;
+                
+                (field.clone(), Some(ident))
+            }
+        };
+        
+        Ok(DirectItem { field, rename })
+    }
 }
 
 
