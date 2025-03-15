@@ -211,7 +211,7 @@ fn init_constructor(
         (true, true) => quote! { constructor, function },
         (true, false) => quote! { constructor },
         (false, true) => quote! { function },
-        (false, false) => unreachable!(),
+        (false, false) => quote! {},
     };
 
     let mut constructor_tokens = quote! {
