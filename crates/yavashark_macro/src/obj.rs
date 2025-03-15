@@ -25,6 +25,26 @@ struct ObjArgs {
     primitive: Option<Ident>,
     #[darling(default)]
     extends: Option<Ident>,
+    #[darling(default)]
+    direct: Direct,
+}
+
+#[derive(Debug, Default)]
+pub struct Direct {
+    pub fields: Vec<DirectItem>,
+}
+
+impl FromMeta for Direct {
+    fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
+        todo!()
+    }
+}
+
+
+#[derive(Debug, FromMeta)]
+struct DirectItem {
+    field: Ident,
+    rename: Option<Ident>,
 }
 
 
