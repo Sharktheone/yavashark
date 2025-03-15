@@ -26,6 +26,8 @@ struct ObjArgs {
     #[darling(default)]
     extends: Option<Ident>,
     #[darling(default)]
+    constructor: bool,
+    #[darling(default)]
     direct: Direct,
 }
 
