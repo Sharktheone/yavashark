@@ -3,7 +3,7 @@ use crate::custom_props::{match_list, match_prop, Act, List};
 use crate::mutable_region::MutableRegion;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
+use quote::{quote, ToTokens};
 use std::mem;
 use darling::ast::NestedMeta;
 use syn::punctuated::Punctuated;
@@ -36,7 +36,24 @@ pub struct Direct {
 
 impl FromMeta for Direct {
     fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
-        todo!()
+        let mut fields = Vec::new();
+        
+        for item in items {
+            let item = match item {
+                NestedMeta::Meta(meta) => meta,
+                NestedMeta::Lit(lit) => {
+                    return Err(darling::Error::from(Error::new(lit.span(), "Unexpected literal")));
+                }
+            };
+            
+            let item = DirectItem::from_meta(item)?;
+            
+            fields.push(item);
+        }
+        
+        
+        
+        Ok(Direct { fields })
     }
 }
 
