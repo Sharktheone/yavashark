@@ -264,62 +264,63 @@ impl Intrinsics {
         )?;
 
         let int8array = Int8Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let uint8array = Uint8Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let uint8clampedarray = Uint8ClampedArray::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let int16array = Int16Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let uint16array = Uint16Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let int32array = Int32Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let uint32array = Uint32Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let float16array = Float16Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let float32array = Float32Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let float64array = Float64Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
         let bigint64array = BigInt64Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
+        #[allow(clippy::similar_names)]
         let biguint64array = BigUint64Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),
         )?;
 
