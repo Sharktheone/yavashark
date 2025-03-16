@@ -15,6 +15,7 @@ use crate::builtins::float64array::Float64Array;
 use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
 use crate::builtins::int8array::Int8Array;
+use crate::builtins::typed_array::TypedArray;
 use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
@@ -258,7 +259,7 @@ impl Intrinsics {
             func_prototype.clone().into(),
         )?;
 
-        let typed_array = ArrayBuffer::initialize_proto(
+        let typed_array = TypedArray::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
