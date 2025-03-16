@@ -2,7 +2,9 @@ mod constant;
 mod method;
 
 use proc_macro::TokenStream as TokenStream1;
-use proc_macro2::{Span, TokenStream};
+use darling::ast::NestedMeta;
+use darling::FromMeta;
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{spanned::Spanned, ImplItem, ItemImpl};
 
@@ -35,9 +37,24 @@ enum MaybeStatic<T> {
     Static(T),
 }
 
+#[derive(Default, FromMeta)]
+pub struct PropertiesArgs {
+    extends: Option<Ident>,
+}
+
 #[allow(unused)]
 pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenStream1> {
     let mut item_impl = syn::parse::<ItemImpl>(item)?;
+
+    let attr_args = match NestedMeta::parse_meta_list(attrs.clone().into()) {
+        Ok(v) => v,
+        Err(e) => { return Err(e); }
+    };
+
+    let args = match PropertiesArgs::from_list(&attr_args) {
+        Ok(args) => args,
+        Err(e) => return Err(e.into()),
+    };
 
     let mut props = Vec::new();
     let mut static_props = Vec::new();
