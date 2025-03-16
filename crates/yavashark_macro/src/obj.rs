@@ -1,105 +1,18 @@
+pub mod args;
+
 use crate::config::Config;
 use crate::custom_props::{match_list, match_prop, Act, List};
 use crate::mutable_region::MutableRegion;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote, ToTokens};
+use quote::quote;
 use std::mem;
 use darling::ast::NestedMeta;
+use darling::FromMeta;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{Error, FieldMutability, Fields, Token};
-use darling::FromMeta;
-
-
-
-#[derive(Debug, FromMeta)]
-struct ObjArgs {
-    #[darling(default)]
-    function: bool,
-    #[darling(default)]
-    to_string: bool,
-    #[darling(default)]
-    name: bool,
-    #[darling(default)]
-    primitive: Option<Ident>,
-    #[darling(default)]
-    extends: Option<Ident>,
-    #[darling(default)]
-    constructor: bool,
-    #[darling(default)]
-    direct: Direct,
-}
-
-#[derive(Debug, Default)]
-pub struct Direct {
-    pub fields: Vec<DirectItem>,
-}
-
-impl FromMeta for Direct {
-    fn from_list(items: &[NestedMeta]) -> darling::Result<Self> {
-        let mut fields = Vec::new();
-        
-        for item in items {
-            let item = match item {
-                NestedMeta::Meta(meta) => meta,
-                NestedMeta::Lit(lit) => {
-                    return Err(darling::Error::from(Error::new(lit.span(), "Unexpected literal")));
-                }
-            };
-            
-            let item = DirectItem::from_meta(item)?;
-            
-            fields.push(item);
-        }
-        
-        
-        
-        Ok(Direct { fields })
-    }
-}
-
-
-#[derive(Debug)]
-pub struct DirectItem {
-    field: Ident,
-    rename: Option<Ident>,
-}
-
-impl FromMeta for DirectItem {
-    fn from_meta(meta: &syn::Meta) -> darling::Result<Self> {
-        let (field, rename) = match meta {
-            syn::Meta::Path(path) => {
-                let field = path.get_ident().ok_or_else(|| {
-                    darling::Error::custom("Expected ident")
-                })?;
-                
-                (field.clone(), None)
-            }
-            syn::Meta::List(list) => {
-                let field = list.path.get_ident().ok_or_else(|| {
-                    darling::Error::custom("Expected ident")
-                })?;
-
-                let ident = syn::parse(list.tokens.clone().into())?;
-                
-                (field.clone(), Some(ident))
-            }
-            syn::Meta::NameValue(name_value) => {
-                let field = name_value.path.get_ident().ok_or_else(|| {
-                    darling::Error::custom("Expected ident")
-                })?;
-                
-                let ident = syn::parse(name_value.value.to_token_stream().into())?;
-                
-                (field.clone(), Some(ident))
-            }
-        };
-        
-        Ok(DirectItem { field, rename })
-    }
-}
-
+use crate::obj::args::{ItemArgs, ObjArgs};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let attr_args = match NestedMeta::parse_meta_list(attrs.clone().into()) {
@@ -107,15 +20,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         Err(e) => { return TokenStream1::from(darling::Error::from(e).write_errors()); }
     };
     
-    let _args = match ObjArgs::from_list(&attr_args) {
+    let args = match ObjArgs::from_list(&attr_args) {
         Ok(args) => args,
         Err(e) => return e.write_errors().into(),
     };
 
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
-    let mut proto = false;
-    let mut direct = Vec::new();
-    let mut constructor = false;
 
     let conf = Config::new(Span::call_site());
 
@@ -127,173 +37,27 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let object_property = &conf.object_property;
     let mut_obj = &conf.mut_obj;
 
-    let mut gc = Vec::new();
-    let mut mutable_region = Vec::new();
-
-    let mut function = false;
-    let mut to_string = false;
-    let mut name = false;
-    let mut primitive = None;
-
-    let attr_parser = syn::meta::parser(|meta| {
-        if meta.path.is_ident("prototype") {
-            proto = true;
-            return Ok(());
-        }
-        if meta.path.is_ident("direct") {
-            meta.parse_nested_meta(|meta| {
-                let mut rename = None;
-
-                let _ = meta.parse_nested_meta(|meta| {
-                    rename = Some(meta.path);
-                    Ok(())
-                });
-
-                direct.push((
-                    meta.path
-                        .get_ident()
-                        .ok_or(syn::Error::new(
-                            meta.path.span(),
-                            "Field name needs to be an ident",
-                        ))?
-                        .clone(),
-                    rename,
-                ));
-
-                Ok(())
-            })?;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("function") {
-            function = true;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("constructor") {
-            constructor = true;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("to_string") {
-            to_string = true;
-            return Ok(());
-        }
-
-        if meta.path.is_ident("name") {
-            name = true;
-            return Ok(());
-        }
-
-        Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
-    });
-
-    syn::parse_macro_input!(attrs with attr_parser);
 
     let Fields::Named(fields) = &mut input.fields else {
         return syn::Error::new(input.span(), "Object must have named fields")
             .to_compile_error()
             .into();
     };
+    
+    let item_args = match ItemArgs::from(fields) {
+        Ok(args) => args,
+        Err(e) => return e.to_compile_error().into(),
+    };
 
-    for f in &mut fields.named {
-        let mut err = None;
-        f.attrs.retain_mut(|attr| {
-            if attr.meta.path().is_ident("gc") {
-                let mut ty = true;
-                let mut func = None;
-                let mut multi = false;
 
-                if !matches!(attr.meta, syn::Meta::Path(_)) {
-                    if let Err(e) = attr.parse_nested_meta(|meta| {
-                        if meta.path.is_ident("untyped") {
-                            ty = false;
-                            return Ok(());
-                        }
-
-                        if meta.path.is_ident("func") {
-                            func = Some(
-                                meta.path
-                                    .get_ident()
-                                    .cloned()
-                                    .ok_or(syn::Error::new(meta.path.span(), "Expected ident"))?,
-                            );
-                            return Ok(());
-                        }
-
-                        if meta.path.is_ident("multi") {
-                            multi = true;
-                            return Ok(());
-                        }
-
-                        Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
-                    }) {
-                        err = Some(e);
-                        return false;
-                    };
-                }
-
-                let id = match f
-                    .ident
-                    .as_ref()
-                    .ok_or(syn::Error::new(attr.meta.span(), "Expected ident"))
-                {
-                    Ok(id) => id,
-                    Err(e) => {
-                        err = Some(e);
-                        return false;
-                    }
-                }
-                .clone();
-
-                gc.push((id, ty, multi, func));
-
-                return false;
-            }
-
-            if attr.meta.path().is_ident("mutable") {
-                let Ok(ident) = f
-                    .ident
-                    .clone()
-                    .ok_or(syn::Error::new(attr.span(), "Expected ident"))
-                else {
-                    err = Some(syn::Error::new(attr.span(), "Expected ident"));
-                    return false;
-                };
-
-                mutable_region.push(ident);
-                return false;
-            }
-
-            if attr.meta.path().is_ident("primitive") {
-                let Ok(ident) = f
-                    .ident
-                    .clone()
-                    .ok_or(syn::Error::new(attr.span(), "Expected ident"))
-                else {
-                    err = Some(syn::Error::new(attr.span(), "Expected ident"));
-                    return false;
-                };
-
-                primitive = Some(ident); //TODO: edge case, what when we have a field that is a primitive but not mutable and a field with the same name that is mutable?
-
-                return false;
-            }
-            true
-        });
-
-        if let Some(e) = err {
-            return e.to_compile_error().into();
-        }
-    }
 
     let mut new_fields = Punctuated::new();
 
-    let mut custom_mut = Vec::with_capacity(mutable_region.len());
+    let mut custom_mut = Vec::with_capacity(item_args.mutable_region.len());
 
     for field in mem::take(&mut fields.named) {
         if let Some(ident) = &field.ident {
-            if !mutable_region.contains(ident) {
+            if !item_args.mutable_region.contains(ident) {
                 new_fields.push(field);
             } else {
                 custom_mut.push(field);
@@ -304,11 +68,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     fields.named = new_fields;
+    let direct = &args.direct.fields;
 
     let mut direct_region = Vec::with_capacity(direct.len());
 
-    for (field, _) in &direct {
-        direct_region.push(field.clone());
+    for item in direct {
+        direct_region.push(item.field.clone());
     }
 
     let mutable_region = MutableRegion::with(direct_region, custom_mut, input.ident.clone());
@@ -342,7 +107,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let values = match_list(&direct, List::Values, value);
     let clear = match_list(&direct, List::Clear, value);
 
-    let function = if function {
+    let function = if args.function {
         quote! {
             fn call(&self, realm: &mut #realm, args: Vec< #value>, this: #value) -> #value_result {
                 yavashark_value::Func::call(self, realm, args, this)
@@ -356,32 +121,32 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         quote! {}
     };
 
-    let custom_refs = if gc.is_empty() {
+    let custom_refs = if item_args.gc.is_empty() {
         TokenStream::new()
     } else {
-        let len = gc.len();
+        let len = item_args.gc.len();
 
-        let refs = gc
+        let refs = item_args.gc
             .into_iter()
             .map(|gc| {
-                let mut func = if gc.1 {
-                    if gc.2 {
+                let mut func = if gc.ty {
+                    if gc.multi {
                         Ident::new("gc_ref_multi", Span::call_site())
                     } else {
                         Ident::new("gc_ref", Span::call_site())
                     }
-                } else if gc.2 {
+                } else if gc.multi {
                     Ident::new("gc_untyped_ref_multi", Span::call_site())
                 } else {
                     Ident::new("gc_untyped_ref", Span::call_site())
                 };
 
-                if let Some(f) = gc.3 {
+                if let Some(f) = gc.func {
                     func = f;
                 }
 
-                let field = gc.0;
-
+                let field = gc.name;
+                
                 quote! {
                     if let Some(r) = self.#field.#func() {
                         refs.push(r);
@@ -402,7 +167,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     };
 
-    let constructor = if constructor {
+    let constructor = if args.constructor {
         quote! {
             fn construct(&self, realm: &mut #realm, args: Vec<#value>) -> Result<#value, #error> {
                 yavashark_value::Constructor::construct(self, realm, args)
@@ -420,7 +185,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         TokenStream::new()
     };
 
-    let to_string = if to_string {
+    let to_string = if args.to_string {
         quote! {
             fn to_string(&self, realm: &mut #realm) -> Result<String, #error> {
                 self.override_to_string(realm)
@@ -442,7 +207,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     };
 
-    let name = if name {
+    let name = if args.name {
         quote! {
             fn name(&self) -> String {
                 yavashark_value::CustomName::custom_name(self)
@@ -457,7 +222,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     };
 
-    let primitive = if let Some(primitive) = primitive {
+    let primitive = if let Some(primitive) = item_args.primitive {
         let is_mutable = mutable_region.contains(&primitive);
 
         if is_mutable {

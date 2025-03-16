@@ -1,39 +1,29 @@
 use crate::config::Config;
+use crate::obj::args::{Direct, DirectItem};
+use darling::ast::NestedMeta;
+use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
 use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());
     let error = &conf.error;
 
-    let mut direct = Vec::new();
+    let attr_args = match NestedMeta::parse_meta_list(attrs.clone().into()) {
+        Ok(v) => v,
+        Err(e) => {
+            return TokenStream1::from(darling::Error::from(e).write_errors());
+        }
+    };
 
-    let parser = syn::meta::parser(|meta| {
-        let mut rename = None;
+    let args = match Direct::from_list(&attr_args) {
+        Ok(args) => args,
+        Err(e) => return e.write_errors().into(),
+    };
 
-        let _ = meta.parse_nested_meta(|meta| {
-            rename = Some(meta.path);
-            Ok(())
-        });
-
-        direct.push((
-            meta.path
-                .get_ident()
-                .ok_or(syn::Error::new(
-                    meta.path.span(),
-                    "Field name needs to be an ident",
-                ))?
-                .clone(),
-            rename,
-        ));
-
-        Ok(())
-    });
-
-    syn::parse_macro_input!(attrs with parser);
+    let direct = args.fields;
 
     if direct.is_empty() {
         return item;
@@ -197,11 +187,13 @@ pub enum Act {
     Delete,
 }
 
-pub fn match_prop(properties: &[(Ident, Option<Path>)], r: Act, value_path: &Path) -> TokenStream {
+pub fn match_prop(properties: &[DirectItem], r: Act, value_path: &Path) -> TokenStream {
     let mut match_properties_define = TokenStream::new();
     let match_non_string = TokenStream::new();
 
-    for (field, rename) in properties {
+    for item in properties {
+        let field = &item.field;
+
         let act = match r {
             Act::Get => quote! {Some(inner.#field.clone())},
             // Act::RefMut => quote! {Some(&mut self.#field.value)},
@@ -217,7 +209,8 @@ pub fn match_prop(properties: &[(Ident, Option<Path>)], r: Act, value_path: &Pat
                 }
             },
         };
-        if let Some(rename) = rename {
+
+        if let Some(rename) = &item.rename {
             let expanded = if matches!(r, Act::Set | Act::SetVar) {
                 quote! {
                     stringify!(#rename) => {
@@ -278,11 +271,13 @@ pub enum List {
     Clear,
 }
 
-pub fn match_list(properties: &[(Ident, Option<Path>)], r: List, value: &Path) -> TokenStream {
+pub fn match_list(properties: &[DirectItem], r: List, value: &Path) -> TokenStream {
     let mut add = TokenStream::new();
 
-    for (field, rename) in properties {
-        let name = if let Some(rename) = rename {
+    for item in properties {
+        let field = &item.field;
+
+        let name = if let Some(rename) = &item.rename {
             quote! { #value::string(stringify!(#rename)) }
         } else {
             quote! {
