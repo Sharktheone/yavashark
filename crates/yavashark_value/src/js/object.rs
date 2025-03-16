@@ -6,8 +6,8 @@ use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::{Collectable, Gc, GcRef};
-
+use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
+use yavashark_garbage::collectable::OwningGcRefCellGuard;
 use crate::js::context::Realm;
 use crate::variable::Variable;
 use crate::{Attributes, Error};
@@ -349,6 +349,20 @@ impl<C: Realm> BoxedObj<C> {
         }
         Self(obj)
     }
+    
+    #[allow(clippy::needless_lifetimes)]
+    fn downcast<'a, T: 'static>(
+        &'a self,
+    ) -> Option<&'a T> {
+        // Safety:
+        // - we only interpret the returned pointer as T
+        // - we only say the reference is valid for 'a this being the lifetime of self
+        unsafe {
+            let ptr = self.deref().downcast(TypeId::of::<T>())?.cast();
+            
+            Some(ptr.as_ref())
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -443,33 +457,13 @@ impl<C: Realm> Object<C> {
         self.0.ptr_id()
     }
 
-    // pub fn downcast<T: Obj<C> + 'static>(
-    //     &self,
-    // ) -> Result<Option<Gc<BoxedObj<C>, T>>, Error<C>> {
-    //     let obj = self.get()?;
-    //
-    //     Ok(obj
-    //         .maybe_map(|r| {
-    //             let this = (**r).as_any();
-    //
-    //             this.downcast_ref::<T>()
-    //         })
-    //         .ok())
-    // }
-    //
-    // pub fn downcast_mut<T: Obj<C> + 'static>(
-    //     &self,
-    // ) -> Result<Option<GcMutRefCellGuard<BoxedObj<C>, T>>, Error<C>> {
-    //     let obj = self.get_mut()?;
-    //
-    //     Ok(obj
-    //         .maybe_map(|r| {
-    //             let this = (**r).as_any_mut();
-    //
-    //             this.downcast_mut::<T>()
-    //         })
-    //         .ok())
-    // }
+    #[allow(clippy::needless_lifetimes)]
+    pub fn downcast<'a, T: 'static>(
+        &'a self,
+    ) -> Option<OwningGcGuard<'a, BoxedObj<C>, T>> {
+        
+        self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
+    }
 }
 
 impl<C: Realm> From<Box<dyn Obj<C>>> for Object<C> {
