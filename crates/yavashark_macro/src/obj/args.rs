@@ -2,7 +2,7 @@ use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro2::Ident;
 use quote::ToTokens;
-use syn::{Error, ExprIf, FieldsNamed};
+use syn::{Error, FieldsNamed, Path};
 use syn::spanned::Spanned;
 
 #[derive(Debug, FromMeta)]
@@ -14,7 +14,7 @@ pub struct ObjArgs {
     #[darling(default)]
     pub name: bool,
     #[darling(default)]
-    pub extends: Option<Ident>,
+    pub extends: Option<Path>,
     #[darling(default)]
     pub constructor: bool,
     #[darling(default)]

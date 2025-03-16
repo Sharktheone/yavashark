@@ -11,7 +11,7 @@ use darling::ast::NestedMeta;
 use darling::FromMeta;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{Error, FieldMutability, Fields, Token};
+use syn::{FieldMutability, Fields, Token};
 use crate::obj::args::{ItemArgs, ObjArgs};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
@@ -76,11 +76,12 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         direct_region.push(item.field.clone());
     }
 
-    let mutable_region = MutableRegion::with(direct_region, custom_mut, input.ident.clone());
+    let mutable_region = MutableRegion::with(direct_region, custom_mut, input.ident.clone(), args.extends.is_some());
 
     let region_ident = mutable_region.full_name();
 
     let inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
+    
     fields.named.push(syn::Field {
         attrs: Vec::new(),
         vis: syn::Visibility::Public(Token![pub](Span::call_site())),
@@ -92,20 +93,38 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             path: inner_path,
         }),
     });
+    
+    let (obj_path, inner_drop, inner_borrow, inner_borrow_mut) = if let Some(extends) = args.extends {
+        fields.named.push(syn::Field {
+            attrs: Vec::new(),
+            vis: syn::Visibility::Public(Token![pub](Span::call_site())),
+            mutability: FieldMutability::None,
+            ident: Some(Ident::new("extends", Span::call_site())),
+            colon_token: None,
+            ty: syn::Type::Path(syn::TypePath {
+                qself: None,
+                path: extends,
+            }),
+        });
+
+        (quote! { self.extends }, quote! { drop(inner);}, TokenStream::new(), TokenStream::new())
+    } else {
+        (quote! { inner.object }, TokenStream::new(), quote! { let inner = self.inner.borrow(); }, quote! { let mut inner = self.inner.borrow_mut(); })
+    };
 
     let struct_name = &input.ident;
 
-    let properties_define = match_prop(&direct, Act::Set, value);
-    let properties_variable_define = match_prop(&direct, Act::SetVar, value);
-    let properties_resolve = match_prop(&direct, Act::None, value);
-    let properties_get = match_prop(&direct, Act::Get, value);
-    let properties_contains = match_prop(&direct, Act::Contains, value);
-    let properties_delete = match_prop(&direct, Act::Delete, value);
+    let properties_define = match_prop(direct, Act::Set, value);
+    let properties_variable_define = match_prop(direct, Act::SetVar, value);
+    let properties_resolve = match_prop(direct, Act::None, value);
+    let properties_get = match_prop(direct, Act::Get, value);
+    let properties_contains = match_prop(direct, Act::Contains, value);
+    let properties_delete = match_prop(direct, Act::Delete, value);
 
-    let properties = match_list(&direct, List::Properties, value);
-    let keys = match_list(&direct, List::Keys, value);
-    let values = match_list(&direct, List::Values, value);
-    let clear = match_list(&direct, List::Clear, value);
+    let properties = match_list(direct, List::Properties, value);
+    let keys = match_list(direct, List::Keys, value);
+    let values = match_list(direct, List::Values, value);
+    let clear = match_list(direct, List::Clear, value);
 
     let function = if args.function {
         quote! {
@@ -255,62 +274,68 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_define
-
-                inner.object.define_property(name, value)
+                
+                #inner_drop
+                #obj_path.define_property(name, value)
             }
 
             fn define_variable(&self, name: #value, value: #variable) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_variable_define
 
-                inner.object.define_variable(name, value)
+                #inner_drop
+                #obj_path.define_variable(name, value)
             }
 
             fn resolve_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
                 let inner = self.inner.borrow();
                 #properties_resolve
 
-                inner.object.resolve_property(name)
+                #obj_path.resolve_property(name)
             }
 
             fn get_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
                 let inner = self.inner.borrow();
                 #properties_get
 
-                inner.object.get_property(name)
+                #obj_path.get_property(name)
             }
 
             fn define_getter(&self, name: #value, value: #value) -> Result<(), #error> {
-                let mut inner = self.inner.borrow_mut();
-                inner.object.define_getter(name, value)
+                #inner_borrow_mut
+                #obj_path.define_getter(name, value)
             }
 
             fn define_setter(&self, name: #value, value: #value) -> Result<(), #error> {
-                let mut inner = self.inner.borrow_mut();
-                inner.object.define_setter(name, value)
+                #inner_borrow_mut
+                #obj_path.define_setter(name, value)
             }
 
             fn get_getter(&self, name: &#value) -> Result<Option<#value>, #error> {
                 let inner = self.inner.borrow();
-                inner.object.get_getter(name)
+                #obj_path.get_getter(name)
             }
 
             fn get_setter(&self, name: &#value) -> Result<Option<#value>, #error> {
                 let inner = self.inner.borrow();
-                inner.object.get_setter(name)
+                #obj_path.get_setter(name)
             }
 
             fn delete_property(&self, name: &#value) -> Result<Option<#value>, #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_delete
-                inner.object.delete_property(name)
+                
+                #inner_drop
+                #obj_path.delete_property(name)
             }
 
 
             fn contains_key(&self, name: &#value) -> Result<bool, #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_contains
-                inner.object.contains_key(name)
+                
+                #inner_drop
+                #obj_path.contains_key(name)
             }
 
 
@@ -319,7 +344,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
                 let inner = self.inner.borrow();
-                let mut props = inner.object.properties()?;
+                let mut props = #obj_path.properties()?;
                 #properties
 
                 Ok(props)
@@ -327,7 +352,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             fn keys(&self) -> Result<Vec<#value>, #error> {
                 let inner = self.inner.borrow();
-                let mut keys = inner.object.keys()?;
+                let mut keys = #obj_path.keys()?;
                 #keys
 
                 Ok(keys)
@@ -335,30 +360,32 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             fn values(&self) -> Result<Vec<#value>, #error> {
                 let inner = self.inner.borrow();
-                let mut values = inner.object.values()?;
+                let mut values = #obj_path.values()?;
                 #values
 
                 Ok(values)
             }
             fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<#value>), #error> {
                 let inner = self.inner.borrow();
-                inner.object.get_array_or_done(index)
+                #obj_path.get_array_or_done(index)
             }
 
             fn clear_values(&self) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #clear
-                inner.object.clear_values()
+                
+                #inner_drop
+                #obj_path.clear_values()
             }
 
             fn prototype(&self) -> Result<#object_property, #error> {
-                let inner = self.inner.borrow();
-                inner.object.prototype()
+                #inner_borrow
+                #obj_path.prototype()
             }
 
             fn set_prototype(&self, proto: #object_property) -> Result<(), #error> {
-                let mut inner = self.inner.borrow_mut();
-                inner.object.set_prototype(proto)
+                #inner_borrow_mut
+                #obj_path.set_prototype(proto)
             }
 
             #constructor
