@@ -1,7 +1,8 @@
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
@@ -142,13 +143,16 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
         false
     }
 
-    // unsafe fn downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
-    //     if ty == TypeId::of::<Self>() {
-    //         NonNull::new(self as *mut ())
-    //     } else {
-    //         None
-    //     }
-    // }
+    /// # Safety: 
+    /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents
+    /// - Caller and implementer must ensure that the pointer is valid for the same lifetime of self
+    unsafe fn downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        if ty == TypeId::of::<Self>() {
+            Some(NonNull::from(self).cast())
+        } else {
+            None
+        }
+    }
 }
 
 pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
