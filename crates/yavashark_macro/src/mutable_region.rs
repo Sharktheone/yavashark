@@ -7,14 +7,16 @@ pub struct MutableRegion {
     direct: Vec<Ident>,
     custom: Vec<Field>,
     name: Ident,
+    extends: bool
 }
 
 impl MutableRegion {
-    pub(crate) fn with(direct: Vec<Ident>, custom: Vec<Field>, name: Ident) -> Self {
+    pub(crate) fn with(direct: Vec<Ident>, custom: Vec<Field>, name: Ident, extends: bool) -> Self {
         Self {
             direct,
             custom,
             name,
+            extends
         }
     }
 
@@ -37,7 +39,7 @@ impl MutableRegion {
 
         let mut_object = &config.mut_object;
 
-        let object = if object {
+        let object = if object && !self.extends {
             quote! {
                 pub object: #mut_object,
             }
