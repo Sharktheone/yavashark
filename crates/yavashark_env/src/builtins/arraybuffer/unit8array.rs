@@ -1,13 +1,41 @@
+use std::cell::RefCell;
 use base64::alphabet::STANDARD;
 use yavashark_macro::{object, props};
-use crate::{Error, ObjectHandle, Res};
+use yavashark_value::Obj;
+use crate::{Error, ObjectHandle, Realm, Res, Value};
+use crate::builtins::int32array::{Int32Array, MutableInt32Array};
+use crate::builtins::typed_array::TypedArray;
 
-#[object]
+#[object(extends = TypedArray)]
 #[derive(Debug)]
 pub struct Uint8Array {}
 
+impl Uint8Array {
+    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.int8array.clone().into())?;
+
+        Ok(Self {
+            inner: RefCell::new(MutableUint8Array {}),
+            extends: ty,
+        })
+    }
+}
+
+
 #[props]
 impl Uint8Array {
+    #[constructor]
+    fn construct(
+        buf: Value,
+        byte_offset: Option<usize>,
+        byte_length: Option<usize>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let ty = TypedArray::new(realm, buf, byte_offset, byte_length)?;
+
+        Ok(Self::new(realm, ty)?.into_object())
+    }
+    
     #[prop("fromBase64")]
     fn from_base_64(base64: &str, options: Option<ObjectHandle>) -> Res<ObjectHandle> {
         Err(Error::new("Not implemented"))
