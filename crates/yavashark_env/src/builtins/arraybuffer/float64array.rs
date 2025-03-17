@@ -1,4 +1,4 @@
-use crate::builtins::typed_array::TypedArray;
+use crate::builtins::typed_array::{Type, TypedArray};
 use crate::{ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
@@ -28,7 +28,7 @@ impl Float64Array {
         byte_length: Option<usize>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let ty = TypedArray::new(realm, buf, byte_offset, byte_length)?;
+        let ty = TypedArray::new(realm, buf, byte_offset, byte_length, Type::F64)?;
 
         Ok(Self::new(realm, ty)?.into_object())
     }

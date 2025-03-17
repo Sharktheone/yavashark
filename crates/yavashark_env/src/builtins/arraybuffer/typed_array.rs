@@ -7,11 +7,30 @@ use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{BoxedObj, Obj};
 
+
+
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum Type {
+    U8,
+    U16,
+    U32,
+    U64,
+    I8,
+    I16,
+    I32,
+    I64,
+    F16,
+    F32,
+    F64,
+}
+
 #[object(direct(buffer, byte_offset, byte_length))]
 #[derive(Debug)]
 pub struct TypedArray {
     #[allow(unused)]
     byte_offset: usize,
+    ty: Type,
 }
 
 impl TypedArray {
@@ -20,6 +39,7 @@ impl TypedArray {
         mut buffer: Value,
         byte_offset: Option<usize>,
         byte_length: Option<usize>,
+        ty: Type,
     ) -> Res<Self> {
         let buf = if let Ok(buf) = <&ArrayBuffer>::from_value_out(buffer.copy()) { buf } else {
             let len = buffer.to_int_or_null() as usize;
@@ -54,6 +74,7 @@ impl TypedArray {
                 byte_length: byte_length.into(),
             }),
             byte_offset,
+            ty,
         })
     }
 

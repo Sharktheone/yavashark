@@ -4,7 +4,7 @@ use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use crate::builtins::int32array::{Int32Array, MutableInt32Array};
-use crate::builtins::typed_array::TypedArray;
+use crate::builtins::typed_array::{Type, TypedArray};
 
 #[object(extends = TypedArray)]
 #[derive(Debug)]
@@ -31,7 +31,7 @@ impl Uint8Array {
         byte_length: Option<usize>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let ty = TypedArray::new(realm, buf, byte_offset, byte_length)?;
+        let ty = TypedArray::new(realm, buf, byte_offset, byte_length, Type::U8)?;
 
         Ok(Self::new(realm, ty)?.into_object())
     }
