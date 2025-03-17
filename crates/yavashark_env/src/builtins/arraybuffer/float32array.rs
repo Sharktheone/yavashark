@@ -21,6 +21,8 @@ impl Float32Array {
 
 #[props]
 impl Float32Array {
+    const BYTES_PER_ELEMENT: usize = size_of::<f32>();
+    
     #[constructor]
     fn construct(
         buf: Value,

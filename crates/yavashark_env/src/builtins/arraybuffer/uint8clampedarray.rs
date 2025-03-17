@@ -21,6 +21,8 @@ impl Uint8ClampedArray {
 
 #[props]
 impl Uint8ClampedArray {
+    const BYTES_PER_ELEMENT: usize = size_of::<u8>();
+
     #[constructor]
     fn construct(
         buf: Value,

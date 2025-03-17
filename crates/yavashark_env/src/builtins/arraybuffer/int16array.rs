@@ -21,6 +21,8 @@ impl Int16Array {
 
 #[props]
 impl Int16Array {
+    const BYTES_PER_ELEMENT: usize = size_of::<i16>();
+    
     #[constructor]
     fn construct(
         buf: Value,

@@ -21,6 +21,8 @@ impl Uint32Array {
 
 #[props]
 impl Uint32Array {
+    const BYTES_PER_ELEMENT: usize = size_of::<u32>();
+
     #[constructor]
     fn construct(
         buf: Value,

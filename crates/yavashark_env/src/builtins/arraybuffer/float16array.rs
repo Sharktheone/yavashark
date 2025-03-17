@@ -1,6 +1,7 @@
 use crate::builtins::typed_array::{Type, TypedArray};
 use crate::{ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
+use half::f16;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 
@@ -21,6 +22,8 @@ impl Float16Array {
 
 #[props]
 impl Float16Array {
+    const BYTES_PER_ELEMENT: usize = size_of::<f16>();
+    
     #[constructor]
     fn construct(
         buf: Value,

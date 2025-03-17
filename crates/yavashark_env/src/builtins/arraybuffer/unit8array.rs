@@ -24,6 +24,8 @@ impl Uint8Array {
 
 #[props]
 impl Uint8Array {
+    const BYTES_PER_ELEMENT: usize = size_of::<u8>();
+
     #[constructor]
     fn construct(
         buf: Value,

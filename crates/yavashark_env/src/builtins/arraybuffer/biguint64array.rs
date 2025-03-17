@@ -21,6 +21,8 @@ impl BigUint64Array {
 
 #[props]
 impl BigUint64Array {
+    const BYTES_PER_ELEMENT: usize = size_of::<u64>();
+    
     #[constructor]
     fn construct(
         buf: Value,
