@@ -150,18 +150,20 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
     let self_ty = self_ty.unwrap_or_else(|| quote! { Self });
 
     for prop in props {
-        let (prop_tokens, name, js_name, prop_type) = match prop {
+        let (prop_tokens, name, js_name, prop_type, var_create) = match prop {
             Prop::Method(method) => (
                 method.init_tokens_self(config, self_ty.clone()),
                 method.name,
                 method.js_name,
                 method.ty,
+                quote! { write_config },
             ),
             Prop::Constant(constant) => (
                 constant.init_tokens(config, self_ty.clone()),
                 constant.name,
                 constant.js_name,
                 Type::Normal,
+                quote! { new_read_only },
             ),
         };
 
@@ -176,7 +178,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_variable(#name.into(), #variable::write_config(prop.into()))?;
+                        obj.define_variable(#name.into(), #variable::#var_create(prop.into()))?;
                     }
                 }
             }
