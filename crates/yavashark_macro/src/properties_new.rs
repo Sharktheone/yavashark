@@ -158,7 +158,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 method.ty,
             ),
             Prop::Constant(constant) => (
-                constant.init_tokens(config),
+                constant.init_tokens(config, self_ty.clone()),
                 constant.name,
                 constant.js_name,
                 Type::Normal,
