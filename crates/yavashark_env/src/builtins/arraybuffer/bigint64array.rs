@@ -22,7 +22,7 @@ impl BigInt64Array {
 #[props]
 impl BigInt64Array {
     const BYTES_PER_ELEMENT: usize = size_of::<i64>();
-    
+
     #[constructor]
     fn construct(
         buf: Value,

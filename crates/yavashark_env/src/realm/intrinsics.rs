@@ -1,14 +1,7 @@
 use crate::array::{Array, ArrayIterator};
-use crate::builtins::dataview::DataView;
-use crate::builtins::{
-    get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal,
-    get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj,
-    Reflect, RegExp, StringObj, SymbolObj, JSON,
-};
-use crate::error::ErrorObj;
-use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::dataview::DataView;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
 use crate::builtins::float64array::Float64Array;
@@ -20,6 +13,13 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
+use crate::builtins::{
+    get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal,
+    get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj,
+    Reflect, RegExp, StringObj, SymbolObj, JSON,
+};
+use crate::error::ErrorObj;
+use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {

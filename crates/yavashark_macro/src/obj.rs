@@ -3,23 +3,25 @@ pub mod args;
 use crate::config::Config;
 use crate::custom_props::{match_list, match_prop, Act, List};
 use crate::mutable_region::MutableRegion;
+use crate::obj::args::{ItemArgs, ObjArgs};
+use darling::ast::NestedMeta;
+use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use std::mem;
-use darling::ast::NestedMeta;
-use darling::FromMeta;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{FieldMutability, Fields, Token};
-use crate::obj::args::{ItemArgs, ObjArgs};
 
 pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let attr_args = match NestedMeta::parse_meta_list(attrs.clone().into()) {
         Ok(v) => v,
-        Err(e) => { return TokenStream1::from(darling::Error::from(e).write_errors()); }
+        Err(e) => {
+            return TokenStream1::from(darling::Error::from(e).write_errors());
+        }
     };
-    
+
     let args = match ObjArgs::from_list(&attr_args) {
         Ok(args) => args,
         Err(e) => return e.write_errors().into(),
@@ -37,19 +39,16 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let object_property = &conf.object_property;
     let mut_obj = &conf.mut_obj;
 
-
     let Fields::Named(fields) = &mut input.fields else {
         return syn::Error::new(input.span(), "Object must have named fields")
             .to_compile_error()
             .into();
     };
-    
+
     let item_args = match ItemArgs::from(fields) {
         Ok(args) => args,
         Err(e) => return e.to_compile_error().into(),
     };
-
-
 
     let mut new_fields = Punctuated::new();
 
@@ -76,12 +75,17 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         direct_region.push(item.field.clone());
     }
 
-    let mutable_region = MutableRegion::with(direct_region, custom_mut, input.ident.clone(), args.extends.is_some());
+    let mutable_region = MutableRegion::with(
+        direct_region,
+        custom_mut,
+        input.ident.clone(),
+        args.extends.is_some(),
+    );
 
     let region_ident = mutable_region.full_name();
 
     let inner_path: syn::Path = syn::parse_quote!(::core::cell::RefCell<#region_ident>);
-    
+
     fields.named.push(syn::Field {
         attrs: Vec::new(),
         vis: syn::Visibility::Public(Token![pub](Span::call_site())),
@@ -92,8 +96,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             qself: None,
             path: inner_path,
         }),
-    }); 
-    
+    });
+
     let downcast = if args.extends.is_some() {
         quote! {
             unsafe fn inner_downcast(&self, ty: ::core::any::TypeId) -> ::core::option::Option<::core::ptr::NonNull<()>> {
@@ -108,7 +112,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         TokenStream::new()
     };
 
-    let (obj_path, inner_drop, inner_borrow, inner_borrow_mut) = if let Some(extends) = args.extends {
+    let (obj_path, inner_drop, inner_borrow, inner_borrow_mut) = if let Some(extends) = args.extends
+    {
         fields.named.push(syn::Field {
             attrs: Vec::new(),
             vis: syn::Visibility::Public(Token![pub](Span::call_site())),
@@ -121,9 +126,19 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }),
         });
 
-        (quote! { self.extends }, quote! { drop(inner);}, TokenStream::new(), TokenStream::new())
+        (
+            quote! { self.extends },
+            quote! { drop(inner);},
+            TokenStream::new(),
+            TokenStream::new(),
+        )
     } else {
-        (quote! { inner.object }, TokenStream::new(), quote! { let inner = self.inner.borrow(); }, quote! { let mut inner = self.inner.borrow_mut(); })
+        (
+            quote! { inner.object },
+            TokenStream::new(),
+            quote! { let inner = self.inner.borrow(); },
+            quote! { let mut inner = self.inner.borrow_mut(); },
+        )
     };
 
     let struct_name = &input.ident;
@@ -159,7 +174,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     } else {
         let len = item_args.gc.len();
 
-        let refs = item_args.gc
+        let refs = item_args
+            .gc
             .into_iter()
             .map(|gc| {
                 let mut func = if gc.ty {
@@ -179,7 +195,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 }
 
                 let field = gc.name;
-                
+
                 quote! {
                     if let Some(r) = self.#field.#func() {
                         refs.push(r);
@@ -278,9 +294,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     };
 
     let region_code = mutable_region.generate(&conf, true);
-    
-    
-   
+
     let expanded = quote! {
         use #mut_obj as _;
         #input
@@ -290,7 +304,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_define
-                
+
                 #inner_drop
                 #obj_path.define_property(name, value)
             }
@@ -340,7 +354,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn delete_property(&self, name: &#value) -> Result<Option<#value>, #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_delete
-                
+
                 #inner_drop
                 #obj_path.delete_property(name)
             }
@@ -349,7 +363,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn contains_key(&self, name: &#value) -> Result<bool, #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_contains
-                
+
                 #inner_drop
                 #obj_path.contains_key(name)
             }
@@ -389,7 +403,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             fn clear_values(&self) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #clear
-                
+
                 #inner_drop
                 #obj_path.clear_values()
             }
@@ -411,7 +425,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #custom_refs
 
             #primitive
-            
+
             #downcast
         }
     };

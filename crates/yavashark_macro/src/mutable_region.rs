@@ -7,7 +7,7 @@ pub struct MutableRegion {
     direct: Vec<Ident>,
     custom: Vec<Field>,
     name: Ident,
-    extends: bool
+    extends: bool,
 }
 
 impl MutableRegion {
@@ -16,7 +16,7 @@ impl MutableRegion {
             direct,
             custom,
             name,
-            extends
+            extends,
         }
     }
 

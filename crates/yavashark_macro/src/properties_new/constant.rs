@@ -10,7 +10,11 @@ pub struct Constant {
 
 impl Constant {
     /// Generate token stream for constant registration.
-    pub fn init_tokens(&self, _config: &crate::config::Config, self_ty: TokenStream) -> TokenStream {
+    pub fn init_tokens(
+        &self,
+        _config: &crate::config::Config,
+        self_ty: TokenStream,
+    ) -> TokenStream {
         let name = &self.name;
 
         quote! {

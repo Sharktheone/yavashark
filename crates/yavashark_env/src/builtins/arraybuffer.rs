@@ -61,10 +61,10 @@ impl ArrayBuffer {
             }),
         }
     }
-    
+
     pub fn get_slice(&self) -> Ref<[u8]> {
         let inner = self.inner.borrow();
-        
+
         Ref::map(inner, |x| x.buffer.as_slice())
     }
 }

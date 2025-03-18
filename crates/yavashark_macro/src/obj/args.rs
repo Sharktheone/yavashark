@@ -2,8 +2,8 @@ use darling::ast::NestedMeta;
 use darling::FromMeta;
 use proc_macro2::Ident;
 use quote::ToTokens;
-use syn::{Error, FieldsNamed, Path};
 use syn::spanned::Spanned;
+use syn::{Error, FieldsNamed, Path};
 
 #[derive(Debug, FromMeta)]
 pub struct ObjArgs {
@@ -34,7 +34,10 @@ impl FromMeta for Direct {
             let item = match item {
                 NestedMeta::Meta(meta) => meta,
                 NestedMeta::Lit(lit) => {
-                    return Err(darling::Error::from(Error::new(lit.span(), "Unexpected literal")));
+                    return Err(darling::Error::from(Error::new(
+                        lit.span(),
+                        "Unexpected literal",
+                    )));
                 }
             };
 
@@ -43,12 +46,9 @@ impl FromMeta for Direct {
             fields.push(item);
         }
 
-
-
         Ok(Direct { fields })
     }
 }
-
 
 #[derive(Debug)]
 pub struct DirectItem {
@@ -60,25 +60,27 @@ impl FromMeta for DirectItem {
     fn from_meta(meta: &syn::Meta) -> darling::Result<Self> {
         let (field, rename) = match meta {
             syn::Meta::Path(path) => {
-                let field = path.get_ident().ok_or_else(|| {
-                    darling::Error::custom("Expected ident")
-                })?;
+                let field = path
+                    .get_ident()
+                    .ok_or_else(|| darling::Error::custom("Expected ident"))?;
 
                 (field.clone(), None)
             }
             syn::Meta::List(list) => {
-                let field = list.path.get_ident().ok_or_else(|| {
-                    darling::Error::custom("Expected ident")
-                })?;
+                let field = list
+                    .path
+                    .get_ident()
+                    .ok_or_else(|| darling::Error::custom("Expected ident"))?;
 
                 let ident = syn::parse(list.tokens.clone().into())?;
 
                 (field.clone(), Some(ident))
             }
             syn::Meta::NameValue(name_value) => {
-                let field = name_value.path.get_ident().ok_or_else(|| {
-                    darling::Error::custom("Expected ident")
-                })?;
+                let field = name_value
+                    .path
+                    .get_ident()
+                    .ok_or_else(|| darling::Error::custom("Expected ident"))?;
 
                 let ident = syn::parse(name_value.value.to_token_stream().into())?;
 
@@ -90,23 +92,18 @@ impl FromMeta for DirectItem {
     }
 }
 
-
-
-
 pub struct ItemArgs {
     pub gc: Vec<GcItem>,
     pub mutable_region: Vec<Ident>,
     pub primitive: Option<Ident>,
 }
 
-
-
 impl ItemArgs {
     pub fn from(fields: &mut FieldsNamed) -> syn::Result<Self> {
         let mut gc = Vec::new();
         let mut mutable_region = Vec::new();
         let mut primitive = None;
-        
+
         for f in &mut fields.named {
             let mut err = None;
             f.attrs.retain_mut(|attr| {
@@ -116,29 +113,28 @@ impl ItemArgs {
                     let mut multi = false;
 
                     if !matches!(attr.meta, syn::Meta::Path(_)) {
-                        if let Err(e) = attr.parse_nested_meta(|meta| {
-                            if meta.path.is_ident("untyped") {
-                                ty = false;
-                                return Ok(());
-                            }
+                        if let Err(e) =
+                            attr.parse_nested_meta(|meta| {
+                                if meta.path.is_ident("untyped") {
+                                    ty = false;
+                                    return Ok(());
+                                }
 
-                            if meta.path.is_ident("func") {
-                                func = Some(
-                                    meta.path
-                                        .get_ident()
-                                        .cloned()
-                                        .ok_or(syn::Error::new(meta.path.span(), "Expected ident"))?,
-                                );
-                                return Ok(());
-                            }
+                                if meta.path.is_ident("func") {
+                                    func = Some(meta.path.get_ident().cloned().ok_or(
+                                        syn::Error::new(meta.path.span(), "Expected ident"),
+                                    )?);
+                                    return Ok(());
+                                }
 
-                            if meta.path.is_ident("multi") {
-                                multi = true;
-                                return Ok(());
-                            }
+                                if meta.path.is_ident("multi") {
+                                    multi = true;
+                                    return Ok(());
+                                }
 
-                            Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
-                        }) {
+                                Err(syn::Error::new(meta.path.span(), "Unknown attribute"))
+                            })
+                        {
                             err = Some(e);
                             return false;
                         };
@@ -155,8 +151,8 @@ impl ItemArgs {
                             return false;
                         }
                     }
-                        .clone();
-                    
+                    .clone();
+
                     gc.push(GcItem {
                         name: id,
                         ty,
@@ -202,7 +198,7 @@ impl ItemArgs {
                 return Err(e);
             }
         }
-        
+
         Ok(Self {
             gc,
             mutable_region,
@@ -211,10 +207,9 @@ impl ItemArgs {
     }
 }
 
-
 pub struct GcItem {
     pub name: Ident,
     pub ty: bool,
     pub multi: bool,
-    pub func: Option<Ident>
+    pub func: Option<Ident>,
 }

@@ -6,10 +6,10 @@ use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
-use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
 use crate::js::context::Realm;
 use crate::variable::Variable;
 use crate::{Attributes, Error};
+use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
 
 use super::Value;
 
@@ -142,7 +142,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
         false
     }
 
-    /// # Safety: 
+    /// # Safety:
     /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents
     /// - Caller and implementer must ensure that the pointer is valid for the same lifetime of self
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
@@ -348,17 +348,15 @@ impl<C: Realm> BoxedObj<C> {
         }
         Self(obj)
     }
-    
+
     #[allow(clippy::needless_lifetimes)]
-    pub(crate) fn downcast<'a, T: 'static>(
-        &'a self,
-    ) -> Option<&'a T> {
+    pub(crate) fn downcast<'a, T: 'static>(&'a self) -> Option<&'a T> {
         // Safety:
         // - we only interpret the returned pointer as T
         // - we only say the reference is valid for 'a this being the lifetime of self
         unsafe {
             let ptr = self.deref().inner_downcast(TypeId::of::<T>())?.cast();
-            
+
             Some(ptr.as_ref())
         }
     }
@@ -457,10 +455,7 @@ impl<C: Realm> Object<C> {
     }
 
     #[allow(clippy::needless_lifetimes)]
-    pub fn downcast<'a, T: 'static>(
-        &'a self,
-    ) -> Option<OwningGcGuard<'a, BoxedObj<C>, T>> {
-        
+    pub fn downcast<'a, T: 'static>(&'a self) -> Option<OwningGcGuard<'a, BoxedObj<C>, T>> {
         self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
     }
 }

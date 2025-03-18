@@ -1,9 +1,9 @@
 mod constant;
 mod method;
 
-use proc_macro::TokenStream as TokenStream1;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
+use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, ToTokens};
 use syn::{spanned::Spanned, ImplItem, ItemImpl};
@@ -49,7 +49,9 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
 
     let attr_args = match NestedMeta::parse_meta_list(attrs.clone().into()) {
         Ok(v) => v,
-        Err(e) => { return Err(e); }
+        Err(e) => {
+            return Err(e);
+        }
     };
 
     let args = match PropertiesArgs::from_list(&attr_args) {

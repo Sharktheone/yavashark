@@ -22,7 +22,7 @@ impl Int32Array {
 #[props]
 impl Int32Array {
     const BYTES_PER_ELEMENT: usize = size_of::<i32>();
-    
+
     #[constructor]
     fn construct(
         buf: Value,
