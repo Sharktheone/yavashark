@@ -1,9 +1,7 @@
 use std::cell::RefCell;
-use base64::alphabet::STANDARD;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use crate::builtins::int32array::{Int32Array, MutableInt32Array};
 use crate::builtins::typed_array::{Type, TypedArray};
 
 #[object(extends = TypedArray)]
@@ -39,22 +37,22 @@ impl Uint8Array {
     }
     
     #[prop("fromBase64")]
-    fn from_base_64(base64: &str, options: Option<ObjectHandle>) -> Res<ObjectHandle> {
+    fn from_base_64(_base64: &str, _options: Option<ObjectHandle>) -> Res<ObjectHandle> {
         Err(Error::new("Not implemented"))
     }
     
     #[prop("fromHex")]
-    fn from_hex(hex: &str) -> Res<ObjectHandle> {
+    fn from_hex(_hex: &str) -> Res<ObjectHandle> {
         Err(Error::new("Not implemented"))
     }
     
     #[prop("setFromBase64")]
-    fn set_from_base_64(&self, base64: &str, options: Option<ObjectHandle>) -> Res<()> {
+    fn set_from_base_64(&self, _base64: &str, _options: Option<ObjectHandle>) -> Res<()> {
         Err(Error::new("Not implemented"))
     }
     
     #[prop("toBase64")]
-    fn to_base_64(&self, options: Option<ObjectHandle>) -> Res<String> {
+    fn to_base_64(&self, _options: Option<ObjectHandle>) -> Res<String> {
         Err(Error::new("Not implemented"))
     }
     
@@ -64,7 +62,7 @@ impl Uint8Array {
     }
     
     #[prop("setFromHex")]
-    fn set_from_hex(&self, hex: &str) -> Res<()> {
+    fn set_from_hex(&self, _hex: &str) -> Res<()> {
         Err(Error::new("Not implemented"))
     }
 }

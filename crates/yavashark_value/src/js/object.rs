@@ -7,7 +7,6 @@ use std::ptr::NonNull;
 use std::sync::atomic::AtomicIsize;
 
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
-use yavashark_garbage::collectable::OwningGcRefCellGuard;
 use crate::js::context::Realm;
 use crate::variable::Variable;
 use crate::{Attributes, Error};

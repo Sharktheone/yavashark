@@ -39,6 +39,7 @@ enum MaybeStatic<T> {
 
 #[derive(Default, FromMeta)]
 pub struct PropertiesArgs {
+    #[allow(unused)]
     extends: Option<Ident>,
 }
 

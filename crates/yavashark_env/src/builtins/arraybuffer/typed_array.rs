@@ -166,7 +166,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
                 buffer.extend_from_slice(&(item.to_number(realm)? as f32).to_le_bytes());
             }
             Type::F64 => {
-                buffer.extend_from_slice(&(item.to_number(realm)? as f64).to_le_bytes());
+                buffer.extend_from_slice(&(item.to_number(realm)?).to_le_bytes());
             }
         }
     }

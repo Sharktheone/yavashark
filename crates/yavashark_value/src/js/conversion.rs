@@ -1,4 +1,4 @@
-use crate::{BoxedObj, Error, Obj, Object, Realm, Symbol, Value};
+use crate::{BoxedObj, Error, Object, Realm, Symbol, Value};
 use num_bigint::BigInt;
 use std::any::type_name;
 use yavashark_garbage::OwningGcGuard;

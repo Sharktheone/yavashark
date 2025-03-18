@@ -8,6 +8,7 @@ use yavashark_value::Obj;
 #[derive(Debug)]
 pub struct Instant {
     #[mutable]
+    #[allow(unused)]
     stamp: BigInt,
 }
 
