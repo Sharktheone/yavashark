@@ -92,8 +92,22 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             qself: None,
             path: inner_path,
         }),
-    });
+    }); 
     
+    let downcast = if args.extends.is_some() {
+        quote! {
+            unsafe fn inner_downcast(&self, ty: ::core::any::TypeId) -> ::core::option::Option<::core::ptr::NonNull<()>> {
+                if ty == ::core::any::TypeId::of::<Self>() {
+                    ::core::option::Option::Some(::core::ptr::NonNull::from(self).cast())
+                } else {
+                    self.extends.inner_downcast(ty)
+                }
+            }
+        }
+    } else {
+        TokenStream::new()
+    };
+
     let (obj_path, inner_drop, inner_borrow, inner_borrow_mut) = if let Some(extends) = args.extends {
         fields.named.push(syn::Field {
             attrs: Vec::new(),
@@ -264,7 +278,9 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     };
 
     let region_code = mutable_region.generate(&conf, true);
-
+    
+    
+   
     let expanded = quote! {
         use #mut_obj as _;
         #input
@@ -395,6 +411,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #custom_refs
 
             #primitive
+            
+            #downcast
         }
     };
 
