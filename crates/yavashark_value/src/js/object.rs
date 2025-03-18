@@ -146,7 +146,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
     /// # Safety: 
     /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents
     /// - Caller and implementer must ensure that the pointer is valid for the same lifetime of self
-    unsafe fn downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
@@ -351,14 +351,14 @@ impl<C: Realm> BoxedObj<C> {
     }
     
     #[allow(clippy::needless_lifetimes)]
-    fn downcast<'a, T: 'static>(
+    pub(crate) fn downcast<'a, T: 'static>(
         &'a self,
     ) -> Option<&'a T> {
         // Safety:
         // - we only interpret the returned pointer as T
         // - we only say the reference is valid for 'a this being the lifetime of self
         unsafe {
-            let ptr = self.deref().downcast(TypeId::of::<T>())?.cast();
+            let ptr = self.deref().inner_downcast(TypeId::of::<T>())?.cast();
             
             Some(ptr.as_ref())
         }
