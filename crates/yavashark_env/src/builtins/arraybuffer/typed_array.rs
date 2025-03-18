@@ -1,14 +1,13 @@
-use crate::builtins::{ArrayBuffer, ArrayBufferConstructor};
+use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
+use crate::utils::ValueIterator;
 use crate::{Error, MutObject, Realm, Res, Value};
+use bytemuck::cast_slice;
+use half::f16;
 use std::cell::RefCell;
-use swc_ecma_ast::Pat::Array;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{BoxedObj, Obj};
-
-
-
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -30,6 +29,7 @@ pub enum Type {
 pub struct TypedArray {
     #[allow(unused)]
     byte_offset: usize,
+    byte_length: usize,
     ty: Type,
 }
 
@@ -101,6 +101,20 @@ impl TypedArray {
         <&ArrayBuffer>::from_value_out(buf)
     }
 
+    pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> Res<&'a [u8]> {
+        let start = self.byte_offset;
+        let end = start + self.byte_length;
+
+        if end > slice.len() {
+            return Err(Error::range("TypedArray is out of bounds"));
+        }
+
+        slice
+            .get(start..end)
+            .ok_or_else(|| Error::range("TypedArray is out of bounds"))
+    }
+}
+
 fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBuffer> {
     let len = items.len()
         * match ty {
@@ -161,4 +175,77 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 }
 
 #[properties_new]
-impl TypedArray {}
+impl TypedArray {
+    pub fn at(&self, idx: usize) -> Res<Value> {
+        let buf = self.get_buffer()?;
+        let slice = buf.get_slice();
+
+        let slice = self.apply_offsets(&slice)?;
+
+        Ok(match self.ty {
+            Type::U8 => slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x)),
+
+            Type::U16 => {
+                let slice = cast_slice::<u8, u16>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::U32 => {
+                let slice = cast_slice::<u8, u32>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::U64 => {
+                let slice = cast_slice::<u8, u64>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::I8 => {
+                let slice = cast_slice::<u8, i8>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::I16 => {
+                let slice = cast_slice::<u8, i16>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::I32 => {
+                let slice = cast_slice::<u8, i32>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::I64 => {
+                let slice = cast_slice::<u8, i64>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::F16 => {
+                let slice = cast_slice::<u8, f16>(slice);
+
+                slice
+                    .get(idx)
+                    .map_or(Value::Undefined, |x| Value::from(x.to_f64()))
+            }
+
+            Type::F32 => {
+                let slice = cast_slice::<u8, f32>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+
+            Type::F64 => {
+                let slice = cast_slice::<u8, f64>(slice);
+
+                slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            }
+        })
+    }
+}

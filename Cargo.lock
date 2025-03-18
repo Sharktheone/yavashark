@@ -1677,6 +1677,7 @@ version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7db2ff139bba50379da6aa0766b52fdcb62cb5b263009b09ed58ba604e14bbd1"
 dependencies = [
+ "bytemuck",
  "cfg-if",
  "crunchy",
 ]
@@ -4816,6 +4817,7 @@ name = "yavashark_env"
 version = "0.1.0"
 dependencies = [
  "base64",
+ "bytemuck",
  "chrono",
  "colored",
  "half",

@@ -15,7 +15,7 @@ pub mod unit8array;
 
 use crate::array::convert_index;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Obj};
 
@@ -60,6 +60,12 @@ impl ArrayBuffer {
                 buffer,
             }),
         }
+    }
+    
+    pub fn get_slice(&self) -> Ref<[u8]> {
+        let inner = self.inner.borrow();
+        
+        Ref::map(inner, |x| x.buffer.as_slice())
     }
 }
 
