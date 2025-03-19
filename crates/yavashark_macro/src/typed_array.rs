@@ -24,14 +24,16 @@ pub fn typed_array_run(input: TokenStream) -> TokenStream {
     }
     
     quote! {
-        let buf = self.get_buffer()?;
-        let slice = buf.get_slice();
+        {
+            let buf = self.get_buffer()?;
+            let slice = buf.get_slice();
 
-        let slice = self.apply_offsets(&slice)?;
-        
-        
-        match self.ty {
-            #cases
+            let slice = self.apply_offsets(&slice)?;
+
+
+            match self.ty {
+                #cases
+            }
         }
         
         
