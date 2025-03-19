@@ -57,6 +57,13 @@ pub fn typed_array_run(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
     let output = typed_array::typed_array_run(input.into());
     output.into()
 }
+
+#[proc_macro]
+pub fn typed_array_run_mut(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let output = typed_array::typed_array_run_mut(input.into());
+    output.into()
+}
+
 fn env_path() -> syn::Path {
     let name = env::var("CARGO_PKG_NAME").unwrap_or("".to_string());
     if name == "yavashark_env" {

@@ -113,6 +113,20 @@ impl TypedArray {
             .get(start..end)
             .ok_or_else(|| Error::range("TypedArray is out of bounds"))
     }
+
+
+    pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> Res<&'a mut [u8]> {
+        let start = self.byte_offset;
+        let end = start + self.byte_length;
+
+        if end > slice.len() {
+            return Err(Error::range("TypedArray is out of bounds"));
+        }
+
+        slice
+            .get_mut(start..end)
+            .ok_or_else(|| Error::range("TypedArray is out of bounds"))
+    }
 }
 
 fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBuffer> {
