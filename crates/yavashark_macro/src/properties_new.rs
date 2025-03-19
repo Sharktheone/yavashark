@@ -39,7 +39,6 @@ enum MaybeStatic<T> {
 
 #[derive(Default, FromMeta)]
 pub struct PropertiesArgs {
-    #[allow(unused)]
     extends: Option<Ident>,
 }
 
@@ -114,6 +113,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         constructor,
         call_constructor,
         &config,
+        args.extends.is_some()
     )?;
 
     let try_into_value = &config.try_into_value;
@@ -214,6 +214,7 @@ fn init_constructor(
     constructor: Option<Method>,
     call_constructor: Option<Method>,
     config: &Config,
+    extends: bool,
 ) -> syn::Result<(TokenStream, TokenStream)> {
     if static_props.is_empty() && constructor.is_none() && call_constructor.is_none() {
         return Ok((TokenStream::new(), TokenStream::new()));
@@ -304,9 +305,17 @@ fn init_constructor(
     }
 
     let variable = &config.variable;
+    
+    let constr_proto = if extends {
+        quote! { {
+            &obj.prototype()?.value.get_property_no_get_set(&"constructor".into())?.value
+        } }
+    } else {
+        quote! { &func_proto }
+    };
 
     let init_tokens = quote! {
-        let constructor = #name::new(&func_proto)?;
+        let constructor = #name::new(#constr_proto)?;
 
         obj.define_variable("constructor".into(), constructor.clone().into())?;
 
