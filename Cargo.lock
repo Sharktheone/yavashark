@@ -4821,6 +4821,7 @@ dependencies = [
  "chrono",
  "colored",
  "half",
+ "hex",
  "indexmap",
  "num-bigint",
  "num-traits",
