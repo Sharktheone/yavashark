@@ -2,11 +2,10 @@ use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, Realm, Res, Value};
-use bytemuck::cast_slice;
 use half::f16;
 use std::cell::RefCell;
 use yavashark_garbage::OwningGcGuard;
-use yavashark_macro::{object, props, typed_array_run};
+use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
 use yavashark_value::{BoxedObj, Obj};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -197,5 +196,17 @@ impl TypedArray {
         Ok(typed_array_run! ({
             slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
         }))
+    }
+    
+    #[prop("copyWithin")]
+    pub fn copy_within(&self, target: usize, start: usize, end: Option<usize>) -> Res<()> {
+        typed_array_run_mut!({
+            let end = end.unwrap_or(slice.len());
+            
+            slice.copy_within(start..end, target);
+        });
+        
+        
+        Ok(())
     }
 }
