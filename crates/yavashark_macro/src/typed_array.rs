@@ -15,7 +15,7 @@ pub fn typed_array_run(input: TokenStream) -> TokenStream {
         
         cases.extend(quote! {
             Type::#t => {
-                let slice = cast_slice::<u8, #ty>(slice);
+                let slice = bytemuck::cast_slice::<u8, #ty>(slice);
                 #input
             }
         });
@@ -48,7 +48,7 @@ pub fn typed_array_run_mut(input: TokenStream) -> TokenStream {
 
         cases.extend(quote! {
             Type::#t => {
-                let slice = cast_slice_mut::<u8, #ty>(slice);
+                let slice = bytemuck::cast_slice_mut::<u8, #ty>(slice);
                 #input
             }
         });
@@ -57,9 +57,9 @@ pub fn typed_array_run_mut(input: TokenStream) -> TokenStream {
     quote! {
         {
             let buf = self.get_buffer()?;
-            let slice = buf.get_slice_mut();
+            let mut slice = buf.get_slice_mut();
 
-            let slice = self.apply_offsets_mut(&slice)?;
+            let mut slice = self.apply_offsets_mut(&mut slice)?;
 
 
             match self.ty {
