@@ -6,7 +6,7 @@ use bytemuck::cast_slice;
 use half::f16;
 use std::cell::RefCell;
 use yavashark_garbage::OwningGcGuard;
-use yavashark_macro::{object, properties_new, typed_array_run};
+use yavashark_macro::{object, props, typed_array_run};
 use yavashark_value::{BoxedObj, Obj};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -174,8 +174,11 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
     Ok(ArrayBuffer::from_buffer(realm, buffer))
 }
 
-#[properties_new]
+#[props]
 impl TypedArray {
+    const BYTES_PER_ELEMENT: u8 = 1;
+    
+    
     pub fn at(&self, idx: usize) -> Res<Value> {
         Ok(typed_array_run! ({
             slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))

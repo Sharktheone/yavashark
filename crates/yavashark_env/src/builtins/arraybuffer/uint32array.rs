@@ -19,7 +19,7 @@ impl Uint32Array {
     }
 }
 
-#[props]
+#[props(extends = TypedArray)]
 impl Uint32Array {
     const BYTES_PER_ELEMENT: usize = size_of::<u32>();
 

@@ -19,7 +19,7 @@ impl Int16Array {
     }
 }
 
-#[props]
+#[props(extends = TypedArray)]
 impl Int16Array {
     const BYTES_PER_ELEMENT: usize = size_of::<i16>();
 

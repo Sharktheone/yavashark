@@ -19,7 +19,7 @@ impl Uint8Array {
     }
 }
 
-#[props]
+#[props(extends = TypedArray)]
 impl Uint8Array {
     const BYTES_PER_ELEMENT: usize = size_of::<u8>();
 

@@ -20,7 +20,7 @@ impl Float16Array {
     }
 }
 
-#[props]
+#[props(extends = TypedArray)]
 impl Float16Array {
     const BYTES_PER_ELEMENT: usize = size_of::<f16>();
 
