@@ -21,6 +21,7 @@ impl BigUint64Array {
 
 #[props(extends = TypedArray)]
 impl BigUint64Array {
+    #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<u64>();
 
     #[constructor]

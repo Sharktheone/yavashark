@@ -21,6 +21,7 @@ impl Int8Array {
 
 #[props(extends = TypedArray)]
 impl Int8Array {
+    #[both]
     const BYTES_PER_ELEMENT: usize = size_of::<i8>();
 
     #[constructor]
