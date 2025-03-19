@@ -9,6 +9,7 @@ mod obj;
 mod properties;
 mod properties_new;
 mod props;
+mod typed_array;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -48,6 +49,13 @@ pub fn custom_props(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     custom_props::custom_props(attrs, item)
+}
+
+
+#[proc_macro]
+pub fn typed_array_run(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let output = typed_array::typed_array_run(input.into());
+    output.into()
 }
 fn env_path() -> syn::Path {
     let name = env::var("CARGO_PKG_NAME").unwrap_or("".to_string());
