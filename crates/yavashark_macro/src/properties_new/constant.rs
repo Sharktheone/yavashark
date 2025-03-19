@@ -3,6 +3,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::Expr;
 
+#[derive(Clone)]
 pub struct Constant {
     pub name: syn::Ident,
     pub js_name: Option<Expr>,
@@ -29,6 +30,7 @@ pub fn parse_constant(
     let mut js_name = None;
 
     let mut is_static = true;
+    let mut is_both = false;
 
     let mut error = None;
     constant.attrs.retain_mut(|attr| {
@@ -46,6 +48,10 @@ pub fn parse_constant(
         } else if attr.path().is_ident("nonstatic") {
             is_static = false;
             return false;
+        } else if attr.path().is_ident("both") {
+            is_both = true;
+            is_static = false;
+            return false;
         }
 
         true
@@ -57,7 +63,9 @@ pub fn parse_constant(
 
     Ok(if is_static {
         MaybeStatic::Static
-    } else {
+    } else if is_both {
+        MaybeStatic::Both
+    } else  {
         MaybeStatic::Impl
     }(Constant {
         name: constant.ident.clone(),

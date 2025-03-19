@@ -35,6 +35,7 @@ enum MaybeConstructor<T> {
 enum MaybeStatic<T> {
     Impl(T),
     Static(T),
+    Both(T),
 }
 
 #[derive(Default, FromMeta)]
@@ -96,6 +97,10 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
                         props.push(Prop::Constant(property));
                     }
                     MaybeStatic::Static(property) => {
+                        static_props.push(Prop::Constant(property));
+                    }
+                    MaybeStatic::Both(property) => {
+                        props.push(Prop::Constant(property.clone()));
                         static_props.push(Prop::Constant(property));
                     }
                 }
