@@ -106,3 +106,18 @@ fn parse() {
 
     dbg!(set);
 }
+
+#[test]
+fn count_instructions() {
+    let set = parse_instruction_set();
+    
+    let mut num = 0;
+    
+    for inst in set {
+        let num_insts = inst.inputs.len().pow(5) * if inst.output.is_some() { 4 } else { 1 };
+        num += num_insts;
+    }
+    
+    dbg!(num);
+    
+}
