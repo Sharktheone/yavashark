@@ -1,0 +1,79 @@
+Add(Data, Data) => Data
+Sub(Data, Data) => Data
+Mul(Data, Data) => Data
+Div(Data, Data) => Data
+Mod(Data, Data) => Data
+
+LNot(Data) => Data
+LOr(Data, Data) => Data
+LAnd(Data, Data) => Data
+BXor(Data, Data) => Data
+BOr(Data, Data) => Data
+BAnd(Data, Data) => Data  
+
+Eq(Data, Data) => Data
+Ne(Data, Data) => Data
+StrictEq(Data, Data) => Data
+StrictNe(Data, Data) => Data
+Lt(Data, Data) => Data
+LtEq(Data, Data) => Data
+Gt(Data, Data) => Data
+GtEq(Data, Data) => Data
+
+LShift(Data, Data) => Data
+RShift(Data, Data) => Data
+ZeroFillRShift(Data, Data) => Data
+
+In(Data, Data) => Data
+InstanceOf(Data, Data) => Data
+
+Exp(Data, Data) => Data
+NullishCoalescing(Data, Data) => Data
+
+Dec(Data) => Data     
+Inc(Data) => Data
+
+PushScope
+PopScope
+
+Call(Data) => Data
+CallMember(Data, Data) => Data      
+
+Jmp(Offset)
+JmpIf(Data, Offset)
+JmpIfNot(Data, Offset)
+JmpIfNull(Data, Offset)
+JmpIfNotNull(Data, Offset)
+JmpIfUndefined(Data, Offset)
+JmpIfNotUndefined(Data, Offset)
+
+JmpRel(Offset)
+JmpIfRel(Data, Offset)
+JmpIfNotRel(Data, Offset)
+JmpIfNullRel(Data, Offset)
+JmpIfNotNullRel(Data, Offset)
+JmpIfUndefinedRel(Data, Offset)
+
+JmpIfEq(Data, Data, Offset)
+JmpIfNe(Data, Data, Offset)
+JmpIfStrictEq(Data, Data, Offset)
+JmpIfStrictNe(Data, Data, Offset)
+JmpIfLt(Data, Data, Offset)
+JmpIfLtEq(Data, Data, Offset)
+JmpIfGt(Data, Data, Offset)
+
+LoadMember(Data, Data) => Data
+LoadVar(Data) => Data
+
+TypeOf(Data) => Data
+
+Push(Data)
+Pop
+PopN(u32)
+PopTo(Data)
+Move(Data, Data)
+Return 
+ReturnValue(Data)
+
+Throw(Data)
+This => Data 
