@@ -10,6 +10,7 @@ mod properties;
 mod properties_new;
 mod props;
 mod typed_array;
+mod instruction;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -62,6 +63,12 @@ pub fn typed_array_run(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 pub fn typed_array_run_mut(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let output = typed_array::typed_array_run_mut(input.into());
     output.into()
+}
+
+
+#[proc_macro]
+pub fn inst(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    instruction::instruction(input.into()).map(Into::into).unwrap_or_else(|e| e.to_compile_error().into())
 }
 
 fn env_path() -> syn::Path {
