@@ -9,7 +9,7 @@ LOr(Data, Data) => Data
 LAnd(Data, Data) => Data
 BXor(Data, Data) => Data
 BOr(Data, Data) => Data
-BAnd(Data, Data) => Data  
+BAnd(Data, Data) => Data
 
 Eq(Data, Data) => Data
 Ne(Data, Data) => Data
@@ -30,14 +30,14 @@ InstanceOf(Data, Data) => Data
 Exp(Data, Data) => Data
 NullishCoalescing(Data, Data) => Data
 
-Dec(Data) => Data     
+Dec(Data) => Data
 Inc(Data) => Data
 
 PushScope
 PopScope
 
 Call(Data) => Data
-CallMember(Data, Data) => Data      
+CallMember(Data, Data) => Data
 
 Jmp(Offset)
 JmpIf(Data, Offset)
@@ -72,8 +72,8 @@ Pop
 PopN(u32)
 PopTo(Data)
 Move(Data, Data)
-Return 
+Return
 ReturnValue(Data)
 
 Throw(Data)
-This => Data 
+This => Data
