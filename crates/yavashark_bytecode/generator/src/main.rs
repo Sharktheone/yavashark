@@ -1,5 +1,8 @@
+use crate::instruction::generate_instruction_enum;
+
 mod parse;
+mod instruction;
 
 fn main() {
-    println!("Hello, world!");
+    generate_instruction_enum()
 }

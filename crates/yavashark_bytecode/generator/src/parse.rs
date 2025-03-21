@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 static INSTRUCTION_SET: &str = include_str!("../../set.instruct");
 
 
@@ -27,6 +29,18 @@ pub struct InstructionDefinition {
     pub output: Option<Type>,
 }
 
+impl InstructionDefinition {
+    pub fn num_instructions(&self) -> usize {
+        self.inputs.len().pow(5) * if self.output.is_some() { 4 } else { 1 }
+    }
+}
+
+static INSTRUCTION_DEFINITION: LazyLock<Vec<InstructionDefinition>> = LazyLock::new(parse_instruction_set);
+
+
+pub fn instruction_def() -> &'static [InstructionDefinition] {
+    &INSTRUCTION_DEFINITION
+}
 
 
 fn parse_instruction_set() -> Vec<InstructionDefinition> {
