@@ -6,7 +6,7 @@ struct InstructionSet {
 }
 
 #[derive(Debug, Clone)]
-enum ArgumentType {
+pub enum ArgumentType {
     Variable,
     Reg,
     Acc,
@@ -39,7 +39,7 @@ impl ArgumentType {
 
 
 #[derive(Debug, Clone)]
-enum ReturnType {
+pub enum ReturnType {
     Variable,
     Reg,
     Acc,
@@ -68,7 +68,7 @@ impl ReturnType {
 }
 
 #[derive(Debug, Clone)]
-struct Instruction {
+pub struct Instruction {
     name: String,
     inputs: Vec<ArgumentType>,
     output: Option<ReturnType>,
