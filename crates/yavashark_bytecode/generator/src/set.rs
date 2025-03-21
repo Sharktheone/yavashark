@@ -58,7 +58,7 @@ impl ReturnType {
     
     fn to_str(&self) -> &str {
         match self {
-            ReturnType::Variable => "Variable",
+            ReturnType::Variable => "Var",
             ReturnType::Reg => "Reg",
             ReturnType::Acc => "Acc",
             ReturnType::Stack => "Stack",
