@@ -27,7 +27,7 @@ impl ArgumentType {
     
     fn to_str(&self) -> &str {
         match self {
-            ArgumentType::Variable => "Variable",
+            ArgumentType::Variable => "Var",
             ArgumentType::Reg => "Reg",
             ArgumentType::Acc => "Acc",
             ArgumentType::Stack => "Stack",
