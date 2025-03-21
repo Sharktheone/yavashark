@@ -46,31 +46,10 @@ pub fn generate_instruction_enum() {
     };
 
 
-    let mut variants = Vec::new();
+    // let mut variants = Vec::new();
 
     for inst in instructions {
-        let mut instruction_variants = Vec::with_capacity(inst.num_instructions());
-
-        instruction_variants.push(InstructionVariant {
-            name: inst.name.clone(),
-            inputs: Vec::new(),
-            output: None,
-        });
         
-
-        
-
-
-        for input in inst.inputs {
-            repeat_vec(&mut instruction_variants, ArgumentType::NUM_TYPES);
-
-
-        }
-
-
-
-
-        // variants.push(generate_variant(&inst.name, ));
     }
 
 
@@ -78,14 +57,4 @@ pub fn generate_instruction_enum() {
 
 
     println!("{}", output);
-}
-
-
-fn repeat_vec<T: Clone>(vec: &mut Vec<T>, times: usize) {
-    let len = vec.len();
-    vec.reserve(len * times);
-
-    for _ in 0..times {
-        vec.extend_from_within(0..len);
-    }
 }

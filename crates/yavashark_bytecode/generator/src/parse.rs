@@ -4,7 +4,7 @@ static INSTRUCTION_SET: &str = include_str!("../../set.instruct");
 
 
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Type {
     Data,
     Offset,
@@ -17,6 +17,14 @@ impl Type {
             "Data" => Type::Data,
             "Offset" => Type::Offset,
             _ => Type::Other(s.to_string())
+        }
+    }
+    
+    pub fn type_str(&self) -> &str {
+        match self {
+            Type::Data => "Data",
+            Type::Offset => "Offset",
+            Type::Other(s) => s,
         }
     }
 }
