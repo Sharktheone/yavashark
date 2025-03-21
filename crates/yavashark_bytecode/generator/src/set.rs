@@ -126,6 +126,7 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
             repeat_vec(&mut inst, ReturnType::NUM_TYPES);
 
             inst.iter_mut().zip(ReturnType::TYPES.iter().cycle()).for_each(|(inst, out)| {
+                inst.name.push_str("To");
                 inst.name.push_str(out.to_str());
                 inst.output = Some(out.clone());
             });
