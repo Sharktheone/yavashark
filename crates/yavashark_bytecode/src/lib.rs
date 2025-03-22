@@ -5,13 +5,14 @@
 //!
 
 pub use consts::*;
-pub use instructions::*;
+pub use instructions_old::*;
 
 mod consts;
 pub mod data;
 pub mod function;
-mod instructions;
+mod instructions_old;
 pub mod writer;
+mod instructions;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;
