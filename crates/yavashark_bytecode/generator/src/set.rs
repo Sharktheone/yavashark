@@ -36,24 +36,13 @@ impl ArgumentType {
         }
     }
     
-    pub fn to_syn_crate(&self) -> syn::Type {
-        match self {
-            ArgumentType::Variable => syn::parse_quote! { crate::data::VarName },
-            ArgumentType::Reg => syn::parse_quote! { crate::data::Reg },
-            ArgumentType::Acc => syn::parse_quote! { crate::data::Acc },
-            ArgumentType::Stack => syn::parse_quote! { crate::data::Stack },
-            ArgumentType::Const => syn::parse_quote! { crate::data::ConstIdx },
-            ArgumentType::Other(s) => syn::parse_str(s).unwrap(),
-        }
-    }
-    
     pub fn to_syn(&self) -> syn::Type {
         match self {
-            ArgumentType::Variable => syn::parse_quote! { yavashark_bytecode::data::VarName },
-            ArgumentType::Reg => syn::parse_quote! { yavashark_bytecode::data::Reg },
-            ArgumentType::Acc => syn::parse_quote! { yavashark_bytecode::data::Acc },
-            ArgumentType::Stack => syn::parse_quote! { yavashark_bytecode::data::Stack },
-            ArgumentType::Const => syn::parse_quote! { yavashark_bytecode::data::ConstIdx },
+            ArgumentType::Variable => syn::parse_quote! { VarName },
+            ArgumentType::Reg => syn::parse_quote! { Reg },
+            ArgumentType::Acc => syn::parse_quote! { Acc },
+            ArgumentType::Stack => syn::parse_quote! { Stack },
+            ArgumentType::Const => syn::parse_quote! { ConstIdx },
             ArgumentType::Other(s) => syn::parse_str(s).unwrap(),
         }
     }
@@ -128,9 +117,12 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
     
     for input in &def.inputs {
         if input == &Type::Data {
+            let len = inst.len();
             repeat_vec(&mut inst, ArgumentType::NUM_TYPES);
 
-            inst.iter_mut().zip(ArgumentType::TYPES.iter().cycle()).for_each(|(inst, input)| {
+            inst.iter_mut().enumerate().for_each(|(idx, inst)| {
+                let input = ArgumentType::TYPES[idx / len].clone();
+                
                 inst.name.push_str(input.to_str());
                 inst.inputs.push(input.clone());
             });
@@ -145,9 +137,12 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
     
     if let Some(output) = &def.output {
         if output == &Type::Data {
+            let len = inst.len();
             repeat_vec(&mut inst, ReturnType::NUM_TYPES);
 
-            inst.iter_mut().zip(ReturnType::TYPES.iter().cycle()).for_each(|(inst, out)| {
+            inst.iter_mut().enumerate().for_each(|(idx, inst)| {
+                let out = ReturnType::TYPES[idx / len].clone();
+                
                 inst.name.push_str("To");
                 inst.name.push_str(out.to_str());
                 inst.output = Some(out.clone());
@@ -171,7 +166,7 @@ fn repeat_vec<T: Clone>(vec: &mut Vec<T>, times: usize) {
     let len = vec.len();
     vec.reserve(len * times);
 
-    for _ in 0..times {
+    for _ in 0..times - 1 {
         vec.extend_from_within(0..len);
     }
 }
