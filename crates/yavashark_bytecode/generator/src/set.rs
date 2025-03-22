@@ -1,4 +1,5 @@
 use std::sync::LazyLock;
+use convert_case::{Case, Casing};
 use crate::parse::{instruction_def, InstructionDefinition, Type};
 
 struct InstructionSet {
@@ -80,6 +81,7 @@ impl ReturnType {
 
 #[derive(Debug, Clone)]
 pub struct Instruction {
+    pub class: String,
     pub name: String,
     pub inputs: Vec<ArgumentType>,
     pub output: Option<ReturnType>,
@@ -109,6 +111,7 @@ fn expand_definitions() -> Vec<Instruction> {
 
 fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
     let mut inst = vec![Instruction {
+        class: get_class(&def.name),
         name: def.name.clone(),
         inputs: Vec::new(),
         output: None,
@@ -168,6 +171,18 @@ fn repeat_vec<T: Clone>(vec: &mut Vec<T>, times: usize) {
 
     for _ in 0..times - 1 {
         vec.extend_from_within(0..len);
+    }
+}
+
+fn get_class(name: &str) -> String {
+    let case = name.to_case(Case::Snake);
+    
+    match &*case {
+        "mod" => "mod_".to_owned(),
+        "in" => "in_".to_owned(),
+        "move" => "move_".to_owned(),
+        "return" => "return_".to_owned(),
+        _ => case,
     }
 }
 
