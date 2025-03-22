@@ -2,7 +2,7 @@ use std::sync::LazyLock;
 use crate::parse::{instruction_def, InstructionDefinition, Type};
 
 struct InstructionSet {
-    instructions: Vec<Instruction>,
+    pub instructions: Vec<Instruction>,
 }
 
 #[derive(Debug, Clone)]
@@ -33,6 +33,28 @@ impl ArgumentType {
             ArgumentType::Stack => "Stack",
             ArgumentType::Const => "Const",
             ArgumentType::Other(s) => s.as_str(),
+        }
+    }
+    
+    pub fn to_syn_crate(&self) -> syn::Type {
+        match self {
+            ArgumentType::Variable => syn::parse_quote! { crate::data::VarName },
+            ArgumentType::Reg => syn::parse_quote! { crate::data::Reg },
+            ArgumentType::Acc => syn::parse_quote! { crate::data::Acc },
+            ArgumentType::Stack => syn::parse_quote! { crate::data::Stack },
+            ArgumentType::Const => syn::parse_quote! { crate::data::ConstIdx },
+            ArgumentType::Other(s) => syn::parse_str(s).unwrap(),
+        }
+    }
+    
+    pub fn to_syn(&self) -> syn::Type {
+        match self {
+            ArgumentType::Variable => syn::parse_quote! { yavashark_bytecode::data::VarName },
+            ArgumentType::Reg => syn::parse_quote! { yavashark_bytecode::data::Reg },
+            ArgumentType::Acc => syn::parse_quote! { yavashark_bytecode::data::Acc },
+            ArgumentType::Stack => syn::parse_quote! { yavashark_bytecode::data::Stack },
+            ArgumentType::Const => syn::parse_quote! { yavashark_bytecode::data::ConstIdx },
+            ArgumentType::Other(s) => syn::parse_str(s).unwrap(),
         }
     }
 }
@@ -69,9 +91,9 @@ impl ReturnType {
 
 #[derive(Debug, Clone)]
 pub struct Instruction {
-    name: String,
-    inputs: Vec<ArgumentType>,
-    output: Option<ReturnType>,
+    pub name: String,
+    pub inputs: Vec<ArgumentType>,
+    pub output: Option<ReturnType>,
 }
 
 

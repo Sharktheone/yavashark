@@ -1,5 +1,8 @@
+use std::env::var;
 use quote::quote;
-use crate::parse;
+use syn::{Field, FieldMutability, Fields, FieldsUnnamed, Variant, Visibility};
+use syn::punctuated::Punctuated;
+use crate::set;
 
 
 #[derive(Debug, Clone, Copy)]
@@ -37,7 +40,7 @@ struct InstructionVariant {
 
 
 pub fn generate_instruction_enum() {
-    let instructions = parse::instruction_def();
+    let instructions = set::instructions();
 
 
     let mut output = quote! {
@@ -46,15 +49,49 @@ pub fn generate_instruction_enum() {
     };
 
 
-    // let mut variants = Vec::new();
+    let mut variants = Vec::new();
 
     for inst in instructions {
+        let fields = if inst.inputs.is_empty() {
+            Fields::Unit
+        } else {
+            
+            
+            let iter = inst.inputs.iter().map(|input| {
+                Field {
+                    attrs: Vec::new(),
+                    vis: Visibility::Inherited,
+                    mutability: FieldMutability::None,
+                    ident: None,
+                    colon_token: None,
+                    ty: input.to_syn_crate(),
+                }
+            });
+            
+            Fields::Unnamed(FieldsUnnamed {
+                paren_token: Default::default(),
+                unnamed: Punctuated::from_iter(iter)
+            })
+        };
         
+        variants.push(Variant {
+            attrs: Vec::new(),
+            ident: syn::Ident::new(&inst.name, proc_macro2::Span::call_site()),
+            fields,
+            discriminant: None,
+        })
     }
+    
+    output.extend(quote! {
+        #[derive(Debug, Clone, Copy)]
+        pub enum Instruction {
+            #(#variants),*
+        }
+    });
 
 
 
 
 
-    println!("{}", output);
+    println!("{:#?}", output);
 }
