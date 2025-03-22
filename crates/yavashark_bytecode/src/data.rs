@@ -18,11 +18,19 @@ impl DataSection {
 
 
 pub enum DataType {
-    Acc,
-    Reg,
-    Var,
-    Const,
-    Stack
+    Acc(Acc),
+    Reg(Reg),
+    Var(VarName),
+    Const(ConstIdx),
+    Stack(Stack)
+}
+
+
+pub enum OutputDataType {
+    Acc(Acc),
+    Reg(Reg),
+    Var(VarName),
+    Stack(Stack)
 }
 
 
@@ -30,24 +38,28 @@ pub trait Data: Copy {
     fn acc(self) -> Option<Acc> {
         None
     }
-    
+
     fn reg(self) -> Option<Reg> {
         None
     }
-    
+
     fn var_name(self) -> Option<VarName> {
         None
     }
-    
+
     fn const_idx(self) -> Option<ConstIdx> {
         None
     }
-    
+
     fn stack(self) -> Option<Stack> {
         None
     }
-    
+
     fn data_type(self) -> DataType;
+}
+
+pub trait OutputData: Copy {
+    fn data_type(self) -> OutputDataType;
 }
 
 
@@ -66,44 +78,44 @@ impl Data for Acc {
     fn acc(self) -> Option<Acc> {
         Some(self)
     }
-    
+
     fn data_type(self) -> DataType {
-        DataType::Acc
+        DataType::Acc(self)
     }
 }
 impl Data for Reg {
     fn reg(self) -> Option<Reg> {
         Some(self)
     }
-    
+
     fn data_type(self) -> DataType {
-        DataType::Reg
+        DataType::Reg(self)
     }
 }
 impl Data for VarName {
     fn var_name(self) -> Option<VarName> {
         Some(self)
     }
-    
+
     fn data_type(self) -> DataType {
-        DataType::Var
+        DataType::Var(self)
     }
 }
 impl Data for ConstIdx {
     fn const_idx(self) -> Option<ConstIdx> {
         Some(self)
     }
-    
+
     fn data_type(self) -> DataType {
-        DataType::Const
+        DataType::Const(self)
     }
 }
 impl Data for Stack {
     fn stack(self) -> Option<Stack> {
         Some(self)
     }
-    
+
     fn data_type(self) -> DataType {
-        DataType::Stack
+        DataType::Stack(self)
     }
 }

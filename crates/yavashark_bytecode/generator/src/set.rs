@@ -184,7 +184,7 @@ fn repeat_vec<T: Clone>(vec: &mut Vec<T>, times: usize) {
     }
 }
 
-fn get_class(name: &str) -> String {
+pub fn get_class(name: &str) -> String {
     let case = name.to_case(Case::Snake);
     
     match &*case {
