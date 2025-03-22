@@ -7,7 +7,8 @@ static INSTRUCTION_SET: &str = include_str!("../../set.instruct");
 #[derive(Debug, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub enum Type {
     Data,
-    Offset,
+    JmpOffset,
+    JmpAddr,
     Other(String)
 }
 
@@ -15,7 +16,8 @@ impl Type {
     fn parse(s: &str) -> Self {
         match s.trim() {
             "Data" => Type::Data,
-            "Offset" => Type::Offset,
+            "JmpOffset" => Type::JmpOffset,
+            "JmpAddr" => Type::JmpAddr,
             _ => Type::Other(s.to_string())
         }
     }
@@ -23,7 +25,8 @@ impl Type {
     pub fn type_str(&self) -> &str {
         match self {
             Type::Data => "Data",
-            Type::Offset => "Offset",
+            Type::JmpOffset => "JmpOffset",
+            Type::JmpAddr => "JmpAddr",
             Type::Other(s) => s,
         }
     }
