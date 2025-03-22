@@ -13,6 +13,7 @@ pub mod function;
 mod instructions_old;
 pub mod writer;
 pub mod instructions;
+mod constructor;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;
