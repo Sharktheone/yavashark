@@ -20,6 +20,10 @@ pub fn generate_execute() {
         let name = Ident::new(&inst.name, proc_macro2::Span::call_site());
         let execute_fn = Ident::new(&inst.class, proc_macro2::Span::call_site());
         
+        if inst.output.is_some() {
+            args.push(quote! { output });
+        }
+        
         let match_args = if args.is_empty() {
             TokenStream::new()
         } else {
@@ -55,7 +59,7 @@ use yavashark_env::ControlResult;
 pub trait Execute {
     fn execute(self, vm: &mut impl VM) -> ControlResult;
 }
-        
+
 
 
 "#;

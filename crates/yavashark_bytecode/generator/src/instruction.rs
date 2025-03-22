@@ -41,19 +41,12 @@ struct InstructionVariant {
 pub fn generate_instruction_enum() {
     let instructions = set::instructions();
 
-
-    let mut output = quote! {
-    };
-
-
     let mut variants = Vec::new();
 
     for inst in instructions {
-        let fields = if inst.inputs.is_empty() {
+        let fields = if inst.inputs.is_empty() && inst.output.is_none() {
             Fields::Unit
         } else {
-            
-            
             let iter = inst.inputs.iter().map(|input| {
                 Field {
                     attrs: Vec::new(),
@@ -64,6 +57,17 @@ pub fn generate_instruction_enum() {
                     ty: input.to_syn(),
                 }
             });
+            
+            let iter = iter.chain(inst.output.iter().map(|output| {
+                Field {
+                    attrs: Vec::new(),
+                    vis: Visibility::Inherited,
+                    mutability: FieldMutability::None,
+                    ident: None,
+                    colon_token: None,
+                    ty: output.to_syn(),
+                }
+            }));
             
             Fields::Unnamed(FieldsUnnamed {
                 paren_token: Default::default(),
@@ -79,12 +83,12 @@ pub fn generate_instruction_enum() {
         })
     }
     
-    output.extend(quote! {
+    let output = quote! {
         #[derive(Debug, Clone, Copy)]
         pub enum Instruction {
             #(#variants),*
         }
-    });
+    };
     
     let file = syn::File {
         shebang: None,
