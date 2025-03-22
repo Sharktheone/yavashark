@@ -39,13 +39,6 @@ PopScope
 Call(Data) => Data
 CallMember(Data, Data) => Data
 
-Jmp(Offset)
-JmpIf(Data, Offset)
-JmpIfNot(Data, Offset)
-JmpIfNull(Data, Offset)
-JmpIfNotNull(Data, Offset)
-JmpIfUndefined(Data, Offset)
-JmpIfNotUndefined(Data, Offset)
 Jmp(JmpAddr)
 JmpIf(Data, JmpAddr)
 JmpIfNot(Data, JmpAddr)
@@ -61,13 +54,6 @@ JmpIfNullRel(Data, JmpOffset)
 JmpIfNotNullRel(Data, JmpOffset)
 JmpIfUndefinedRel(Data, JmpOffset)
 
-JmpIfEq(Data, Data, Offset)
-JmpIfNe(Data, Data, Offset)
-JmpIfStrictEq(Data, Data, Offset)
-JmpIfStrictNe(Data, Data, Offset)
-JmpIfLt(Data, Data, Offset)
-JmpIfLtEq(Data, Data, Offset)
-JmpIfGt(Data, Data, Offset)
 JmpIfEq(Data, Data, JmpAddr)
 JmpIfNe(Data, Data, JmpAddr)
 JmpIfStrictEq(Data, Data, JmpAddr)
@@ -75,6 +61,16 @@ JmpIfStrictNe(Data, Data, JmpAddr)
 JmpIfLt(Data, Data, JmpAddr)
 JmpIfLtEq(Data, Data, JmpAddr)
 JmpIfGt(Data, Data, JmpAddr)
+JmpIfGtEq(Data, Data, JmpAddr)
+
+JmpIfEqRel(Data, Data, JmpOffset)
+JmpIfNeRel(Data, Data, JmpOffset)
+JmpIfStrictEqRel(Data, Data, JmpOffset)
+JmpIfStrictNeRel(Data, Data, JmpOffset)
+JmpIfLtRel(Data, Data, JmpOffset)
+JmpIfLtEqRel(Data, Data, JmpOffset)
+JmpIfGtRel(Data, Data, JmpOffset)
+JmpIfGtEqRel(Data, Data, JmpOffset)        
 
 LoadMember(Data, Data) => Data
 LoadVar(Data) => Data
