@@ -12,7 +12,7 @@ pub mod data;
 pub mod function;
 mod instructions_old;
 pub mod writer;
-mod instructions;
+pub mod instructions;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;

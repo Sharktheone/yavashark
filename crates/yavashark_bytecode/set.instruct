@@ -70,7 +70,7 @@ JmpIfStrictNeRel(Data, Data, JmpOffset)
 JmpIfLtRel(Data, Data, JmpOffset)
 JmpIfLtEqRel(Data, Data, JmpOffset)
 JmpIfGtRel(Data, Data, JmpOffset)
-JmpIfGtEqRel(Data, Data, JmpOffset)        
+JmpIfGtEqRel(Data, Data, JmpOffset)
 
 LoadMember(Data, Data) => Data
 LoadVar(Data) => Data

@@ -77,6 +77,16 @@ impl ReturnType {
             ReturnType::Other(s) => s.as_str(),
         }
     }
+
+    pub fn to_syn(&self) -> syn::Type {
+        match self {
+            ReturnType::Variable => syn::parse_quote! { VarName },
+            ReturnType::Reg => syn::parse_quote! { Reg },
+            ReturnType::Acc => syn::parse_quote! { Acc },
+            ReturnType::Stack => syn::parse_quote! { Stack },
+            ReturnType::Other(s) => syn::parse_str(s).unwrap(),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
