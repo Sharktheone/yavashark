@@ -7,6 +7,7 @@ Mod(Data, Data) => Data
 LNot(Data) => Data
 LOr(Data, Data) => Data
 LAnd(Data, Data) => Data
+
 BXor(Data, Data) => Data
 BOr(Data, Data) => Data
 BAnd(Data, Data) => Data
