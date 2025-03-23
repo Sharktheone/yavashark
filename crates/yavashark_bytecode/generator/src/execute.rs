@@ -1,4 +1,3 @@
-use convert_case::Casing;
 use crate::set;
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
@@ -33,7 +32,7 @@ pub fn generate_execute() {
         args.push(quote! { vm });
 
         variants.push(quote! {
-            Self::#name #match_args => instruction::#execute_fn(#(#args),*),
+            Self::#name #match_args => instruction::#execute_fn(#(#args),*)?,
         });
     }
 
@@ -43,6 +42,8 @@ pub fn generate_execute() {
                 match self {
                     #(#variants)*
                 }
+                
+                Ok(())
             }
         }
     };
