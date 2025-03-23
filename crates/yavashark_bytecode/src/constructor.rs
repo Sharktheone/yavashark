@@ -11328,6 +11328,26 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn jmp_if_nullish(arg0: impl Data, arg1: JmpAddr) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::JmpIfNullishAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::JmpIfNullishConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::JmpIfNullishReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::JmpIfNullishStack(arg0, arg1),
+            DataType::Var(arg0) => Self::JmpIfNullishVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn jmp_if_not_nullish(arg0: impl Data, arg1: JmpAddr) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::JmpIfNotNullishAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::JmpIfNotNullishConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::JmpIfNotNullishReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::JmpIfNotNullishStack(arg0, arg1),
+            DataType::Var(arg0) => Self::JmpIfNotNullishVar(arg0, arg1),
+        }
+    }
+    #[must_use]
     pub fn jmp_rel(arg0: JmpOffset) -> Self {
         Self::JmpRel(arg0)
     }
@@ -11379,6 +11399,36 @@ impl Instruction {
             DataType::Reg(arg0) => Self::JmpIfUndefinedRelReg(arg0, arg1),
             DataType::Stack(arg0) => Self::JmpIfUndefinedRelStack(arg0, arg1),
             DataType::Var(arg0) => Self::JmpIfUndefinedRelVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn jmp_if_not_undefined_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::JmpIfNotUndefinedRelAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::JmpIfNotUndefinedRelConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::JmpIfNotUndefinedRelReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::JmpIfNotUndefinedRelStack(arg0, arg1),
+            DataType::Var(arg0) => Self::JmpIfNotUndefinedRelVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn jmp_if_nullish_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::JmpIfNullishRelAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::JmpIfNullishRelConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::JmpIfNullishRelReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::JmpIfNullishRelStack(arg0, arg1),
+            DataType::Var(arg0) => Self::JmpIfNullishRelVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn jmp_if_not_nullish_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::JmpIfNotNullishRelAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::JmpIfNotNullishRelConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::JmpIfNotNullishRelReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::JmpIfNotNullishRelStack(arg0, arg1),
+            DataType::Var(arg0) => Self::JmpIfNotNullishRelVar(arg0, arg1),
         }
     }
     #[must_use]

@@ -7959,6 +7959,36 @@ impl Execute for Instruction {
             Self::JmpIfNotUndefinedConst(arg0, arg1) => {
                 instruction::jmp_if_not_undefined(arg0, arg1, vm)?
             }
+            Self::JmpIfNullishVar(arg0, arg1) => {
+                instruction::jmp_if_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishReg(arg0, arg1) => {
+                instruction::jmp_if_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishAcc(arg0, arg1) => {
+                instruction::jmp_if_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishStack(arg0, arg1) => {
+                instruction::jmp_if_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishConst(arg0, arg1) => {
+                instruction::jmp_if_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishVar(arg0, arg1) => {
+                instruction::jmp_if_not_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishReg(arg0, arg1) => {
+                instruction::jmp_if_not_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishAcc(arg0, arg1) => {
+                instruction::jmp_if_not_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishStack(arg0, arg1) => {
+                instruction::jmp_if_not_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishConst(arg0, arg1) => {
+                instruction::jmp_if_not_nullish(arg0, arg1, vm)?
+            }
             Self::JmpRel(arg0) => instruction::jmp_rel(arg0, vm)?,
             Self::JmpIfRelVar(arg0, arg1) => instruction::jmp_if_rel(arg0, arg1, vm)?,
             Self::JmpIfRelReg(arg0, arg1) => instruction::jmp_if_rel(arg0, arg1, vm)?,
@@ -8024,6 +8054,51 @@ impl Execute for Instruction {
             }
             Self::JmpIfUndefinedRelConst(arg0, arg1) => {
                 instruction::jmp_if_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefinedRelVar(arg0, arg1) => {
+                instruction::jmp_if_not_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefinedRelReg(arg0, arg1) => {
+                instruction::jmp_if_not_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefinedRelAcc(arg0, arg1) => {
+                instruction::jmp_if_not_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefinedRelStack(arg0, arg1) => {
+                instruction::jmp_if_not_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefinedRelConst(arg0, arg1) => {
+                instruction::jmp_if_not_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishRelVar(arg0, arg1) => {
+                instruction::jmp_if_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishRelReg(arg0, arg1) => {
+                instruction::jmp_if_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishRelAcc(arg0, arg1) => {
+                instruction::jmp_if_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishRelStack(arg0, arg1) => {
+                instruction::jmp_if_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishRelConst(arg0, arg1) => {
+                instruction::jmp_if_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishRelVar(arg0, arg1) => {
+                instruction::jmp_if_not_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishRelReg(arg0, arg1) => {
+                instruction::jmp_if_not_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishRelAcc(arg0, arg1) => {
+                instruction::jmp_if_not_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishRelStack(arg0, arg1) => {
+                instruction::jmp_if_not_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishRelConst(arg0, arg1) => {
+                instruction::jmp_if_not_nullish_rel(arg0, arg1, vm)?
             }
             Self::JmpIfEqVarVar(arg0, arg1, arg2) => {
                 instruction::jmp_if_eq(arg0, arg1, arg2, vm)?
