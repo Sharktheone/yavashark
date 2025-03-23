@@ -8,6 +8,7 @@ mod value_ext;
 mod vm;
 // mod execute;
 mod instruction;
+mod data;
 
 pub use regs::*;
 pub use stack::*;
