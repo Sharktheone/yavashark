@@ -5,6 +5,7 @@ mod cmp;
 mod scope;
 mod call;
 mod other;
+mod jmp;
 
 pub use math::*;
 pub use logical::*;
@@ -13,3 +14,4 @@ pub use cmp::*;
 pub use scope::*;
 pub use call::*;
 pub use other::*;
+pub use jmp::*;
