@@ -11,6 +11,7 @@ use yavashark_env::{Error, Realm, Res, Value, ValueResult};
 pub struct BorrowedVM<'a> {
     regs: Registers,
     stack: Stack,
+    call_args: Vec<Value>,
 
     pc: usize,
     code: &'a [Instruction],
@@ -29,10 +30,11 @@ impl<'a> BorrowedVM<'a> {
         data: &'a DataSection,
         realm: &'a mut Realm,
         file: PathBuf,
-    ) -> yavashark_env::Res<Self> {
+    ) -> Res<Self> {
         Ok(Self {
             regs: Registers::new(),
             stack: Stack::new(),
+            call_args: Vec::new(),
             pc: 0,
             code,
             data,
@@ -52,6 +54,7 @@ impl<'a> BorrowedVM<'a> {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
+            call_args: Vec::new(),
             pc: 0,
             code,
             data,
@@ -162,6 +165,10 @@ impl VM for BorrowedVM<'_> {
         self.get_stack(idx)
     }
 
+    fn set_stack(&mut self, idx: u32, value: Value) -> Res {
+        self.set_stack(idx, value)
+    }
+
     fn get_args(&mut self, num: u16) -> Vec<Value> {
         self.get_args(num)
     }
@@ -184,5 +191,17 @@ impl VM for BorrowedVM<'_> {
 
     fn pop_scope(&mut self) -> Res {
         self.pop_scope()
+    }
+
+    fn push_call_args(&mut self, args: Vec<Value>) {
+        self.call_args.extend(args);
+    }
+    
+    fn push_call_arg(&mut self, arg: Value) {
+        self.call_args.push(arg);
+    }
+
+    fn get_call_args(&mut self) -> Vec<Value> {
+        std::mem::take(&mut self.call_args)
     }
 }

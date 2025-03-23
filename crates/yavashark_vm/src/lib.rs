@@ -6,7 +6,7 @@ mod stack;
 mod storage;
 mod value_ext;
 mod vm;
-// mod execute;
+mod execute;
 mod instruction;
 mod data;
 

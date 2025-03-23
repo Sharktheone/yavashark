@@ -33,6 +33,12 @@ impl Stack {
     pub fn get(&self, idx: usize) -> Option<&Value> {
         self.stack.get(idx)
     }
+    
+    pub fn set(&mut self, idx: usize, value: Value) {
+        if idx < self.stack.len() {
+            self.stack[idx] = value;
+        }
+    }
 
     pub fn pop_n(&mut self, n: usize) -> Vec<Value> {
         let mut values = Vec::with_capacity(n);

@@ -37,5 +37,7 @@ pub trait VM {
     
     fn push_call_args(&mut self, args: Vec<Value>);
     
+    fn push_call_arg(&mut self, arg: Value);
+    
     fn get_call_args(&mut self) -> Vec<Value>;
 }

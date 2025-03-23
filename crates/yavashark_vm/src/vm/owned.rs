@@ -1,5 +1,6 @@
 mod storage;
 
+use std::mem;
 use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
@@ -11,6 +12,7 @@ use yavashark_env::{Error, Realm, Res, Value};
 pub struct OwnedVM {
     regs: Registers,
     stack: Stack,
+    call_args: Vec<Value>,
 
     pc: usize,
     code: Vec<Instruction>,
@@ -34,6 +36,7 @@ impl OwnedVM {
         Ok(Self {
             regs: Registers::new(),
             stack: Stack::new(),
+            call_args: Vec::new(),
             pc: 0,
             code,
             data,
@@ -53,6 +56,7 @@ impl OwnedVM {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
+            call_args: Vec::new(),
             pc: 0,
             code,
             data,
@@ -72,6 +76,7 @@ impl OwnedVM {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
+            call_args: Vec::new(),
             pc: 0,
             code,
             data,
@@ -176,6 +181,10 @@ impl VM for OwnedVM {
         self.get_stack(idx)
     }
 
+    fn set_stack(&mut self, idx: u32, value: Value) -> Res {
+        self.set_stack(idx, value)
+    }
+
     fn get_args(&mut self, num: u16) -> Vec<Value> {
         self.get_args(num)
     }
@@ -198,6 +207,18 @@ impl VM for OwnedVM {
 
     fn pop_scope(&mut self) -> Res {
         self.pop_scope()
+    }
+
+    fn push_call_args(&mut self, args: Vec<Value>) {
+        self.call_args.extend(args);
+    }
+
+    fn push_call_arg(&mut self, arg: Value) {
+        self.call_args.push(arg);
+    }
+
+    fn get_call_args(&mut self) -> Vec<Value> {
+        mem::take(&mut self.call_args)
     }
 }
 

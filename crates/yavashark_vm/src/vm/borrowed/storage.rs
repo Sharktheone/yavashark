@@ -79,6 +79,12 @@ impl BorrowedVM<'_> {
     pub fn get_stack(&self, idx: u32) -> Option<Value> {
         self.stack.get(idx as usize).cloned()
     }
+    
+    pub fn set_stack(&mut self, idx: u32, value: Value) -> Res {
+        self.stack.set(idx as usize, value);
+        
+        Ok(())
+    }
 
     pub fn get_args(&mut self, num: u16) -> Vec<Value> {
         self.stack.pop_n(num as usize)
