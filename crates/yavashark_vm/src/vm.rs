@@ -22,6 +22,7 @@ pub trait VM {
     fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value>;
     #[must_use]
     fn get_stack(&self, idx: u32) -> Option<Value>;
+    fn set_stack(&mut self, idx: u32, value: Value) -> Res;
     fn get_args(&mut self, num: u16) -> Vec<Value>;
 
     fn get_realm(&mut self) -> &mut yavashark_env::Realm;
