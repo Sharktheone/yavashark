@@ -34,4 +34,8 @@ pub trait VM {
     fn push_scope(&mut self) -> Res;
 
     fn pop_scope(&mut self) -> Res;
+    
+    fn push_call_args(&mut self, args: Vec<Value>);
+    
+    fn get_call_args(&mut self) -> Vec<Value>;
 }

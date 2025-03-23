@@ -41,3 +41,25 @@ pub fn mod_(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut
 
     output.set(result, vm)
 }
+
+pub fn exp(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let left = left.get(vm)?;
+    let right = right.get(vm)?;
+    let result = left.exp(&right, vm.get_realm())?;
+
+    output.set(result, vm)
+}
+
+pub fn dec(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+    let result = data.sub(&1.into(), vm.get_realm())?;
+
+    output.set(result, vm)
+}
+
+pub fn inc(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+    let result = data.add(&1.into(), vm.get_realm())?;
+
+    output.set(result, vm)
+}
