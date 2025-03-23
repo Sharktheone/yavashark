@@ -81,8 +81,8 @@ TypeOf(Data) => Data
 Push(Data)
 Pop
 PopN(u32)
-PopTo(Data)
-Move(Data, Data)
+PopTo => Data
+Move(Data) => Data
 Return
 ReturnValue(Data)
 

@@ -12861,61 +12861,55 @@ impl Instruction {
         Self::PopN(arg0)
     }
     #[must_use]
-    pub fn pop_to(arg0: impl Data) -> Self {
-        match arg0.data_type() {
-            DataType::Acc(arg0) => Self::PopToAcc(arg0),
-            DataType::Const(arg0) => Self::PopToConst(arg0),
-            DataType::Reg(arg0) => Self::PopToReg(arg0),
-            DataType::Stack(arg0) => Self::PopToStack(arg0),
-            DataType::Var(arg0) => Self::PopToVar(arg0),
+    pub fn pop_to(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::PopToToAcc(output),
+            OutputDataType::Reg(output) => Self::PopToToReg(output),
+            OutputDataType::Stack(output) => Self::PopToToStack(output),
+            OutputDataType::Var(output) => Self::PopToToVar(output),
         }
     }
     #[must_use]
-    pub fn move_(arg0: impl Data, arg1: impl Data) -> Self {
+    pub fn move_(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => {
-                match arg1.data_type() {
-                    DataType::Acc(arg1) => Self::MoveAccAcc(arg0, arg1),
-                    DataType::Const(arg1) => Self::MoveAccConst(arg0, arg1),
-                    DataType::Reg(arg1) => Self::MoveAccReg(arg0, arg1),
-                    DataType::Stack(arg1) => Self::MoveAccStack(arg0, arg1),
-                    DataType::Var(arg1) => Self::MoveAccVar(arg0, arg1),
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MoveAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MoveAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::MoveAccToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::MoveAccToVar(arg0, output),
                 }
             }
             DataType::Const(arg0) => {
-                match arg1.data_type() {
-                    DataType::Acc(arg1) => Self::MoveConstAcc(arg0, arg1),
-                    DataType::Const(arg1) => Self::MoveConstConst(arg0, arg1),
-                    DataType::Reg(arg1) => Self::MoveConstReg(arg0, arg1),
-                    DataType::Stack(arg1) => Self::MoveConstStack(arg0, arg1),
-                    DataType::Var(arg1) => Self::MoveConstVar(arg0, arg1),
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MoveConstToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MoveConstToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::MoveConstToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::MoveConstToVar(arg0, output),
                 }
             }
             DataType::Reg(arg0) => {
-                match arg1.data_type() {
-                    DataType::Acc(arg1) => Self::MoveRegAcc(arg0, arg1),
-                    DataType::Const(arg1) => Self::MoveRegConst(arg0, arg1),
-                    DataType::Reg(arg1) => Self::MoveRegReg(arg0, arg1),
-                    DataType::Stack(arg1) => Self::MoveRegStack(arg0, arg1),
-                    DataType::Var(arg1) => Self::MoveRegVar(arg0, arg1),
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MoveRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MoveRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::MoveRegToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::MoveRegToVar(arg0, output),
                 }
             }
             DataType::Stack(arg0) => {
-                match arg1.data_type() {
-                    DataType::Acc(arg1) => Self::MoveStackAcc(arg0, arg1),
-                    DataType::Const(arg1) => Self::MoveStackConst(arg0, arg1),
-                    DataType::Reg(arg1) => Self::MoveStackReg(arg0, arg1),
-                    DataType::Stack(arg1) => Self::MoveStackStack(arg0, arg1),
-                    DataType::Var(arg1) => Self::MoveStackVar(arg0, arg1),
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MoveStackToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MoveStackToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::MoveStackToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::MoveStackToVar(arg0, output),
                 }
             }
             DataType::Var(arg0) => {
-                match arg1.data_type() {
-                    DataType::Acc(arg1) => Self::MoveVarAcc(arg0, arg1),
-                    DataType::Const(arg1) => Self::MoveVarConst(arg0, arg1),
-                    DataType::Reg(arg1) => Self::MoveVarReg(arg0, arg1),
-                    DataType::Stack(arg1) => Self::MoveVarStack(arg0, arg1),
-                    DataType::Var(arg1) => Self::MoveVarVar(arg0, arg1),
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MoveVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MoveVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::MoveVarToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::MoveVarToVar(arg0, output),
                 }
             }
         }
