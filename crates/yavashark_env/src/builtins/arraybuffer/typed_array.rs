@@ -1,12 +1,15 @@
 use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
 use crate::utils::ValueIterator;
-use crate::{Error, MutObject, Realm, Res, Value};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use half::f16;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
 use yavashark_value::{BoxedObj, Obj};
+use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
+use num_traits::FromPrimitive;
+
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -126,6 +129,12 @@ impl TypedArray {
             .get_mut(start..end)
             .ok_or_else(|| Error::range("TypedArray is out of bounds"))
     }
+
+    pub fn to_value_vec(&self) -> Res<Vec<Value>> {
+        Ok(typed_array_run!({
+            slice.iter().map(|x| (*x).into()).collect()
+        }))
+    }
 }
 
 fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBuffer> {
@@ -209,4 +218,65 @@ impl TypedArray {
         
         Ok(())
     }
+
+
+    fn entries(&self, #[realm] realm: &Realm) -> ValueResult {
+        let array = Array::with_elements(realm, self.to_value_vec()?)?.into_object();
+
+        let iter = ArrayIterator {
+            inner: RefCell::new(MutableArrayIterator {
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+            }),
+            array,
+            next: Cell::new(0),
+            done: Cell::new(false),
+        };
+
+        Ok(iter.into_value())
+    }
+
+    fn every(&self, #[this] array: &Value, #[realm] realm: &mut Realm, callback: &ObjectHandle) -> Res<bool> {
+        typed_array_run!({
+            for (idx, x) in slice.iter().enumerate() {
+                let args = vec![(*x).into(), idx.into(), array.copy()];
+
+                let res = callback.call(realm, args, Value::Undefined)?;
+
+                if !res.is_truthy() {
+                    return Ok(false);
+                }
+            }
+        });
+
+        Ok(true)
+    }
+
+
+    fn fill(
+        &self,
+        #[this] array: Value,
+        #[realm] realm: &mut Realm,
+        value: &Value,
+        start: Option<isize>,
+        end: Option<isize>,
+    ) -> ValueResult {
+        typed_array_run_mut!({
+            let len = slice.len();
+
+            let start = start.map_or(0, |start| convert_index(start, len));
+            let end = end.map_or(len, |end| convert_index(end, len));
+
+            let value: TY = FromPrimitive::from_f64(value.to_number(realm)?).ok_or(Error::ty("Failed to convert to value"))?;
+
+            for val in slice.get_mut(start..end).ok_or(Error::range("TypedArray is out of bounds"))? {
+                *val = value;
+            }
+        });
+
+
+        Ok(array)
+    }
 }
+
+
+// pub trait FromF64

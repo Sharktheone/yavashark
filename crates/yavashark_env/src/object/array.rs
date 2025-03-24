@@ -1184,9 +1184,9 @@ impl ArrayConstructor {
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub struct ArrayIterator {
-    array: ObjectHandle,
-    next: Cell<usize>,
-    done: Cell<bool>,
+    pub array: ObjectHandle,
+    pub next: Cell<usize>,
+    pub done: Cell<bool>,
 }
 
 #[properties]
