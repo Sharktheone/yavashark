@@ -16,23 +16,20 @@ impl DataSection {
     }
 }
 
-
 pub enum DataType {
     Acc(Acc),
     Reg(Reg),
     Var(VarName),
     Const(ConstIdx),
-    Stack(Stack)
+    Stack(Stack),
 }
-
 
 pub enum OutputDataType {
     Acc(Acc),
     Reg(Reg),
     Var(VarName),
-    Stack(Stack)
+    Stack(Stack),
 }
-
 
 pub trait Data: Copy {
     fn acc(self) -> Option<Acc> {
@@ -61,7 +58,6 @@ pub trait Data: Copy {
 pub trait OutputData: Copy {
     fn data_type(self) -> OutputDataType;
 }
-
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Acc;

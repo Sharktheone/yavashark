@@ -118,7 +118,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
         constructor,
         call_constructor,
         &config,
-        args.extends.is_some()
+        args.extends.is_some(),
     )?;
 
     let try_into_value = &config.try_into_value;
@@ -310,7 +310,7 @@ fn init_constructor(
     }
 
     let variable = &config.variable;
-    
+
     let constr_proto = if extends {
         quote! { {
             &obj.prototype()?.value.get_property_no_get_set(&"constructor".into())?.value

@@ -1,7 +1,6 @@
-use yavashark_env::Res;
 use crate::data::{Data, OutputData};
 use crate::VM;
-
+use yavashark_env::Res;
 
 pub fn b_xor(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
@@ -27,7 +26,12 @@ pub fn b_and(left: impl Data, right: impl Data, output: impl OutputData, vm: &mu
     output.set(result, vm)
 }
 
-pub fn l_shift(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+pub fn l_shift(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
     let result = left.shr(&right, vm.get_realm())?;
@@ -35,7 +39,12 @@ pub fn l_shift(left: impl Data, right: impl Data, output: impl OutputData, vm: &
     output.set(result, vm)
 }
 
-pub fn r_shift(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+pub fn r_shift(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
     let result = left.shl(&right, vm.get_realm())?;
@@ -43,7 +52,12 @@ pub fn r_shift(left: impl Data, right: impl Data, output: impl OutputData, vm: &
     output.set(result, vm)
 }
 
-pub fn zero_fill_r_shift(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+pub fn zero_fill_r_shift(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
     let result = left.ushr(&right, vm.get_realm())?;

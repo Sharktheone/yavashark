@@ -1,6 +1,6 @@
-use std::sync::LazyLock;
+use crate::parse::{InstructionDefinition, Type, instruction_def};
 use convert_case::{Case, Casing};
-use crate::parse::{instruction_def, InstructionDefinition, Type};
+use std::sync::LazyLock;
 
 struct InstructionSet {
     pub instructions: Vec<Instruction>,
@@ -25,7 +25,7 @@ impl ArgumentType {
         ArgumentType::Stack,
         ArgumentType::Const,
     ];
-    
+
     fn to_str(&self) -> &str {
         match self {
             ArgumentType::Variable => "Var",
@@ -36,7 +36,7 @@ impl ArgumentType {
             ArgumentType::Other(s) => s.as_str(),
         }
     }
-    
+
     pub fn to_syn(&self) -> syn::Type {
         match self {
             ArgumentType::Variable => syn::parse_quote! { VarName },
@@ -48,7 +48,6 @@ impl ArgumentType {
         }
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub enum ReturnType {
@@ -67,7 +66,7 @@ impl ReturnType {
         ReturnType::Acc,
         ReturnType::Stack,
     ];
-    
+
     fn to_str(&self) -> &str {
         match self {
             ReturnType::Variable => "Var",
@@ -97,25 +96,23 @@ pub struct Instruction {
     pub output: Option<ReturnType>,
 }
 
-
 static INSTRUCTIONS: LazyLock<Vec<Instruction>> = LazyLock::new(expand_definitions);
 
 pub fn instructions() -> &'static [Instruction] {
     &INSTRUCTIONS
 }
 
-
 fn expand_definitions() -> Vec<Instruction> {
     let instructions = instruction_def();
-    
+
     let mut inst = Vec::new();
-    
+
     for def in instructions {
         inst.extend(expand_definition(def));
     }
 
     println!("{:#?}", inst.len());
-    
+
     inst
 }
 
@@ -126,8 +123,7 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
         inputs: Vec::new(),
         output: None,
     }];
-    
-    
+
     for input in &def.inputs {
         if input == &Type::Data {
             let len = inst.len();
@@ -135,19 +131,19 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
 
             inst.iter_mut().enumerate().for_each(|(idx, inst)| {
                 let input = ArgumentType::TYPES[idx / len].clone();
-                
+
                 inst.name.push_str(input.to_str());
                 inst.inputs.push(input.clone());
             });
         } else {
             let ty = input.type_str();
-            
+
             inst.iter_mut().for_each(|inst| {
                 inst.inputs.push(ArgumentType::Other(ty.to_owned()));
             });
         }
     }
-    
+
     if let Some(output) = &def.output {
         if output == &Type::Data {
             let len = inst.len();
@@ -155,7 +151,7 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
 
             inst.iter_mut().enumerate().for_each(|(idx, inst)| {
                 let out = ReturnType::TYPES[idx / len].clone();
-                
+
                 inst.name.push_str("To");
                 inst.name.push_str(out.to_str());
                 inst.output = Some(out.clone());
@@ -168,12 +164,9 @@ fn expand_definition(def: &InstructionDefinition) -> Vec<Instruction> {
             });
         }
     }
-    
+
     inst
 }
-
-
-
 
 fn repeat_vec<T: Clone>(vec: &mut Vec<T>, times: usize) {
     let len = vec.len();
@@ -186,7 +179,7 @@ fn repeat_vec<T: Clone>(vec: &mut Vec<T>, times: usize) {
 
 pub fn get_class(name: &str) -> String {
     let case = name.to_case(Case::Snake);
-    
+
     match &*case {
         "mod" => "mod_".to_owned(),
         "in" => "in_".to_owned(),
@@ -196,12 +189,10 @@ pub fn get_class(name: &str) -> String {
     }
 }
 
-
-
 #[test]
 fn expand() {
     let insts = instructions();
-    
+
     for inst in insts {
         println!("{:#?}", inst);
     }

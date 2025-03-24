@@ -46,19 +46,16 @@ impl Uint8Array {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let standard = if let Some(options) = options {
-            options.resolve_property(&"alphabet".into(), realm)?.is_some_and(|x| x.normal_eq(&"base64url".into()))
+            options
+                .resolve_property(&"alphabet".into(), realm)?
+                .is_some_and(|x| x.normal_eq(&"base64url".into()))
         } else {
             false
         };
-        
-        let engine = if standard {
-            &URL_SAFE
-        } else {
-            &STANDARD
-        };
-        
-        let engine =
-            engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
+
+        let engine = if standard { &URL_SAFE } else { &STANDARD };
+
+        let engine = engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
 
         let bytes = engine
             .decode(base64.as_bytes())
@@ -83,62 +80,58 @@ impl Uint8Array {
     }
 
     #[prop("setFromBase64")]
-    fn set_from_base_64(&self, base64: &str, options: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn set_from_base_64(
+        &self,
+        base64: &str,
+        options: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let standard = if let Some(options) = options {
-            options.resolve_property(&"alphabet".into(), realm)?.is_some_and(|x| x.normal_eq(&"base64url".into()))
+            options
+                .resolve_property(&"alphabet".into(), realm)?
+                .is_some_and(|x| x.normal_eq(&"base64url".into()))
         } else {
             false
         };
 
-        let engine = if standard {
-            &URL_SAFE
-        } else {
-            &STANDARD
-        };
+        let engine = if standard { &URL_SAFE } else { &STANDARD };
 
-        let engine =
-            engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
-        
-        
-        
+        let engine = engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
+
         let buf = self.extends.get_buffer()?;
-        
+
         let mut inner = buf.inner.borrow_mut();
-        
+
         engine.decode_vec(base64.as_bytes(), &mut inner.buffer)?;
-        
-        let written  = inner.buffer.len();
+
+        let written = inner.buffer.len();
         let read = base64.len();
-        
+
         let obj = Object::new(realm);
-        
+
         obj.define_property("written".into(), written.into())?;
         obj.define_property("read".into(), read.into())?;
-        
+
         Ok(obj)
-        
     }
 
     #[prop("toBase64")]
     fn to_base_64(&self, options: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let standard = if let Some(options) = options {
-            options.resolve_property(&"alphabet".into(), realm)?.is_some_and(|x| x.normal_eq(&"base64url".into()))
+            options
+                .resolve_property(&"alphabet".into(), realm)?
+                .is_some_and(|x| x.normal_eq(&"base64url".into()))
         } else {
             false
         };
 
-        let engine = if standard {
-            &URL_SAFE
-        } else {
-            &STANDARD
-        };
+        let engine = if standard { &URL_SAFE } else { &STANDARD };
 
-        let engine =
-            engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
-        
+        let engine = engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
+
         let buf = self.extends.get_buffer()?;
         let slice = buf.get_slice();
-        
+
         Ok(engine.encode(slice.as_ref()))
     }
 
@@ -146,22 +139,21 @@ impl Uint8Array {
     fn to_hex(&self) -> Res<String> {
         let buf = self.extends.get_buffer()?;
         let slice = buf.get_slice();
-        
+
         Ok(hex::encode(slice.as_ref()))
-        
     }
 
     #[prop("setFromHex")]
     fn set_from_hex(&self, hex: &str) -> Res<()> {
         let buf = self.extends.get_buffer()?;
         let mut inner = buf.inner.borrow_mut();
-        
+
         if inner.buffer.len() < hex.len() * 2 {
             inner.buffer.resize(hex.len() * 2, 0);
         }
-        
+
         hex::encode_to_slice(hex, &mut inner.buffer)?;
-        
+
         Ok(())
     }
 }

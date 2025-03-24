@@ -1,9 +1,9 @@
-use std::mem::offset_of;
+use crate::parse::Type;
+use crate::set::{ArgumentType, ReturnType};
 use crate::{parse, set};
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use crate::parse::Type;
-use crate::set::{ArgumentType, ReturnType};
+use std::mem::offset_of;
 
 pub fn generate_constructors() {
     let defs = parse::instruction_def();
@@ -20,18 +20,25 @@ pub fn generate_constructors() {
             (quote! { #id: #ty }, id)
         });
 
-        let args = args.chain(def.output.iter().map(|output| {
-            let id = Ident::new("output", proc_macro2::Span::call_site());
-            let ty = output.to_syn_out();
+        let args = args
+            .chain(def.output.iter().map(|output| {
+                let id = Ident::new("output", proc_macro2::Span::call_site());
+                let ty = output.to_syn_out();
 
-            (quote! { #id: #ty }, id)
-        })).collect::<Vec<_>>();
-        
+                (quote! { #id: #ty }, id)
+            }))
+            .collect::<Vec<_>>();
+
         let fn_args = args.iter().map(|(arg, _)| arg);
         let call_args = args.iter().map(|(_, id)| id.clone()).collect::<Vec<_>>();
-        
-        
-        let matcher = gen_match(&def.name, &mut Vec::new(), &def.inputs, def.output.as_ref(), &call_args);
+
+        let matcher = gen_match(
+            &def.name,
+            &mut Vec::new(),
+            &def.inputs,
+            def.output.as_ref(),
+            &call_args,
+        );
 
         constructors.push(quote! {
             #[must_use]
@@ -64,23 +71,29 @@ use crate::instructions::Instruction;
         attrs: Vec::new(),
         items: vec![syn::parse2(output).unwrap()],
     };
-    
+
     let out = prettyplease::unparse(&file);
-    
+
     let out = format!("{}{}", header, out);
-    
+
     std::fs::write("crates/yavashark_bytecode/src/constructor.rs", out).unwrap();
 }
 
-fn gen_match(name: &str, prev: &mut Vec<ArgumentType>, input: &[Type], out: Option<&Type>, args: &[Ident]) -> TokenStream {
+fn gen_match(
+    name: &str,
+    prev: &mut Vec<ArgumentType>,
+    input: &[Type],
+    out: Option<&Type>,
+    args: &[Ident],
+) -> TokenStream {
     if input.is_empty() && out.is_none() {
         let name = Ident::new(name, proc_macro2::Span::call_site());
-        
+
         return quote! {
             Self::#name
-        }
+        };
     }
-    
+
     if !input.is_empty() {
         gen_match_input(name, prev, input, out, args)
     } else {
@@ -88,65 +101,74 @@ fn gen_match(name: &str, prev: &mut Vec<ArgumentType>, input: &[Type], out: Opti
     }
 }
 
-fn gen_match_input(name: &str, prev: &mut Vec<ArgumentType>, input: &[Type], out: Option<&Type>, args: &[Ident]) -> TokenStream {
+fn gen_match_input(
+    name: &str,
+    prev: &mut Vec<ArgumentType>,
+    input: &[Type],
+    out: Option<&Type>,
+    args: &[Ident],
+) -> TokenStream {
     let (first, input) = input.split_first().unwrap();
-    
+
     let is_last = input.is_empty() && out.is_none();
-    
+
     if is_last {
-        return gen_last(name, prev, first, args)
+        return gen_last(name, prev, first, args);
     }
-    
+
     if first != &Type::Data {
         prev.push(ArgumentType::Other("Other".to_string()));
         let out = gen_match(name, prev, input, out, args);
         prev.pop();
-        
-        return out
+
+        return out;
     }
 
-    let arg_name = Ident::new(&format!("arg{}", prev.len()), proc_macro2::Span::call_site());
-    
+    let arg_name = Ident::new(
+        &format!("arg{}", prev.len()),
+        proc_macro2::Span::call_site(),
+    );
+
     let acc = {
         prev.push(ArgumentType::Acc);
         let out = gen_match(name, prev, input, out, args);
         prev.pop();
-        
+
         out
     };
-    
+
     let const_idx = {
         prev.push(ArgumentType::Const);
         let out = gen_match(name, prev, input, out, args);
         prev.pop();
-        
+
         out
     };
-    
+
     let reg = {
         prev.push(ArgumentType::Reg);
         let out = gen_match(name, prev, input, out, args);
         prev.pop();
-        
+
         out
     };
-    
+
     let stack = {
         prev.push(ArgumentType::Stack);
         let out = gen_match(name, prev, input, out, args);
         prev.pop();
-        
+
         out
     };
-    
+
     let var = {
         prev.push(ArgumentType::Variable);
         let out = gen_match(name, prev, input, out, args);
         prev.pop();
-        
+
         out
     };
-    
+
     quote! {
         match #arg_name.data_type() {
             DataType::Acc(#arg_name) => #acc,
@@ -161,55 +183,57 @@ fn gen_match_input(name: &str, prev: &mut Vec<ArgumentType>, input: &[Type], out
 fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident]) -> TokenStream {
     if last != &Type::Data {
         let out = get_enum_variant(name, prev);
-        
+
         return quote! {
             Self::#out(#(#args),*)
-        }
+        };
     }
-    
-    
-    let arg_name = Ident::new(&format!("arg{}", prev.len()), proc_macro2::Span::call_site());
-    
+
+    let arg_name = Ident::new(
+        &format!("arg{}", prev.len()),
+        proc_macro2::Span::call_site(),
+    );
+
     let acc = {
         prev.push(ArgumentType::Acc);
         let out = get_enum_variant(name, prev);
         prev.pop();
-        
+
         out
     };
-    
+
     let const_idx = {
         prev.push(ArgumentType::Const);
         let out = get_enum_variant(name, prev);
         prev.pop();
-        
+
         out
     };
-    
+
     let reg = {
         prev.push(ArgumentType::Reg);
         let out = get_enum_variant(name, prev);
         prev.pop();
-        
+
         out
     };
-    
+
     let stack = {
         prev.push(ArgumentType::Stack);
         let out = get_enum_variant(name, prev);
         prev.pop();
-        
+
         out
     };
-    
+
     let var = {
         prev.push(ArgumentType::Variable);
         let out = get_enum_variant(name, prev);
         prev.pop();
-        
+
         out
     };
-    
+
     quote! {
         match #arg_name.data_type() {
             DataType::Acc(#arg_name) => Self::#acc(#(#args),*),
@@ -221,14 +245,16 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
     }
 }
 
-
-fn gen_match_output(name: &str, prev: &[ArgumentType], _last: &Type, args: &[Ident]) -> TokenStream {
+fn gen_match_output(
+    name: &str,
+    prev: &[ArgumentType],
+    _last: &Type,
+    args: &[Ident],
+) -> TokenStream {
     let acc = get_enum_variant_out(name, prev, ReturnType::Acc);
     let reg = get_enum_variant_out(name, prev, ReturnType::Reg);
     let stack = get_enum_variant_out(name, prev, ReturnType::Stack);
     let var = get_enum_variant_out(name, prev, ReturnType::Variable);
-    
-
 
     quote! {
         match output.data_type() {
@@ -242,7 +268,7 @@ fn gen_match_output(name: &str, prev: &[ArgumentType], _last: &Type, args: &[Ide
 
 fn get_enum_variant(name: &str, prev: &[ArgumentType]) -> Ident {
     let mut out = name.to_owned();
-    
+
     for arg in prev {
         match arg {
             ArgumentType::Acc => out.push_str("Acc"),
@@ -250,16 +276,16 @@ fn get_enum_variant(name: &str, prev: &[ArgumentType]) -> Ident {
             ArgumentType::Reg => out.push_str("Reg"),
             ArgumentType::Stack => out.push_str("Stack"),
             ArgumentType::Variable => out.push_str("Var"),
-            ArgumentType::Other(_) =>  {},
+            ArgumentType::Other(_) => {}
         }
     }
-    
+
     Ident::new(&out, proc_macro2::Span::call_site())
 }
 
 fn get_enum_variant_out(name: &str, prev: &[ArgumentType], output: ReturnType) -> Ident {
     let mut out = name.to_owned();
-    
+
     for arg in prev {
         match arg {
             ArgumentType::Acc => out.push_str("Acc"),
@@ -267,19 +293,19 @@ fn get_enum_variant_out(name: &str, prev: &[ArgumentType], output: ReturnType) -
             ArgumentType::Reg => out.push_str("Reg"),
             ArgumentType::Stack => out.push_str("Stack"),
             ArgumentType::Variable => out.push_str("Var"),
-            ArgumentType::Other(_) =>  {},
+            ArgumentType::Other(_) => {}
         }
     }
-    
+
     out.push_str("To");
-    
+
     match output {
         ReturnType::Variable => out.push_str("Var"),
         ReturnType::Reg => out.push_str("Reg"),
         ReturnType::Acc => out.push_str("Acc"),
         ReturnType::Stack => out.push_str("Stack"),
-        ReturnType::Other(_) => {},
+        ReturnType::Other(_) => {}
     }
-    
+
     Ident::new(&out, proc_macro2::Span::call_site())
 }

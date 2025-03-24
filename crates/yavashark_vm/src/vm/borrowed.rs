@@ -196,7 +196,7 @@ impl VM for BorrowedVM<'_> {
     fn push_call_args(&mut self, args: Vec<Value>) {
         self.call_args.extend(args);
     }
-    
+
     fn push_call_arg(&mut self, arg: Value) {
         self.call_args.push(arg);
     }

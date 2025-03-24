@@ -7,13 +7,13 @@
 pub use consts::*;
 pub use instructions_old::*;
 
+mod constructor;
 mod consts;
 pub mod data;
 pub mod function;
+pub mod instructions;
 mod instructions_old;
 pub mod writer;
-pub mod instructions;
-mod constructor;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;

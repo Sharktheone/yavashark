@@ -4,13 +4,13 @@ use std::env;
 
 mod config;
 mod custom_props;
+mod instruction;
 mod mutable_region;
 mod obj;
 mod properties;
 mod properties_new;
 mod props;
 mod typed_array;
-mod instruction;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -52,7 +52,6 @@ pub fn custom_props(
     custom_props::custom_props(attrs, item)
 }
 
-
 #[proc_macro]
 pub fn typed_array_run(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let output = typed_array::typed_array_run(input.into());
@@ -65,10 +64,11 @@ pub fn typed_array_run_mut(input: proc_macro::TokenStream) -> proc_macro::TokenS
     output.into()
 }
 
-
 #[proc_macro]
 pub fn inst(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    instruction::instruction(input.into()).map(Into::into).unwrap_or_else(|e| e.to_compile_error().into())
+    instruction::instruction(input.into())
+        .map(Into::into)
+        .unwrap_or_else(|e| e.to_compile_error().into())
 }
 
 fn env_path() -> syn::Path {

@@ -1,6 +1,6 @@
-use yavashark_bytecode::data::{Acc, Reg, VarName, ConstIdx, Stack};
-use yavashark_env::{Error, Res, Value};
 use crate::VM;
+use yavashark_bytecode::data::{Acc, ConstIdx, Reg, Stack, VarName};
+use yavashark_env::{Error, Res, Value};
 
 pub trait Data: Copy {
     fn get(self, vm: &mut impl VM) -> Res<Value>;
@@ -23,7 +23,6 @@ impl OutputData for Acc {
         Ok(())
     }
 }
-
 
 impl Data for Reg {
     fn get(self, vm: &mut impl VM) -> Res<Value> {
@@ -57,7 +56,8 @@ impl Data for ConstIdx {
 
 impl Data for Stack {
     fn get(self, vm: &mut impl VM) -> Res<Value> {
-        vm.get_stack(self.0).ok_or_else(|| Error::new("Invalid stack index"))
+        vm.get_stack(self.0)
+            .ok_or_else(|| Error::new("Invalid stack index"))
     }
 }
 

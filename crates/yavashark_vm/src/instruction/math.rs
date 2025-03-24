@@ -1,6 +1,6 @@
-use yavashark_env::Res;
 use crate::data::{Data, OutputData};
 use crate::VM;
+use yavashark_env::Res;
 
 pub fn add(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;

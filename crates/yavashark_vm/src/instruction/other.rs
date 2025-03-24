@@ -1,8 +1,13 @@
-use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 use crate::data::{Data, OutputData};
 use crate::VM;
+use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 
-pub fn nullish_coalescing(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+pub fn nullish_coalescing(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
@@ -24,7 +29,12 @@ pub fn in_(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut 
     output.set(result, vm)
 }
 
-pub fn instance_of(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+pub fn instance_of(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
@@ -33,7 +43,12 @@ pub fn instance_of(left: impl Data, right: impl Data, output: impl OutputData, v
     output.set(result, vm)
 }
 
-pub fn load_member(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+pub fn load_member(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
@@ -47,7 +62,6 @@ pub fn load_var(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> R
 
     output.set(result, vm)
 }
-
 
 pub fn type_of(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let data = data.get(vm)?;
@@ -74,7 +88,7 @@ pub fn pop_n(n: u32, vm: &mut impl VM) -> Res {
     for _ in 0..n {
         vm.pop().ok_or(Error::new("Stack is empty"))?;
     }
-    
+
     Ok(())
 }
 
@@ -86,7 +100,7 @@ pub fn pop_to(data: impl OutputData, vm: &mut impl VM) -> Res {
 
 pub fn move_(from: impl Data, data: impl OutputData, vm: &mut impl VM) -> Res {
     let result = from.get(vm)?;
-    
+
     data.set(result, vm)
 }
 

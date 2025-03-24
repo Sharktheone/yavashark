@@ -33,7 +33,7 @@ impl Stack {
     pub fn get(&self, idx: usize) -> Option<&Value> {
         self.stack.get(idx)
     }
-    
+
     pub fn set(&mut self, idx: usize, value: Value) {
         if idx < self.stack.len() {
             self.stack[idx] = value;

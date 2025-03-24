@@ -1,15 +1,14 @@
+use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use half::f16;
+use num_traits::FromPrimitive;
 use std::cell::{Cell, RefCell};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
 use yavashark_value::{BoxedObj, Obj};
-use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
-use num_traits::FromPrimitive;
-
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -116,7 +115,6 @@ impl TypedArray {
             .ok_or_else(|| Error::range("TypedArray is out of bounds"))
     }
 
-
     pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> Res<&'a mut [u8]> {
         let start = self.byte_offset;
         let end = start + self.byte_length;
@@ -199,26 +197,23 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 #[props]
 impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
-    
-    
+
     pub fn at(&self, idx: usize) -> Res<Value> {
-        Ok(typed_array_run! ({
+        Ok(typed_array_run!({
             slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
         }))
     }
-    
+
     #[prop("copyWithin")]
     pub fn copy_within(&self, target: usize, start: usize, end: Option<usize>) -> Res<()> {
         typed_array_run_mut!({
             let end = end.unwrap_or(slice.len());
-            
+
             slice.copy_within(start..end, target);
         });
-        
-        
+
         Ok(())
     }
-
 
     fn entries(&self, #[realm] realm: &Realm) -> ValueResult {
         let array = Array::with_elements(realm, self.to_value_vec()?)?.into_object();
@@ -235,7 +230,12 @@ impl TypedArray {
         Ok(iter.into_value())
     }
 
-    fn every(&self, #[this] array: &Value, #[realm] realm: &mut Realm, callback: &ObjectHandle) -> Res<bool> {
+    fn every(
+        &self,
+        #[this] array: &Value,
+        #[realm] realm: &mut Realm,
+        callback: &ObjectHandle,
+    ) -> Res<bool> {
         typed_array_run!({
             for (idx, x) in slice.iter().enumerate() {
                 let args = vec![(*x).into(), idx.into(), array.copy()];
@@ -251,7 +251,6 @@ impl TypedArray {
         Ok(true)
     }
 
-
     fn fill(
         &self,
         #[this] array: Value,
@@ -266,17 +265,19 @@ impl TypedArray {
             let start = start.map_or(0, |start| convert_index(start, len));
             let end = end.map_or(len, |end| convert_index(end, len));
 
-            let value: TY = FromPrimitive::from_f64(value.to_number(realm)?).ok_or(Error::ty("Failed to convert to value"))?;
+            let value: TY = FromPrimitive::from_f64(value.to_number(realm)?)
+                .ok_or(Error::ty("Failed to convert to value"))?;
 
-            for val in slice.get_mut(start..end).ok_or(Error::range("TypedArray is out of bounds"))? {
+            for val in slice
+                .get_mut(start..end)
+                .ok_or(Error::range("TypedArray is out of bounds"))?
+            {
                 *val = value;
             }
         });
 
-
         Ok(array)
     }
 }
-
 
 // pub trait FromF64

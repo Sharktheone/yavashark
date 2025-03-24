@@ -1,8 +1,8 @@
 mod storage;
 
-use std::mem;
 use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
+use std::mem;
 use std::path::PathBuf;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};

@@ -1103,8 +1103,7 @@ impl Array {
 
         Ok(iter.into())
     }
-    
-    
+
     #[prop("toString")]
     fn to_string_js(&self, #[realm] realm: &mut Realm) -> Res<String> {
         self.override_to_string(realm)

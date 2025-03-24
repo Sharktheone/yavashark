@@ -65,7 +65,7 @@ pub fn parse_constant(
         MaybeStatic::Static
     } else if is_both {
         MaybeStatic::Both
-    } else  {
+    } else {
         MaybeStatic::Impl
     }(Constant {
         name: constant.ident.clone(),
