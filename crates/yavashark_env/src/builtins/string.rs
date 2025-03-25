@@ -7,7 +7,7 @@ use std::cmp;
 use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, MutObj, Obj};
+use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -78,9 +78,15 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
     }
 }
 
-#[object(constructor, function, to_string)]
+#[object(constructor, function, to_string, name)]
 #[derive(Debug)]
 pub struct StringConstructor {}
+
+impl CustomName for StringConstructor {
+    fn custom_name(&self) -> String {
+        "String".to_string()
+    }
+}
 
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
@@ -90,6 +96,8 @@ impl StringConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
         };
+        
+        this.define_property("name".into(), "String".into())?;
 
         this.initialize(func.copy())?;
 
