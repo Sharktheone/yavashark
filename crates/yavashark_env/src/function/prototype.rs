@@ -6,7 +6,7 @@ use yavashark_value::{MutObj, Obj};
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -17,6 +17,7 @@ struct MutableFunctionPrototype {
     pub constructor: ObjectProperty,
     pub length: ObjectProperty,
     pub name: ObjectProperty,
+    pub to_string: ObjectProperty,
 }
 
 #[derive(Debug)]
@@ -36,6 +37,7 @@ impl FunctionPrototype {
                 constructor: Value::Undefined.into(),
                 length: Value::Number(0.0).into(),
                 name: Value::String("Function".to_string()).into(),
+                to_string: Value::Undefined.into(),
             }),
         }
     }
@@ -47,6 +49,7 @@ impl FunctionPrototype {
         this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
         this.call = NativeFunction::with_proto("call", call, func.copy()).into();
         this.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
+        this.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
 
         this.constructor
             .value
@@ -124,6 +127,10 @@ fn constructor(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueRes
     eval.call(realm, vec![Value::String(buf)], Value::Undefined)
 }
 
+fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    Ok(this.to_string(realm)?.into())
+}
+
 impl Obj<Realm> for FunctionPrototype {
     fn define_property(&self, name: Value, value: Value) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
@@ -154,6 +161,11 @@ impl Obj<Realm> for FunctionPrototype {
                     this.name = value.into();
                     return Ok(());
                 }
+                "toString" => {
+                    this.to_string = value.into();
+                    return Ok(());
+                }
+                
                 _ => {}
             }
         }
@@ -190,6 +202,10 @@ impl Obj<Realm> for FunctionPrototype {
                     this.name = value.into();
                     return Ok(());
                 }
+                "toString" => {
+                    this.to_string = value.into();
+                    return Ok(());
+                }
                 _ => {}
             }
         }
@@ -208,6 +224,7 @@ impl Obj<Realm> for FunctionPrototype {
                 "constructor" => return Ok(Some(this.constructor.clone())),
                 "length" => return Ok(Some(this.length.clone())),
                 "name" => return Ok(Some(this.name.clone())),
+                "toString" => return Ok(Some(this.to_string.clone())),
                 _ => {}
             }
         }
@@ -226,6 +243,7 @@ impl Obj<Realm> for FunctionPrototype {
                 "constructor" => return Ok(Some(this.constructor.copy())),
                 "length" => return Ok(Some(this.length.copy())),
                 "name" => return Ok(Some(this.name.copy())),
+                "toString" => return Ok(Some(this.to_string.copy())),
                 _ => {}
             }
         }
@@ -289,6 +307,11 @@ impl Obj<Realm> for FunctionPrototype {
                     this.name = Value::Undefined.into();
                     return Ok(Some(old));
                 }
+                "toString" => {
+                    let old = this.to_string.value.copy();
+                    this.to_string = Value::Undefined.into();
+                    return Ok(Some(old));
+                }
                 _ => {}
             }
         }
@@ -299,7 +322,7 @@ impl Obj<Realm> for FunctionPrototype {
     fn contains_key(&self, name: &Value) -> Res<bool> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" => return Ok(true),
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => return Ok(true),
                 _ => {}
             }
         }
@@ -337,6 +360,7 @@ impl Obj<Realm> for FunctionPrototype {
             this.length.value.copy(),
         ));
         props.push((Value::String("name".to_string()), this.name.value.copy()));
+        props.push((Value::String("toString".to_string()), this.to_string.value.copy()));
 
         Ok(props)
     }
@@ -351,6 +375,7 @@ impl Obj<Realm> for FunctionPrototype {
         keys.push(Value::String("constructor".to_string()));
         keys.push(Value::String("length".to_string()));
         keys.push(Value::String("name".to_string()));
+        keys.push(Value::String("toString".to_string()));
 
         Ok(keys)
     }
@@ -365,6 +390,7 @@ impl Obj<Realm> for FunctionPrototype {
         values.push(this.constructor.value.copy());
         values.push(this.length.value.copy());
         values.push(this.name.value.copy());
+        values.push(this.to_string.value.copy());
 
         Ok(values)
     }
@@ -385,6 +411,7 @@ impl Obj<Realm> for FunctionPrototype {
         this.constructor = Value::Undefined.into();
         this.length = Value::Number(0.0).into();
         this.name = Value::String("Function".to_string()).into();
+        this.to_string = Value::Undefined.into();
 
         Ok(())
     }
