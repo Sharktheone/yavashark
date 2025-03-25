@@ -26,8 +26,7 @@ impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
         let val = self
             .args
             .next()
-            .ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
-        let val = mem::replace(val, Value::Undefined);
+            .map_or(Value::Undefined, |val| mem::replace(val, Value::Undefined));
 
         T::from_value_out(val)
     }

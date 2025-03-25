@@ -101,20 +101,14 @@ impl FromValueOutput for bool {
 impl FromValueOutput for String {
     type Output = Self;
     fn from_value_out(value: Value) -> Res<Self::Output> {
-        match value {
-            Value::String(s) => Ok(s),
-            _ => Err(Error::ty_error(format!("Expected string, found {value:?}"))),
-        }
+        value.to_string_no_realm()
     }
 }
 
 impl FromValueOutput for &str {
     type Output = String;
     fn from_value_out(value: Value) -> Res<Self::Output> {
-        match value {
-            Value::String(s) => Ok(s),
-            _ => Err(Error::ty_error(format!("Expected string, found {value:?}"))),
-        }
+        String::from_value_out(value)
     }
 }
 
@@ -154,6 +148,7 @@ macro_rules! impl_from_value_output {
                 fn from_value_out(value: Value) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
+                        Value::String(ref s) => s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}"))),
                         _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
                     }
                 }
@@ -188,8 +183,7 @@ impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
         let val = self
             .values
             .next()
-            .ok_or_else(|| Error::ty_error("Expected a value".to_owned()))?;
-        let val = mem::replace(val, Value::Undefined);
+            .map_or(Value::Undefined, |val| mem::replace(val, Value::Undefined));
 
         T::from_value_out(val)
     }

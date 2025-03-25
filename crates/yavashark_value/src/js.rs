@@ -508,6 +508,20 @@ impl<C: Realm> Value<C> {
         })
     }
 
+
+    pub fn to_string_no_realm(&self) -> Result<String, Error<C>> {
+        Ok(match self {
+            Self::Object(o) => o.to_string_internal()?,
+            Self::Null => "null".to_string(),
+            Self::Undefined => "undefined".to_string(),
+            Self::Number(n) => fmt_num(*n),
+            Self::String(s) => s.clone(),
+            Self::Boolean(b) => b.to_string(),
+            Self::Symbol(s) => s.to_string(),
+            Self::BigInt(b) => b.to_string(),
+        })
+    }
+
     pub fn into_string(self, realm: &mut C) -> Result<String, Error<C>> {
         Ok(match self {
             Self::Object(o) => o.to_string(realm)?,
@@ -534,7 +548,12 @@ fn fmt_num(n: f64) -> String {
             "-Infinity".to_string()
         }
     } else {
-        n.to_string()
+        let abs_n = n.abs();
+        if abs_n >= 1e21 || abs_n < 1e-6 {
+            format!("{n:e}")
+        } else {
+            n.to_string()
+        }
     }
 }
 
