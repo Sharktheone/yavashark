@@ -2,7 +2,7 @@ use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
-use yavashark_value::{BoxedObj, Constructor, Func, Obj};
+use yavashark_value::{BoxedObj, Constructor, CustomName, Func, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -1179,13 +1179,19 @@ impl ArrayConstructor {
     }
 }
 
-#[object]
+#[object(name)]
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub struct ArrayIterator {
     pub array: ObjectHandle,
     pub next: Cell<usize>,
     pub done: Cell<bool>,
+}
+
+impl CustomName for ArrayIterator {
+    fn custom_name(&self) -> String {
+        "Array Iterator".to_owned()
+    }
 }
 
 #[properties]

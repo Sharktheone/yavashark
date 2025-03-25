@@ -1,4 +1,4 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
@@ -11,7 +11,7 @@ pub struct BooleanObj {
     boolean: bool,
 }
 
-#[object(constructor, function)]
+#[object(constructor, function, to_string)]
 #[derive(Debug)]
 pub struct BooleanConstructor {}
 
@@ -25,6 +25,14 @@ impl BooleanConstructor {
         };
 
         Ok(this.into_object())
+    }
+
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
+        Ok("function Boolean() { [native code] }".to_string())
+    }
+
+    pub fn override_to_string_internal(&self) -> Res<String> {
+        Ok("function Boolean() { [native code] }".to_string())
     }
 }
 

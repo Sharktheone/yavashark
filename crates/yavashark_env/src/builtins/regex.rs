@@ -50,7 +50,7 @@ impl RegExp {
     }
 }
 
-#[object(constructor, function)]
+#[object(constructor, function, to_string)]
 #[derive(Debug)]
 pub struct RegExpConstructor {}
 
@@ -73,6 +73,14 @@ impl RegExpConstructor {
         this.initialize(func.copy())?;
 
         Ok(this.into_object())
+    }
+
+    fn override_to_string_internal(&self) -> Res<String> {
+        Ok("function RegExp() { [native code] }".to_string())
+    }
+
+    fn override_to_string(&self, _: &mut Realm) -> Res<String> {
+        Ok("function RegExp() { [native code] }".to_string())
     }
 }
 
@@ -139,5 +147,16 @@ impl RegExp {
     #[prop("test")]
     pub fn test(&self, value: &str) -> bool {
         self.regex.is_match(value)
+    }
+    
+    #[prop("toString")]
+    pub fn js_to_string(&self) -> String {
+        let str = self.regex.to_string();
+        
+        if str.is_empty() {
+            return "/(?:)/".to_string();
+        }
+        
+        format!("/{}/{}", str, if self.global { "g" } else { "" })
     }
 }

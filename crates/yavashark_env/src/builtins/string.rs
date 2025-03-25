@@ -199,6 +199,25 @@ impl StringObj {
 
         string.map(ToString::to_string)
     }
+    
+    pub fn get_single(&self, index: isize) -> Option<String> {
+        let inner = self.inner.borrow();
+        let len = inner.string.len() as isize;
+
+
+        let start = if index < 0 {
+            (len + index) as usize
+        } else {
+            index as usize
+        };
+        
+        let end = start + 1;
+
+        let string = inner.string.get(start..end);
+
+        string.map(ToString::to_string)
+        
+    }
 }
 
 #[properties_new(constructor(StringConstructor::new))]
@@ -213,7 +232,7 @@ impl StringObj {
     }
 
     pub fn at(&self, index: isize) -> Value {
-        self.get(index, index + 1)
+        self.get_single(index)
             .map_or(Value::Undefined, Into::into)
     }
 
@@ -231,13 +250,13 @@ impl StringObj {
 
     #[prop("charAt")]
     pub fn char_at(&self, index: isize) -> Value {
-        self.get(index, index + 1)
+        self.get_single(index)
             .map_or(Value::Undefined, Into::into)
     }
 
     #[prop("charCodeAt")]
     pub fn char_code_at(&self, index: isize) -> Value {
-        self.get(index, index + 1)
+        self.get_single(index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
             .into()
@@ -245,7 +264,7 @@ impl StringObj {
 
     #[prop("codePointAt")]
     pub fn code_point_at(&self, index: isize) -> Value {
-        self.get(index, index + 1)
+        self.get_single(index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
             .into()
