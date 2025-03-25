@@ -67,6 +67,14 @@ impl ObjectImpl<Realm> for NativeFunction {
         (self.f)(args, obj, realm)
     }
 
+    fn to_string(&self, _: &mut Realm) -> Result<String, yavashark_value::Error<Realm>> {
+        Ok(format!("function {}() {{ [native code] }}", self.name))
+    }
+
+    fn to_string_internal(&self) -> Result<String, yavashark_value::Error<Realm>> {
+        Ok(format!("function {}() {{ [native code] }}", self.name))
+    }
+
     fn is_function(&self) -> bool {
         true
     }
