@@ -78,7 +78,7 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
     }
 }
 
-#[object(constructor, function)]
+#[object(constructor, function, to_string)]
 #[derive(Debug)]
 pub struct StringConstructor {}
 
@@ -94,6 +94,14 @@ impl StringConstructor {
         this.initialize(func.copy())?;
 
         Ok(this.into_object())
+    }
+
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
+        Ok("function String() { [native code] }".to_string())
+    }
+
+    pub fn override_to_string_internal(&self) -> Res<String> {
+        Ok("function String() { [native code] }".to_string())
     }
 }
 
