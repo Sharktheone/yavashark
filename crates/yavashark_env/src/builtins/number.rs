@@ -1,4 +1,4 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
@@ -11,7 +11,7 @@ pub struct NumberObj {
     number: f64,
 }
 
-#[object(constructor, function)]
+#[object(constructor, function, to_string)]
 #[derive(Debug)]
 pub struct NumberConstructor {}
 
@@ -27,6 +27,16 @@ impl NumberConstructor {
         this.initialize(func.copy())?;
 
         Ok(this.into_object())
+    }
+
+
+
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
+        Ok("function Number() { [native code] }".to_string())
+    }
+
+    pub fn override_to_string_internal(&self) -> Res<String> {
+        Ok("function Number() { [native code] }".to_string())
     }
 }
 
@@ -131,4 +141,70 @@ impl NumberObj {
 }
 
 #[properties_new(constructor(NumberConstructor::new))]
-impl NumberObj {}
+impl NumberObj {
+    #[prop("toString")]
+    fn to_string(&self, radix: Option<u32>) -> crate::Res<String> {
+        let inner = self.inner.try_borrow()?;
+
+        let num = inner.number;
+
+        if num.is_nan() {
+            return Ok("NaN".to_owned());
+        }
+
+        if num.is_infinite() {
+            return Ok(if num.is_sign_positive() {
+                "Infinity".to_owned()
+            } else {
+                "-Infinity".to_owned()
+            });
+        }
+
+        radix.map_or_else(|| Ok(num.to_string()), |radix| float_to_string_with_radix(num, radix))
+    }
+}
+
+
+//TODO: find a better way to do this
+fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
+    const PRECISION: usize = 5;
+
+    if !(2..=36).contains(&radix) {
+        return Err(crate::Error::range("toString() radix argument must be between 2 and 36"));
+    }
+
+    let is_negative = value < 0.0;
+    let value = value.abs();
+
+    let int_part = value.trunc() as u64;
+    let int_str = num_bigint::BigUint::from(int_part).to_str_radix(radix).to_string();
+
+    let mut result = String::new();
+    if is_negative {
+        result.push('-');
+    }
+    result.push_str(&int_str);
+
+    let mut frac_part = value.fract();
+    if frac_part > 0.0 && PRECISION > 0 {
+        result.push('.');
+
+        for _ in 0..PRECISION {
+            frac_part *= f64::from(radix);
+            let digit = frac_part.trunc() as u32;
+
+            if digit < 10 {
+                result.push(char::from_digit(digit, radix).ok_or(crate::Error::new("Failed to convert digit to char"))?);
+            } else {
+                result.push((b'a' + (digit - 10) as u8) as char);
+            }
+
+            frac_part -= f64::from(digit);
+            if frac_part == 0.0 {
+                break;
+            }
+        }
+    }
+
+    Ok(result)
+}

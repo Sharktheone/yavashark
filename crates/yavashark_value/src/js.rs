@@ -500,7 +500,7 @@ impl<C: Realm> Value<C> {
             Self::Object(o) => o.to_string(realm)?,
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
-            Self::Number(n) => n.to_string(),
+            Self::Number(n) => fmt_num(*n),
             Self::String(s) => s.clone(),
             Self::Boolean(b) => b.to_string(),
             Self::Symbol(s) => s.to_string(),
@@ -513,12 +513,28 @@ impl<C: Realm> Value<C> {
             Self::Object(o) => o.to_string(realm)?,
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
-            Self::Number(n) => n.to_string(),
+            Self::Number(n) => fmt_num(n),
             Self::String(s) => s,
             Self::Boolean(b) => b.to_string(),
             Self::Symbol(s) => s.to_string(),
             Self::BigInt(b) => b.to_string(),
         })
+    }
+}
+
+fn fmt_num(n: f64) -> String {
+    if n.is_nan() {
+        "NaN".to_string()
+    } else if n == 0.0 {
+        "0".to_string()
+    } else if n.is_infinite() {
+        if n.is_sign_positive() {
+            "Infinity".to_string()
+        } else {
+            "-Infinity".to_string()
+        }
+    } else {
+        n.to_string()
     }
 }
 
