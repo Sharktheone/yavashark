@@ -29,8 +29,6 @@ impl NumberConstructor {
         Ok(this.into_object())
     }
 
-
-
     pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
         Ok("function Number() { [native code] }".to_string())
     }
@@ -160,24 +158,30 @@ impl NumberObj {
             });
         }
 
-        radix.map_or_else(|| Ok(num.to_string()), |radix| float_to_string_with_radix(num, radix))
+        radix.map_or_else(
+            || Ok(num.to_string()),
+            |radix| float_to_string_with_radix(num, radix),
+        )
     }
 }
-
 
 //TODO: find a better way to do this
 fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
     const PRECISION: usize = 5;
 
     if !(2..=36).contains(&radix) {
-        return Err(crate::Error::range("toString() radix argument must be between 2 and 36"));
+        return Err(crate::Error::range(
+            "toString() radix argument must be between 2 and 36",
+        ));
     }
 
     let is_negative = value < 0.0;
     let value = value.abs();
 
     let int_part = value.trunc() as u64;
-    let int_str = num_bigint::BigUint::from(int_part).to_str_radix(radix).to_string();
+    let int_str = num_bigint::BigUint::from(int_part)
+        .to_str_radix(radix)
+        .to_string();
 
     let mut result = String::new();
     if is_negative {
@@ -194,7 +198,10 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
             let digit = frac_part.trunc() as u32;
 
             if digit < 10 {
-                result.push(char::from_digit(digit, radix).ok_or(crate::Error::new("Failed to convert digit to char"))?);
+                result.push(
+                    char::from_digit(digit, radix)
+                        .ok_or(crate::Error::new("Failed to convert digit to char"))?,
+                );
             } else {
                 result.push((b'a' + (digit - 10) as u8) as char);
             }

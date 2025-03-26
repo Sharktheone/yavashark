@@ -96,7 +96,7 @@ impl StringConstructor {
                 object: MutObject::with_proto(func.copy()),
             }),
         };
-        
+
         this.define_property("name".into(), "String".into())?;
 
         this.initialize(func.copy())?;
@@ -199,24 +199,22 @@ impl StringObj {
 
         string.map(ToString::to_string)
     }
-    
+
     pub fn get_single(&self, index: isize) -> Option<String> {
         let inner = self.inner.borrow();
         let len = inner.string.len() as isize;
-
 
         let start = if index < 0 {
             (len + index) as usize
         } else {
             index as usize
         };
-        
+
         let end = start + 1;
 
         let string = inner.string.get(start..end);
 
         string.map(ToString::to_string)
-        
     }
 }
 
@@ -232,8 +230,7 @@ impl StringObj {
     }
 
     pub fn at(&self, index: isize) -> Value {
-        self.get_single(index)
-            .map_or(Value::Undefined, Into::into)
+        self.get_single(index).map_or(Value::Undefined, Into::into)
     }
 
     pub fn big(&self) -> ValueResult {
@@ -250,8 +247,7 @@ impl StringObj {
 
     #[prop("charAt")]
     pub fn char_at(&self, index: isize) -> Value {
-        self.get_single(index)
-            .map_or(Value::Undefined, Into::into)
+        self.get_single(index).map_or(Value::Undefined, Into::into)
     }
 
     #[prop("charCodeAt")]

@@ -1,9 +1,11 @@
-use swc_ecma_ast::{BlockStmt, Class, ClassDecl, ClassMember, DebuggerStmt, Decl, Expr, ExprStmt, ForHead, Pat, PropName, Stmt, UsingDecl, VarDeclOrExpr, WithStmt};
+use swc_ecma_ast::{
+    BlockStmt, Class, ClassDecl, ClassMember, DebuggerStmt, Decl, Expr, ExprStmt, ForHead, Pat,
+    PropName, Stmt, UsingDecl, VarDeclOrExpr, WithStmt,
+};
 
 pub trait ASTNode {
     fn has_call(&self) -> bool;
 }
-
 
 impl ASTNode for Stmt {
     fn has_call(&self) -> bool {
@@ -75,13 +77,19 @@ impl ASTNode for swc_ecma_ast::ContinueStmt {
 
 impl ASTNode for swc_ecma_ast::IfStmt {
     fn has_call(&self) -> bool {
-        self.test.has_call() ||  self.cons.has_call() || self.alt.as_deref().is_some_and(ASTNode::has_call)
+        self.test.has_call()
+            || self.cons.has_call()
+            || self.alt.as_deref().is_some_and(ASTNode::has_call)
     }
 }
 
 impl ASTNode for swc_ecma_ast::SwitchStmt {
     fn has_call(&self) -> bool {
-        self.discriminant.has_call() || self.cases.iter().any(|c| c.test.as_deref().is_some_and(ASTNode::has_call) || c.cons.iter().any(ASTNode::has_call))
+        self.discriminant.has_call()
+            || self.cases.iter().any(|c| {
+                c.test.as_deref().is_some_and(ASTNode::has_call)
+                    || c.cons.iter().any(ASTNode::has_call)
+            })
     }
 }
 
@@ -93,7 +101,9 @@ impl ASTNode for swc_ecma_ast::ThrowStmt {
 
 impl ASTNode for swc_ecma_ast::TryStmt {
     fn has_call(&self) -> bool {
-        self.block.has_call() || self.handler.as_ref().is_some_and(|h| h.body.has_call()) || self.finalizer.as_ref().is_some_and(ASTNode::has_call)
+        self.block.has_call()
+            || self.handler.as_ref().is_some_and(|h| h.body.has_call())
+            || self.finalizer.as_ref().is_some_and(ASTNode::has_call)
     }
 }
 
@@ -111,7 +121,10 @@ impl ASTNode for swc_ecma_ast::DoWhileStmt {
 
 impl ASTNode for swc_ecma_ast::ForStmt {
     fn has_call(&self) -> bool {
-        self.init.as_ref().is_some_and(ASTNode::has_call) || self.test.as_deref().is_some_and(ASTNode::has_call) || self.update.as_deref().is_some_and(ASTNode::has_call) || self.body.has_call()
+        self.init.as_ref().is_some_and(ASTNode::has_call)
+            || self.test.as_deref().is_some_and(ASTNode::has_call)
+            || self.update.as_deref().is_some_and(ASTNode::has_call)
+            || self.body.has_call()
     }
 }
 
@@ -134,11 +147,10 @@ impl ASTNode for Decl {
             Decl::Fn(f) => f.has_call(),
             Decl::Var(v) => v.has_call(),
             Decl::Using(u) => u.has_call(),
-            
-            _ => false
+
+            _ => false,
         }
     }
-    
 }
 
 impl ASTNode for ClassDecl {
@@ -155,17 +167,19 @@ impl ASTNode for swc_ecma_ast::FnDecl {
 
 impl ASTNode for UsingDecl {
     fn has_call(&self) -> bool {
-        self.decls.iter().any(|d| d.init.as_deref().is_some_and(ASTNode::has_call) || d.name.has_call())
+        self.decls
+            .iter()
+            .any(|d| d.init.as_deref().is_some_and(ASTNode::has_call) || d.name.has_call())
     }
 }
 
 impl ASTNode for Class {
     fn has_call(&self) -> bool {
-        self.super_class.as_deref().is_some_and(ASTNode::has_call) || self.body.iter().any(|m| match m {
-            ClassMember::StaticBlock(s) => s.body.has_call(),
-            _ => false
-        })
-        
+        self.super_class.as_deref().is_some_and(ASTNode::has_call)
+            || self.body.iter().any(|m| match m {
+                ClassMember::StaticBlock(s) => s.body.has_call(),
+                _ => false,
+            })
     }
 }
 
@@ -186,7 +200,9 @@ impl ASTNode for VarDeclOrExpr {
 
 impl ASTNode for swc_ecma_ast::VarDecl {
     fn has_call(&self) -> bool {
-        self.decls.iter().any(|d| d.init.as_deref().is_some_and(ASTNode::has_call) || d.name.has_call())
+        self.decls
+            .iter()
+            .any(|d| d.init.as_deref().is_some_and(ASTNode::has_call) || d.name.has_call())
     }
 }
 
@@ -202,7 +218,7 @@ impl ASTNode for ForHead {
 
 impl ASTNode for Pat {
     fn has_call(&self) -> bool {
-        match self { 
+        match self {
             Self::Ident(_) | Self::Invalid(_) => false,
             Self::Array(array) => array.has_call(),
             Self::Rest(rest) => rest.has_call(),
@@ -215,7 +231,9 @@ impl ASTNode for Pat {
 
 impl ASTNode for swc_ecma_ast::ArrayPat {
     fn has_call(&self) -> bool {
-        self.elems.iter().any(|e| e.as_ref().is_some_and(ASTNode::has_call))
+        self.elems
+            .iter()
+            .any(|e| e.as_ref().is_some_and(ASTNode::has_call))
     }
 }
 
@@ -229,7 +247,9 @@ impl ASTNode for swc_ecma_ast::ObjectPat {
     fn has_call(&self) -> bool {
         self.props.iter().any(|p| match p {
             swc_ecma_ast::ObjectPatProp::KeyValue(kv) => kv.key.has_call() || kv.value.has_call(),
-            swc_ecma_ast::ObjectPatProp::Assign(a) => a.value.as_deref().is_some_and(ASTNode::has_call),
+            swc_ecma_ast::ObjectPatProp::Assign(a) => {
+                a.value.as_deref().is_some_and(ASTNode::has_call)
+            }
             swc_ecma_ast::ObjectPatProp::Rest(r) => r.arg.has_call(),
         })
     }

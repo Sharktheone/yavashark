@@ -1,7 +1,7 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
-use yavashark_env::Res;
 use yavashark_env::utils::ValueIterator;
+use yavashark_env::Res;
 
 pub fn call(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let func = func.get(vm)?;

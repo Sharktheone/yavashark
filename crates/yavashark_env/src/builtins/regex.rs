@@ -148,15 +148,15 @@ impl RegExp {
     pub fn test(&self, value: &str) -> bool {
         self.regex.is_match(value)
     }
-    
+
     #[prop("toString")]
     pub fn js_to_string(&self) -> String {
         let str = self.regex.to_string();
-        
+
         if str.is_empty() {
             return "/(?:)/".to_string();
         }
-        
+
         format!("/{}/{}", str, if self.global { "g" } else { "" })
     }
 }

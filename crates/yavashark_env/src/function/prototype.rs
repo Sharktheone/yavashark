@@ -6,7 +6,10 @@ use yavashark_value::{MutObj, Obj};
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, ValueResult,
+    Variable,
+};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -165,7 +168,7 @@ impl Obj<Realm> for FunctionPrototype {
                     this.to_string = value.into();
                     return Ok(());
                 }
-                
+
                 _ => {}
             }
         }
@@ -322,7 +325,9 @@ impl Obj<Realm> for FunctionPrototype {
     fn contains_key(&self, name: &Value) -> Res<bool> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => return Ok(true),
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
+                    return Ok(true)
+                }
                 _ => {}
             }
         }
@@ -360,7 +365,10 @@ impl Obj<Realm> for FunctionPrototype {
             this.length.value.copy(),
         ));
         props.push((Value::String("name".to_string()), this.name.value.copy()));
-        props.push((Value::String("toString".to_string()), this.to_string.value.copy()));
+        props.push((
+            Value::String("toString".to_string()),
+            this.to_string.value.copy(),
+        ));
 
         Ok(props)
     }

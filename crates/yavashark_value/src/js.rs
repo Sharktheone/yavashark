@@ -508,7 +508,6 @@ impl<C: Realm> Value<C> {
         })
     }
 
-
     pub fn to_string_no_realm(&self) -> Result<String, Error<C>> {
         Ok(match self {
             Self::Object(o) => o.to_string_internal()?,
