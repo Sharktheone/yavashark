@@ -1,0 +1,14 @@
+[package]
+name = "yavashark_compiler"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+yavashark_bytecode = { path = "../yavashark_bytecode" }
+swc_common = "8.0.0"
+swc_ecma_ast = "8.0.0"
+anyhow = "1.0.86"
+log = "0.4.22"
+
+[lints]
+workspace = true
