@@ -283,7 +283,7 @@ impl<C: Realm, V: 'static> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
 #[allow(unused)]
 mod tests {
     use super::*;
-    use crate::{ObjectProperty, Variable};
+    use crate::{Obj, ObjectProperty, Variable};
     use std::fmt::Debug;
     use std::mem;
     use std::slice::IterMut;

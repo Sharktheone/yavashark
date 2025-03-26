@@ -3,7 +3,6 @@ use crate::set::{ArgumentType, ReturnType};
 use crate::{parse, set};
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use std::mem::offset_of;
 
 pub fn generate_constructors() {
     let defs = parse::instruction_def();
