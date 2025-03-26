@@ -7898,6 +7898,16 @@ impl Execute for Instruction {
             Self::CallMemberConstConstToStack(arg0, arg1, output) => {
                 instruction::call_member(arg0, arg1, output, vm)?
             }
+            Self::PushCallVar(arg0) => instruction::push_call(arg0, vm)?,
+            Self::PushCallReg(arg0) => instruction::push_call(arg0, vm)?,
+            Self::PushCallAcc(arg0) => instruction::push_call(arg0, vm)?,
+            Self::PushCallStack(arg0) => instruction::push_call(arg0, vm)?,
+            Self::PushCallConst(arg0) => instruction::push_call(arg0, vm)?,
+            Self::SpreadCallVar(arg0) => instruction::spread_call(arg0, vm)?,
+            Self::SpreadCallReg(arg0) => instruction::spread_call(arg0, vm)?,
+            Self::SpreadCallAcc(arg0) => instruction::spread_call(arg0, vm)?,
+            Self::SpreadCallStack(arg0) => instruction::spread_call(arg0, vm)?,
+            Self::SpreadCallConst(arg0) => instruction::spread_call(arg0, vm)?,
             Self::Jmp(arg0) => instruction::jmp(arg0, vm)?,
             Self::JmpIfVar(arg0, arg1) => instruction::jmp_if(arg0, arg1, vm)?,
             Self::JmpIfReg(arg0, arg1) => instruction::jmp_if(arg0, arg1, vm)?,

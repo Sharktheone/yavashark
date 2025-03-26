@@ -40,6 +40,9 @@ PopScope
 Call(Data) => Data
 CallMember(Data, Data) => Data
 
+PushCall(Data)
+SpreadCall(Data)
+
 Jmp(JmpAddr)
 JmpIf(Data, JmpAddr)
 JmpIfNot(Data, JmpAddr)

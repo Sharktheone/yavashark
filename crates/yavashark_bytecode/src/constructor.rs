@@ -11264,6 +11264,26 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn push_call(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PushCallAcc(arg0),
+            DataType::Const(arg0) => Self::PushCallConst(arg0),
+            DataType::Reg(arg0) => Self::PushCallReg(arg0),
+            DataType::Stack(arg0) => Self::PushCallStack(arg0),
+            DataType::Var(arg0) => Self::PushCallVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn spread_call(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::SpreadCallAcc(arg0),
+            DataType::Const(arg0) => Self::SpreadCallConst(arg0),
+            DataType::Reg(arg0) => Self::SpreadCallReg(arg0),
+            DataType::Stack(arg0) => Self::SpreadCallStack(arg0),
+            DataType::Var(arg0) => Self::SpreadCallVar(arg0),
+        }
+    }
+    #[must_use]
     pub fn jmp(arg0: JmpAddr) -> Self {
         Self::Jmp(arg0)
     }

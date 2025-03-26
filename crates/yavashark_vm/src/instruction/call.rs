@@ -1,6 +1,7 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_env::Res;
+use yavashark_env::utils::ValueIterator;
 
 pub fn call(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let func = func.get(vm)?;
@@ -27,4 +28,24 @@ pub fn call_member(
     let ret = obj.call_method(&member, vm.get_realm(), args)?;
 
     output.set(ret, vm)
+}
+
+pub fn push_call(arg: impl Data, vm: &mut impl VM) -> Res {
+    let arg = arg.get(vm)?;
+
+    vm.push_call_arg(arg);
+
+    Ok(())
+}
+
+pub fn spread_call(args: impl Data, vm: &mut impl VM) -> Res {
+    let args = args.get(vm)?;
+
+    let iter = ValueIterator::new(&args, vm.get_realm())?;
+
+    while let Some(value) = iter.next(vm.get_realm())? {
+        vm.push_call_arg(value);
+    }
+
+    Ok(())
 }
