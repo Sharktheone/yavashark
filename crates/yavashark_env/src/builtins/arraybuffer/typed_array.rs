@@ -70,12 +70,15 @@ impl TypedArray {
         //     return Err(Error::range("byteOffset is out of bounds"));
         // }
         //
-        let byte_length = byte_length.map_or_else(|| buf_len - byte_offset, |len| {
-            // if len + byte_offset > buf_len {
-            //     return Err(Error::range("byteLength is out of bounds"));
-            // } //TODO
-            len
-        });
+        let byte_length = byte_length.map_or_else(
+            || buf_len - byte_offset,
+            |len| {
+                // if len + byte_offset > buf_len {
+                //     return Err(Error::range("byteLength is out of bounds"));
+                // } //TODO
+                len
+            },
+        );
 
         Ok(Self {
             inner: RefCell::new(MutableTypedArray {
@@ -137,7 +140,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
             Type::U8 | Type::I8 => 1,
             Type::U16 | Type::I16 | Type::F16 => 2,
             Type::U32 | Type::I32 | Type::F32 => 4,
-            Type::U64 | Type::I64 | Type::F64=> 8,
+            Type::U64 | Type::I64 | Type::F64 => 8,
         };
 
     let mut buffer = Vec::with_capacity(len);
