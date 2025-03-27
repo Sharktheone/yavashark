@@ -234,6 +234,7 @@ mod test {
         let mut vm = OwnedVM {
             regs: Registers::new(),
             stack: Stack::new(),
+            call_args: Vec::new(),
             pc: 0,
             code: vec![
                 Instruction::LdaAcc(0),

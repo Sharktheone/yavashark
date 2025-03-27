@@ -143,10 +143,10 @@ impl ASTNode for swc_ecma_ast::ForOfStmt {
 impl ASTNode for Decl {
     fn has_call(&self) -> bool {
         match self {
-            Decl::Class(c) => c.has_call(),
-            Decl::Fn(f) => f.has_call(),
-            Decl::Var(v) => v.has_call(),
-            Decl::Using(u) => u.has_call(),
+            Self::Class(c) => c.has_call(),
+            Self::Fn(f) => f.has_call(),
+            Self::Var(v) => v.has_call(),
+            Self::Using(u) => u.has_call(),
 
             _ => false,
         }
@@ -192,8 +192,8 @@ impl ASTNode for ExprStmt {
 impl ASTNode for VarDeclOrExpr {
     fn has_call(&self) -> bool {
         match self {
-            VarDeclOrExpr::VarDecl(v) => v.has_call(),
-            VarDeclOrExpr::Expr(e) => e.has_call(),
+            Self::VarDecl(v) => v.has_call(),
+            Self::Expr(e) => e.has_call(),
         }
     }
 }

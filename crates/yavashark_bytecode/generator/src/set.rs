@@ -2,10 +2,6 @@ use crate::parse::{InstructionDefinition, Type, instruction_def};
 use convert_case::{Case, Casing};
 use std::sync::LazyLock;
 
-struct InstructionSet {
-    pub instructions: Vec<Instruction>,
-}
-
 #[derive(Debug, Clone)]
 pub enum ArgumentType {
     Variable,

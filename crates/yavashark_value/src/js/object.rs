@@ -142,7 +142,7 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
         false
     }
 
-    /// # Safety:
+    /// # Safety
     /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents
     /// - Caller and implementer must ensure that the pointer is valid for the same lifetime of self
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {

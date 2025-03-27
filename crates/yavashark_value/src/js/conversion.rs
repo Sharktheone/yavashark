@@ -269,7 +269,7 @@ impl<C: Realm, V: 'static> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
             ))),
         }?;
 
-        obj.maybe_map(|o| o.downcast::<V>()).map_err(|obj| {
+        obj.maybe_map(BoxedObj::downcast).map_err(|obj| {
             Error::ty_error(format!(
                 "Expected an object of type {:?}, found {:?}",
                 obj.name(),

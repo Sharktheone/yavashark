@@ -75,10 +75,12 @@ impl RegExpConstructor {
         Ok(this.into_object())
     }
 
+    #[allow(clippy::unused_self)]
     fn override_to_string_internal(&self) -> Res<String> {
         Ok("function RegExp() { [native code] }".to_string())
     }
 
+    #[allow(clippy::unused_self)]
     fn override_to_string(&self, _: &mut Realm) -> Res<String> {
         Ok("function RegExp() { [native code] }".to_string())
     }

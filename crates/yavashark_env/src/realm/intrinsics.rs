@@ -141,6 +141,7 @@ impl Intrinsics {
     obj!(temporal);
 }
 
+#[allow(clippy::similar_names)]
 impl Intrinsics {
     pub(crate) fn new() -> Result<Self, Error> {
         let obj_prototype = ObjectHandle::new(Prototype::new());
@@ -319,7 +320,6 @@ impl Intrinsics {
             func_prototype.clone().into(),
         )?;
 
-        #[allow(clippy::similar_names)]
         let biguint64array = BigUint64Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone().into()),
             func_prototype.clone().into(),

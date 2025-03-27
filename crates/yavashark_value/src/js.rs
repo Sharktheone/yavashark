@@ -548,10 +548,10 @@ fn fmt_num(n: f64) -> String {
         }
     } else {
         let abs_n = n.abs();
-        if abs_n >= 1e21 || abs_n < 1e-6 {
-            format!("{n:e}")
-        } else {
+        if (1e-6..1e21).contains(&abs_n) {
             n.to_string()
+        } else {
+            format!("{n:e}")
         }
     }
 }

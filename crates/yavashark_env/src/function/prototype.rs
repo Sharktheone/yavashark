@@ -7,7 +7,7 @@ use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
 use crate::{
-    Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, ValueResult,
+    Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult,
     Variable,
 };
 

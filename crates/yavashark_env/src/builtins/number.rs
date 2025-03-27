@@ -180,8 +180,7 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
 
     let int_part = value.trunc() as u64;
     let int_str = num_bigint::BigUint::from(int_part)
-        .to_str_radix(radix)
-        .to_string();
+        .to_str_radix(radix);
 
     let mut result = String::new();
     if is_negative {

@@ -1,5 +1,5 @@
 use crate::conversion::FromValueOutput;
-use crate::{Error, Res, Value};
+use crate::{Res, Value};
 use std::mem;
 use std::slice::IterMut;
 
