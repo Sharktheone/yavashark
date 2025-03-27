@@ -30,6 +30,7 @@ impl App {
     }
 
     pub fn layout(&self) -> Vec<u8> {
+        #[allow(clippy::unwrap_used)]
         let mut trace = self.tracer.lock().unwrap();
         if let Some(ref svg_content) = trace.svg_content {
             return svg_content.as_bytes().to_vec();
