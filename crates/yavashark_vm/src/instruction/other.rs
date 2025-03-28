@@ -142,3 +142,8 @@ pub fn await_(_data: impl Data, _vm: &impl VM) -> ControlResult {
     // Err(ControlFlow::Await(result))
     unimplemented!()
 }
+
+pub fn debugger(_vm: &mut impl VM) -> Res {
+    dbg!("Set debug point here!");
+    Ok(())
+}

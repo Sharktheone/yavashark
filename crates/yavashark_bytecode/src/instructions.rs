@@ -3381,4 +3381,5 @@ pub enum Instruction {
     AwaitAcc(Acc),
     AwaitStack(Stack),
     AwaitConst(ConstIdx),
+    Debugger,
 }

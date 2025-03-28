@@ -9771,6 +9771,7 @@ impl Execute for Instruction {
             Self::AwaitAcc(arg0) => instruction::await_(arg0, vm)?,
             Self::AwaitStack(arg0) => instruction::await_(arg0, vm)?,
             Self::AwaitConst(arg0) => instruction::await_(arg0, vm)?,
+            Self::Debugger => instruction::debugger(vm)?,
         }
         Ok(())
     }

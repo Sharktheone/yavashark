@@ -13040,4 +13040,8 @@ impl Instruction {
             DataType::Var(arg0) => Self::AwaitVar(arg0),
         }
     }
+    #[must_use]
+    pub fn debugger() -> Self {
+        Self::Debugger
+    }
 }
