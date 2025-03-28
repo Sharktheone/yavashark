@@ -1,7 +1,11 @@
+mod ident;
+mod lit;
+mod this;
+
+use crate::{Compiler, Res};
 use anyhow::anyhow;
 use swc_ecma_ast::Expr;
 use yavashark_bytecode::data::OutputData;
-use crate::{Compiler, Res};
 
 impl Compiler {
     pub fn compile_expr(&mut self, expr: &Expr, out: Option<impl OutputData>) -> Res {
@@ -31,9 +35,8 @@ impl Compiler {
             Expr::Await(a) => self.compile_await(a, out),
             Expr::Paren(p) => self.compile_paren(p, out),
             _ => Err(anyhow!("Unsupported expression")),
-            
         }
-        
+
         Ok(())
     }
 }
