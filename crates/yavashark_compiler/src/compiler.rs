@@ -1,5 +1,7 @@
-use yavashark_bytecode::ConstValue;
+mod statement;
+
 use yavashark_bytecode::instructions::Instruction;
+use yavashark_bytecode::ConstValue;
 
 pub struct Compiler {
     pub instructions: Vec<Instruction>,
