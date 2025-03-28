@@ -72,7 +72,7 @@ impl OwnedVM {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        Ok(val.clone().into_value(&self.realm))
+        val.clone().into_value(&self.realm)
     }
 
     #[must_use]
