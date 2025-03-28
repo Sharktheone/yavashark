@@ -9761,6 +9761,16 @@ impl Execute for Instruction {
             Self::ThisToReg(output) => instruction::this(output, vm)?,
             Self::ThisToAcc(output) => instruction::this(output, vm)?,
             Self::ThisToStack(output) => instruction::this(output, vm)?,
+            Self::YieldVar(arg0) => instruction::yield_(arg0, vm)?,
+            Self::YieldReg(arg0) => instruction::yield_(arg0, vm)?,
+            Self::YieldAcc(arg0) => instruction::yield_(arg0, vm)?,
+            Self::YieldStack(arg0) => instruction::yield_(arg0, vm)?,
+            Self::YieldConst(arg0) => instruction::yield_(arg0, vm)?,
+            Self::AwaitVar(arg0) => instruction::await_(arg0, vm)?,
+            Self::AwaitReg(arg0) => instruction::await_(arg0, vm)?,
+            Self::AwaitAcc(arg0) => instruction::await_(arg0, vm)?,
+            Self::AwaitStack(arg0) => instruction::await_(arg0, vm)?,
+            Self::AwaitConst(arg0) => instruction::await_(arg0, vm)?,
         }
         Ok(())
     }

@@ -13020,4 +13020,24 @@ impl Instruction {
             OutputDataType::Var(output) => Self::ThisToVar(output),
         }
     }
+    #[must_use]
+    pub fn yield_(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::YieldAcc(arg0),
+            DataType::Const(arg0) => Self::YieldConst(arg0),
+            DataType::Reg(arg0) => Self::YieldReg(arg0),
+            DataType::Stack(arg0) => Self::YieldStack(arg0),
+            DataType::Var(arg0) => Self::YieldVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn await_(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::AwaitAcc(arg0),
+            DataType::Const(arg0) => Self::AwaitConst(arg0),
+            DataType::Reg(arg0) => Self::AwaitReg(arg0),
+            DataType::Stack(arg0) => Self::AwaitStack(arg0),
+            DataType::Var(arg0) => Self::AwaitVar(arg0),
+        }
+    }
 }
