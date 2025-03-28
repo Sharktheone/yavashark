@@ -125,3 +125,20 @@ pub fn this(output: impl OutputData, vm: &mut impl VM) -> Res {
 
     output.set(result, vm)
 }
+
+
+pub fn yield_(_data: impl Data, _vm: &impl VM) -> ControlResult {
+    // let result = data.get(vm)?;
+    // 
+    // Err(ControlFlow::Yield(result))
+    
+    unimplemented!()
+}
+
+
+pub fn await_(_data: impl Data, _vm: &impl VM) -> ControlResult {
+    // let result = data.get(vm)?;
+    // 
+    // Err(ControlFlow::Await(result))
+    unimplemented!()
+}
