@@ -96,3 +96,6 @@ ReturnValue(Data)
 
 Throw(Data)
 This => Data
+
+Yield(Data)
+Await(Data)
