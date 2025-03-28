@@ -1,5 +1,6 @@
 mod block;
 mod debugger;
+mod expr;
 
 use swc_ecma_ast::Stmt;
 use crate::{Compiler, Res};
