@@ -4905,6 +4905,7 @@ name = "yavashark_bytecode"
 version = "0.1.0"
 dependencies = [
  "bincode",
+ "num-bigint",
  "yavashark_env",
  "yavashark_macro",
  "yavashark_value",

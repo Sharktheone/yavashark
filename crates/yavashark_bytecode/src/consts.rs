@@ -1,9 +1,11 @@
+use num_bigint::BigInt;
 use crate::data::DataSection;
 use crate::function::BytecodeFunction;
 use crate::Instruction;
 use yavashark_env::realm::Realm;
 use yavashark_env::{Object, Value, ValueResult};
 use yavashark_env::array::Array;
+use yavashark_env::builtins::RegExp;
 use yavashark_value::{ConstString, IntoValue, Obj};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -16,6 +18,8 @@ pub enum ConstValue {
     Object(ObjectLiteralBlueprint),
     Array(ArrayLiteralBlueprint),
     Function(FunctionBlueprint),
+    BigInt(BigInt),
+    Regex(String, String),
     Symbol(ConstString),
 }
 
@@ -31,6 +35,8 @@ impl ConstValue {
             Self::Array(array) => array.into_value(realm)?,
             Self::Symbol(s) => Value::Symbol(s.into()),
             Self::Function(f) => BytecodeFunction::from_blueprint(f, realm).into(),
+            Self::BigInt(b) => Value::BigInt(b),
+            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(realm, &exp, &flags)?.into_value(),
         })
     }
 }
