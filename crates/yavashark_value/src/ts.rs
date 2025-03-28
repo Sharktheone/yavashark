@@ -11,7 +11,7 @@ impl<T: TSValue> Value<T> {
 
     pub fn type_of(&self) -> &'static str {
         match self {
-            Value::Null => "null",
+            Value::Null => "object",
             Value::Undefined => "undefined",
             Value::Some(value) => value.type_of(),
         }

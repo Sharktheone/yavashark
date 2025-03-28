@@ -202,7 +202,7 @@ impl<C: Realm> Value<C> {
     #[must_use]
     pub fn type_of(&self) -> &'static str {
         match self {
-            Self::Null => "null",
+            Self::Null => "object",
             Self::Undefined => "undefined",
             Self::Number(_) => "number",
             Self::String(_) => "string",
