@@ -4,18 +4,19 @@ use yavashark_bytecode::ConstValue;
 use yavashark_bytecode::data::OutputData;
 use yavashark_bytecode::instructions::Instruction;
 use crate::{Compiler, Res};
+use crate::compiler::statement::expr::MoveOptimization;
 
 impl Compiler {
-    pub fn compile_lit(&mut self, lit: &Lit, out: Option<impl OutputData>) -> Res {
+    pub fn compile_lit(&mut self, lit: &Lit, out: Option<impl OutputData>) -> Res<Option<MoveOptimization>> {
         if let Some(out) = out {
             let val = lit_to_const_value(lit)?;
             
             let c_idx = self.alloc_const(val);
             
-            self.instructions.push(Instruction::move_(c_idx, out));
+            Ok(Some(MoveOptimization::new(c_idx, vec![Instruction::move_(c_idx, out)])))
+        } else {
+            Ok(None)
         }
-        
-        Ok(())
     }
 }
 
