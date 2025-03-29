@@ -504,7 +504,7 @@ impl<C: Realm> ObjectProperty<C> {
     pub const fn getter(value: Value<C>) -> Self {
         Self {
             value: Value::Undefined,
-            attributes: Attributes::new(),
+            attributes: Attributes::config(),
             get: value,
             set: Value::Undefined,
         }
@@ -514,7 +514,7 @@ impl<C: Realm> ObjectProperty<C> {
     pub const fn setter(value: Value<C>) -> Self {
         Self {
             value: Value::Undefined,
-            attributes: Attributes::new(),
+            attributes: Attributes::config(),
             get: Value::Undefined,
             set: value,
         }
