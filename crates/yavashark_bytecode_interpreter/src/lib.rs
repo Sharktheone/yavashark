@@ -17,7 +17,7 @@ impl ByteCodeInterpreter {
         let code = ByteCodegen::compile(script)
             .map_err(|e| Error::new_error(format!("Failed to compile: {e:?}")))?;
 
-        let ds = DataSection::new(code.variables, code.literals);
+        let ds = DataSection::new(code.variables, Vec::new(), code.literals);
 
         let mut vm = BorrowedVM::with_scope(&code.instructions, &ds, realm, scope.clone());
 

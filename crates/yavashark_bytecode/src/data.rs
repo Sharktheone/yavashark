@@ -3,19 +3,18 @@ use crate::ConstValue;
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct DataSection {
     pub var_names: Vec<String>,
+    pub labels: Vec<String>,
     pub constants: Vec<ConstValue>,
 }
 
 impl DataSection {
     #[must_use]
-    pub const fn new(var_names: Vec<String>, constants: Vec<ConstValue>) -> Self {
-        Self {
-            var_names,
-            constants,
-        }
+    pub const fn new(var_names: Vec<String>, labels: Vec<String>, constants: Vec<ConstValue>) -> Self {
+        Self { var_names, labels, constants }
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DataType {
     Acc(Acc),
     Reg(Reg),
@@ -24,6 +23,7 @@ pub enum DataType {
     Stack(Stack),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OutputDataType {
     Acc(Acc),
     Reg(Reg),
@@ -69,6 +69,9 @@ pub struct VarName(pub u32);
 pub struct ConstIdx(pub u32);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Stack(pub u32);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Label(pub u32);
 
 impl Data for Acc {
     fn acc(self) -> Option<Acc> {
@@ -116,6 +119,48 @@ impl Data for Stack {
     }
 }
 
+impl Data for DataType {
+    
+    fn acc(self) -> Option<Acc> {
+        match self {
+            Self::Acc(acc) => Some(acc),
+            _ => None,
+        }
+    }
+    
+    fn reg(self) -> Option<Reg> {
+        match self {
+            Self::Reg(reg) => Some(reg),
+            _ => None,
+        }
+    }
+    
+    fn var_name(self) -> Option<VarName> {
+        match self {
+            Self::Var(var) => Some(var),
+            _ => None,
+        }
+    }
+    
+    fn const_idx(self) -> Option<ConstIdx> {
+        match self {
+            Self::Const(const_idx) => Some(const_idx),
+            _ => None,
+        }
+    }
+    
+    fn stack(self) -> Option<Stack> {
+        match self {
+            Self::Stack(stack) => Some(stack),
+            _ => None,
+        }
+    }
+    
+    fn data_type(self) -> DataType {
+        self
+    }
+}
+
 impl OutputData for Acc {
     fn data_type(self) -> OutputDataType {
         OutputDataType::Acc(self)
@@ -137,5 +182,11 @@ impl OutputData for VarName {
 impl OutputData for Stack {
     fn data_type(self) -> OutputDataType {
         OutputDataType::Stack(self)
+    }
+}
+
+impl OutputData for OutputDataType {
+    fn data_type(self) -> OutputDataType {
+        self
     }
 }

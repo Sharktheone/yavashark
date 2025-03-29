@@ -139,7 +139,7 @@ fn main() {
             }
 
             if bytecode {
-                let data = DataSection::new(bc.variables, bc.literals);
+                let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
                 let mut vm = OwnedVM::new(bc.instructions, data, path).unwrap();
 

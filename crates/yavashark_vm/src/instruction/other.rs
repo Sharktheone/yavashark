@@ -1,3 +1,4 @@
+use yavashark_bytecode::data::Label;
 use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
@@ -146,4 +147,14 @@ pub fn await_(_data: impl Data, _vm: &impl VM) -> ControlResult {
 pub fn debugger(_vm: &mut impl VM) -> Res {
     dbg!("Set debug point here!");
     Ok(())
+}
+
+pub fn break_(_vm: &mut impl VM) -> ControlResult {
+    Err(ControlFlow::Break(None))
+}
+
+pub fn break_label(label: Label, vm: &impl VM) -> ControlResult {
+    let label = vm.get_label(label)?;
+    
+    Err(ControlFlow::Break(Some(label.to_owned())))
 }

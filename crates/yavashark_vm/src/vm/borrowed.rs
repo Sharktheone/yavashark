@@ -129,8 +129,12 @@ impl VM for BorrowedVM<'_> {
         self.var_name(name)
     }
 
-    fn get_register(&self, reg: Reg) -> yavashark_env::Res<Value> {
+    fn get_register(&self, reg: Reg) -> Res<Value> {
         self.get_register(reg)
+    }
+    
+    fn get_label(&self, label: yavashark_bytecode::data::Label) -> Res<&str> {
+        self.get_label(label)
     }
 
     fn set_variable(&mut self, name: VarName, value: Value) -> Res {

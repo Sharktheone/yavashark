@@ -4,7 +4,7 @@
 #![allow(unknown_lints)]
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
-use crate::data::{Acc, ConstIdx, Reg, Stack, VarName};
+use crate::data::{Acc, ConstIdx, Reg, Stack, VarName, Label};
 use crate::{JmpOffset, JmpAddr}; 
 
 
@@ -3362,6 +3362,8 @@ pub enum Instruction {
     ReturnValueAcc(Acc),
     ReturnValueStack(Stack),
     ReturnValueConst(ConstIdx),
+    Break,
+    BreakLabel(Label),
     ThrowVar(VarName),
     ThrowReg(Reg),
     ThrowAcc(Acc),
@@ -3382,4 +3384,9 @@ pub enum Instruction {
     AwaitStack(Stack),
     AwaitConst(ConstIdx),
     Debugger,
+    WithVar(VarName),
+    WithReg(Reg),
+    WithAcc(Acc),
+    WithStack(Stack),
+    WithConst(ConstIdx),
 }

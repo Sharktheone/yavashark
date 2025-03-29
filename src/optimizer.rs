@@ -50,7 +50,7 @@ fn get_optimizer(realm: &Realm) -> ObjectHandle {
                     }
                 };
 
-                let data = DataSection::new(bc.variables, bc.literals);
+                let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
                 BytecodeFunction {
                     instructions: bc.instructions,

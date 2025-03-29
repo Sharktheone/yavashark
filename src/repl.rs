@@ -162,7 +162,7 @@ fn run_input(
         }
 
         if conf.bytecode {
-            let data = DataSection::new(bc.variables, bc.literals);
+            let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
             let mut vm = OwnedVM::with_realm_scope(
                 bc.instructions,

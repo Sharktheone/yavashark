@@ -4,7 +4,7 @@ use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::DataSection;
+use yavashark_bytecode::data::{DataSection, Label};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
@@ -147,6 +147,10 @@ impl VM for OwnedVM {
 
     fn get_register(&self, reg: Reg) -> yavashark_env::Res<Value> {
         self.get_register(reg)
+    }
+    
+    fn get_label(&self, label: Label) -> Res<&str> {
+        self.get_label(label)
     }
 
     fn set_variable(&mut self, name: VarName, value: Value) -> Res {

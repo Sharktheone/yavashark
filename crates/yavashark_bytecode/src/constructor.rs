@@ -6,7 +6,7 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 
-use crate::data::{Data, DataType, OutputData, OutputDataType};
+use crate::data::{Data, DataType, OutputData, OutputDataType, Label};
 use crate::{JmpOffset, JmpAddr}; 
 use crate::instructions::Instruction; 
 
@@ -13002,6 +13002,14 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn break_() -> Self {
+        Self::Break
+    }
+    #[must_use]
+    pub fn break_label(arg0: Label) -> Self {
+        Self::BreakLabel(arg0)
+    }
+    #[must_use]
     pub fn throw(arg0: impl Data) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => Self::ThrowAcc(arg0),
@@ -13043,5 +13051,15 @@ impl Instruction {
     #[must_use]
     pub fn debugger() -> Self {
         Self::Debugger
+    }
+    #[must_use]
+    pub fn with(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::WithAcc(arg0),
+            DataType::Const(arg0) => Self::WithConst(arg0),
+            DataType::Reg(arg0) => Self::WithReg(arg0),
+            DataType::Stack(arg0) => Self::WithStack(arg0),
+            DataType::Var(arg0) => Self::WithVar(arg0),
+        }
     }
 }

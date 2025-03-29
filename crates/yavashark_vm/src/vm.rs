@@ -5,14 +5,16 @@ pub use borrowed::*;
 pub use owned::*;
 
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
+use yavashark_bytecode::data::Label;
 use yavashark_env::{Res, Value};
 
 pub trait VM {
     fn acc(&self) -> Value;
     fn set_acc(&mut self, value: Value);
-    fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value>;
+    fn get_variable(&mut self, name: VarName) -> Res<Value>;
     fn var_name(&self, name: VarName) -> Option<&str>;
-    fn get_register(&self, reg: Reg) -> yavashark_env::Res<Value>;
+    fn get_register(&self, reg: Reg) -> Res<Value>;
+    fn get_label(&self, label: Label) -> Res<&str>;
     fn set_variable(&mut self, name: VarName, value: Value) -> Res;
     fn set_register(&mut self, reg: Reg, value: Value) -> Res;
     fn push(&mut self, value: Value);

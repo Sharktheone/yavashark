@@ -183,6 +183,7 @@ pub fn get_class(name: &str) -> String {
         "return" => "return_".to_owned(),
         "yield" => "yield_".to_owned(),
         "await" => "await_".to_owned(),
+        "break" => "break_".to_owned(),
         _ => case,
     }
 }

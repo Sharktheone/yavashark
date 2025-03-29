@@ -9752,6 +9752,8 @@ impl Execute for Instruction {
             Self::ReturnValueAcc(arg0) => instruction::return_value(arg0, vm)?,
             Self::ReturnValueStack(arg0) => instruction::return_value(arg0, vm)?,
             Self::ReturnValueConst(arg0) => instruction::return_value(arg0, vm)?,
+            Self::Break => instruction::break_(vm)?,
+            Self::BreakLabel(arg0) => instruction::break_label(arg0, vm)?,
             Self::ThrowVar(arg0) => instruction::throw(arg0, vm)?,
             Self::ThrowReg(arg0) => instruction::throw(arg0, vm)?,
             Self::ThrowAcc(arg0) => instruction::throw(arg0, vm)?,
@@ -9772,6 +9774,11 @@ impl Execute for Instruction {
             Self::AwaitStack(arg0) => instruction::await_(arg0, vm)?,
             Self::AwaitConst(arg0) => instruction::await_(arg0, vm)?,
             Self::Debugger => instruction::debugger(vm)?,
+            Self::WithVar(arg0) => instruction::with(arg0, vm)?,
+            Self::WithReg(arg0) => instruction::with(arg0, vm)?,
+            Self::WithAcc(arg0) => instruction::with(arg0, vm)?,
+            Self::WithStack(arg0) => instruction::with(arg0, vm)?,
+            Self::WithConst(arg0) => instruction::with(arg0, vm)?,
         }
         Ok(())
     }
