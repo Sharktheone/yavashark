@@ -11,7 +11,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 pub use symbol::*;
 pub use variable::*;
-use yavashark_garbage::{Collectable, GcRef};
+use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
 
 use crate::Error;
 
@@ -241,6 +241,13 @@ impl<C: Realm> Value<C> {
         };
 
         Ok(obj)
+    }
+
+    #[allow(clippy::needless_lifetimes)]
+    pub fn downcast<'a, T: 'static>(&'a self) -> Result<Option<OwningGcGuard<'a, BoxedObj<C>, T>>, Error<C>> {
+        let obj = self.as_object()?;
+        
+        Ok(obj.downcast())
     }
 
     pub fn to_object(self) -> Result<Object<C>, Error<C>> {

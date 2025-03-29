@@ -1,12 +1,16 @@
 mod block;
 mod debugger;
 mod expr;
+mod ret;
+mod break_;
+mod throw;
+mod labeled;
 
 use swc_ecma_ast::Stmt;
 use crate::{Compiler, Res};
 
 impl Compiler {
-    pub fn compile_statement(&mut self, stmt: &Stmt) -> Res {
+    pub fn compile_stmt(&mut self, stmt: &Stmt) -> Res {
         match stmt {
             Stmt::Block(block) => self.compile_block(block),
             Stmt::Empty(_) => Ok(()),
@@ -30,9 +34,9 @@ impl Compiler {
         }
     }
 
-    pub fn compile_statements(&mut self, script: &[Stmt]) -> Res {
+    pub fn compile_stmts(&mut self, script: &[Stmt]) -> Res {
         for stmt in script {
-            self.compile_statement(stmt)?;
+            self.compile_stmt(stmt)?;
         }
 
         Ok(())
