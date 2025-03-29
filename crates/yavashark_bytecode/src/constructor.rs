@@ -13010,6 +13010,14 @@ impl Instruction {
         Self::BreakLabel(arg0)
     }
     #[must_use]
+    pub fn continue_() -> Self {
+        Self::Continue
+    }
+    #[must_use]
+    pub fn continue_label(arg0: Label) -> Self {
+        Self::ContinueLabel(arg0)
+    }
+    #[must_use]
     pub fn throw(arg0: impl Data) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => Self::ThrowAcc(arg0),

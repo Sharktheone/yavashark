@@ -96,6 +96,8 @@ ReturnValue(Data)
 
 Break
 BreakLabel(Label)
+Continue
+ContinueLabel(Label)
 
 Throw(Data)
 This => Data

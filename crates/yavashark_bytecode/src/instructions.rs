@@ -3364,6 +3364,8 @@ pub enum Instruction {
     ReturnValueConst(ConstIdx),
     Break,
     BreakLabel(Label),
+    Continue,
+    ContinueLabel(Label),
     ThrowVar(VarName),
     ThrowReg(Reg),
     ThrowAcc(Acc),

@@ -184,6 +184,7 @@ pub fn get_class(name: &str) -> String {
         "yield" => "yield_".to_owned(),
         "await" => "await_".to_owned(),
         "break" => "break_".to_owned(),
+        "continue" => "continue_".to_owned(),
         _ => case,
     }
 }

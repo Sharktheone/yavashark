@@ -9754,6 +9754,8 @@ impl Execute for Instruction {
             Self::ReturnValueConst(arg0) => instruction::return_value(arg0, vm)?,
             Self::Break => instruction::break_(vm)?,
             Self::BreakLabel(arg0) => instruction::break_label(arg0, vm)?,
+            Self::Continue => instruction::continue_(vm)?,
+            Self::ContinueLabel(arg0) => instruction::continue_label(arg0, vm)?,
             Self::ThrowVar(arg0) => instruction::throw(arg0, vm)?,
             Self::ThrowReg(arg0) => instruction::throw(arg0, vm)?,
             Self::ThrowAcc(arg0) => instruction::throw(arg0, vm)?,
