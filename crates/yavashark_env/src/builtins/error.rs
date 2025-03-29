@@ -8,8 +8,6 @@ macro_rules! error {
             let proto = Object::with_proto(error);
 
             proto.define_property("name".into(), stringify!($name).into())?;
-            proto.define_property("message".into(), "".into())?;
-            proto.define_property("stack".into(), "".into())?;
 
             let constr = NativeConstructor::with_proto(
                 stringify!($name).into(),
