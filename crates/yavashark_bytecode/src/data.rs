@@ -115,3 +115,27 @@ impl Data for Stack {
         DataType::Stack(self)
     }
 }
+
+impl OutputData for Acc {
+    fn data_type(self) -> OutputDataType {
+        OutputDataType::Acc(self)
+    }
+}
+
+impl OutputData for Reg {
+    fn data_type(self) -> OutputDataType {
+        OutputDataType::Reg(self)
+    }
+}
+
+impl OutputData for VarName {
+    fn data_type(self) -> OutputDataType {
+        OutputDataType::Var(self)
+    }
+}
+
+impl OutputData for Stack {
+    fn data_type(self) -> OutputDataType {
+        OutputDataType::Stack(self)
+    }
+}
