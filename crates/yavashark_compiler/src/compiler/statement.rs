@@ -9,6 +9,14 @@ mod with;
 mod continue_;
 mod if_;
 mod test;
+mod switch;
+mod try_;
+mod while_;
+mod do_while;
+mod for_;
+mod for_in;
+mod for_of;
+mod decl;
 
 use swc_ecma_ast::Stmt;
 use crate::{Compiler, Res};

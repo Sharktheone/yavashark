@@ -5,6 +5,7 @@ use crate::Compiler;
 
 impl Compiler {
     pub fn test_lit(&mut self, l: &Lit) -> Test {
+        #[allow(clippy::match_same_arms)]
         match l {
             Lit::Str(str) => {
                 if str.is_empty() {
@@ -31,8 +32,8 @@ impl Compiler {
                 }
                 
             }
-            Lit::BigInt(bigInt) => {
-                if bigInt.value.is_zero() {
+            Lit::BigInt(big_int) => {
+                if big_int.value.is_zero() {
                     Test::Never
                 } else {
                     Test::Unconditional
