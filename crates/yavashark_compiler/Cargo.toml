@@ -9,6 +9,7 @@ swc_common = "8.0.0"
 swc_ecma_ast = "8.0.0"
 anyhow = "1.0.86"
 log = "0.4.22"
+num-traits = "0.2.19"
 
 [lints]
 workspace = true
