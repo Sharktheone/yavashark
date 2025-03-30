@@ -1,5 +1,5 @@
 use swc_ecma_ast::Ident;
-use yavashark_bytecode::data::OutputData;
+use yavashark_bytecode::data::{OutputData, VarName};
 use yavashark_bytecode::instructions::Instruction;
 use crate::Compiler;
 use crate::compiler::statement::expr::MoveOptimization;
@@ -14,5 +14,10 @@ impl Compiler {
         } else {
             None
         }
+    }
+    
+    pub fn get_ident(&mut self, ident: &Ident) -> VarName {
+        let name = ident.sym.as_str();
+        self.alloc_var(name)
     }
 }
