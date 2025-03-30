@@ -5,6 +5,10 @@ mod ret;
 mod break_;
 mod throw;
 mod labeled;
+mod with;
+mod continue_;
+mod if_;
+mod test;
 
 use swc_ecma_ast::Stmt;
 use crate::{Compiler, Res};
