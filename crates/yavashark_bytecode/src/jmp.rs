@@ -2,6 +2,7 @@ use crate::data::DataType;
 use crate::instructions::Instruction;
 use crate::{JmpAddr, JmpOffset};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum  Test {
     Unconditional,
     Never,
@@ -47,10 +48,10 @@ impl Test {
             Self::Gt(data1, data2) => Instruction::jmp_if_gt(data1, data2, addr),
             Self::GtEq(data1, data2) => Instruction::jmp_if_gt_eq(data1, data2, addr),
         })
-        
+
     }
-    
-    #[must_use] 
+
+    #[must_use]
     pub fn get_rel(self, addr: JmpOffset) -> Option<Instruction> {
         Some(match self {
             Self::Unconditional => Instruction::jmp_rel(addr),
