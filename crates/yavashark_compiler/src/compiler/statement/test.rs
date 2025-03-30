@@ -2,7 +2,7 @@ mod lit;
 
 use anyhow::anyhow;
 use swc_ecma_ast::Expr;
-use yavashark_bytecode::data::Acc;
+use yavashark_bytecode::data::{Acc, Data, DataType};
 use yavashark_bytecode::jmp::Test;
 use crate::{Compiler, Res};
 
@@ -11,11 +11,11 @@ impl Compiler {
         let out = Some(Acc);
 
         //TODO: implement side effects (e.g if Array has a function call)
-        Ok(match test {
-            Expr::This(_) => Test::Unconditional,
-            Expr::Array(_) => Test::Unconditional,
-            Expr::Object(o) => Test::Unconditional,
-            Expr::Fn(f) => Test::Unconditional,
+        match test {
+            Expr::This(_) => return Ok(Test::Unconditional),
+            Expr::Array(_) => return Ok(Test::Unconditional),
+            Expr::Object(o) => return Ok(Test::Unconditional),
+            Expr::Fn(f) => return Ok(Test::Unconditional),
             Expr::Unary(u) => self.compile_unary(u, out),
             Expr::Update(u) => self.compile_update(u, out),
             Expr::Bin(b) => self.compile_bin(b, out),
@@ -26,17 +26,20 @@ impl Compiler {
             Expr::Call(c) => self.compile_call(c, out),
             Expr::New(n) => self.compile_new(n, out),
             Expr::Seq(s) => self.compile_seq(s, out),
-            Expr::Ident(i) => return Ok(self.compile_ident(i, out)),
-            Expr::Lit(l) => return self.compile_lit(l, out),
+            Expr::Ident(i) => return Ok(Test::Cond(self.get_ident(i).data_type())),
+            Expr::Lit(l) => return Ok(self.test_lit(l)),
             Expr::Tpl(t) => self.compile_tpl(t, out),
             Expr::TaggedTpl(t) => self.compile_tagged_tpl(t, out),
-            Expr::Arrow(a) => Test::Unconditional,
-            Expr::Class(c) => Test::Unconditional,
+            Expr::Arrow(a) => return Ok(Test::Unconditional),
+            Expr::Class(c) => return Ok(Test::Unconditional),
             Expr::Yield(y) => self.compile_yield(y, out),
             Expr::MetaProp(m) => self.compile_meta_prop(m, out),
             Expr::Await(a) => self.compile_await(a, out),
             Expr::Paren(p) => self.compile_paren(p, out),
             _ => Err(anyhow!("Unsupported expression")),
-        })
+        }
+        
+        
+        Ok(Test::Cond(DataType::Acc(Acc)))
     }
 }
