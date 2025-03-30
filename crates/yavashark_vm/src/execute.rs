@@ -9781,6 +9781,8 @@ impl Execute for Instruction {
             Self::WithAcc(arg0) => instruction::with(arg0, vm)?,
             Self::WithStack(arg0) => instruction::with(arg0, vm)?,
             Self::WithConst(arg0) => instruction::with(arg0, vm)?,
+            Self::EnterTry(arg0) => instruction::enter_try(arg0, vm)?,
+            Self::LeaveTry => instruction::leave_try(vm)?,
         }
         Ok(())
     }

@@ -4,7 +4,7 @@
 #![allow(unknown_lints)]
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
-use crate::data::{Acc, ConstIdx, Reg, Stack, VarName, Label};
+use crate::data::{Acc, ConstIdx, Reg, Stack, VarName, Label, TryIdx};
 use crate::{JmpOffset, JmpAddr}; 
 
 
@@ -3391,4 +3391,6 @@ pub enum Instruction {
     WithAcc(Acc),
     WithStack(Stack),
     WithConst(ConstIdx),
+    EnterTry(TryIdx),
+    LeaveTry,
 }

@@ -6,7 +6,7 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 
-use crate::data::{Data, DataType, OutputData, OutputDataType, Label};
+use crate::data::{Data, DataType, OutputData, OutputDataType, Label, TryIdx};
 use crate::{JmpOffset, JmpAddr}; 
 use crate::instructions::Instruction; 
 
@@ -13069,5 +13069,13 @@ impl Instruction {
             DataType::Stack(arg0) => Self::WithStack(arg0),
             DataType::Var(arg0) => Self::WithVar(arg0),
         }
+    }
+    #[must_use]
+    pub fn enter_try(arg0: TryIdx) -> Self {
+        Self::EnterTry(arg0)
+    }
+    #[must_use]
+    pub fn leave_try() -> Self {
+        Self::LeaveTry
     }
 }
