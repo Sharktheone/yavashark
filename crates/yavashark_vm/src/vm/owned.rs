@@ -224,6 +224,14 @@ impl VM for OwnedVM {
     fn get_call_args(&mut self) -> Vec<Value> {
         mem::take(&mut self.call_args)
     }
+
+    fn get_scope(&self) -> &Scope {
+        &self.current_scope
+    }
+
+    fn get_scope_mut(&mut self) -> &mut Scope {
+        &mut self.current_scope
+    }
 }
 
 #[cfg(test)]

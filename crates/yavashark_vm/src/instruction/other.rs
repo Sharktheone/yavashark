@@ -158,3 +158,29 @@ pub fn break_label(label: Label, vm: &impl VM) -> ControlResult {
     
     Err(ControlFlow::Break(Some(label.to_owned())))
 }
+
+pub fn continue_(_vm: &mut impl VM) -> ControlResult {
+    Err(ControlFlow::Continue(None))
+}
+
+pub fn continue_label(label: Label, vm: &impl VM) -> ControlResult {
+    let label = vm.get_label(label)?;
+    
+    Err(ControlFlow::Continue(Some(label.to_owned())))
+}
+
+pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
+    let obj = data.get(vm)?;
+    
+    let scope = vm.get_scope_mut();
+
+    for (key, value) in obj.properties()? {
+        let Value::String(key) = key else {
+            continue;
+        };
+
+        scope.declare_var(key, value)?;
+    }
+
+    Ok(())
+}
