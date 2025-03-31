@@ -78,8 +78,10 @@ impl ArrayBuffer {
 #[properties_new(constructor(ArrayBufferConstructor::new))]
 impl ArrayBuffer {
     fn resize(&self, len: usize) {
-        self.inner.borrow_mut().byte_length = len.into();
-        self.inner.borrow_mut().buffer.resize(len, 0);
+        let mut inner = self.inner.borrow_mut();
+        
+        inner.byte_length = len.into();
+        inner.buffer.resize(len, 0);
     }
 
     fn slice(
