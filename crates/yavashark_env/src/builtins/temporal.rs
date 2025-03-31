@@ -67,6 +67,7 @@ pub fn get_temporal(
         Object::raw_with_proto(obj_proto.clone().into()),
         func_proto.clone().into(),
     )?;
+
     obj.define_variable("PlainDate".into(), constr(&plain_date))?;
 
     let plain_time = PlainTime::initialize_proto(

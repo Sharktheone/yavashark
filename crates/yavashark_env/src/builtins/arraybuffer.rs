@@ -14,7 +14,7 @@ pub mod uint8clampedarray;
 pub mod unit8array;
 
 use crate::array::convert_index;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Obj};
@@ -112,8 +112,9 @@ pub struct ArrayBufferConstructor {}
 
 #[properties_new(raw)]
 impl ArrayBufferConstructor {
-    pub const fn is_view(&self, _: &Value) -> bool {
-        false //TODO
+    #[prop("isView")]
+    pub fn is_view(&self, view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
+        view.instance_of(&realm.intrinsics.typed_array_constructor().value, realm)
     }
 }
 
