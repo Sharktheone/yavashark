@@ -223,6 +223,12 @@ impl<C: Realm> IntoValue<C> for Object<C> {
     }
 }
 
+impl<C: Realm> IntoValue<C> for BigInt {
+    fn into_value(self) -> Value<C> {
+        Value::BigInt(self)
+    }
+}
+
 impl<C: Realm> IntoValue<C> for Symbol {
     fn into_value(self) -> Value<C> {
         Value::Symbol(self)

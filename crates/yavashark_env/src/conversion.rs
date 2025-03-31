@@ -89,12 +89,7 @@ impl FromValueOutput for () {
 impl FromValueOutput for bool {
     type Output = Self;
     fn from_value_out(value: Value) -> Res<Self::Output> {
-        match value {
-            Value::Boolean(b) => Ok(b),
-            _ => Err(Error::ty_error(format!(
-                "Expected boolean, found {value:?}"
-            ))),
-        }
+        Ok(value.is_truthy())
     }
 }
 
@@ -149,6 +144,8 @@ macro_rules! impl_from_value_output {
                     match value {
                         Value::Number(n) => Ok(n as $t),
                         Value::String(ref s) => s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}"))),
+                        Value::Undefined => Ok(0 as $t),
+                        Value::Null => Ok(0 as $t),
                         _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
                     }
                 }

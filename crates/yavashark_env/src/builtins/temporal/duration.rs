@@ -1,6 +1,7 @@
 use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
+use chrono::TimeDelta;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 
@@ -30,6 +31,10 @@ impl Duration {
             negative: Cell::new(negative),
         }
     }
+    
+    pub fn from_duration(delta: TimeDelta, realm: &Realm) -> Res<Self> {
+        Ok(Self::with_sign(realm, delta.to_std()?, false))
+    }
 
     fn from_secs(realm: &Realm, secs: i64) -> Self {
         Self::with_sign(
@@ -39,7 +44,7 @@ impl Duration {
         )
     }
 
-    fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<Self>> {
+    pub fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<Self>> {
         if let Ok(this) = <&Self>::from_value_out(info.copy()) {
             return Ok(RefOrOwned::Ref(this));
         }
@@ -54,24 +59,24 @@ impl Duration {
 
             let years = extract()?;
             let months = extract()?;
+            let weeks = extract()?;
             let days = extract()?;
             let hours = extract()?;
             let minutes = extract()?;
             let seconds = extract()?;
             let milliseconds = extract()?;
             let microseconds = extract()?;
-            let nanoseconds = extract()?;
 
             return Ok(RefOrOwned::Owned(Self::constructor(
                 years,
                 months,
+                weeks,
                 days,
                 hours,
                 minutes,
                 seconds,
                 milliseconds,
                 microseconds,
-                nanoseconds,
                 realm,
             )?));
         }
@@ -89,16 +94,16 @@ impl Duration {
     }
 
     #[allow(clippy::too_many_arguments)]
-    fn constructor(
+    pub fn constructor(
         years: Option<i64>,
         months: Option<i64>,
+        weeks: Option<i64>,
         days: Option<i64>,
         hours: Option<i64>,
         minutes: Option<i64>,
         seconds: Option<i64>,
         milliseconds: Option<i64>,
         microseconds: Option<i64>,
-        nanoseconds: Option<i64>,
         realm: &Realm,
     ) -> Res<Self> {
         let mut dur = std::time::Duration::ZERO;
@@ -125,6 +130,10 @@ impl Duration {
             dur += std::time::Duration::from_secs(check_sign(months)? * 30 * 24 * 60 * 60);
         }
 
+        if let Some(weeks) = weeks {
+            dur += std::time::Duration::from_secs(check_sign(weeks)? * 7 * 24 * 60 * 60);
+        }
+
         if let Some(days) = days {
             dur += std::time::Duration::from_secs(check_sign(days)? * 24 * 60 * 60);
         }
@@ -149,11 +158,15 @@ impl Duration {
             dur += std::time::Duration::from_micros(check_sign(microseconds)?);
         }
 
-        if let Some(nanoseconds) = nanoseconds {
-            dur += std::time::Duration::from_nanos(check_sign(nanoseconds)?);
-        }
-
         Ok(Self::with_sign(realm, dur, negative))
+    }
+
+    pub fn to_duration(&self) -> std::time::Duration {
+        self.dur.get()
+    }
+
+    pub fn is_negative(&self) -> bool {
+        self.negative.get()
     }
 }
 
@@ -161,28 +174,28 @@ impl Duration {
 impl Duration {
     #[constructor]
     #[allow(clippy::too_many_arguments)]
-    fn construct(
+    pub fn construct(
         years: Option<i64>,
         months: Option<i64>,
+        weeks: Option<i64>,
         days: Option<i64>,
         hours: Option<i64>,
         minutes: Option<i64>,
         seconds: Option<i64>,
         milliseconds: Option<i64>,
         microseconds: Option<i64>,
-        nanoseconds: Option<i64>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
         Ok(Self::constructor(
             years,
             months,
+            weeks,
             days,
             hours,
             minutes,
             seconds,
             milliseconds,
             microseconds,
-            nanoseconds,
             realm,
         )?
         .into_object())
@@ -193,10 +206,29 @@ impl Duration {
     }
 
     fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
-        let left = Self::from_value_ref(left, realm)?.dur.get();
-        let right = Self::from_value_ref(right, realm)?.dur.get();
+        let left = Self::from_value_ref(left, realm)?;
+        let right = Self::from_value_ref(right, realm)?;
 
-        Ok(left.cmp(&right) as i8)
+        if left.negative.get() && !right.negative.get() {
+            return Ok(-1);
+        }
+
+        if !left.negative.get() && right.negative.get() {
+            return Ok(1);
+        }
+
+        let neg = left.negative.get();
+
+        let left = left.dur.get();
+        let right = right.dur.get();
+
+
+
+        let cmp = left.cmp(&right) as i8;
+
+
+
+        Ok(if neg { -cmp } else { cmp })
     }
 
     fn abs(&self) {
@@ -336,42 +368,42 @@ impl Duration {
 
     #[get("days")]
     fn days(&self) -> i64 {
-        self.dur.get().as_secs() as i64 / (24 * 60 * 60)
+        self.dur.get().as_secs() as i64 / (24 * 60 * 60) % 365 % 30 % 7
     }
 
     #[get("hours")]
     fn hours(&self) -> i64 {
-        self.dur.get().as_secs() as i64 / (60 * 60)
+        self.dur.get().as_secs() as i64 / (60 * 60) % 24
     }
 
     #[get("microseconds")]
     fn microseconds(&self) -> i64 {
-        self.dur.get().as_micros() as i64
+        self.dur.get().as_micros() as i64 % 1000
     }
 
     #[get("milliseconds")]
     fn milliseconds(&self) -> i64 {
-        self.dur.get().as_millis() as i64
+        self.dur.get().as_millis() as i64 % 1000
     }
 
     #[get("minutes")]
     fn minutes(&self) -> i64 {
-        self.dur.get().as_secs() as i64 / 60
+        self.dur.get().as_secs() as i64 / 60 % 60
     }
 
     #[get("months")]
     fn months(&self) -> i64 {
-        self.dur.get().as_secs() as i64 / (30 * 24 * 60 * 60)
+        self.dur.get().as_secs() as i64 / (30 * 24 * 60 * 60) % 12
     }
 
     #[get("nanoseconds")]
     fn nanoseconds(&self) -> i64 {
-        self.dur.get().as_nanos() as i64
+        self.dur.get().as_nanos() as i64 % 1000
     }
 
     #[get("seconds")]
     fn seconds(&self) -> i64 {
-        self.dur.get().as_secs() as i64
+        self.dur.get().as_secs() as i64 % 60
     }
 
     #[get("sign")]
@@ -385,7 +417,7 @@ impl Duration {
 
     #[get("weeks")]
     fn weeks(&self) -> i64 {
-        self.dur.get().as_secs() as i64 / (7 * 24 * 60 * 60)
+        self.dur.get().as_secs() as i64 / (7 * 24 * 60 * 60) % 7
     }
 
     #[get("years")]

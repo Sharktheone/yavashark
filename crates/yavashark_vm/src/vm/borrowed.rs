@@ -208,4 +208,12 @@ impl VM for BorrowedVM<'_> {
     fn get_call_args(&mut self) -> Vec<Value> {
         std::mem::take(&mut self.call_args)
     }
+
+    fn get_scope(&self) -> &Scope {
+        &self.current_scope
+    }
+    
+    fn get_scope_mut(&mut self) -> &mut Scope {
+        &mut self.current_scope
+    }
 }

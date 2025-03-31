@@ -6,6 +6,7 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use half::f16;
 use num_traits::FromPrimitive;
 use std::cell::{Cell, RefCell};
+use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
 use yavashark_value::{BoxedObj, Obj};
@@ -25,12 +26,54 @@ pub enum Type {
     F64,
 }
 
-#[object(direct(buffer, byte_offset, byte_length))]
+impl Type {
+    pub fn size(&self) -> usize {
+        match self {
+            Type::U8 | Type::I8 => 1,
+            Type::U16 | Type::I16 | Type::F16 => 2,
+            Type::U32 | Type::I32 | Type::F32 => 4,
+            Type::U64 | Type::I64 | Type::F64 => 8,
+        }
+    }
+}
+
+#[repr(Rust, packed)]
+struct Packed<T>(T);
+
+impl<T> From<T> for Packed<T> {
+    fn from(value: T) -> Self {
+        Self(value)
+    }
+}
+
+// impl<T> Into<T> for Packed<T> {
+//     fn into(self) -> T {
+//         self.0
+//     }
+// }
+
+unsafe impl<T: Zeroable> Zeroable for Packed<T> {}
+
+impl<T: Copy> Copy for Packed<T> {}
+
+impl<T: Clone + Copy> Clone for Packed<T> {
+    fn clone(&self) -> Self { *self }
+}
+
+unsafe impl<T: AnyBitPattern> AnyBitPattern for Packed<T> {}
+
+unsafe impl<T: NoUninit> NoUninit for Packed<T> {}
+
+
+
+#[object(direct(byte_offset, byte_length))]
 #[derive(Debug)]
 pub struct TypedArray {
     #[allow(unused)]
     byte_offset: usize,
     byte_length: usize,
+    #[gc]
+    buffer: Value,
     ty: Type,
 }
 
@@ -83,10 +126,10 @@ impl TypedArray {
         Ok(Self {
             inner: RefCell::new(MutableTypedArray {
                 object: MutObject::with_proto(realm.intrinsics.typed_array.clone().into()),
-                buffer: buffer.into(),
                 byte_offset: byte_offset.into(),
                 byte_length: byte_length.into(),
             }),
+            buffer,
             byte_offset,
             byte_length,
             ty,
@@ -94,20 +137,21 @@ impl TypedArray {
     }
 
     pub fn get_buffer(&self) -> Res<OwningGcGuard<BoxedObj<Realm>, ArrayBuffer>> {
-        let inner = self.inner.borrow();
-
-        let buf = inner.buffer.value.clone();
+        let buf = self.buffer.clone();
 
         <&ArrayBuffer>::from_value_out(buf)
     }
 
     pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> Res<&'a [u8]> {
         let start = self.byte_offset;
-        let end = start + self.byte_length;
+        let mut end = start + self.byte_length;
+        end -= end % self.ty.size();
 
         if end > slice.len() {
             return Err(Error::range("TypedArray is out of bounds"));
         }
+
+
 
         slice
             .get(start..end)
@@ -116,7 +160,8 @@ impl TypedArray {
 
     pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> Res<&'a mut [u8]> {
         let start = self.byte_offset;
-        let end = start + self.byte_length;
+        let mut end = start + self.byte_length;
+        end -= end % self.ty.size();
 
         if end > slice.len() {
             return Err(Error::range("TypedArray is out of bounds"));
@@ -129,7 +174,7 @@ impl TypedArray {
 
     pub fn to_value_vec(&self) -> Res<Vec<Value>> {
         Ok(typed_array_run!({
-            slice.iter().map(|x| (*x).into()).collect()
+            slice.iter().map(|x| x.0.into()).collect()
         }))
     }
 }
@@ -190,9 +235,14 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
 
+    #[get("buffer")]
+    pub fn buffer(&self) -> Value {
+        self.buffer.clone()
+    }
+
     pub fn at(&self, idx: usize) -> Res<Value> {
         Ok(typed_array_run!({
-            slice.get(idx).map_or(Value::Undefined, |x| Value::from(*x))
+            slice.get(idx).map_or(Value::Undefined, |x| Value::from(x.0))
         }))
     }
 
@@ -228,9 +278,16 @@ impl TypedArray {
         #[realm] realm: &mut Realm,
         callback: &ObjectHandle,
     ) -> Res<bool> {
+        if !callback.is_function() {
+            return Err(Error::ty("Callback is not a function"));
+        }
+
         typed_array_run!({
-            for (idx, x) in slice.iter().enumerate() {
-                let args = vec![(*x).into(), idx.into(), array.copy()];
+            let owned = slice.to_vec();
+            drop(slice0);
+            drop(buf);
+            for (idx, x) in owned.into_iter().enumerate() {
+                let args = vec![x.0.into(), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, Value::Undefined)?;
 
@@ -264,7 +321,7 @@ impl TypedArray {
                 .get_mut(start..end)
                 .ok_or(Error::range("TypedArray is out of bounds"))?
             {
-                *val = value;
+                val.0 = value;
             }
         });
 
@@ -272,4 +329,6 @@ impl TypedArray {
     }
 }
 
-// pub trait FromF64
+fn bytemuck_err(err: bytemuck::PodCastError) -> Error {
+    Error::new_error(err.to_string())
+}

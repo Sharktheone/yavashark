@@ -7,6 +7,7 @@ pub use owned::*;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_bytecode::data::Label;
 use yavashark_env::{Res, Value};
+use yavashark_env::scope::Scope;
 
 pub trait VM {
     fn acc(&self) -> Value;
@@ -42,4 +43,8 @@ pub trait VM {
     fn push_call_arg(&mut self, arg: Value);
 
     fn get_call_args(&mut self) -> Vec<Value>;
+    
+    fn get_scope(&self) -> &Scope;
+    
+    fn get_scope_mut(&mut self) -> &mut Scope;
 }
