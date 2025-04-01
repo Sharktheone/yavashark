@@ -278,6 +278,22 @@ pub struct OwningGcGuard<'a, T: Collectable, V = T> {
     gc: Gc<T>,
 }
 
+impl<T: Collectable, V> Clone for OwningGcGuard<'_, T, V> {
+    fn clone(&self) -> Self {
+        Self {
+            value_ptr: self.value_ptr,
+            gc: self.gc.clone(),
+        }
+    }
+}
+
+
+impl<T: Collectable, V: Debug> Debug for OwningGcGuard<'_, T, V> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.value_ptr.fmt(f)
+    }
+}
+
 /// Here the magic of gc references happens!
 impl<T: Collectable, V> Drop for GcGuard<'_, T, V> {
     fn drop(&mut self) {
