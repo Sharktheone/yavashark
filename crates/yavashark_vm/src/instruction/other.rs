@@ -1,4 +1,4 @@
-use yavashark_bytecode::data::Label;
+use yavashark_bytecode::data::{ConstIdx, Label, TryIdx};
 use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
@@ -182,5 +182,17 @@ pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
         scope.declare_var(key, value)?;
     }
 
+    Ok(())
+}
+
+pub fn enter_try(id: TryIdx, vm: &mut impl VM) -> Res {
+    // vm.enter_try();
+    
+    Ok(())
+}
+
+pub fn leave_try(vm: &mut impl VM) -> Res {
+    // vm.leave_try();
+    
     Ok(())
 }
