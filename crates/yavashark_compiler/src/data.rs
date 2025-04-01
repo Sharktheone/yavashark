@@ -1,6 +1,6 @@
 use std::borrow::Cow;
 use yavashark_bytecode::ConstValue;
-use yavashark_bytecode::data::{ConstIdx, Label, VarName};
+use yavashark_bytecode::data::{ConstIdx, DataType, Label, Reg, VarName, Stack, OutputDataType};
 use crate::Compiler;
 
 impl Compiler {
@@ -59,4 +59,53 @@ impl Compiler {
     pub fn get_label(&self, label: &str) -> Option<Label> {
         self.labeled.iter().position(|x| x == label).map(|x| Label(x as u32))
     }
+    
+    pub fn alloc_reg(&mut self) -> Option<Reg> {
+        self.used_registers.iter_mut().position(|x| {
+            if *x {
+                false
+            } else {
+                *x = true;
+                true
+            }
+        }).map(|x| {
+            Reg(x as u8)
+        })
+        
+    }
+    
+    pub fn dealloc_reg(&mut self, reg: Reg) {
+        if let Some(reg) = self.used_registers.get_mut(reg.0 as usize) {
+            *reg = false;
+        }
+    }
+    
+    pub fn alloc_stack(&mut self) -> Stack {
+        let stack = Stack(self.stack_ptr);
+        self.stack_ptr += 1;
+        stack
+    }
+    
+    pub fn delloc_stack(&mut self, stack: Stack) {
+        if stack.0 == self.stack_ptr - 1 {
+            self.stack_ptr -= 1;
+            return
+        }
+        
+        self.stack_to_deallloc.push(stack);
+    }
+    
+    pub fn alloc_reg_or_stack(&mut self) -> OutputDataType {
+        self.alloc_reg().map(OutputDataType::Reg).unwrap_or_else(|| OutputDataType::Stack(self.alloc_stack()))
+    }
+    
+    pub fn dealloc(&mut self, data: impl Into<DataType>) {
+        match data.into() {
+            DataType::Reg(reg) => self.dealloc_reg(reg),
+            DataType::Stack(stack) => self.delloc_stack(stack),
+            _ => {}
+        }
+    }
+    
+    
 }

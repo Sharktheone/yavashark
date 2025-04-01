@@ -31,6 +31,63 @@ pub enum OutputDataType {
     Stack(Stack),
 }
 
+impl From<OutputDataType> for DataType {
+    fn from(val: OutputDataType) -> DataType {
+        match val {
+            OutputDataType::Acc(acc) => DataType::Acc(acc),
+            OutputDataType::Reg(reg) => DataType::Reg(reg),
+            OutputDataType::Var(var) => DataType::Var(var),
+            OutputDataType::Stack(stack) => DataType::Stack(stack),
+        }
+    }
+}
+
+impl From<Acc> for DataType {
+    fn from(val: Acc) -> DataType {
+        DataType::Acc(val)
+    }
+}
+
+impl From<Reg> for DataType {
+    fn from(val: Reg) -> DataType {
+        DataType::Reg(val)
+    }
+}
+
+impl From<VarName> for DataType {
+    fn from(val: VarName) -> DataType {
+        DataType::Var(val)
+    }
+}
+
+impl From<ConstIdx> for DataType {
+    fn from(val: ConstIdx) -> DataType {
+        DataType::Const(val)
+    }
+}
+
+impl From<Stack> for DataType {
+    fn from(val: Stack) -> DataType {
+        DataType::Stack(val)
+    }
+}
+
+impl TryFrom<DataType> for OutputDataType {
+    type Error = ();
+
+    fn try_from(value: DataType) -> Result<Self, Self::Error> {
+        match value {
+            DataType::Acc(acc) => Ok(OutputDataType::Acc(acc)),
+            DataType::Reg(reg) => Ok(OutputDataType::Reg(reg)),
+            DataType::Var(var) => Ok(OutputDataType::Var(var)),
+            DataType::Stack(stack) => Ok(OutputDataType::Stack(stack)),
+            DataType::Const(_) => Err(()),
+        }
+    }
+}
+
+
+
 pub trait Data: Copy {
     fn acc(self) -> Option<Acc> {
         None
