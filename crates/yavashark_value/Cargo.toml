@@ -13,15 +13,13 @@ num-traits = "0.2.19"
 half = "2.5.0"
 
 
-
-
 [features]
 default = []
 js = []
 ts = []
+obj_trace = ["yavashark_garbage/trace", "yavashark_garbage/easy_debug"]
 anyhow = ["dep:anyhow"]
 dbg_object_gc = []
-obj_trace = ["yavashark_garbage/trace", "yavashark_garbage/easy_debug"]
 obj_dbg = ["yavashark_garbage/easy_debug"]
 display_object = []
 

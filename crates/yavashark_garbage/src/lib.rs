@@ -19,7 +19,7 @@ pub(crate) mod spin_lock;
 
 pub mod collectable;
 pub(crate) mod tagged_ptr;
-#[cfg(any(feature = "easy_debug", feature = "trace"))]
+#[cfg(all(any(feature = "easy_debug", feature = "trace"), not(target_arch = "wasm32")))]
 mod trace;
 #[cfg(feature = "trace")]
 mod trace_gui;
