@@ -13,11 +13,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{
-    get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal,
-    get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj,
-    Reflect, RegExp, StringObj, SymbolObj, JSON,
-};
+use crate::builtins::{get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal, get_type_error, get_uri_error, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Reflect, RegExp, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
 
@@ -72,6 +68,7 @@ pub struct Intrinsics {
     pub(crate) temporal_plain_month_day: ObjectHandle,
     pub(crate) temporal_plain_year_month: ObjectHandle,
     pub(crate) temporal_zoned_date_time: ObjectHandle,
+    pub(crate) promise: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -134,6 +131,7 @@ impl Intrinsics {
     constructor!(map);
     constructor!(set);
     constructor!(date);
+    constructor!(promise);
 
     obj!(json);
     obj!(math);
@@ -344,6 +342,11 @@ impl Intrinsics {
 
         let (temporal, temporal_protos) =
             get_temporal(obj_prototype.clone(), func_prototype.clone())?;
+        
+        let promise = Promise::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
 
         Ok(Self {
             obj: obj_prototype,
@@ -395,6 +398,7 @@ impl Intrinsics {
             temporal_plain_month_day: temporal_protos.plain_month_day,
             temporal_plain_year_month: temporal_protos.plain_year_month,
             temporal_zoned_date_time: temporal_protos.zoned_date_time,
+            promise,
         })
     }
 }

@@ -14,6 +14,7 @@ mod set;
 mod string;
 mod symbol;
 mod temporal;
+mod promise;
 
 pub use arraybuffer::*;
 pub use bigint::*;
@@ -31,3 +32,4 @@ pub use set::*;
 pub use string::*;
 pub use symbol::*;
 pub use temporal::*;
+pub use promise::*;
