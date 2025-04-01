@@ -1,7 +1,7 @@
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use chrono::{DateTime, Utc};
 use num_bigint::BigInt;
-use num_traits::{ToPrimitive, Zero};
+use num_traits::ToPrimitive;
 use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;

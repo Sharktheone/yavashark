@@ -42,9 +42,7 @@ impl Constructor<Realm> for NativeConstructor {
 impl Func<Realm> for NativeConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
         if self.special {
-            (self.f)(args, realm)?;
-
-            Ok(Value::Undefined)
+            (self.f)(args, realm)
         } else {
             Err(Error::ty_error(format!(
                 "Constructor {} requires 'new'",
