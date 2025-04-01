@@ -1,8 +1,11 @@
-mod borrowed;
+mod old;
 mod owned;
+mod borrowed;
 
-pub use borrowed::*;
+pub use old::borrowed::*;
+pub use old::owned::*;
 pub use owned::*;
+pub use borrowed::*;
 
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_bytecode::data::Label;

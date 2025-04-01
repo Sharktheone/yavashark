@@ -1,14 +1,14 @@
-use crate::execute::Execute;
-use crate::{Registers, Stack, VM};
-use std::mem;
-use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, Label};
-use yavashark_bytecode::instructions::Instruction;
-use yavashark_bytecode::{ConstIdx, Reg, VarName};
-use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, Res, Value};
+mod storage;
 
-pub struct BorrowedVM<'a> {
+use crate::execute_old::Execute;
+use crate::{Registers, Stack, VM};
+use std::path::PathBuf;
+use yavashark_bytecode::data::DataSection;
+use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
+use yavashark_env::scope::Scope;
+use yavashark_env::{Error, Realm, Res, Value, ValueResult};
+
+pub struct OldBorrowedVM<'a> {
     regs: Registers,
     stack: Stack,
     call_args: Vec<Value>,
@@ -24,7 +24,7 @@ pub struct BorrowedVM<'a> {
     realm: &'a mut Realm,
 }
 
-impl<'a> BorrowedVM<'a> {
+impl<'a> OldBorrowedVM<'a> {
     pub fn new(
         code: &'a [Instruction],
         data: &'a DataSection,
@@ -63,129 +63,17 @@ impl<'a> BorrowedVM<'a> {
             realm,
         }
     }
-
-    pub fn run(&mut self) -> Res {
-        while self.pc < self.code.len() {
-            let instr = self.code[self.pc];
-            self.pc += 1;
-
-            instr.execute(self)?;
-        }
-
-        Ok(())
-    }
-}
-
-impl<'a> VM for BorrowedVM<'a> {
-    fn acc(&self) -> Value {
-        self.acc.clone()
+    pub fn get_realm(&mut self) -> &mut Realm {
+        self.realm
     }
 
-    fn set_acc(&mut self, value: Value) {
-        self.acc = value;
-    }
-
-    fn get_variable(&mut self, name: VarName) -> Res<Value> {
-        let Some(name) = self.data.var_names.get(name as usize) else {
-            return Err(Error::reference("Invalid variable name"));
-        };
-
-        self.current_scope
-            .resolve(name)?
-            .ok_or(Error::reference("Variable not found"))
-    }
-
-    #[must_use]
-    fn var_name(&self, name: VarName) -> Option<&str> {
-        self.data.var_names.get(name as usize).map(String::as_str)
-    }
-
-    fn get_register(&self, reg: Reg) -> Res<Value> {
-        self.regs
-            .get(reg)
-            .ok_or(Error::reference("Invalid register"))
-    }
-
-    fn get_label(&self, label: Label) -> Res<&str> {
-        self.data
-            .labels
-            .get(label.0 as usize)
-            .map(String::as_str)
-            .ok_or(Error::reference("Invalid label"))
-    }
-
-    fn set_variable(&mut self, name: VarName, value: Value) -> Res {
-        let name = self
-            .var_name(name)
-            .ok_or(Error::reference("Invalid variable name"))?;
-        self.current_scope.declare_var(name.into(), value)
-    }
-
-    fn set_register(&mut self, reg: Reg, value: Value) -> Res {
-        self.regs.set(reg, value)
-    }
-
-    fn push(&mut self, value: Value) {
-        self.stack.push(value);
-    }
-
-    fn pop(&mut self) -> Option<Value> {
-        self.stack.pop()
-    }
-
-    fn set_accb(&mut self, value: bool) {
-        self.acc = Value::Boolean(value);
-    }
-
-    fn get_this(&self) -> Res<Value> {
-        self.current_scope.this()
-    }
-
-    fn get_constant(&self, const_idx: ConstIdx) -> Res<Value> {
-        let val = self
-            .data
-            .constants
-            .get(const_idx as usize)
-            .ok_or(Error::reference("Invalid constant index"))?;
-
-        val.clone().into_value(&self.realm)
-    }
-
-    #[must_use]
-    fn get_stack(&self, idx: u32) -> Option<Value> {
-        self.stack.get(idx as usize).cloned()
-    }
-
-    fn set_stack(&mut self, idx: u32, value: Value) -> Res {
-        self.stack.set(idx as usize, value);
-
-        Ok(())
-    }
-
-    fn get_args(&mut self, num: u16) -> Vec<Value> {
-        self.stack.pop_n(num as usize)
-    }
-
-    fn get_realm(&mut self) -> &mut Realm {
-        &mut self.realm
-    }
-
-    fn set_pc(&mut self, pc: usize) {
-        self.pc = pc;
-    }
-
-    fn offset_pc(&mut self, offset: isize) {
-        // pc won't be above isize::MAX, since this is `Vec`'s length limit
-        self.pc = (self.pc as isize + offset) as usize;
-    }
-
-    fn push_scope(&mut self) -> Res {
+    pub fn push_scope(&mut self) -> Res {
         self.current_scope = self.current_scope.child()?;
 
         Ok(())
     }
 
-    fn pop_scope(&mut self) -> Res {
+    pub fn pop_scope(&mut self) -> Res {
         let scope = self.current_scope.parent()?;
 
         if let Some(p) = scope {
@@ -197,6 +85,118 @@ impl<'a> VM for BorrowedVM<'a> {
         Ok(())
     }
 
+    pub fn set_pc(&mut self, pc: usize) {
+        self.pc = pc;
+    }
+
+    pub fn offset_pc(&mut self, offset: isize) {
+        // pc won't be above isize::MAX, since this is `Vec`'s length limit
+        self.pc = (self.pc as isize + offset) as usize;
+    }
+
+    pub fn run(&mut self) -> Res {
+        while self.pc < self.code.len() {
+            let instr = self.code[self.pc];
+            self.pc += 1;
+
+            instr.execute(self)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn run_ret(&mut self) -> ValueResult {
+        self.run()?;
+
+        Ok(self.acc())
+    }
+}
+
+impl VM for OldBorrowedVM<'_> {
+    fn acc(&self) -> Value {
+        self.acc()
+    }
+
+    fn set_acc(&mut self, value: Value) {
+        self.set_acc(value);
+    }
+
+    fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
+        self.get_variable(name)
+    }
+
+    fn var_name(&self, name: VarName) -> Option<&str> {
+        self.var_name(name)
+    }
+
+    fn get_register(&self, reg: Reg) -> Res<Value> {
+        self.get_register(reg)
+    }
+    
+    fn get_label(&self, label: yavashark_bytecode::data::Label) -> Res<&str> {
+        self.get_label(label)
+    }
+
+    fn set_variable(&mut self, name: VarName, value: Value) -> Res {
+        self.set_variable(name, value)
+    }
+
+    fn set_register(&mut self, reg: Reg, value: Value) -> Res {
+        self.set_register(reg, value)
+    }
+
+    fn push(&mut self, value: Value) {
+        self.push(value);
+    }
+
+    fn pop(&mut self) -> Option<Value> {
+        self.pop()
+    }
+
+    fn set_accb(&mut self, value: bool) {
+        self.set_accb(value);
+    }
+
+    fn get_this(&self) -> yavashark_env::Res<Value> {
+        self.get_this()
+    }
+
+    fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
+        self.get_constant(const_idx)
+    }
+
+    fn get_stack(&self, idx: u32) -> Option<Value> {
+        self.get_stack(idx)
+    }
+
+    fn set_stack(&mut self, idx: u32, value: Value) -> Res {
+        self.set_stack(idx, value)
+    }
+
+    fn get_args(&mut self, num: u16) -> Vec<Value> {
+        self.get_args(num)
+    }
+
+    fn get_realm(&mut self) -> &mut yavashark_env::Realm {
+        self.get_realm()
+    }
+
+    fn set_pc(&mut self, pc: usize) {
+        self.set_pc(pc);
+    }
+
+    fn offset_pc(&mut self, offset: isize) {
+        self.offset_pc(offset);
+    }
+
+    fn push_scope(&mut self) -> Res {
+        self.push_scope()
+    }
+
+    fn pop_scope(&mut self) -> Res {
+        self.pop_scope()
+    }
+
     fn push_call_args(&mut self, args: Vec<Value>) {
         self.call_args.extend(args);
     }
@@ -206,13 +206,13 @@ impl<'a> VM for BorrowedVM<'a> {
     }
 
     fn get_call_args(&mut self) -> Vec<Value> {
-        mem::take(&mut self.call_args)
+        std::mem::take(&mut self.call_args)
     }
 
     fn get_scope(&self) -> &Scope {
         &self.current_scope
     }
-
+    
     fn get_scope_mut(&mut self) -> &mut Scope {
         &mut self.current_scope
     }

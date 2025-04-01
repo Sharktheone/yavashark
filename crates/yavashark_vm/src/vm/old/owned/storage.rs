@@ -1,11 +1,11 @@
-use crate::vm::owned::OwnedVM;
+use crate::vm::old::owned::OldOwnedVM;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_bytecode::data::Label;
 use yavashark_env::value::Error;
 use yavashark_env::{Res, Value};
 
 #[allow(unused)]
-impl OwnedVM {
+impl OldOwnedVM {
     pub fn get_variable(&mut self, name: VarName) -> Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
