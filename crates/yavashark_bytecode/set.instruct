@@ -114,3 +114,19 @@ With(Data)
 
 EnterTry(TryIdx)
 LeaveTry
+
+AddAssign(Data) => Data
+SubAssign(Data) => Data
+MulAssign(Data) => Data
+DivAssign(Data) => Data
+RemAssign(Data) => Data
+LShiftAssign(Data) => Data
+RShiftAssign(Data) => Data
+ZeroFillRShiftAssign(Data) => Data
+BAndAssign(Data) => Data
+BOrAssign(Data) => Data
+BXorAssign(Data) => Data
+ExpAssign(Data) => Data
+AndAssign(Data) => Data
+OrAssign(Data) => Data
+NullishAssign(Data) => Data
