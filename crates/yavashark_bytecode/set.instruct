@@ -38,7 +38,9 @@ PushScope
 PopScope
 
 Call(Data) => Data
+CallNoOutput(Data) 
 CallMember(Data, Data) => Data
+CallMemberNoOutput(Data, Data) 
 
 PushCall(Data)
 SpreadCall(Data)
@@ -101,6 +103,7 @@ ContinueLabel(Label)
 
 Throw(Data)
 This => Data
+LoadSuper => Data 
 
 Yield(Data)
 Await(Data)
