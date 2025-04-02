@@ -249,3 +249,42 @@ impl OutputData for OutputDataType {
         self
     }
 }
+
+impl Data for OutputDataType {
+    
+    fn acc(self) -> Option<Acc> {
+        match self {
+            Self::Acc(acc) => Some(acc),
+            _ => None,
+        }
+    }
+    
+    fn reg(self) -> Option<Reg> {
+        match self {
+            Self::Reg(reg) => Some(reg),
+            _ => None,
+        }
+    }
+    
+    fn var_name(self) -> Option<VarName> {
+        match self {
+            Self::Var(var) => Some(var),
+            _ => None,
+        }
+    }
+    
+    fn const_idx(self) -> Option<ConstIdx> {
+        None
+    }
+    
+    fn stack(self) -> Option<Stack> {
+        match self {
+            Self::Stack(stack) => Some(stack),
+            _ => None,
+        }
+    }
+    
+    fn data_type(self) -> DataType {
+        self.into()
+    }
+}
