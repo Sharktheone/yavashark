@@ -14,10 +14,10 @@ impl Compiler {
         //TODO: implement side effects (e.g if Array has a function call)
         #[allow(clippy::match_same_arms)]
         match test {
-            Expr::This(_) => return Ok(Test::Unconditional),
-            Expr::Array(_) => return Ok(Test::Unconditional),
-            Expr::Object(_) => return Ok(Test::Unconditional),
-            Expr::Fn(_) => return Ok(Test::Unconditional),
+            Expr::This(_) => return Ok(Test::Never),
+            Expr::Array(_) => return Ok(Test::Never),
+            Expr::Object(_) => return Ok(Test::Never),
+            Expr::Fn(_) => return Ok(Test::Never),
             Expr::Unary(u) => self.compile_unary(u, out)?,
             Expr::Update(u) => self.compile_update(u, out)?,
             Expr::Bin(b) => self.compile_bin(b, out)?,
@@ -28,12 +28,12 @@ impl Compiler {
             Expr::Call(c) => self.compile_call(c, out)?,
             Expr::New(n) => self.compile_new(n, out)?,
             Expr::Seq(s) => self.compile_seq(s, out)?,
-            Expr::Ident(i) => return Ok(Test::Cond(self.get_ident(i).data_type())),
+            Expr::Ident(i) => return Ok(Test::Not(self.get_ident(i).data_type())),
             Expr::Lit(l) => return Ok(self.test_lit(l)),
             Expr::Tpl(t) => self.compile_tpl(t, out)?,
             Expr::TaggedTpl(t) => self.compile_tagged_tpl(t, out)?,
-            Expr::Arrow(_) => return Ok(Test::Unconditional),
-            Expr::Class(_) => return Ok(Test::Unconditional),
+            Expr::Arrow(_) => return Ok(Test::Never),
+            Expr::Class(_) => return Ok(Test::Never),
             Expr::Yield(y) => self.compile_yield(y, out)?,
             Expr::MetaProp(m) => self.compile_meta_prop(m, out)?,
             Expr::Await(a) => self.compile_await(a, out)?,
@@ -42,6 +42,6 @@ impl Compiler {
         }
 
 
-        Ok(Test::Cond(DataType::Acc(Acc)))
+        Ok(Test::Not(DataType::Acc(Acc)))
     }
 }

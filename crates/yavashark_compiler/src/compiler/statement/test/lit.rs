@@ -9,39 +9,39 @@ impl Compiler {
         match l {
             Lit::Str(str) => {
                 if str.is_empty() {
-                    Test::Never
+                    Test::Always
                 } else {
-                    Test::Unconditional
+                    Test::Never
                 }
                 
             }
             Lit::Bool(bool) => {
                 if bool.value {
-                    Test::Unconditional
-                } else {
                     Test::Never
+                } else {
+                    Test::Always
                 }
                 
             }
-            Lit::Null(_) => Test::Never,
+            Lit::Null(_) => Test::Always,
             Lit::Num(number) => {
                 if number.value == 0.0 {
-                    Test::Never
+                    Test::Always
                 } else {
-                    Test::Unconditional
+                    Test::Never
                 }
                 
             }
             Lit::BigInt(big_int) => {
                 if big_int.value.is_zero() {
-                    Test::Never
+                    Test::Always
                 } else {
-                    Test::Unconditional
+                    Test::Never
                 }
                 
             }
-            Lit::Regex(_) => Test::Unconditional,
-            _ => Test::Unconditional,
+            Lit::Regex(_) => Test::Never,
+            _ => Test::Never,
         }
     }
 }

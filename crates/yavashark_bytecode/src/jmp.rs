@@ -4,7 +4,7 @@ use crate::{JmpAddr, JmpOffset};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum  Test {
-    Unconditional,
+    Always,
     Never,
     Cond(DataType),
     Not(DataType),
@@ -29,7 +29,7 @@ impl Test {
     #[must_use]
     pub fn get(self, addr: JmpAddr) -> Option<Instruction> {
         Some(match self {
-            Self::Unconditional => Instruction::jmp(addr),
+            Self::Always => Instruction::jmp(addr),
             Self::Never => return None,
             Self::Cond(data) => Instruction::jmp_if(data, addr),
             Self::Not(data) => Instruction::jmp_if_not(data, addr),
@@ -54,7 +54,7 @@ impl Test {
     #[must_use]
     pub fn get_rel(self, addr: JmpOffset) -> Option<Instruction> {
         Some(match self {
-            Self::Unconditional => Instruction::jmp_rel(addr),
+            Self::Always => Instruction::jmp_rel(addr),
             Self::Never => return None,
             Self::Cond(data) => Instruction::jmp_if_rel(data, addr),
             Self::Not(data) => Instruction::jmp_if_not_rel(data, addr),
