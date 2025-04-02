@@ -57,6 +57,15 @@ impl Compiler {
         self.compile_expr_no_out(&expr.expr)
     }
     
+    pub fn compile_expr_stmt_last(&mut self, expr: &ExprStmt) -> Res {
+        if let Some(optim) = self.compile_expr(&expr.expr, Some(Acc))? {
+            optim.reject(self);
+        }
+        
+        
+        Ok(())
+    }
+    
     pub fn compile_expr(&mut self, expr: &Expr, out: Option<impl OutputData>) -> Res<Option<MoveOptimization>> {
         match expr {
             Expr::This(this) => self.compile_this(this, out),
