@@ -1,4 +1,8 @@
-use swc_ecma_ast::{AssignTarget, AssignTargetPat, BlockStmt, Class, ClassDecl, ClassMember, DebuggerStmt, Decl, Expr, ExprStmt, ForHead, MemberProp, OptChainBase, Pat, Prop, PropName, PropOrSpread, SimpleAssignTarget, Stmt, SuperProp, UsingDecl, VarDeclOrExpr, WithStmt};
+use swc_ecma_ast::{
+    AssignTarget, AssignTargetPat, BlockStmt, Class, ClassDecl, ClassMember, DebuggerStmt, Decl,
+    Expr, ExprStmt, ForHead, MemberProp, OptChainBase, Pat, Prop, PropName, PropOrSpread,
+    SimpleAssignTarget, Stmt, SuperProp, UsingDecl, VarDeclOrExpr, WithStmt,
+};
 
 pub trait ASTNode {
     fn has_call(&self) -> bool;
@@ -270,7 +274,10 @@ impl ASTNode for PropName {
 impl ASTNode for Expr {
     fn has_call(&self) -> bool {
         match self {
-            Self::Array(a) => a.elems.iter().any(|i| i.as_ref().is_some_and(|expr| expr.expr.has_call())),
+            Self::Array(a) => a
+                .elems
+                .iter()
+                .any(|i| i.as_ref().is_some_and(|expr| expr.expr.has_call())),
             Self::Object(o) => o.props.iter().any(ASTNode::has_call),
             Self::Unary(u) => u.arg.has_call(),
             Self::Update(u) => u.arg.has_call(),
@@ -287,12 +294,11 @@ impl ASTNode for Expr {
             Self::Await(a) => a.arg.has_call(),
             Self::Paren(p) => p.expr.has_call(),
             Self::OptChain(o) => o.base.has_call(),
-            
+
             _ => false,
         }
     }
 }
-
 
 impl ASTNode for PropOrSpread {
     fn has_call(&self) -> bool {
@@ -309,7 +315,7 @@ impl ASTNode for Prop {
             Self::Shorthand(_) => false,
             Self::KeyValue(kv) => kv.key.has_call() || kv.value.has_call(),
             Self::Assign(a) => a.value.has_call(),
-            Self::Getter(g) => g.key.has_call(), 
+            Self::Getter(g) => g.key.has_call(),
             Self::Setter(s) => s.key.has_call(),
             Self::Method(m) => m.key.has_call(),
         }
@@ -332,7 +338,7 @@ impl ASTNode for SimpleAssignTarget {
             Self::SuperProp(s) => s.prop.has_call(),
             Self::Paren(p) => p.expr.has_call(),
             Self::OptChain(o) => o.base.has_call(),
-            _ => false
+            _ => false,
         }
     }
 }
@@ -349,7 +355,7 @@ impl ASTNode for AssignTargetPat {
 
 impl ASTNode for SuperProp {
     fn has_call(&self) -> bool {
-        match self { 
+        match self {
             Self::Ident(_) => false,
             Self::Computed(c) => c.expr.has_call(),
         }

@@ -1,8 +1,8 @@
-use yavashark_bytecode::data::{Label, TryIdx};
 use crate::data::{Data, OutputData};
 use crate::VM;
-use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
+use yavashark_bytecode::data::{Label, TryIdx};
 use yavashark_env::builtins::Promise;
+use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 
 pub fn nullish_coalescing(
     left: impl Data,
@@ -128,40 +128,37 @@ pub fn this(output: impl OutputData, vm: &mut impl VM) -> Res {
     output.set(result, vm)
 }
 
-
 pub fn yield_(_data: impl Data, _vm: &impl VM) -> ControlResult {
     // let result = data.get(vm)?;
-    // 
+    //
     // Err(ControlFlow::Yield(result))
-    
+
     unimplemented!()
 }
 
 pub fn await_(data: impl Data, out: impl OutputData, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
-    
+
     match result {
         Value::Object(obj) if obj.downcast::<Promise>().is_some() => {
             return Err(ControlFlow::Await(obj))
         }
-        
+
         _ => out.set(result, vm)?,
     }
-    
+
     Ok(())
 }
 
-
 pub fn await_no_output(data: impl Data, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
-    
+
     if let Value::Object(obj) = result {
         if obj.downcast::<Promise>().is_some() {
             return Err(ControlFlow::Await(obj));
-
         }
     }
-    
+
     Ok(())
 }
 
@@ -176,7 +173,7 @@ pub fn break_(_vm: &mut impl VM) -> ControlResult {
 
 pub fn break_label(label: Label, vm: &impl VM) -> ControlResult {
     let label = vm.get_label(label)?;
-    
+
     Err(ControlFlow::Break(Some(label.to_owned())))
 }
 
@@ -186,13 +183,13 @@ pub fn continue_(_vm: &mut impl VM) -> ControlResult {
 
 pub fn continue_label(label: Label, vm: &impl VM) -> ControlResult {
     let label = vm.get_label(label)?;
-    
+
     Err(ControlFlow::Continue(Some(label.to_owned())))
 }
 
 pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
     let obj = data.get(vm)?;
-    
+
     let scope = vm.get_scope_mut();
 
     for (key, value) in obj.properties()? {
@@ -230,12 +227,12 @@ pub fn load_super_constructor(output: impl OutputData, vm: &mut impl VM) -> Res 
 
 pub fn enter_try(id: TryIdx, vm: &mut impl VM) -> Res {
     // vm.enter_try();
-    
+
     Ok(())
 }
 
 pub fn leave_try(vm: &mut impl VM) -> Res {
     // vm.leave_try();
-    
+
     Ok(())
 }

@@ -1,7 +1,7 @@
 use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
-use std::cell::{Cell, RefCell};
 use chrono::TimeDelta;
+use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 
@@ -31,7 +31,7 @@ impl Duration {
             negative: Cell::new(negative),
         }
     }
-    
+
     pub fn from_duration(delta: TimeDelta, realm: &Realm) -> Res<Self> {
         Ok(Self::with_sign(realm, delta.to_std()?, false))
     }
@@ -222,11 +222,7 @@ impl Duration {
         let left = left.dur.get();
         let right = right.dur.get();
 
-
-
         let cmp = left.cmp(&right) as i8;
-
-
 
         Ok(if neg { -cmp } else { cmp })
     }

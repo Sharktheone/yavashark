@@ -1,6 +1,6 @@
 use crate::vm::old::owned::OldOwnedVM;
-use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_bytecode::data::Label;
+use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
 use yavashark_env::{Res, Value};
 
@@ -18,10 +18,7 @@ impl OldOwnedVM {
 
     #[must_use]
     pub fn var_name(&self, name: VarName) -> Option<&str> {
-        self.data
-            .var_names
-            .get(name as usize)
-            .map(String::as_str)
+        self.data.var_names.get(name as usize).map(String::as_str)
     }
 
     pub fn get_register(&self, reg: Reg) -> Res<Value> {
@@ -29,7 +26,7 @@ impl OldOwnedVM {
             .get(reg)
             .ok_or(Error::reference("Invalid register"))
     }
-    
+
     pub fn get_label(&self, label: Label) -> Res<&str> {
         self.data
             .labels

@@ -148,7 +148,7 @@ impl VM for OldOwnedVM {
     fn get_register(&self, reg: Reg) -> yavashark_env::Res<Value> {
         self.get_register(reg)
     }
-    
+
     fn get_label(&self, label: Label) -> Res<&str> {
         self.get_label(label)
     }

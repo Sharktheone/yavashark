@@ -3,7 +3,7 @@ use crate::instructions::Instruction;
 use crate::{JmpAddr, JmpOffset};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum  Test {
+pub enum Test {
     Always,
     Never,
     Cond(DataType),
@@ -23,7 +23,6 @@ pub enum  Test {
     Gt(DataType, DataType),
     GtEq(DataType, DataType),
 }
-
 
 impl Test {
     #[must_use]
@@ -48,7 +47,6 @@ impl Test {
             Self::Gt(data1, data2) => Instruction::jmp_if_gt(data1, data2, addr),
             Self::GtEq(data1, data2) => Instruction::jmp_if_gt_eq(data1, data2, addr),
         })
-
     }
 
     #[must_use]
@@ -67,7 +65,9 @@ impl Test {
             Self::Eq(data1, data2) => Instruction::jmp_if_eq_rel(data1, data2, addr),
             Self::NotEq(data1, data2) => Instruction::jmp_if_ne_rel(data1, data2, addr),
             Self::StrictEq(data1, data2) => Instruction::jmp_if_strict_eq_rel(data1, data2, addr),
-            Self::StrictNotEq(data1, data2) => Instruction::jmp_if_strict_ne_rel(data1, data2, addr),
+            Self::StrictNotEq(data1, data2) => {
+                Instruction::jmp_if_strict_ne_rel(data1, data2, addr)
+            }
             Self::Lt(data1, data2) => Instruction::jmp_if_lt_rel(data1, data2, addr),
             Self::LtEq(data1, data2) => Instruction::jmp_if_lt_eq_rel(data1, data2, addr),
             Self::Gt(data1, data2) => Instruction::jmp_if_gt_rel(data1, data2, addr),

@@ -21,10 +21,10 @@ mod global;
 mod native_object;
 pub mod optimizer;
 pub mod realm;
+pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-pub mod task_queue;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;

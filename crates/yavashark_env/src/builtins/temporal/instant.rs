@@ -1,3 +1,5 @@
+use crate::builtins::temporal::duration::Duration;
+use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use chrono::{DateTime, Utc};
 use num_bigint::BigInt;
@@ -5,8 +7,6 @@ use num_traits::ToPrimitive;
 use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
-use crate::builtins::temporal::duration::Duration;
-use crate::conversion::FromValueOutput;
 
 #[object]
 #[derive(Debug)]
@@ -38,12 +38,17 @@ impl Instant {
 
     pub fn from(value: Value, realm: &Realm) -> Res<Self> {
         if let Value::String(str) = &value {
-            return DateTime::parse_from_rfc3339(str).map(|dt| Self { //TODO: this needs to be RFC 9557
-                inner: RefCell::new(MutableInstant {
-                    object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone().into()),
-                }),
-                stamp: Cell::new(dt.into())
-            }).map_err(|_| Error::ty("Invalid date"));
+            return DateTime::parse_from_rfc3339(str)
+                .map(|dt| Self {
+                    //TODO: this needs to be RFC 9557
+                    inner: RefCell::new(MutableInstant {
+                        object: MutObject::with_proto(
+                            realm.intrinsics.temporal_instant.clone().into(),
+                        ),
+                    }),
+                    stamp: Cell::new(dt.into()),
+                })
+                .map_err(|_| Error::ty("Invalid date"));
         }
 
         let instant = <&Self>::from_value_out(value)?;
@@ -70,12 +75,18 @@ impl Instant {
     #[prop("from")]
     fn from_js(info: Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         if let Value::String(str) = &info {
-            return Ok(DateTime::parse_from_rfc3339(str).map(|dt| Self { //TODO: this needs to be RFC 9557
-                inner: RefCell::new(MutableInstant {
-                    object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone().into()),
-                }),
-                stamp: Cell::new(dt.into())
-            }).map_err(|_| Error::ty("Invalid date"))?.into_object());
+            return Ok(DateTime::parse_from_rfc3339(str)
+                .map(|dt| Self {
+                    //TODO: this needs to be RFC 9557
+                    inner: RefCell::new(MutableInstant {
+                        object: MutObject::with_proto(
+                            realm.intrinsics.temporal_instant.clone().into(),
+                        ),
+                    }),
+                    stamp: Cell::new(dt.into()),
+                })
+                .map_err(|_| Error::ty("Invalid date"))?
+                .into_object());
         }
 
         let instant = <&Self>::from_value_out(info)?;
@@ -104,19 +115,18 @@ impl Instant {
 
         let dt = if other.is_negative() {
             self.stamp.get() - other.to_duration()
-        } else  {
+        } else {
             self.stamp.get() + other.to_duration()
         };
 
         Ok(Self::from_stamp(dt, realm).into_object())
     }
 
-
     fn equals(&self, other: &Self) -> bool {
         self.stamp == other.stamp
     }
 
-    fn round(&self, _opts: Value, #[realm] realm: &Realm) -> Res<ObjectHandle>{
+    fn round(&self, _opts: Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         Ok(Self::from_stamp(self.stamp.get(), realm).into_object())
     }
 
@@ -131,7 +141,7 @@ impl Instant {
 
         let dt = if other.is_negative() {
             self.stamp.get() + other.to_duration()
-        } else  {
+        } else {
             self.stamp.get() - other.to_duration()
         };
 

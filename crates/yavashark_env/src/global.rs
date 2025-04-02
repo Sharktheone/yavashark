@@ -218,7 +218,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         "Temporal".into(),
         Variable::write_config(realm.intrinsics.temporal_obj().value),
     )?;
-    
+
     obj.define_variable(
         "Promise".into(),
         Variable::write_config(realm.intrinsics.promise_constructor().value),

@@ -1,8 +1,7 @@
+use crate::{Compiler, Res};
+use yavashark_bytecode::JmpAddr;
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::jmp::Test;
-use yavashark_bytecode::JmpAddr;
-use crate::{Compiler, Res};
-
 
 impl Compiler {
     pub fn compile_if(&mut self, i: &swc_ecma_ast::IfStmt) -> Res {
@@ -20,7 +19,6 @@ impl Compiler {
 
             self.compile_stmt(&i.cons)?;
 
-
             if let Some(alt) = &i.alt {
                 if let Some(inst) = cond.get(self.instructions.len() + 1 as JmpAddr) {
                     self.instructions[jmp] = inst;
@@ -37,9 +35,7 @@ impl Compiler {
                 self.instructions[jmp] = inst;
             }
         }
-        
-        
+
         Ok(())
     }
-    
 }

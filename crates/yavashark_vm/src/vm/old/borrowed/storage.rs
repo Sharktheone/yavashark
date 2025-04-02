@@ -1,6 +1,6 @@
 use crate::vm::old::borrowed::OldBorrowedVM;
-use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_bytecode::data::Label;
+use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
 use yavashark_env::{Res, Value};
 
@@ -29,7 +29,7 @@ impl OldBorrowedVM<'_> {
             .get(reg)
             .ok_or(Error::reference("Invalid register"))
     }
-    
+
     pub fn get_label(&self, label: Label) -> Res<&str> {
         self.data
             .labels
@@ -37,7 +37,6 @@ impl OldBorrowedVM<'_> {
             .map(std::string::String::as_str)
             .ok_or(Error::reference("Invalid label"))
     }
-
 
     pub fn set_variable(&mut self, name: VarName, value: Value) -> Res {
         let name = self

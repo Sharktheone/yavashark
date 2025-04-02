@@ -9,8 +9,16 @@ pub struct DataSection {
 
 impl DataSection {
     #[must_use]
-    pub const fn new(var_names: Vec<String>, labels: Vec<String>, constants: Vec<ConstValue>) -> Self {
-        Self { var_names, labels, constants }
+    pub const fn new(
+        var_names: Vec<String>,
+        labels: Vec<String>,
+        constants: Vec<ConstValue>,
+    ) -> Self {
+        Self {
+            var_names,
+            labels,
+            constants,
+        }
     }
 }
 
@@ -85,8 +93,6 @@ impl TryFrom<DataType> for OutputDataType {
         }
     }
 }
-
-
 
 pub trait Data: Copy {
     fn acc(self) -> Option<Acc> {
@@ -179,42 +185,41 @@ impl Data for Stack {
 }
 
 impl Data for DataType {
-    
     fn acc(self) -> Option<Acc> {
         match self {
             Self::Acc(acc) => Some(acc),
             _ => None,
         }
     }
-    
+
     fn reg(self) -> Option<Reg> {
         match self {
             Self::Reg(reg) => Some(reg),
             _ => None,
         }
     }
-    
+
     fn var_name(self) -> Option<VarName> {
         match self {
             Self::Var(var) => Some(var),
             _ => None,
         }
     }
-    
+
     fn const_idx(self) -> Option<ConstIdx> {
         match self {
             Self::Const(const_idx) => Some(const_idx),
             _ => None,
         }
     }
-    
+
     fn stack(self) -> Option<Stack> {
         match self {
             Self::Stack(stack) => Some(stack),
             _ => None,
         }
     }
-    
+
     fn data_type(self) -> DataType {
         self
     }
@@ -251,39 +256,38 @@ impl OutputData for OutputDataType {
 }
 
 impl Data for OutputDataType {
-    
     fn acc(self) -> Option<Acc> {
         match self {
             Self::Acc(acc) => Some(acc),
             _ => None,
         }
     }
-    
+
     fn reg(self) -> Option<Reg> {
         match self {
             Self::Reg(reg) => Some(reg),
             _ => None,
         }
     }
-    
+
     fn var_name(self) -> Option<VarName> {
         match self {
             Self::Var(var) => Some(var),
             _ => None,
         }
     }
-    
+
     fn const_idx(self) -> Option<ConstIdx> {
         None
     }
-    
+
     fn stack(self) -> Option<Stack> {
         match self {
             Self::Stack(stack) => Some(stack),
             _ => None,
         }
     }
-    
+
     fn data_type(self) -> DataType {
         self.into()
     }

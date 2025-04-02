@@ -1,3 +1,4 @@
+use crate::task::BytecodeAsyncTask;
 use crate::{BorrowedVM, OldBorrowedVM, VM};
 use std::any::Any;
 use std::rc::Rc;
@@ -6,7 +7,6 @@ use yavashark_bytecode::{instructions, Instruction};
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult, Value};
-use crate::task::BytecodeAsyncTask;
 
 #[derive(Debug)]
 pub struct OldBytecodeFunction {
@@ -32,7 +32,6 @@ impl FunctionCode for OldBytecodeFunction {
     }
 }
 
-
 #[derive(Debug)]
 pub struct BytecodeFunctionCode {
     pub instructions: Vec<instructions::Instruction>,
@@ -49,11 +48,10 @@ pub struct BytecodeFunction {
 impl FunctionCode for BytecodeFunction {
     fn call(&self, realm: &mut Realm, scope: &mut Scope, this: Value) -> RuntimeResult {
         let scope = Scope::with_parent_this(scope, this)?;
-        
+
         if self.is_async {
             return Ok(BytecodeAsyncTask::new(Rc::clone(&self.code), realm, scope)?.into());
         }
-        
 
         let mut vm = BorrowedVM::with_scope(&self.code.instructions, &self.code.ds, realm, scope);
 

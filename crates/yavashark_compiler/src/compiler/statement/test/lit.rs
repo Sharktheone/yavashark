@@ -1,7 +1,7 @@
+use crate::Compiler;
 use num_traits::Zero;
 use swc_ecma_ast::Lit;
 use yavashark_bytecode::jmp::Test;
-use crate::Compiler;
 
 impl Compiler {
     pub fn test_lit(&mut self, l: &Lit) -> Test {
@@ -13,7 +13,6 @@ impl Compiler {
                 } else {
                     Test::Never
                 }
-                
             }
             Lit::Bool(bool) => {
                 if bool.value {
@@ -21,7 +20,6 @@ impl Compiler {
                 } else {
                     Test::Always
                 }
-                
             }
             Lit::Null(_) => Test::Always,
             Lit::Num(number) => {
@@ -30,7 +28,6 @@ impl Compiler {
                 } else {
                     Test::Never
                 }
-                
             }
             Lit::BigInt(big_int) => {
                 if big_int.value.is_zero() {
@@ -38,7 +35,6 @@ impl Compiler {
                 } else {
                     Test::Never
                 }
-                
             }
             Lit::Regex(_) => Test::Never,
             _ => Test::Never,

@@ -138,23 +138,22 @@ fn main() {
             };
             println!("Interpreter: {result:?}");
         }
-        
+
         if bytecode {
             let bc = Compiler::compile(&script.body).unwrap();
-            
+
             if instructions {
                 println!("{bc:#?}");
             }
-            
+
             if bytecode {
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
-                
+
                 vm.run().unwrap();
-                
+
                 println!("Bytecode: {:?}", vm.acc());
             }
-            
         }
 
         if old_bytecode || instructions {

@@ -1,5 +1,5 @@
-use swc_common::Spanned;
 use crate::Interpreter;
+use swc_common::Spanned;
 use swc_ecma_ast::AwaitExpr;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult};

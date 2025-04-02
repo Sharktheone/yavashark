@@ -79,7 +79,7 @@ impl ArrayBuffer {
 impl ArrayBuffer {
     fn resize(&self, len: usize) {
         let mut inner = self.inner.borrow_mut();
-        
+
         inner.byte_length = len.into();
         inner.buffer.resize(len, 0);
     }

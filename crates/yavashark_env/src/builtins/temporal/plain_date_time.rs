@@ -1,9 +1,9 @@
-use std::cell::{Cell, RefCell};
+use crate::builtins::temporal::duration::Duration;
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
+use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use crate::builtins::temporal::duration::Duration;
 
 #[object]
 #[derive(Debug)]
@@ -15,7 +15,19 @@ pub struct PlainDateTime {
 impl PlainDateTime {
     #[constructor]
     #[allow(clippy::too_many_arguments)]
-    pub fn construct(year: i32, month: u32, day: u32, hour: Option<u32>, minute: Option<u32>, second: Option<u32>, millisecond: Option<u32>, microsecond: Option<u32>, nanosecond: Option<u32>, _calendar: Option<String>, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn construct(
+        year: i32,
+        month: u32,
+        day: u32,
+        hour: Option<u32>,
+        minute: Option<u32>,
+        second: Option<u32>,
+        millisecond: Option<u32>,
+        microsecond: Option<u32>,
+        nanosecond: Option<u32>,
+        _calendar: Option<String>,
+        #[realm] realm: &Realm,
+    ) -> Res<ObjectHandle> {
         let hour = hour.unwrap_or(0);
         let minute = minute.unwrap_or(0);
         let second = second.unwrap_or(0);
@@ -23,56 +35,95 @@ impl PlainDateTime {
         let microsecond = microsecond.unwrap_or(0);
         let nanosecond = nanosecond.unwrap_or(0);
 
-
-
         let date = NaiveDateTime::new(
             NaiveDate::from_ymd_opt(year, month, day).ok_or(Error::range("Invalid date"))?,
-            NaiveTime::from_hms_micro_opt(hour, minute, second, millisecond * 1000 + microsecond).ok_or(Error::range("Invalid time"))?
-                .with_nanosecond(nanosecond).ok_or(Error::range("Invalid time"))?,
+            NaiveTime::from_hms_micro_opt(hour, minute, second, millisecond * 1000 + microsecond)
+                .ok_or(Error::range("Invalid time"))?
+                .with_nanosecond(nanosecond)
+                .ok_or(Error::range("Invalid time"))?,
         );
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date_time.clone().into()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.temporal_plain_date_time.clone().into(),
+                ),
             }),
             date: Cell::new(date),
-        }.into_object())
+        }
+        .into_object())
     }
-
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         if let Value::String(str) = &info {
-            return Ok(NaiveDateTime::parse_from_str(&str, "%Y-%m-%dT%H:%M:%S%.f").map(|date| Self {
-                inner: RefCell::new(MutablePlainDateTime {
-                    object: MutObject::with_proto(realm.intrinsics.temporal_plain_date_time.clone().into()),
-                }),
-                date: Cell::new(date)
-            }).map_err(|_| Error::range("Invalid date"))?.into_object());
+            return Ok(NaiveDateTime::parse_from_str(&str, "%Y-%m-%dT%H:%M:%S%.f")
+                .map(|date| Self {
+                    inner: RefCell::new(MutablePlainDateTime {
+                        object: MutObject::with_proto(
+                            realm.intrinsics.temporal_plain_date_time.clone().into(),
+                        ),
+                    }),
+                    date: Cell::new(date),
+                })
+                .map_err(|_| Error::range("Invalid date"))?
+                .into_object());
         }
 
         let obj = info.to_object()?;
 
-        if obj.contains_key(&"year".into())? || obj.contains_key(&"month".into())? || obj.contains_key(&"day".into())? {
-            let year = obj.resolve_property(&"year".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
-            let month = obj.resolve_property(&"month".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let day = obj.resolve_property(&"day".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let hour = obj.resolve_property(&"hour".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let minute = obj.resolve_property(&"minute".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let second = obj.resolve_property(&"second".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let millisecond = obj.resolve_property(&"millisecond".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let microsecond = obj.resolve_property(&"microsecond".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
-            let nanosecond = obj.resolve_property(&"nanosecond".into(), realm)?.map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+        if obj.contains_key(&"year".into())?
+            || obj.contains_key(&"month".into())?
+            || obj.contains_key(&"day".into())?
+        {
+            let year = obj
+                .resolve_property(&"year".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
+            let month = obj
+                .resolve_property(&"month".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let day = obj
+                .resolve_property(&"day".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let hour = obj
+                .resolve_property(&"hour".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let minute = obj
+                .resolve_property(&"minute".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let second = obj
+                .resolve_property(&"second".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let millisecond = obj
+                .resolve_property(&"millisecond".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let microsecond = obj
+                .resolve_property(&"microsecond".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+            let nanosecond = obj
+                .resolve_property(&"nanosecond".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
 
             return Ok(Self {
                 inner: RefCell::new(MutablePlainDateTime {
-                    object: MutObject::with_proto(realm.intrinsics.temporal_plain_date_time.clone().into()),
+                    object: MutObject::with_proto(
+                        realm.intrinsics.temporal_plain_date_time.clone().into(),
+                    ),
                 }),
                 date: Cell::new(NaiveDateTime::new(
-                    NaiveDate::from_ymd_opt(year, month, day).ok_or(Error::range("Invalid date"))?,
-                    NaiveTime::from_hms_micro_opt(hour, minute, second, millisecond * 1000 + microsecond).ok_or(Error::range("Invalid time"))?
-                        .with_nanosecond(nanosecond).ok_or(Error::range("Invalid time"))?,
-                ))
-            }.into_object());
+                    NaiveDate::from_ymd_opt(year, month, day)
+                        .ok_or(Error::range("Invalid date"))?,
+                    NaiveTime::from_hms_micro_opt(
+                        hour,
+                        minute,
+                        second,
+                        millisecond * 1000 + microsecond,
+                    )
+                    .ok_or(Error::range("Invalid time"))?
+                    .with_nanosecond(nanosecond)
+                    .ok_or(Error::range("Invalid time"))?,
+                )),
+            }
+            .into_object());
         }
 
         Err(Error::range("Invalid date")) //TODO
@@ -88,56 +139,96 @@ impl PlainDateTime {
 
     pub fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let duration = self.date.get().signed_duration_since(other.date.get());
-        let duration = duration.num_microseconds().ok_or(Error::range("Invalid duration"))?;
+        let duration = duration
+            .num_microseconds()
+            .ok_or(Error::range("Invalid duration"))?;
         let duration = duration as f64 / 1_000_000.0;
 
-        Ok(Duration::constructor(None, None, None, None, None, None, None, None, Some(duration as i64), realm)?.into_object())
+        Ok(Duration::constructor(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(duration as i64),
+            realm,
+        )?
+        .into_object())
     }
 
     pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let duration = other.date.get().signed_duration_since(self.date.get());
-        let duration = duration.num_microseconds().ok_or(Error::range("Invalid duration"))?;
+        let duration = duration
+            .num_microseconds()
+            .ok_or(Error::range("Invalid duration"))?;
         let duration = duration as f64 / 1_000_000.0;
 
-        Ok(Duration::constructor(None, None, None, None, None, None, None, None, Some(duration as i64), realm)?.into_object())
+        Ok(Duration::constructor(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            Some(duration as i64),
+            realm,
+        )?
+        .into_object())
     }
 
     pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let date = self.date.get();
 
-        let dur = chrono::Duration::from_std(duration.to_duration()).map_err(|_| Error::range("Invalid duration"))?;
+        let dur = chrono::Duration::from_std(duration.to_duration())
+            .map_err(|_| Error::range("Invalid duration"))?;
 
         let date = if duration.is_negative() {
-            date.checked_sub_signed(dur).ok_or(Error::range("Invalid date"))?
+            date.checked_sub_signed(dur)
+                .ok_or(Error::range("Invalid date"))?
         } else {
-            date.checked_add_signed(dur).ok_or(Error::range("Invalid date"))?
+            date.checked_add_signed(dur)
+                .ok_or(Error::range("Invalid date"))?
         };
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date_time.clone().into()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.temporal_plain_date_time.clone().into(),
+                ),
             }),
-            date: Cell::new(date)
-        }.into_object())
+            date: Cell::new(date),
+        }
+        .into_object())
     }
 
     pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let date = self.date.get();
 
-        let dur = chrono::Duration::from_std(duration.to_duration()).map_err(|_| Error::range("Invalid duration"))?;
+        let dur = chrono::Duration::from_std(duration.to_duration())
+            .map_err(|_| Error::range("Invalid duration"))?;
 
         let date = if duration.is_negative() {
-            date.checked_add_signed(dur).ok_or(Error::range("Invalid date"))?
+            date.checked_add_signed(dur)
+                .ok_or(Error::range("Invalid date"))?
         } else {
-            date.checked_sub_signed(dur).ok_or(Error::range("Invalid date"))?
+            date.checked_sub_signed(dur)
+                .ok_or(Error::range("Invalid date"))?
         };
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date_time.clone().into()),
+                object: MutObject::with_proto(
+                    realm.intrinsics.temporal_plain_date_time.clone().into(),
+                ),
             }),
-            date: Cell::new(date)
-        }.into_object())
+            date: Cell::new(date),
+        }
+        .into_object())
     }
 
     #[prop("toJSON")]
@@ -152,7 +243,9 @@ impl PlainDateTime {
 
     #[prop("valueOf")]
     pub fn value_of(&self) -> Res {
-        Err(Error::ty("Called valueOf on a Temporal.PlainDateTime object"))
+        Err(Error::ty(
+            "Called valueOf on a Temporal.PlainDateTime object",
+        ))
     }
 
     #[get("day")]
@@ -233,7 +326,7 @@ impl PlainDateTime {
     pub fn millisecond(&self) -> u32 {
         self.date.get().nanosecond() * 1_000_000
     }
-    
+
     #[get("minute")]
     pub fn minute(&self) -> u32 {
         self.date.get().minute()
@@ -254,12 +347,12 @@ impl PlainDateTime {
     pub const fn months_in_year() -> u32 {
         12
     }
-    
+
     #[get("nanosecond")]
     pub fn nanosecond(&self) -> u32 {
         self.date.get().nanosecond()
     }
-    
+
     #[get("second")]
     pub fn second(&self) -> u32 {
         self.date.get().second()
@@ -276,7 +369,8 @@ impl PlainDateTime {
     }
 
     #[get("yearOfWeek")]
-    pub fn year_of_week(&self) -> i32 { // honestly, WHAT THE FUCK?
+    pub fn year_of_week(&self) -> i32 {
+        // honestly, WHAT THE FUCK?
         self.date.get().year()
     }
 }

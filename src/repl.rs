@@ -32,7 +32,7 @@ pub fn repl(conf: Conf) -> Res {
     let mut vm_realm = Realm::new()?;
     vm_realm.set_eval(InterpreterEval)?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
-    
+
     let mut old_vm_realm = Realm::new()?;
     old_vm_realm.set_eval(InterpreterEval)?;
     let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
@@ -50,7 +50,7 @@ pub fn repl(conf: Conf) -> Res {
     rl.set_helper(Some(h));
 
     let mut count = 1;
-    
+
     let rt = Builder::new_current_thread().enable_all().build()?;
 
     loop {
@@ -111,7 +111,7 @@ fn run_input(
     vm_scope: &Scope,
     old_vm_realm: &mut Realm,
     old_vm_scope: &Scope,
-    rt: &Runtime
+    rt: &Runtime,
 ) {
     if input.is_empty() {
         return;
@@ -155,16 +155,16 @@ fn run_input(
                 return;
             }
         };
-        
+
         if conf.old_bytecode || conf.bytecode {
             println!("Interpreter: {}", result.pretty_print());
         } else {
             println!("{}", result.pretty_print());
         }
-        
+
         rt.block_on(interpreter_realm.run_event_loop());
     }
-    
+
     if conf.bytecode || conf.instructions {
         let bc = match Compiler::compile(&script.body) {
             Ok(bc) => bc,
@@ -173,27 +173,22 @@ fn run_input(
                 return;
             }
         };
-        
+
         if conf.instructions {
             println!("{bc:#?}");
         }
-        
+
         if conf.bytecode {
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
-            let mut vm = BorrowedVM::with_scope(
-                &bc.instructions,
-                &data,
-                vm_realm,
-                vm_scope.clone(),
-            );
-            
-            
+            let mut vm =
+                BorrowedVM::with_scope(&bc.instructions, &data, vm_realm, vm_scope.clone());
+
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");
             }
-            
+
             println!("Bytecode: {:?}", vm.acc());
-            
+
             rt.block_on(vm_realm.run_event_loop());
         }
     }
@@ -220,14 +215,13 @@ fn run_input(
                 old_vm_realm,
                 old_vm_scope.clone(),
             );
-            
 
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");
             }
 
             println!("OldBytecode: {:?}", vm.acc());
-            
+
             rt.block_on(old_vm_realm.run_event_loop());
         }
     }
@@ -241,7 +235,7 @@ pub fn old_repl(conf: conf::Conf) -> Res {
 
     let mut vm_realm = Realm::new()?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
-    
+
     let mut old_vm_realm = Realm::new()?;
     let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
     let rt = Builder::new_current_thread().enable_all().build()?;

@@ -244,9 +244,11 @@ impl<C: Realm> Value<C> {
     }
 
     #[allow(clippy::needless_lifetimes)]
-    pub fn downcast<'a, T: 'static>(&'a self) -> Result<Option<OwningGcGuard<'a, BoxedObj<C>, T>>, Error<C>> {
+    pub fn downcast<'a, T: 'static>(
+        &'a self,
+    ) -> Result<Option<OwningGcGuard<'a, BoxedObj<C>, T>>, Error<C>> {
         let obj = self.as_object()?;
-        
+
         Ok(obj.downcast())
     }
 

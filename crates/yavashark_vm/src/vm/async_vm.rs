@@ -1,4 +1,5 @@
 use crate::execute::Execute;
+use crate::function_code::BytecodeFunctionCode;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
@@ -6,7 +7,6 @@ use yavashark_bytecode::data::{Label, OutputData, OutputDataType};
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
-use crate::function_code::BytecodeFunctionCode;
 
 pub struct VmState {
     regs: Registers,
@@ -34,10 +34,7 @@ pub enum AsyncPoll {
 }
 
 impl VmState {
-    pub const fn new(
-        code: Rc<BytecodeFunctionCode>,
-        scope: Scope
-    ) -> Self {
+    pub const fn new(code: Rc<BytecodeFunctionCode>, scope: Scope) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
@@ -53,25 +50,15 @@ impl VmState {
 
 impl<'a> AsyncVM<'a> {
     #[must_use]
-    pub const fn new(
-        code: Rc<BytecodeFunctionCode>,
-        scope: Scope,
-        realm: &'a mut Realm,
-    ) -> Self {
+    pub const fn new(code: Rc<BytecodeFunctionCode>, scope: Scope, realm: &'a mut Realm) -> Self {
         let state = VmState::new(code, scope);
-        
-        Self {
-            state,
-            realm,
-        }
+
+        Self { state, realm }
     }
-    
+
     #[must_use]
     pub const fn from_state(state: VmState, realm: &'a mut Realm) -> Self {
-        Self {
-            state,
-            realm,
-        }
+        Self { state, realm }
     }
 
     pub fn run(mut self) -> AsyncPoll {
@@ -81,28 +68,35 @@ impl<'a> AsyncVM<'a> {
 
             match instr.execute(&mut self) {
                 Ok(_) => {}
-                Err(e) => {
-                    match e {
-                        ControlFlow::Error(e) => return AsyncPoll::Ret(self.state, Err(e)),
-                        ControlFlow::Return(value) => {
-                            self.state.acc = value;
-                            break;
-                        }
-                        ControlFlow::Break(_) => {
-                            return AsyncPoll::Ret(self.state, Err(Error::new("Break outside of loop")));
-                        }
-                        ControlFlow::Continue(_) => {
-                            return AsyncPoll::Ret(self.state, Err(Error::new("Continue outside of loop")));
-                        }
-                        ControlFlow::Await(out) => {
-                            return AsyncPoll::Await(self.state, out);
-                        }
-                        ControlFlow::Yield(_) => {
-                            return AsyncPoll::Ret(self.state, Err(Error::new("Yield outside of generator")));
-                        }
-                        ControlFlow::OptChainShortCircuit => {}
+                Err(e) => match e {
+                    ControlFlow::Error(e) => return AsyncPoll::Ret(self.state, Err(e)),
+                    ControlFlow::Return(value) => {
+                        self.state.acc = value;
+                        break;
                     }
-                }
+                    ControlFlow::Break(_) => {
+                        return AsyncPoll::Ret(
+                            self.state,
+                            Err(Error::new("Break outside of loop")),
+                        );
+                    }
+                    ControlFlow::Continue(_) => {
+                        return AsyncPoll::Ret(
+                            self.state,
+                            Err(Error::new("Continue outside of loop")),
+                        );
+                    }
+                    ControlFlow::Await(out) => {
+                        return AsyncPoll::Await(self.state, out);
+                    }
+                    ControlFlow::Yield(_) => {
+                        return AsyncPoll::Ret(
+                            self.state,
+                            Err(Error::new("Yield outside of generator")),
+                        );
+                    }
+                    ControlFlow::OptChainShortCircuit => {}
+                },
             }
         }
 
@@ -124,24 +118,33 @@ impl<'a> VM for AsyncVM<'a> {
             return Err(Error::reference("Invalid variable name"));
         };
 
-        self.state.current_scope
+        self.state
+            .current_scope
             .resolve(name)?
             .ok_or(Error::reference("Variable not found"))
     }
 
     #[must_use]
     fn var_name(&self, name: VarName) -> Option<&str> {
-        self.state.code.ds.var_names.get(name as usize).map(String::as_str)
+        self.state
+            .code
+            .ds
+            .var_names
+            .get(name as usize)
+            .map(String::as_str)
     }
 
     fn get_register(&self, reg: Reg) -> Res<Value> {
-        self.state.regs
+        self.state
+            .regs
             .get(reg)
             .ok_or(Error::reference("Invalid register"))
     }
 
     fn get_label(&self, label: Label) -> Res<&str> {
-        self.state.code.ds
+        self.state
+            .code
+            .ds
             .labels
             .get(label.0 as usize)
             .map(String::as_str)
@@ -176,7 +179,8 @@ impl<'a> VM for AsyncVM<'a> {
     }
 
     fn get_constant(&self, const_idx: ConstIdx) -> Res<Value> {
-        let val = self.state
+        let val = self
+            .state
             .code
             .ds
             .constants

@@ -3,10 +3,10 @@ use crate::builtins::ArrayBuffer;
 use crate::conversion::FromValueOutput;
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
+use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
 use half::f16;
 use num_traits::FromPrimitive;
 use std::cell::{Cell, RefCell};
-use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
 use yavashark_value::{BoxedObj, Obj};
@@ -57,14 +57,14 @@ unsafe impl<T: Zeroable> Zeroable for Packed<T> {}
 impl<T: Copy> Copy for Packed<T> {}
 
 impl<T: Clone + Copy> Clone for Packed<T> {
-    fn clone(&self) -> Self { *self }
+    fn clone(&self) -> Self {
+        *self
+    }
 }
 
 unsafe impl<T: AnyBitPattern> AnyBitPattern for Packed<T> {}
 
 unsafe impl<T: NoUninit> NoUninit for Packed<T> {}
-
-
 
 #[object(direct(byte_offset, byte_length))]
 #[derive(Debug)]
@@ -150,8 +150,6 @@ impl TypedArray {
         if end > slice.len() {
             return Err(Error::range("TypedArray is out of bounds"));
         }
-
-
 
         slice
             .get(start..end)
@@ -242,7 +240,9 @@ impl TypedArray {
 
     pub fn at(&self, idx: usize) -> Res<Value> {
         Ok(typed_array_run!({
-            slice.get(idx).map_or(Value::Undefined, |x| Value::from(x.0))
+            slice
+                .get(idx)
+                .map_or(Value::Undefined, |x| Value::from(x.0))
         }))
     }
 

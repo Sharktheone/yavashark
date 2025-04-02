@@ -80,15 +80,13 @@ impl Method {
             .map(|js| quote! { #js })
             .unwrap_or_else(|| quote! { stringify!(#name_ident) });
         let mut length = self.args.len();
-        
+
         if self.this.is_some() {
             length -= 1;
         }
         if self.realm.is_some() {
             length -= 1;
         }
-        
-        
 
         quote! {
             #native_function::with_proto_and_len(#js_name.as_ref(), |mut args, mut this, realm| {

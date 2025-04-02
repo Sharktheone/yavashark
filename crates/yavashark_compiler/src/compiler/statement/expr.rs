@@ -1,27 +1,27 @@
+mod array;
+mod arrow;
+mod assign;
+mod await_;
+mod bin;
+mod call;
+mod class;
+mod cond;
+mod fn_;
 mod ident;
 mod lit;
-mod this;
-mod array;
+mod member;
+mod meta_prop;
+mod new;
 mod object;
-mod fn_;
+mod paren;
+mod seq;
+mod super_prop;
+mod tagged_tpl;
+mod this;
+mod tpl;
 mod unary;
 mod update;
-mod bin;
-mod assign;
-mod member;
-mod super_prop;
-mod cond;
-mod call;
-mod new;
-mod seq;
-mod tpl;
-mod tagged_tpl;
-mod arrow;
-mod class;
 mod yield_;
-mod meta_prop;
-mod await_;
-mod paren;
 
 use crate::{Compiler, Res};
 use anyhow::anyhow;
@@ -45,28 +45,30 @@ impl MoveOptimization {
     pub fn accept(self) -> DataType {
         self.output
     }
-    
+
     pub fn reject(self, compiler: &mut Compiler) {
         compiler.instructions.extend(self.reject_instructions);
     }
 }
 
 impl Compiler {
-    
     pub fn compile_expr_stmt(&mut self, expr: &ExprStmt) -> Res {
         self.compile_expr_no_out(&expr.expr)
     }
-    
+
     pub fn compile_expr_stmt_last(&mut self, expr: &ExprStmt) -> Res {
         if let Some(optim) = self.compile_expr(&expr.expr, Some(Acc))? {
             optim.reject(self);
         }
-        
-        
+
         Ok(())
     }
-    
-    pub fn compile_expr(&mut self, expr: &Expr, out: Option<impl OutputData>) -> Res<Option<MoveOptimization>> {
+
+    pub fn compile_expr(
+        &mut self,
+        expr: &Expr,
+        out: Option<impl OutputData>,
+    ) -> Res<Option<MoveOptimization>> {
         match expr {
             Expr::This(this) => self.compile_this(this, out),
             Expr::Array(a) => return self.compile_array(a, out),
@@ -97,20 +99,22 @@ impl Compiler {
 
         Ok(None)
     }
-    
-    pub fn compile_expr_data(&mut self, expr: &Expr, out: Option<impl OutputData>) -> Res<DataType> {
+
+    pub fn compile_expr_data(
+        &mut self,
+        expr: &Expr,
+        out: Option<impl OutputData>,
+    ) -> Res<DataType> {
         match self.compile_expr(expr, out)? {
-            Some(optim) => {
-                Ok(optim.output)
-            }
+            Some(optim) => Ok(optim.output),
             None => Ok(DataType::Acc(Acc)),
         }
     }
-    
+
     pub fn compile_expr_data_acc(&mut self, expr: &Expr) -> Res<DataType> {
         self.compile_expr_data(expr, Some(Acc))
     }
-    
+
     pub fn compile_expr_no_out(&mut self, expr: &Expr) -> Res {
         self.compile_expr(expr, None::<Acc>)?;
         Ok(())

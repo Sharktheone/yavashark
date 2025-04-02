@@ -132,7 +132,7 @@ impl VM for OldBorrowedVM<'_> {
     fn get_register(&self, reg: Reg) -> Res<Value> {
         self.get_register(reg)
     }
-    
+
     fn get_label(&self, label: yavashark_bytecode::data::Label) -> Res<&str> {
         self.get_label(label)
     }
@@ -212,7 +212,7 @@ impl VM for OldBorrowedVM<'_> {
     fn get_scope(&self) -> &Scope {
         &self.current_scope
     }
-    
+
     fn get_scope_mut(&mut self) -> &mut Scope {
         &mut self.current_scope
     }

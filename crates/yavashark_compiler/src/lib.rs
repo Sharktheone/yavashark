@@ -1,6 +1,6 @@
-mod node;
 mod compiler;
 mod data;
+mod node;
 
 pub use compiler::*;
 

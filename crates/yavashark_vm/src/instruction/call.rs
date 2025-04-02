@@ -41,24 +41,19 @@ pub fn call_member(
     output.set(ret, vm)
 }
 
-pub fn call_member_no_output(
-    obj: impl Data,
-    member: impl Data,
-    vm: &mut impl VM,
-) -> Res {
+pub fn call_member_no_output(obj: impl Data, member: impl Data, vm: &mut impl VM) -> Res {
     let obj = obj.get(vm)?;
     let member = member.get(vm)?;
 
     let args = vm.get_call_args();
 
     obj.call_method(&member, vm.get_realm(), args)?;
-    
+
     Ok(())
 }
 
 pub fn construct(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> ControlResult {
     let func = func.get(vm)?;
-
 
     let Value::Object(constructor) = func.copy() else {
         return Err(ControlFlow::error_type(format!(
@@ -72,7 +67,7 @@ pub fn construct(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> 
     let ret = constructor.construct(vm.get_realm(), args)?;
 
     output.set(ret, vm)?;
-    
+
     Ok(())
 }
 
@@ -105,10 +100,9 @@ pub fn call_super(output: impl OutputData, vm: &mut impl VM) -> Res {
     let constructor = constructor.resolve(proto.copy(), realm)?;
 
     let constructor = constructor.as_object()?;
-    
+
     let args = vm.get_call_args();
-    let ret = constructor
-        .construct(vm.get_realm(), args)?;
+    let ret = constructor.construct(vm.get_realm(), args)?;
 
     output.set(ret, vm)
 }
@@ -125,11 +119,10 @@ pub fn call_super_no_output(vm: &mut impl VM) -> Res {
     let constructor = constructor.resolve(proto.copy(), realm)?;
 
     let constructor = constructor.as_object()?;
-    
+
     let args = vm.get_call_args();
-    
-    constructor
-        .construct(vm.get_realm(), args)?;
+
+    constructor.construct(vm.get_realm(), args)?;
 
     Ok(())
 }

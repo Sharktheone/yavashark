@@ -19,7 +19,10 @@ pub(crate) mod spin_lock;
 
 pub mod collectable;
 pub(crate) mod tagged_ptr;
-#[cfg(all(any(feature = "easy_debug", feature = "trace"), not(target_arch = "wasm32")))]
+#[cfg(all(
+    any(feature = "easy_debug", feature = "trace"),
+    not(target_arch = "wasm32")
+))]
 mod trace;
 #[cfg(feature = "trace")]
 mod trace_gui;
@@ -278,7 +281,6 @@ pub struct OwningGcGuard<'a, T: Collectable, V = T> {
     gc: Gc<T>,
 }
 
-
 pub struct OwningGcGuardRefed<T: Collectable, V = T> {
     value_ptr: V,
     _gc: Gc<T>,
@@ -292,7 +294,6 @@ impl<T: Collectable, V> Clone for OwningGcGuard<'_, T, V> {
         }
     }
 }
-
 
 impl<T: Collectable, V: Debug> Debug for OwningGcGuard<'_, T, V> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -363,7 +364,6 @@ impl<'a, T: Collectable, V> DerefMut for OwningGcGuardRefed<T, V> {
     }
 }
 
-
 impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
     pub fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> OwningGcGuard<'a, T, U> {
         let value_ptr = f(self.value_ptr);
@@ -385,23 +385,19 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
             })
             .ok_or(self)
     }
-    
+
     #[must_use]
     pub fn gc(&self) -> Gc<T> {
         self.gc.clone()
     }
-    
-    pub fn map_refed<U: 'a, F: FnOnce(&'a V) -> U>(
-        self,
-        f: F,
-    ) -> OwningGcGuardRefed<T, U> {
+
+    pub fn map_refed<U: 'a, F: FnOnce(&'a V) -> U>(self, f: F) -> OwningGcGuardRefed<T, U> {
         let val = f(self.value_ptr);
-        
+
         OwningGcGuardRefed {
             value_ptr: val,
             _gc: self.gc,
         }
-    
     }
 }
 

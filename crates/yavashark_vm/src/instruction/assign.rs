@@ -1,6 +1,6 @@
 use crate::data::{Data, OutputData};
-use yavashark_env::Res;
 use crate::VM;
+use yavashark_env::Res;
 
 pub fn add_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
@@ -50,7 +50,7 @@ pub fn rem_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> 
 pub fn l_shift_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.shl(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -59,7 +59,7 @@ pub fn l_shift_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM)
 pub fn r_shift_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.shr(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -68,7 +68,7 @@ pub fn r_shift_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM)
 pub fn zero_fill_r_shift_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.ushr(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -77,7 +77,7 @@ pub fn zero_fill_r_shift_assign(val: impl Data, output: impl OutputData, vm: &mu
 pub fn b_and_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.ushr(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -86,7 +86,7 @@ pub fn b_and_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -
 pub fn b_or_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.or(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -95,7 +95,7 @@ pub fn b_or_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) ->
 pub fn b_xor_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.xor(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -104,7 +104,7 @@ pub fn b_xor_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -
 pub fn exp_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let val = val.get(vm)?;
     let out = output.get(vm)?;
-    
+
     let ret = val.exp(&out, vm.get_realm())?;
 
     output.set(ret, vm)
@@ -130,7 +130,7 @@ pub fn or_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> R
 
 pub fn nullish_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let out = output.get(vm)?;
-    
+
     if out.is_nullish() {
         let val = val.get(vm)?;
         output.set(val, vm)
@@ -138,4 +138,3 @@ pub fn nullish_assign(val: impl Data, output: impl OutputData, vm: &mut impl VM)
         Ok(())
     }
 }
-

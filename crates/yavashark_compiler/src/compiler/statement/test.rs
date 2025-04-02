@@ -1,11 +1,11 @@
 mod lit;
 mod paren;
 
+use crate::{Compiler, Res};
 use anyhow::anyhow;
 use swc_ecma_ast::Expr;
 use yavashark_bytecode::data::{Acc, Data, DataType};
 use yavashark_bytecode::jmp::Test;
-use crate::{Compiler, Res};
 
 impl Compiler {
     pub fn compile_test_expr(&mut self, test: &Expr) -> Res<Test> {
@@ -40,7 +40,6 @@ impl Compiler {
             Expr::Paren(p) => return self.test_paren(p),
             _ => return Err(anyhow!("Unsupported expression")),
         }
-
 
         Ok(Test::Not(DataType::Acc(Acc)))
     }

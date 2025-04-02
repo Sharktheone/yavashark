@@ -67,7 +67,12 @@ impl Promise {
     pub async fn wait(&self) -> ValueResult {
         self.notify.notified().await;
 
-        Ok(self.inner.try_borrow_mut()?.value.clone().unwrap_or(Value::Undefined))
+        Ok(self
+            .inner
+            .try_borrow_mut()?
+            .value
+            .clone()
+            .unwrap_or(Value::Undefined))
     }
 
     pub fn resolve(&self, value: Value, realm: &mut Realm) -> Res {
@@ -116,7 +121,7 @@ impl Promise {
 
         Ok(())
     }
-    
+
     pub fn set_res(&self, res: ValueResult, realm: &mut Realm) {
         match res {
             Ok(val) => self.resolve(val, realm).unwrap(),
@@ -229,7 +234,7 @@ impl Promise {
 
         Ok(promise)
     }
-    
+
     pub fn catch(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         self.then(None, Some(f), realm, Value::Undefined)
     }
@@ -251,8 +256,9 @@ impl Promise {
                 Ok(val) => {
                     if let Ok(prom) = <&Self>::from_value_out(val) {
                         if prom.state.get() == PromiseState::Rejected {
-                            promise.reject(&
-                                prom.inner
+                            promise.reject(
+                                &prom
+                                    .inner
                                     .try_borrow()?
                                     .value
                                     .clone()

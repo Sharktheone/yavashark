@@ -1,18 +1,18 @@
+mod async_vm;
+mod borrowed;
 mod old;
 mod owned;
-mod borrowed;
-mod async_vm;
 
+pub use async_vm::*;
+pub use borrowed::*;
 pub use old::borrowed::*;
 pub use old::owned::*;
 pub use owned::*;
-pub use borrowed::*;
-pub use async_vm::*;
 
-use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_bytecode::data::{Label, OutputData};
-use yavashark_env::{Res, Value};
+use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
+use yavashark_env::{Res, Value};
 
 pub trait VM {
     fn acc(&self) -> Value;
@@ -48,10 +48,10 @@ pub trait VM {
     fn push_call_arg(&mut self, arg: Value);
 
     fn get_call_args(&mut self) -> Vec<Value>;
-    
+
     fn get_scope(&self) -> &Scope;
-    
+
     fn get_scope_mut(&mut self) -> &mut Scope;
-    
+
     fn set_continue_storage(&mut self, out: impl OutputData);
 }

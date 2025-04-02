@@ -1,11 +1,11 @@
-use num_bigint::BigInt;
 use crate::data::DataSection;
 use crate::function::BytecodeFunction;
 use crate::Instruction;
-use yavashark_env::realm::Realm;
-use yavashark_env::{Object, Value, ValueResult};
+use num_bigint::BigInt;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
+use yavashark_env::realm::Realm;
+use yavashark_env::{Object, Value, ValueResult};
 use yavashark_value::{ConstString, IntoValue, Obj};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -36,7 +36,9 @@ impl ConstValue {
             Self::Symbol(s) => Value::Symbol(s.into()),
             Self::Function(f) => BytecodeFunction::from_blueprint(f, realm).into(),
             Self::BigInt(b) => Value::BigInt(b),
-            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(realm, &exp, &flags)?.into_value(),
+            Self::Regex(exp, flags) => {
+                RegExp::new_from_str_with_flags(realm, &exp, &flags)?.into_value()
+            }
         })
     }
 }
@@ -58,7 +60,6 @@ impl ObjectLiteralBlueprint {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteralBlueprint {
     pub properties: Vec<ConstValue>,
@@ -66,8 +67,12 @@ pub struct ArrayLiteralBlueprint {
 
 impl ArrayLiteralBlueprint {
     pub fn into_value(self, realm: &Realm) -> ValueResult {
-        let props = self.properties.into_iter().map(|v| v.into_value(realm)).collect::<Result<Vec<_>, _>>()?;
-        
+        let props = self
+            .properties
+            .into_iter()
+            .map(|v| v.into_value(realm))
+            .collect::<Result<Vec<_>, _>>()?;
+
         Ok(Array::with_elements(realm, props)?.into_value())
     }
 }

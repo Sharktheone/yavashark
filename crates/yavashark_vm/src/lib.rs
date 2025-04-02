@@ -7,9 +7,9 @@ mod instructions;
 mod regs;
 mod stack;
 mod storage;
+mod task;
 mod value_ext;
 mod vm;
-mod task;
 
 pub use regs::*;
 pub use stack::*;

@@ -28,7 +28,6 @@ impl Interpreter {
         //     RefCell::new(boxed)
         // });
 
-
         let name = stmt.ident.sym.to_string();
         let function = if stmt.function.is_async || stmt.function.is_generator {
             ByteCodeInterpreter::compile_fn(&stmt.function, name.clone(), fn_scope, realm)?.into()
@@ -41,7 +40,6 @@ impl Interpreter {
                 realm,
             )
         };
-
 
         Ok((name, function.into()))
     }

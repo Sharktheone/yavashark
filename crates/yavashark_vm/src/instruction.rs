@@ -1,3 +1,4 @@
+mod assign;
 mod bit;
 mod call;
 mod cmp;
@@ -7,8 +8,8 @@ mod logical;
 mod math;
 mod other;
 mod scope;
-mod assign;
 
+pub use assign::*;
 pub use bit::*;
 pub use call::*;
 pub use cmp::*;
@@ -18,4 +19,3 @@ pub use logical::*;
 pub use math::*;
 pub use other::*;
 pub use scope::*;
-pub use assign::*;

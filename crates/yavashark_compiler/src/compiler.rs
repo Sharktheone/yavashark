@@ -1,10 +1,10 @@
 mod statement;
 
+use crate::Res;
 use swc_ecma_ast::Stmt;
-use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::ConstValue;
 use yavashark_bytecode::data::{Label, Stack};
-use crate::Res;
+use yavashark_bytecode::instructions::Instruction;
 
 #[derive(Debug, Clone, Default)]
 pub struct Compiler {
@@ -22,18 +22,17 @@ pub struct Compiler {
     pub stack_to_deallloc: Vec<Stack>,
 }
 
-
 impl Compiler {
     #[must_use]
     pub fn new() -> Self {
         Self::default()
     }
-    
+
     pub fn compile(stmt: &[Stmt]) -> Res<Self> {
         let mut this = Self::new();
-        
+
         this.compile_stmts(stmt)?;
-        
+
         Ok(this)
     }
 }
