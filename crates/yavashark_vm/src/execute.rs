@@ -7601,6 +7601,11 @@ impl Execute for Instruction {
             Self::CallAccToStack(arg0, output) => instruction::call(arg0, output, vm)?,
             Self::CallStackToStack(arg0, output) => instruction::call(arg0, output, vm)?,
             Self::CallConstToStack(arg0, output) => instruction::call(arg0, output, vm)?,
+            Self::CallNoOutputVar(arg0) => instruction::call_no_output(arg0, vm)?,
+            Self::CallNoOutputReg(arg0) => instruction::call_no_output(arg0, vm)?,
+            Self::CallNoOutputAcc(arg0) => instruction::call_no_output(arg0, vm)?,
+            Self::CallNoOutputStack(arg0) => instruction::call_no_output(arg0, vm)?,
+            Self::CallNoOutputConst(arg0) => instruction::call_no_output(arg0, vm)?,
             Self::CallMemberVarVarToVar(arg0, arg1, output) => {
                 instruction::call_member(arg0, arg1, output, vm)?
             }
@@ -7900,6 +7905,161 @@ impl Execute for Instruction {
             }
             Self::CallMemberConstConstToStack(arg0, arg1, output) => {
                 instruction::call_member(arg0, arg1, output, vm)?
+            }
+            Self::CallMemberNoOutputVarVar(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputRegVar(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputAccVar(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputStackVar(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputConstVar(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputVarReg(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputRegReg(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputAccReg(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputStackReg(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputConstReg(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputVarAcc(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputRegAcc(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputAccAcc(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputStackAcc(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputConstAcc(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputVarStack(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputRegStack(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputAccStack(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputStackStack(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputConstStack(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputVarConst(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputRegConst(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputAccConst(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputStackConst(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallMemberNoOutputConstConst(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallSuperToVar(output) => instruction::call_super(output, vm)?,
+            Self::CallSuperToReg(output) => instruction::call_super(output, vm)?,
+            Self::CallSuperToAcc(output) => instruction::call_super(output, vm)?,
+            Self::CallSuperToStack(output) => instruction::call_super(output, vm)?,
+            Self::CallSuperNoOutput => instruction::call_super_no_output(vm)?,
+            Self::ConstructVarToVar(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructRegToVar(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructAccToVar(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructStackToVar(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructConstToVar(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructVarToReg(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructRegToReg(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructAccToReg(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructStackToReg(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructConstToReg(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructVarToAcc(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructRegToAcc(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructAccToAcc(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructStackToAcc(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructConstToAcc(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructVarToStack(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructRegToStack(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructAccToStack(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructStackToStack(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructConstToStack(arg0, output) => {
+                instruction::construct(arg0, output, vm)?
+            }
+            Self::ConstructNoOutputVar(arg0) => {
+                instruction::construct_no_output(arg0, vm)?
+            }
+            Self::ConstructNoOutputReg(arg0) => {
+                instruction::construct_no_output(arg0, vm)?
+            }
+            Self::ConstructNoOutputAcc(arg0) => {
+                instruction::construct_no_output(arg0, vm)?
+            }
+            Self::ConstructNoOutputStack(arg0) => {
+                instruction::construct_no_output(arg0, vm)?
+            }
+            Self::ConstructNoOutputConst(arg0) => {
+                instruction::construct_no_output(arg0, vm)?
             }
             Self::PushCallVar(arg0) => instruction::push_call(arg0, vm)?,
             Self::PushCallReg(arg0) => instruction::push_call(arg0, vm)?,
@@ -9765,6 +9925,22 @@ impl Execute for Instruction {
             Self::ThisToReg(output) => instruction::this(output, vm)?,
             Self::ThisToAcc(output) => instruction::this(output, vm)?,
             Self::ThisToStack(output) => instruction::this(output, vm)?,
+            Self::LoadSuperToVar(output) => instruction::load_super(output, vm)?,
+            Self::LoadSuperToReg(output) => instruction::load_super(output, vm)?,
+            Self::LoadSuperToAcc(output) => instruction::load_super(output, vm)?,
+            Self::LoadSuperToStack(output) => instruction::load_super(output, vm)?,
+            Self::LoadSuperConstructorToVar(output) => {
+                instruction::load_super_constructor(output, vm)?
+            }
+            Self::LoadSuperConstructorToReg(output) => {
+                instruction::load_super_constructor(output, vm)?
+            }
+            Self::LoadSuperConstructorToAcc(output) => {
+                instruction::load_super_constructor(output, vm)?
+            }
+            Self::LoadSuperConstructorToStack(output) => {
+                instruction::load_super_constructor(output, vm)?
+            }
             Self::YieldVar(arg0) => instruction::yield_(arg0, vm)?,
             Self::YieldReg(arg0) => instruction::yield_(arg0, vm)?,
             Self::YieldAcc(arg0) => instruction::yield_(arg0, vm)?,
@@ -9783,6 +9959,906 @@ impl Execute for Instruction {
             Self::WithConst(arg0) => instruction::with(arg0, vm)?,
             Self::EnterTry(arg0) => instruction::enter_try(arg0, vm)?,
             Self::LeaveTry => instruction::leave_try(vm)?,
+            Self::AddAssignVarToVar(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignRegToVar(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignAccToVar(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignStackToVar(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignConstToVar(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignVarToReg(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignRegToReg(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignAccToReg(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignStackToReg(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignConstToReg(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignVarToAcc(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignRegToAcc(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignAccToAcc(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignStackToAcc(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignConstToAcc(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignVarToStack(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignRegToStack(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignAccToStack(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignStackToStack(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::AddAssignConstToStack(arg0, output) => {
+                instruction::add_assign(arg0, output, vm)?
+            }
+            Self::SubAssignVarToVar(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignRegToVar(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignAccToVar(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignStackToVar(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignConstToVar(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignVarToReg(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignRegToReg(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignAccToReg(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignStackToReg(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignConstToReg(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignVarToAcc(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignRegToAcc(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignAccToAcc(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignStackToAcc(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignConstToAcc(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignVarToStack(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignRegToStack(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignAccToStack(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignStackToStack(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::SubAssignConstToStack(arg0, output) => {
+                instruction::sub_assign(arg0, output, vm)?
+            }
+            Self::MulAssignVarToVar(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignRegToVar(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignAccToVar(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignStackToVar(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignConstToVar(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignVarToReg(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignRegToReg(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignAccToReg(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignStackToReg(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignConstToReg(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignVarToAcc(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignRegToAcc(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignAccToAcc(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignStackToAcc(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignConstToAcc(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignVarToStack(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignRegToStack(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignAccToStack(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignStackToStack(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::MulAssignConstToStack(arg0, output) => {
+                instruction::mul_assign(arg0, output, vm)?
+            }
+            Self::DivAssignVarToVar(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignRegToVar(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignAccToVar(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignStackToVar(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignConstToVar(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignVarToReg(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignRegToReg(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignAccToReg(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignStackToReg(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignConstToReg(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignVarToAcc(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignRegToAcc(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignAccToAcc(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignStackToAcc(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignConstToAcc(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignVarToStack(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignRegToStack(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignAccToStack(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignStackToStack(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::DivAssignConstToStack(arg0, output) => {
+                instruction::div_assign(arg0, output, vm)?
+            }
+            Self::RemAssignVarToVar(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignRegToVar(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignAccToVar(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignStackToVar(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignConstToVar(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignVarToReg(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignRegToReg(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignAccToReg(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignStackToReg(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignConstToReg(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignVarToAcc(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignRegToAcc(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignAccToAcc(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignStackToAcc(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignConstToAcc(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignVarToStack(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignRegToStack(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignAccToStack(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignStackToStack(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::RemAssignConstToStack(arg0, output) => {
+                instruction::rem_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignVarToVar(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignRegToVar(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignAccToVar(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignStackToVar(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignConstToVar(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignVarToReg(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignRegToReg(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignAccToReg(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignStackToReg(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignConstToReg(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignVarToAcc(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignRegToAcc(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignAccToAcc(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignStackToAcc(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignConstToAcc(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignVarToStack(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignRegToStack(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignAccToStack(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignStackToStack(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::LShiftAssignConstToStack(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignVarToVar(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignRegToVar(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignAccToVar(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignStackToVar(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignConstToVar(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignVarToReg(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignRegToReg(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignAccToReg(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignStackToReg(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignConstToReg(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignVarToAcc(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignRegToAcc(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignAccToAcc(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignStackToAcc(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignConstToAcc(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignVarToStack(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignRegToStack(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignAccToStack(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignStackToStack(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssignConstToStack(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignVarToVar(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignRegToVar(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignAccToVar(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignStackToVar(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignConstToVar(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignVarToReg(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignRegToReg(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignAccToReg(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignStackToReg(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignConstToReg(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignVarToAcc(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignRegToAcc(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignAccToAcc(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignStackToAcc(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignConstToAcc(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignVarToStack(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignRegToStack(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignAccToStack(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignStackToStack(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssignConstToStack(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignVarToVar(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignRegToVar(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignAccToVar(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignStackToVar(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignConstToVar(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignVarToReg(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignRegToReg(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignAccToReg(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignStackToReg(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignConstToReg(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignVarToAcc(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignRegToAcc(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignAccToAcc(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignStackToAcc(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignConstToAcc(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignVarToStack(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignRegToStack(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignAccToStack(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignStackToStack(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BAndAssignConstToStack(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignVarToVar(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignRegToVar(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignAccToVar(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignStackToVar(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignConstToVar(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignVarToReg(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignRegToReg(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignAccToReg(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignStackToReg(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignConstToReg(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignVarToAcc(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignRegToAcc(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignAccToAcc(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignStackToAcc(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignConstToAcc(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignVarToStack(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignRegToStack(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignAccToStack(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignStackToStack(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BOrAssignConstToStack(arg0, output) => {
+                instruction::b_or_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignVarToVar(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignRegToVar(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignAccToVar(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignStackToVar(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignConstToVar(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignVarToReg(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignRegToReg(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignAccToReg(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignStackToReg(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignConstToReg(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignVarToAcc(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignRegToAcc(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignAccToAcc(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignStackToAcc(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignConstToAcc(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignVarToStack(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignRegToStack(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignAccToStack(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignStackToStack(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::BXorAssignConstToStack(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignVarToVar(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignRegToVar(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignAccToVar(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignStackToVar(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignConstToVar(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignVarToReg(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignRegToReg(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignAccToReg(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignStackToReg(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignConstToReg(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignVarToAcc(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignRegToAcc(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignAccToAcc(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignStackToAcc(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignConstToAcc(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignVarToStack(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignRegToStack(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignAccToStack(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignStackToStack(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::ExpAssignConstToStack(arg0, output) => {
+                instruction::exp_assign(arg0, output, vm)?
+            }
+            Self::AndAssignVarToVar(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignRegToVar(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignAccToVar(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignStackToVar(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignConstToVar(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignVarToReg(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignRegToReg(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignAccToReg(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignStackToReg(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignConstToReg(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignVarToAcc(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignRegToAcc(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignAccToAcc(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignStackToAcc(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignConstToAcc(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignVarToStack(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignRegToStack(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignAccToStack(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignStackToStack(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::AndAssignConstToStack(arg0, output) => {
+                instruction::and_assign(arg0, output, vm)?
+            }
+            Self::OrAssignVarToVar(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignRegToVar(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignAccToVar(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignStackToVar(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignConstToVar(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignVarToReg(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignRegToReg(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignAccToReg(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignStackToReg(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignConstToReg(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignVarToAcc(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignRegToAcc(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignAccToAcc(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignStackToAcc(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignConstToAcc(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignVarToStack(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignRegToStack(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignAccToStack(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignStackToStack(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::OrAssignConstToStack(arg0, output) => {
+                instruction::or_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignVarToVar(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignRegToVar(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignAccToVar(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignStackToVar(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignConstToVar(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignVarToReg(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignRegToReg(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignAccToReg(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignStackToReg(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignConstToReg(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignVarToAcc(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignRegToAcc(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignAccToAcc(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignStackToAcc(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignConstToAcc(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignVarToStack(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignRegToStack(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignAccToStack(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignStackToStack(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::NullishAssignConstToStack(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
         }
         Ok(())
     }

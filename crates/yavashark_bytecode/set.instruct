@@ -41,6 +41,11 @@ Call(Data) => Data
 CallNoOutput(Data) 
 CallMember(Data, Data) => Data
 CallMemberNoOutput(Data, Data) 
+CallSuper => Data
+CallSuperNoOutput  
+
+Construct(Data) => Data
+ConstructNoOutput(Data)
 
 PushCall(Data)
 SpreadCall(Data)
@@ -104,6 +109,7 @@ ContinueLabel(Label)
 Throw(Data)
 This => Data
 LoadSuper => Data 
+LoadSuperConstructor => Data 
 
 Yield(Data)
 Await(Data)

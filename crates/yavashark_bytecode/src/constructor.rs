@@ -10838,6 +10838,16 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn call_no_output(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::CallNoOutputAcc(arg0),
+            DataType::Const(arg0) => Self::CallNoOutputConst(arg0),
+            DataType::Reg(arg0) => Self::CallNoOutputReg(arg0),
+            DataType::Stack(arg0) => Self::CallNoOutputStack(arg0),
+            DataType::Var(arg0) => Self::CallNoOutputVar(arg0),
+        }
+    }
+    #[must_use]
     pub fn call_member(
         arg0: impl Data,
         arg1: impl Data,
@@ -11264,6 +11274,154 @@ impl Instruction {
                     }
                 }
             }
+        }
+    }
+    #[must_use]
+    pub fn call_member_no_output(arg0: impl Data, arg1: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::CallMemberNoOutputAccAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::CallMemberNoOutputAccConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::CallMemberNoOutputAccReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::CallMemberNoOutputAccStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::CallMemberNoOutputAccVar(arg0, arg1),
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::CallMemberNoOutputConstAcc(arg0, arg1),
+                    DataType::Const(arg1) => {
+                        Self::CallMemberNoOutputConstConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => Self::CallMemberNoOutputConstReg(arg0, arg1),
+                    DataType::Stack(arg1) => {
+                        Self::CallMemberNoOutputConstStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => Self::CallMemberNoOutputConstVar(arg0, arg1),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::CallMemberNoOutputRegAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::CallMemberNoOutputRegConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::CallMemberNoOutputRegReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::CallMemberNoOutputRegStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::CallMemberNoOutputRegVar(arg0, arg1),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::CallMemberNoOutputStackAcc(arg0, arg1),
+                    DataType::Const(arg1) => {
+                        Self::CallMemberNoOutputStackConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => Self::CallMemberNoOutputStackReg(arg0, arg1),
+                    DataType::Stack(arg1) => {
+                        Self::CallMemberNoOutputStackStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => Self::CallMemberNoOutputStackVar(arg0, arg1),
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::CallMemberNoOutputVarAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::CallMemberNoOutputVarConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::CallMemberNoOutputVarReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::CallMemberNoOutputVarStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::CallMemberNoOutputVarVar(arg0, arg1),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn call_super(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::CallSuperToAcc(output),
+            OutputDataType::Reg(output) => Self::CallSuperToReg(output),
+            OutputDataType::Stack(output) => Self::CallSuperToStack(output),
+            OutputDataType::Var(output) => Self::CallSuperToVar(output),
+        }
+    }
+    #[must_use]
+    pub fn call_super_no_output() -> Self {
+        Self::CallSuperNoOutput
+    }
+    #[must_use]
+    pub fn construct(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ConstructAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ConstructAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ConstructAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ConstructAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ConstructConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ConstructConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ConstructConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ConstructConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ConstructRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ConstructRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ConstructRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ConstructRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ConstructStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ConstructStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ConstructStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ConstructStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ConstructVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ConstructVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ConstructVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ConstructVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn construct_no_output(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::ConstructNoOutputAcc(arg0),
+            DataType::Const(arg0) => Self::ConstructNoOutputConst(arg0),
+            DataType::Reg(arg0) => Self::ConstructNoOutputReg(arg0),
+            DataType::Stack(arg0) => Self::ConstructNoOutputStack(arg0),
+            DataType::Var(arg0) => Self::ConstructNoOutputVar(arg0),
         }
     }
     #[must_use]
@@ -13037,6 +13195,24 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn load_super(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::LoadSuperToAcc(output),
+            OutputDataType::Reg(output) => Self::LoadSuperToReg(output),
+            OutputDataType::Stack(output) => Self::LoadSuperToStack(output),
+            OutputDataType::Var(output) => Self::LoadSuperToVar(output),
+        }
+    }
+    #[must_use]
+    pub fn load_super_constructor(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::LoadSuperConstructorToAcc(output),
+            OutputDataType::Reg(output) => Self::LoadSuperConstructorToReg(output),
+            OutputDataType::Stack(output) => Self::LoadSuperConstructorToStack(output),
+            OutputDataType::Var(output) => Self::LoadSuperConstructorToVar(output),
+        }
+    }
+    #[must_use]
     pub fn yield_(arg0: impl Data) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => Self::YieldAcc(arg0),
@@ -13077,5 +13253,1070 @@ impl Instruction {
     #[must_use]
     pub fn leave_try() -> Self {
         Self::LeaveTry
+    }
+    #[must_use]
+    pub fn add_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AddAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AddAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AddAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AddAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AddAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AddAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AddAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AddAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AddAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AddAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AddAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AddAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AddAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AddAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AddAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AddAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AddAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AddAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AddAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AddAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn sub_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::SubAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::SubAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::SubAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::SubAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::SubAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::SubAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::SubAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::SubAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::SubAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::SubAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::SubAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::SubAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::SubAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::SubAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::SubAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::SubAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::SubAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::SubAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::SubAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::SubAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn mul_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MulAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MulAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::MulAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::MulAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::MulAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::MulAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::MulAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::MulAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MulAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MulAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::MulAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::MulAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::MulAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::MulAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::MulAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::MulAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::MulAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::MulAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::MulAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::MulAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn div_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::DivAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::DivAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::DivAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::DivAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::DivAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::DivAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::DivAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::DivAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::DivAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::DivAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::DivAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::DivAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::DivAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::DivAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::DivAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::DivAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::DivAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::DivAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::DivAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::DivAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn rem_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::RemAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::RemAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::RemAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::RemAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RemAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RemAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RemAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RemAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::RemAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::RemAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::RemAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::RemAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RemAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RemAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RemAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RemAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::RemAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::RemAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::RemAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::RemAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn l_shift_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LShiftAssignAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LShiftAssignAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LShiftAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LShiftAssignAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LShiftAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LShiftAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LShiftAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LShiftAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LShiftAssignRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LShiftAssignRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LShiftAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LShiftAssignRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LShiftAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LShiftAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LShiftAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LShiftAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LShiftAssignVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LShiftAssignVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LShiftAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LShiftAssignVarToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn r_shift_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RShiftAssignAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RShiftAssignAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RShiftAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RShiftAssignAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RShiftAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RShiftAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RShiftAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RShiftAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RShiftAssignRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RShiftAssignRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RShiftAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RShiftAssignRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RShiftAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RShiftAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RShiftAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RShiftAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::RShiftAssignVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::RShiftAssignVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::RShiftAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::RShiftAssignVarToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn zero_fill_r_shift_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ZeroFillRShiftAssignAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ZeroFillRShiftAssignAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ZeroFillRShiftAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ZeroFillRShiftAssignAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ZeroFillRShiftAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ZeroFillRShiftAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ZeroFillRShiftAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ZeroFillRShiftAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ZeroFillRShiftAssignRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ZeroFillRShiftAssignRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ZeroFillRShiftAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ZeroFillRShiftAssignRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ZeroFillRShiftAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ZeroFillRShiftAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ZeroFillRShiftAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ZeroFillRShiftAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ZeroFillRShiftAssignVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ZeroFillRShiftAssignVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ZeroFillRShiftAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ZeroFillRShiftAssignVarToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn b_and_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BAndAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BAndAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BAndAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BAndAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BAndAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BAndAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BAndAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BAndAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BAndAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BAndAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BAndAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BAndAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BAndAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BAndAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BAndAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BAndAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BAndAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BAndAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BAndAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BAndAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn b_or_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BOrAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BOrAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BOrAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BOrAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BOrAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BOrAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BOrAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BOrAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BOrAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BOrAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BOrAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BOrAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BOrAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BOrAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BOrAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BOrAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BOrAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BOrAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BOrAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BOrAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn b_xor_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BXorAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BXorAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BXorAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BXorAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BXorAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BXorAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BXorAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BXorAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BXorAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BXorAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BXorAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BXorAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BXorAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BXorAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BXorAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BXorAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BXorAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BXorAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BXorAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BXorAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn exp_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ExpAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ExpAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ExpAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ExpAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ExpAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ExpAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ExpAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ExpAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ExpAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ExpAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ExpAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ExpAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ExpAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ExpAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ExpAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ExpAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ExpAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ExpAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ExpAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ExpAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn and_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AndAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AndAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AndAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AndAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AndAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AndAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AndAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AndAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AndAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AndAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AndAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AndAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AndAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AndAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AndAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AndAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AndAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AndAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AndAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AndAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn or_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::OrAssignAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::OrAssignAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::OrAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::OrAssignAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::OrAssignConstToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::OrAssignConstToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::OrAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::OrAssignConstToVar(arg0, output),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::OrAssignRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::OrAssignRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::OrAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::OrAssignRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::OrAssignStackToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::OrAssignStackToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::OrAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::OrAssignStackToVar(arg0, output),
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::OrAssignVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::OrAssignVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::OrAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::OrAssignVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn nullish_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::NullishAssignAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::NullishAssignAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::NullishAssignAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::NullishAssignAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::NullishAssignConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::NullishAssignConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::NullishAssignConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::NullishAssignConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::NullishAssignRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::NullishAssignRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::NullishAssignRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::NullishAssignRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::NullishAssignStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::NullishAssignStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::NullishAssignStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::NullishAssignStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::NullishAssignVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::NullishAssignVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::NullishAssignVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::NullishAssignVarToVar(arg0, output)
+                    }
+                }
+            }
+        }
     }
 }

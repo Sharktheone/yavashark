@@ -185,6 +185,28 @@ pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
     Ok(())
 }
 
+pub fn load_super(output: impl OutputData, vm: &mut impl VM) -> Res {
+    let this = vm.get_scope().this()?;
+
+    let proto = this.prototype(vm.get_realm())?;
+    let sup = proto.prototype(vm.get_realm())?;
+
+    output.set(sup, vm)
+}
+
+pub fn load_super_constructor(output: impl OutputData, vm: &mut impl VM) -> Res {
+    let this = vm.get_scope().this()?;
+
+    let proto = this.prototype(vm.get_realm())?;
+    let sup = proto.prototype(vm.get_realm())?;
+
+    let constructor = sup.as_object()?.constructor()?;
+
+    let constructor = constructor.resolve(proto.copy(), vm.get_realm())?;
+
+    output.set(constructor, vm)
+}
+
 pub fn enter_try(id: TryIdx, vm: &mut impl VM) -> Res {
     // vm.enter_try();
     
