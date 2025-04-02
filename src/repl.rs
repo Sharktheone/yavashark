@@ -11,6 +11,7 @@ use std::path::Path;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+use tokio::runtime::{Builder, Runtime};
 use yavashark_codegen::ByteCodegen;
 use yavashark_compiler::Compiler;
 use yavashark_env::print::PrettyPrint;
@@ -18,7 +19,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
+use yavashark_vm::{BorrowedVM, OldBorrowedVM, VM};
 
 pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
@@ -49,6 +50,8 @@ pub fn repl(conf: Conf) -> Res {
     rl.set_helper(Some(h));
 
     let mut count = 1;
+    
+    let rt = Builder::new_current_thread().enable_all().build()?;
 
     loop {
         let p = format!("{count}> ");
@@ -87,25 +90,28 @@ pub fn repl(conf: Conf) -> Res {
             conf,
             &mut interpreter_realm,
             &mut interpreter_scope,
-            &vm_realm,
+            &mut vm_realm,
             &vm_scope,
-            &old_vm_realm,
+            &mut old_vm_realm,
             &old_vm_scope,
+            &rt,
         );
     }
 
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn run_input(
     input: &str,
     conf: Conf,
     interpreter_realm: &mut Realm,
     interpreter_scope: &mut Scope,
-    vm_realm: &Realm,
+    vm_realm: &mut Realm,
     vm_scope: &Scope,
-    old_vm_realm: &Realm,
+    old_vm_realm: &mut Realm,
     old_vm_scope: &Scope,
+    rt: &Runtime
 ) {
     if input.is_empty() {
         return;
@@ -149,12 +155,14 @@ fn run_input(
                 return;
             }
         };
-
+        
         if conf.old_bytecode || conf.bytecode {
             println!("Interpreter: {}", result.pretty_print());
         } else {
             println!("{}", result.pretty_print());
         }
+        
+        rt.block_on(interpreter_realm.run_event_loop());
     }
     
     if conf.bytecode || conf.instructions {
@@ -172,18 +180,21 @@ fn run_input(
         
         if conf.bytecode {
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
-            let mut vm = OwnedVM::with_realm_scope(
-                bc.instructions,
-                data,
-                vm_realm.clone(),
+            let mut vm = BorrowedVM::with_scope(
+                &bc.instructions,
+                &data,
+                vm_realm,
                 vm_scope.clone(),
             );
+            
             
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");
             }
             
             println!("Bytecode: {:?}", vm.acc());
+            
+            rt.block_on(vm_realm.run_event_loop());
         }
     }
 
@@ -203,18 +214,21 @@ fn run_input(
         if conf.old_bytecode {
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
-            let mut vm = OldOwnedVM::with_realm_scope(
-                bc.instructions,
-                data,
-                old_vm_realm.clone(),
+            let mut vm = OldBorrowedVM::with_scope(
+                &bc.instructions,
+                &data,
+                old_vm_realm,
                 old_vm_scope.clone(),
             );
+            
 
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");
             }
 
             println!("OldBytecode: {:?}", vm.acc());
+            
+            rt.block_on(old_vm_realm.run_event_loop());
         }
     }
 }
@@ -225,11 +239,12 @@ pub fn old_repl(conf: conf::Conf) -> Res {
     let mut interpreter_realm = Realm::new()?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
-    let vm_realm = Realm::new()?;
+    let mut vm_realm = Realm::new()?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
     
-    let old_vm_realm = Realm::new()?;
+    let mut old_vm_realm = Realm::new()?;
     let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
+    let rt = Builder::new_current_thread().enable_all().build()?;
 
     let mut repl = Repl::new(Box::new(move |input| {
         run_input(
@@ -237,10 +252,11 @@ pub fn old_repl(conf: conf::Conf) -> Res {
             conf,
             &mut interpreter_realm,
             &mut interpreter_scope,
-            &vm_realm,
+            &mut vm_realm,
             &vm_scope,
-            &old_vm_realm,
+            &mut old_vm_realm,
             &old_vm_scope,
+            &rt,
         );
     }));
 

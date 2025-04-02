@@ -2,7 +2,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, Label};
+use yavashark_bytecode::data::{DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
@@ -22,6 +22,7 @@ pub struct OwnedVM {
     acc: Value,
 
     realm: Realm,
+    continue_storage: Option<OutputDataType>,
 }
 
 impl OwnedVM {
@@ -42,6 +43,7 @@ impl OwnedVM {
             current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
+            continue_storage: None,
         })
     }
 
@@ -62,6 +64,7 @@ impl OwnedVM {
             current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
+            continue_storage: None,
         }
     }
 
@@ -82,6 +85,7 @@ impl OwnedVM {
             current_scope: scope,
             acc: Value::Undefined,
             realm,
+            continue_storage: None,
         }
     }
 
@@ -236,5 +240,9 @@ impl VM for OwnedVM {
 
     fn get_scope_mut(&mut self) -> &mut Scope {
         &mut self.current_scope
+    }
+
+    fn set_continue_storage(&mut self, out: impl OutputData) {
+        self.continue_storage = Some(out.data_type());
     }
 }

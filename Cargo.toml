@@ -23,6 +23,7 @@ yavashark_codegen = { path = "crates/yavashark_codegen" }
 yavashark_vm = { path = "crates/yavashark_vm" }
 yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments"]}
 yavashark_compiler = { path = "crates/yavashark_compiler" }
+tokio = { version = "1.10.0", features = ["full"] }
 
 
 

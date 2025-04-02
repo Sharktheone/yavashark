@@ -1,6 +1,6 @@
 use swc_common::Span;
-use swc_ecma_ast::{BlockStmt, Class, ClassMember, Param, ParamOrTsParamProp, PropName};
-
+use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, Param, ParamOrTsParamProp, PropName};
+use yavashark_bytecode_interpreter::ByteCodeInterpreter;
 use crate::function::{JSFunction, RawJSFunction};
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
@@ -37,8 +37,7 @@ pub fn create_class(
             ClassMember::Method(method) => {
                 let (name, func) = create_method(
                     &method.key,
-                    method.function.params.clone(),
-                    method.function.body.clone(),
+                    &method.function,
                     scope,
                     realm,
                     stmt.span,
@@ -69,8 +68,7 @@ pub fn create_class(
             ClassMember::PrivateMethod(method) => {
                 let (name, func) = create_method(
                     &PropName::Ident(format!("#{}", method.key.name).as_str().into()),
-                    method.function.params.clone(),
-                    method.function.body.clone(),
+                    &method.function,
                     scope,
                     realm,
                     stmt.span,
@@ -151,15 +149,19 @@ pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: Stri
 
 fn create_method(
     name: &PropName,
-    params: Vec<Param>,
-    body: Option<BlockStmt>,
+    func: &Function,
     scope: &mut Scope,
     realm: &mut Realm,
     span: Span,
 ) -> Res<(Value, Value), Error> {
     let name = prop_name_to_value(name, realm, span, scope)?;
 
-    let func = JSFunction::new(name.to_string(realm)?, params, body, scope.clone(), realm);
+    if func.is_async || func.is_generator {
+        let name_str = name.to_string(realm)?;
+        return Ok((name, (ByteCodeInterpreter::compile_fn(&func, name_str, scope.clone(), realm)?.into())));
+    }
+
+    let func = JSFunction::new(name.to_string(realm)?, func.params.clone(), func.body.clone(), scope.clone(), realm);
     Ok((name, func.into()))
 }
 

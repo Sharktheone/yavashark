@@ -112,7 +112,8 @@ LoadSuper => Data
 LoadSuperConstructor => Data 
 
 Yield(Data)
-Await(Data)
+Await(Data) => Data
+AwaitNoOutput(Data) 
 
 Debugger
 

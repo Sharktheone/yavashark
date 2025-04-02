@@ -9,6 +9,7 @@ mod stack;
 mod storage;
 mod value_ext;
 mod vm;
+mod task;
 
 pub use regs::*;
 pub use stack::*;

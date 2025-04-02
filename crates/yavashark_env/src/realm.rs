@@ -11,12 +11,14 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use yavashark_value::Realm as RealmT;
+use crate::task_queue::AsyncTaskQueue;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Realm {
     pub intrinsics: Intrinsics, // [[Intrinsics]]
     pub global: ObjectHandle,   // [[GlobalObject]]
     pub env: Environment,       // [[GlobalEnv]]
+    pub queue: AsyncTaskQueue,
 }
 
 impl Realm {
@@ -31,6 +33,7 @@ impl Realm {
             },
             intrinsics,
             global: global.clone(),
+            queue: AsyncTaskQueue::new(),
         };
 
         init_global_obj(&global, &realm)?;
@@ -59,6 +62,10 @@ impl Realm {
         self.intrinsics.eval = Some(eval_func.clone());
         self.global
             .define_variable("eval".into(), Variable::write_config(eval_func.into()))
+    }
+    
+    pub async fn run_event_loop(&mut self) {
+        self.queue.runner().run(self).await
     }
 }
 

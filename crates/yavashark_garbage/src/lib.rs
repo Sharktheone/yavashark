@@ -2,7 +2,7 @@
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
 use std::fmt::{Debug, Formatter};
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -278,6 +278,12 @@ pub struct OwningGcGuard<'a, T: Collectable, V = T> {
     gc: Gc<T>,
 }
 
+
+pub struct OwningGcGuardRefed<T: Collectable, V = T> {
+    value_ptr: V,
+    _gc: Gc<T>,
+}
+
 impl<T: Collectable, V> Clone for OwningGcGuard<'_, T, V> {
     fn clone(&self) -> Self {
         Self {
@@ -343,6 +349,21 @@ impl<'a, T: Collectable, V> Deref for OwningGcGuard<'a, T, V> {
     }
 }
 
+impl<'a, T: Collectable, V> Deref for OwningGcGuardRefed<T, V> {
+    type Target = V;
+
+    fn deref(&self) -> &Self::Target {
+        &self.value_ptr
+    }
+}
+
+impl<'a, T: Collectable, V> DerefMut for OwningGcGuardRefed<T, V> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value_ptr
+    }
+}
+
+
 impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
     pub fn map<U, F: FnOnce(&V) -> &U>(self, f: F) -> OwningGcGuard<'a, T, U> {
         let value_ptr = f(self.value_ptr);
@@ -363,6 +384,24 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
                 gc: self.gc.clone(),
             })
             .ok_or(self)
+    }
+    
+    #[must_use]
+    pub fn gc(&self) -> Gc<T> {
+        self.gc.clone()
+    }
+    
+    pub fn map_refed<U: 'a, F: FnOnce(&'a V) -> U>(
+        self,
+        f: F,
+    ) -> OwningGcGuardRefed<T, U> {
+        let val = f(self.value_ptr);
+        
+        OwningGcGuardRefed {
+            value_ptr: val,
+            _gc: self.gc,
+        }
+    
     }
 }
 

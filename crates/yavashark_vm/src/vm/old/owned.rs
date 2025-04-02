@@ -4,7 +4,7 @@ use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, Label};
+use yavashark_bytecode::data::{DataSection, Label, OutputData};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
@@ -231,6 +231,10 @@ impl VM for OldOwnedVM {
 
     fn get_scope_mut(&mut self) -> &mut Scope {
         &mut self.current_scope
+    }
+
+    fn set_continue_storage(&mut self, out: impl OutputData) {
+        todo!()
     }
 }
 

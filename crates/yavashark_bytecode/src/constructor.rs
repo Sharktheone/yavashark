@@ -13223,13 +13223,62 @@ impl Instruction {
         }
     }
     #[must_use]
-    pub fn await_(arg0: impl Data) -> Self {
+    pub fn await_(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
-            DataType::Acc(arg0) => Self::AwaitAcc(arg0),
-            DataType::Const(arg0) => Self::AwaitConst(arg0),
-            DataType::Reg(arg0) => Self::AwaitReg(arg0),
-            DataType::Stack(arg0) => Self::AwaitStack(arg0),
-            DataType::Var(arg0) => Self::AwaitVar(arg0),
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AwaitAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AwaitAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::AwaitAccToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::AwaitAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AwaitConstToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AwaitConstToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AwaitConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AwaitConstToVar(arg0, output),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AwaitRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AwaitRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::AwaitRegToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::AwaitRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AwaitStackToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AwaitStackToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::AwaitStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::AwaitStackToVar(arg0, output),
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::AwaitVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::AwaitVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::AwaitVarToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::AwaitVarToVar(arg0, output),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn await_no_output(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::AwaitNoOutputAcc(arg0),
+            DataType::Const(arg0) => Self::AwaitNoOutputConst(arg0),
+            DataType::Reg(arg0) => Self::AwaitNoOutputReg(arg0),
+            DataType::Stack(arg0) => Self::AwaitNoOutputStack(arg0),
+            DataType::Var(arg0) => Self::AwaitNoOutputVar(arg0),
         }
     }
     #[must_use]

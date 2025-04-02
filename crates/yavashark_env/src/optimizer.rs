@@ -114,15 +114,20 @@ impl RawOptimFunction {
         if let Some(block) = &self.block {
             let func = block.borrow();
 
-            if let Err(e) = func.call(realm, scope, this) {
-                return match e {
-                    ControlFlow::Error(e) => Err(e),
-                    ControlFlow::Return(v) => Ok(v),
-                    ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
-                    ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
-                    ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
-                };
-            }
+            return match func.call(realm, scope, this) {
+                Err(e) => {
+                    match e {
+                        ControlFlow::Error(e) => Err(e),
+                        ControlFlow::Return(v) => Ok(v),
+                        ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
+                        ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
+                        ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement")),
+                        ControlFlow::Await(_) => Err(Error::syn("Illegal await statement")),
+                        ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
+                    }
+                }
+                Ok(v) => Ok(v),
+            };
         }
 
         Ok(Value::Undefined)

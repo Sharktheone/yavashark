@@ -1,7 +1,12 @@
+mod into_promise;
+
+pub use into_promise::*;
+
 use crate::conversion::FromValueOutput;
 use crate::error::ErrorObj;
-use crate::{MutObject, NativeFunction, ObjectHandle, Realm, Res, Value};
+use crate::{MutObject, NativeFunction, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
+use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
@@ -16,6 +21,7 @@ pub enum PromiseState {
 #[object]
 #[derive(Debug)]
 pub struct Promise {
+    pub notify: Notify,
     pub state: Cell<PromiseState>,
     #[mutable]
     pub value: Option<Value>,
@@ -42,8 +48,10 @@ pub struct RejectedHandler {
 }
 
 impl Promise {
+    #[must_use]
     pub fn new(realm: &Realm) -> Self {
         Self {
+            notify: Notify::new(),
             state: Cell::new(PromiseState::Pending),
             inner: RefCell::new(MutablePromise {
                 object: MutObject::with_proto(realm.intrinsics.promise.clone().into()),
@@ -53,6 +61,13 @@ impl Promise {
                 finally: Vec::new(),
             }),
         }
+    }
+
+    #[allow(clippy::future_not_send)]
+    pub async fn wait(&self) -> ValueResult {
+        self.notify.notified().await;
+
+        Ok(self.inner.try_borrow_mut()?.value.clone().unwrap_or(Value::Undefined))
     }
 
     pub fn resolve(&self, value: Value, realm: &mut Realm) -> Res {
@@ -73,6 +88,8 @@ impl Promise {
             handler.call(realm, vec![], Value::Undefined)?;
         }
 
+        self.notify.notify_waiters();
+
         Ok(())
     }
 
@@ -89,13 +106,25 @@ impl Promise {
         for handler in inner.on_rejected.drain(..) {
             handler.handle(value.clone(), realm)?;
         }
-        //TODO: handle uncaught rejection
+        //TODO: handle unhandled rejection
 
         for handler in inner.finally.drain(..) {
             handler.call(realm, vec![], Value::Undefined)?;
         }
 
+        self.notify.notify_waiters();
+
         Ok(())
+    }
+    
+    pub fn set_res(&self, res: ValueResult, realm: &mut Realm) {
+        match res {
+            Ok(val) => self.resolve(val, realm).unwrap(),
+            Err(err) => {
+                let val = ErrorObj::error_to_value(err, realm);
+                self.reject(&val, realm).unwrap();
+            }
+        }
     }
 
     pub fn with_callback(callback: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {

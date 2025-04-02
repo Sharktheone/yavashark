@@ -1,7 +1,8 @@
-use yavashark_bytecode::data::{ConstIdx, Label, TryIdx};
+use yavashark_bytecode::data::{Label, TryIdx};
 use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
+use yavashark_env::builtins::Promise;
 
 pub fn nullish_coalescing(
     left: impl Data,
@@ -136,12 +137,32 @@ pub fn yield_(_data: impl Data, _vm: &impl VM) -> ControlResult {
     unimplemented!()
 }
 
+pub fn await_(data: impl Data, out: impl OutputData, vm: &mut impl VM) -> ControlResult {
+    let result = data.get(vm)?;
+    
+    match result {
+        Value::Object(obj) if obj.downcast::<Promise>().is_some() => {
+            return Err(ControlFlow::Await(obj))
+        }
+        
+        _ => out.set(result, vm)?,
+    }
+    
+    Ok(())
+}
 
-pub fn await_(_data: impl Data, _vm: &impl VM) -> ControlResult {
-    // let result = data.get(vm)?;
-    // 
-    // Err(ControlFlow::Await(result))
-    unimplemented!()
+
+pub fn await_no_output(data: impl Data, vm: &mut impl VM) -> ControlResult {
+    let result = data.get(vm)?;
+    
+    if let Value::Object(obj) = result {
+        if obj.downcast::<Promise>().is_some() {
+            return Err(ControlFlow::Await(obj));
+
+        }
+    }
+    
+    Ok(())
 }
 
 pub fn debugger(_vm: &mut impl VM) -> Res {

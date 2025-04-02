@@ -8,6 +8,7 @@ mod http;
 mod io;
 mod tcp;
 mod time;
+mod timers;
 
 pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
     let obj = obj.get();
@@ -17,6 +18,7 @@ pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("tcp".into(), Tcp::new(realm)?.into())?;
     obj.define_variable("io".into(), io::Io::new(realm)?.into())?;
     obj.define_variable("time".into(), time::Timer::new(realm)?.into())?;
+    obj.define_variable("setTimeout".into(), timers::get_set_timeout(realm).into())?;
 
     Ok(())
 }

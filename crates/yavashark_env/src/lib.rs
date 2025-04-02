@@ -24,6 +24,7 @@ pub mod realm;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
+pub mod task_queue;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
@@ -44,6 +45,8 @@ pub enum ControlFlow {
     Break(Option<String>),
     Return(Value),
     Error(Error),
+    Yield(Value),
+    Await(ObjectHandle),
     OptChainShortCircuit,
 }
 

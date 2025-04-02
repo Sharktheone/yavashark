@@ -4,7 +4,7 @@ use yavashark_env::{
     conversion::FromValueOutput, Error, NativeFunction, ObjectHandle, Realm, Res, Value,
 };
 use yavashark_interpreter::function::OptimizedJSFunction;
-use yavashark_vm::function_code::BytecodeFunction;
+use yavashark_vm::function_code::OldBytecodeFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
 pub fn define_optimizer(realm: &Realm) -> Res {
@@ -52,7 +52,7 @@ fn get_optimizer(realm: &Realm) -> ObjectHandle {
 
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
-                BytecodeFunction {
+                OldBytecodeFunction {
                     instructions: bc.instructions,
                     ds: data,
                 }

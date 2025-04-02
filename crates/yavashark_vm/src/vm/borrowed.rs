@@ -2,7 +2,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, Label};
+use yavashark_bytecode::data::{DataSection, Label, OutputData};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
@@ -215,5 +215,9 @@ impl<'a> VM for BorrowedVM<'a> {
 
     fn get_scope_mut(&mut self) -> &mut Scope {
         &mut self.current_scope
+    }
+
+    fn set_continue_storage(&mut self, out: impl OutputData) {
+        todo!()
     }
 }
