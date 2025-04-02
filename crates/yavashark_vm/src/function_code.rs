@@ -1,4 +1,4 @@
-use crate::BorrowedVM;
+use crate::OldBorrowedVM;
 use std::any::Any;
 use yavashark_bytecode::data::DataSection;
 use yavashark_bytecode::Instruction;
@@ -18,7 +18,7 @@ impl FunctionCode for BytecodeFunction {
 
         println!("Running bytecode with VM!");
 
-        let mut vm = BorrowedVM::with_scope(&self.instructions, &self.ds, realm, scope);
+        let mut vm = OldBorrowedVM::with_scope(&self.instructions, &self.ds, realm, scope);
 
         vm.run()?;
 

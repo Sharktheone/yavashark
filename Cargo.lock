@@ -1783,20 +1783,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hstr"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71399f53a92ef72ee336a4b30201c6e944827e14e0af23204c291aad9c24cc85"
-dependencies = [
- "hashbrown 0.14.5",
- "new_debug_unreachable",
- "once_cell",
- "phf",
- "rustc-hash 2.1.1",
- "triomphe",
-]
-
-[[package]]
 name = "humantime"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3516,37 +3502,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "swc_allocator"
-version = "4.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc6b926f0d94bbb34031fe5449428cfa1268cdc0b31158d6ad9c97e0fc1e79dd"
-dependencies = [
- "allocator-api2",
- "bumpalo",
- "ptr_meta",
- "rustc-hash 2.1.1",
- "triomphe",
-]
-
-[[package]]
 name = "swc_atoms"
 version = "3.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c24077f986f0bc1c07823f850f688dd9be91b186efdb03fe1d52f7c2f2a4a346"
 dependencies = [
- "hstr 0.2.17",
- "once_cell",
- "rustc-hash 2.1.1",
- "serde",
-]
-
-[[package]]
-name = "swc_atoms"
-version = "5.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d7077ba879f95406459bc0c81f3141c529b34580bc64d7ab7bd15e7118a0391"
-dependencies = [
- "hstr 1.0.0",
+ "hstr",
  "once_cell",
  "rustc-hash 2.1.1",
  "serde",
@@ -3569,34 +3530,8 @@ dependencies = [
  "rustc-hash 2.1.1",
  "serde",
  "siphasher 0.3.11",
- "swc_allocator 3.0.0",
- "swc_atoms 3.1.0",
- "swc_eq_ignore_macros",
- "swc_visit",
- "tracing",
- "unicode-width 0.1.14",
- "url",
-]
-
-[[package]]
-name = "swc_common"
-version = "8.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e4a932c152e7142de2d5dba1c393e5523c47cd8fe656e5b0d411954bbaf1810"
-dependencies = [
- "ast_node",
- "better_scoped_tls",
- "cfg-if",
- "either",
- "from_variant",
- "new_debug_unreachable",
- "num-bigint",
- "once_cell",
- "rustc-hash 2.1.1",
- "serde",
- "siphasher 0.3.11",
- "swc_allocator 4.0.0",
- "swc_atoms 5.0.0",
+ "swc_allocator",
+ "swc_atoms",
  "swc_eq_ignore_macros",
  "swc_visit",
  "tracing",
@@ -3616,26 +3551,8 @@ dependencies = [
  "phf",
  "scoped-tls",
  "string_enum",
- "swc_atoms 3.1.0",
- "swc_common 6.1.1",
- "swc_visit",
- "unicode-id-start",
-]
-
-[[package]]
-name = "swc_ecma_ast"
-version = "8.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01f80679b1afc52ae0663eed0a2539cc3c108d48c287b5601712f9850d9fa9c2"
-dependencies = [
- "bitflags 2.8.0",
- "is-macro",
- "num-bigint",
- "phf",
- "scoped-tls",
- "string_enum",
- "swc_atoms 5.0.0",
- "swc_common 8.0.1",
+ "swc_atoms",
+ "swc_common",
  "swc_visit",
  "unicode-id-start",
 ]
@@ -3656,9 +3573,9 @@ dependencies = [
  "smallvec",
  "smartstring",
  "stacker",
- "swc_atoms 3.1.0",
- "swc_common 6.1.1",
- "swc_ecma_ast 6.1.0",
+ "swc_atoms",
+ "swc_common",
+ "swc_ecma_ast",
  "tracing",
  "typed-arena",
 ]
@@ -4931,11 +4848,12 @@ dependencies = [
  "js-sys",
  "rustyline",
  "rustyline-derive",
- "swc_common 6.1.1",
- "swc_ecma_ast 6.1.0",
+ "swc_common",
+ "swc_ecma_ast",
  "swc_ecma_parser",
  "wasm-bindgen",
  "yavashark_codegen",
+ "yavashark_compiler",
  "yavashark_env",
  "yavashark_interpreter",
  "yavashark_vm",
@@ -4956,7 +4874,7 @@ dependencies = [
 name = "yavashark_bytecode_interpreter"
 version = "0.1.0"
 dependencies = [
- "swc_ecma_ast 6.1.0",
+ "swc_ecma_ast",
  "yavashark_bytecode",
  "yavashark_codegen",
  "yavashark_env",
@@ -4969,8 +4887,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "swc_common 6.1.1",
- "swc_ecma_ast 6.1.0",
+ "swc_common",
+ "swc_ecma_ast",
  "swc_ecma_parser",
  "yavashark_bytecode",
 ]
@@ -4982,8 +4900,8 @@ dependencies = [
  "anyhow",
  "log",
  "num-traits",
- "swc_common 8.0.1",
- "swc_ecma_ast 8.1.0",
+ "swc_common",
+ "swc_ecma_ast",
  "yavashark_bytecode",
 ]
 
@@ -5007,7 +4925,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
- "swc_ecma_ast 6.1.0",
+ "swc_ecma_ast",
  "unicode-normalization",
  "yavashark_garbage",
  "yavashark_macro",
@@ -5036,8 +4954,8 @@ version = "0.1.0"
 dependencies = [
  "env_logger",
  "log",
- "swc_common 6.1.1",
- "swc_ecma_ast 6.1.0",
+ "swc_common",
+ "swc_ecma_ast",
  "swc_ecma_parser",
  "yavashark_env",
  "yavashark_garbage",
@@ -5079,7 +4997,7 @@ name = "yavashark_swc"
 version = "0.1.0"
 dependencies = [
  "rand 0.9.0",
- "swc_common 6.1.1",
+ "swc_common",
  "swc_ecma_parser",
 ]
 
@@ -5088,8 +5006,8 @@ name = "yavashark_test262"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.8.0",
- "swc_common 6.1.1",
- "swc_ecma_ast 6.1.0",
+ "swc_common",
+ "swc_ecma_ast",
  "swc_ecma_parser",
  "yaml-rust2",
  "yavashark_env",

@@ -7,7 +7,7 @@ pub use yavashark_vm as vm;
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, ValueResult};
-use yavashark_vm::BorrowedVM;
+use yavashark_vm::OldBorrowedVM;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
 pub struct ByteCodeInterpreter;
@@ -19,7 +19,7 @@ impl ByteCodeInterpreter {
 
         let ds = DataSection::new(code.variables, Vec::new(), code.literals);
 
-        let mut vm = BorrowedVM::with_scope(&code.instructions, &ds, realm, scope.clone());
+        let mut vm = OldBorrowedVM::with_scope(&code.instructions, &ds, realm, scope.clone());
 
         vm.run_ret()
     }

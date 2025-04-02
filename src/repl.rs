@@ -12,12 +12,13 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
+use yavashark_compiler::Compiler;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::OwnedVM;
+use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
 
 pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
@@ -30,6 +31,10 @@ pub fn repl(conf: Conf) -> Res {
     let mut vm_realm = Realm::new()?;
     vm_realm.set_eval(InterpreterEval)?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
+    
+    let mut old_vm_realm = Realm::new()?;
+    old_vm_realm.set_eval(InterpreterEval)?;
+    let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
 
     let config = Config::builder()
         .history_ignore_space(true)
@@ -84,6 +89,8 @@ pub fn repl(conf: Conf) -> Res {
             &mut interpreter_scope,
             &vm_realm,
             &vm_scope,
+            &old_vm_realm,
+            &old_vm_scope,
         );
     }
 
@@ -97,6 +104,8 @@ fn run_input(
     interpreter_scope: &mut Scope,
     vm_realm: &Realm,
     vm_scope: &Scope,
+    old_vm_realm: &Realm,
+    old_vm_scope: &Scope,
 ) {
     if input.is_empty() {
         return;
@@ -141,14 +150,44 @@ fn run_input(
             }
         };
 
-        if conf.bytecode {
+        if conf.old_bytecode || conf.bytecode {
             println!("Interpreter: {}", result.pretty_print());
         } else {
             println!("{}", result.pretty_print());
         }
     }
-
+    
     if conf.bytecode || conf.instructions {
+        let bc = match Compiler::compile(&script.body) {
+            Ok(bc) => bc,
+            Err(e) => {
+                eprintln!("Failed to compile code: {e:?}");
+                return;
+            }
+        };
+        
+        if conf.instructions {
+            println!("{bc:#?}");
+        }
+        
+        if conf.bytecode {
+            let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
+            let mut vm = OwnedVM::with_realm_scope(
+                bc.instructions,
+                data,
+                vm_realm.clone(),
+                vm_scope.clone(),
+            );
+            
+            if let Err(e) = vm.run() {
+                eprintln!("Uncaught: {e:?}");
+            }
+            
+            println!("Bytecode: {:?}", vm.acc());
+        }
+    }
+
+    if conf.old_bytecode || conf.instructions {
         let bc = match ByteCodegen::compile(&script.body) {
             Ok(bc) => bc,
             Err(e) => {
@@ -161,21 +200,21 @@ fn run_input(
             println!("{bc:#?}");
         }
 
-        if conf.bytecode {
+        if conf.old_bytecode {
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
-            let mut vm = OwnedVM::with_realm_scope(
+            let mut vm = OldOwnedVM::with_realm_scope(
                 bc.instructions,
                 data,
-                vm_realm.clone(),
-                vm_scope.clone(),
+                old_vm_realm.clone(),
+                old_vm_scope.clone(),
             );
 
             if let Err(e) = vm.run() {
                 eprintln!("Uncaught: {e:?}");
             }
 
-            println!("Bytecode: {:?}", vm.acc());
+            println!("OldBytecode: {:?}", vm.acc());
         }
     }
 }
@@ -188,6 +227,9 @@ pub fn old_repl(conf: conf::Conf) -> Res {
 
     let vm_realm = Realm::new()?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
+    
+    let old_vm_realm = Realm::new()?;
+    let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
 
     let mut repl = Repl::new(Box::new(move |input| {
         run_input(
@@ -197,6 +239,8 @@ pub fn old_repl(conf: conf::Conf) -> Res {
             &mut interpreter_scope,
             &vm_realm,
             &vm_scope,
+            &old_vm_realm,
+            &old_vm_scope,
         );
     }));
 

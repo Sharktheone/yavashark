@@ -9,9 +9,10 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_codegen::ByteCodegen;
+use yavashark_compiler::Compiler;
 use yavashark_env::print::PrettyPrint;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::OwnedVM;
+use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -36,6 +37,14 @@ fn main() {
             clap::Arg::new("bytecode")
                 .help("Run with the bytecode-interpreter")
                 .short('b')
+                .required(false)
+                .default_value("false")
+                .action(clap::ArgAction::SetTrue),
+        )
+        .arg(
+            clap::Arg::new("oldbytecode")
+                .help("Run with the old bytecode-interpreter")
+                .short('B')
                 .required(false)
                 .default_value("false")
                 .action(clap::ArgAction::SetTrue),
@@ -80,6 +89,7 @@ fn main() {
 
     let interpreter = matches.get_flag("interpreter");
     let bytecode = matches.get_flag("bytecode");
+    let old_bytecode = matches.get_flag("oldbytecode");
     let ast = matches.get_flag("ast");
     let instructions = matches.get_flag("instructions");
     let shell = matches.get_flag("shell");
@@ -128,18 +138,36 @@ fn main() {
             };
             println!("Interpreter: {result:?}");
         }
+        
+        if bytecode {
+            let bc = Compiler::compile(&script.body).unwrap();
+            
+            if instructions {
+                println!("{bc:#?}");
+            }
+            
+            if bytecode {
+                let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
+                let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
+                
+                vm.run().unwrap();
+                
+                println!("Bytecode: {:?}", vm.acc());
+            }
+            
+        }
 
-        if bytecode || instructions {
+        if old_bytecode || instructions {
             let bc = ByteCodegen::compile(&script.body).unwrap();
 
             if instructions {
                 println!("{bc:#?}");
             }
 
-            if bytecode {
+            if old_bytecode {
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
 
-                let mut vm = OwnedVM::new(bc.instructions, data, path).unwrap();
+                let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
 
                 vm.run().unwrap();
 
@@ -153,6 +181,7 @@ fn main() {
         interpreter,
         bytecode,
         instructions,
+        old_bytecode,
     };
 
     if shell && shellold {
