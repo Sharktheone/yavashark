@@ -11,7 +11,7 @@ use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::task_queue::AsyncTask;
 use yavashark_env::value::{BoxedObj, Obj};
-use yavashark_env::{ObjectHandle, Realm, Res};
+use yavashark_env::{ObjectHandle, Realm, Res, Value};
 use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
 
 pub struct BytecodeAsyncTask {
@@ -54,8 +54,16 @@ impl AsyncTask for BytecodeAsyncTask {
             let pinned = unsafe { Pin::new_unchecked(&mut promise.1) };
             if pinned.poll(cx).is_pending() {
                 return Poll::Pending;
+            } else if let Some(state) = inner.state.as_mut() {
+                let val = promise.0.inner.borrow().value.clone().unwrap_or(Value::Undefined);
+                
+                state.continue_async(val)?;
+                
+                
             }
         }
+        
+        _ = inner.await_promise.take();
 
         if let Some(state) = inner.state.take() {
             let vm = AsyncVM::from_state(state, realm);

@@ -46,6 +46,32 @@ impl VmState {
             continue_storage: None,
         }
     }
+    
+    pub fn continue_async(&mut self, val: Value) -> Res {
+        if let Some(storage) = self.continue_storage.take() {
+            match storage {
+                OutputDataType::Acc(_) => self.acc = val,
+                OutputDataType::Reg(reg) => self.regs.set(reg.0, val)?,
+                OutputDataType::Stack(stack) => self.stack.set(stack.0 as usize, val),
+                OutputDataType::Var(name) => {
+                    let name = self
+                        .code
+                        .ds
+                        .var_names
+                        .get(name.0 as usize)
+                        .map(String::as_str)
+                        .ok_or(Error::reference("Invalid variable name"))?;
+                    
+                    self.current_scope.declare_var(name.into(), val)?;
+                }
+                
+                
+            }
+        }
+        
+        Ok(())
+    }
+
 }
 
 impl<'a> AsyncVM<'a> {
