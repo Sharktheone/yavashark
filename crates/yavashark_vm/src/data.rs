@@ -2,11 +2,11 @@ use crate::VM;
 use yavashark_bytecode::data::{Acc, ConstIdx, Reg, Stack, VarName};
 use yavashark_env::{Error, Res, Value};
 
-pub trait Data: Copy {
+pub trait Data: Copy + yavashark_bytecode::data::Data {
     fn get(self, vm: &mut impl VM) -> Res<Value>;
 }
 
-pub trait OutputData: Data {
+pub trait OutputData: Data + yavashark_bytecode::data::OutputData {
     fn set(self, value: Value, vm: &mut impl VM) -> Res;
 }
 
