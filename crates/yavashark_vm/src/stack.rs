@@ -35,9 +35,10 @@ impl Stack {
     }
 
     pub fn set(&mut self, idx: usize, value: Value) {
-        if idx < self.stack.len() {
-            self.stack[idx] = value;
+        if idx >= self.stack.len() {
+            self.stack.resize(idx + 1, Value::Undefined);
         }
+        self.stack[idx] = value;
     }
 
     pub fn pop_n(&mut self, n: usize) -> Vec<Value> {
