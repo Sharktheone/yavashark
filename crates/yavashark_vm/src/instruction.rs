@@ -8,6 +8,7 @@ mod logical;
 mod math;
 mod other;
 mod scope;
+mod decl;
 
 pub use assign::*;
 pub use bit::*;
@@ -19,3 +20,4 @@ pub use logical::*;
 pub use math::*;
 pub use other::*;
 pub use scope::*;
+pub use decl::*;

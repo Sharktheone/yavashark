@@ -61,7 +61,7 @@ pub fn generate_constructors() {
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 
-use crate::data::{Data, DataType, OutputData, OutputDataType, Label, TryIdx};
+use crate::data::{Data, DataType, OutputData, OutputDataType, Label, TryIdx, VarName};
 use crate::{JmpOffset, JmpAddr}; 
 use crate::instructions::Instruction; 
 

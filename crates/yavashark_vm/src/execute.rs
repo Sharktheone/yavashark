@@ -10883,6 +10883,23 @@ impl Execute for Instruction {
             Self::NullishAssignConstToStack(arg0, output) => {
                 instruction::nullish_assign(arg0, output, vm)?
             }
+            Self::DeclConstVar(arg0, arg1) => instruction::decl_const(arg0, arg1, vm)?,
+            Self::DeclConstReg(arg0, arg1) => instruction::decl_const(arg0, arg1, vm)?,
+            Self::DeclConstAcc(arg0, arg1) => instruction::decl_const(arg0, arg1, vm)?,
+            Self::DeclConstStack(arg0, arg1) => instruction::decl_const(arg0, arg1, vm)?,
+            Self::DeclConstConst(arg0, arg1) => instruction::decl_const(arg0, arg1, vm)?,
+            Self::DeclVarVar(arg0, arg1) => instruction::decl_var(arg0, arg1, vm)?,
+            Self::DeclVarReg(arg0, arg1) => instruction::decl_var(arg0, arg1, vm)?,
+            Self::DeclVarAcc(arg0, arg1) => instruction::decl_var(arg0, arg1, vm)?,
+            Self::DeclVarStack(arg0, arg1) => instruction::decl_var(arg0, arg1, vm)?,
+            Self::DeclVarConst(arg0, arg1) => instruction::decl_var(arg0, arg1, vm)?,
+            Self::DeclEmptyVar(arg0) => instruction::decl_empty_var(arg0, vm)?,
+            Self::DeclLetVar(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
+            Self::DeclLetReg(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
+            Self::DeclLetAcc(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
+            Self::DeclLetStack(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
+            Self::DeclLetConst(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
+            Self::DeclEmptyLet(arg0) => instruction::decl_empty_let(arg0, vm)?,
         }
         Ok(())
     }

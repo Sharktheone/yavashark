@@ -1,8 +1,21 @@
+mod class;
+mod fn_;
+mod var;
+mod using;
+
+use anyhow::anyhow;
 use crate::{Compiler, Res};
 use swc_ecma_ast::Decl;
 
 impl Compiler {
     pub fn compile_decl(&mut self, d: &Decl) -> Res {
-        todo!()
+        match d {
+            Decl::Class(class) => self.decl_class(class),
+            Decl::Fn(fn_decl) => self.decl_fn(fn_decl),
+            Decl::Var(var) => self.decl_var(var),
+            Decl::Using(using) => self.decl_using(using),
+            
+            _ => Err(anyhow!("Typescript not supported"))
+        }
     }
 }

@@ -137,3 +137,9 @@ ExpAssign(Data) => Data
 AndAssign(Data) => Data
 OrAssign(Data) => Data
 NullishAssign(Data) => Data
+
+DeclConst(Data, VarName)
+DeclVar(Data, VarName)
+DeclEmptyVar(VarName)
+DeclLet(Data, VarName)
+DeclEmptyLet(VarName)

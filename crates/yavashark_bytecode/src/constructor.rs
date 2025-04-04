@@ -6,7 +6,7 @@
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
 
-use crate::data::{Data, DataType, OutputData, OutputDataType, Label, TryIdx};
+use crate::data::{Data, DataType, OutputData, OutputDataType, Label, TryIdx, VarName};
 use crate::{JmpOffset, JmpAddr}; 
 use crate::instructions::Instruction; 
 
@@ -14367,5 +14367,43 @@ impl Instruction {
                 }
             }
         }
+    }
+    #[must_use]
+    pub fn decl_const(arg0: impl Data, arg1: VarName) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::DeclConstAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::DeclConstConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::DeclConstReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::DeclConstStack(arg0, arg1),
+            DataType::Var(arg0) => Self::DeclConstVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn decl_var(arg0: impl Data, arg1: VarName) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::DeclVarAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::DeclVarConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::DeclVarReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::DeclVarStack(arg0, arg1),
+            DataType::Var(arg0) => Self::DeclVarVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn decl_empty_var(arg0: VarName) -> Self {
+        Self::DeclEmptyVar(arg0)
+    }
+    #[must_use]
+    pub fn decl_let(arg0: impl Data, arg1: VarName) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::DeclLetAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::DeclLetConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::DeclLetReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::DeclLetStack(arg0, arg1),
+            DataType::Var(arg0) => Self::DeclLetVar(arg0, arg1),
+        }
+    }
+    #[must_use]
+    pub fn decl_empty_let(arg0: VarName) -> Self {
+        Self::DeclEmptyLet(arg0)
     }
 }
