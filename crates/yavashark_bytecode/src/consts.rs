@@ -2,7 +2,7 @@ use std::rc::Rc;
 use crate::data::DataSection;
 use crate::instructions;
 use num_bigint::BigInt;
-use yavashark_value::ConstString,;
+use yavashark_value::ConstString;
 use swc_ecma_ast::Param;
 
 #[derive(Debug, Clone, PartialEq)]
