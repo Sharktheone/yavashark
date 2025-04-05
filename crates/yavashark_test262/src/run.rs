@@ -11,7 +11,9 @@ use yavashark_interpreter::Interpreter;
 
 pub fn run_file(file: PathBuf) -> Result<String, Error> {
     let (stmt, metadata) = parse_file(&file);
-    let (mut realm, mut scope) = setup_global(file.clone(), metadata.flags.contains(Flags::RAW))?;
+    let raw = metadata.flags.contains(Flags::RAW);
+    let async_ = metadata.flags.contains(Flags::ASYNC);
+    let (mut realm, mut scope) = setup_global(file.clone(), raw, async_)?;
 
     run_file_in(file, &mut realm, &mut scope, stmt, metadata)
 }

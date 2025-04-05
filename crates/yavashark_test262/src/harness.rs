@@ -38,7 +38,21 @@ pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
     Ok(())
 }
 
-pub fn setup_global(file: PathBuf, raw: bool) -> Res<(Realm, Scope)> {
+pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
+    let path = scope.get_current_path()?;
+
+    let async_path = Path::new(TEST262_DIR).join("harness/doneprintHandle.js");
+
+    scope.set_path(async_path)?;
+
+    Interpreter::run_program_in(&COMPILED[0].0, realm, scope)?;
+
+    scope.set_path(path)?;
+
+    Ok(())
+}
+
+pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope)> {
     let mut r = Realm::new()?;
     let mut s = Scope::global(&r, file);
 
@@ -51,7 +65,12 @@ pub fn setup_global(file: PathBuf, raw: bool) -> Res<(Realm, Scope)> {
 
     if !raw {
         run_harness_in_realm(&mut r, &mut s)?;
+        
+        if async_ {
+            run_async_in_realm(&mut r, &mut s)?;
+        }
     }
+    
 
     r.set_eval(InterpreterEval)?;
 
@@ -65,7 +84,7 @@ mod tests {
 
     #[test]
     fn new_harness() {
-        let (_global, _scope) = match setup_global(PathBuf::new(), false) {
+        let (_global, _scope) = match setup_global(PathBuf::new(), false, false) {
             Ok(v) => v,
             Err(e) => {
                 panic!("Failed to create new harness: {e}")
