@@ -6,7 +6,7 @@ use yavashark_value::{MutObj, Obj};
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{Error, MutObject, NativeConstructor, NativeFunction, ObjectProperty, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -48,7 +48,7 @@ impl FunctionPrototype {
         this.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
         this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
         this.call = NativeFunction::with_proto("call", call, func.copy()).into();
-        this.constructor = NativeFunction::with_proto("Function", constructor, func.copy()).into();
+        this.constructor = NativeConstructor::with_proto("Function".to_string(), constructor, func.copy(), func.copy()).into();
         this.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
 
         this.constructor
@@ -97,7 +97,7 @@ fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 }
 
 #[allow(unused)]
-fn constructor(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> ValueResult {
     let Some(body) = args.pop() else {
         return Ok(NativeFunction::new("anonymous", |_, _, _| Ok(Value::Undefined), realm).into());
     };
@@ -426,4 +426,5 @@ impl Obj<Realm> for FunctionPrototype {
 
         this.object.prototype()
     }
+    
 }
