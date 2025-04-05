@@ -14,12 +14,14 @@ use yavashark_macro::{object, properties_new};
 pub fn print(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
         "print",
-        |args, _, _| {
+        |args, _, realm| {
             let Some(first) = args.first() else {
                 return Err(Error::ty("expected at least one argument"));
             };
+            
+            let arg = first.to_string(realm)?;
 
-            println!("{first:?}");
+            println!("{arg}");
 
             Ok(Value::Undefined)
         },
