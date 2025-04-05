@@ -45,7 +45,7 @@ pub fn generate_instruction_enum() {
     }
 
     let output = quote! {
-        #[derive(Debug, Clone, Copy)]
+        #[derive(Debug, Clone, Copy, PartialEq)]
         pub enum Instruction {
             #(#variants),*
         }

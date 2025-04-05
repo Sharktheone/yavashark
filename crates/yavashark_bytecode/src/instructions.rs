@@ -9,7 +9,7 @@ use crate::{JmpOffset, JmpAddr};
 
 
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Instruction {
     AddVarVarToVar(VarName, VarName, VarName),
     AddRegVarToVar(Reg, VarName, VarName),
