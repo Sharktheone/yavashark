@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	 "context"
 	"os/exec"
 	"strings"
 	"time"
@@ -61,13 +61,31 @@ func runTest(path string) Result {
 			Msg:    out,
 			Path:   path,
 		}
-	} else if strings.HasPrefix(out, "FAIL") {
+	}
+
+    if strings.HasPrefix(out, "FAIL") {
 		return Result{
 			Status: status.FAIL,
 			Msg:    out,
 			Path:   path,
 		}
-	}
+    }
+
+    if strings.HasPrefix(out, "Test262:AsyncTestComplete") {
+	    return Result{
+	        Status: status.PASS,
+	        Msg: out,
+	        Path: path,
+        }
+    }
+
+    if strings.HasPrefix(out, "Test262:AsyncTestFailure:") {
+        return Result{
+            Status: status.FAIL,
+            Msg:    out,
+            Path: path,
+        }
+    }
 
 	return Result{
 		Status: status.CRASH,
