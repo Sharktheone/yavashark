@@ -42,10 +42,12 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
     let path = scope.get_current_path()?;
 
     let async_path = Path::new(TEST262_DIR).join("harness/doneprintHandle.js");
+    
+    let prog = parse_file(async_path.as_path()).0;
 
     scope.set_path(async_path)?;
 
-    Interpreter::run_program_in(&COMPILED[0].0, realm, scope)?;
+    Interpreter::run_program_in(&prog, realm, scope)?;
 
     scope.set_path(path)?;
 
