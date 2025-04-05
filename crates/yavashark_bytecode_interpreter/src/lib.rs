@@ -3,6 +3,7 @@ use std::rc::Rc;
 use swc_ecma_ast::{Function, Stmt};
 
 pub use yavashark_bytecode as bytecode;
+use yavashark_bytecode::BytecodeFunctionCode;
 pub use yavashark_codegen as codegen;
 pub use yavashark_vm as vm;
 
@@ -12,7 +13,7 @@ use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, ObjectHandle, Realm, Res, ValueResult};
 use yavashark_vm::OldBorrowedVM;
-use yavashark_vm::function_code::{BytecodeFunction, BytecodeFunctionCode};
+use yavashark_vm::function_code::{BytecodeFunction};
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
 pub struct ByteCodeInterpreter;

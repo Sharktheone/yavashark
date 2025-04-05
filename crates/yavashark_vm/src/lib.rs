@@ -10,6 +10,7 @@ mod storage;
 mod task;
 mod value_ext;
 mod vm;
+mod consts;
 
 pub use regs::*;
 pub use stack::*;

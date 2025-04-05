@@ -1,10 +1,10 @@
-use crate::function_code::BytecodeFunctionCode;
 use crate::{AsyncPoll, AsyncVM, VmState, VM};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 use tokio::sync::futures::Notified;
+use yavashark_bytecode::BytecodeFunctionCode;
 use yavashark_env::builtins::Promise;
 use yavashark_env::conversion::FromValueOutput;
 use yavashark_env::error::ErrorObj;

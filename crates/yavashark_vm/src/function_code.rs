@@ -3,7 +3,7 @@ use crate::{BorrowedVM, OldBorrowedVM, VM};
 use std::any::Any;
 use std::rc::Rc;
 use yavashark_bytecode::data::DataSection;
-use yavashark_bytecode::{instructions, Instruction};
+use yavashark_bytecode::{BytecodeFunctionCode, Instruction};
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult, Value};
@@ -32,11 +32,6 @@ impl FunctionCode for OldBytecodeFunction {
     }
 }
 
-#[derive(Debug)]
-pub struct BytecodeFunctionCode {
-    pub instructions: Vec<instructions::Instruction>,
-    pub ds: DataSection,
-}
 
 #[derive(Debug)]
 pub struct BytecodeFunction {

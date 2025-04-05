@@ -7,6 +7,7 @@ use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
+use crate::consts::ConstIntoValue;
 
 pub struct OwnedVM {
     regs: Registers,
@@ -173,7 +174,7 @@ impl VM for OwnedVM {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm)
+        val.clone().into_value(&self.realm, &self.current_scope)
     }
 
     #[must_use]

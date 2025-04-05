@@ -3,6 +3,7 @@ use yavashark_bytecode::data::Label;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::value::Error;
 use yavashark_env::{Res, Value};
+use crate::consts::ConstIntoValue;
 
 #[allow(unused)]
 impl OldOwnedVM {
@@ -78,7 +79,7 @@ impl OldOwnedVM {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm)
+        val.clone().into_value(&self.realm, &self.current_scope)
     }
 
     #[must_use]

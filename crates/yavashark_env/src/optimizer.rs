@@ -47,7 +47,7 @@ impl OptimFunction {
         params: Vec<Param>,
         block: Option<RefCell<Box<dyn FunctionCode>>>,
         scope: Scope,
-        realm: &mut Realm,
+        realm: &Realm,
     ) -> Res<ObjectHandle> {
         let prototype = Object::new(realm);
 

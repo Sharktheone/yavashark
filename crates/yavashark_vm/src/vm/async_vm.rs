@@ -1,12 +1,12 @@
 use crate::execute::Execute;
-use crate::function_code::BytecodeFunctionCode;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
 use yavashark_bytecode::data::{Label, OutputData, OutputDataType};
-use yavashark_bytecode::{ConstIdx, Reg, VarName};
+use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
+use crate::consts::ConstIntoValue;
 
 pub struct VmState {
     regs: Registers,
@@ -213,7 +213,7 @@ impl<'a> VM for AsyncVM<'a> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm)
+        val.clone().into_value(&self.realm, &self.state.current_scope)
     }
 
     #[must_use]

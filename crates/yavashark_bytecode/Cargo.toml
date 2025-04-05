@@ -9,6 +9,7 @@ yavashark_value = { path = "../yavashark_value" }
 yavashark_macro = { path = "../yavashark_macro" }
 bincode = "2.0.0-rc.3"
 num-bigint = "0.4.6"
+swc_ecma_ast = "6.1.0"
 
 [lints]
 workspace = true
