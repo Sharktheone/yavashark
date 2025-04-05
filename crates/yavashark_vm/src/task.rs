@@ -1,4 +1,4 @@
-use crate::{AsyncPoll, AsyncVM, VmState, VM};
+use crate::{AsyncPoll, AsyncVM, VmState};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;

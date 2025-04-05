@@ -1,12 +1,9 @@
-use crate::builtins::Promise;
-use crate::{Realm, Res, ValueResult};
+use crate::{Realm, Res};
 use std::fmt::Debug;
-use std::future::{poll_fn, Future};
+use std::future::poll_fn;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::{fmt, mem};
-use yavashark_garbage::OwningGcGuard;
-use yavashark_value::BoxedObj;
 
 pub trait AsyncTask {
     fn poll(self: Pin<&mut Self>, cx: &mut Context, realm: &mut Realm) -> Poll<Res>;

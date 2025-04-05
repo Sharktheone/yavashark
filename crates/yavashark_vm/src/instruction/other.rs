@@ -227,13 +227,9 @@ pub fn load_super_constructor(output: impl OutputData, vm: &mut impl VM) -> Res 
 }
 
 pub fn enter_try(id: TryIdx, vm: &mut impl VM) -> Res {
-    // vm.enter_try();
-
-    Ok(())
+    vm.enter_try(id)
 }
 
 pub fn leave_try(vm: &mut impl VM) -> Res {
-    // vm.leave_try();
-
-    Ok(())
+    vm.leave_try()
 }

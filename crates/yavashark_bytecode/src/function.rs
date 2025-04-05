@@ -1,8 +1,5 @@
 use crate::data::DataSection;
-use crate::{FunctionBlueprint, Instruction};
-use std::cell::RefCell;
-use yavashark_env::realm::Realm;
-use yavashark_env::{MutObject, ObjectHandle};
+use crate::Instruction;
 use yavashark_macro::object;
 
 #[derive(Debug)]

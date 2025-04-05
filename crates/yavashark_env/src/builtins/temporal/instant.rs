@@ -36,6 +36,7 @@ impl Instant {
         }
     }
 
+    #[allow(unused)]
     pub fn from(value: Value, realm: &Realm) -> Res<Self> {
         if let Value::String(str) = &value {
             return DateTime::parse_from_rfc3339(str)
