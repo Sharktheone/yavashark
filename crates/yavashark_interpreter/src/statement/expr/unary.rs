@@ -40,7 +40,7 @@ impl Interpreter {
             UnaryOp::Plus => Value::Number(value.to_number(realm)?),
             UnaryOp::Minus => Value::Number(-value.to_number(realm)?),
             UnaryOp::Bang => Value::Boolean(!value.is_truthy()),
-            UnaryOp::Tilde => Value::Number((!(value.to_int_or_null())) as f64),
+            UnaryOp::Tilde => Value::Number((!(value.to_int_or_null())?) as f64),
             UnaryOp::TypeOf => Value::String(value.type_of().into()),
             UnaryOp::Void => Value::Undefined,
             UnaryOp::Delete => Value::Boolean(false), // unreachable
