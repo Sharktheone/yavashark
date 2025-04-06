@@ -77,7 +77,7 @@ impl<'a> BorrowedVM<'a> {
     }
 }
 
-impl<'a> VM for BorrowedVM<'a> {
+impl VM for BorrowedVM<'_> {
     fn acc(&self) -> Value {
         self.acc.clone()
     }
@@ -149,7 +149,7 @@ impl<'a> VM for BorrowedVM<'a> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm, &self.current_scope)
+        val.clone().into_value(self.realm, &self.current_scope)
     }
 
     #[must_use]
@@ -168,7 +168,7 @@ impl<'a> VM for BorrowedVM<'a> {
     }
 
     fn get_realm(&mut self) -> &mut Realm {
-        &mut self.realm
+        self.realm
     }
 
     fn set_pc(&mut self, pc: usize) {

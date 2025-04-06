@@ -57,8 +57,7 @@ pub fn construct(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> 
 
     let Value::Object(constructor) = func.copy() else {
         return Err(ControlFlow::error_type(format!(
-            "{:?} is not a constructor",
-            func
+            "{func:?} is not a constructor",
         )));
     };
 
@@ -76,8 +75,7 @@ pub fn construct_no_output(func: impl Data, vm: &mut impl VM) -> ControlResult {
 
     let Value::Object(constructor) = func.copy() else {
         return Err(ControlFlow::error_type(format!(
-            "{:?} is not a constructor",
-            func
+            "{func:?} is not a constructor",
         )));
     };
 

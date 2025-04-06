@@ -27,12 +27,13 @@ pub enum Type {
 }
 
 impl Type {
-    pub fn size(&self) -> usize {
+    #[must_use]
+    pub const fn size(&self) -> usize {
         match self {
-            Type::U8 | Type::I8 => 1,
-            Type::U16 | Type::I16 | Type::F16 => 2,
-            Type::U32 | Type::I32 | Type::F32 => 4,
-            Type::U64 | Type::I64 | Type::F64 => 8,
+            Self::U8 | Self::I8 => 1,
+            Self::U16 | Self::I16 | Self::F16 => 2,
+            Self::U32 | Self::I32 | Self::F32 => 4,
+            Self::U64 | Self::I64 | Self::F64 => 8,
         }
     }
 }

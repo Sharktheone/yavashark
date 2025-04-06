@@ -65,7 +65,7 @@ impl Realm {
     }
 
     pub async fn run_event_loop(&mut self) {
-        self.queue.runner().run(self).await
+        self.queue.runner().run(self).await;
     }
 }
 

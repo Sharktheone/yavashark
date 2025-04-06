@@ -1,3 +1,6 @@
+#![allow(clippy::future_not_send)]
+
+
 pub use console::*;
 pub use function::*;
 pub use native_object::*;

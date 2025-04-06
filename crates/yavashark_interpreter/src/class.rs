@@ -155,7 +155,7 @@ fn create_method(
         let name_str = name.to_string(realm)?;
         return Ok((
             name,
-            (ByteCodeInterpreter::compile_fn(&func, name_str, scope.clone(), realm)?.into()),
+            (ByteCodeInterpreter::compile_fn(func, name_str, scope.clone(), realm)?.into()),
         ));
     }
 

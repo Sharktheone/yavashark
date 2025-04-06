@@ -63,7 +63,6 @@ impl Promise {
         }
     }
 
-    #[allow(clippy::future_not_send)]
     pub async fn wait(&self) -> ValueResult {
         self.notify.notified().await;
 
@@ -75,7 +74,7 @@ impl Promise {
             .unwrap_or(Value::Undefined))
     }
 
-    pub fn resolve(&self, value: Value, realm: &mut Realm) -> Res {
+    pub fn resolve(&self, value: &Value, realm: &mut Realm) -> Res {
         let mut inner = self.inner.try_borrow_mut()?;
 
         if self.state.get() != PromiseState::Pending {
@@ -122,14 +121,16 @@ impl Promise {
         Ok(())
     }
 
-    pub fn set_res(&self, res: ValueResult, realm: &mut Realm) {
+    pub fn set_res(&self, res: ValueResult, realm: &mut Realm) -> Res {
         match res {
-            Ok(val) => self.resolve(val, realm).unwrap(),
+            Ok(val) => self.resolve(&val, realm)?,
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
-                self.reject(&val, realm).unwrap();
+                self.reject(&val, realm)?;
             }
         }
+        
+        Ok(())
     }
 
     pub fn with_callback(callback: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
@@ -142,7 +143,7 @@ impl Promise {
             "on_fullfilled",
             move |args, _, realm| {
                 let this = <&Self>::from_value_out(promise_clone.clone().into())?;
-                this.resolve(args.first().cloned().unwrap_or(Value::Undefined), realm)?;
+                this.resolve(&args.first().cloned().unwrap_or(Value::Undefined), realm)?;
 
                 Ok(Value::Undefined)
             },
@@ -198,13 +199,13 @@ impl Promise {
                 PromiseState::Fulfilled => {
                     let val = inner.value.clone().unwrap_or(Value::Undefined);
                     let ret = on_fulfilled.call(realm, vec![val], this.clone())?;
-                    promise_obj.resolve(ret, realm)?;
+                    promise_obj.resolve(&ret, realm)?;
                 }
                 PromiseState::Pending => {
                     let handler = FullfilledHandler::new(promise_obj.clone(), on_fulfilled, realm);
                     inner.on_fulfilled.push(handler);
                 }
-                _ => {}
+                PromiseState::Rejected => {}
             }
         };
 
@@ -212,14 +213,14 @@ impl Promise {
             match state {
                 PromiseState::Rejected => {
                     let val = inner.value.clone().unwrap_or(Value::Undefined);
-                    let ret = on_rejected.call(realm, vec![val], this.clone())?;
+                    let ret = on_rejected.call(realm, vec![val], this)?;
                     promise_obj.reject(&ret, realm)?;
                 }
                 PromiseState::Pending => {
                     let handler = RejectedHandler::new(promise_obj.clone(), on_rejected, realm);
                     inner.on_rejected.push(handler);
                 }
-                _ => {}
+                PromiseState::Fulfilled => {}
             }
         };
 
@@ -293,7 +294,7 @@ impl FullfilledHandler {
 
     pub fn handle(&self, value: Value, realm: &mut Realm) -> Res {
         match self.f.call(realm, vec![value], Value::Undefined) {
-            Ok(ret) => self.promise.resolve(ret, realm),
+            Ok(ret) => self.promise.resolve(&ret, realm),
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
 
@@ -321,7 +322,7 @@ impl RejectedHandler {
 
     pub fn handle(&self, value: Value, realm: &mut Realm) -> Res {
         match self.f.call(realm, vec![value], Value::Undefined) {
-            Ok(ret) => self.promise.resolve(ret, realm),
+            Ok(ret) => self.promise.resolve(&ret, realm),
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
 

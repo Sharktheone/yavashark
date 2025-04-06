@@ -30,7 +30,7 @@ impl Interpreter {
 
         let name = stmt.ident.sym.to_string();
         let function = if stmt.function.is_async || stmt.function.is_generator {
-            ByteCodeInterpreter::compile_fn(&stmt.function, name.clone(), fn_scope, realm)?.into()
+            ByteCodeInterpreter::compile_fn(&stmt.function, name.clone(), fn_scope, realm)?
         } else {
             JSFunction::new(
                 name.clone(),

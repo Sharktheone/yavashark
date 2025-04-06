@@ -10,17 +10,15 @@ impl Compiler {
         ident: &Ident,
         out: Option<impl OutputData>,
     ) -> Option<MoveOptimization> {
-        if let Some(out) = out {
+        out.map(|out| {
             let name = ident.sym.as_str();
             let var = self.alloc_var(name);
 
-            Some(MoveOptimization::new(
+            MoveOptimization::new(
                 var,
                 vec![Instruction::load_var(var, out)],
-            ))
-        } else {
-            None
-        }
+            )
+        })
     }
 
     pub fn get_ident(&mut self, ident: &Ident) -> VarName {
