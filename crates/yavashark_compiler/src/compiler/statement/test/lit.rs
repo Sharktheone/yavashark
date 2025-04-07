@@ -37,7 +37,7 @@ impl Compiler {
                 }
             }
             Lit::Regex(_) => Test::Never,
-            _ => Test::Never,
+            Lit::JSXText(_) => Test::Never,
         }
     }
 }

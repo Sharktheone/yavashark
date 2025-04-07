@@ -55,10 +55,12 @@ impl Compiler {
         self.active_labeled.pop();
     }
 
+    #[must_use]
     pub fn has_label(&self, label: &str) -> bool {
         self.labeled.iter().any(|x| x == label)
     }
 
+    #[must_use]
     pub fn get_label(&self, label: &str) -> Option<Label> {
         self.labeled
             .iter()

@@ -34,7 +34,7 @@ impl PlainDate {
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         if let Value::String(str) = &info {
-            return Ok(NaiveDate::parse_from_str(&str, "%Y-%m-%d")
+            return Ok(NaiveDate::parse_from_str(str, "%Y-%m-%d")
                 .map(|date| Self {
                     inner: RefCell::new(MutablePlainDate {
                         object: MutObject::with_proto(
@@ -79,6 +79,7 @@ impl PlainDate {
         Err(Error::ty("Invalid date")) //TODO
     }
 
+    #[allow(clippy::use_self)]
     pub fn compare(left: &PlainDate, right: &PlainDate) -> i32 {
         left.date.get().cmp(&right.date.get()) as i32
     }
@@ -183,7 +184,7 @@ impl PlainDate {
     }
 
     #[prop("valueOf")]
-    pub fn value_of(&self) -> Res {
+    pub fn value_of() -> Res {
         Err(Error::ty("Called valueOf on a Temporal.PlainDate object"))
     }
 

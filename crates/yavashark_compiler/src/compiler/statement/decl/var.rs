@@ -13,9 +13,9 @@ impl Compiler {
                     
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.instructions.push(Instruction::decl_var(out, name))
+                        self.instructions.push(Instruction::decl_var(out, name));
                     } else {
-                        self.instructions.push(Instruction::decl_empty_var(name))
+                        self.instructions.push(Instruction::decl_empty_var(name));
                     }
                 }
             }
@@ -27,9 +27,9 @@ impl Compiler {
                     
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.instructions.push(Instruction::decl_let(out, name))
+                        self.instructions.push(Instruction::decl_let(out, name));
                     } else {
-                        self.instructions.push(Instruction::decl_empty_let(name))
+                        self.instructions.push(Instruction::decl_empty_let(name));
                     }
                 }
             }
@@ -41,7 +41,7 @@ impl Compiler {
                     
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.instructions.push(Instruction::decl_const(out, name))
+                        self.instructions.push(Instruction::decl_const(out, name));
                     } else {
                         return Err(anyhow!("Const declaration without initializer"))
                     }

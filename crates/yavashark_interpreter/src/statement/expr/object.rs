@@ -63,7 +63,6 @@ impl Interpreter {
                                         fn_scope,
                                         realm,
                                     )?
-                                    .into()
                                 } else {
                                     JSFunction::new(
                                         name.clone(),

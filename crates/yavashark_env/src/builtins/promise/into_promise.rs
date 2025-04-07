@@ -35,7 +35,7 @@ impl<F: Future<Output = O>, O: TryIntoValue> AsyncTask for FutureTask<F, O> {
         match projected.future.poll(cx) {
             Poll::Ready(value) => {
                 let value = value.try_into_value();
-                projected.promise.set_res(value, realm);
+                projected.promise.set_res(value, realm)?;
                 Poll::Ready(Ok(()))
             }
             Poll::Pending => Poll::Pending,

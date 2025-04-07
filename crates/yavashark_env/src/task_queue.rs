@@ -1,12 +1,9 @@
-use crate::builtins::Promise;
-use crate::{Realm, Res, ValueResult};
+use crate::{Realm, Res};
 use std::fmt::Debug;
-use std::future::{poll_fn, Future};
+use std::future::poll_fn;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::{fmt, mem};
-use yavashark_garbage::OwningGcGuard;
-use yavashark_value::BoxedObj;
 
 pub trait AsyncTask {
     fn poll(self: Pin<&mut Self>, cx: &mut Context, realm: &mut Realm) -> Poll<Res>;
@@ -14,7 +11,7 @@ pub trait AsyncTask {
 
 #[derive(Default)]
 pub struct AsyncTaskQueue {
-    microtasks: Vec<Box<dyn FnOnce(&mut Realm)>>,
+    microtasks: Vec<Microtask>,
     queue: Vec<Pin<Box<dyn AsyncTask>>>,
 }
 
@@ -71,8 +68,10 @@ impl AsyncTaskQueue {
     }
 }
 
+pub type Microtask = Box<dyn FnOnce(&mut Realm)>;
+
 pub struct Microtasks {
-    queue: Vec<Box<dyn FnOnce(&mut Realm)>>,
+    queue: Vec<Microtask>,
 }
 
 pub struct TaskQueueRunner {
@@ -82,7 +81,7 @@ pub struct TaskQueueRunner {
 impl TaskQueueRunner {
     pub async fn run(&mut self, realm: &mut Realm) {
         poll_fn(|cx| {
-            self.flush_microtasks(realm);
+            Self::flush_microtasks(realm);
 
             self.queue.append(&mut realm.queue.queue);
 
@@ -98,7 +97,7 @@ impl TaskQueueRunner {
         .await;
     }
 
-    fn flush_microtasks(&mut self, realm: &mut Realm) {
+    fn flush_microtasks(realm: &mut Realm) {
         let micro = realm.queue.flush_microtasks();
 
         for task in micro.queue {
@@ -106,7 +105,7 @@ impl TaskQueueRunner {
         }
 
         if !realm.queue.microtasks.is_empty() {
-            self.flush_microtasks(realm);
+            Self::flush_microtasks(realm);
         }
     }
 }

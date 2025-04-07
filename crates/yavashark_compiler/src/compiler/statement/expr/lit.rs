@@ -35,6 +35,6 @@ pub fn lit_to_const_value(lit: &Lit) -> Res<ConstValue> {
         Lit::Null(_) => ConstValue::Null,
         Lit::BigInt(b) => ConstValue::BigInt((*b.value).clone()),
         Lit::Regex(r) => ConstValue::Regex(r.exp.to_string(), r.flags.to_string()),
-        _ => return Err(anyhow!("Unsupported literal")),
+        Lit::JSXText(_) => return Err(anyhow!("Unsupported literal")),
     })
 }

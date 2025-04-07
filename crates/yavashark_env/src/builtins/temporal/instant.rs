@@ -15,7 +15,7 @@ pub struct Instant {
 }
 
 impl Instant {
-    pub fn new(stamp: BigInt, realm: &Realm) -> Res<Self> {
+    pub fn new(stamp: &BigInt, realm: &Realm) -> Res<Self> {
         let ns = stamp.to_i64().ok_or(Error::range("stamp out of range"))?;
         let dt = DateTime::from_timestamp_nanos(ns);
 
@@ -36,6 +36,7 @@ impl Instant {
         }
     }
 
+    #[allow(unused)]
     pub fn from(value: Value, realm: &Realm) -> Res<Self> {
         if let Value::String(str) = &value {
             return DateTime::parse_from_rfc3339(str)
@@ -64,10 +65,11 @@ impl Instant {
 #[props]
 impl Instant {
     #[constructor]
-    fn construct(epoch: BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn construct(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         Ok(Self::new(epoch, realm)?.into_object())
     }
 
+    #[allow(clippy::use_self)]
     fn compare(left: &Instant, right: &Instant) -> i8 {
         left.stamp.cmp(&right.stamp) as i8
     }
@@ -95,7 +97,7 @@ impl Instant {
     }
 
     #[prop("fromEpochMilliseconds")]
-    fn from_epoch_milliseconds(epoch: BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn from_epoch_milliseconds(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let ns = epoch.to_i64().ok_or(Error::range("epoch out of range"))?;
         let dt = DateTime::from_timestamp_millis(ns).ok_or(Error::range("epoch out of range"))?;
 
@@ -103,7 +105,7 @@ impl Instant {
     }
 
     #[prop("fromEpochNanoseconds")]
-    fn from_epoch_nanoseconds(epoch: BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let ns = epoch.to_i64().ok_or(Error::range("epoch out of range"))?;
         let dt = DateTime::from_timestamp_nanos(ns);
 
@@ -154,7 +156,7 @@ impl Instant {
     }
 
     #[prop("toString")]
-    fn to_string(&self) -> String {
+    fn to_string_js(&self) -> String {
         self.stamp.get().to_rfc3339() //TODO: this needs to be RFC 9557
     }
 

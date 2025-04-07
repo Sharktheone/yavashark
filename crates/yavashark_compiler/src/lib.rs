@@ -1,3 +1,6 @@
+#![allow(unused)]
+
+
 mod compiler;
 mod data;
 mod node;

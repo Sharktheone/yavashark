@@ -2,7 +2,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
-use yavashark_bytecode::data::{Label, OutputData, OutputDataType};
+use yavashark_bytecode::data::{Label, OutputData, OutputDataType, TryIdx};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
@@ -34,6 +34,7 @@ pub enum AsyncPoll {
 }
 
 impl VmState {
+    #[must_use]
     pub const fn new(code: Rc<BytecodeFunctionCode>, scope: Scope) -> Self {
         Self {
             regs: Registers::new(),
@@ -87,13 +88,14 @@ impl<'a> AsyncVM<'a> {
         Self { state, realm }
     }
 
+    #[must_use]
     pub fn run(mut self) -> AsyncPoll {
         while self.state.pc < self.state.code.instructions.len() {
             let instr = &self.state.code.instructions[self.state.pc];
             self.state.pc += 1;
 
             match instr.execute(&mut self) {
-                Ok(_) => {}
+                Ok(()) => {}
                 Err(e) => match e {
                     ControlFlow::Error(e) => return AsyncPoll::Ret(self.state, Err(e)),
                     ControlFlow::Return(value) => {
@@ -130,7 +132,7 @@ impl<'a> AsyncVM<'a> {
     }
 }
 
-impl<'a> VM for AsyncVM<'a> {
+impl VM for AsyncVM<'_> {
     fn acc(&self) -> Value {
         self.state.acc.clone()
     }
@@ -213,7 +215,7 @@ impl<'a> VM for AsyncVM<'a> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm, &self.state.current_scope)
+        val.clone().into_value(self.realm, &self.state.current_scope)
     }
 
     #[must_use]
@@ -232,7 +234,7 @@ impl<'a> VM for AsyncVM<'a> {
     }
 
     fn get_realm(&mut self) -> &mut Realm {
-        &mut self.realm
+        self.realm
     }
 
     fn set_pc(&mut self, pc: usize) {
@@ -284,5 +286,13 @@ impl<'a> VM for AsyncVM<'a> {
 
     fn set_continue_storage(&mut self, out: impl OutputData) {
         self.state.continue_storage = Some(out.data_type());
+    }
+    
+    fn enter_try(&mut self, _id: TryIdx) -> Res {
+        todo!()
+    }
+    
+    fn leave_try(&mut self) -> Res {
+        todo!()
     }
 }

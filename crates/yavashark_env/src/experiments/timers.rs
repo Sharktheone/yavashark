@@ -61,7 +61,7 @@ impl AsyncTask for TimeoutTask {
             Poll::Ready(()) => {
                 let res = proj.cb.call(realm, Vec::new(), Value::Undefined);
 
-                proj.promise.set_res(res, realm);
+                proj.promise.set_res(res, realm)?;
 
                 Poll::Ready(Ok(()))
             }

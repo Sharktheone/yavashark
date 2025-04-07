@@ -350,7 +350,7 @@ impl<'a, T: Collectable, V> Deref for OwningGcGuard<'a, T, V> {
     }
 }
 
-impl<'a, T: Collectable, V> Deref for OwningGcGuardRefed<T, V> {
+impl<T: Collectable, V> Deref for OwningGcGuardRefed<T, V> {
     type Target = V;
 
     fn deref(&self) -> &Self::Target {
@@ -358,7 +358,7 @@ impl<'a, T: Collectable, V> Deref for OwningGcGuardRefed<T, V> {
     }
 }
 
-impl<'a, T: Collectable, V> DerefMut for OwningGcGuardRefed<T, V> {
+impl<T: Collectable, V> DerefMut for OwningGcGuardRefed<T, V> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.value_ptr
     }

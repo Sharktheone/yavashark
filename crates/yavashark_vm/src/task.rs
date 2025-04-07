@@ -1,4 +1,4 @@
-use crate::{AsyncPoll, AsyncVM, VmState, VM};
+use crate::{AsyncPoll, AsyncVM, VmState};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
@@ -72,7 +72,7 @@ impl AsyncTask for BytecodeAsyncTask {
                     inner.state = Some(state);
                     let promise = match <&Promise>::from_value_out(promise.into()) {
                         Ok(promise) => promise,
-                        Err(e) => return Poll::Ready(Err(e.into())),
+                        Err(e) => return Poll::Ready(Err(e)),
                     };
 
                     let promise = promise.map_refed(|promise| (promise, promise.notify.notified()));
@@ -83,7 +83,7 @@ impl AsyncTask for BytecodeAsyncTask {
                 }
                 AsyncPoll::Ret(state, ret) => {
                     match ret {
-                        Ok(_) => inner.promise.resolve(state.acc, realm)?,
+                        Ok(()) => inner.promise.resolve(&state.acc, realm)?,
                         Err(e) => {
                             let e = ErrorObj::error_to_value(e, realm);
                             inner.promise.reject(&e, realm)?;

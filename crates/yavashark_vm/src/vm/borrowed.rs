@@ -2,7 +2,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, Label, OutputData};
+use yavashark_bytecode::data::{DataSection, Label, OutputData, TryIdx};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
@@ -77,7 +77,7 @@ impl<'a> BorrowedVM<'a> {
     }
 }
 
-impl<'a> VM for BorrowedVM<'a> {
+impl VM for BorrowedVM<'_> {
     fn acc(&self) -> Value {
         self.acc.clone()
     }
@@ -149,7 +149,7 @@ impl<'a> VM for BorrowedVM<'a> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm, &self.current_scope)
+        val.clone().into_value(self.realm, &self.current_scope)
     }
 
     #[must_use]
@@ -168,7 +168,7 @@ impl<'a> VM for BorrowedVM<'a> {
     }
 
     fn get_realm(&mut self) -> &mut Realm {
-        &mut self.realm
+        self.realm
     }
 
     fn set_pc(&mut self, pc: usize) {
@@ -218,7 +218,15 @@ impl<'a> VM for BorrowedVM<'a> {
         &mut self.current_scope
     }
 
-    fn set_continue_storage(&mut self, out: impl OutputData) {
+    fn set_continue_storage(&mut self, _out: impl OutputData) {
+        todo!()
+    }
+
+    fn enter_try(&mut self, _id: TryIdx) -> Res {
+        todo!()
+    }
+
+    fn leave_try(&mut self) -> Res {
         todo!()
     }
 }

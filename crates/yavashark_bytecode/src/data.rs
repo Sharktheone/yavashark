@@ -40,43 +40,43 @@ pub enum OutputDataType {
 }
 
 impl From<OutputDataType> for DataType {
-    fn from(val: OutputDataType) -> DataType {
+    fn from(val: OutputDataType) -> Self {
         match val {
-            OutputDataType::Acc(acc) => DataType::Acc(acc),
-            OutputDataType::Reg(reg) => DataType::Reg(reg),
-            OutputDataType::Var(var) => DataType::Var(var),
-            OutputDataType::Stack(stack) => DataType::Stack(stack),
+            OutputDataType::Acc(acc) => Self::Acc(acc),
+            OutputDataType::Reg(reg) => Self::Reg(reg),
+            OutputDataType::Var(variable) => Self::Var(variable),
+            OutputDataType::Stack(stack) => Self::Stack(stack),
         }
     }
 }
 
 impl From<Acc> for DataType {
-    fn from(val: Acc) -> DataType {
-        DataType::Acc(val)
+    fn from(val: Acc) -> Self {
+        Self::Acc(val)
     }
 }
 
 impl From<Reg> for DataType {
-    fn from(val: Reg) -> DataType {
-        DataType::Reg(val)
+    fn from(val: Reg) -> Self {
+        Self::Reg(val)
     }
 }
 
 impl From<VarName> for DataType {
-    fn from(val: VarName) -> DataType {
-        DataType::Var(val)
+    fn from(val: VarName) -> Self {
+        Self::Var(val)
     }
 }
 
 impl From<ConstIdx> for DataType {
-    fn from(val: ConstIdx) -> DataType {
-        DataType::Const(val)
+    fn from(val: ConstIdx) -> Self {
+        Self::Const(val)
     }
 }
 
 impl From<Stack> for DataType {
-    fn from(val: Stack) -> DataType {
-        DataType::Stack(val)
+    fn from(val: Stack) -> Self {
+        Self::Stack(val)
     }
 }
 
@@ -85,10 +85,10 @@ impl TryFrom<DataType> for OutputDataType {
 
     fn try_from(value: DataType) -> Result<Self, Self::Error> {
         match value {
-            DataType::Acc(acc) => Ok(OutputDataType::Acc(acc)),
-            DataType::Reg(reg) => Ok(OutputDataType::Reg(reg)),
-            DataType::Var(var) => Ok(OutputDataType::Var(var)),
-            DataType::Stack(stack) => Ok(OutputDataType::Stack(stack)),
+            DataType::Acc(acc) => Ok(Self::Acc(acc)),
+            DataType::Reg(reg) => Ok(Self::Reg(reg)),
+            DataType::Var(var) => Ok(Self::Var(var)),
+            DataType::Stack(stack) => Ok(Self::Stack(stack)),
             DataType::Const(_) => Err(()),
         }
     }

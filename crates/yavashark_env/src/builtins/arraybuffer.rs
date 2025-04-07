@@ -135,12 +135,16 @@ impl ArrayBufferConstructor {
 
 impl Constructor<Realm> for ArrayBufferConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let len = args.first().map_or(0, Value::to_int_or_null) as usize;
-        let max_len = args.get(1).and_then(|v| {
+        let len = args.first().map_or(Ok(0), Value::to_int_or_null)? as usize;
+        let max_len = match args.get(1).map(|v| {
             let x = v.get_property(&"maxByteLength".into(), realm);
 
-            x.ok().map(|x| x.to_int_or_null())
-        });
+            x.and_then(|x| x.to_int_or_null())
+        }) {
+            Some(Ok(x)) => Some(x),
+            Some(Err(e)) => return Err(e),
+            None => None,
+        };
 
         if max_len.is_some_and(i64::is_negative) {
             return Err(Error::range("maxByteLength must be positive"));

@@ -99,15 +99,14 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    #[must_use]
-    pub fn to_int_or_null(&self) -> i64 {
-        match self {
+    pub fn to_int_or_null(&self) -> Result<i64, Error<C>> {
+        Ok(match self {
             Self::Number(n) => *n as i64,
             Self::Boolean(b) => i64::from(*b),
             Self::String(s) => s.parse().unwrap_or(0),
-            Self::Symbol(_) => todo!("return a Result here.... to throw an TypeError"),
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to number")),
             _ => 0,
-        }
+        })
     }
 }
 
