@@ -24,7 +24,8 @@ impl Interpreter {
     ) -> Res {
         match stmt {
             Pat::Ident(id) => {
-                scope.declare_var(id.sym.to_string(), value.next().unwrap_or(Value::Undefined));
+                let value = value.next().unwrap_or(Value::Undefined);
+                scope.declare_var(id.sym.to_string(), value);
             }
             Pat::Array(arr) => {
                 let mut iter = value.next().unwrap_or(Value::Undefined).iter_no_realm(realm)?;
@@ -36,7 +37,6 @@ impl Interpreter {
                         return Err(Error::syn("Rest element must be last element"));
                     }
 
-                    let next = iter.next(realm)?.unwrap_or(Value::Undefined);
 
                     if matches!(elem, Some(Pat::Rest(_))) {
                         #[allow(clippy::unwrap_used)]
@@ -52,6 +52,8 @@ impl Interpreter {
                         let assert_last = true;
                     }
 
+                    let next = iter.next(realm)?.unwrap_or(Value::Undefined);
+
                     if let Some(elem) = elem {
                         Self::run_pat(realm, elem, scope, &mut iter::once(next))?;
                     }
@@ -59,9 +61,9 @@ impl Interpreter {
             }
             Pat::Rest(rest) => {
                 let collect = value.collect::<Vec<_>>();
-                
+
                 let array = Array::with_elements(realm, collect)?.into_value();
-                
+
                 Self::run_pat(realm, &rest.arg, scope, &mut iter::once(array))?;
             }
             Pat::Object(obj) => {
@@ -79,7 +81,7 @@ impl Interpreter {
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
                             let mut value = value.next().and_then(|x| x.get_property(&key.clone().into(), realm).ok()).unwrap_or(Value::Undefined);
-                            
+
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
@@ -107,14 +109,14 @@ impl Interpreter {
             }
             Pat::Assign(assign) => {
                 let val = value.next().unwrap_or(Value::Undefined);
-                
+
                 let val = if val.is_truthy() {
                     val
                 } else {
                     Self::run_expr(realm, &assign.right, assign.span, scope)?
                 };
 
-                Self::run_pat(realm, &assign.left, scope, value)?;
+                Self::run_pat(realm, &assign.left, scope, &mut iter::once(val))?;
             }
             Pat::Expr(expr) => {
                 Self::assign_expr(realm, expr, value.next().unwrap_or(Value::Undefined), scope)?;
