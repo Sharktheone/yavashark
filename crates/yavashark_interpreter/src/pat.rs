@@ -68,19 +68,20 @@ impl Interpreter {
             }
             Pat::Object(obj) => {
                 let mut rest_not_props = Vec::with_capacity(obj.props.len());
+                let object = value.next().unwrap_or(Value::Undefined);
 
                 for prop in &obj.props {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
-                            let value = value.next().and_then(|x| x.get_property(&key, realm).ok()).unwrap_or(Value::Undefined);
+                            let value = object.get_property(&key, realm).unwrap_or(Value::Undefined);
 
                             Self::run_pat(realm, &kv.value, scope, &mut iter::once(value))?;
                             rest_not_props.push(key);
                         }
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
-                            let mut value = value.next().and_then(|x| x.get_property(&key.clone().into(), realm).ok()).unwrap_or(Value::Undefined);
+                            let mut value = object.get_property(&key.clone().into(), realm).unwrap_or(Value::Undefined);
 
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
@@ -94,7 +95,7 @@ impl Interpreter {
                         ObjectPatProp::Rest(rest) => {
                             let mut rest_props = Vec::new();
 
-                            for (name, value) in value.next().unwrap_or(Value::Undefined).properties()? {
+                            for (name, value) in object.properties()? {
                                 if !rest_not_props.contains(&name) {
                                     rest_props.push((name, value));
                                 }
