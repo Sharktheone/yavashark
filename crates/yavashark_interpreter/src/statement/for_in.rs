@@ -1,3 +1,4 @@
+use std::iter;
 use crate::Interpreter;
 use swc_ecma_ast::{ForHead, ForInStmt};
 use yavashark_env::scope::Scope;
@@ -65,7 +66,7 @@ impl Interpreter {
                         value.clone()
                     };
 
-                    Self::run_pat(realm, &decl.name, scope, value.clone())?;
+                    Self::run_pat(realm, &decl.name, scope, &mut iter::once(value.clone()))?;
                 }
             }
             ForHead::UsingDecl(decl) => {
@@ -78,11 +79,11 @@ impl Interpreter {
                         value.clone()
                     };
 
-                    Self::run_pat(realm, &decl.name, scope, value.clone())?;
+                    Self::run_pat(realm, &decl.name, scope, &mut iter::once(value.clone()))?;
                 }
             }
             ForHead::Pat(pat) => {
-                Self::run_pat(realm, &pat, scope, value.clone())?;
+                Self::run_pat(realm, &pat, scope, &mut iter::once(value.clone()))?;
             }
         }
         Ok(())

@@ -1,3 +1,4 @@
+use std::iter;
 use swc_common::{Span, DUMMY_SP};
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 
@@ -9,7 +10,7 @@ use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_value::IntoValue;
 
 impl Interpreter {
-    pub fn run_pat(realm: &mut Realm, stmt: &Pat, scope: &mut Scope, value: Value) -> Res {
+    pub fn run_pat(realm: &mut Realm, stmt: &Pat, scope: &mut Scope, value: &mut impl Iterator<Item = Value>) -> Res {
         Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP)
     }
 
@@ -18,15 +19,15 @@ impl Interpreter {
         realm: &mut Realm,
         stmt: &Pat,
         scope: &mut Scope,
-        value: Value,
+        value: &mut impl Iterator<Item = Value>,
         span: Span,
     ) -> Res {
         match stmt {
             Pat::Ident(id) => {
-                scope.declare_var(id.sym.to_string(), value);
+                scope.declare_var(id.sym.to_string(), value.next().unwrap_or(Value::Undefined));
             }
             Pat::Array(arr) => {
-                let mut iter = value.iter_no_realm(realm)?;
+                let mut iter = value.next().unwrap_or(Value::Undefined).iter_no_realm(realm)?;
 
                 let mut assert_last = false;
 
@@ -47,19 +48,21 @@ impl Interpreter {
                             elems.push(res);
                         }
 
-                        let elems = Array::with_elements(realm, elems)?.into_value();
-
-                        Self::run_pat(realm, rest, scope, elems)?;
+                        Self::run_pat(realm, rest, scope, &mut elems.into_iter())?;
                         let assert_last = true;
                     }
 
                     if let Some(elem) = elem {
-                        Self::run_pat(realm, elem, scope, next)?;
+                        Self::run_pat(realm, elem, scope, &mut iter::once(next))?;
                     }
                 }
             }
             Pat::Rest(rest) => {
-                Self::run_pat(realm, &rest.arg, scope, value)?;
+                let collect = value.collect::<Vec<_>>();
+                
+                let array = Array::with_elements(realm, collect)?.into_value();
+                
+                Self::run_pat(realm, &rest.arg, scope, &mut iter::once(array))?;
             }
             Pat::Object(obj) => {
                 let mut rest_not_props = Vec::with_capacity(obj.props.len());
@@ -68,17 +71,15 @@ impl Interpreter {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
-                            let value = value.get_property(&key, realm).unwrap_or(Value::Undefined);
+                            let value = value.next().and_then(|x| x.get_property(&key, realm).ok()).unwrap_or(Value::Undefined);
 
-                            Self::run_pat(realm, &kv.value, scope, value)?;
+                            Self::run_pat(realm, &kv.value, scope, &mut iter::once(value))?;
                             rest_not_props.push(key);
                         }
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
-                            let mut value = value
-                                .get_property(&key.clone().into(), realm)
-                                .unwrap_or(Value::Undefined);
-
+                            let mut value = value.next().and_then(|x| x.get_property(&key.clone().into(), realm).ok()).unwrap_or(Value::Undefined);
+                            
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
@@ -91,7 +92,7 @@ impl Interpreter {
                         ObjectPatProp::Rest(rest) => {
                             let mut rest_props = Vec::new();
 
-                            for (name, value) in value.properties()? {
+                            for (name, value) in value.next().unwrap_or(Value::Undefined).properties()? {
                                 if !rest_not_props.contains(&name) {
                                     rest_props.push((name, value));
                                 }
@@ -99,14 +100,16 @@ impl Interpreter {
 
                             let rest_obj = Object::from_values(rest_props, realm)?;
 
-                            Self::run_pat(realm, &rest.arg, scope, rest_obj.into_value())?;
+                            Self::run_pat(realm, &rest.arg, scope, &mut iter::once(rest_obj.into_value()))?;
                         }
                     }
                 }
             }
             Pat::Assign(assign) => {
-                let value = if value.is_truthy() {
-                    value
+                let val = value.next().unwrap_or(Value::Undefined);
+                
+                let val = if val.is_truthy() {
+                    val
                 } else {
                     Self::run_expr(realm, &assign.right, assign.span, scope)?
                 };
@@ -114,7 +117,7 @@ impl Interpreter {
                 Self::run_pat(realm, &assign.left, scope, value)?;
             }
             Pat::Expr(expr) => {
-                Self::assign_expr(realm, expr, value, scope)?;
+                Self::assign_expr(realm, expr, value.next().unwrap_or(Value::Undefined), scope)?;
             }
             Pat::Invalid(i) => {
                 return Err(Error::syn("Invalid pattern"));

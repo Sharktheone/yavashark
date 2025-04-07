@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::env::args;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 use yavashark_env::scope::Scope;
@@ -25,9 +26,11 @@ impl Func<Realm> for ArrowFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut self.scope.child()?;
         scope.state_set_function()?;
+        
+        let mut args_iter = args.into_iter();
 
-        for (pat, value) in self.expr.params.iter().zip(args.iter()) {
-            Interpreter::run_pat(realm, pat, scope, value.copy())?;
+        for pat in self.expr.params.iter() {
+            Interpreter::run_pat(realm, pat, scope, &mut args_iter)?;
         }
 
         let res = match &*self.expr.body {

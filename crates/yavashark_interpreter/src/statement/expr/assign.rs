@@ -1,3 +1,4 @@
+use std::iter;
 use swc_common::Spanned;
 use swc_ecma_ast::{
     AssignExpr, AssignOp, AssignTarget, AssignTargetPat, ExportDefaultExpr, Expr, MemberExpr,
@@ -175,12 +176,12 @@ impl Interpreter {
             AssignTargetPat::Array(arr) => {
                 let pat = Pat::Array(arr.clone());
 
-                Self::run_pat(realm, &pat, scope, value)?;
+                Self::run_pat(realm, &pat, scope, &mut iter::once(value))?;
             }
             AssignTargetPat::Object(expr) => {
                 let pat = Pat::Object(expr.clone());
 
-                Self::run_pat(realm, &pat, scope, value)?;
+                Self::run_pat(realm, &pat, scope, &mut iter::once(value))?;
             }
             AssignTargetPat::Invalid(_) => {
                 return Err(Error::syn("Invalid left-hand side in assignment"))
@@ -379,12 +380,12 @@ impl Interpreter {
             AssignTargetPat::Array(arr) => {
                 let pat = Pat::Array(arr.clone());
 
-                Self::run_pat(realm, &pat, scope, left.copy())?;
+                Self::run_pat(realm, &pat, scope, &mut iter::once(left.copy()))?;
             }
             AssignTargetPat::Object(expr) => {
                 let pat = Pat::Object(expr.clone());
 
-                Self::run_pat(realm, &pat, scope, left.copy())?;
+                Self::run_pat(realm, &pat, scope, &mut iter::once(left.copy()))?;
             }
             AssignTargetPat::Invalid(_) => {
                 return Err(Error::syn("Invalid left-hand side in assignment").into())

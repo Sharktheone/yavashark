@@ -1,3 +1,4 @@
+use std::iter;
 use crate::Interpreter;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 use yavashark_env::error::ErrorObj;
@@ -27,7 +28,7 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
             if let Some(param) = &catch.param {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                Interpreter::run_pat(realm, param, scope, err);
+                Interpreter::run_pat(realm, param, scope, &mut iter::once(err));
             }
 
             Interpreter::run_block(realm, &catch.body, scope)

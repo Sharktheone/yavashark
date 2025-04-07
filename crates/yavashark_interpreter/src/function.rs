@@ -2,6 +2,7 @@ use crate::Interpreter;
 use log::info;
 use std::any::Any;
 use std::cell::RefCell;
+use std::iter;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::array::Array;
 use yavashark_env::optimizer::FunctionCode;
@@ -107,13 +108,15 @@ impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         scope.state_set_returnable();
+        
+        let mut iter = args.clone().into_iter();
 
-        for (i, p) in self.params.iter().enumerate() {
+        for p in self.params.iter() {
             Interpreter::run_pat(
                 realm,
                 &p.pat,
                 scope,
-                args.get(i).unwrap_or(&Value::Undefined).copy(),
+                &mut iter,
             )?;
         }
 
