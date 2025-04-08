@@ -1,0 +1,5 @@
+package web
+
+func Serve() {
+
+}
