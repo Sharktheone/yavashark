@@ -2,7 +2,6 @@ package results
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 	"yavashark_test262_runner/status"
@@ -69,7 +68,10 @@ func (tr *TestResults) ComputeDiff(other *TestResults) (Diff, error) {
 
 	for _, res := range other.TestResults {
 		if item, ok := aggregated[res.Path]; ok {
-			item.other = &res
+			aggregated[res.Path] = DiffItem{
+				own:   item.own,
+				other: &res,
+			}
 		}
 	}
 
@@ -79,10 +81,10 @@ func (tr *TestResults) ComputeDiff(other *TestResults) (Diff, error) {
 		}
 
 		if res.own.Status != res.other.Status {
-			d := TestDiff{From: res.own.Status, To: res.other.Status}
+			d := TestDiff{To: res.own.Status, From: res.other.Status}
 
 			if item, ok := diff[d]; ok {
-				item = append(item, res)
+				diff[d] = append(item, res)
 			} else {
 				diff[d] = []DiffItem{res}
 			}
@@ -105,37 +107,45 @@ func (d *Diff) Sort() {
 func (d *Diff) PrintDiff() {
 	for k, v := range *d {
 		for _, item := range v {
-			log.Printf("Diff: %s -> %s: %s\n", k.From, k.To, item.own.Path)
+			fmt.Printf("Diff: %s -> %s: %s\n", k.From, k.To, item.own.Path)
 		}
 	}
+
+	print("\n\n\n")
 }
 
 func (d *Diff) PrintGrouped() {
 	for k, v := range *d {
-		log.Printf("Diff: %s -> %s\n", k.From, k.To)
+		fmt.Printf("Diff: %s -> %s\n", k.From, k.To)
 		for _, item := range v {
-			log.Printf("  - %s\n", item.own.Path)
+			fmt.Printf("  - %s\n", item.own.Path)
 		}
 	}
+
+	print("\n\n\n")
 }
 
 func (d *Diff) PrintDiffFilter(filter []TestDiff) {
 	for _, f := range filter {
 		if v, ok := (*d)[f]; ok {
 			for _, item := range v {
-				log.Printf("Diff: %s -> %s: %s\n", f.From, f.To, item.own.Path)
+				fmt.Printf("Diff: %s -> %s: %s\n", f.From, f.To, item.own.Path)
 			}
 		}
 	}
+
+	print("\n\n\n")
 }
 
 func (d *Diff) PrintGroupedFilter(filter []TestDiff) {
 	for _, f := range filter {
 		if v, ok := (*d)[f]; ok {
-			log.Printf("Diff: %s -> %s\n", f.From, f.To)
+			fmt.Printf("Diff: %s -> %s\n", f.From, f.To)
 			for _, item := range v {
-				log.Printf("  - %s\n", item.own.Path)
+				fmt.Printf("  - %s\n", item.own.Path)
 			}
 		}
 	}
+
+	print("\n\n\n")
 }

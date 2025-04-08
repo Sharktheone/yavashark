@@ -78,30 +78,37 @@ func main() {
 	close(resultsChan)
 
 	if *diff {
-		diff, err := testResults.ComputeDiffPrev()
-		if err != nil {
-			log.Printf("Failed to compute diff: %v", err)
-			return
-		}
-
-		if *diffFilter != "" {
-			diff.PrintDiff()
-		} else {
-			filter, err := results.ParseFilter(*diffFilter)
-			if err != nil {
-				log.Printf("Failed to parse diff filter: %v", err)
-				return
-			}
-
-			diff.PrintDiffFilter(filter)
-		}
-
+		printDiff(testResults, *diffFilter)
 	}
 
 	testResults.PrintResults()
 
+	print("\n\n\n")
+
+	_ = testResults.ComparePrev()
+
 	if *ciEnabled {
 		ci.RunCi(testResults, *repoPath, *historyOnly, *testRoot)
+	}
+}
+
+func printDiff(testResults *results.TestResults, diffFilter string) {
+	diff, err := testResults.ComputeDiffPrev()
+	if err != nil {
+		log.Printf("Failed to compute diff: %v", err)
+		return
+	}
+
+	if diffFilter == "" {
+		diff.PrintGrouped()
+	} else {
+		filter, err := results.ParseFilter(diffFilter)
+		if err != nil {
+			log.Printf("Failed to parse diff filter: %v", err)
+			return
+		}
+
+		diff.PrintGroupedFilter(filter)
 	}
 }
 

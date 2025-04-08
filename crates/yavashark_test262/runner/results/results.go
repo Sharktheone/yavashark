@@ -94,7 +94,7 @@ func (tr *TestResults) PrintResults() {
 	printRes("Parse Error", tr.ParseError, tr.Total)
 	fmt.Printf("Total: %d\n", tr.Total)
 
-	printRes("Passed (no parse)", tr.Passed-tr.ParseError, tr.Total-tr.ParseError)
+	printRes("Passed (no parse)", tr.Passed, tr.Total-tr.ParseError)
 	fmt.Printf("Total (no parse): %d\n", tr.Total-tr.ParseError)
 }
 
@@ -107,23 +107,28 @@ func (tr *TestResults) ComparePrev() error {
 	if err != nil {
 		return err
 	}
+	if prevRaw == nil {
+		return nil
+	}
 
 	prev := fromResults(prevRaw)
 
-	printDiff("Passed", tr.Passed-prev.Passed, tr.Total)
-	printDiff("Failed", tr.Failed-prev.Failed, tr.Total)
-	printDiff("Skipped", tr.Skipped-prev.Skipped, tr.Total)
-	printDiff("Not Implemented", tr.NotImplemented-prev.NotImplemented, tr.Total)
-	printDiff("Runner Error", tr.RunnerError-prev.RunnerError, tr.Total)
-	printDiff("Crashed", tr.Crashed-prev.Crashed, tr.Total)
-	printDiff("Timeout", tr.Timeout-prev.Timeout, tr.Total)
-	printDiff("Parse Error", tr.ParseError-prev.ParseError, tr.Total)
-	printDiff("Total", tr.Total-prev.Total, tr.Total)
+	printDiff("Passed", tr.Passed, prev.Passed, tr.Total)
+	printDiff("Failed", tr.Failed, prev.Failed, tr.Total)
+	printDiff("Skipped", tr.Skipped, prev.Skipped, tr.Total)
+	printDiff("Not Implemented", tr.NotImplemented, prev.NotImplemented, tr.Total)
+	printDiff("Runner Error", tr.RunnerError, prev.RunnerError, tr.Total)
+	printDiff("Crashed", tr.Crashed, prev.Crashed, tr.Total)
+	printDiff("Timeout", tr.Timeout, prev.Timeout, tr.Total)
+	printDiff("Parse Error", tr.ParseError, prev.ParseError, tr.Total)
+	printDiff("Total", tr.Total, prev.Total, tr.Total)
 
 	return nil
 }
 
-func printDiff(name string, n uint32, total uint32) {
+func printDiff(name string, n1 uint32, n2 uint32, total uint32) {
+	n := int32(n1) - int32(n2)
+
 	perc := float64(n) / float64(total) * 100
 	fmt.Printf("%s: %+d, %+f%%\n", name, n, perc)
 }

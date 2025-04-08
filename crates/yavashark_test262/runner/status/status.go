@@ -45,6 +45,21 @@ func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
 }
 
+func (s *Status) UnmarshalJSON(data []byte) error {
+	var statusStr string
+	if err := json.Unmarshal(data, &statusStr); err != nil {
+		return err
+	}
+
+	status, err := ParseStatus(statusStr)
+	if err != nil {
+		return err
+	}
+
+	*s = status
+	return nil
+}
+
 func ParseStatus(s string) (Status, error) {
 	switch s {
 	case "PASS":
