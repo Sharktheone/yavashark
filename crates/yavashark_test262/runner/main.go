@@ -87,6 +87,10 @@ func main() {
 
 	testResults.PrintResults()
 
+	if *testdir == "" {
+		testResults.Write()
+	}
+
 	print("\n\n\n")
 
 	if *ciEnabled {
