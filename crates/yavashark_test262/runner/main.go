@@ -26,9 +26,10 @@ func main() {
 	testRootDir := flag.String("test_root", DEFAULT_TEST_ROOT, "Path to test root directory")
 	diff := flag.Bool("diff", true, "Diff to use for CI results")
 	diffFilter := flag.String("dfilter", "", "Diff filter to use for CI results")
-	testdir := flag.String("testdir", "", "Path in the test directory")
+	//testdir := flag.String("testdir", "", "Path in the test directory")
 
-	testRoot := filepath.Join(*testRootDir, *testdir)
+	//testRoot := filepath.Join(*testRootDir, *testdir)
+	testRoot := *testRootDir
 
 	flag.Parse()
 
@@ -87,9 +88,9 @@ func main() {
 
 	testResults.PrintResults()
 
-	if *testdir == "" {
-		testResults.Write()
-	}
+	//if *testdir == "" {
+	//	testResults.Write()
+	//}
 
 	print("\n\n\n")
 
