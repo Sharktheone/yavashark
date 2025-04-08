@@ -23,9 +23,13 @@ func main() {
 	repoPath := flag.String("repo", "", "Path to external repository for CI results")
 	historyOnly := flag.Bool("history-only", false, "Only generate the history file (skip git commit)")
 	workers := *flag.Int("workers", DEFAULT_WORKERS, "Number of workers")
-	testRoot := flag.String("test_root", DEFAULT_TEST_ROOT, "Path to test root directory")
+	testRootDir := flag.String("test_root", DEFAULT_TEST_ROOT, "Path to test root directory")
 	diff := flag.Bool("diff", true, "Diff to use for CI results")
 	diffFilter := flag.String("dfilter", "", "Diff filter to use for CI results")
+	testdir := flag.String("testdir", "", "Path in the test directory")
+
+	testRoot := filepath.Join(*testRootDir, *testdir)
+
 	flag.Parse()
 
 	jobs := make(chan string, workers*8)
@@ -40,7 +44,7 @@ func main() {
 		go worker(i, jobs, resultsChan, wg)
 	}
 
-	num := countTests(*testRoot)
+	num := countTests(testRoot)
 
 	testResults := results.New(num)
 
@@ -51,7 +55,7 @@ func main() {
 	}()
 
 	now := time.Now()
-	_ = filepath.Walk(*testRoot, func(path string, info os.FileInfo, err error) error {
+	_ = filepath.Walk(testRoot, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			//log.Printf("Failed to get file info for %s: %v", path, err)
 			return nil
@@ -86,7 +90,7 @@ func main() {
 	print("\n\n\n")
 
 	if *ciEnabled {
-		ci.RunCi(testResults, *repoPath, *historyOnly, *diff, *testRoot)
+		ci.RunCi(testResults, *repoPath, *historyOnly, *diff, testRoot)
 	} else {
 		_ = testResults.ComparePrev()
 
