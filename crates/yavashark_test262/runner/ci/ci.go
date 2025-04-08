@@ -14,7 +14,7 @@ import (
 	"yavashark_test262_runner/status"
 )
 
-func RunCi(tr *results.TestResults, repoPath string, historyOnly bool, testRoot string) {
+func RunCi(tr *results.TestResults, repoPath string, historyOnly bool, diff bool, testRoot string) {
 	if repoPath == "" {
 		fmt.Println("CI mode enabled but no repository path specified via --repo")
 		os.Exit(1)
@@ -53,12 +53,12 @@ func RunCi(tr *results.TestResults, repoPath string, historyOnly bool, testRoot 
 		}
 	}
 
-	if err := runCI(tr.TestResults, overallSummary, repoPath, historyOnly, testRoot); err != nil {
+	if err := runCI(tr, overallSummary, repoPath, historyOnly, diff, testRoot); err != nil {
 		panic(err)
 	}
 }
 
-func runCI(testResults []results.Result, overall Summary, repo string, historyOnly bool, root string) error {
+func runCI(testResults *results.TestResults, overall Summary, repo string, historyOnly bool, diff bool, root string) error {
 	if err := generateHistoryFile(repo, overall); err != nil {
 		return err
 	}
@@ -68,7 +68,11 @@ func runCI(testResults []results.Result, overall Summary, repo string, historyOn
 		return nil
 	}
 
-	if err := results.WriteCIResultsPath(testResults, filepath.Join(repo, "results.json"), root); err != nil {
+	if diff {
+		printCiDiff(filepath.Join(repo, "results.json"), testResults)
+	}
+
+	if err := results.WriteCIResultsPath(testResults.TestResults, filepath.Join(repo, "results.json"), root); err != nil {
 		return err
 	}
 
@@ -84,7 +88,7 @@ func runCI(testResults []results.Result, overall Summary, repo string, historyOn
 
 	dirSummaries := map[string]*DirectorySummary{}
 
-	for _, res := range testResults {
+	for _, res := range testResults.TestResults {
 		relPath, err := filepath.Rel(root, res.Path)
 		if err != nil {
 			relPath = res.Path
@@ -241,4 +245,18 @@ func computeAggregate(dir string, summaries map[string]*DirectorySummary) Direct
 		}
 	}
 	return agg
+}
+
+func printCiDiff(path string, testResults *results.TestResults) {
+	prev, _ := loadPrevCi(path)
+	if prev != nil {
+		d, err := testResults.ComputeDiff(prev)
+		if err != nil {
+			return
+		}
+
+		d.PrintGrouped()
+	}
+
+	testResults.Compare(prev)
 }

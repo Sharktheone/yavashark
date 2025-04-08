@@ -101,6 +101,31 @@ func (s CIStatus) MarshalJSON() ([]byte, error) {
 	return json.Marshal(string(s))
 }
 
+func (s *CIStatus) UnmarshalJSON(data []byte) error {
+	var statusStr string
+	if err := json.Unmarshal(data, &statusStr); err != nil {
+		return err
+	}
+
+	status := CIStatus(statusStr)
+
+	if !status.IsValid() {
+		return fmt.Errorf("unknown CI status: %s", statusStr)
+	}
+
+	*s = status
+	return nil
+}
+
+func (s CIStatus) IsValid() bool {
+	switch s {
+	case CI_FAIL, CI_CRASH, CI_ERROR, CI_TIMEOUT, CI_OK, CI_PASS, CI_SKIP, CI_NOT_RUN, CI_PRECONDITION_FAILED:
+		return true
+	default:
+		return false
+	}
+}
+
 func (s Status) ToCIStatus() CIStatus {
 	switch s {
 	case PASS:
@@ -121,5 +146,28 @@ func (s Status) ToCIStatus() CIStatus {
 		return CI_NOT_RUN
 	default:
 		return CI_ERROR
+	}
+}
+
+func (s CIStatus) ToStatus() Status {
+	switch s {
+	case CI_PASS:
+		return PASS
+	case CI_FAIL:
+		return FAIL
+	case CI_SKIP:
+		return SKIP
+	case CI_TIMEOUT:
+		return TIMEOUT
+	case CI_CRASH:
+		return CRASH
+	case CI_OK:
+		return PARSE_ERROR
+	case CI_PRECONDITION_FAILED:
+		return NOT_IMPLEMENTED
+	case CI_NOT_RUN:
+		return RUNNER_ERROR
+	default:
+		return CRASH
 	}
 }

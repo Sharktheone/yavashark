@@ -75,6 +75,20 @@ func convertResultsToCI(results []Result, root string) []CIResult {
 	return ciResults
 }
 
+func ConvertResultsFromCI(results []CIResult) []Result {
+	r := make([]Result, len(results))
+
+	for i, res := range results {
+		r[i] = Result{
+			Status: res.Status.ToStatus(),
+			Msg:    "",
+			Path:   res.Path,
+		}
+	}
+
+	return r
+}
+
 func WriteCIResultsPath(results []Result, path string, root string) error {
 	ciResults := convertResultsToCI(results, root)
 

@@ -77,7 +77,7 @@ func main() {
 
 	close(resultsChan)
 
-	if *diff {
+	if *diff && !*ciEnabled {
 		printDiff(testResults, *diffFilter)
 	}
 
@@ -85,10 +85,11 @@ func main() {
 
 	print("\n\n\n")
 
-	_ = testResults.ComparePrev()
-
 	if *ciEnabled {
-		ci.RunCi(testResults, *repoPath, *historyOnly, *testRoot)
+		ci.RunCi(testResults, *repoPath, *historyOnly, *diff, *testRoot)
+	} else {
+		_ = testResults.ComparePrev()
+
 	}
 }
 

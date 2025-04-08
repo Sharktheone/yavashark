@@ -50,7 +50,7 @@ func (tr *TestResults) ComputeDiffPrev() (Diff, error) {
 		return nil, err
 	}
 
-	prev := fromResults(prevRaw)
+	prev := FromResults(prevRaw)
 
 	return tr.ComputeDiff(prev)
 }
