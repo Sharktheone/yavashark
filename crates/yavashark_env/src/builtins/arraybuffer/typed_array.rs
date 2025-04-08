@@ -88,7 +88,7 @@ impl TypedArray {
     ) -> Res<Self> {
         let buf = if let Ok(buf) = <&ArrayBuffer>::from_value_out(buffer.copy()) {
             buf
-        } else if buffer.contains_key(&"length".into()).ok().unwrap_or(false) {
+        } else if buffer.has_key(&"length".into()).ok().unwrap_or(false) {
             let iter = ValueIterator::new(&buffer, realm)?;
 
             let mut items = Vec::new();

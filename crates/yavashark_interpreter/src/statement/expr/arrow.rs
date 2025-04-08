@@ -29,7 +29,7 @@ impl Func<Realm> for ArrowFunction {
         
         let mut args_iter = args.into_iter();
 
-        for pat in self.expr.params.iter() {
+        for pat in &self.expr.params {
             Interpreter::run_pat(realm, pat, scope, &mut args_iter)?;
         }
 

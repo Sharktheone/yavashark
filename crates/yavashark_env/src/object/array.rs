@@ -10,18 +10,20 @@ use crate::utils::ValueIterator;
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 
-#[object(direct(length), to_string)]
+#[object(to_string)]
 #[derive(Debug)]
-pub struct Array {}
+pub struct Array {
+    length: Cell<usize>,
+}
 
 impl Array {
     pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
         let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
 
         inner.object.set_array(elements);
-        inner.length.value = Value::Number(inner.object.array.len() as f64);
 
         drop(inner);
 
@@ -31,16 +33,12 @@ impl Array {
     pub fn with_len(realm: &Realm, len: usize) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
-        let mut inner = array.inner.try_borrow_mut()?;
-
-        inner.length.value = Value::Number(len as f64);
-
-        drop(inner);
+        array.length.set(len);
 
         Ok(array)
     }
 
-    pub fn from_array_like(realm: &Realm, array_like: Value) -> Res<Self> {
+    pub fn from_array_like(realm: &mut Realm, array_like: Value) -> Res<Self> {
         let Value::Object(array_like) = array_like else {
             return Err(Error::ty_error(format!(
                 "Expected object, found {array_like:?}"
@@ -51,7 +49,7 @@ impl Array {
 
         let mut inner = array.inner.try_borrow_mut()?;
 
-        let len = array_like.get_property(&"length".into())?.value.as_number() as usize;
+        let len = array_like.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined).as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = array_like.get_array_or_done(idx)?;
@@ -61,7 +59,7 @@ impl Array {
             }
         }
 
-        inner.length.value = Value::Number(len as f64);
+        array.length.set(len);
 
         drop(inner);
 
@@ -73,8 +71,8 @@ impl Array {
         Self {
             inner: RefCell::new(MutableArray {
                 object: MutObject::with_proto(proto),
-                length: ObjectProperty::new(Value::Number(0.0)),
             }),
+            length: Cell::new(0),
         }
     }
 
@@ -122,10 +120,10 @@ impl Array {
         let mut inner = self.inner.try_borrow_mut()?;
 
         inner.object.insert_array(idx, val.into());
-        let len = inner.length.value.to_number_or_null();
+        let len = self.length.get();
 
-        if idx >= len as usize {
-            inner.length.value = Value::Number(idx as f64 + 1.0);
+        if idx >= len {
+            self.length.set(idx + 1);
         }
 
         Ok(())
@@ -151,7 +149,7 @@ impl Array {
             .object
             .array
             .push((index, Variable::new(value).into()));
-        inner.length.value = Value::Number(index as f64 + 1.0);
+        self.length.set(index + 1);
 
         Ok(Value::Undefined)
     }
@@ -167,6 +165,11 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
 }
 #[properties_new(constructor(ArrayConstructor::new))]
 impl Array {
+    #[get("length")]
+    fn get_length(&self) -> usize {
+        self.length.get()
+    }
+    
     fn at(#[this] this: &Value, idx: usize) -> ValueResult {
         let this = this.as_object()?;
 
@@ -180,7 +183,7 @@ impl Array {
 
         let mut push_to = |val: Value| -> Res {
             if let Value::Object(obj) = &val {
-                if obj.contains_key(&"length".into())? {
+                if obj.has_key(&"length".into())? {
                     let iter = ValueIterator::new(&val, realm)?;
 
                     while let Some(val) = iter.next(realm)? {
@@ -210,10 +213,11 @@ impl Array {
         target: isize,
         start: isize,
         end: Option<isize>,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this_val.as_object()?;
 
-        let len = this.get_property(&"length".into())?.value.as_number() as usize;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined).as_number() as usize;
 
         let target = convert_index(target, len);
         let start = convert_index(start, len);
@@ -248,9 +252,9 @@ impl Array {
     fn every(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -276,10 +280,11 @@ impl Array {
         value: &Value,
         start: Option<isize>,
         end: Option<isize>,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this_val.as_object()?;
 
-        let len = this.get_property(&"length".into())?.value.as_number() as usize;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined).as_number() as usize;
 
         let start = start.map_or(0, |start| convert_index(start, len));
         let end = end.map_or(len, |end| convert_index(end, len));
@@ -298,9 +303,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let array = Self::from_realm(realm);
 
@@ -326,9 +331,9 @@ impl Array {
     fn find(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -356,9 +361,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -387,9 +392,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in (0..len).rev() {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -418,9 +423,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in (0..len).rev() {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -449,7 +454,7 @@ impl Array {
             }
 
             if let Value::Object(obj) = &val {
-                if obj.contains_key(&"length".into())? {
+                if obj.has_key(&"length".into())? {
                     let iter = ValueIterator::new(&val, realm)?;
 
                     while let Some(val) = iter.next(realm)? {
@@ -469,9 +474,9 @@ impl Array {
 
         let depth = depth.unwrap_or(1);
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -494,9 +499,9 @@ impl Array {
 
         let array = Self::from_realm(realm);
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -509,7 +514,7 @@ impl Array {
                 )?;
 
                 if let Value::Object(obj) = &x {
-                    if obj.contains_key(&"length".into())? {
+                    if obj.has_key(&"length".into())? {
                         let iter = ValueIterator::new(&x, realm)?;
 
                         while let Some(val) = iter.next(realm)? {
@@ -534,9 +539,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -557,12 +562,13 @@ impl Array {
         #[this] this: &Value,
         search_element: &Value,
         from_index: Option<isize>,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let from_index = from_index.unwrap_or(0);
 
@@ -586,12 +592,13 @@ impl Array {
         #[this] this: &Value,
         search_element: &Value,
         from_index: Option<isize>,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let from_index = from_index.unwrap_or(0);
 
@@ -615,7 +622,7 @@ impl Array {
 
         let mut buf = String::new();
 
-        let len = this.get_property(&"length".into())?.value.as_number() as usize;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined).as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -652,12 +659,13 @@ impl Array {
         #[this] this: &Value,
         search_element: &Value,
         from_index: Option<isize>,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let from_index = from_index.unwrap_or(len as isize - 1);
 
@@ -679,9 +687,9 @@ impl Array {
     fn map(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let array = Self::from_realm(realm);
 
@@ -698,12 +706,12 @@ impl Array {
         Ok(array.into_value())
     }
 
-    fn pop(#[this] this: &Value) -> ValueResult {
+    fn pop(#[this] this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         if len == 0 {
             this.define_property("length".into(), 0.into())?;
@@ -721,10 +729,10 @@ impl Array {
     }
 
     #[prop("push")]
-    fn push_js(#[this] this: &Value, #[variadic] args: &[Value]) -> ValueResult {
+    fn push_js(#[this] this: &Value, #[variadic] args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
-        let mut idx = this.get_property(&"length".into())?.value.as_number() as usize;
+        let mut idx = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined).as_number() as usize;
 
         for arg in args {
             this.define_property(idx.into(), arg.clone())?;
@@ -744,9 +752,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let mut acc = initial_value.clone();
 
@@ -774,9 +782,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let mut acc = initial_value.clone();
 
@@ -795,12 +803,12 @@ impl Array {
         Ok(acc)
     }
 
-    fn reverse(#[this] this_val: Value) -> ValueResult {
+    fn reverse(#[this] this_val: Value, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this_val.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let mut idx = 0;
 
@@ -822,12 +830,12 @@ impl Array {
         Ok(this_val)
     }
 
-    fn shift(#[this] this: &Value) -> ValueResult {
+    fn shift(#[this] this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         if len == 0 {
             this.define_property("length".into(), 0.into())?;
@@ -851,13 +859,13 @@ impl Array {
         #[this] this: &Value,
         start: isize,
         end: Option<isize>,
-        #[realm] realm: &Realm,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let start = convert_index(start, len);
         let end = end.map_or(len, |end| convert_index(end, len));
@@ -878,9 +886,9 @@ impl Array {
     fn some(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -908,13 +916,13 @@ impl Array {
         start: isize,
         delete_count: Option<isize>,
         items: Vec<Value>,
-        #[realm] realm: &Realm,
+        #[realm] realm: &mut Realm,
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let start = convert_index(start, len);
 
@@ -955,14 +963,14 @@ impl Array {
     }
 
     #[prop("toReversed")]
-    fn js_to_reversed(#[this] this: &Value, #[realm] realm: &Realm) -> ValueResult {
+    fn js_to_reversed(#[this] this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
         let array = Self::from_realm(realm);
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         for idx in (0..len).rev() {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -983,9 +991,9 @@ impl Array {
     ) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let mut values = Vec::new();
 
@@ -1017,12 +1025,12 @@ impl Array {
         Ok(Self::with_elements(realm, values)?.into_value())
     }
 
-    fn unshift(#[this] this: &Value, args: Vec<Value>) -> ValueResult {
+    fn unshift(#[this] this: &Value, args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
-        let len = this.get_property(&"length".into())?;
+        let len = this.resolve_property(&"length".into(), realm)?.unwrap_or(Value::Undefined);
 
-        let len = len.value.as_number() as usize;
+        let len = len.as_number() as usize;
 
         let mut idx = args.len() + len;
 
@@ -1133,7 +1141,7 @@ impl Constructor<Realm> for ArrayConstructor {
         let mut inner = this.inner.try_borrow_mut()?;
 
         inner.object.array = values;
-        inner.length.value = Value::Number(inner.object.array.len() as f64);
+        this.length.set(inner.object.array.len());
 
         drop(inner);
 

@@ -50,6 +50,10 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
         Ok(self.get_property(name)?.is_some())
     }
 
+    fn has_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
+        Ok(self.resolve_property(name)?.is_some())
+    }
+
     fn name(&self) -> String;
 
     fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;

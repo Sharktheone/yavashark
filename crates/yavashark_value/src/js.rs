@@ -463,6 +463,13 @@ impl<C: Realm> Value<C> {
         }
     }
 
+    pub fn has_key(&self, name: &Self) -> Result<bool, Error<C>> {
+        match self {
+            Self::Object(o) => o.has_key(name),
+            _ => Err(Error::ty("Value is not an object")),
+        }
+    }
+
     pub fn call(&self, realm: &mut C, args: Vec<Self>, this: Self) -> Result<Self, Error<C>> {
         match self {
             Self::Object(o) => o.call(realm, args, this),
