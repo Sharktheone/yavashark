@@ -24,6 +24,8 @@ func main() {
 	historyOnly := flag.Bool("history-only", false, "Only generate the history file (skip git commit)")
 	workers := *flag.Int("workers", DEFAULT_WORKERS, "Number of workers")
 	testRoot := flag.String("test_root", DEFAULT_TEST_ROOT, "Path to test root directory")
+	diff := flag.Bool("diff", true, "Diff to use for CI results")
+	diffFilter := flag.String("dfilter", "", "Diff filter to use for CI results")
 	flag.Parse()
 
 	jobs := make(chan string, workers*8)
@@ -74,6 +76,27 @@ func main() {
 	log.Printf("Finished running %d tests in %s", num, time.Since(now).String())
 
 	close(resultsChan)
+
+	if *diff {
+		diff, err := testResults.ComputeDiffPrev()
+		if err != nil {
+			log.Printf("Failed to compute diff: %v", err)
+			return
+		}
+
+		if *diffFilter != "" {
+			diff.PrintDiff()
+		} else {
+			filter, err := results.ParseFilter(*diffFilter)
+			if err != nil {
+				log.Printf("Failed to parse diff filter: %v", err)
+				return
+			}
+
+			diff.PrintDiffFilter(filter)
+		}
+
+	}
 
 	testResults.PrintResults()
 

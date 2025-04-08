@@ -1,6 +1,9 @@
 package status
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type Status uint8
 
@@ -40,6 +43,29 @@ func (s Status) String() string {
 
 func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String())
+}
+
+func ParseStatus(s string) (Status, error) {
+	switch s {
+	case "PASS":
+		return PASS, nil
+	case "FAIL":
+		return FAIL, nil
+	case "SKIP":
+		return SKIP, nil
+	case "TIMEOUT":
+		return TIMEOUT, nil
+	case "CRASH":
+		return CRASH, nil
+	case "PARSE_ERROR":
+		return PARSE_ERROR, nil
+	case "NOT_IMPLEMENTED":
+		return NOT_IMPLEMENTED, nil
+	case "RUNNER_ERROR":
+		return RUNNER_ERROR, nil
+	default:
+		return CRASH, fmt.Errorf("unknown status: %s", s)
+	}
 }
 
 type CIStatus string

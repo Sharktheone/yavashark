@@ -45,6 +45,9 @@ func writeResultsPath(results []Result, path string) error {
 func loadResultsPath(path string) ([]Result, error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
 		return nil, err
 	}
 
