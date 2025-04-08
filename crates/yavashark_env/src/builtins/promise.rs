@@ -129,7 +129,7 @@ impl Promise {
                 self.reject(&val, realm)?;
             }
         }
-        
+
         Ok(())
     }
 

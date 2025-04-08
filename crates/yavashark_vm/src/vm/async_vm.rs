@@ -1,3 +1,4 @@
+use crate::consts::ConstIntoValue;
 use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
@@ -6,7 +7,6 @@ use yavashark_bytecode::data::{Label, OutputData, OutputDataType, TryIdx};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
-use crate::consts::ConstIntoValue;
 
 pub struct VmState {
     regs: Registers,
@@ -47,7 +47,7 @@ impl VmState {
             continue_storage: None,
         }
     }
-    
+
     pub fn continue_async(&mut self, val: Value) -> Res {
         if let Some(storage) = self.continue_storage.take() {
             match storage {
@@ -62,17 +62,14 @@ impl VmState {
                         .get(name.0 as usize)
                         .map(String::as_str)
                         .ok_or(Error::reference("Invalid variable name"))?;
-                    
+
                     self.current_scope.declare_var(name.into(), val)?;
                 }
-                
-                
             }
         }
-        
+
         Ok(())
     }
-
 }
 
 impl<'a> AsyncVM<'a> {
@@ -215,7 +212,8 @@ impl VM for AsyncVM<'_> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(self.realm, &self.state.current_scope)
+        val.clone()
+            .into_value(self.realm, &self.state.current_scope)
     }
 
     #[must_use]
@@ -287,11 +285,11 @@ impl VM for AsyncVM<'_> {
     fn set_continue_storage(&mut self, out: impl OutputData) {
         self.state.continue_storage = Some(out.data_type());
     }
-    
+
     fn enter_try(&mut self, _id: TryIdx) -> Res {
         todo!()
     }
-    
+
     fn leave_try(&mut self) -> Res {
         todo!()
     }

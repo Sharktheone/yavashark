@@ -10,12 +10,15 @@ impl Compiler {
         expr: &FnExpr,
         out: Option<impl OutputData>,
     ) -> Res<Option<MoveOptimization>> {
-        let Some(out)  = out else {
+        let Some(out) = out else {
             return Ok(None);
         };
-        
+
         let f = self.create_function(&expr.function, None)?;
-        
-        Ok(Some(MoveOptimization::new(f, vec![Instruction::move_(f, out)])))
+
+        Ok(Some(MoveOptimization::new(
+            f,
+            vec![Instruction::move_(f, out)],
+        )))
     }
 }

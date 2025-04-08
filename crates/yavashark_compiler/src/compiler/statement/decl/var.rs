@@ -1,7 +1,7 @@
+use crate::Compiler;
 use anyhow::anyhow;
 use swc_ecma_ast::{VarDecl, VarDeclKind};
 use yavashark_bytecode::instructions::Instruction;
-use crate::Compiler;
 
 impl Compiler {
     pub fn decl_var(&mut self, var: &VarDecl) -> crate::Res {
@@ -10,7 +10,7 @@ impl Compiler {
                 for decl in &var.decls {
                     let name = decl.name.as_ident().ok_or(anyhow!("Expected identifier"))?;
                     let name = self.alloc_var(name.id.as_ref());
-                    
+
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
                         self.instructions.push(Instruction::decl_var(out, name));
@@ -19,12 +19,12 @@ impl Compiler {
                     }
                 }
             }
-            
+
             VarDeclKind::Let => {
                 for decl in &var.decls {
                     let name = decl.name.as_ident().ok_or(anyhow!("Expected identifier"))?;
                     let name = self.alloc_var(name.id.as_ref());
-                    
+
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
                         self.instructions.push(Instruction::decl_let(out, name));
@@ -38,16 +38,15 @@ impl Compiler {
                 for decl in &var.decls {
                     let name = decl.name.as_ident().ok_or(anyhow!("Expected identifier"))?;
                     let name = self.alloc_var(name.id.as_ref());
-                    
+
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
                         self.instructions.push(Instruction::decl_const(out, name));
                     } else {
-                        return Err(anyhow!("Const declaration without initializer"))
+                        return Err(anyhow!("Const declaration without initializer"));
                     }
                 }
             }
-
         }
 
         Ok(())

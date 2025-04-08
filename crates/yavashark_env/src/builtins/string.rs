@@ -226,7 +226,12 @@ impl StringObj {
     }
 
     pub fn anchor(&self, name: &str) -> ValueResult {
-        Ok(format!("<a name=\"{}\">{}</a>", name.replace('"', "&quot;"), self.inner.borrow().string).into())
+        Ok(format!(
+            "<a name=\"{}\">{}</a>",
+            name.replace('"', "&quot;"),
+            self.inner.borrow().string
+        )
+        .into())
     }
 
     pub fn at(&self, index: isize) -> Value {
@@ -629,12 +634,12 @@ fn is_lone_surrogate(c: char) -> bool {
     (0xD800..=0xDFFF).contains(&c) || (0xDC00..=0xDFFF).contains(&c)
 }
 
-// 
-// 
+//
+//
 // #[must_use]
 // pub fn htmlstr(s: &str) -> String {
 //     let mut result = String::with_capacity(s.len());
-// 
+//
 //     for c in s.chars() {
 //         if let Some(replacement) = replace_html(c) {
 //             result.push_str(replacement);
@@ -642,10 +647,10 @@ fn is_lone_surrogate(c: char) -> bool {
 //             result.push(c);
 //         }
 //     }
-// 
+//
 //     result
 // }
-// 
+//
 // #[must_use]
 // pub const fn replace_html(c: char) -> Option<&'static str> {
 //     Some(match c {
@@ -1009,10 +1014,10 @@ fn is_lone_surrogate(c: char) -> bool {
 //         '♣' => "&clubs;",
 //         '♥' => "&hearts;",
 //         '♦' => "&diams;",
-//         
+//
 //         _ => return None
-// 
+//
 //     })
-//     
-// 
+//
+//
 // }

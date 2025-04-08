@@ -32,7 +32,6 @@ impl FunctionCode for OldBytecodeFunction {
     }
 }
 
-
 #[derive(Debug)]
 pub struct BytecodeFunction {
     pub code: Rc<BytecodeFunctionCode>,

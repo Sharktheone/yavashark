@@ -54,7 +54,7 @@ pub trait VM {
     fn get_scope_mut(&mut self) -> &mut Scope;
 
     fn set_continue_storage(&mut self, out: impl OutputData);
-    
+
     fn enter_try(&mut self, id: TryIdx) -> Res;
     fn leave_try(&mut self) -> Res;
 }

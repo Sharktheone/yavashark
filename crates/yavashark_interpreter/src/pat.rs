@@ -10,7 +10,12 @@ use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_value::IntoValue;
 
 impl Interpreter {
-    pub fn run_pat(realm: &mut Realm, stmt: &Pat, scope: &mut Scope, value: &mut impl Iterator<Item = Value>) -> Res {
+    pub fn run_pat(
+        realm: &mut Realm,
+        stmt: &Pat,
+        scope: &mut Scope,
+        value: &mut impl Iterator<Item = Value>,
+    ) -> Res {
         Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP)
     }
 
@@ -28,7 +33,10 @@ impl Interpreter {
                 scope.declare_var(id.sym.to_string(), value);
             }
             Pat::Array(arr) => {
-                let mut iter = value.next().unwrap_or(Value::Undefined).iter_no_realm(realm)?;
+                let mut iter = value
+                    .next()
+                    .unwrap_or(Value::Undefined)
+                    .iter_no_realm(realm)?;
 
                 let mut assert_last = false;
 
@@ -36,7 +44,6 @@ impl Interpreter {
                     if assert_last {
                         return Err(Error::syn("Rest element must be last element"));
                     }
-
 
                     if matches!(elem, Some(Pat::Rest(_))) {
                         #[allow(clippy::unwrap_used)]
@@ -74,14 +81,17 @@ impl Interpreter {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
-                            let value = object.get_property(&key, realm).unwrap_or(Value::Undefined);
+                            let value =
+                                object.get_property(&key, realm).unwrap_or(Value::Undefined);
 
                             Self::run_pat(realm, &kv.value, scope, &mut iter::once(value))?;
                             rest_not_props.push(key);
                         }
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
-                            let mut value = object.get_property(&key.clone().into(), realm).unwrap_or(Value::Undefined);
+                            let mut value = object
+                                .get_property(&key.clone().into(), realm)
+                                .unwrap_or(Value::Undefined);
 
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
@@ -103,7 +113,12 @@ impl Interpreter {
 
                             let rest_obj = Object::from_values(rest_props, realm)?;
 
-                            Self::run_pat(realm, &rest.arg, scope, &mut iter::once(rest_obj.into_value()))?;
+                            Self::run_pat(
+                                realm,
+                                &rest.arg,
+                                scope,
+                                &mut iter::once(rest_obj.into_value()),
+                            )?;
                         }
                     }
                 }

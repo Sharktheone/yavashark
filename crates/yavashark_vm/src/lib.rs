@@ -1,3 +1,4 @@
+mod consts;
 mod data;
 mod execute;
 mod execute_old;
@@ -10,7 +11,6 @@ mod storage;
 mod task;
 mod value_ext;
 mod vm;
-mod consts;
 
 pub use regs::*;
 pub use stack::*;

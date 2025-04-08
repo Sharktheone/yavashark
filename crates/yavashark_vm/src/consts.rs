@@ -1,12 +1,12 @@
+use crate::function_code::BytecodeFunction;
 use std::cell::RefCell;
 use yavashark_bytecode::{ArrayLiteralBlueprint, ConstValue, ObjectLiteralBlueprint};
-use yavashark_env::{Object, Realm, Value, ValueResult};
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use crate::function_code::BytecodeFunction;
+use yavashark_env::{Object, Realm, Value, ValueResult};
 
 pub trait ConstIntoValue {
     fn into_value(self, realm: &Realm, scope: &Scope) -> ValueResult;
@@ -24,13 +24,13 @@ impl ConstIntoValue for ConstValue {
             Self::Array(array) => array.into_value(realm, scope)?,
             Self::Symbol(s) => Value::Symbol(s.into()),
             Self::Function(bp) => {
+                let func: RefCell<Box<dyn FunctionCode>> =
+                    RefCell::new(Box::new(BytecodeFunction {
+                        code: bp.code,
+                        is_async: bp.is_async,
+                        is_generator: bp.is_generator,
+                    }));
 
-                let func: RefCell<Box<dyn FunctionCode>> = RefCell::new(Box::new(BytecodeFunction {
-                    code: bp.code,
-                    is_async: bp.is_async,
-                    is_generator: bp.is_generator,
-                }));
-                
                 let optim = OptimFunction::new(
                     bp.name.unwrap_or("anonymous".to_string()),
                     bp.params,
@@ -38,13 +38,11 @@ impl ConstIntoValue for ConstValue {
                     scope.clone(),
                     realm,
                 )?;
-                
+
                 optim.into()
-            },
-            Self::BigInt(b) => Value::BigInt(b),
-            Self::Regex(exp, flags) => {
-                RegExp::new_from_str_with_flags(realm, &exp, &flags)?.into()
             }
+            Self::BigInt(b) => Value::BigInt(b),
+            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(realm, &exp, &flags)?.into(),
         })
     }
 }

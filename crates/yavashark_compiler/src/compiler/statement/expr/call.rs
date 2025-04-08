@@ -7,7 +7,7 @@ use yavashark_bytecode::instructions::Instruction;
 impl Compiler {
     pub fn compile_call(&mut self, expr: &CallExpr, out: Option<impl OutputData>) -> Res {
         self.compile_call_args(&expr.args)?;
-        
+
         let callee = match &expr.callee {
             Callee::Expr(expr) => self.compile_expr_data_acc(expr)?,
             Callee::Super(_) => {
@@ -27,11 +27,8 @@ impl Compiler {
 
         Ok(())
     }
-    
-    pub fn compile_call_args(
-        &mut self,
-        args: &[swc_ecma_ast::ExprOrSpread],
-    ) -> Res {
+
+    pub fn compile_call_args(&mut self, args: &[swc_ecma_ast::ExprOrSpread]) -> Res {
         let args_have_call = args.iter().any(|arg| arg.expr.has_call());
 
         if args_have_call {
@@ -47,8 +44,7 @@ impl Compiler {
                 }
             }
         }
-        
-        Ok(())
 
+        Ok(())
     }
 }

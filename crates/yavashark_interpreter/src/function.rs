@@ -108,16 +108,11 @@ impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         scope.state_set_returnable();
-        
+
         let mut iter = args.clone().into_iter();
 
         for p in self.params.iter() {
-            Interpreter::run_pat(
-                realm,
-                &p.pat,
-                scope,
-                &mut iter,
-            )?;
+            Interpreter::run_pat(realm, &p.pat, scope, &mut iter)?;
         }
 
         let args = Array::with_elements(realm, args)?;

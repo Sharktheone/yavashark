@@ -5,37 +5,33 @@ use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {
     pub fn compile_bin(&mut self, expr: &BinExpr, out: Option<impl OutputData>) -> Res {
-        let Some(out) = out else {
-            return Ok(())
-        };
-        
+        let Some(out) = out else { return Ok(()) };
+
         let reg1 = self.alloc_reg_or_stack();
         let reg2 = self.alloc_reg_or_stack();
-        
+
         //TODO: in theory we can optimize some things out here...
         let left = self.compile_expr_data(&expr.left, Some(reg1))?;
         let right = self.compile_expr_data(&expr.right, Some(reg2))?;
-        
-        self.instructions.push(
-            get_bin_instruction(
-                left,
-                right,
-                out,
-                expr.op,
-            )
-        );
-        
+
+        self.instructions
+            .push(get_bin_instruction(left, right, out, expr.op));
+
         self.dealloc(reg1);
         self.dealloc(reg2);
         self.dealloc(left);
         self.dealloc(right);
-        
+
         Ok(())
     }
-    
 }
 
-pub fn get_bin_instruction(left: DataType, right: DataType, out: impl OutputData, op: BinaryOp) -> Instruction {
+pub fn get_bin_instruction(
+    left: DataType,
+    right: DataType,
+    out: impl OutputData,
+    op: BinaryOp,
+) -> Instruction {
     match op {
         BinaryOp::EqEq => Instruction::eq(left, right, out),
         BinaryOp::NotEq => Instruction::ne(left, right, out),

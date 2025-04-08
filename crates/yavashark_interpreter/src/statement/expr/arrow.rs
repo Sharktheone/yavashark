@@ -26,7 +26,7 @@ impl Func<Realm> for ArrowFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut self.scope.child()?;
         scope.state_set_function()?;
-        
+
         let mut args_iter = args.into_iter();
 
         for pat in &self.expr.params {

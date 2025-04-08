@@ -1,9 +1,9 @@
-use std::rc::Rc;
 use crate::data::DataSection;
 use crate::instructions;
 use num_bigint::BigInt;
-use yavashark_value::ConstString;
+use std::rc::Rc;
 use swc_ecma_ast::Param;
+use yavashark_value::ConstString;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ConstValue {
@@ -25,13 +25,10 @@ pub struct ObjectLiteralBlueprint {
     pub properties: Vec<(String, ConstValue)>,
 }
 
-
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteralBlueprint {
     pub properties: Vec<ConstValue>,
 }
-
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct BytecodeFunctionCode {

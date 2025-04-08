@@ -1,5 +1,5 @@
-use std::iter;
 use crate::Interpreter;
+use std::iter;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;

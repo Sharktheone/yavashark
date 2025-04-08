@@ -55,14 +55,18 @@ impl AsyncTask for BytecodeAsyncTask {
             if pinned.poll(cx).is_pending() {
                 return Poll::Pending;
             } else if let Some(state) = inner.state.as_mut() {
-                let val = promise.0.inner.borrow().value.clone().unwrap_or(Value::Undefined);
-                
+                let val = promise
+                    .0
+                    .inner
+                    .borrow()
+                    .value
+                    .clone()
+                    .unwrap_or(Value::Undefined);
+
                 state.continue_async(val)?;
-                
-                
             }
         }
-        
+
         _ = inner.await_promise.take();
 
         if let Some(state) = inner.state.take() {

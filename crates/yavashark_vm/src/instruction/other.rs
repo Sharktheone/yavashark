@@ -142,7 +142,7 @@ pub fn await_(data: impl Data, out: impl OutputData, vm: &mut impl VM) -> Contro
     match result {
         Value::Object(obj) if obj.downcast::<Promise>().is_some() => {
             vm.set_continue_storage(out);
-            return Err(ControlFlow::Await(obj))
+            return Err(ControlFlow::Await(obj));
         }
 
         _ => out.set(result, vm)?,

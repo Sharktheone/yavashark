@@ -12,8 +12,8 @@ use tokio::runtime::Builder;
 use yavashark_codegen::ByteCodegen;
 use yavashark_compiler::Compiler;
 use yavashark_env::print::PrettyPrint;
-use yavashark_env::Realm;
 use yavashark_env::scope::Scope;
+use yavashark_env::Realm;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
 
@@ -130,13 +130,17 @@ fn main() {
         if ast {
             println!("AST:\n{script:#?}");
         }
-        
+
         let rt = Builder::new_current_thread().enable_all().build().unwrap();
 
         if interpreter {
             let mut realm = Realm::new().unwrap();
             let mut scope = Scope::global(&realm, path.clone());
-            let result = match yavashark_interpreter::Interpreter::run_in(&script.body, &mut realm, &mut scope) {
+            let result = match yavashark_interpreter::Interpreter::run_in(
+                &script.body,
+                &mut realm,
+                &mut scope,
+            ) {
                 Ok(v) => v,
                 Err(e) => {
                     println!("Error: {}", e.pretty_print());
@@ -144,7 +148,7 @@ fn main() {
                 }
             };
             println!("Interpreter: {result:?}");
-            
+
             rt.block_on(realm.run_event_loop());
         }
 
@@ -160,7 +164,7 @@ fn main() {
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
                 vm.run().unwrap();
-                
+
                 rt.block_on(vm.get_realm().run_event_loop());
 
                 println!("Bytecode: {:?}", vm.acc());

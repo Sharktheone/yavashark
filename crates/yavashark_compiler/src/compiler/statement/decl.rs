@@ -1,10 +1,10 @@
 mod class;
 mod fn_;
-mod var;
 mod using;
+mod var;
 
-use anyhow::anyhow;
 use crate::{Compiler, Res};
+use anyhow::anyhow;
 use swc_ecma_ast::Decl;
 
 impl Compiler {
@@ -14,8 +14,8 @@ impl Compiler {
             Decl::Fn(fn_decl) => self.decl_fn(fn_decl),
             Decl::Var(var) => self.decl_var(var),
             Decl::Using(using) => self.decl_using(using),
-            
-            _ => Err(anyhow!("Typescript not supported"))
+
+            _ => Err(anyhow!("Typescript not supported")),
         }
     }
 }

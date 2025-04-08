@@ -14,10 +14,7 @@ impl Compiler {
             let name = ident.sym.as_str();
             let var = self.alloc_var(name);
 
-            MoveOptimization::new(
-                var,
-                vec![Instruction::load_var(var, out)],
-            )
+            MoveOptimization::new(var, vec![Instruction::load_var(var, out)])
         })
     }
 

@@ -1,3 +1,4 @@
+use crate::consts::ConstIntoValue;
 use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
@@ -7,7 +8,6 @@ use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
-use crate::consts::ConstIntoValue;
 
 pub struct OwnedVM {
     regs: Registers,

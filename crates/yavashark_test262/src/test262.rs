@@ -18,7 +18,7 @@ pub fn print(realm: &mut Realm) -> ObjectHandle {
             let Some(first) = args.first() else {
                 return Err(Error::ty("expected at least one argument"));
             };
-            
+
             let arg = first.to_string(realm)?;
 
             println!("{arg}");

@@ -42,7 +42,7 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
     let path = scope.get_current_path()?;
 
     let async_path = Path::new(TEST262_DIR).join("harness/doneprintHandle.js");
-    
+
     let prog = parse_file(async_path.as_path()).0;
 
     scope.set_path(async_path)?;
@@ -67,12 +67,11 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope
 
     if !raw {
         run_harness_in_realm(&mut r, &mut s)?;
-        
+
         if async_ {
             run_async_in_realm(&mut r, &mut s)?;
         }
     }
-    
 
     r.set_eval(InterpreterEval)?;
 

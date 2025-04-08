@@ -1,5 +1,5 @@
-use std::iter;
 use crate::Interpreter;
+use std::iter;
 use swc_ecma_ast::{ForHead, ForInStmt};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;

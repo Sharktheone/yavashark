@@ -13,7 +13,7 @@ use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, ObjectHandle, Realm, Res, ValueResult};
 use yavashark_vm::OldBorrowedVM;
-use yavashark_vm::function_code::{BytecodeFunction};
+use yavashark_vm::function_code::BytecodeFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
 pub struct ByteCodeInterpreter;
