@@ -1,10 +1,12 @@
 package main
 
 import (
-	 "context"
+	"context"
+	"errors"
 	"os/exec"
 	"strings"
 	"time"
+	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/status"
 )
 
@@ -14,7 +16,7 @@ const (
 	TIMEOUT = 4 * time.Second
 )
 
-func runTest(path string) Result {
+func runTest(path string) results.Result {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
@@ -24,8 +26,8 @@ func runTest(path string) Result {
 
 	out := string(outRaw)
 
-	if ctx.Err() == context.DeadlineExceeded {
-		return Result{
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return results.Result{
 			Status: status.TIMEOUT,
 			Msg:    "Test timed out",
 			Path:   path,
@@ -34,7 +36,7 @@ func runTest(path string) Result {
 
 	if err != nil {
 		if strings.HasPrefix(out, "PARSE_ERROR") {
-			return Result{
+			return results.Result{
 				Status: status.PARSE_ERROR,
 				Msg:    out,
 				Path:   path,
@@ -42,13 +44,13 @@ func runTest(path string) Result {
 		}
 
 		if strings.Contains(out, "not yet implemented") && strings.Contains(out, "thread '") && strings.Contains(out, "' panicked at") {
-			return Result{
+			return results.Result{
 				Status: status.NOT_IMPLEMENTED,
 				Msg:    out,
 				Path:   path,
 			}
 		}
-		return Result{
+		return results.Result{
 			Status: status.CRASH,
 			Msg:    out,
 			Path:   path,
@@ -56,38 +58,38 @@ func runTest(path string) Result {
 	}
 
 	if strings.HasPrefix(out, "PASS") {
-		return Result{
+		return results.Result{
 			Status: status.PASS,
 			Msg:    out,
 			Path:   path,
 		}
 	}
 
-    if strings.HasPrefix(out, "FAIL") {
-		return Result{
+	if strings.HasPrefix(out, "FAIL") {
+		return results.Result{
 			Status: status.FAIL,
 			Msg:    out,
 			Path:   path,
 		}
-    }
+	}
 
-    if strings.HasPrefix(out, "Test262:AsyncTestComplete") {
-	    return Result{
-	        Status: status.PASS,
-	        Msg: out,
-	        Path: path,
-        }
-    }
+	if strings.HasPrefix(out, "Test262:AsyncTestComplete") {
+		return results.Result{
+			Status: status.PASS,
+			Msg:    out,
+			Path:   path,
+		}
+	}
 
-    if strings.HasPrefix(out, "Test262:AsyncTestFailure:") {
-        return Result{
-            Status: status.FAIL,
-            Msg:    out,
-            Path: path,
-        }
-    }
+	if strings.HasPrefix(out, "Test262:AsyncTestFailure:") {
+		return results.Result{
+			Status: status.FAIL,
+			Msg:    out,
+			Path:   path,
+		}
+	}
 
-	return Result{
+	return results.Result{
 		Status: status.CRASH,
 		Msg:    out,
 		Path:   path,

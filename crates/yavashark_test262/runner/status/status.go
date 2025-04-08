@@ -15,29 +15,31 @@ const (
 	RUNNER_ERROR
 )
 
-func (s Status) MarshalJSON() ([]byte, error) {
-	var statusStr string
+func (s Status) String() string {
 	switch s {
 	case PASS:
-		statusStr = "PASS"
+		return "PASS"
 	case FAIL:
-		statusStr = "FAIL"
+		return "FAIL"
 	case SKIP:
-		statusStr = "SKIP"
+		return "SKIP"
 	case TIMEOUT:
-		statusStr = "TIMEOUT"
+		return "TIMEOUT"
 	case CRASH:
-		statusStr = "CRASH"
+		return "CRASH"
 	case PARSE_ERROR:
-		statusStr = "PARSE_ERROR"
+		return "PARSE_ERROR"
 	case NOT_IMPLEMENTED:
-		statusStr = "NOT_IMPLEMENTED"
+		return "NOT_IMPLEMENTED"
 	case RUNNER_ERROR:
-		statusStr = "RUNNER_ERROR"
+		return "RUNNER_ERROR"
 	default:
-		statusStr = "UNKNOWN"
+		return "UNKNOWN"
 	}
-	return json.Marshal(statusStr)
+}
+
+func (s Status) MarshalJSON() ([]byte, error) {
+	return json.Marshal(s.String())
 }
 
 type CIStatus string

@@ -1,4 +1,4 @@
-package main
+package results
 
 import (
 	"encoding/json"
@@ -27,6 +27,10 @@ func writeResults(results []Result) error {
 	return writeResultsPath(results, RESULT_PATH)
 }
 
+func loadResults() ([]Result, error) {
+	return loadResultsPath(RESULT_PATH)
+}
+
 func writeResultsPath(results []Result, path string) error {
 	out, err := json.Marshal(results)
 	if err != nil {
@@ -36,6 +40,19 @@ func writeResultsPath(results []Result, path string) error {
 	err = os.WriteFile(path, out, 0644)
 
 	return nil
+}
+
+func loadResultsPath(path string) ([]Result, error) {
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []Result
+
+	err = json.Unmarshal(contents, &results)
+
+	return results, err
 }
 
 func convertResultsToCI(results []Result, root string) []CIResult {
@@ -55,7 +72,7 @@ func convertResultsToCI(results []Result, root string) []CIResult {
 	return ciResults
 }
 
-func writeCIResultsPath(results []Result, path string, root string) error {
+func WriteCIResultsPath(results []Result, path string, root string) error {
 	ciResults := convertResultsToCI(results, root)
 
 	out, err := json.Marshal(ciResults)
