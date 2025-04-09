@@ -1,7 +1,6 @@
-go 1.23.2
+go 1.24.1
 
 use (
- ./crates/yavashark_test262/runner
+	./crates/yavashark_test262/runner
+	./crates/yavashark_test262/viewer
 )
-
-

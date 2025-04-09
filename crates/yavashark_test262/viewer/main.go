@@ -1,5 +1,7 @@
 package main
 
-func main() {
+import "viewer/router"
 
+func main() {
+	router.Start()
 }
