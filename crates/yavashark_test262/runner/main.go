@@ -10,6 +10,7 @@ import (
 	"time"
 	"yavashark_test262_runner/ci"
 	"yavashark_test262_runner/results"
+	"yavashark_test262_runner/worker"
 )
 
 const (
@@ -41,7 +42,7 @@ func main() {
 	wg.Add(workers)
 
 	for i := range workers {
-		go worker(i, jobs, resultsChan, wg)
+		go worker.Worker(i, jobs, resultsChan, wg)
 	}
 
 	num := countTests(testRoot)

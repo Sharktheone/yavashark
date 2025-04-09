@@ -1,4 +1,4 @@
-package main
+package test
 
 import (
 	"context"
@@ -16,7 +16,7 @@ const (
 	TIMEOUT = 4 * time.Second
 )
 
-func runTest(path string) results.Result {
+func RunTest(path string) results.Result {
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
 	defer cancel()
 
