@@ -98,7 +98,7 @@ impl Func<Realm> for OptimFunction {
 impl RawOptimFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
-        scope.state_set_function()?;
+        // scope.state_set_function()?;
         scope.state_set_returnable()?;
 
         for (i, p) in self.params.iter().enumerate() {
@@ -112,9 +112,9 @@ impl RawOptimFunction {
             )?;
         }
         
-        let scope = &mut Scope::with_parent(&self.scope)?;
+        let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function()?;
-        scope.state_set_returnable()?;
+        // scope.state_set_returnable()?;
 
         let args = Array::with_elements(realm, args)?;
 

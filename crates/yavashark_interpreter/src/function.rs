@@ -127,7 +127,7 @@ impl RawJSFunction {
             Interpreter::run_pat(realm, &p.pat, scope, &mut iter)?;
         }
         
-        let scope = &mut Scope::with_parent(&self.scope)?;
+        let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function();
         scope.state_set_returnable();
 
