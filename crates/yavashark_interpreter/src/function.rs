@@ -63,10 +63,17 @@ impl JSFunction {
         block: Option<BlockStmt>,
         scope: Scope,
         realm: &mut Realm,
-    ) -> ObjectHandle {
+    ) -> Res<ObjectHandle> {
         let prototype = Object::new(realm);
 
         scope.copy_path();
+
+
+        let len = params.last().map_or(0, |last| if last.pat.is_rest() {
+                params.len() -1
+            } else {
+                params.len()
+            });
 
         let this = Self {
             inner: RefCell::new(MutableJSFunction {
@@ -81,10 +88,14 @@ impl JSFunction {
             },
         };
 
+
         let handle = ObjectHandle::new(this);
+
+        handle.define_property("name".into(), handle.clone().into())?;
+        handle.define_property("length".into(), len.into())?;
         prototype.define_property("constructor".into(), handle.clone().into());
 
-        handle
+        Ok(handle)
     }
 
     pub fn new_instance(&self, realm: &mut Realm) -> ValueResult {
@@ -111,14 +122,15 @@ impl RawJSFunction {
 
         let mut iter = args.clone().into_iter();
 
-        for p in self.params.iter() {
+        for p in &self.params {
             Interpreter::run_pat(realm, &p.pat, scope, &mut iter)?;
         }
+
 
         let args = Array::with_elements(realm, args)?;
 
         let args = ObjectHandle::new(args);
-        
+
         args.define_variable("callee".into(), Variable::write_config(this.copy()))?;
 
         scope.declare_var("arguments".into(), args.into());

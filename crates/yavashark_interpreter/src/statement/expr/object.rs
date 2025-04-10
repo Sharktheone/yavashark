@@ -70,7 +70,7 @@ impl Interpreter {
                                         method.function.body.clone(),
                                         fn_scope,
                                         realm,
-                                    )
+                                    )?
                                 };
 
                             let value = function.into();
@@ -93,7 +93,7 @@ impl Interpreter {
                                 set.body.clone(),
                                 fn_scope,
                                 realm,
-                            )
+                            )?
                             .into();
 
                             obj.define_setter(key, func)?;
@@ -111,7 +111,7 @@ impl Interpreter {
                                 get.body.clone(),
                                 fn_scope,
                                 realm,
-                            )
+                            )?
                             .into();
 
                             obj.define_getter(key, func)?;

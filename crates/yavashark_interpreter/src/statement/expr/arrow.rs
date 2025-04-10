@@ -1,11 +1,10 @@
 use std::cell::RefCell;
-use std::env::args;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Func;
 use yavashark_env::{
-    ControlFlow, MutObject, Object, ObjectHandle, Realm, RuntimeResult, Value, ValueResult,
+    ControlFlow, MutObject, ObjectHandle, Realm, RuntimeResult, Value, ValueResult,
 };
 use yavashark_macro::object;
 
@@ -66,6 +65,18 @@ impl Interpreter {
         };
 
         let arrow = ObjectHandle::new(arrow);
+
+        arrow.define_property("name".into(), "".into())?;
+
+        let len = stmt.params.last().map_or(0, |last| {
+            if last.is_rest() {
+                stmt.params.len() - 1
+            } else {
+                stmt.params.len()
+            }
+        });
+
+        arrow.define_property("length".into(), len.into())?;
 
         Ok(arrow.into())
     }

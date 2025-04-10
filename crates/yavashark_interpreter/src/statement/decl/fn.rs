@@ -38,7 +38,7 @@ impl Interpreter {
                 stmt.function.body.clone(),
                 fn_scope,
                 realm,
-            )
+            )?
         };
 
         Ok((name, function.into()))

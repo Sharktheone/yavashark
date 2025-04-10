@@ -28,7 +28,7 @@ impl Interpreter {
             stmt.function.body.clone(),
             fn_scope,
             realm,
-        );
+        )?;
 
         Ok(function.into())
     }

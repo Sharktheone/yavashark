@@ -49,6 +49,12 @@ impl OptimFunction {
         let prototype = Object::new(realm);
 
         scope.copy_path()?;
+        
+        let len = params.last().map_or(0, |last| if last.pat.is_rest() {
+            params.len() -1
+        } else {
+            params.len()
+        });
 
         let this = Self {
             inner: RefCell::new(MutableOptimFunction {
@@ -64,6 +70,9 @@ impl OptimFunction {
         };
 
         let handle = ObjectHandle::new(this);
+        
+        handle.define_property("name".into(), handle.clone().into())?;
+        handle.define_property("length".into(), len.into())?;
         prototype.define_property("constructor".into(), handle.clone().into())?;
 
         Ok(handle)

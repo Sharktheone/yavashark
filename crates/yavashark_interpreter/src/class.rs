@@ -165,7 +165,7 @@ fn create_method(
         func.body.clone(),
         scope.clone(),
         realm,
-    );
+    )?;
     Ok((name, func.into()))
 }
 
