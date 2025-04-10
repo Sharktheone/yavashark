@@ -75,7 +75,13 @@ impl Interpreter {
             }
             Pat::Object(obj) => {
                 let mut rest_not_props = Vec::with_capacity(obj.props.len());
-                let object = value.next().unwrap_or(Value::Undefined);
+                let Some(object) = value.next() else {
+                    return Err(Error::ty("Cannot destructure undefined"));
+                };
+                
+                if object.is_nullish() {
+                    return Err(Error::ty("Cannot destructure null or undefined"));
+                }
 
                 for prop in &obj.props {
                     match prop {
