@@ -2,20 +2,30 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"os"
+	"path/filepath"
+	"sync"
+	"viewer/conf"
+	"yavashark_test262_runner/results"
+	"yavashark_test262_runner/run"
+)
+
+var (
+	testRun = sync.Mutex{}
 )
 
 func current(c *fiber.Ctx) error {
-	f, err := os.Open("results.json")
+	res, err := results.LoadResults()
 	if err != nil {
 		return err
 	}
 
-	defer f.Close()
+	if res == nil {
+		return fiber.NewError(fiber.StatusNotFound, "No results found")
+	}
 
-	//TODO: we need to parse the results.jsn file and convert it to the ci format
+	resCi := results.ConvertResultsToCI(res, conf.TestRoot)
 
-	return nil
+	return c.Status(fiber.StatusOK).JSON(resCi)
 }
 
 func rerunAll(c *fiber.Ctx) error {
@@ -23,7 +33,18 @@ func rerunAll(c *fiber.Ctx) error {
 		return err
 	}
 
-	return nil
+	if !testRun.TryLock() {
+		return fiber.NewError(fiber.StatusTooManyRequests, "Test is already running")
+	}
+
+	defer testRun.Unlock()
+
+	res := run.TestsInDir(conf.TestRoot, conf.Workers)
+	res.Write()
+
+	resCi := results.ConvertResultsToCI(res.TestResults, conf.TestRoot)
+
+	return c.Status(fiber.StatusOK).JSON(resCi)
 }
 
 func rerun(c *fiber.Ctx) error {
@@ -31,11 +52,40 @@ func rerun(c *fiber.Ctx) error {
 		return err
 	}
 
-	return nil
+	if !testRun.TryLock() {
+		return fiber.NewError(fiber.StatusTooManyRequests, "Test is already running")
+	}
+
+	defer testRun.Unlock()
+
+	path := c.Params("path")
+
+	fullPath := filepath.Join(conf.TestRoot, path)
+
+	run.TestsInDir(fullPath, conf.Workers)
+
+	return current(c)
 }
 
 func info(c *fiber.Ctx) error {
-	//TODO: we need to parse the results.json file and get the info about the specific test
+	res, err := results.LoadResults()
+	if err != nil {
+		return err
+	}
 
-	return nil
+	path, err := filepath.Rel("/api/info/", c.Path())
+	if err != nil {
+		return err
+	}
+	fullPath := filepath.Join(conf.TestRoot, path)
+
+	for _, r := range res {
+		if r.Path == fullPath {
+			return c.Status(fiber.StatusOK).JSON(r)
+		}
+	}
+
+	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+		"error": "Test not found",
+	})
 }

@@ -103,7 +103,7 @@ func printRes(name string, n uint32, total uint32) {
 }
 
 func (tr *TestResults) ComparePrev() error {
-	prevRaw, err := loadResults()
+	prevRaw, err := LoadResults()
 	if err != nil {
 		return err
 	}

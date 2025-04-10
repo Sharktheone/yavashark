@@ -248,7 +248,7 @@ func computeAggregate(dir string, summaries map[string]*DirectorySummary) Direct
 }
 
 func printCiDiff(path string, testResults *results.TestResults) {
-	prev, _ := loadPrevCi(path)
+	prev, _ := LoadPrevCi(path)
 	if prev != nil {
 		d, err := testResults.ComputeDiff(prev)
 		if err != nil {

@@ -19,8 +19,8 @@ func Start() {
 
 	api.Get("current", current)
 	api.Get("rerun", rerunAll)
-	api.Post("rerun", rerun)
-	api.Get("info/:path", info)
+	api.Get("rerun/*", rerun)
+	api.Get("info/*", info)
 
 	web.Serve(app)
 

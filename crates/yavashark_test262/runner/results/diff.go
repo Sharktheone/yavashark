@@ -45,7 +45,7 @@ func ParseFilter(filter string) ([]TestDiff, error) {
 }
 
 func (tr *TestResults) ComputeDiffPrev() (Diff, error) {
-	prevRaw, err := loadResults()
+	prevRaw, err := LoadResults()
 	if err != nil {
 		return nil, err
 	}

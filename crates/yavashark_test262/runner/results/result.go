@@ -27,7 +27,7 @@ func writeResults(results []Result) error {
 	return writeResultsPath(results, RESULT_PATH)
 }
 
-func loadResults() ([]Result, error) {
+func LoadResults() ([]Result, error) {
 	return loadResultsPath(RESULT_PATH)
 }
 
@@ -58,7 +58,7 @@ func loadResultsPath(path string) ([]Result, error) {
 	return results, err
 }
 
-func convertResultsToCI(results []Result, root string) []CIResult {
+func ConvertResultsToCI(results []Result, root string) []CIResult {
 	ciResults := make([]CIResult, len(results))
 	for i, res := range results {
 		path, err := filepath.Rel(root, res.Path)
@@ -90,7 +90,7 @@ func ConvertResultsFromCI(results []CIResult) []Result {
 }
 
 func WriteCIResultsPath(results []Result, path string, root string) error {
-	ciResults := convertResultsToCI(results, root)
+	ciResults := ConvertResultsToCI(results, root)
 
 	out, err := json.Marshal(ciResults)
 	if err != nil {

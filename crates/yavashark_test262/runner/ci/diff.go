@@ -6,7 +6,7 @@ import (
 	"yavashark_test262_runner/results"
 )
 
-func loadPrevCi(path string) (*results.TestResults, error) {
+func LoadPrevCi(path string) (*results.TestResults, error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
 		if os.IsNotExist(err) {
