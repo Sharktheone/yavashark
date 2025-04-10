@@ -153,11 +153,6 @@ impl<C: Realm> Value<C> {
     }
 
     #[must_use]
-    pub const fn symbol(name: &'static str) -> Self {
-        Self::Symbol(Symbol::new(name))
-    }
-
-    #[must_use]
     pub fn string(s: &str) -> Self {
         Self::String(s.to_string())
     }

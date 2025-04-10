@@ -5164,6 +5164,7 @@ dependencies = [
  "half",
  "num-bigint",
  "num-traits",
+ "rand 0.9.0",
  "yavashark_garbage",
 ]
 
