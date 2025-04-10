@@ -26,8 +26,8 @@ impl Eval for InterpreterEval {
             }
         };
         
-        let scope = &mut scope.child()?;
-        scope.state_set_function();
+        // let scope = &mut scope.child()?;
+        // scope.state_set_function();
 
         Interpreter::run_in(&script.body, realm, scope)
     }
