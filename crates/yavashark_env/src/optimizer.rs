@@ -98,6 +98,7 @@ impl Func<Realm> for OptimFunction {
 impl RawOptimFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
+        scope.state_set_function()?;
         scope.state_set_returnable()?;
 
         for (i, p) in self.params.iter().enumerate() {
@@ -110,6 +111,10 @@ impl RawOptimFunction {
                 args.get(i).unwrap_or(&Value::Undefined).copy(),
             )?;
         }
+        
+        let scope = &mut Scope::with_parent(&self.scope)?;
+        scope.state_set_function()?;
+        scope.state_set_returnable()?;
 
         let args = Array::with_elements(realm, args)?;
 

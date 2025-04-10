@@ -126,6 +126,10 @@ impl RawJSFunction {
         for p in &self.params {
             Interpreter::run_pat(realm, &p.pat, scope, &mut iter)?;
         }
+        
+        let scope = &mut Scope::with_parent(&self.scope)?;
+        scope.state_set_function();
+        scope.state_set_returnable();
 
 
         let args = Array::with_elements(realm, args)?;
