@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"path/filepath"
 	"sync"
+	"viewer/cache"
 	"viewer/conf"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/run"
@@ -14,16 +15,11 @@ var (
 )
 
 func current(c *fiber.Ctx) error {
-	res, err := results.LoadResults()
+	resCi, err := cache.GetCi()
+
 	if err != nil {
 		return err
 	}
-
-	if res == nil {
-		return fiber.NewError(fiber.StatusNotFound, "No results found")
-	}
-
-	resCi := results.ConvertResultsToCI(res, conf.TestRoot)
 
 	return c.Status(fiber.StatusOK).JSON(resCi)
 }
@@ -68,7 +64,7 @@ func rerun(c *fiber.Ctx) error {
 }
 
 func info(c *fiber.Ctx) error {
-	res, err := results.LoadResults()
+	res, err := cache.GetResultsIndex()
 	if err != nil {
 		return err
 	}
@@ -79,10 +75,8 @@ func info(c *fiber.Ctx) error {
 	}
 	fullPath := filepath.Join(conf.TestRoot, path)
 
-	for _, r := range res {
-		if r.Path == fullPath {
-			return c.Status(fiber.StatusOK).JSON(r)
-		}
+	if res, ok := (*res)[fullPath]; ok {
+		return c.Status(fiber.StatusOK).JSON(res)
 	}
 
 	return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
