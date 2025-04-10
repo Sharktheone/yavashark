@@ -118,6 +118,7 @@ impl Func<Realm> for JSFunction {
 impl RawJSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
+        scope.state_set_function();
         scope.state_set_returnable();
 
         let mut iter = args.clone().into_iter();
