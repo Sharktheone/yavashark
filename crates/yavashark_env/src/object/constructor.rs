@@ -182,30 +182,22 @@ impl ObjectConstructor {
 
     #[prop("getOwnPropertyNames")]
     fn get_own_property_names(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
-        let keys = obj.keys()?;
+        let mut keys = obj.keys()?;
+        
+        keys.retain(|k| !k.is_symbol());
+        
+        
 
         Ok(Array::with_elements(realm, keys)?.into_value())
     }
 
     #[prop("getOwnPropertySymbols")]
     fn get_own_property_symbols(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
-        let keys = obj.keys()?;
+        let mut keys = obj.keys()?;
 
-        let mut props = Vec::with_capacity(keys.len());
+        keys.retain(Value::is_symbol);
 
-        for key in keys {
-            if !matches!(key, Value::Symbol(_)) {
-                continue;
-            }
-
-            // if !value.attributes.is_enumerable() { // TODO: not sure
-            //     continue;
-            // }
-
-            props.push(key);
-        }
-
-        Ok(Array::with_elements(realm, props)?.into_value())
+        Ok(Array::with_elements(realm, keys)?.into_value())
     }
 
     #[prop("getPrototypeOf")]
