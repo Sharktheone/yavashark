@@ -1,9 +1,6 @@
 use crate::array::Array;
 use crate::scope::Scope;
-use crate::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult,
-    Value, ValueResult,
-};
+use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult, Value, ValueResult, Variable};
 use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::Debug;
@@ -108,8 +105,10 @@ impl RawOptimFunction {
         let args = Array::with_elements(realm, args)?;
 
         let args = ObjectHandle::new(args);
+        
+        args.define_property("callee".into(), this.copy())?;
 
-        scope.declare_var("arguments".into(), args.into())?;
+        args.define_variable("callee".into(), Variable::write_config(this.copy()))?;
 
         if let Some(block) = &self.block {
             let func = block.borrow();

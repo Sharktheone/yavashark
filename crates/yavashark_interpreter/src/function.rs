@@ -118,6 +118,8 @@ impl RawJSFunction {
         let args = Array::with_elements(realm, args)?;
 
         let args = ObjectHandle::new(args);
+        
+        args.define_variable("callee".into(), Variable::write_config(this.copy()))?;
 
         scope.declare_var("arguments".into(), args.into());
 
