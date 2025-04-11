@@ -55,7 +55,10 @@ func rerun(c *fiber.Ctx) error {
 
 	defer testRun.Unlock()
 
-	path := c.Params("path")
+	path, err := filepath.Rel("/api/info/", c.Path())
+	if err != nil {
+		return err
+	}
 
 	fullPath := filepath.Join(conf.TestRoot, path)
 
