@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gofiber/fiber/v2"
 	"path/filepath"
+	"strings"
 	"sync"
 	"viewer/cache"
 	"viewer/conf"
@@ -73,6 +74,9 @@ func info(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	path = strings.TrimSuffix(path, ".json")
+
 	fullPath := filepath.Join(conf.TestRoot, path)
 
 	if res, ok := (*res)[fullPath]; ok {
