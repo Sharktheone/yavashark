@@ -87,7 +87,8 @@ impl Prototype {
         this_borrow
             .constructor
             .value
-            .define_property("prototype".into(), this)?;
+            .as_object()?
+            .define_variable("prototype".into(), Variable::new_read_only(this))?;
 
         this_borrow.has_own_property =
             NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();

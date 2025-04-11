@@ -62,7 +62,8 @@ impl FunctionPrototype {
 
         this.constructor
             .value
-            .define_property("prototype".into(), func)
+            .as_object()?
+            .define_variable("prototype".into(), Variable::new_read_only(func))
     }
 }
 

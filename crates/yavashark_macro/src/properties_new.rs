@@ -324,7 +324,7 @@ fn init_constructor(
 
         obj.define_variable("constructor".into(), constructor.clone().into())?;
 
-        constructor.define_variable("prototype".into(), #variable::write_config(obj.clone().into()))?;
+        constructor.define_variable("prototype".into(), #variable::new_read_only(obj.clone().into()))?;
 
 
     };

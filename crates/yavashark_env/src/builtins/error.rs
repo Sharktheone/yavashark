@@ -1,5 +1,5 @@
 use crate::error::ErrorObj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Value};
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Value, Variable};
 use yavashark_value::Obj;
 
 macro_rules! error {
@@ -24,7 +24,7 @@ macro_rules! error {
                 func,
             );
 
-            constr.define_property("prototype".into(), proto.clone().into())?;
+            constr.define_variable("prototype".into(), Variable::new_read_only(proto.clone().into()))?;
             constr.define_property("name".into(), stringify!($name).into())?;
 
             proto.define_property("constructor".into(), constr.into())?;

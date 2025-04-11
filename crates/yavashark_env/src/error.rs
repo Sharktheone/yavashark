@@ -2,7 +2,7 @@ use crate::realm::Realm;
 use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
-use yavashark_value::ErrorKind;
+use yavashark_value::{ErrorKind, Variable};
 
 pub fn get_error(realm: &Realm) -> ValueResult {
     let constr = NativeConstructor::special(
@@ -24,7 +24,7 @@ pub fn get_error(realm: &Realm) -> ValueResult {
         .error
         .define_property("constructor".into(), constr.clone().into())?;
 
-    constr.define_property("prototype".into(), realm.intrinsics.error.clone().into())?;
+    constr.define_variable("prototype".into(), Variable::new_read_only(realm.intrinsics.error.clone().into()))?;
 
     Ok(constr.into())
 }

@@ -305,7 +305,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             },
             quote! {
-                constructor.define_variable("prototype".into(), #variable::new(obj.clone().into()))?;
+                constructor.define_variable("prototype".into(), #variable::new_read_only(obj.clone().into()))?;
             },
         )
     } else {
