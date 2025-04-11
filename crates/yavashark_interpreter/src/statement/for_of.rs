@@ -15,7 +15,7 @@ impl Interpreter {
 
         while let Some(key) = iter.next(realm)? {
             let scope = &mut Scope::with_parent(scope)?;
-            
+
             Self::run_for_head(realm, stmt.left.clone(), scope, &key)?;
 
             let result = Self::run_statement(realm, &stmt.body, scope);

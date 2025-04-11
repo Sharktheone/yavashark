@@ -68,12 +68,13 @@ impl JSFunction {
 
         scope.copy_path();
 
-
-        let len = params.last().map_or(0, |last| if last.pat.is_rest() {
-                params.len() -1
+        let len = params.last().map_or(0, |last| {
+            if last.pat.is_rest() {
+                params.len() - 1
             } else {
                 params.len()
-            });
+            }
+        });
 
         let this = Self {
             inner: RefCell::new(MutableJSFunction {
@@ -87,7 +88,6 @@ impl JSFunction {
                 scope,
             },
         };
-
 
         let handle = ObjectHandle::new(this);
 
@@ -126,11 +126,10 @@ impl RawJSFunction {
         for p in &self.params {
             Interpreter::run_pat(realm, &p.pat, scope, &mut iter)?;
         }
-        
+
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function();
         scope.state_set_returnable();
-
 
         let args = Array::with_elements(realm, args)?;
 

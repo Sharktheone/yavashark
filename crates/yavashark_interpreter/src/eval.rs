@@ -25,7 +25,7 @@ impl Eval for InterpreterEval {
                 return Err(Error::syn_error(format!("{e:?}")));
             }
         };
-        
+
         // let scope = &mut scope.child()?;
         // scope.state_set_function();
 

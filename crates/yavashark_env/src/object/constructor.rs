@@ -183,10 +183,8 @@ impl ObjectConstructor {
     #[prop("getOwnPropertyNames")]
     fn get_own_property_names(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
         let mut keys = obj.keys()?;
-        
+
         keys.retain(|k| !k.is_symbol());
-        
-        
 
         Ok(Array::with_elements(realm, keys)?.into_value())
     }

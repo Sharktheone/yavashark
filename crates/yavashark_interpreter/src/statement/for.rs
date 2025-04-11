@@ -22,7 +22,7 @@ impl Interpreter {
 
         loop {
             let scope = &mut Scope::with_parent(scope)?;
-            
+
             if let Some(test) = &stmt.test {
                 let value = Self::run_expr(realm, test, stmt.span, scope)?;
                 if value.is_falsey() {

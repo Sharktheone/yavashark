@@ -24,7 +24,10 @@ macro_rules! error {
                 func,
             );
 
-            constr.define_variable("prototype".into(), Variable::new_read_only(proto.clone().into()))?;
+            constr.define_variable(
+                "prototype".into(),
+                Variable::new_read_only(proto.clone().into()),
+            )?;
             constr.define_property("name".into(), stringify!($name).into())?;
 
             proto.define_property("constructor".into(), constr.into())?;

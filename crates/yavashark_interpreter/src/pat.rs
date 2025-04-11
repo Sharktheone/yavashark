@@ -78,7 +78,7 @@ impl Interpreter {
                 let Some(object) = value.next() else {
                     return Err(Error::ty("Cannot destructure undefined"));
                 };
-                
+
                 if object.is_nullish() {
                     return Err(Error::ty("Cannot destructure null or undefined"));
                 }

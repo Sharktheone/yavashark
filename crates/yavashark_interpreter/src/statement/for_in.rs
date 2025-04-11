@@ -25,7 +25,7 @@ impl Interpreter {
             let scope = &mut Scope::with_parent(scope)?;
             let label = scope.last_label()?;
             scope.state_set_loop()?;
-            
+
             let Some(prop) = obj.get_property(&key)? else {
                 //TODO: we should directly return the attributes and so on in `.keys`
                 continue;

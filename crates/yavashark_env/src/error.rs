@@ -24,7 +24,10 @@ pub fn get_error(realm: &Realm) -> ValueResult {
         .error
         .define_property("constructor".into(), constr.clone().into())?;
 
-    constr.define_variable("prototype".into(), Variable::new_read_only(realm.intrinsics.error.clone().into()))?;
+    constr.define_variable(
+        "prototype".into(),
+        Variable::new_read_only(realm.intrinsics.error.clone().into()),
+    )?;
 
     Ok(constr.into())
 }

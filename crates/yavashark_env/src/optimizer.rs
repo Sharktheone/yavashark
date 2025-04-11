@@ -1,6 +1,9 @@
 use crate::array::Array;
 use crate::scope::Scope;
-use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult, Value, ValueResult, Variable};
+use crate::{
+    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult,
+    Value, ValueResult, Variable,
+};
 use std::any::Any;
 use std::cell::RefCell;
 use std::fmt::Debug;
@@ -49,11 +52,13 @@ impl OptimFunction {
         let prototype = Object::new(realm);
 
         scope.copy_path()?;
-        
-        let len = params.last().map_or(0, |last| if last.pat.is_rest() {
-            params.len() -1
-        } else {
-            params.len()
+
+        let len = params.last().map_or(0, |last| {
+            if last.pat.is_rest() {
+                params.len() - 1
+            } else {
+                params.len()
+            }
         });
 
         let this = Self {
@@ -70,7 +75,7 @@ impl OptimFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        
+
         handle.define_property("name".into(), handle.clone().into())?;
         handle.define_property("length".into(), len.into())?;
         prototype.define_property("constructor".into(), handle.clone().into())?;
@@ -111,7 +116,7 @@ impl RawOptimFunction {
                 args.get(i).unwrap_or(&Value::Undefined).copy(),
             )?;
         }
-        
+
         let scope = &mut Scope::with_parent(scope)?;
         scope.state_set_function()?;
         // scope.state_set_returnable()?;
@@ -119,7 +124,7 @@ impl RawOptimFunction {
         let args = Array::with_elements(realm, args)?;
 
         let args = ObjectHandle::new(args);
-        
+
         args.define_property("callee".into(), this.copy())?;
 
         args.define_variable("callee".into(), Variable::write_config(this.copy()))?;

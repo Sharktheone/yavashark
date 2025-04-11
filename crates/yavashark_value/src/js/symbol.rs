@@ -1,6 +1,6 @@
 use crate::ConstString;
-use std::fmt::Display;
 use rand::random;
+use std::fmt::Display;
 
 macro_rules! symbol {
     ($name:ident, $symbol:ident, $id:literal) => {
@@ -46,7 +46,8 @@ impl From<String> for Symbol {
 
 impl From<ConstString> for Symbol {
     fn from(s: ConstString) -> Self {
-        Self { inner: s,
+        Self {
+            inner: s,
             id: random(),
         }
     }
