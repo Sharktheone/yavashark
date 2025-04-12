@@ -90,10 +90,13 @@ func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 
 	for _, res := range aggregated {
 		if res.own == nil || res.other == nil {
+			log.Debug("Skipping nil result")
 			continue
 		}
+		log.Debug("Diffing:", res.own.Path, res.other.Path)
 
 		if res.own.Status != res.other.Status {
+			log.Debug("Diff found:", res.own.Path, res.other.Path)
 			d := TestDiff{To: res.own.Status, From: res.other.Status}
 
 			if item, ok := diff[d]; ok {
