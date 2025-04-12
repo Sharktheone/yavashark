@@ -2,6 +2,7 @@ package results
 
 import (
 	"fmt"
+	"github.com/gofiber/fiber/v2/log"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -68,12 +69,17 @@ func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 
 	for _, res := range tr.TestResults {
 		path := fixPath(res.Path, root)
+		log.Debug(path, res.Path)
 		aggregated[path] = DiffItem{
 			own: &res,
 		}
 	}
 
+	log.Info("Aggregated", len(aggregated))
+
 	for _, res := range other.TestResults {
+		path := fixPath(res.Path, root)
+		log.Debug(path, res.Path)
 		if item, ok := aggregated[res.Path]; ok {
 			aggregated[res.Path] = DiffItem{
 				own:   item.own,
@@ -81,6 +87,8 @@ func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 			}
 		}
 	}
+
+	log.Info("Aggregated", len(aggregated))
 
 	for _, res := range aggregated {
 		if res.own == nil || res.other == nil {
