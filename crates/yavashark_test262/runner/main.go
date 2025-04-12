@@ -37,17 +37,16 @@ func main() {
 
 	testResults.PrintResults()
 
-	//if *testdir == "" {
-	//	testResults.Write()
-	//}
-
 	print("\n\n\n")
 
 	if *ciEnabled {
 		ci.RunCi(testResults, *repoPath, *historyOnly, *diff, testRoot)
 	} else {
 		_ = testResults.ComparePrev()
+	}
 
+	if *testdir == "" {
+		testResults.Write()
 	}
 }
 
