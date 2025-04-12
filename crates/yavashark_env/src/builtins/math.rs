@@ -131,7 +131,7 @@ impl Math {
     }
 
     fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
-       Ok(args.iter()
+        Ok(args.iter()
             .try_fold(None::<f64>, |acc, v| {
                 let val = v.to_number(realm)?;
                 
@@ -144,7 +144,7 @@ impl Math {
                         return f64::NAN;
                     }
                     
-                    acc.max(val)
+                    float_max(acc, val)
                 })))
             })?.unwrap_or(f64::NEG_INFINITY))
     }
@@ -162,7 +162,7 @@ impl Math {
                     if acc.is_nan() {
                         return f64::NAN;
                     }
-                    acc.min(val)
+                    float_min(acc, val)
                 })))
             })?.unwrap_or(f64::INFINITY))
     }
@@ -218,5 +218,32 @@ impl Math {
 
     fn trunc(value: f64) -> f64 {
         value.trunc()
+    }
+}
+
+
+fn float_max(left: f64, right: f64) -> f64 {
+    #[allow(clippy::float_cmp)]
+    if left > right {
+        left
+    } else if right > left {
+        right
+    } else if left == right {
+        if left.is_sign_positive() && right.is_sign_negative() { left } else { right }
+    } else {
+        left + right
+    }
+}
+
+fn float_min(left: f64, right: f64) -> f64 {
+    #[allow(clippy::float_cmp)]
+    if left < right {
+        left
+    } else if right < left {
+        right
+    } else if left == right {
+        if left.is_sign_negative() && right.is_sign_positive() { left } else { right }
+    } else {
+        left + right
     }
 }
