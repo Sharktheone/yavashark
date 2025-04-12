@@ -134,7 +134,18 @@ impl Math {
        Ok(args.iter()
             .try_fold(None::<f64>, |acc, v| {
                 let val = v.to_number(realm)?;
-                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| acc.max(val))))
+                
+                if val.is_nan() {
+                    return Ok::<Option<f64>, Error>(Some(f64::NAN));
+                }
+                
+                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| {
+                    if acc.is_nan() {
+                        return f64::NAN;
+                    }
+                    
+                    acc.max(val)
+                })))
             })?.unwrap_or(f64::NEG_INFINITY))
     }
 
@@ -143,7 +154,16 @@ impl Math {
             .try_fold(None::<f64>, |acc, v| {
                 let val = v.to_number(realm)?;
                 
-                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| acc.min(val))))
+                if val.is_nan() {
+                    return Ok::<Option<f64>, Error>(Some(f64::NAN));
+                }
+                
+                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| {
+                    if acc.is_nan() {
+                        return f64::NAN;
+                    }
+                    acc.min(val)
+                })))
             })?.unwrap_or(f64::INFINITY))
     }
 

@@ -6,7 +6,7 @@ use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, ToTokens};
-use syn::{spanned::Spanned, ImplItem, ItemImpl};
+use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl};
 
 use crate::config::Config;
 use crate::properties_new::constant::{parse_constant, Constant};
@@ -41,6 +41,7 @@ enum MaybeStatic<T> {
 #[derive(Default, FromMeta)]
 pub struct PropertiesArgs {
     extends: Option<Ident>,
+    or: Option<Expr>,
 }
 
 #[allow(unused)]
