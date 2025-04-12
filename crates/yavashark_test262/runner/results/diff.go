@@ -80,7 +80,7 @@ func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 	for _, res := range other.TestResults {
 		if item, ok := aggregated[res.Path]; ok {
 			path := fixPath(res.Path, root)
-			log.Debug(path)
+			log.Debug(path, res.Path)
 			aggregated[path] = DiffItem{
 				own:   item.own,
 				other: &res,
