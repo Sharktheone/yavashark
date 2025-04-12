@@ -54,21 +54,27 @@ func (tr *TestResults) ComputeDiffPrev() (Diff, error) {
 
 	return tr.ComputeDiff(prev), nil
 }
-
 func (tr *TestResults) ComputeDiff(other *TestResults) Diff {
+	return tr.ComputeDiffRoot(other, "")
+
+}
+
+func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 	diff := make(Diff)
 
 	aggregated := make(AggregatedDiff, max(len(tr.TestResults), len(other.TestResults)))
 
 	for _, res := range tr.TestResults {
-		aggregated[res.Path] = DiffItem{
+		path := strings.TrimPrefix(res.Path, root)
+		aggregated[path] = DiffItem{
 			own: &res,
 		}
 	}
 
 	for _, res := range other.TestResults {
 		if item, ok := aggregated[res.Path]; ok {
-			aggregated[res.Path] = DiffItem{
+			path := strings.TrimPrefix(res.Path, root)
+			aggregated[path] = DiffItem{
 				own:   item.own,
 				other: &res,
 			}
