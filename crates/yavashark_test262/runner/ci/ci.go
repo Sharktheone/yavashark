@@ -70,6 +70,8 @@ func runCI(testResults *results.TestResults, overall Summary, repo string, histo
 
 	if diff {
 		printCiDiff(filepath.Join(repo, "results.json"), testResults)
+	} else {
+		testResults.PrintResults()
 	}
 
 	if err := results.WriteCIResultsPath(testResults.TestResults, filepath.Join(repo, "results.json"), root); err != nil {
@@ -250,13 +252,14 @@ func computeAggregate(dir string, summaries map[string]*DirectorySummary) Direct
 func printCiDiff(path string, testResults *results.TestResults) {
 	prev, _ := LoadPrevCi(path)
 	if prev != nil {
-		d, err := testResults.ComputeDiff(prev)
-		if err != nil {
-			return
-		}
+		d := testResults.ComputeDiff(prev)
 
 		d.PrintGrouped()
-	}
 
-	testResults.Compare(prev)
+		println("\n\n")
+
+		testResults.PrintResults()
+
+		testResults.Compare(prev)
+	}
 }

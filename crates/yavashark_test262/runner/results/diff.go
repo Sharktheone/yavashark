@@ -52,10 +52,10 @@ func (tr *TestResults) ComputeDiffPrev() (Diff, error) {
 
 	prev := FromResults(prevRaw)
 
-	return tr.ComputeDiff(prev)
+	return tr.ComputeDiff(prev), nil
 }
 
-func (tr *TestResults) ComputeDiff(other *TestResults) (Diff, error) {
+func (tr *TestResults) ComputeDiff(other *TestResults) Diff {
 	diff := make(Diff)
 
 	aggregated := make(AggregatedDiff, max(len(tr.TestResults), len(other.TestResults)))
@@ -93,7 +93,7 @@ func (tr *TestResults) ComputeDiff(other *TestResults) (Diff, error) {
 
 	diff.Sort()
 
-	return diff, nil
+	return diff
 }
 
 func (d *Diff) Sort() {

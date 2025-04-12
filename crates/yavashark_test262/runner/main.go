@@ -35,13 +35,12 @@ func main() {
 		printDiff(testResults, *diffFilter)
 	}
 
-	testResults.PrintResults()
-
-	print("\n\n\n")
-
 	if *ciEnabled {
 		ci.RunCi(testResults, *repoPath, *historyOnly, *diff, testRoot)
 	} else {
+		testResults.PrintResults()
+
+		print("\n\n\n")
 		_ = testResults.ComparePrev()
 	}
 
