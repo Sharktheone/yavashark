@@ -2,6 +2,7 @@ package results
 
 import (
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 	"yavashark_test262_runner/status"
@@ -60,12 +61,13 @@ func (tr *TestResults) ComputeDiff(other *TestResults) Diff {
 }
 
 func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
+
 	diff := make(Diff)
 
 	aggregated := make(AggregatedDiff, max(len(tr.TestResults), len(other.TestResults)))
 
 	for _, res := range tr.TestResults {
-		path := strings.TrimPrefix(res.Path, root)
+		path := fixPath(res.Path, root)
 		aggregated[path] = DiffItem{
 			own: &res,
 		}
@@ -73,7 +75,7 @@ func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 
 	for _, res := range other.TestResults {
 		if item, ok := aggregated[res.Path]; ok {
-			path := strings.TrimPrefix(res.Path, root)
+			path := fixPath(res.Path, root)
 			aggregated[path] = DiffItem{
 				own:   item.own,
 				other: &res,
@@ -100,6 +102,15 @@ func (tr *TestResults) ComputeDiffRoot(other *TestResults, root string) Diff {
 	diff.Sort()
 
 	return diff
+}
+
+func fixPath(path, root string) string {
+	path, err := filepath.Rel(root, path)
+	if err != nil {
+		return strings.TrimPrefix(path, root)
+	}
+
+	return path
 }
 
 func (d *Diff) Sort() {
