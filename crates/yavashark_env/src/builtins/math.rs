@@ -1,5 +1,5 @@
 use crate::utils::ValueIterator;
-use crate::{MutObject, ObjectHandle, Realm, Res, Value};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
@@ -131,13 +131,20 @@ impl Math {
     }
 
     fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
-        args.iter()
-            .try_fold(f64::NEG_INFINITY, |acc, v| Ok(acc.max(v.to_number(realm)?)))
+       Ok(args.iter()
+            .try_fold(None::<f64>, |acc, v| {
+                let val = v.to_number(realm)?;
+                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| acc.max(val))))
+            })?.unwrap_or(f64::NEG_INFINITY))
     }
 
     fn min(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
-        args.iter()
-            .try_fold(f64::INFINITY, |acc, v| Ok(acc.min(v.to_number(realm)?)))
+        Ok(args.iter()
+            .try_fold(None::<f64>, |acc, v| {
+                let val = v.to_number(realm)?;
+                
+                Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| acc.min(val))))
+            })?.unwrap_or(f64::INFINITY))
     }
 
     fn pow(base: f64, exponent: f64) -> f64 {
