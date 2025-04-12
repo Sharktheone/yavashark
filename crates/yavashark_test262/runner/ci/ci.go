@@ -254,11 +254,17 @@ func printCiDiff(path string, testResults *results.TestResults) {
 	if prev != nil {
 		d := testResults.ComputeDiff(prev)
 
+		println("<=== DIFF ===>")
+
 		d.PrintGrouped()
 
 		println("\n\n")
+		println("<=== Test Results ===>")
 
 		testResults.PrintResults()
+
+		println("\n")
+		println("<=== Comparison ===>")
 
 		testResults.Compare(prev)
 	}
