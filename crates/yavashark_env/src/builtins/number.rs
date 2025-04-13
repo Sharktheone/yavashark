@@ -40,7 +40,6 @@ impl NumberConstructor {
     }
 
     fn construct_from(realm: &mut Realm, val: &Value) -> Res<f64> {
-        dbg!(val);
         Ok(match val {
             Value::BigInt(v) => v.to_f64().unwrap_or_else(|| {
                 let (sign, digits) = v.to_u64_digits();
