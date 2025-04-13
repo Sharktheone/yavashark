@@ -1,7 +1,6 @@
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use num_traits::Zero;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
