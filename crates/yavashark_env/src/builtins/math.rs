@@ -1,6 +1,7 @@
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
+use num_traits::Zero;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
@@ -180,6 +181,10 @@ impl Math {
     }
 
     const fn sign(value: f64) -> f64 {
+        if value == -0.0 && value.is_sign_negative() {
+            return -0.0;
+        }
+        
         value.signum()
     }
 
