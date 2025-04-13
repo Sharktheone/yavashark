@@ -45,7 +45,7 @@ impl NumberConstructor {
     pub const MIN_SAFE_INTEGER: f64 = -9_007_199_254_740_991.0;
 
     pub const MAX_VALUE: f64 = f64::MAX;
-    pub const MIN_VALUE: f64 = f64::MIN;
+    pub const MIN_VALUE: f64 = 5e-324;
 
     pub const NEGATIVE_INFINITY: f64 = f64::NEG_INFINITY;
     pub const POSITIVE_INFINITY: f64 = f64::INFINITY;
