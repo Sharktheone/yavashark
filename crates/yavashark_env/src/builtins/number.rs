@@ -1,5 +1,7 @@
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
+use num_bigint::Sign;
+use num_traits::ToPrimitive;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
 
@@ -35,6 +37,22 @@ impl NumberConstructor {
 
     pub fn override_to_string_internal(&self) -> Res<String> {
         Ok("function Number() { [native code] }".to_string())
+    }
+
+    fn construct_from(realm: &mut Realm, val: &Value) -> Res<f64> {
+        dbg!(val);
+        Ok(match val {
+            Value::BigInt(v) => v.to_f64().unwrap_or_else(|| {
+                let (sign, digits) = v.to_u64_digits();
+
+                let val = digits.first().unwrap_or(&0).to_f64().unwrap_or(0.0);
+
+                if sign == Sign::Minus { -val } else { val }
+            }),
+            _ => {
+                val.to_number(realm)?
+            }
+        })
     }
 }
 
@@ -115,7 +133,7 @@ impl NumberConstructor {
 impl Constructor<Realm> for NumberConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let str = match args.first() {
-            Some(v) => v.to_number(realm)?,
+            Some(v) => Self::construct_from(realm, v)?,
             None => 0.0,
         };
 
@@ -128,7 +146,7 @@ impl Constructor<Realm> for NumberConstructor {
 impl Func<Realm> for NumberConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let str = match args.first() {
-            Some(v) => v.to_number(realm)?,
+            Some(v) => Self::construct_from(realm, v)?,
             None => 0.0,
         };
 
