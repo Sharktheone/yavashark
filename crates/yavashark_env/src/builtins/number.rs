@@ -54,26 +54,42 @@ impl NumberConstructor {
 
     #[prop("isFinite")]
     #[must_use]
-    pub const fn is_finite(number: f64) -> bool {
-        number.is_finite()
+    pub const fn is_finite(number: &Value) -> bool {
+        if let Value::Number(number) = number {
+            number.is_finite()
+        } else {
+            false
+        }
     }
 
     #[prop("isNaN")]
     #[must_use]
-    pub const fn is_nan(number: f64) -> bool {
-        number.is_nan()
+    pub const fn is_nan(number: &Value) -> bool {
+        if let Value::Number(number) = number {
+            number.is_nan()
+        } else {
+            false
+        }
     }
 
     #[prop("isInteger")]
     #[must_use]
-    pub fn is_integer(number: f64) -> bool {
-        number.fract() == 0.0
+    pub fn is_integer(number: &Value) -> bool {
+        if let Value::Number(number) = number {
+            number.fract() == 0.0
+        } else {
+            false
+        }
     }
 
     #[prop("isSafeInteger")]
     #[must_use]
-    pub fn is_safe_integer(number: f64) -> bool {
-        number.is_finite() && number.abs() <= Self::MAX_SAFE_INTEGER
+    pub fn is_safe_integer(number: &Value) -> bool {
+        if let Value::Number(number) = number {
+            number.is_finite() && number.abs() <= Self::MAX_SAFE_INTEGER
+        } else {
+            false
+        }
     }
 
     #[prop("parseFloat")]
