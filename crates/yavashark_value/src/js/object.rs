@@ -8,7 +8,7 @@ use std::sync::atomic::AtomicIsize;
 
 use crate::js::context::Realm;
 use crate::variable::Variable;
-use crate::{Attributes, Error};
+use crate::{Attributes, Error, IntoValueRef};
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
 
 use super::Value;
@@ -461,6 +461,23 @@ impl<C: Realm> Object<C> {
     #[allow(clippy::needless_lifetimes)]
     pub fn downcast<'a, T: 'static>(&'a self) -> Option<OwningGcGuard<'a, BoxedObj<C>, T>> {
         self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
+    }
+    
+    pub fn set(&self, name: impl Into<Value<C>>, value: impl Into<Variable<C>>, realm: &mut C) -> Result<Value<C>, Error<C>> {
+        let name = name.into();
+        let value = value.into();
+
+        self.0
+            .define_variable(name, value)
+            .map(|_| Value::Undefined)
+    }
+    
+    pub fn get(&self, name: impl IntoValueRef<C>, realm: &mut C) -> Result<Value<C>, Error<C>> {
+        let name = name.into_value_ref();
+
+        self.0
+            .get_property(name.as_ref())?
+            .map(|x| x.get(Value::Object(self.clone()), realm)).unwrap_or(Ok(Value::Undefined))
     }
 }
 
