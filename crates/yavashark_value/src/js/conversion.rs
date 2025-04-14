@@ -138,6 +138,20 @@ pub trait IntoValue<C: Realm> {
     fn into_value(self) -> Value<C>;
 }
 
+pub trait IntoValueRef<C: Realm> {
+    type ValueRef: AsRef<Value<C>>;
+    
+    fn into_value_ref(self) -> Self::ValueRef;
+}
+
+impl<V: IntoValue<C>, C: Realm> IntoValueRef<C> for V {
+    type ValueRef = Value<C>;
+
+    fn into_value_ref(self) -> Self::ValueRef {
+        self.into_value()
+    }
+}
+
 impl<C: Realm> IntoValue<C> for Value<C> {
     fn into_value(self) -> Self {
         self
@@ -208,6 +222,13 @@ impl<C: Realm> FromValue<C> for () {
 impl<C: Realm> IntoValue<C> for String {
     fn into_value(self) -> Value<C> {
         Value::String(self)
+    }
+}
+
+impl<C: Realm> IntoValue<C> for &str {
+    
+    fn into_value(self) -> Value<C> {
+        Value::String(self.to_owned())
     }
 }
 
