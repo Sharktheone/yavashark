@@ -64,6 +64,7 @@ pub enum Value<C: Realm> {
     BigInt(BigInt),
 }
 
+
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
         self.copy()
@@ -71,6 +72,12 @@ impl<C: Realm> Clone for Value<C> {
 }
 
 impl<C: Realm> Eq for Value<C> {}
+
+impl<C: Realm> AsRef<Self> for Value<C> {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
 
 #[derive(Debug, Hash)]
 pub enum Type {
