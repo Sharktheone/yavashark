@@ -106,7 +106,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -147,7 +147,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -186,7 +186,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -226,7 +226,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -263,7 +263,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -302,7 +302,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -342,7 +342,7 @@ impl NativeFunction {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 
@@ -460,7 +460,7 @@ impl NativeFunctionBuilder {
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.get();
+            let this = handle.guard();
 
             let this = this.as_any();
 

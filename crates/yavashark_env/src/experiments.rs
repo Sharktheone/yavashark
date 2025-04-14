@@ -11,7 +11,7 @@ mod time;
 mod timers;
 
 pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
-    let obj = obj.get();
+    let obj = obj.guard();
 
     obj.define_variable("fs".into(), Fs::new(realm)?.into())?;
     obj.define_variable("http".into(), Http::new(realm)?.into())?;

@@ -404,7 +404,7 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
 impl<T: Collectable> Gc<T> {
     #[must_use]
     #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
-    pub fn get(&self) -> GcGuard<T> {
+    pub fn guard(&self) -> GcGuard<T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         GcGuard {
             value_ptr,
@@ -1439,21 +1439,21 @@ mod tests {
         setup_logger();
 
         let x = Gc::new(5);
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
         let y = x.clone();
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
         let z = x.clone();
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
         let w = x.clone();
 
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
 
         drop(y);
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
         drop(z);
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
         drop(w);
-        println!("{:?}", *x.get());
+        println!("{:?}", *x.guard());
     }
 
     #[test]
@@ -1464,7 +1464,7 @@ mod tests {
 
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-            x.get().borrow_mut().other.push(y.clone());
+            x.guard().borrow_mut().other.push(y.clone());
 
             let _x = x;
             let _y = y;
@@ -1482,9 +1482,9 @@ mod tests {
             let x = Gc::new(RefCell::new(Node::new(5)));
             let y = Gc::new(RefCell::new(Node::with_other(6, x.clone())));
 
-            x.get().borrow_mut().other.push(y);
+            x.guard().borrow_mut().other.push(y);
 
-            root.get().borrow_mut().other.push(x);
+            root.guard().borrow_mut().other.push(x);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
@@ -1504,7 +1504,7 @@ mod tests {
             let x = Gc::new(RefCell::new(Node::new(5)));
             let y = Gc::new(RefCell::new(Node::with_other(6, x)));
 
-            root.get().borrow_mut().other.push(y);
+            root.guard().borrow_mut().other.push(y);
         }
 
         assert_eq!(unsafe { NODES_LEFT }, 3); //root, x, y
@@ -1528,7 +1528,7 @@ mod tests {
                     x = x_new;
                 }
 
-                let root = root.get();
+                let root = root.guard();
                 let mut root = root.borrow_mut();
                 root.other.push(x);
 
@@ -1564,7 +1564,7 @@ mod tests {
             let m3 = Node::add_with_other(8, &func_proto);
             let m4 = Node::add_with_other(8, &func_proto);
 
-            let pr = proto.get();
+            let pr = proto.guard();
             let mut pr = pr.borrow_mut();
             pr.other.push(m1);
             pr.other.push(m2);

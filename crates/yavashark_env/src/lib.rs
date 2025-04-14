@@ -88,7 +88,7 @@ impl ControlFlow {
     pub fn throw(val: Value) -> Self {
         if let Value::Object(obj) = &val {
             {
-                let obj = obj.get();
+                let obj = obj.guard();
                 let this = (**obj).as_any();
 
                 if let Some(err) = this.downcast_ref::<ErrorObj>() {

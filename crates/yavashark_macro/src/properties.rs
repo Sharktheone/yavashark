@@ -287,7 +287,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             });
 
         let any_cast = quote! {{
-            let x = x.get();
+            let x = x.guard();
             let deez = (**x).as_any().downcast_ref::<Self>()
                 .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?} trace: {}", #fn_name, this, x.class_name())))?;
 

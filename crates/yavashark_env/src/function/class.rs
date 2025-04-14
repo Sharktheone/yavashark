@@ -89,7 +89,7 @@ impl Class {
         let this = Self::new(realm, "Class".to_string()).into_value();
 
         if let Value::Object(o) = this.copy() {
-            let deez = o.get();
+            let deez = o.guard();
             let constructor = deez.constructor()?;
             drop(deez);
             let constructor = constructor.resolve(Value::Object(o), realm)?;

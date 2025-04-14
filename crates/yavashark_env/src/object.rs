@@ -554,7 +554,7 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let Value::Object(proto) = self.prototype()?.value {
-            let proto = proto.get();
+            let proto = proto.guard();
 
             return proto.constructor();
         }

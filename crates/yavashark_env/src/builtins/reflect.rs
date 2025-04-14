@@ -92,7 +92,7 @@ impl Reflect {
         prop: &Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let obj = target.get();
+        let obj = target.guard();
 
         let Some(prop) = obj.get_property(prop)? else {
             return Ok(Value::Undefined);

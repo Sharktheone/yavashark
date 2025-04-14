@@ -94,7 +94,7 @@ pub fn get_own_property_descriptor(
 
     let key = &args[1];
 
-    let obj = obj.get();
+    let obj = obj.guard();
 
     let Some(prop) = obj.get_property(key)? else {
         return Ok(Value::Undefined);

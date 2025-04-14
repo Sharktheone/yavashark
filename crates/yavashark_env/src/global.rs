@@ -7,7 +7,7 @@ use crate::Value;
 use crate::{get_console, ObjectHandle, Res, Variable};
 
 pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
-    let obj = handle.get();
+    let obj = handle.guard();
 
     obj.define_variable(
         "undefined".into(),

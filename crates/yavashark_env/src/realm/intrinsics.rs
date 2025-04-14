@@ -153,7 +153,7 @@ impl Intrinsics {
 
         {
             let obj_this = obj_prototype.clone().into();
-            let obj = obj_prototype.get();
+            let obj = obj_prototype.guard();
 
             let obj = obj.as_any();
 
@@ -165,7 +165,7 @@ impl Intrinsics {
         }
 
         {
-            let func = func_prototype.get();
+            let func = func_prototype.guard();
 
             let func = func.as_any();
 
