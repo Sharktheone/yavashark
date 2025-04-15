@@ -1,4 +1,4 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use num_bigint::Sign;
 use num_traits::ToPrimitive;
@@ -245,4 +245,25 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
     }
 
     Ok(result)
+}
+
+
+pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
+    NativeFunction::new("isNan", |args, _, realm| {
+        Ok(Value::Boolean(if let Some(val) = args.first() {
+            val.to_number(realm)?.is_nan()
+        } else {
+            true
+        }))
+    }, realm)
+}
+
+pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
+    NativeFunction::new("isFinite", |args, _, realm| {
+        Ok(Value::Boolean(if let Some(val) = args.first() {
+            val.to_number(realm)?.is_finite()
+        } else {
+            false
+        }))
+    }, realm)
 }
