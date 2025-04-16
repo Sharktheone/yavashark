@@ -160,7 +160,7 @@ fn main() {
             }
 
             if bytecode {
-                let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
+                let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
                 vm.run().unwrap();
@@ -179,7 +179,7 @@ fn main() {
             }
 
             if old_bytecode {
-                let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
+                let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
                 let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
 

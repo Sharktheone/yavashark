@@ -24,7 +24,7 @@ impl Compiler {
             this.compile_block(body)?;
         }
 
-        let ds = DataSection::new(this.variables, this.labeled, this.literals);
+        let ds = DataSection::new(this.variables, this.labeled, this.literals, this.control);
 
         Ok(BytecodeFunctionCode {
             instructions: this.instructions,

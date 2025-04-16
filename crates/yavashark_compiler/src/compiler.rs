@@ -4,6 +4,7 @@ mod statement;
 use crate::Res;
 use swc_ecma_ast::Stmt;
 use yavashark_bytecode::ConstValue;
+use yavashark_bytecode::control::ControlBlock;
 use yavashark_bytecode::data::{Label, Stack};
 use yavashark_bytecode::instructions::Instruction;
 
@@ -14,6 +15,7 @@ pub struct Compiler {
     pub labeled: Vec<String>,
     pub active_labeled: Vec<Label>,
     pub literals: Vec<ConstValue>,
+    pub control: Vec<ControlBlock>,
     labels: Vec<(String, usize)>,
     loop_label: Option<usize>,
     label_backpatch: Vec<(LabelName, usize)>,

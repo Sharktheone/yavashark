@@ -179,7 +179,7 @@ fn run_input(
         }
 
         if conf.bytecode {
-            let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
+            let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
             let mut vm =
                 BorrowedVM::with_scope(&bc.instructions, &data, vm_realm, vm_scope.clone());
 
@@ -207,7 +207,7 @@ fn run_input(
         }
 
         if conf.old_bytecode {
-            let data = DataSection::new(bc.variables, Vec::new(), bc.literals);
+            let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
             let mut vm = OldBorrowedVM::with_scope(
                 &bc.instructions,

@@ -23,7 +23,7 @@ impl ByteCodeInterpreter {
         let code = ByteCodegen::compile(script)
             .map_err(|e| Error::new_error(format!("Failed to compile: {e:?}")))?;
 
-        let ds = DataSection::new(code.variables, Vec::new(), code.literals);
+        let ds = DataSection::new(code.variables, Vec::new(), code.literals, Vec::new());
 
         let mut vm = OldBorrowedVM::with_scope(&code.instructions, &ds, realm, scope.clone());
 
@@ -41,7 +41,7 @@ impl ByteCodeInterpreter {
             let code = Compiler::compile(&body.stmts)
                 .map_err(|e| Error::syn_error(format!("Failed to compile: {e:?}")))?;
 
-            let ds = DataSection::new(code.variables, Vec::new(), code.literals);
+            let ds = DataSection::new(code.variables, Vec::new(), code.literals, code.control);
 
             compiled = Some(RefCell::new(Box::new(BytecodeFunction {
                 code: Rc::new(BytecodeFunctionCode {
