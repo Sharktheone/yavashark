@@ -1,7 +1,8 @@
 use crate::Compiler;
 use std::borrow::Cow;
 use yavashark_bytecode::ConstValue;
-use yavashark_bytecode::data::{ConstIdx, DataType, Label, OutputDataType, Reg, Stack, VarName};
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
+use yavashark_bytecode::data::{ConstIdx, ControlIdx, DataType, Label, OutputDataType, Reg, Stack, VarName};
 
 impl Compiler {
     pub fn alloc_var<'a>(&mut self, name: impl Into<Cow<'a, str>>) -> VarName {
@@ -114,6 +115,19 @@ impl Compiler {
             DataType::Reg(reg) => self.dealloc_reg(reg),
             DataType::Stack(stack) => self.delloc_stack(stack),
             _ => {}
+        }
+    }
+    
+    pub fn new_try_block(&mut self) -> ControlIdx {
+        let idx = self.control.len();
+        self.control.push(ControlBlock::Try(Default::default()));
+        ControlIdx(idx as u32)
+        
+    }
+    
+    pub fn set_try(&mut self, idx: ControlIdx, block: TryBlock) {
+        if let Some(control) = self.control.get_mut(idx.0 as usize) {
+            *control = ControlBlock::Try(block);
         }
     }
 }

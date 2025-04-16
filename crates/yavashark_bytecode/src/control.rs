@@ -1,16 +1,19 @@
+use crate::data::VarName;
 use crate::JmpOffset;
 
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ControlBlock {
     Try(TryBlock),
     Pat(PatBlock),
 }
 
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct TryBlock {
-    catch: Option<JmpOffset>,
-    finally: Option<JmpOffset>,
+    pub exit: JmpOffset,
+    pub catch: Option<JmpOffset>,
+    pub catch_pat: Option<PatBlock>,
+    pub finally: Option<JmpOffset>,
 }
 
-#[derive(Debug, Clone, PartialOrd, PartialEq)]
-pub struct PatBlock;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PatBlock(VarName);
