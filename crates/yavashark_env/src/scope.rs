@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
-use yavashark_value::CustomGcRefUntyped;
+use yavashark_value::{CustomGcRefUntyped, IntoValue};
 
 use crate::realm::Realm;
 use crate::{Error, Object, ObjectHandle, Res, Value, Variable};
@@ -157,9 +157,67 @@ pub struct ModuleScope {
 }
 
 #[derive(Debug)]
+pub struct VariableReference {
+    name: Value,
+    object: ObjectHandle,
+}
+
+#[derive(Debug)]
+pub enum VariableOrRef {
+    Variable(Variable),
+    Ref(VariableReference),
+}
+
+impl VariableReference {
+    pub fn get(&self) -> Variable {
+        self.object
+            .resolve_property_no_get_set(&self.name)
+            .ok()
+            .flatten()
+            .map(|p| Variable::with_attributes(p.value, p.attributes))
+            .unwrap_or(Value::Undefined.into())
+    }
+    
+    pub fn update(&self, value: Value) -> Res {
+        self.object
+            .define_property(self.name.clone(), value)
+    }
+}
+
+impl VariableOrRef {
+    pub fn get(&self) -> Variable {
+        match self {
+            Self::Variable(v) => v.clone(),
+            Self::Ref(r) => r.get(),
+        }
+    }
+
+    pub fn update(&mut self, value: Value) -> Res {
+        match self {
+            Self::Variable(v) => v.value = value,
+            Self::Ref(r) => return r.update(value)
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
 pub enum ObjectOrVariables {
     Object(ObjectHandle),
-    Variables(HashMap<String, Variable>),
+    Variables(HashMap<String, VariableOrRef>),
+}
+
+impl From<Variable> for VariableOrRef {
+    fn from(variable: Variable) -> Self {
+        Self::Variable(variable)
+    }
+}
+
+impl From<VariableReference> for VariableOrRef {
+    fn from(variable: VariableReference) -> Self {
+        Self::Ref(variable)
+    }
 }
 
 impl ObjectOrVariables {
@@ -167,7 +225,7 @@ impl ObjectOrVariables {
         match self {
             Self::Object(o) => o.define_variable(name.into(), variable)?,
             Self::Variables(v) => {
-                v.insert(name, variable);
+                v.insert(name, variable.into());
             }
         }
 
@@ -181,7 +239,7 @@ impl ObjectOrVariables {
                 .ok()
                 .flatten()
                 .map(|x| Variable::with_attributes(x.value, x.attributes)),
-            Self::Variables(v) => v.get(name).cloned(),
+            Self::Variables(v) => v.get(name).map(|p| p.get()),
         }
     }
 
@@ -233,7 +291,7 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
                 let mut refs = Vec::with_capacity(v.len());
 
                 for v in v.values() {
-                    if let Value::Object(o) = &v.value {
+                    if let Value::Object(o) = &v.get().value {
                         refs.push(o.get_untyped_ref());
                     }
                 }
@@ -291,24 +349,27 @@ impl ScopeInternal {
 
         variables.insert(
             "undefined".to_string(),
-            Variable::new_read_only(Value::Undefined),
+            Variable::new_read_only(Value::Undefined).into(),
         );
         variables.insert(
             "NaN".to_string(),
-            Variable::new_read_only(Value::Number(f64::NAN)),
+            Variable::new_read_only(Value::Number(f64::NAN)).into(),
         );
         variables.insert(
             "Infinity".to_string(),
-            Variable::new_read_only(Value::Number(f64::INFINITY)),
+            Variable::new_read_only(Value::Number(f64::INFINITY)).into(),
         );
-        variables.insert("null".to_string(), Variable::new_read_only(Value::Null));
+        variables.insert(
+            "null".to_string(),
+            Variable::new_read_only(Value::Null).into(),
+        );
         variables.insert(
             "true".to_string(),
-            Variable::new_read_only(Value::Boolean(true)),
+            Variable::new_read_only(Value::Boolean(true)).into(),
         );
         variables.insert(
             "false".to_string(),
-            Variable::new_read_only(Value::Boolean(false)),
+            Variable::new_read_only(Value::Boolean(false)).into(),
         );
 
         let state = parent.borrow()?.state.copy();
@@ -492,11 +553,11 @@ impl ScopeInternal {
             }
             ObjectOrVariables::Variables(ref mut v) => {
                 if let Some(var) = v.get_mut(name) {
-                    if !var.properties.is_writable() {
+                    if !var.get().properties.is_writable() {
                         return Ok(false);
                     }
 
-                    var.value = value;
+                    var.update(value)?;
                     return Ok(true);
                 }
             }
@@ -524,11 +585,11 @@ impl ScopeInternal {
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
-                    if !var.properties.is_writable() {
+                    if !var.get().properties.is_writable() {
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
-                    var.value = value;
+                    var.update(value)?;
                     return Ok(());
                 }
             }
@@ -580,7 +641,7 @@ impl ScopeInternal {
             }
             ObjectOrVariables::Variables(v) => {
                 for (name, variable) in v {
-                    variables.insert(name.clone(), variable.clone());
+                    variables.insert(name.clone(), variable.get());
                 }
             }
         }
