@@ -15,6 +15,7 @@ pub mod instructions;
 mod instructions_old;
 pub mod jmp;
 pub mod writer;
+pub mod control;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;
