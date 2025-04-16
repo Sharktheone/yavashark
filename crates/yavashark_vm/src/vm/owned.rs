@@ -3,7 +3,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, Label, OutputData, OutputDataType, TryIdx};
+use yavashark_bytecode::data::{DataSection, Label, OutputData, OutputDataType, ControlIdx};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
@@ -247,7 +247,7 @@ impl VM for OwnedVM {
         self.continue_storage = Some(out.data_type());
     }
 
-    fn enter_try(&mut self, _id: TryIdx) -> Res {
+    fn enter_try(&mut self, _id: ControlIdx) -> Res {
         todo!()
     }
 

@@ -131,7 +131,9 @@ pub struct VarName(pub u32);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ConstIdx(pub u32);
 
-pub type TryIdx = ConstIdx;
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ControlIdx(pub u32);
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Stack(pub u32);
 

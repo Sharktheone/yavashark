@@ -119,7 +119,7 @@ Debugger
 
 With(Data)
 
-EnterTry(TryIdx)
+EnterTry(ControlIdx)
 LeaveTry
 
 AddAssign(Data) => Data

@@ -1,4 +1,4 @@
-pub enum Value<T: TSValue> {
+enum Value<T: TSValue> {
     Null,
     Undefined,
     Some(T),

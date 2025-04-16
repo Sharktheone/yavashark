@@ -1,6 +1,6 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
-use yavashark_bytecode::data::{Label, TryIdx};
+use yavashark_bytecode::data::{Label, ControlIdx};
 use yavashark_env::builtins::Promise;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 
@@ -226,7 +226,7 @@ pub fn load_super_constructor(output: impl OutputData, vm: &mut impl VM) -> Res 
     output.set(constructor, vm)
 }
 
-pub fn enter_try(id: TryIdx, vm: &mut impl VM) -> Res {
+pub fn enter_try(id: ControlIdx, vm: &mut impl VM) -> Res {
     vm.enter_try(id)
 }
 

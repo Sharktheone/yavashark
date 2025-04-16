@@ -3,7 +3,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
-use yavashark_bytecode::data::{Label, OutputData, OutputDataType, TryIdx};
+use yavashark_bytecode::data::{Label, OutputData, OutputDataType, ControlIdx};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
@@ -286,7 +286,7 @@ impl VM for AsyncVM<'_> {
         self.state.continue_storage = Some(out.data_type());
     }
 
-    fn enter_try(&mut self, _id: TryIdx) -> Res {
+    fn enter_try(&mut self, _id: ControlIdx) -> Res {
         todo!()
     }
 

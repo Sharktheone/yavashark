@@ -9,7 +9,7 @@ pub use old::borrowed::*;
 pub use old::owned::*;
 pub use owned::*;
 
-use yavashark_bytecode::data::{Label, OutputData, TryIdx};
+use yavashark_bytecode::data::{Label, OutputData, ControlIdx};
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Res, Value};
@@ -55,6 +55,6 @@ pub trait VM {
 
     fn set_continue_storage(&mut self, out: impl OutputData);
 
-    fn enter_try(&mut self, id: TryIdx) -> Res;
+    fn enter_try(&mut self, id: ControlIdx) -> Res;
     fn leave_try(&mut self) -> Res;
 }

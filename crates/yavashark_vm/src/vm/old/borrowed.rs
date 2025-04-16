@@ -3,7 +3,7 @@ mod storage;
 use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
-use yavashark_bytecode::data::{DataSection, OutputData, TryIdx};
+use yavashark_bytecode::data::{DataSection, OutputData, ControlIdx};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value, ValueResult};
@@ -221,7 +221,7 @@ impl VM for OldBorrowedVM<'_> {
         todo!()
     }
 
-    fn enter_try(&mut self, _id: TryIdx) -> Res {
+    fn enter_try(&mut self, _id: ControlIdx) -> Res {
         todo!()
     }
 
