@@ -248,6 +248,7 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
 }
 
 
+#[must_use]
 pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
     NativeFunction::new("isNan", |args, _, realm| {
         Ok(Value::Boolean(if let Some(val) = args.first() {
@@ -258,6 +259,7 @@ pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
     }, realm)
 }
 
+#[must_use]
 pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
     NativeFunction::new("isFinite", |args, _, realm| {
         Ok(Value::Boolean(if let Some(val) = args.first() {

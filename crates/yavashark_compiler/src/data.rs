@@ -120,7 +120,7 @@ impl Compiler {
     
     pub fn new_try_block(&mut self) -> ControlIdx {
         let idx = self.control.len();
-        self.control.push(ControlBlock::Try(Default::default()));
+        self.control.push(ControlBlock::Try(TryBlock::default()));
         ControlIdx(idx as u32)
         
     }

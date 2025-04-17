@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
-use yavashark_value::{CustomGcRefUntyped, IntoValue};
+use yavashark_value::CustomGcRefUntyped;
 
 use crate::realm::Realm;
 use crate::{Error, Object, ObjectHandle, Res, Value, Variable};
@@ -169,13 +169,13 @@ pub enum VariableOrRef {
 }
 
 impl VariableReference {
+    #[must_use]
     pub fn get(&self) -> Variable {
         self.object
             .resolve_property_no_get_set(&self.name)
             .ok()
             .flatten()
-            .map(|p| Variable::with_attributes(p.value, p.attributes))
-            .unwrap_or(Value::Undefined.into())
+            .map_or(Value::Undefined.into(), |p| Variable::with_attributes(p.value, p.attributes))
     }
     
     pub fn update(&self, value: Value) -> Res {
@@ -185,6 +185,7 @@ impl VariableReference {
 }
 
 impl VariableOrRef {
+    #[must_use]
     pub fn get(&self) -> Variable {
         match self {
             Self::Variable(v) => v.clone(),
@@ -239,7 +240,7 @@ impl ObjectOrVariables {
                 .ok()
                 .flatten()
                 .map(|x| Variable::with_attributes(x.value, x.attributes)),
-            Self::Variables(v) => v.get(name).map(|p| p.get()),
+            Self::Variables(v) => v.get(name).map(VariableOrRef::get),
         }
     }
 

@@ -463,13 +463,13 @@ impl<C: Realm> Object<C> {
         self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
     }
     
-    pub fn set(&self, name: impl Into<Value<C>>, value: impl Into<Variable<C>>, realm: &mut C) -> Result<Value<C>, Error<C>> {
+    pub fn set(&self, name: impl Into<Value<C>>, value: impl Into<Variable<C>>, _realm: &mut C) -> Result<Value<C>, Error<C>> {
         let name = name.into();
         let value = value.into();
 
         self.0
             .define_variable(name, value)
-            .map(|_| Value::Undefined)
+            .map(|()| Value::Undefined)
     }
     
     pub fn get(&self, name: impl IntoValueRef<C>, realm: &mut C) -> Result<Value<C>, Error<C>> {
@@ -477,7 +477,7 @@ impl<C: Realm> Object<C> {
 
         self.0
             .get_property(name.as_ref())?
-            .map(|x| x.get(Value::Object(self.clone()), realm)).unwrap_or(Ok(Value::Undefined))
+            .map_or(Ok(Value::Undefined), |x| x.get(Value::Object(self.clone()), realm))
     }
 }
 
