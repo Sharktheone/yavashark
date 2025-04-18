@@ -311,6 +311,18 @@ impl Default for YSString {
     }
 }
 
+impl From<&str> for YSString {
+    fn from(str: &str) -> Self {
+        Self::from_ref(str)
+    }
+}
+
+impl From<String> for YSString {
+    fn from(str: String) -> Self {
+        Self::from_string(str)
+    }
+}
+
 impl YSString {
     #[must_use]
     pub const fn new() -> Self {
@@ -333,6 +345,21 @@ impl YSString {
     pub fn from_string(str: String) -> Self {
         let str = InlineString::try_from_string(&str).map_or_else(
             || match SmallString::from_string(str) {
+                Ok(str) => InnerString::Owned(str),
+                Err(str) => InnerString::BoxedOwned(Box::new(str)),
+            },
+            InnerString::Inline,
+        );
+
+        Self {
+            inner: UnsafeCell::new(str),
+        }
+    }
+    
+    #[must_use]
+    pub fn from_ref(str: &str) -> Self {
+        let str = InlineString::try_from_string(str).map_or_else(
+            || match SmallString::from_string(str.to_string()) {
                 Ok(str) => InnerString::Owned(str),
                 Err(str) => InnerString::BoxedOwned(Box::new(str)),
             },
