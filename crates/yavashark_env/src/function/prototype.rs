@@ -51,7 +51,7 @@ impl FunctionPrototype {
         this.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
         this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
         this.call = NativeFunction::with_proto("call", call, func.copy()).into();
-        this.constructor = NativeConstructor::with_proto(
+        this.constructor = NativeConstructor::special_with_proto(
             "Function".to_string(),
             constructor,
             func.copy(),
