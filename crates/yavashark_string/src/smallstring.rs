@@ -1,3 +1,5 @@
+use std::fmt::Display;
+use std::hash::Hash;
 use crate::smallvec::SmallVec;
 use std::mem;
 use std::rc::Rc;
@@ -5,6 +7,20 @@ use std::rc::Rc;
 #[derive(Debug, Clone, Default)]
 pub struct SmallString {
     inner: SmallVec<u8>,
+}
+
+impl Hash for SmallString {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        let slice = self.as_str();
+
+        slice.hash(state);
+    }
+}
+
+impl Display for SmallString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
 }
 
 impl SmallString {

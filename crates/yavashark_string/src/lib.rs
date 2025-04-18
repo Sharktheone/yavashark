@@ -10,11 +10,53 @@ use crate::uz::UZ_BYTES;
 use std::borrow::Cow;
 use std::cell::UnsafeCell;
 use std::cmp::Ordering;
+use std::fmt::{Debug, Display, Formatter};
+use std::hash::{Hash, Hasher};
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
 pub struct YSString {
     inner: UnsafeCell<InnerString>,
+}
+
+impl Display for YSString {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.inner() {
+            InnerString::Inline(inline) => write!(f, "{}", inline.as_str()),
+            InnerString::Static(static_str) => write!(f, "{static_str}"),
+            InnerString::Owned(owned) => write!(f, "{owned}"),
+            InnerString::BoxedOwned(boxed) => write!(f, "{boxed}"),
+            InnerString::Rc(rc) => write!(f, "{rc}"),
+            InnerString::Rope(rope) => write!(f, "{}", rope.as_string()),
+        }
+    }
+}
+
+impl Debug for YSString {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.inner() {
+            InnerString::Inline(inline) => write!(f, "{}", inline.as_str()),
+            InnerString::Static(static_str) => write!(f, "{static_str}"),
+            InnerString::Owned(owned) => write!(f, "{owned}"),
+            InnerString::BoxedOwned(boxed) => write!(f, "{boxed}"),
+            InnerString::Rc(rc) => write!(f, "{rc}"),
+            InnerString::Rope(rope) => write!(f, "{}", rope.as_string()),
+        }
+    }
+}
+
+impl Hash for YSString {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self.inner() {
+            InnerString::Inline(inline) => inline.as_str().hash(state),
+            InnerString::Static(static_str) => static_str.hash(state),
+            InnerString::Owned(owned) => owned.hash(state),
+            InnerString::BoxedOwned(boxed) => boxed.hash(state),
+            InnerString::Rc(rc) => rc.hash(state),
+            InnerString::Rope(rope) => rope.as_string().hash(state),
+        }
+    }
+    
 }
 
 enum InnerString {
