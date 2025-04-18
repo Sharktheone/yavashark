@@ -9,13 +9,13 @@ pub use instructions_old::*;
 
 mod constructor;
 mod consts;
+pub mod control;
 pub mod data;
 pub mod function;
 pub mod instructions;
 mod instructions_old;
 pub mod jmp;
 pub mod writer;
-pub mod control;
 
 pub type VarName = u32;
 pub type ConstIdx = u32;

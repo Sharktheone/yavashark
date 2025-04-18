@@ -175,12 +175,13 @@ impl VariableReference {
             .resolve_property_no_get_set(&self.name)
             .ok()
             .flatten()
-            .map_or(Value::Undefined.into(), |p| Variable::with_attributes(p.value, p.attributes))
+            .map_or(Value::Undefined.into(), |p| {
+                Variable::with_attributes(p.value, p.attributes)
+            })
     }
-    
+
     pub fn update(&self, value: Value) -> Res {
-        self.object
-            .define_property(self.name.clone(), value)
+        self.object.define_property(self.name.clone(), value)
     }
 }
 
@@ -196,7 +197,7 @@ impl VariableOrRef {
     pub fn update(&mut self, value: Value) -> Res {
         match self {
             Self::Variable(v) => v.value = value,
-            Self::Ref(r) => return r.update(value)
+            Self::Ref(r) => return r.update(value),
         }
 
         Ok(())

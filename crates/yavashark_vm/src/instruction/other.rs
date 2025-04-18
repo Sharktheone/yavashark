@@ -1,6 +1,6 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
-use yavashark_bytecode::data::{Label, ControlIdx};
+use yavashark_bytecode::data::{ControlIdx, Label};
 use yavashark_env::builtins::Promise;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 

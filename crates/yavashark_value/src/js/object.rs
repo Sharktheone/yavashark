@@ -462,8 +462,13 @@ impl<C: Realm> Object<C> {
     pub fn downcast<'a, T: 'static>(&'a self) -> Option<OwningGcGuard<'a, BoxedObj<C>, T>> {
         self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
     }
-    
-    pub fn set(&self, name: impl Into<Value<C>>, value: impl Into<Variable<C>>, _realm: &mut C) -> Result<Value<C>, Error<C>> {
+
+    pub fn set(
+        &self,
+        name: impl Into<Value<C>>,
+        value: impl Into<Variable<C>>,
+        _realm: &mut C,
+    ) -> Result<Value<C>, Error<C>> {
         let name = name.into();
         let value = value.into();
 
@@ -471,13 +476,15 @@ impl<C: Realm> Object<C> {
             .define_variable(name, value)
             .map(|()| Value::Undefined)
     }
-    
+
     pub fn get(&self, name: impl IntoValueRef<C>, realm: &mut C) -> Result<Value<C>, Error<C>> {
         let name = name.into_value_ref();
 
         self.0
             .get_property(name.as_ref())?
-            .map_or(Ok(Value::Undefined), |x| x.get(Value::Object(self.clone()), realm))
+            .map_or(Ok(Value::Undefined), |x| {
+                x.get(Value::Object(self.clone()), realm)
+            })
     }
 }
 

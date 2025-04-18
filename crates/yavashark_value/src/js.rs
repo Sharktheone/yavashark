@@ -64,7 +64,6 @@ pub enum Value<C: Realm> {
     BigInt(BigInt),
 }
 
-
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
         self.copy()

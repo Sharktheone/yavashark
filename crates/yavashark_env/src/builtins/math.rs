@@ -131,40 +131,44 @@ impl Math {
     }
 
     fn max(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
-        Ok(args.iter()
+        Ok(args
+            .iter()
             .try_fold(None::<f64>, |acc, v| {
                 let val = v.to_number(realm)?;
-                
+
                 if val.is_nan() {
                     return Ok::<Option<f64>, Error>(Some(f64::NAN));
                 }
-                
+
                 Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| {
                     if acc.is_nan() {
                         return f64::NAN;
                     }
-                    
+
                     float_max(acc, val)
                 })))
-            })?.unwrap_or(f64::NEG_INFINITY))
+            })?
+            .unwrap_or(f64::NEG_INFINITY))
     }
 
     fn min(#[variadic] args: &[Value], #[realm] realm: &mut Realm) -> Res<f64> {
-        Ok(args.iter()
+        Ok(args
+            .iter()
             .try_fold(None::<f64>, |acc, v| {
                 let val = v.to_number(realm)?;
-                
+
                 if val.is_nan() {
                     return Ok::<Option<f64>, Error>(Some(f64::NAN));
                 }
-                
+
                 Ok::<Option<f64>, Error>(Some(acc.map_or(val, |acc| {
                     if acc.is_nan() {
                         return f64::NAN;
                     }
                     float_min(acc, val)
                 })))
-            })?.unwrap_or(f64::INFINITY))
+            })?
+            .unwrap_or(f64::INFINITY))
     }
 
     fn pow(base: f64, exponent: f64) -> f64 {
@@ -183,7 +187,7 @@ impl Math {
         if value == -0.0 && value.is_sign_negative() {
             return -0.0;
         }
-        
+
         value.signum()
     }
 
@@ -225,7 +229,6 @@ impl Math {
     }
 }
 
-
 fn float_max(left: f64, right: f64) -> f64 {
     #[allow(clippy::float_cmp)]
     if left > right {
@@ -233,7 +236,11 @@ fn float_max(left: f64, right: f64) -> f64 {
     } else if right > left {
         right
     } else if left == right {
-        if left.is_sign_positive() && right.is_sign_negative() { left } else { right }
+        if left.is_sign_positive() && right.is_sign_negative() {
+            left
+        } else {
+            right
+        }
     } else {
         left + right
     }
@@ -246,7 +253,11 @@ fn float_min(left: f64, right: f64) -> f64 {
     } else if right < left {
         right
     } else if left == right {
-        if left.is_sign_negative() && right.is_sign_positive() { left } else { right }
+        if left.is_sign_negative() && right.is_sign_positive() {
+            left
+        } else {
+            right
+        }
     } else {
         left + right
     }

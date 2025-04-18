@@ -1,7 +1,7 @@
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
-use std::cell::RefCell;
 use num_bigint::Sign;
 use num_traits::ToPrimitive;
+use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
 
@@ -46,11 +46,13 @@ impl NumberConstructor {
 
                 let val = digits.first().unwrap_or(&0).to_f64().unwrap_or(0.0);
 
-                if sign == Sign::Minus { -val } else { val }
+                if sign == Sign::Minus {
+                    -val
+                } else {
+                    val
+                }
             }),
-            _ => {
-                val.to_number(realm)?
-            }
+            _ => val.to_number(realm)?,
         })
     }
 }
@@ -247,25 +249,32 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
     Ok(result)
 }
 
-
 #[must_use]
 pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
-    NativeFunction::new("isNan", |args, _, realm| {
-        Ok(Value::Boolean(if let Some(val) = args.first() {
-            val.to_number(realm)?.is_nan()
-        } else {
-            true
-        }))
-    }, realm)
+    NativeFunction::new(
+        "isNan",
+        |args, _, realm| {
+            Ok(Value::Boolean(if let Some(val) = args.first() {
+                val.to_number(realm)?.is_nan()
+            } else {
+                true
+            }))
+        },
+        realm,
+    )
 }
 
 #[must_use]
 pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
-    NativeFunction::new("isFinite", |args, _, realm| {
-        Ok(Value::Boolean(if let Some(val) = args.first() {
-            val.to_number(realm)?.is_finite()
-        } else {
-            false
-        }))
-    }, realm)
+    NativeFunction::new(
+        "isFinite",
+        |args, _, realm| {
+            Ok(Value::Boolean(if let Some(val) = args.first() {
+                val.to_number(realm)?.is_finite()
+            } else {
+                false
+            }))
+        },
+        realm,
+    )
 }

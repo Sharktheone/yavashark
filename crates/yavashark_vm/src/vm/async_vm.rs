@@ -3,7 +3,7 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
-use yavashark_bytecode::data::{Label, OutputData, OutputDataType, ControlIdx};
+use yavashark_bytecode::data::{ControlIdx, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};

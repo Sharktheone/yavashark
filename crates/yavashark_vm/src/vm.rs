@@ -9,7 +9,7 @@ pub use old::borrowed::*;
 pub use old::owned::*;
 pub use owned::*;
 
-use yavashark_bytecode::data::{Label, OutputData, ControlIdx};
+use yavashark_bytecode::data::{ControlIdx, Label, OutputData};
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Res, Value};

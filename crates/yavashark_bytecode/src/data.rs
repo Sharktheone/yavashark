@@ -1,12 +1,12 @@
-use crate::ConstValue;
 use crate::control::ControlBlock;
+use crate::ConstValue;
 
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct DataSection {
     pub var_names: Vec<String>,
     pub labels: Vec<String>,
     pub constants: Vec<ConstValue>,
-    pub control: Vec<ControlBlock>
+    pub control: Vec<ControlBlock>,
 }
 
 impl DataSection {
