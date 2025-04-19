@@ -6,6 +6,7 @@ use std::mem;
 use std::path::PathBuf;
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
 
@@ -23,6 +24,8 @@ pub struct OldOwnedVM {
     acc: Value,
 
     realm: Realm,
+
+    try_stack: Vec<TryBlock>
 }
 
 impl OldOwnedVM {
@@ -43,6 +46,7 @@ impl OldOwnedVM {
             current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
+            try_stack: Vec::new()
         })
     }
 
@@ -63,6 +67,7 @@ impl OldOwnedVM {
             current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
+            try_stack: Vec::new()
         }
     }
 
@@ -83,6 +88,7 @@ impl OldOwnedVM {
             current_scope: scope,
             acc: Value::Undefined,
             realm,
+            try_stack: Vec::new()
         }
     }
     pub fn get_realm(&mut self) -> &mut Realm {
@@ -237,12 +243,30 @@ impl VM for OldOwnedVM {
         todo!()
     }
 
-    fn enter_try(&mut self, _id: ControlIdx) -> Res {
-        todo!()
+
+
+    fn enter_try(&mut self, id: ControlIdx) -> Res {
+        let Some(c) = self.data.control.get(id.0 as usize) else {
+            return Err(Error::new("Invalid control index"));
+        };
+
+        let ControlBlock::Try(tb) = c else {
+            return Err(Error::new("Control block is not a try block"));
+        };
+
+        self.try_stack.push(*tb);
+
+        Ok(())
     }
 
     fn leave_try(&mut self) -> Res {
-        todo!()
+        let tb = self.try_stack.last_mut().ok_or(Error::new("No try block"))?;
+
+        if let Some(f) = tb.finally.take() {
+            self.offset_pc(f);
+        }
+
+        Ok(())
     }
 }
 
@@ -296,10 +320,12 @@ mod test {
                     ConstValue::String("True".into()),
                     ConstValue::String("False".into()),
                 ],
+                control: Vec::new(),
             },
             current_scope: Scope::new(&realm, PathBuf::from("../../../../../test.js")),
             acc: Value::Undefined,
             realm,
+            try_stack: Vec::new()
         };
 
         vm.run().unwrap();

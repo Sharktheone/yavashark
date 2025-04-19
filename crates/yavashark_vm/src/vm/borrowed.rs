@@ -6,6 +6,7 @@ use std::path::PathBuf;
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
 
@@ -23,6 +24,8 @@ pub struct BorrowedVM<'a> {
     acc: Value,
 
     realm: &'a mut Realm,
+    
+    try_stack: Vec<TryBlock>
 }
 
 impl<'a> BorrowedVM<'a> {
@@ -42,6 +45,7 @@ impl<'a> BorrowedVM<'a> {
             current_scope: Scope::new(realm, file),
             acc: Value::Undefined,
             realm,
+            try_stack: Vec::new(),
         })
     }
 
@@ -62,6 +66,7 @@ impl<'a> BorrowedVM<'a> {
             current_scope: scope,
             acc: Value::Undefined,
             realm,
+            try_stack: Vec::new(),
         }
     }
 
@@ -222,11 +227,27 @@ impl VM for BorrowedVM<'_> {
         todo!()
     }
 
-    fn enter_try(&mut self, _id: ControlIdx) -> Res {
-        todo!()
+    fn enter_try(&mut self, id: ControlIdx) -> Res {
+        let Some(c) = self.data.control.get(id.0 as usize) else  {
+            return Err(Error::new("Invalid control index"));
+        };
+
+        let ControlBlock::Try(tb) = c else {
+            return Err(Error::new("Control block is not a try block"));
+        };
+
+        self.try_stack.push(*tb);
+
+        Ok(())
     }
 
     fn leave_try(&mut self) -> Res {
-        todo!()
+        let tb = self.try_stack.last_mut().ok_or(Error::new("No try block"))?;
+
+        if let Some(f) = tb.finally.take() {
+            self.offset_pc(f);
+        }
+
+        Ok(())
     }
 }
