@@ -48,6 +48,7 @@ impl VmState {
             current_scope: scope,
             acc: Value::Undefined,
             continue_storage: None,
+            try_stack: Vec::new(),
         }
     }
 
