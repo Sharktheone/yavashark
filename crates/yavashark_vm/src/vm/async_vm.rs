@@ -5,6 +5,7 @@ use std::mem;
 use std::rc::Rc;
 use yavashark_bytecode::data::{ControlIdx, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
 
@@ -21,6 +22,8 @@ pub struct VmState {
     pub acc: Value,
 
     continue_storage: Option<OutputDataType>,
+
+    try_stack: Vec<TryBlock>
 }
 
 pub struct AsyncVM<'a> {
@@ -286,11 +289,28 @@ impl VM for AsyncVM<'_> {
         self.state.continue_storage = Some(out.data_type());
     }
 
-    fn enter_try(&mut self, _id: ControlIdx) -> Res {
-        todo!()
+    fn enter_try(&mut self, id: ControlIdx) -> Res {
+        let Some(c) = self.state.code.ds.control.get(id.0 as usize) else  {
+            return Err(Error::new("Invalid control index"));
+        };
+
+        let ControlBlock::Try(tb) = c else {
+            return Err(Error::new("Control block is not a try block"));
+        };
+
+        self.state.try_stack.push(*tb);
+
+        Ok(())
     }
 
     fn leave_try(&mut self) -> Res {
-        todo!()
+        let tb = self.state.try_stack.last_mut().ok_or(Error::new("No try block"))?;
+        
+        if let Some(f) = tb.finally.take() {
+            self.offset_pc(f);
+        }
+        
+        Ok(())
+        
     }
 }
