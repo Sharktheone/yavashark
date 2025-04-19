@@ -4,7 +4,7 @@ use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
-use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData};
+use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
@@ -24,6 +24,8 @@ pub struct OldOwnedVM {
     acc: Value,
 
     realm: Realm,
+    
+    continue_storage: Option<OutputDataType>,
 
     try_stack: Vec<TryBlock>
 }
@@ -46,6 +48,7 @@ impl OldOwnedVM {
             current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
+            continue_storage: None,
             try_stack: Vec::new()
         })
     }
@@ -67,6 +70,7 @@ impl OldOwnedVM {
             current_scope: Scope::new(&realm, file),
             acc: Value::Undefined,
             realm,
+            continue_storage: None,
             try_stack: Vec::new()
         }
     }
@@ -88,6 +92,7 @@ impl OldOwnedVM {
             current_scope: scope,
             acc: Value::Undefined,
             realm,
+            continue_storage: None,
             try_stack: Vec::new()
         }
     }
@@ -239,8 +244,8 @@ impl VM for OldOwnedVM {
         &mut self.current_scope
     }
 
-    fn set_continue_storage(&mut self, _out: impl OutputData) {
-        todo!()
+    fn set_continue_storage(&mut self, out: impl OutputData) {
+        self.continue_storage = Some(out.data_type());
     }
 
 
@@ -322,6 +327,7 @@ mod test {
                 ],
                 control: Vec::new(),
             },
+            continue_storage: None,
             current_scope: Scope::new(&realm, PathBuf::from("../../../../../test.js")),
             acc: Value::Undefined,
             realm,

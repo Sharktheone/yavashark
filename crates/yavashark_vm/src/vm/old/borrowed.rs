@@ -3,7 +3,7 @@ mod storage;
 use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
-use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData};
+use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData, OutputDataType};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
@@ -23,6 +23,8 @@ pub struct OldBorrowedVM<'a> {
     acc: Value,
 
     realm: &'a mut Realm,
+
+    continue_storage: Option<OutputDataType>,
     
     try_stack: Vec<TryBlock>
 }
@@ -44,7 +46,7 @@ impl<'a> OldBorrowedVM<'a> {
             current_scope: Scope::new(realm, file),
             acc: Value::Undefined,
             realm,
-            
+            continue_storage: None,
             try_stack: Vec::new(),
         })
     }
@@ -66,7 +68,7 @@ impl<'a> OldBorrowedVM<'a> {
             current_scope: scope,
             acc: Value::Undefined,
             realm,
-            
+            continue_storage: None,
             try_stack: Vec::new(),
         }
     }
@@ -224,8 +226,8 @@ impl VM for OldBorrowedVM<'_> {
         &mut self.current_scope
     }
 
-    fn set_continue_storage(&mut self, _out: impl OutputData) {
-        todo!()
+    fn set_continue_storage(&mut self, out: impl OutputData) {
+        self.continue_storage = Some(out.data_type());
     }
 
     fn enter_try(&mut self, id: ControlIdx) -> Res {
