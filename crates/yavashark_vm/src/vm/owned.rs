@@ -180,7 +180,7 @@ impl VM for OwnedVM {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone().into_value(&self.realm, &self.current_scope)
+        val.clone().into_value(self)
     }
 
     #[must_use]

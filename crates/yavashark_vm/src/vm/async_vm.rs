@@ -217,7 +217,7 @@ impl VM for AsyncVM<'_> {
             .ok_or(Error::reference("Invalid constant index"))?;
 
         val.clone()
-            .into_value(self.realm, &self.state.current_scope)
+            .into_value(self)
     }
 
     #[must_use]
