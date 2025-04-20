@@ -4,17 +4,16 @@ use yavashark_bytecode::{ArrayLiteralBlueprint, ConstValue, DataTypeValue, Objec
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
-use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{Object, Realm, Value, ValueResult};
+use yavashark_env::{Object, Value, ValueResult};
 use crate::VM;
 
 pub trait ConstIntoValue {
-    fn into_value(self, vm: &mut impl VM) -> ValueResult;
+    fn into_value(self, vm: &impl VM) -> ValueResult;
 }
 
 impl ConstIntoValue for ConstValue {
-    fn into_value(self, vm: &mut impl VM) -> ValueResult {
+    fn into_value(self, vm: &impl VM) -> ValueResult {
         Ok(match self {
             Self::Null => Value::Null,
             Self::Undefined => Value::Undefined,
@@ -36,33 +35,33 @@ impl ConstIntoValue for ConstValue {
                     bp.name.unwrap_or("anonymous".to_string()),
                     bp.params,
                     Some(func),
-                    scope.clone(),
-                    realm,
+                    vm.get_scope().clone(),
+                    vm.get_realm_ref(),
                 )?;
 
                 optim.into()
             }
             Self::BigInt(b) => Value::BigInt(b),
-            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(realm, &exp, &flags)?.into(),
+            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into(),
         })
     }
 }
 
 impl ConstIntoValue for ArrayLiteralBlueprint {
-    fn into_value(self, vm: &mut impl VM) -> ValueResult {
+    fn into_value(self, vm: &impl VM) -> ValueResult {
         let props = self
             .properties
             .into_iter()
             .map(|v| v.into_value(vm))
             .collect::<Result<Vec<_>, _>>()?;
 
-        Ok(Array::with_elements(vm.get_realm(), props)?.into_value())
+        Ok(Array::with_elements(vm.get_realm_ref(), props)?.into_value())
     }
 }
 
 impl ConstIntoValue for ObjectLiteralBlueprint {
-    fn into_value(self, vm: &mut impl VM) -> ValueResult {
-        let obj = Object::new(vm.get_realm());
+    fn into_value(self, vm: &impl VM) -> ValueResult {
+        let obj = Object::new(vm.get_realm_ref());
 
         for (key, value) in self.properties {
             obj.define_property(key.into(), value.into_value(vm)?)?;
@@ -73,7 +72,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
 }
 
 impl ConstIntoValue for DataTypeValue {
-    fn into_value(self, vm: &mut impl VM) -> ValueResult {
+    fn into_value(self, vm: &impl VM) -> ValueResult {
         todo!()
     }
 }

@@ -34,6 +34,7 @@ pub trait VM {
     fn get_args(&mut self, num: u16) -> Vec<Value>;
 
     fn get_realm(&mut self) -> &mut yavashark_env::Realm;
+    fn get_realm_ref(&self) -> &yavashark_env::Realm;
 
     fn set_pc(&mut self, pc: usize);
 
