@@ -1,4 +1,4 @@
-use crate::data::DataSection;
+use crate::data::{Acc, DataSection, DataType, Reg, VarName, ConstIdx, Stack};
 use crate::instructions;
 use num_bigint::BigInt;
 use std::rc::Rc;
@@ -21,13 +21,33 @@ pub enum ConstValue {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub enum DataTypeValue {
+    Null,
+    Undefined,
+    Number(f64),
+    String(String),
+    Boolean(bool),
+    Object(ObjectLiteralBlueprint),
+    Array(ArrayLiteralBlueprint),
+    Function(FunctionBlueprint),
+    BigInt(BigInt),
+    Regex(String, String),
+    Symbol(ConstString),
+    
+    Acc(Acc),
+    Reg(Reg),
+    Var(VarName),
+    Stack(Stack),
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct ObjectLiteralBlueprint {
-    pub properties: Vec<(String, ConstValue)>,
+    pub properties: Vec<(String, DataTypeValue)>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ArrayLiteralBlueprint {
-    pub properties: Vec<ConstValue>,
+    pub properties: Vec<DataTypeValue>,
 }
 
 #[derive(Debug, PartialEq, Clone)]
