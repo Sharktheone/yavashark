@@ -3,10 +3,10 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
-use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
 
@@ -25,7 +25,7 @@ pub struct OwnedVM {
 
     realm: Realm,
     continue_storage: Option<OutputDataType>,
-    
+
     try_stack: Vec<TryBlock>,
 }
 
@@ -48,7 +48,7 @@ impl OwnedVM {
             acc: Value::Undefined,
             realm,
             continue_storage: None,
-            try_stack: Vec::new()
+            try_stack: Vec::new(),
         })
     }
 
@@ -70,7 +70,7 @@ impl OwnedVM {
             acc: Value::Undefined,
             realm,
             continue_storage: None,
-            try_stack: Vec::new()
+            try_stack: Vec::new(),
         }
     }
 
@@ -92,7 +92,7 @@ impl OwnedVM {
             acc: Value::Undefined,
             realm,
             continue_storage: None,
-            try_stack: Vec::new()
+            try_stack: Vec::new(),
         }
     }
 
@@ -268,7 +268,10 @@ impl VM for OwnedVM {
     }
 
     fn leave_try(&mut self) -> Res {
-        let tb = self.try_stack.last_mut().ok_or(Error::new("No try block"))?;
+        let tb = self
+            .try_stack
+            .last_mut()
+            .ok_or(Error::new("No try block"))?;
 
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);
@@ -276,5 +279,4 @@ impl VM for OwnedVM {
 
         Ok(())
     }
-
 }

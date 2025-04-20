@@ -1,4 +1,4 @@
-use crate::data::{Acc, DataSection, DataType, Reg, VarName, ConstIdx, Stack};
+use crate::data::{Acc, ConstIdx, DataSection, DataType, Reg, Stack, VarName};
 use crate::instructions;
 use num_bigint::BigInt;
 use std::rc::Rc;
@@ -33,7 +33,7 @@ pub enum DataTypeValue {
     BigInt(BigInt),
     Regex(String, String),
     Symbol(ConstString),
-    
+
     Acc(Acc),
     Reg(Reg),
     Var(VarName),

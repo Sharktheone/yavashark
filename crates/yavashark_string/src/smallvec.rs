@@ -1,11 +1,11 @@
+use crate::smallstring::SmallString;
 use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
 use std::fmt::{Debug, Formatter};
+use std::hash::Hash;
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::{fmt, mem};
-use std::hash::Hash;
-use crate::smallstring::SmallString;
 
 /// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
 #[repr(Rust, packed)]
@@ -18,10 +18,9 @@ pub struct SmallVec<T> {
 impl<T: Hash> Hash for SmallVec<T> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         let slice = self.slice();
-        
+
         slice.hash(state);
     }
-    
 }
 
 impl<T> Drop for SmallVec<T> {

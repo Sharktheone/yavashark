@@ -3,9 +3,9 @@ mod storage;
 use crate::execute_old::Execute;
 use crate::{Registers, Stack, VM};
 use std::path::PathBuf;
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData, OutputDataType};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
-use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value, ValueResult};
 
@@ -25,8 +25,8 @@ pub struct OldBorrowedVM<'a> {
     realm: &'a mut Realm,
 
     continue_storage: Option<OutputDataType>,
-    
-    try_stack: Vec<TryBlock>
+
+    try_stack: Vec<TryBlock>,
 }
 
 impl<'a> OldBorrowedVM<'a> {
@@ -245,7 +245,10 @@ impl VM for OldBorrowedVM<'_> {
     }
 
     fn leave_try(&mut self) -> Res {
-        let tb = self.try_stack.last_mut().ok_or(Error::new("No try block"))?;
+        let tb = self
+            .try_stack
+            .last_mut()
+            .ok_or(Error::new("No try block"))?;
 
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);

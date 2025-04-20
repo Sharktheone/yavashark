@@ -3,9 +3,9 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
-use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
 
@@ -23,7 +23,7 @@ pub struct VmState {
 
     continue_storage: Option<OutputDataType>,
 
-    try_stack: Vec<TryBlock>
+    try_stack: Vec<TryBlock>,
 }
 
 pub struct AsyncVM<'a> {
@@ -291,7 +291,7 @@ impl VM for AsyncVM<'_> {
     }
 
     fn enter_try(&mut self, id: ControlIdx) -> Res {
-        let Some(c) = self.state.code.ds.control.get(id.0 as usize) else  {
+        let Some(c) = self.state.code.ds.control.get(id.0 as usize) else {
             return Err(Error::new("Invalid control index"));
         };
 
@@ -305,13 +305,16 @@ impl VM for AsyncVM<'_> {
     }
 
     fn leave_try(&mut self) -> Res {
-        let tb = self.state.try_stack.last_mut().ok_or(Error::new("No try block"))?;
-        
+        let tb = self
+            .state
+            .try_stack
+            .last_mut()
+            .ok_or(Error::new("No try block"))?;
+
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);
         }
-        
+
         Ok(())
-        
     }
 }

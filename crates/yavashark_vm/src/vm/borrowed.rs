@@ -3,10 +3,10 @@ use crate::execute::Execute;
 use crate::{Registers, Stack, VM};
 use std::mem;
 use std::path::PathBuf;
+use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
-use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
 
@@ -24,10 +24,10 @@ pub struct BorrowedVM<'a> {
     acc: Value,
 
     realm: &'a mut Realm,
-    
+
     continue_storage: Option<OutputDataType>,
-    
-    try_stack: Vec<TryBlock>
+
+    try_stack: Vec<TryBlock>,
 }
 
 impl<'a> BorrowedVM<'a> {
@@ -232,7 +232,7 @@ impl VM for BorrowedVM<'_> {
     }
 
     fn enter_try(&mut self, id: ControlIdx) -> Res {
-        let Some(c) = self.data.control.get(id.0 as usize) else  {
+        let Some(c) = self.data.control.get(id.0 as usize) else {
             return Err(Error::new("Invalid control index"));
         };
 
@@ -246,7 +246,10 @@ impl VM for BorrowedVM<'_> {
     }
 
     fn leave_try(&mut self) -> Res {
-        let tb = self.try_stack.last_mut().ok_or(Error::new("No try block"))?;
+        let tb = self
+            .try_stack
+            .last_mut()
+            .ok_or(Error::new("No try block"))?;
 
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);

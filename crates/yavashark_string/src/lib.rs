@@ -56,7 +56,6 @@ impl Hash for YSString {
             InnerString::Rope(rope) => rope.as_string().hash(state),
         }
     }
-    
 }
 
 enum InnerString {
@@ -355,7 +354,7 @@ impl YSString {
             inner: UnsafeCell::new(str),
         }
     }
-    
+
     #[must_use]
     pub fn from_ref(str: &str) -> Self {
         let str = InlineString::try_from_string(str).map_or_else(

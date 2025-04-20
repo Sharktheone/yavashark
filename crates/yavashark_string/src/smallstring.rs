@@ -1,6 +1,6 @@
+use crate::smallvec::SmallVec;
 use std::fmt::Display;
 use std::hash::Hash;
-use crate::smallvec::SmallVec;
 use std::mem;
 use std::rc::Rc;
 
