@@ -190,6 +190,10 @@ impl VM for OldBorrowedVM<'_> {
         self.get_realm()
     }
 
+    fn get_realm_ref(&self) -> &Realm {
+        self.realm
+    }
+
     fn set_pc(&mut self, pc: usize) {
         self.set_pc(pc);
     }
