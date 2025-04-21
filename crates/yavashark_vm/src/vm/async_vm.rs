@@ -216,8 +216,7 @@ impl VM for AsyncVM<'_> {
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
 
-        val.clone()
-            .into_value(self)
+        val.clone().into_value(self)
     }
 
     #[must_use]

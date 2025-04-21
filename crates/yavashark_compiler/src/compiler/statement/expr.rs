@@ -114,12 +114,12 @@ impl Compiler {
     pub fn compile_expr_data_acc(&mut self, expr: &Expr) -> Res<DataType> {
         self.compile_expr_data(expr, Some(Acc))
     }
-    
+
     pub fn compile_expr_data_certain(&mut self, expr: &Expr, out: impl OutputData) -> Res {
-        if let Some(optim) = self.compile_expr(expr, Some(out))? { 
+        if let Some(optim) = self.compile_expr(expr, Some(out))? {
             optim.reject(self);
         }
-        
+
         Ok(())
     }
 

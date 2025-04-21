@@ -1,12 +1,14 @@
 use crate::function_code::BytecodeFunction;
+use crate::VM;
 use std::cell::RefCell;
-use yavashark_bytecode::{ArrayLiteralBlueprint, ConstValue, DataTypeValue, ObjectLiteralBlueprint};
+use yavashark_bytecode::{
+    ArrayLiteralBlueprint, ConstValue, DataTypeValue, ObjectLiteralBlueprint,
+};
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Value, ValueResult};
-use crate::VM;
 
 pub trait ConstIntoValue {
     fn into_value(self, vm: &impl VM) -> ValueResult;
@@ -42,7 +44,9 @@ impl ConstIntoValue for ConstValue {
                 optim.into()
             }
             Self::BigInt(b) => Value::BigInt(b),
-            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into(),
+            Self::Regex(exp, flags) => {
+                RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into()
+            }
         })
     }
 }
@@ -64,7 +68,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
         let obj = Object::new(vm.get_realm_ref());
 
         for (key, value) in self.properties {
-            obj.define_property(key.into_value(vm)?,value.into_value(vm)?)?;
+            obj.define_property(key.into_value(vm)?, value.into_value(vm)?)?;
         }
 
         Ok(obj.into())
@@ -100,7 +104,9 @@ impl ConstIntoValue for DataTypeValue {
                 optim.into()
             }
             Self::BigInt(b) => Value::BigInt(b),
-            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into(),
+            Self::Regex(exp, flags) => {
+                RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into()
+            }
             Self::Symbol(s) => Value::Symbol(s.into()),
             Self::Acc(_) => vm.acc(),
             Self::Reg(reg) => vm.get_register(reg.0)?,
