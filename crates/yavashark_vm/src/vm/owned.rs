@@ -117,7 +117,7 @@ impl VM for OwnedVM {
         self.acc = value;
     }
 
-    fn get_variable(&mut self, name: VarName) -> Res<Value> {
+    fn get_variable(&self, name: VarName) -> Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };

@@ -148,7 +148,7 @@ impl VM for OldOwnedVM {
         self.set_acc(value);
     }
 
-    fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
+    fn get_variable(&self, name: VarName) -> yavashark_env::Res<Value> {
         self.get_variable(name)
     }
 

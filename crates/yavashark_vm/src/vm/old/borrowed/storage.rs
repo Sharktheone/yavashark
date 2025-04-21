@@ -7,7 +7,7 @@ use yavashark_env::{Res, Value};
 
 #[allow(unused)]
 impl OldBorrowedVM<'_> {
-    pub fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
+    pub fn get_variable(&self, name: VarName) -> yavashark_env::Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };

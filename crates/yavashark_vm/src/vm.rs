@@ -17,7 +17,7 @@ use yavashark_env::{Res, Value};
 pub trait VM {
     fn acc(&self) -> Value;
     fn set_acc(&mut self, value: Value);
-    fn get_variable(&mut self, name: VarName) -> Res<Value>;
+    fn get_variable(&self, name: VarName) -> Res<Value>;
     fn var_name(&self, name: VarName) -> Option<&str>;
     fn get_register(&self, reg: Reg) -> Res<Value>;
     fn get_label(&self, label: Label) -> Res<&str>;

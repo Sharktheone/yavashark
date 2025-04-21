@@ -5,7 +5,7 @@ use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::value::Obj;
-use yavashark_env::{Object, Value, ValueResult};
+use yavashark_env::{Error, Object, Value, ValueResult};
 use crate::VM;
 
 pub trait ConstIntoValue {
@@ -73,6 +73,39 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
 
 impl ConstIntoValue for DataTypeValue {
     fn into_value(self, vm: &impl VM) -> ValueResult {
-        todo!()
+        Ok(match self {
+            Self::Null => Value::Null,
+            Self::Undefined => Value::Undefined,
+            Self::Number(n) => Value::Number(n),
+            Self::String(s) => Value::String(s),
+            Self::Boolean(b) => Value::Boolean(b),
+            Self::Object(obj) => obj.into_value(vm)?,
+            Self::Array(array) => array.into_value(vm)?,
+            Self::Function(bp) => {
+                let func: RefCell<Box<dyn FunctionCode>> =
+                    RefCell::new(Box::new(BytecodeFunction {
+                        code: bp.code,
+                        is_async: bp.is_async,
+                        is_generator: bp.is_generator,
+                    }));
+
+                let optim = OptimFunction::new(
+                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.params,
+                    Some(func),
+                    vm.get_scope().clone(),
+                    vm.get_realm_ref(),
+                )?;
+
+                optim.into()
+            }
+            Self::BigInt(b) => Value::BigInt(b),
+            Self::Regex(exp, flags) => RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into(),
+            Self::Symbol(s) => Value::Symbol(s.into()),
+            Self::Acc(_) => vm.acc(),
+            Self::Reg(reg) => vm.get_register(reg.0)?,
+            Self::Var(var) => vm.get_variable(var.0)?,
+            Self::Stack(stack) => vm.get_stack(stack.0).ok_or(Error::new("invalid stack"))?,
+        })
     }
 }
