@@ -107,12 +107,20 @@ impl Compiler {
     ) -> Res<DataType> {
         match self.compile_expr(expr, out)? {
             Some(optim) => Ok(optim.output),
-            None => Ok(DataType::Acc(Acc)),
+            None => Ok(DataType::Acc(Acc)), //TODO: this is not correct as there are instructions that don't return anything
         }
     }
 
     pub fn compile_expr_data_acc(&mut self, expr: &Expr) -> Res<DataType> {
         self.compile_expr_data(expr, Some(Acc))
+    }
+    
+    pub fn compile_expr_data_certain(&mut self, expr: &Expr, out: impl OutputData) -> Res {
+        if let Some(optim) = self.compile_expr(expr, Some(out))? { 
+            optim.reject(self);
+        }
+        
+        Ok(())
     }
 
     pub fn compile_expr_no_out(&mut self, expr: &Expr) -> Res {
