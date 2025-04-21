@@ -64,7 +64,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
         let obj = Object::new(vm.get_realm_ref());
 
         for (key, value) in self.properties {
-            obj.define_property(key.into(), value.into_value(vm)?)?;
+            obj.define_property(key.into_value(vm)?,value.into_value(vm)?)?;
         }
 
         Ok(obj.into())

@@ -1,4 +1,4 @@
-use crate::data::{Acc, ConstIdx, DataSection, DataType, Reg, Stack, VarName};
+use crate::data::{Acc, ConstIdx, Data, DataSection, DataType, OutputDataType, Reg, Stack, VarName};
 use crate::instructions;
 use num_bigint::BigInt;
 use std::rc::Rc;
@@ -42,7 +42,7 @@ pub enum DataTypeValue {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ObjectLiteralBlueprint {
-    pub properties: Vec<(String, DataTypeValue)>,
+    pub properties: Vec<(DataTypeValue, DataTypeValue)>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -63,4 +63,46 @@ pub struct FunctionBlueprint {
     pub code: Rc<BytecodeFunctionCode>,
     pub is_async: bool,
     pub is_generator: bool,
+}
+
+
+impl From<&str> for ConstValue {
+    fn from(value: &str) -> Self {
+        Self::String(value.to_string())
+    }
+}
+
+impl From<String> for ConstValue {
+    fn from(value: String) -> Self {
+        Self::String(value)
+    }
+}
+
+impl From<OutputDataType> for DataTypeValue {
+    fn from(val: OutputDataType) -> Self {
+        match val {
+            OutputDataType::Acc(acc) => Self::Acc(acc),
+            OutputDataType::Reg(reg) => Self::Reg(reg),
+            OutputDataType::Var(variable) => Self::Var(variable),
+            OutputDataType::Stack(stack) => Self::Stack(stack),
+        }
+    }
+}
+
+impl From<ConstValue> for DataTypeValue {
+    fn from(val: ConstValue) -> Self {
+        match val {
+            ConstValue::Null => Self::Null,
+            ConstValue::Undefined => Self::Undefined,
+            ConstValue::Number(n) => Self::Number(n),
+            ConstValue::String(s) => Self::String(s),
+            ConstValue::Boolean(b) => Self::Boolean(b),
+            ConstValue::Object(obj) => Self::Object(obj),
+            ConstValue::Array(arr) => Self::Array(arr),
+            ConstValue::Function(func) => Self::Function(func),
+            ConstValue::BigInt(b) => Self::BigInt(b),
+            ConstValue::Regex(exp, flags) => Self::Regex(exp, flags),
+            ConstValue::Symbol(s) => Self::Symbol(s),
+        }
+    }
 }
