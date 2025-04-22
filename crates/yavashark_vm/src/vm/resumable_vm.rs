@@ -7,7 +7,7 @@ use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value};
+use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value, ValueResult};
 
 pub struct VmState {
     regs: Registers,
@@ -26,7 +26,7 @@ pub struct VmState {
     try_stack: Vec<TryBlock>,
 }
 
-pub struct AsyncVM<'a> {
+pub struct ResumableVM<'a> {
     state: VmState,
     realm: &'a mut Realm,
 }
@@ -34,6 +34,17 @@ pub struct AsyncVM<'a> {
 pub enum AsyncPoll {
     Await(VmState, ObjectHandle),
     Ret(VmState, Res),
+}
+
+pub enum GeneratorPoll {
+    Ret(ValueResult),
+    Yield(VmState, Value),
+}
+
+pub enum AsyncGeneratorPoll {
+    Await(VmState, ObjectHandle),
+    Ret(VmState, ValueResult),
+    Yield(VmState, Value),
 }
 
 impl VmState {
@@ -76,7 +87,7 @@ impl VmState {
     }
 }
 
-impl<'a> AsyncVM<'a> {
+impl<'a> ResumableVM<'a> {
     #[must_use]
     pub const fn new(code: Rc<BytecodeFunctionCode>, scope: Scope, realm: &'a mut Realm) -> Self {
         let state = VmState::new(code, scope);
@@ -88,9 +99,89 @@ impl<'a> AsyncVM<'a> {
     pub const fn from_state(state: VmState, realm: &'a mut Realm) -> Self {
         Self { state, realm }
     }
+    
+    #[must_use] 
+    pub fn next(mut self) -> GeneratorPoll {
+        while self.state.pc < self.state.code.instructions.len() {
+            let instr = &self.state.code.instructions[self.state.pc];
+            self.state.pc += 1;
+
+            match instr.execute(&mut self) {
+                Ok(()) => {}
+                Err(e) => match e {
+                    ControlFlow::Error(e) => return GeneratorPoll::Ret(Err(e)),
+                    ControlFlow::Return(value) => return GeneratorPoll::Ret(Ok(value)),
+                    ControlFlow::Break(_) => {
+                        return GeneratorPoll::Ret(
+                            Err(Error::new("Break outside of loop")),
+                        );
+                    }
+                    ControlFlow::Continue(_) => {
+                        return GeneratorPoll::Ret(
+                            Err(Error::new("Continue outside of loop")),
+                        );
+                    }
+                    ControlFlow::Await(_) => {
+                        return GeneratorPoll::Ret(
+                            Err(Error::new("Await outside async function")),
+                        );
+                    }
+                    ControlFlow::Yield(v) => {
+                        return GeneratorPoll::Yield(
+                            self.state,
+                            v
+                        );
+                    }
+                    ControlFlow::OptChainShortCircuit => {}
+                },
+            }
+        }
+
+        GeneratorPoll::Ret(Ok(Value::Undefined))
+    }
+    
+    #[must_use]
+    pub fn poll_next(mut self) -> AsyncGeneratorPoll {
+        while self.state.pc < self.state.code.instructions.len() {
+            let instr = &self.state.code.instructions[self.state.pc];
+            self.state.pc += 1;
+
+            match instr.execute(&mut self) {
+                Ok(()) => {}
+                Err(e) => match e {
+                    ControlFlow::Error(e) => return AsyncGeneratorPoll::Ret(self.state, Err(e)),
+                    ControlFlow::Return(value) => return AsyncGeneratorPoll::Ret(self.state, Ok(value)),
+                    ControlFlow::Break(_) => {
+                        return AsyncGeneratorPoll::Ret(
+                            self.state,
+                            Err(Error::new("Break outside of loop")),
+                        );
+                    }
+                    ControlFlow::Continue(_) => {
+                        return AsyncGeneratorPoll::Ret(
+                            self.state,
+                            Err(Error::new("Continue outside of loop")),
+                        );
+                    }
+                    ControlFlow::Await(out) => {
+                        return AsyncGeneratorPoll::Await(self.state, out);
+                    }
+                    ControlFlow::Yield(v) => {
+                        return AsyncGeneratorPoll::Yield(
+                            self.state,
+                            v
+                        );
+                    }
+                    ControlFlow::OptChainShortCircuit => {}
+                },
+            }
+        }
+
+        AsyncGeneratorPoll::Ret(self.state, Ok(Value::Undefined))
+    }
 
     #[must_use]
-    pub fn run(mut self) -> AsyncPoll {
+    pub fn poll(mut self) -> AsyncPoll {
         while self.state.pc < self.state.code.instructions.len() {
             let instr = &self.state.code.instructions[self.state.pc];
             self.state.pc += 1;
@@ -133,7 +224,7 @@ impl<'a> AsyncVM<'a> {
     }
 }
 
-impl VM for AsyncVM<'_> {
+impl VM for ResumableVM<'_> {
     fn acc(&self) -> Value {
         self.state.acc.clone()
     }

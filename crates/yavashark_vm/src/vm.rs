@@ -1,9 +1,9 @@
-mod async_vm;
+mod resumable_vm;
 mod borrowed;
 mod old;
 mod owned;
 
-pub use async_vm::*;
+pub use resumable_vm::*;
 pub use borrowed::*;
 pub use old::borrowed::*;
 pub use old::owned::*;

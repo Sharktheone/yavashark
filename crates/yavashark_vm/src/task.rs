@@ -1,4 +1,4 @@
-use crate::{AsyncPoll, AsyncVM, VmState};
+use crate::{AsyncPoll, ResumableVM, VmState};
 use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
@@ -70,8 +70,8 @@ impl AsyncTask for BytecodeAsyncTask {
         _ = inner.await_promise.take();
 
         if let Some(state) = inner.state.take() {
-            let vm = AsyncVM::from_state(state, realm);
-            match vm.run() {
+            let vm = ResumableVM::from_state(state, realm);
+            match vm.poll() {
                 AsyncPoll::Await(state, promise) => {
                     inner.state = Some(state);
                     let promise = match <&Promise>::from_value_out(promise.into()) {
