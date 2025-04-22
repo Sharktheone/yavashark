@@ -1,5 +1,5 @@
 use crate::data::{
-    Acc, ConstIdx, Data, DataSection, DataType, OutputDataType, Reg, Stack, VarName,
+    Acc, DataSection, OutputDataType, Reg, Stack, VarName,
 };
 use crate::instructions;
 use num_bigint::BigInt;
