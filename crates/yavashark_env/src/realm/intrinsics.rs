@@ -73,6 +73,7 @@ pub struct Intrinsics {
     pub(crate) temporal_plain_year_month: ObjectHandle,
     pub(crate) temporal_zoned_date_time: ObjectHandle,
     pub(crate) promise: ObjectHandle,
+    pub generator_function: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -351,7 +352,7 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-
+        
         Ok(Self {
             obj: obj_prototype,
             func: func_prototype,
@@ -403,6 +404,7 @@ impl Intrinsics {
             temporal_plain_year_month: temporal_protos.plain_year_month,
             temporal_zoned_date_time: temporal_protos.zoned_date_time,
             promise,
+            generator_function: Object::null(),
         })
     }
 }

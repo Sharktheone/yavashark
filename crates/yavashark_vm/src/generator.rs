@@ -4,7 +4,7 @@ use std::rc::Rc;
 use yavashark_bytecode::BytecodeFunctionCode;
 use yavashark_env::{Realm, ValueResult, Value, MutObject};
 use yavashark_env::scope::Scope;
-use yavashark_macro::object;
+use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
 use crate::VmState;
 
@@ -15,6 +15,25 @@ pub struct GeneratorFunction {
     scope: Scope,
 }
 
+impl GeneratorFunction {
+    #[must_use] 
+    pub fn new(code: Rc<BytecodeFunctionCode>, scope: Scope, realm: &Realm) -> Self {
+        Self { 
+            inner: RefCell::new(MutableGeneratorFunction {
+                object: MutObject::with_proto(realm.intrinsics.generator_function.clone().into())
+            }),
+            code,
+            scope
+        }
+    }
+}
+
+#[props]
+impl GeneratorFunction {
+    
+    
+}
+
 impl Func<Realm> for GeneratorFunction {
     fn call(&self, realm: &mut Realm, _args: Vec<Value>, _this: Value) -> ValueResult {
         let generator = Generator::new(realm, Rc::clone(&self.code), self.scope.clone());
@@ -22,6 +41,7 @@ impl Func<Realm> for GeneratorFunction {
         Ok(generator.into_value())
     }
 }
+
 
 #[object]
 pub struct Generator {
