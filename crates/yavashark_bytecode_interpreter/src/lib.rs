@@ -12,8 +12,10 @@ use yavashark_compiler::Compiler;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, ObjectHandle, Realm, Res, ValueResult};
+use yavashark_env::value::Obj;
 use yavashark_vm::OldBorrowedVM;
 use yavashark_vm::function_code::BytecodeFunction;
+use yavashark_vm::generator::GeneratorFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
 pub struct ByteCodeInterpreter;
@@ -36,22 +38,40 @@ impl ByteCodeInterpreter {
         scope: Scope,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let mut compiled: Option<RefCell<Box<dyn FunctionCode + 'static>>> = None;
+        let mut compiled: Option<Rc<BytecodeFunctionCode>> = None;
         if let Some(body) = &func.body {
             let code = Compiler::compile(&body.stmts)
                 .map_err(|e| Error::syn_error(format!("Failed to compile: {e:?}")))?;
 
             let ds = DataSection::new(code.variables, Vec::new(), code.literals, code.control);
 
-            compiled = Some(RefCell::new(Box::new(BytecodeFunction {
-                code: Rc::new(BytecodeFunctionCode {
+            compiled = Some(Rc::new(BytecodeFunctionCode {
                     instructions: code.instructions,
                     ds,
-                }),
-                is_async: func.is_async,
-                is_generator: func.is_generator,
-            })));
+                }));
         }
+        
+        if func.is_generator && !func.is_async {
+            let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm);
+            
+            return Ok(g.into_object());
+        }
+        
+        if func.is_generator && func.is_async {
+            //async generator TODO
+        }
+        
+        
+        let compiled = compiled.map(|code| {
+            let x: RefCell<Box<dyn FunctionCode + 'static>> = RefCell::new(Box::new(BytecodeFunction {
+                code,
+                is_generator: func.is_generator,
+                is_async: func.is_async,
+            }));
+            
+            x
+        });
+
 
         OptimFunction::new(name, func.params.clone(), compiled, scope, realm)
     }

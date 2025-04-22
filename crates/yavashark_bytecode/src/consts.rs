@@ -52,7 +52,7 @@ pub struct ArrayLiteralBlueprint {
     pub properties: Vec<DataTypeValue>,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 pub struct BytecodeFunctionCode {
     pub instructions: Vec<instructions::Instruction>,
     pub ds: DataSection,

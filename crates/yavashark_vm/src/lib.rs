@@ -11,7 +11,8 @@ mod storage;
 mod task;
 mod value_ext;
 mod vm;
-mod generator;
+pub mod generator;
+pub mod async_generator;
 
 pub use regs::*;
 pub use stack::*;
