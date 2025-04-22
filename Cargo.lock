@@ -5175,6 +5175,8 @@ dependencies = [
  "yavashark_bytecode",
  "yavashark_env",
  "yavashark_garbage",
+ "yavashark_macro",
+ "yavashark_value",
 ]
 
 [[package]]

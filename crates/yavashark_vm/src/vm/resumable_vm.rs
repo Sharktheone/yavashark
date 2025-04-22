@@ -99,8 +99,8 @@ impl<'a> ResumableVM<'a> {
     pub const fn from_state(state: VmState, realm: &'a mut Realm) -> Self {
         Self { state, realm }
     }
-    
-    #[must_use] 
+
+    #[must_use]
     pub fn next(mut self) -> GeneratorPoll {
         while self.state.pc < self.state.code.instructions.len() {
             let instr = &self.state.code.instructions[self.state.pc];
@@ -139,7 +139,7 @@ impl<'a> ResumableVM<'a> {
 
         GeneratorPoll::Ret(Ok(Value::Undefined))
     }
-    
+
     #[must_use]
     pub fn poll_next(mut self) -> AsyncGeneratorPoll {
         while self.state.pc < self.state.code.instructions.len() {
