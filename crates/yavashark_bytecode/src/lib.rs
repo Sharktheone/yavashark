@@ -11,7 +11,6 @@ mod constructor;
 mod consts;
 pub mod control;
 pub mod data;
-pub mod function;
 pub mod instructions;
 mod instructions_old;
 pub mod jmp;

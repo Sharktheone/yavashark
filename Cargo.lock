@@ -4999,8 +4999,6 @@ dependencies = [
  "bincode",
  "num-bigint",
  "swc_ecma_ast",
- "yavashark_env",
- "yavashark_macro",
  "yavashark_value",
 ]
 
