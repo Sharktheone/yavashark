@@ -353,7 +353,7 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         Ok(Self {
             obj: obj_prototype,
             func: func_prototype,

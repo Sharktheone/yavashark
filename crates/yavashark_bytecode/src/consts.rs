@@ -1,6 +1,4 @@
-use crate::data::{
-    Acc, DataSection, OutputDataType, Reg, Stack, VarName,
-};
+use crate::data::{Acc, DataSection, OutputDataType, Reg, Stack, VarName};
 use crate::instructions;
 use num_bigint::BigInt;
 use std::rc::Rc;

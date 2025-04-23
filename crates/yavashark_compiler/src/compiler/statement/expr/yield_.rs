@@ -7,10 +7,10 @@ impl Compiler {
     pub fn compile_yield(&mut self, expr: &YieldExpr, out: Option<impl OutputData>) -> Res {
         if let Some(arg) = &expr.arg {
             let arg = self.compile_expr_data_acc(arg)?;
-            
+
             self.instructions.push(Instruction::yield_(arg));
         }
-        
+
         Ok(())
     }
 }

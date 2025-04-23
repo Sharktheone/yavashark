@@ -130,7 +130,7 @@ pub fn this(output: impl OutputData, vm: &mut impl VM) -> Res {
 
 pub fn yield_(data: impl Data, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
-    
+
     Err(ControlFlow::Yield(result))
 }
 

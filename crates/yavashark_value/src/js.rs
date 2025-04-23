@@ -303,7 +303,7 @@ impl<C: Realm> Value<C> {
     pub const fn is_bigint(&self) -> bool {
         matches!(self, Self::BigInt(_))
     }
-    
+
     #[must_use]
     pub fn is_function(&self) -> bool {
         matches!(self, Self::Object(o) if o.is_function())
@@ -336,7 +336,6 @@ impl<C: Realm> Value<C> {
                                 self.copy(),
                             )?
                             .assert_no_object();
-                        
                     }
                 }
 

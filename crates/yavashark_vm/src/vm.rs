@@ -1,13 +1,13 @@
-mod resumable_vm;
 mod borrowed;
 mod old;
 mod owned;
+mod resumable_vm;
 
-pub use resumable_vm::*;
 pub use borrowed::*;
 pub use old::borrowed::*;
 pub use old::owned::*;
 pub use owned::*;
+pub use resumable_vm::*;
 
 use yavashark_bytecode::data::{ControlIdx, Label, OutputData};
 use yavashark_bytecode::{ConstIdx, Reg, VarName};

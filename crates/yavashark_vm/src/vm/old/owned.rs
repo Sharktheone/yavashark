@@ -31,11 +31,7 @@ pub struct OldOwnedVM {
 }
 
 impl OldOwnedVM {
-    pub fn new(
-        code: Vec<Instruction>,
-        data: DataSection,
-        file: PathBuf,
-    ) -> Res<Self> {
+    pub fn new(code: Vec<Instruction>, data: DataSection, file: PathBuf) -> Res<Self> {
         let realm = Realm::new()?;
 
         Ok(Self {

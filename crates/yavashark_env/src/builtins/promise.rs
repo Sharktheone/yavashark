@@ -278,35 +278,34 @@ impl Promise {
     #[prop("resolve")]
     fn resolve_(val: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let promise = Self::new(realm);
-        
+
         promise.resolve(val, realm)?;
-        
+
         Ok(promise.into_object())
     }
-    
+
     #[prop("reject")]
     fn reject_(val: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let promise = Self::new(realm);
-        
+
         promise.reject(val, realm)?;
-        
+
         Ok(promise.into_object())
     }
-    
+
     #[prop("try")]
     fn try_(
         callback: &ObjectHandle,
         args: Vec<Value>,
         #[realm] realm: &mut Realm,
         #[this] this: Value,
-        
     ) -> Res<ObjectHandle> {
         let promise = Self::new(realm);
-        
+
         let ret = callback.call(realm, args, this);
-        
+
         promise.set_res(ret, realm)?;
-        
+
         Ok(promise.into_object())
     }
 }

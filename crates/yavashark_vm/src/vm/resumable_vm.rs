@@ -112,25 +112,16 @@ impl<'a> ResumableVM<'a> {
                     ControlFlow::Error(e) => return GeneratorPoll::Ret(Err(e)),
                     ControlFlow::Return(value) => return GeneratorPoll::Ret(Ok(value)),
                     ControlFlow::Break(_) => {
-                        return GeneratorPoll::Ret(
-                            Err(Error::new("Break outside of loop")),
-                        );
+                        return GeneratorPoll::Ret(Err(Error::new("Break outside of loop")));
                     }
                     ControlFlow::Continue(_) => {
-                        return GeneratorPoll::Ret(
-                            Err(Error::new("Continue outside of loop")),
-                        );
+                        return GeneratorPoll::Ret(Err(Error::new("Continue outside of loop")));
                     }
                     ControlFlow::Await(_) => {
-                        return GeneratorPoll::Ret(
-                            Err(Error::new("Await outside async function")),
-                        );
+                        return GeneratorPoll::Ret(Err(Error::new("Await outside async function")));
                     }
                     ControlFlow::Yield(v) => {
-                        return GeneratorPoll::Yield(
-                            self.state,
-                            v
-                        );
+                        return GeneratorPoll::Yield(self.state, v);
                     }
                     ControlFlow::OptChainShortCircuit => {}
                 },
@@ -150,7 +141,9 @@ impl<'a> ResumableVM<'a> {
                 Ok(()) => {}
                 Err(e) => match e {
                     ControlFlow::Error(e) => return AsyncGeneratorPoll::Ret(self.state, Err(e)),
-                    ControlFlow::Return(value) => return AsyncGeneratorPoll::Ret(self.state, Ok(value)),
+                    ControlFlow::Return(value) => {
+                        return AsyncGeneratorPoll::Ret(self.state, Ok(value))
+                    }
                     ControlFlow::Break(_) => {
                         return AsyncGeneratorPoll::Ret(
                             self.state,
@@ -167,10 +160,7 @@ impl<'a> ResumableVM<'a> {
                         return AsyncGeneratorPoll::Await(self.state, out);
                     }
                     ControlFlow::Yield(v) => {
-                        return AsyncGeneratorPoll::Yield(
-                            self.state,
-                            v
-                        );
+                        return AsyncGeneratorPoll::Yield(self.state, v);
                     }
                     ControlFlow::OptChainShortCircuit => {}
                 },
