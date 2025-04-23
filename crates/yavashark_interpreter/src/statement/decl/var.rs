@@ -136,7 +136,7 @@ impl Interpreter {
                             realm,
                             &decl.name,
                             scope,
-                            &mut iter::once(Value::Undefined),
+                            &mut iter::once(value),
                             DUMMY_SP,
                             |scope, name, value| {
                                 let var = Variable::Const(name, value);
