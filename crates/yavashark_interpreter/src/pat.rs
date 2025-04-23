@@ -16,7 +16,10 @@ impl Interpreter {
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
     ) -> Res {
-        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP)
+        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP, |scope, name, value| {
+            scope.declare_var(name, value);
+            Ok(())
+        })
     }
 
     #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
@@ -26,11 +29,12 @@ impl Interpreter {
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
         span: Span,
+        mut cb: impl FnMut(&mut Scope, String, Value) -> Res,
     ) -> Res {
         match stmt {
             Pat::Ident(id) => {
                 let value = value.next().unwrap_or(Value::Undefined);
-                scope.declare_var(id.sym.to_string(), value);
+                cb(scope, id.id.sym.to_string(), value)?;
             }
             Pat::Array(arr) => {
                 let mut iter = value
@@ -105,7 +109,7 @@ impl Interpreter {
                                 }
                             }
 
-                            scope.declare_var(key.clone(), value);
+                            cb(scope, key.clone(), value)?;
                             rest_not_props.push(key.into());
                         }
                         ObjectPatProp::Rest(rest) => {
