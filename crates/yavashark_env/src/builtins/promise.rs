@@ -4,7 +4,7 @@ pub use into_promise::*;
 
 use crate::conversion::FromValueOutput;
 use crate::error::ErrorObj;
-use crate::{MutObject, NativeFunction, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
@@ -322,6 +322,23 @@ impl Promise {
         promise.set_res(ret, realm)?;
 
         Ok(promise.into_object())
+    }
+    
+    fn with_resolvers(#[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let ret = Object::new(realm);
+        
+        let promise = Self::new(realm).into_object();
+        ret.set("promise", promise.clone(), realm)?;
+        
+        let gc = Self::get_gc(promise)?;
+        
+        let resolve = Self::get_fullfilled(gc.clone(), realm);
+        let reject = Self::get_rejected(gc, realm);
+        
+        ret.set("resolve", resolve, realm)?;
+        ret.set("reject", reject, realm)?;
+        
+        Ok(ret)
     }
 }
 
