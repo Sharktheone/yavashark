@@ -20,3 +20,9 @@ pub use stack::*;
 pub use yavashark_bytecode;
 
 pub use vm::*;
+use yavashark_env::{Realm, Res};
+use crate::generator::Generator;
+
+pub fn init(realm: &mut Realm) -> Res {
+    Generator::init(realm)
+}

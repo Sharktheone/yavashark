@@ -74,6 +74,7 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope
     }
 
     r.set_eval(InterpreterEval)?;
+    yavashark_vm::init(&mut r)?;
 
     Ok((r, s))
 }

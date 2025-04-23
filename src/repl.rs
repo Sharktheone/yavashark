@@ -26,15 +26,18 @@ pub fn repl(conf: Conf) -> Res {
 
     let mut interpreter_realm = Realm::new()?;
     define_optimizer(&interpreter_realm)?;
+    yavashark_vm::init(&mut interpreter_realm)?;
     interpreter_realm.set_eval(InterpreterEval)?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
     let mut vm_realm = Realm::new()?;
     vm_realm.set_eval(InterpreterEval)?;
+    yavashark_vm::init(&mut vm_realm)?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
     let mut old_vm_realm = Realm::new()?;
     old_vm_realm.set_eval(InterpreterEval)?;
+    yavashark_vm::init(&mut old_vm_realm)?;
     let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
 
     let config = Config::builder()

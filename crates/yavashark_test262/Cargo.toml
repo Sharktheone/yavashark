@@ -9,6 +9,7 @@ yavashark_macro = { path = "../yavashark_macro" }
 yavashark_value = { path = "../yavashark_value", features = ["display_object"] }
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_interpreter = { path = "../yavashark_interpreter" }
+yavashark_vm = { path = "../yavashark_vm" }
 
 
 swc_common = "6.1.1"

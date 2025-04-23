@@ -78,6 +78,7 @@ impl Test262 {
         let mut new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
 
         new_realm.set_eval(InterpreterEval)?;
+        yavashark_vm::init(&mut new_realm)?;
 
         let global = new_realm.global.clone();
 

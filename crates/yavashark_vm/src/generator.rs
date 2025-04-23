@@ -52,10 +52,27 @@ impl Generator {
         let state = VmState::new(code, scope);
         Self { 
             inner: RefCell::new(MutableGenerator {
-                object: MutObject::new(realm),
+                object: MutObject::with_proto(realm.intrinsics.generator.clone().into()),
             }),
             state: RefCell::new(Some(state)),
         }
+    }
+    
+    pub fn init(realm: &mut Realm) -> Res {
+        let gf = GeneratorFunction::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
+            realm.intrinsics.func.clone().into()
+        )?;
+        
+        let g = Generator::initialize_proto(
+            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
+            realm.intrinsics.func.clone().into()
+        )?;
+        
+        realm.intrinsics.generator_function = gf;
+        realm.intrinsics.generator = g;
+        
+        Ok(())
     }
 }
 

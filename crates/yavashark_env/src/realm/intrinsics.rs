@@ -74,6 +74,7 @@ pub struct Intrinsics {
     pub(crate) temporal_zoned_date_time: ObjectHandle,
     pub(crate) promise: ObjectHandle,
     pub generator_function: ObjectHandle,
+    pub generator: ObjectHandle,
 }
 
 macro_rules! constructor {
@@ -405,6 +406,7 @@ impl Intrinsics {
             temporal_zoned_date_time: temporal_protos.zoned_date_time,
             promise,
             generator_function: Object::null(),
+            generator: Object::null(),
         })
     }
 }

@@ -27,6 +27,7 @@ pub struct Interpreter;
 impl Interpreter {
     pub fn run(script: &Vec<Stmt>, file: PathBuf) -> Res<Value> {
         let mut realm = &mut Realm::new()?;
+        yavashark_vm::init(realm)?;
         let mut scope = Scope::global(realm, file);
 
         Self::run_statements(realm, script, &mut scope).or_else(|e| match e {
@@ -69,6 +70,7 @@ impl Interpreter {
     #[allow(clippy::missing_panics_doc)]
     pub fn run_test(script: &Vec<Stmt>) -> (ValueResult, Rc<RefCell<yavashark_env::tests::State>>) {
         let mut context = &mut Realm::new().unwrap();
+        yavashark_vm::init(context).unwrap();
         let mut scope = Scope::global(context, PathBuf::from("test.js"));
 
         let (mock, state) = yavashark_env::tests::mock_object(context);

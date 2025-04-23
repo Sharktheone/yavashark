@@ -14,6 +14,7 @@ yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_env = { path = "../yavashark_env", features = ["tests"] }
 yavashark_value = { path = "../yavashark_value" }
 yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter" }
+yavashark_vm = { path = "../yavashark_vm" }
 log = "0.4.21"
 env_logger = "0.11.3"
 
