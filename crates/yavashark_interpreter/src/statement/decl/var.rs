@@ -1,4 +1,6 @@
-use swc_ecma_ast::{Pat, VarDecl, VarDeclKind};
+use std::iter;
+use swc_common::DUMMY_SP;
+use swc_ecma_ast::{VarDecl, VarDeclKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
 
@@ -57,22 +59,35 @@ impl Interpreter {
         match stmt.kind {
             VarDeclKind::Var => {
                 for decl in &stmt.decls {
-                    let id = &decl.name;
-                    let Pat::Ident(id) = id else {
-                        return Err(Error::new("Pattern is not an identifier"));
-                    };
-
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = Self::run_expr(realm, init, stmt.span, scope)?;
 
-                        let var = Variable::Var(id.sym.to_string(), value);
+                        Self::run_pat_internal(
+                            realm,
+                            &decl.name,
+                            scope,
+                            &mut iter::once(value),
+                            DUMMY_SP,
+                            |scope, name, value| {
+                                let var = Variable::Var(name, value);
 
-                        cb(scope, var)?;
+                                cb(scope, var)
+                            },
+                        )?;
                     } else {
-                        let var = Variable::Var(id.sym.to_string(), Value::Undefined);
+                        Self::run_pat_internal(
+                            realm,
+                            &decl.name,
+                            scope,
+                            &mut iter::once(Value::Undefined),
+                            DUMMY_SP,
+                            |scope, name, value| {
+                                let var = Variable::Var(name, value);
 
-                        cb(scope, var)?;
+                                cb(scope, var)
+                            },
+                        )?;
                     }
                 }
 
@@ -80,39 +95,55 @@ impl Interpreter {
             }
             VarDeclKind::Let => {
                 for decl in &stmt.decls {
-                    let id = &decl.name;
-                    let Pat::Ident(id) = id else {
-                        return Err(Error::new("Pattern is not an identifier"));
-                    };
-
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = Self::run_expr(realm, init, stmt.span, scope)?;
-                        let var = Variable::Let(id.sym.to_string(), value);
+                        Self::run_pat_internal(
+                            realm,
+                            &decl.name,
+                            scope,
+                            &mut iter::once(value),
+                            DUMMY_SP,
+                            |scope, name, value| {
+                                let var = Variable::Let(name, value);
 
-                        cb(scope, var)?;
+                                cb(scope, var)
+                            },
+                        )?;
                     } else {
-                        let var = Variable::Let(id.sym.to_string(), Value::Undefined);
+                        Self::run_pat_internal(
+                            realm,
+                            &decl.name,
+                            scope,
+                            &mut iter::once(Value::Undefined),
+                            DUMMY_SP,
+                            |scope, name, value| {
+                                let var = Variable::Let(name, value);
 
-                        cb(scope, var)?;
+                                cb(scope, var)
+                            },
+                        )?;
                     }
                 }
                 Ok(())
             }
             VarDeclKind::Const => {
                 for decl in &stmt.decls {
-                    let id = &decl.name;
-                    let Pat::Ident(id) = id else {
-                        return Err(Error::new("Pattern is not an identifier"));
-                    };
-
                     let init = &decl.init;
                     if let Some(init) = init {
                         let value = Self::run_expr(realm, init, stmt.span, scope)?;
+                        Self::run_pat_internal(
+                            realm,
+                            &decl.name,
+                            scope,
+                            &mut iter::once(Value::Undefined),
+                            DUMMY_SP,
+                            |scope, name, value| {
+                                let var = Variable::Const(name, value);
 
-                        let var = Variable::Const(id.sym.to_string(), value);
-
-                        cb(scope, var)?;
+                                cb(scope, var)
+                            },
+                        )?;
                     } else {
                         return Err(Error::new("Const declaration must have an initializer"));
                     }
