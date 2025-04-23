@@ -2,11 +2,11 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
 use yavashark_bytecode::BytecodeFunctionCode;
-use yavashark_env::{Realm, ValueResult, Value, MutObject};
+use yavashark_env::{Realm, ValueResult, Value, MutObject, Object, ObjectHandle, Res};
 use yavashark_env::scope::Scope;
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
-use crate::VmState;
+use crate::{GeneratorPoll, ResumableVM, VmState};
 
 #[object(function)]
 #[derive(Debug)]
@@ -31,7 +31,6 @@ impl GeneratorFunction {
 #[props]
 impl GeneratorFunction {
     
-    
 }
 
 impl Func<Realm> for GeneratorFunction {
@@ -45,7 +44,7 @@ impl Func<Realm> for GeneratorFunction {
 
 #[object]
 pub struct Generator {
-    state: Option<VmState>,
+    state: RefCell<Option<VmState>>,
 }
 
 impl Generator {
@@ -53,9 +52,49 @@ impl Generator {
         let state = VmState::new(code, scope);
         Self { 
             inner: RefCell::new(MutableGenerator {
-                object: MutObject::new(realm)
+                object: MutObject::new(realm),
             }),
-            state: Some(state)
+            state: RefCell::new(Some(state)),
+        }
+    }
+}
+
+#[props]
+impl Generator {
+    pub fn next(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let Some(state) = self.state.take() else {
+            let obj = Object::new(realm);
+            
+            obj.define_property("done".into(), true.into())?;
+            obj.define_property("value".into(), Value::Undefined)?;
+            
+            return Ok(obj)
+        };
+        
+        let vm = ResumableVM::from_state(state, realm);
+        
+        match vm.next() {
+            GeneratorPoll::Yield(state, val) => {
+                self.state.replace(Some(state));
+                
+                let obj = Object::new(realm);
+                
+                obj.define_property("done".into(), false.into())?;
+                obj.define_property("value".into(), val)?;
+                
+                Ok(obj)
+                
+            }
+            GeneratorPoll::Ret(res) => {
+                let val = res?;
+                
+                let obj = Object::new(realm);
+                
+                obj.define_property("done".into(), true.into())?;
+                obj.define_property("value".into(), val)?;
+                
+                Ok(obj)
+            }
         }
     }
 }
