@@ -325,16 +325,19 @@ impl<C: Realm> Value<C> {
 
                 let to_prim = o.resolve_property(&Symbol::TO_PRIMITIVE.into(), realm)?;
 
-                if let Some(to_prim) = to_prim {
-                    return to_prim
-                        .call(
-                            realm,
-                            vec![Self::String(
-                                hint.take().unwrap_or_else(|| "default".to_string()),
-                            )],
-                            self.copy(),
-                        )?
-                        .assert_no_object();
+                if let Some(Self::Object(to_prim)) = to_prim {
+                    if to_prim.is_function() {
+                        return to_prim
+                            .call(
+                                realm,
+                                vec![Self::String(
+                                    hint.take().unwrap_or_else(|| "default".to_string()),
+                                )],
+                                self.copy(),
+                            )?
+                            .assert_no_object();
+                        
+                    }
                 }
 
                 if hint.as_deref() == Some("string") {
