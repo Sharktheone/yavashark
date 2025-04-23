@@ -52,7 +52,7 @@ impl ByteCodeInterpreter {
         }
         
         if func.is_generator && !func.is_async {
-            let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm);
+            let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, func.params.clone());
             
             return Ok(g.into_object());
         }

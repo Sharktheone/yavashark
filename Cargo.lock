@@ -5173,6 +5173,7 @@ name = "yavashark_vm"
 version = "0.1.0"
 dependencies = [
  "log",
+ "swc_ecma_ast",
  "tokio",
  "yavashark_bytecode",
  "yavashark_env",
