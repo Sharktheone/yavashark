@@ -132,34 +132,49 @@ impl Promise {
 
         Ok(())
     }
-
-    pub fn with_callback(callback: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
-        let promise = Self::new(realm).into_object();
-
-        let promise_clone = promise.clone();
-        let promise_clone2 = promise.clone();
-
-        let on_fullfilled = NativeFunction::new(
+    
+    pub fn get_fullfilled(
+        this: GcPromise,
+        realm: &mut Realm,
+    ) -> ObjectHandle {
+        NativeFunction::new(
             "on_fullfilled",
             move |args, _, realm| {
-                let this = <&Self>::from_value_out(promise_clone.clone().into())?;
                 this.resolve(&args.first().cloned().unwrap_or(Value::Undefined), realm)?;
 
                 Ok(Value::Undefined)
             },
             realm,
-        );
-
-        let on_rejected = NativeFunction::new(
+        )
+    }
+    
+    pub fn get_rejected(
+        this: GcPromise,
+        realm: &mut Realm,
+    ) -> ObjectHandle {
+        NativeFunction::new(
             "on_rejected",
             move |args, _, realm| {
-                let this = <&Self>::from_value_out(promise_clone2.clone().into())?;
                 this.reject(&args.first().cloned().unwrap_or(Value::Undefined), realm)?;
 
                 Ok(Value::Undefined)
             },
             realm,
-        );
+        )
+    }
+    
+    pub fn get_gc(this: ObjectHandle) -> Res<GcPromise> {
+        <&Self>::from_value_out(this.into())
+
+    }
+
+    pub fn with_callback(callback: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+        let promise = Self::new(realm).into_object();
+        
+        let gc = Self::get_gc(promise.clone())?;
+        
+        let on_fullfilled = Self::get_fullfilled(gc.clone(), realm);
+        let on_rejected = Self::get_rejected(gc, realm);
 
         callback.call(
             realm,
