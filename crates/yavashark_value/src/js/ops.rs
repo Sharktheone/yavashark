@@ -99,11 +99,16 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    pub fn to_int_or_null(&self) -> Result<i64, Error<C>> {
+    pub fn to_int_or_null(&self, realm: &mut C) -> Result<i64, Error<C>> {
         Ok(match self {
             Self::Number(n) => *n as i64,
             Self::Boolean(b) => i64::from(*b),
             Self::String(s) => s.parse().unwrap_or(0),
+            Self::Object(o) => {
+                self
+                    .to_primitive(Some("number".to_owned()), realm)?
+                    .assert_no_object()?.to_int_or_null(realm)?
+            }
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to number")),
             _ => 0,
         })
@@ -732,9 +737,7 @@ impl<C: Realm> Value<C> {
     pub fn normal_eq(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
         let lhs = self.to_primitive(None, realm)?;
         let rhs = rhs.to_primitive(None, realm)?;
-        
-        
-        
+
         Ok(match (lhs, rhs) {
             (Self::Null | Self::Undefined, Self::Null | Self::Undefined) => true,
             (Self::Number(a), Self::Number(b)) => a == b,

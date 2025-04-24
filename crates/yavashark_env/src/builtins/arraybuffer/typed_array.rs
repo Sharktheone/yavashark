@@ -101,7 +101,7 @@ impl TypedArray {
 
             <&ArrayBuffer>::from_value_out(buffer.copy())?
         } else {
-            let len = buffer.to_int_or_null()? as usize;
+            let len = buffer.to_int_or_null(realm)? as usize;
             buffer = ArrayBuffer::new(realm, len).into_value();
 
             <&ArrayBuffer>::from_value_out(buffer.copy())?
