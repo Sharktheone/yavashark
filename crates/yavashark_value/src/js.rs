@@ -178,7 +178,8 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => *n == 0.0 || n.is_nan(),
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
-            Self::Object(_) | Self::Symbol(_) => false,
+            Self::Object(o) => o.primitive().is_some_and(|o| if o.is_object() { false } else { o.is_falsey() }),
+            Self::Symbol(_) => false,
             Self::BigInt(b) => b.is_zero(),
         }
     }
@@ -190,7 +191,8 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => !(*n == 0.0 || n.is_nan()),
             Self::String(s) => !s.is_empty(),
             Self::Boolean(b) => *b,
-            Self::Object(_) | Self::Symbol(_) => true,
+            Self::Object(o) => o.primitive().is_none_or(|o| if o.is_object() { true } else { o.is_truthy() }),
+            Self::Symbol(_) => true,
             Self::BigInt(b) => !b.is_zero(),
         }
     }
