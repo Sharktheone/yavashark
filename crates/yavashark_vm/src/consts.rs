@@ -56,7 +56,7 @@ impl ConstIntoValue for ArrayLiteralBlueprint {
         let props = self
             .properties
             .into_iter()
-            .map(|v| v.into_value(vm))
+            .map(|v| v.map(|v| v.into_value(vm)).unwrap_or(Ok(Value::Undefined)))
             .collect::<Result<Vec<_>, _>>()?;
 
         Ok(Array::with_elements(vm.get_realm_ref(), props)?.into_value())
