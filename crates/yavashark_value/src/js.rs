@@ -211,7 +211,7 @@ impl<C: Realm> Value<C> {
             Self::String(_) => "string",
             Self::Boolean(_) => "boolean",
             Self::Object(o) => {
-                if o.is_function() {
+                if o.is_function() | o.is_constructor() {
                     "function"
                 } else {
                     "object"
