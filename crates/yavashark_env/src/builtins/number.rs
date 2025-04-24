@@ -278,3 +278,36 @@ pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
         realm,
     )
 }
+
+
+#[must_use]
+pub fn get_parse_int(realm: &Realm) -> ObjectHandle {
+    NativeFunction::new(
+        "parseInt",
+        |args, _, realm| {
+            let radix = args.get(1).and_then(|v| v.to_number(realm).ok()).map(|v| v as u32);
+
+            let str = args.first()
+                .and_then(|v| v.to_string(realm).ok())
+                .unwrap_or_default();
+
+            Ok(Value::Number(NumberConstructor::parse_int(&str, radix)))
+        },
+        realm,
+    )
+}
+
+#[must_use]
+pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
+    NativeFunction::new(
+        "parseFloat",
+        |args, _, realm| {
+            let str = args.first()
+                .and_then(|v| v.to_string(realm).ok())
+                .unwrap_or_default();
+
+            Ok(Value::Number(NumberConstructor::parse_float(&str)))
+        },
+        realm,
+    )
+}

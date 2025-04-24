@@ -1,7 +1,4 @@
-use crate::builtins::{
-    get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape,
-    get_is_finite, get_is_nan,
-};
+use crate::builtins::{get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape, get_is_finite, get_is_nan, get_parse_float, get_parse_int};
 use crate::error::get_error;
 use crate::realm::Realm;
 use crate::Value;
@@ -257,8 +254,15 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         };
     }
 
-    copy_from!(c, number_constructor, parseInt);
-    copy_from!(c, number_constructor, parseFloat);
+    obj.define_variable(
+        "parseInt".into(),
+        Variable::write_config(get_parse_int(realm).into()),
+    )?;
+    
+    obj.define_variable(
+        "parseFloat".into(),
+        Variable::write_config(get_parse_float(realm).into()),
+    )?;
 
     obj.define_variable(
         "isNaN".into(),
