@@ -12,12 +12,12 @@ impl Interpreter {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
 
-                Value::Boolean(left.normal_eq(&right))
+                Value::Boolean(left.normal_eq(&right, realm)?)
             }
             BinaryOp::NotEq => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                Value::Boolean(!left.normal_eq(&right))
+                Value::Boolean(!left.normal_eq(&right, realm)?)
             }
             BinaryOp::EqEqEq => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;

@@ -93,7 +93,7 @@ pub fn jmp_if_eq_rel(left: impl Data, right: impl Data, addr: JmpOffset, vm: &mu
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
-    if left.normal_eq(&right) {
+    if left.normal_eq(&right, vm.get_realm())? {
         vm.offset_pc(addr);
     }
 
@@ -104,7 +104,7 @@ pub fn jmp_if_ne_rel(left: impl Data, right: impl Data, addr: JmpOffset, vm: &mu
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
-    if !left.normal_eq(&right) {
+    if !left.normal_eq(&right, vm.get_realm())? {
         vm.offset_pc(addr);
     }
 

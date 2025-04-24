@@ -729,9 +729,13 @@ impl<C: Realm> Value<C> {
     //     ))
     // }
 
-    #[must_use]
-    pub fn normal_eq(&self, rhs: &Self) -> bool {
-        match (self, rhs) {
+    pub fn normal_eq(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
+        let lhs = self.to_primitive(None, realm)?;
+        let rhs = rhs.to_primitive(None, realm)?;
+        
+        
+        
+        Ok(match (lhs, rhs) {
             (Self::Null | Self::Undefined, Self::Null | Self::Undefined) => true,
             (Self::Number(a), Self::Number(b)) => a == b,
             (Self::String(a), Self::String(b)) => a == b,
@@ -740,22 +744,22 @@ impl<C: Realm> Value<C> {
             (Self::Symbol(a), Self::Symbol(b)) => a == b,
 
             (Self::Number(a), Self::String(b)) | (Self::String(b), Self::Number(a)) => {
-                if *a == 0.0 && b.is_empty() {
-                    return true;
+                if a == 0.0 && b.is_empty() {
+                    return Ok(true);
                 }
 
                 a.to_string() == *b
             }
 
             (Self::Number(a), Self::Boolean(b)) | (Self::Boolean(b), Self::Number(a)) => {
-                *a == b.num()
+                a == b.num()
             }
 
             (Self::Number(a), Self::Object(b)) | (Self::Object(b), Self::Number(a)) => {
                 let b = format!("{b}");
 
-                if *a == 0.0 && b.is_empty() {
-                    return true;
+                if a == 0.0 && b.is_empty() {
+                    return Ok(true);
                 }
 
                 a.to_string() == *b
@@ -776,7 +780,7 @@ impl<C: Realm> Value<C> {
             (Self::BigInt(a), Self::BigInt(b)) => a == b,
 
             (Self::BigInt(a), Self::Number(b)) | (Self::Number(b), Self::BigInt(a)) => {
-                a.to_f64().unwrap_or(f64::NAN) == *b
+                a.to_f64().unwrap_or(f64::NAN) == b
             }
 
             (Self::BigInt(a), Self::String(b)) | (Self::String(b), Self::BigInt(a)) => {
@@ -784,7 +788,7 @@ impl<C: Realm> Value<C> {
             }
 
             _ => false,
-        }
+        })
     }
 
     pub fn instance_of(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {

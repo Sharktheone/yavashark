@@ -5,7 +5,7 @@ use yavashark_env::Res;
 pub fn eq(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
-    let result = left.normal_eq(&right).into();
+    let result = left.normal_eq(&right, vm.get_realm())?.into();
 
     output.set(result, vm)
 }
@@ -13,7 +13,7 @@ pub fn eq(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut i
 pub fn ne(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let left = left.get(vm)?;
     let right = right.get(vm)?;
-    let result = (!left.normal_eq(&right)).into();
+    let result = (!left.normal_eq(&right, vm.get_realm())?).into();
 
     output.set(result, vm)
 }

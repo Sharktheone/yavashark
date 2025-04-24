@@ -93,7 +93,7 @@ pub fn jmp_if_eq(left: impl Data, right: impl Data, addr: JmpAddr, vm: &mut impl
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
-    if left.normal_eq(&right) {
+    if left.normal_eq(&right, vm.get_realm())? {
         vm.set_pc(addr);
     }
 
@@ -104,7 +104,7 @@ pub fn jmp_if_ne(left: impl Data, right: impl Data, addr: JmpAddr, vm: &mut impl
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
-    if !left.normal_eq(&right) {
+    if !left.normal_eq(&right, vm.get_realm())? {
         vm.set_pc(addr);
     }
 
