@@ -196,7 +196,7 @@ fn run_input(
         }
     }
 
-    if conf.old_bytecode || conf.instructions {
+    if conf.old_bytecode {
         let bc = match ByteCodegen::compile(&script.body) {
             Ok(bc) => bc,
             Err(e) => {
