@@ -18,12 +18,13 @@ impl Compiler {
             self.instructions.push(Instruction::JmpRel(0));
 
             self.compile_stmt(&w.body)?;
+            
+            self.instructions.push(Instruction::jmp(addr));
 
             if let Some(inst) = cond.get(self.instructions.len() as yavashark_bytecode::JmpAddr) {
                 self.instructions[jmp] = inst;
             }
             
-            self.instructions.push(Instruction::jmp(addr));
         }
 
         Ok(())
