@@ -43,7 +43,7 @@ impl OldBorrowedVM<'_> {
         let name = self
             .var_name(name)
             .ok_or(Error::reference("Invalid variable name"))?;
-        self.current_scope.declare_var(name.into(), value)
+        self.current_scope.update_or_define(name.into(), value)
     }
 
     pub fn set_register(&mut self, reg: Reg, value: Value) -> Res {

@@ -22,6 +22,9 @@ pub trait VM {
     fn get_register(&self, reg: Reg) -> Res<Value>;
     fn get_label(&self, label: Label) -> Res<&str>;
     fn set_variable(&mut self, name: VarName, value: Value) -> Res;
+    // fn define_variable(&mut self, name: VarName, value: Value) -> Res {
+    //     self.set_variable(name, value) //TODO: this is NOT correct!
+    // }
     fn set_register(&mut self, reg: Reg, value: Value) -> Res;
     fn push(&mut self, value: Value);
     fn pop(&mut self) -> Option<Value>;
