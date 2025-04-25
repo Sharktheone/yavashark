@@ -56,7 +56,6 @@ impl Compiler {
         
         self.dealloc(source);
         
-        
-        todo!()
+        Ok(())
     }
 }
