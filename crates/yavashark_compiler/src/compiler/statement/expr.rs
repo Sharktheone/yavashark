@@ -107,7 +107,7 @@ impl Compiler {
     ) -> Res<DataType> {
         match self.compile_expr(expr, out)? {
             Some(optim) => Ok(optim.output),
-            None => Ok(DataType::Acc(Acc)), //TODO: this is not correct as there are instructions that don't return anything
+            None => Ok(out.map_or(DataType::Acc(Acc), |o| o.data_type().into())), //TODO: this is not correct as there are instructions that don't return anything
         }
     }
 
