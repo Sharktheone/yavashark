@@ -8,7 +8,7 @@ use std::sync::atomic::AtomicIsize;
 
 use crate::js::context::Realm;
 use crate::variable::Variable;
-use crate::{Attributes, Error, IntoValueRef};
+use crate::{Attributes, Error, IntoValueRef, Symbol};
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
 
 use super::Value;
@@ -485,6 +485,74 @@ impl<C: Realm> Object<C> {
             .map_or(Ok(Value::Undefined), |x| {
                 x.get(Value::Object(self.clone()), realm)
             })
+    }
+    
+    pub fn to_primitive(&self, mut hint: Option<String>, realm: &mut C) -> Result<Value<C>, Error<C>> {
+        if let Some(prim) = self.primitive() {
+            return prim.assert_no_object();
+        }
+
+        let to_prim = self.resolve_property(&Symbol::TO_PRIMITIVE.into(), realm)?;
+
+        if let Some(Value::Object(to_prim)) = to_prim {
+            if to_prim.is_function() {
+                return to_prim
+                    .call(
+                        realm,
+                        vec![Value::String(
+                            hint.take().unwrap_or_else(|| "default".to_string()),
+                        )],
+                        self.clone().into(),
+                    )?
+                    .assert_no_object();
+            }
+        }
+
+        if hint.as_deref() == Some("string") {
+            let to_string = self.resolve_property(&"toString".into(), realm)?;
+
+            if let Some(Value::Object(to_string)) = to_string {
+                if to_string.is_function() {
+                    return to_string
+                        .call(realm, Vec::new(), self.clone().into())?
+                        .assert_no_object();
+                }
+            }
+
+            let to_value = self.resolve_property(&"valueOf".into(), realm)?;
+
+            if let Some(Value::Object(to_value)) = to_value {
+                if to_value.is_function() {
+                    return to_value
+                        .call(realm, Vec::new(), self.clone().into())?
+                        .assert_no_object();
+                }
+            }
+        }
+
+        let to_value = self.resolve_property(&"valueOf".into(), realm)?;
+
+        if let Some(Value::Object(to_value)) = to_value {
+            if to_value.is_function() {
+                let val = to_value.call(realm, Vec::new(), self.clone().into())?;
+
+                if !val.is_object() {
+                    return Ok(val);
+                }
+            }
+        }
+
+        let to_string = self.resolve_property(&"toString".into(), realm)?;
+
+        if let Some(Value::Object(to_string)) = to_string {
+            if to_string.is_function() {
+                return to_string
+                    .call(realm, Vec::new(), self.clone().into())?
+                    .assert_no_object();
+            }
+        }
+
+        Err(Error::ty("Cannot convert object to primitive"))
     }
 }
 
