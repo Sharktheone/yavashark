@@ -222,38 +222,6 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
         Variable::write_config(realm.intrinsics.promise_constructor().value),
     )?;
 
-    macro_rules! copy_from {
-        ($prop:ident, $name:ident) => {
-            obj.define_variable(
-                stringify!($name).into(),
-                Variable::write_config(
-                    realm
-                        .intrinsics
-                        .$prop
-                        .resolve_property_no_get_set(&stringify!($name).into())?
-                        .map(|x| x.value)
-                        .unwrap_or(Value::Undefined),
-                ),
-            )?;
-        };
-
-        (c, $prop:ident, $name:ident) => {
-            obj.define_variable(
-                stringify!($name).into(),
-                Variable::write_config(
-                    realm
-                        .intrinsics
-                        .$prop()
-                        .value
-                        .as_object()?
-                        .resolve_property_no_get_set(&stringify!($name).into())?
-                        .map(|x| x.value)
-                        .unwrap_or(Value::Undefined),
-                ),
-            )?;
-        };
-    }
-
     obj.define_variable(
         "parseInt".into(),
         Variable::write_config(get_parse_int(realm).into()),

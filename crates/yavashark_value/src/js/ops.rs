@@ -104,7 +104,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => *n as i64,
             Self::Boolean(b) => i64::from(*b),
             Self::String(s) => s.parse().unwrap_or(0),
-            Self::Object(o) => {
+            Self::Object(_) => {
                 self
                     .to_primitive(Some("number".to_owned()), realm)?
                     .assert_no_object()?.to_int_or_null(realm)?

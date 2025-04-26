@@ -1,7 +1,6 @@
 use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
 use yavashark_env::Res;
-use yavashark_value::IntoValue;
 
 pub fn eq(lhs: VarName, rhs: VarName, vm: &mut impl VM) -> Res {
     let lhs = vm.get_variable(lhs)?;
