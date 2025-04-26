@@ -35,8 +35,8 @@ impl GeneratorFunction {
             params,
         }
     }
-    
-    #[must_use] 
+
+    #[must_use]
     pub fn empty(realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableGeneratorFunction {
@@ -53,14 +53,11 @@ impl GeneratorFunction {
 impl GeneratorFunction {
     #[prop("length")]
     const LENGTH: usize = 0;
-    
+
     #[constructor]
-    pub fn construct(
-        #[realm] realm: &mut Realm,
-        mut args: Vec<Value>
-    ) -> ValueResult {
+    pub fn construct(#[realm] realm: &mut Realm, mut args: Vec<Value>) -> ValueResult {
         let Some(code) = args.pop() else {
-            return Ok(Self::empty(realm).into_value())
+            return Ok(Self::empty(realm).into_value());
         };
 
         let mut buf = "function* anonymous(".to_owned();

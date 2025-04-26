@@ -1,13 +1,15 @@
 use crate::{Compiler, Res};
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
-use yavashark_bytecode::{instructions::Instruction, jmp::Test, JmpAddr};
+use yavashark_bytecode::{JmpAddr, instructions::Instruction, jmp::Test};
 
 impl Compiler {
     pub fn compile_for(&mut self, f: &ForStmt) -> Res {
         if let Some(init) = &f.init {
             match init {
                 VarDeclOrExpr::VarDecl(vd) => self.decl_var(vd)?,
-                VarDeclOrExpr::Expr(expr)  => { self.compile_expr_no_out(expr)?; }
+                VarDeclOrExpr::Expr(expr) => {
+                    self.compile_expr_no_out(expr)?;
+                }
             }
         }
 

@@ -1,9 +1,9 @@
 use super::MoveOptimization;
 use crate::{Compiler, Res};
 use swc_ecma_ast::{ArrayLit, ExprOrSpread, PropOrSpread};
-use yavashark_bytecode::{ArrayLiteralBlueprint, ConstValue};
 use yavashark_bytecode::data::OutputData;
 use yavashark_bytecode::instructions::Instruction;
+use yavashark_bytecode::{ArrayLiteralBlueprint, ConstValue};
 
 impl Compiler {
     pub fn compile_array(
@@ -25,15 +25,12 @@ impl Compiler {
                     dealloc.push(storage);
 
                     self.compile_expr_data_certain(&expr.expr, storage);
-                    
+
                     properties.push(Some(storage.into()));
-                    
                 }
                 None => {
                     properties.push(None);
                 }
-                
-                
             }
         }
         let ob = self.alloc_const(ConstValue::Array(ArrayLiteralBlueprint { properties }));

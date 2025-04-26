@@ -486,8 +486,12 @@ impl<C: Realm> Object<C> {
                 x.get(Value::Object(self.clone()), realm)
             })
     }
-    
-    pub fn to_primitive(&self, mut hint: Option<String>, realm: &mut C) -> Result<Value<C>, Error<C>> {
+
+    pub fn to_primitive(
+        &self,
+        mut hint: Option<String>,
+        realm: &mut C,
+    ) -> Result<Value<C>, Error<C>> {
         if let Some(prim) = self.primitive() {
             return prim.assert_no_object();
         }

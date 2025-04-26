@@ -5,7 +5,6 @@ use yavashark_bytecode::data::{DataType, OutputData};
 use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {
-    
     pub fn compile_member_prop(&mut self, m: &MemberProp) -> Res<DataType> {
         Ok(match m {
             MemberProp::Ident(ident) => {
@@ -21,9 +20,7 @@ impl Compiler {
             }
         })
     }
-    
-    
-    
+
     pub fn compile_member(&mut self, expr: &MemberExpr, out: Option<impl OutputData>) -> Res {
         let Some(out) = out else { return Ok(()) };
 
