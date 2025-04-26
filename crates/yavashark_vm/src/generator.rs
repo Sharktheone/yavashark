@@ -1,6 +1,7 @@
 use crate::{GeneratorPoll, ResumableVM, VmState};
 use std::cell::RefCell;
 use std::fmt::Debug;
+use std::path::PathBuf;
 use std::rc::Rc;
 use swc_ecma_ast::{Param, Pat};
 use yavashark_bytecode::BytecodeFunctionCode;
@@ -34,10 +35,59 @@ impl GeneratorFunction {
             params,
         }
     }
+    
+    #[must_use] 
+    pub fn empty(realm: &Realm) -> Self {
+        Self {
+            inner: RefCell::new(MutableGeneratorFunction {
+                object: MutObject::with_proto(realm.intrinsics.generator_function.clone().into()),
+            }),
+            code: Rc::new(BytecodeFunctionCode::default()),
+            scope: Scope::new(realm, PathBuf::new()),
+            params: Vec::new(),
+        }
+    }
 }
 
 #[props]
-impl GeneratorFunction {}
+impl GeneratorFunction {
+    #[prop("length")]
+    const LENGTH: usize = 0;
+    
+    #[constructor]
+    pub fn construct(
+        #[realm] realm: &mut Realm,
+        mut args: Vec<Value>
+    ) -> ValueResult {
+        let Some(code) = args.pop() else {
+            return Ok(Self::empty(realm).into_value())
+        };
+
+        let mut buf = "function* anonymous(".to_owned();
+
+        for (i, arg) in args.iter().enumerate() {
+            if i != 0 {
+                buf.push(',');
+            }
+
+            buf.push_str(&arg.to_string(realm)?);
+        }
+
+        buf.push_str(") { ");
+
+        buf.push_str(&code.to_string(realm)?);
+
+        buf.push_str(" }");
+
+        buf.push_str("anonymous");
+
+        let Some(eval) = realm.intrinsics.eval.clone() else {
+            return Err(Error::new("eval is not defined"));
+        };
+
+        eval.call(realm, vec![Value::String(buf)], Value::Undefined)
+    }
+}
 
 impl Func<Realm> for GeneratorFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {

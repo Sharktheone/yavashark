@@ -42,7 +42,7 @@ pub struct Intrinsics {
     pub(crate) syntax_error: ObjectHandle,
     pub(crate) eval_error: ObjectHandle,
     pub(crate) uri_error: ObjectHandle,
-    pub(crate) eval: Option<ObjectHandle>,
+    pub eval: Option<ObjectHandle>,
     pub(crate) arraybuffer: ObjectHandle,
     pub(crate) data_view: ObjectHandle,
     pub(crate) typed_array: ObjectHandle,
