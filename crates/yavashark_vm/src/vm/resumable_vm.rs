@@ -8,6 +8,7 @@ use yavashark_bytecode::data::{ControlIdx, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value, ValueResult};
+use yavashark_env::error::ErrorObj;
 
 pub struct VmState {
     regs: Registers,
@@ -24,6 +25,8 @@ pub struct VmState {
     continue_storage: Option<OutputDataType>,
 
     try_stack: Vec<TryBlock>,
+    
+    throw: Option<Error>,
 }
 
 pub struct ResumableVM<'a> {
@@ -60,6 +63,7 @@ impl VmState {
             acc: Value::Undefined,
             continue_storage: None,
             try_stack: Vec::new(),
+            throw: None,
         }
     }
 
@@ -211,6 +215,27 @@ impl<'a> ResumableVM<'a> {
         }
 
         AsyncPoll::Ret(self.state, Ok(()))
+    }
+    
+    pub fn handle_error(&mut self, err: Error) -> Res {
+        if let Some(tb) = self.state.try_stack.last_mut() {
+            if let Some(catch) = tb.catch.take() {
+                if tb.finally.is_none() {
+                    self.state.try_stack.pop();
+                }
+                self.offset_pc(catch);
+                self.set_acc(ErrorObj::error_to_value(err, self.realm)); 
+                
+            } else if let Some(finally) = tb.finally.take() {
+                self.state.throw = Some(err);
+                self.offset_pc(finally);
+                
+                self.state.try_stack.pop();
+            }
+            
+        }
+
+        Ok(())
     }
 }
 
