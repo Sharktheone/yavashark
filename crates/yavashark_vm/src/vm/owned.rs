@@ -280,6 +280,8 @@ impl VM for OwnedVM {
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);
         } else {
+            let exit = tb.exit;
+            self.offset_pc(exit);
             self.try_stack.pop();
         }
 

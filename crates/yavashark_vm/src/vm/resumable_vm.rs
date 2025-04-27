@@ -423,6 +423,8 @@ impl VM for ResumableVM<'_> {
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);
         } else {
+            let exit = tb.exit;
+            self.offset_pc(exit);
             self.state.try_stack.pop();
         }
 
