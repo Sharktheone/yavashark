@@ -9,6 +9,7 @@ use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, Outpu
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
+use yavashark_env::error::ErrorObj;
 
 pub struct OldOwnedVM {
     regs: Registers,
@@ -28,6 +29,8 @@ pub struct OldOwnedVM {
     continue_storage: Option<OutputDataType>,
 
     try_stack: Vec<TryBlock>,
+    
+    throw: Option<Error>,
 }
 
 impl OldOwnedVM {
@@ -46,6 +49,7 @@ impl OldOwnedVM {
             realm,
             continue_storage: None,
             try_stack: Vec::new(),
+            throw: None,
         })
     }
 
@@ -68,6 +72,7 @@ impl OldOwnedVM {
             realm,
             continue_storage: None,
             try_stack: Vec::new(),
+            throw: None,
         }
     }
 
@@ -90,6 +95,7 @@ impl OldOwnedVM {
             realm,
             continue_storage: None,
             try_stack: Vec::new(),
+            throw: None,
         }
     }
     pub fn get_realm(&mut self) -> &mut Realm {
@@ -129,6 +135,25 @@ impl OldOwnedVM {
             self.pc += 1;
 
             instr.execute(self)?;
+        }
+
+        Ok(())
+    }
+
+    pub fn handle_error(&mut self, err: Error) -> Res {
+        if let Some(tb) = self.try_stack.last_mut() {
+            if let Some(catch) = tb.catch.take() {
+                if tb.finally.is_none() {
+                    self.try_stack.pop();
+                }
+                self.offset_pc(catch);
+                self.set_acc(ErrorObj::error_to_value(err, &self.realm));
+            } else if let Some(finally) = tb.finally.take() {
+                self.throw = Some(err);
+                self.offset_pc(finally);
+
+                self.try_stack.pop();
+            }
         }
 
         Ok(())
@@ -272,6 +297,11 @@ impl VM for OldOwnedVM {
             self.offset_pc(f);
         } else {
             let exit = tb.exit;
+
+            if let Some(err) = self.throw.take() {
+                return self.handle_error(err);
+            }
+
             self.offset_pc(exit);
             self.try_stack.pop();
         }
@@ -337,6 +367,7 @@ mod test {
             acc: Value::Undefined,
             realm,
             try_stack: Vec::new(),
+            throw: None,
         };
 
         vm.run().unwrap();
