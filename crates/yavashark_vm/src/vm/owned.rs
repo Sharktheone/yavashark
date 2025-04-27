@@ -279,6 +279,8 @@ impl VM for OwnedVM {
 
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);
+        } else {
+            self.try_stack.pop();
         }
 
         Ok(())

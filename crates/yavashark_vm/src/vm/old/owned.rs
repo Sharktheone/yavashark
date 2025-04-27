@@ -270,6 +270,8 @@ impl VM for OldOwnedVM {
 
         if let Some(f) = tb.finally.take() {
             self.offset_pc(f);
+        } else {
+            self.try_stack.pop();
         }
 
         Ok(())
