@@ -15,7 +15,7 @@ impl Compiler {
             Test::Always => {
                 self.instructions.push(Instruction::jmp(start));
             }
-            Test::Never => {},
+            Test::Never => {}
             _ => {
                 if let Some(inst) = cond.get(start as yavashark_bytecode::JmpAddr) {
                     self.instructions.push(inst);

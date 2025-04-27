@@ -1,6 +1,6 @@
 mod function;
-mod statement;
 mod pat;
+mod statement;
 
 use crate::Res;
 use swc_ecma_ast::Stmt;
