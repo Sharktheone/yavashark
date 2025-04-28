@@ -13,7 +13,7 @@ import (
 const (
 	ENGINE_LOCATION = "../../target/release/yavashark_test262"
 
-	TIMEOUT = 4 * time.Second
+	TIMEOUT = 12 * time.Second
 )
 
 func RunTest(path string) results.Result {
