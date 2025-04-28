@@ -12,7 +12,7 @@ import (
 const (
 	DEFAULT_TEST_ROOT = "test262/test"
 
-	DEFAULT_WORKERS = 128
+	DEFAULT_WORKERS = 256
 )
 
 func main() {
