@@ -1,5 +1,6 @@
 mod lit;
 mod paren;
+mod seq;
 
 use crate::{Compiler, Res};
 use anyhow::anyhow;
@@ -27,7 +28,7 @@ impl Compiler {
             Expr::Cond(c) => self.compile_cond(c, out)?,
             Expr::Call(c) => self.compile_call(c, out)?,
             Expr::New(n) => self.compile_new(n, out)?,
-            Expr::Seq(s) => self.compile_seq(s, out)?,
+            Expr::Seq(s) => return self.test_seq(s),
             Expr::Ident(i) => return Ok(Test::Not(self.get_ident(i).data_type())),
             Expr::Lit(l) => return Ok(self.test_lit(l)),
             Expr::Tpl(t) => self.compile_tpl(t, out)?,

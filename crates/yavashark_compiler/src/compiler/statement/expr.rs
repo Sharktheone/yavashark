@@ -83,7 +83,7 @@ impl Compiler {
             Expr::Cond(c) => self.compile_cond(c, out)?,
             Expr::Call(c) => self.compile_call(c, out)?,
             Expr::New(n) => self.compile_new(n, out)?,
-            Expr::Seq(s) => self.compile_seq(s, out)?,
+            Expr::Seq(s) => return self.compile_seq(s, out),
             Expr::Ident(i) => return Ok(self.compile_ident(i, out)),
             Expr::Lit(l) => return self.compile_lit(l, out),
             Expr::Tpl(t) => self.compile_tpl(t, out)?,
