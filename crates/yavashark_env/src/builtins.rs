@@ -15,6 +15,7 @@ mod set;
 mod string;
 mod symbol;
 mod temporal;
+mod arguments;
 
 pub use arraybuffer::*;
 pub use bigint::*;
