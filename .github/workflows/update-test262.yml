@@ -15,14 +15,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Checkout data repository
-        uses: actions/checkout@v3
-        with:
-          repository: sharktheone/yavashark-data
-          token: ${{ secrets.YAVASHARK_DATA_PAT }}
-          path: data
-          persist-credentials: 'true'
-
       - name: Checkout test262 repository
         uses: actions/checkout@v4
         with:
@@ -50,6 +42,14 @@ jobs:
         working-directory: crates/yavashark_test262
         run: |
           ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test
+
+      - name: Checkout data repository
+        uses: actions/checkout@v3
+        with:
+          repository: Sharktheone/yavashark-data
+          token: ${{ secrets.YAVASHARK_DATA_PAT }}
+          path: data
+          persist-credentials: 'true'
 
       - name: Update results
         working-directory: data
