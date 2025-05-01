@@ -427,8 +427,7 @@ impl VM for ResumableVM<'_> {
             if let Some(err) = self.state.throw.take() {
                 return self.handle_error(err);
             }
-            
-            
+
             self.offset_pc(exit);
             self.state.try_stack.pop();
         }

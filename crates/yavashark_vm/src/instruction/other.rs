@@ -232,7 +232,6 @@ pub fn leave_try(vm: &mut impl VM) -> Res {
     vm.leave_try()
 }
 
-
 pub fn pat_begin_rest(len: usize, vm: &mut impl VM) -> Res {
     todo!()
 }

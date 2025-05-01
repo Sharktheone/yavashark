@@ -6,9 +6,9 @@ use std::path::PathBuf;
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData, OutputDataType};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
+use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value, ValueResult};
-use yavashark_env::error::ErrorObj;
 
 pub struct OldBorrowedVM<'a> {
     regs: Registers,
@@ -28,7 +28,7 @@ pub struct OldBorrowedVM<'a> {
     continue_storage: Option<OutputDataType>,
 
     try_stack: Vec<TryBlock>,
-    
+
     throw: Option<Error>,
 }
 
@@ -124,7 +124,7 @@ impl<'a> OldBorrowedVM<'a> {
 
         Ok(self.acc())
     }
-    
+
     pub fn handle_error(&mut self, err: Error) -> Res {
         if let Some(tb) = self.try_stack.last_mut() {
             if let Some(catch) = tb.catch.take() {

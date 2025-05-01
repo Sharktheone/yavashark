@@ -1,9 +1,9 @@
 use crate::{Compiler, Res};
 use swc_ecma_ast::CondExpr;
+use yavashark_bytecode::JmpAddr;
 use yavashark_bytecode::data::OutputData;
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::jmp::Test;
-use yavashark_bytecode::JmpAddr;
 
 impl Compiler {
     pub fn compile_cond(&mut self, expr: &CondExpr, out: Option<impl OutputData>) -> Res {

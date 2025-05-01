@@ -7,9 +7,9 @@ use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
+use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
-use yavashark_env::error::ErrorObj;
 
 pub struct OwnedVM {
     regs: Registers,
@@ -28,7 +28,7 @@ pub struct OwnedVM {
     continue_storage: Option<OutputDataType>,
 
     try_stack: Vec<TryBlock>,
-    
+
     throw: Option<Error>,
 }
 
@@ -112,7 +112,7 @@ impl OwnedVM {
 
         Ok(())
     }
-    
+
     pub fn handle_error(&mut self, err: Error) -> Res {
         if let Some(tb) = self.try_stack.last_mut() {
             if let Some(catch) = tb.catch.take() {
@@ -306,11 +306,11 @@ impl VM for OwnedVM {
             self.offset_pc(f);
         } else {
             let exit = tb.exit;
-            
+
             if let Some(err) = self.throw.take() {
                 return self.handle_error(err);
             }
-            
+
             self.offset_pc(exit);
             self.try_stack.pop();
         }

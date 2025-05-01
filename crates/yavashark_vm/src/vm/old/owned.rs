@@ -7,9 +7,9 @@ use std::path::PathBuf;
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
+use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
-use yavashark_env::error::ErrorObj;
 
 pub struct OldOwnedVM {
     regs: Registers,
@@ -29,7 +29,7 @@ pub struct OldOwnedVM {
     continue_storage: Option<OutputDataType>,
 
     try_stack: Vec<TryBlock>,
-    
+
     throw: Option<Error>,
 }
 
