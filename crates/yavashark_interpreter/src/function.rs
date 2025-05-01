@@ -12,6 +12,7 @@ use yavashark_env::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value, ValueResult,
     Variable,
 };
+use yavashark_env::builtins::Arguments;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_value::{
@@ -131,11 +132,9 @@ impl RawJSFunction {
         scope.state_set_function();
         scope.state_set_returnable();
 
-        let args = Array::with_elements(realm, args)?;
+        let args = Arguments::new(args, this.copy(), realm);
 
         let args = ObjectHandle::new(args);
-
-        args.define_variable("callee".into(), Variable::write_config(this.copy()))?;
 
         scope.declare_var("arguments".into(), args.into());
 
