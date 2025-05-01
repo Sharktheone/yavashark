@@ -79,10 +79,15 @@ impl ObjectImpl<Realm> for Arguments {
             }
         }
         
-        if matches!(name, Value::String(s) if s == "callee") {
-            return Ok(Some(self.callee.clone().into()));
+        if let Value::String(s) = &name {
+            if s == "length" {
+                return Ok(Some(self.args.borrow().len().into()));
+            }
+            if s == "callee" {
+                return Ok(Some(self.callee.clone().into()));
+            }
         }
-
+        
         self.get_wrapped_object().resolve_property(name)
         
     }
@@ -94,8 +99,13 @@ impl ObjectImpl<Realm> for Arguments {
             }
         }
 
-        if matches!(name, Value::String(s) if s == "callee") {
-            return Ok(Some(self.callee.clone().into()));
+        if let Value::String(s) = &name {
+            if s == "length" {
+                return Ok(Some(self.args.borrow().len().into()));
+            }
+            if s == "callee" {
+                return Ok(Some(self.callee.clone().into()));
+            }
         }
 
         self.get_wrapped_object().get_property(name)
