@@ -6,7 +6,8 @@ use crate::{MutObject, Realm, Res, Value, ObjectProperty, Variable};
 #[derive(Debug)]
 pub struct Arguments {
     pub inner: RefCell<MutObject>,
-    callee: Value,
+    pub callee: Value,
+    pub length: RefCell<Value>,
     pub args: RefCell<Vec<Value>>,
 }
 
@@ -16,14 +17,15 @@ impl Arguments {
         Self {
             inner: RefCell::new(MutObject::new(realm)),
             callee,
+            length: RefCell::new(args.len().into()),
             args: RefCell::new(args),
         }
     }
-    
+
     pub fn resolve_array(&self, idx: usize) -> Option<ObjectProperty> {
         Some(self.args.borrow().get(idx)?.copy().into())
     }
-    
+
     pub fn set_array(&self, idx: usize, value: Value) -> Res<()> {
         if let Some(v) = self.args.borrow_mut().get_mut(idx) {
             *v = value;
@@ -57,6 +59,13 @@ impl ObjectImpl<Realm> for Arguments {
                 return Ok(());
             }
         }
+        
+        if let Value::String(s) = &name {
+            if s == "length" {
+                *self.length.borrow_mut() = value;
+                return Ok(());
+            }
+        }
 
         self.get_wrapped_object().define_property(name, value)
     }
@@ -65,6 +74,13 @@ impl ObjectImpl<Realm> for Arguments {
         if let Value::Number(idx) = &name {
             if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
                 *v = value.value;
+                return Ok(());
+            }
+        }
+        
+        if let Value::String(s) = &name {
+            if s == "length" {
+                *self.length.borrow_mut() = value.value;
                 return Ok(());
             }
         }
@@ -78,18 +94,18 @@ impl ObjectImpl<Realm> for Arguments {
                 return Ok(Some(value));
             }
         }
-        
+
         if let Value::String(s) = &name {
             if s == "length" {
-                return Ok(Some(self.args.borrow().len().into()));
+                return Ok(Some(self.length.borrow().clone().into()));
             }
             if s == "callee" {
                 return Ok(Some(self.callee.clone().into()));
             }
         }
-        
+
         self.get_wrapped_object().resolve_property(name)
-        
+
     }
 
     fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
@@ -101,7 +117,7 @@ impl ObjectImpl<Realm> for Arguments {
 
         if let Value::String(s) = &name {
             if s == "length" {
-                return Ok(Some(self.args.borrow().len().into()));
+                return Ok(Some(self.length.borrow().clone().into()));
             }
             if s == "callee" {
                 return Ok(Some(self.callee.clone().into()));
