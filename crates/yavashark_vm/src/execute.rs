@@ -10900,6 +10900,281 @@ impl Execute for Instruction {
             Self::DeclLetStack(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
             Self::DeclLetConst(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
             Self::DeclEmptyLet(arg0) => instruction::decl_empty_let(arg0, vm)?,
+            Self::PatBeginRest(arg0) => instruction::pat_begin_rest(arg0, vm)?,
+            Self::PatVoidNext => instruction::pat_void_next(vm)?,
+            Self::PatMoveLetVarVar(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetRegVar(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetAccVar(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetStackVar(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetConstVar(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetVarReg(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetRegReg(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetAccReg(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetStackReg(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetConstReg(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetVarAcc(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetRegAcc(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetAccAcc(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetStackAcc(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetConstAcc(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetVarStack(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetRegStack(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetAccStack(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetStackStack(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetConstStack(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetVarConst(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetRegConst(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetAccConst(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetStackConst(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveLetConstConst(arg0, arg1) => {
+                instruction::pat_move_let(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstVarVar(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstRegVar(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstAccVar(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstStackVar(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstConstVar(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstVarReg(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstRegReg(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstAccReg(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstStackReg(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstConstReg(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstVarAcc(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstRegAcc(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstAccAcc(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstStackAcc(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstConstAcc(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstVarStack(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstRegStack(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstAccStack(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstStackStack(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstConstStack(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstVarConst(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstRegConst(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstAccConst(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstStackConst(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveConstConstConst(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarVarVar(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarRegVar(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarAccVar(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarStackVar(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarConstVar(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarVarReg(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarRegReg(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarAccReg(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarStackReg(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarConstReg(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarVarAcc(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarRegAcc(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarAccAcc(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarStackAcc(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarConstAcc(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarVarStack(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarRegStack(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarAccStack(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarStackStack(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarConstStack(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarVarConst(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarRegConst(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarAccConst(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarStackConst(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatMoveVarConstConst(arg0, arg1) => {
+                instruction::pat_move_var(arg0, arg1, vm)?
+            }
+            Self::PatRestLetVar(arg0) => instruction::pat_rest_let(arg0, vm)?,
+            Self::PatRestLetReg(arg0) => instruction::pat_rest_let(arg0, vm)?,
+            Self::PatRestLetAcc(arg0) => instruction::pat_rest_let(arg0, vm)?,
+            Self::PatRestLetStack(arg0) => instruction::pat_rest_let(arg0, vm)?,
+            Self::PatRestLetConst(arg0) => instruction::pat_rest_let(arg0, vm)?,
+            Self::PatRestConstVar(arg0) => instruction::pat_rest_const(arg0, vm)?,
+            Self::PatRestConstReg(arg0) => instruction::pat_rest_const(arg0, vm)?,
+            Self::PatRestConstAcc(arg0) => instruction::pat_rest_const(arg0, vm)?,
+            Self::PatRestConstStack(arg0) => instruction::pat_rest_const(arg0, vm)?,
+            Self::PatRestConstConst(arg0) => instruction::pat_rest_const(arg0, vm)?,
+            Self::PatRestVarVar(arg0) => instruction::pat_rest_var(arg0, vm)?,
+            Self::PatRestVarReg(arg0) => instruction::pat_rest_var(arg0, vm)?,
+            Self::PatRestVarAcc(arg0) => instruction::pat_rest_var(arg0, vm)?,
+            Self::PatRestVarStack(arg0) => instruction::pat_rest_var(arg0, vm)?,
+            Self::PatRestVarConst(arg0) => instruction::pat_rest_var(arg0, vm)?,
+            Self::PatArrayMoveLetVar(arg0) => instruction::pat_array_move_let(arg0, vm)?,
+            Self::PatArrayMoveLetReg(arg0) => instruction::pat_array_move_let(arg0, vm)?,
+            Self::PatArrayMoveLetAcc(arg0) => instruction::pat_array_move_let(arg0, vm)?,
+            Self::PatArrayMoveLetStack(arg0) => {
+                instruction::pat_array_move_let(arg0, vm)?
+            }
+            Self::PatArrayMoveLetConst(arg0) => {
+                instruction::pat_array_move_let(arg0, vm)?
+            }
+            Self::PatArrayMoveConstVar(arg0) => {
+                instruction::pat_array_move_const(arg0, vm)?
+            }
+            Self::PatArrayMoveConstReg(arg0) => {
+                instruction::pat_array_move_const(arg0, vm)?
+            }
+            Self::PatArrayMoveConstAcc(arg0) => {
+                instruction::pat_array_move_const(arg0, vm)?
+            }
+            Self::PatArrayMoveConstStack(arg0) => {
+                instruction::pat_array_move_const(arg0, vm)?
+            }
+            Self::PatArrayMoveConstConst(arg0) => {
+                instruction::pat_array_move_const(arg0, vm)?
+            }
+            Self::PatArrayMoveVarVar(arg0) => instruction::pat_array_move_var(arg0, vm)?,
+            Self::PatArrayMoveVarReg(arg0) => instruction::pat_array_move_var(arg0, vm)?,
+            Self::PatArrayMoveVarAcc(arg0) => instruction::pat_array_move_var(arg0, vm)?,
+            Self::PatArrayMoveVarStack(arg0) => {
+                instruction::pat_array_move_var(arg0, vm)?
+            }
+            Self::PatArrayMoveVarConst(arg0) => {
+                instruction::pat_array_move_var(arg0, vm)?
+            }
         }
         Ok(())
     }

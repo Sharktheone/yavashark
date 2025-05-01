@@ -14406,4 +14406,222 @@ impl Instruction {
     pub fn decl_empty_let(arg0: VarName) -> Self {
         Self::DeclEmptyLet(arg0)
     }
+    #[must_use]
+    pub fn pat_begin_rest(arg0: usize) -> Self {
+        Self::PatBeginRest(arg0)
+    }
+    #[must_use]
+    pub fn pat_void_next() -> Self {
+        Self::PatVoidNext
+    }
+    #[must_use]
+    pub fn pat_move_let(arg0: impl Data, arg1: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveLetAccAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveLetAccConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveLetAccReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveLetAccStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveLetAccVar(arg0, arg1),
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveLetConstAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveLetConstConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveLetConstReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveLetConstStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveLetConstVar(arg0, arg1),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveLetRegAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveLetRegConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveLetRegReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveLetRegStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveLetRegVar(arg0, arg1),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveLetStackAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveLetStackConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveLetStackReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveLetStackStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveLetStackVar(arg0, arg1),
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveLetVarAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveLetVarConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveLetVarReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveLetVarStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveLetVarVar(arg0, arg1),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn pat_move_const(arg0: impl Data, arg1: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveConstAccAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveConstAccConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveConstAccReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveConstAccStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveConstAccVar(arg0, arg1),
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveConstConstAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveConstConstConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveConstConstReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveConstConstStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveConstConstVar(arg0, arg1),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveConstRegAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveConstRegConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveConstRegReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveConstRegStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveConstRegVar(arg0, arg1),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveConstStackAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveConstStackConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveConstStackReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveConstStackStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveConstStackVar(arg0, arg1),
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveConstVarAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveConstVarConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveConstVarReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveConstVarStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveConstVarVar(arg0, arg1),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn pat_move_var(arg0: impl Data, arg1: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveVarAccAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveVarAccConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveVarAccReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveVarAccStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveVarAccVar(arg0, arg1),
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveVarConstAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveVarConstConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveVarConstReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveVarConstStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveVarConstVar(arg0, arg1),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveVarRegAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveVarRegConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveVarRegReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveVarRegStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveVarRegVar(arg0, arg1),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveVarStackAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveVarStackConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveVarStackReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveVarStackStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveVarStackVar(arg0, arg1),
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => Self::PatMoveVarVarAcc(arg0, arg1),
+                    DataType::Const(arg1) => Self::PatMoveVarVarConst(arg0, arg1),
+                    DataType::Reg(arg1) => Self::PatMoveVarVarReg(arg0, arg1),
+                    DataType::Stack(arg1) => Self::PatMoveVarVarStack(arg0, arg1),
+                    DataType::Var(arg1) => Self::PatMoveVarVarVar(arg0, arg1),
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn pat_rest_let(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatRestLetAcc(arg0),
+            DataType::Const(arg0) => Self::PatRestLetConst(arg0),
+            DataType::Reg(arg0) => Self::PatRestLetReg(arg0),
+            DataType::Stack(arg0) => Self::PatRestLetStack(arg0),
+            DataType::Var(arg0) => Self::PatRestLetVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_rest_const(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatRestConstAcc(arg0),
+            DataType::Const(arg0) => Self::PatRestConstConst(arg0),
+            DataType::Reg(arg0) => Self::PatRestConstReg(arg0),
+            DataType::Stack(arg0) => Self::PatRestConstStack(arg0),
+            DataType::Var(arg0) => Self::PatRestConstVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_rest_var(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatRestVarAcc(arg0),
+            DataType::Const(arg0) => Self::PatRestVarConst(arg0),
+            DataType::Reg(arg0) => Self::PatRestVarReg(arg0),
+            DataType::Stack(arg0) => Self::PatRestVarStack(arg0),
+            DataType::Var(arg0) => Self::PatRestVarVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_array_move_let(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatArrayMoveLetAcc(arg0),
+            DataType::Const(arg0) => Self::PatArrayMoveLetConst(arg0),
+            DataType::Reg(arg0) => Self::PatArrayMoveLetReg(arg0),
+            DataType::Stack(arg0) => Self::PatArrayMoveLetStack(arg0),
+            DataType::Var(arg0) => Self::PatArrayMoveLetVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_array_move_const(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatArrayMoveConstAcc(arg0),
+            DataType::Const(arg0) => Self::PatArrayMoveConstConst(arg0),
+            DataType::Reg(arg0) => Self::PatArrayMoveConstReg(arg0),
+            DataType::Stack(arg0) => Self::PatArrayMoveConstStack(arg0),
+            DataType::Var(arg0) => Self::PatArrayMoveConstVar(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_array_move_var(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatArrayMoveVarAcc(arg0),
+            DataType::Const(arg0) => Self::PatArrayMoveVarConst(arg0),
+            DataType::Reg(arg0) => Self::PatArrayMoveVarReg(arg0),
+            DataType::Stack(arg0) => Self::PatArrayMoveVarStack(arg0),
+            DataType::Var(arg0) => Self::PatArrayMoveVarVar(arg0),
+        }
+    }
 }
