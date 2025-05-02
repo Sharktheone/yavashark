@@ -3,6 +3,7 @@ use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
 use syn::Expr;
+use crate::deref_type;
 
 #[derive(Clone)]
 pub struct Method {
@@ -88,14 +89,14 @@ impl Method {
             length -= 1;
         }
 
-
         let optionals = self.args.iter().filter(|arg| {
-            if let syn::Type::Path(path) = arg {
-                path.path.is_ident("Option")
+            if let syn::Type::Path(path) = deref_type(arg) {
+                path.path.segments.first().map(|seg| &seg.ident.to_string() == "Option").unwrap_or(false)
             } else {
                 false
             }
         }).count();
+
 
         length -= optionals;
 

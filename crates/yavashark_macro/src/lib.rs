@@ -88,3 +88,11 @@ fn value_path() -> syn::Path {
         syn::parse_str("yavashark_value").unwrap()
     }
 }
+
+
+fn deref_type(ty: &syn::Type) -> &syn::Type {
+    match ty {
+        syn::Type::Reference(r) => deref_type(&r.elem),
+        _ => ty,
+    }
+}
