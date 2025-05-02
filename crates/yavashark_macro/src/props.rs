@@ -438,7 +438,14 @@ impl Method {
             .map(|js_name| quote! {#js_name})
             .unwrap_or_else(|| quote! {stringify!(#name)});
 
-        let length = self.args.len();
+        let mut length = self.args.len();
+
+        if self.this.is_some() {
+            length -= 1;
+        }
+        if self.realm.is_some() {
+            length -= 1;
+        }
 
         quote! {
             #native_function::with_proto_and_len(#name.as_ref(), |mut args, mut this, realm| {
