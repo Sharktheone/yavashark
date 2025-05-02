@@ -88,6 +88,17 @@ impl Method {
             length -= 1;
         }
 
+
+        let optionals = self.args.iter().filter(|arg| {
+            if let syn::Type::Path(path) = arg {
+                path.path.is_ident("Option")
+            } else {
+                false
+            }
+        }).count();
+
+        length -= optionals;
+
         quote! {
             #native_function::with_proto_and_len(#js_name.as_ref(), |mut args, mut this, realm| {
                 #arg_prepare
