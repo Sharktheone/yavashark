@@ -15,6 +15,7 @@ pub enum ConstValue {
     Object(ObjectLiteralBlueprint),
     Array(ArrayLiteralBlueprint),
     Function(FunctionBlueprint),
+    ArrowFunction(ArrowFunctionBlueprint),
     BigInt(BigInt),
     Regex(String, String),
     Symbol(ConstString),
@@ -30,6 +31,7 @@ pub enum DataTypeValue {
     Object(ObjectLiteralBlueprint),
     Array(ArrayLiteralBlueprint),
     Function(FunctionBlueprint),
+    ArrowFunction(ArrowFunctionBlueprint),
     BigInt(BigInt),
     Regex(String, String),
     Symbol(ConstString),
@@ -63,6 +65,15 @@ pub struct FunctionBlueprint {
     pub code: Rc<BytecodeFunctionCode>,
     pub is_async: bool,
     pub is_generator: bool,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct ArrowFunctionBlueprint {
+    pub params: Vec<Param>,
+    pub code: Rc<BytecodeFunctionCode>,
+    pub is_async: bool,
+    pub is_generator: bool,
+
 }
 
 impl From<&str> for ConstValue {
@@ -99,6 +110,7 @@ impl From<ConstValue> for DataTypeValue {
             ConstValue::Object(obj) => Self::Object(obj),
             ConstValue::Array(arr) => Self::Array(arr),
             ConstValue::Function(func) => Self::Function(func),
+            ConstValue::ArrowFunction(func) => Self::ArrowFunction(func),
             ConstValue::BigInt(b) => Self::BigInt(b),
             ConstValue::Regex(exp, flags) => Self::Regex(exp, flags),
             ConstValue::Symbol(s) => Self::Symbol(s),

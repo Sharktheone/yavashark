@@ -1,4 +1,4 @@
-use crate::function_code::BytecodeFunction;
+use crate::function_code::{BytecodeArrowFunction, BytecodeFunction};
 use crate::VM;
 use std::cell::RefCell;
 use yavashark_bytecode::{
@@ -35,6 +35,25 @@ impl ConstIntoValue for ConstValue {
 
                 let optim = OptimFunction::new(
                     bp.name.unwrap_or("anonymous".to_string()),
+                    bp.params,
+                    Some(func),
+                    vm.get_scope().clone(),
+                    vm.get_realm_ref(),
+                )?;
+
+                optim.into()
+            }
+            Self::ArrowFunction(bp) => {
+                let func: RefCell<Box<dyn FunctionCode>> =
+                    RefCell::new(Box::new(BytecodeArrowFunction {
+                        code: bp.code,
+                        this: vm.get_this()?,
+                        is_async: bp.is_async,
+                        is_generator: bp.is_generator,
+                    }));
+
+                let optim = OptimFunction::new(
+                    "anonymous".to_string(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -95,6 +114,25 @@ impl ConstIntoValue for DataTypeValue {
 
                 let optim = OptimFunction::new(
                     bp.name.unwrap_or("anonymous".to_string()),
+                    bp.params,
+                    Some(func),
+                    vm.get_scope().clone(),
+                    vm.get_realm_ref(),
+                )?;
+
+                optim.into()
+            }
+            Self::ArrowFunction(bp) => {
+                let func: RefCell<Box<dyn FunctionCode>> =
+                    RefCell::new(Box::new(BytecodeArrowFunction {
+                        code: bp.code,
+                        this: vm.get_this()?,
+                        is_async: bp.is_async,
+                        is_generator: bp.is_generator,
+                    }));
+
+                let optim = OptimFunction::new(
+                    "anonymous".to_string(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),

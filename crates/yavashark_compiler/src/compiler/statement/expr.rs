@@ -88,7 +88,7 @@ impl Compiler {
             Expr::Lit(l) => return self.compile_lit(l, out),
             Expr::Tpl(t) => self.compile_tpl(t, out)?,
             Expr::TaggedTpl(t) => self.compile_tagged_tpl(t, out)?,
-            Expr::Arrow(a) => self.compile_arrow(a, out)?,
+            Expr::Arrow(a) => return self.compile_arrow(a, out),
             Expr::Class(c) => return self.compile_class(c, out),
             Expr::Yield(y) => self.compile_yield(y, out)?,
             Expr::MetaProp(m) => self.compile_meta_prop(m, out)?,

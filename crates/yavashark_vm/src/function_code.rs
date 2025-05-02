@@ -58,3 +58,31 @@ impl FunctionCode for BytecodeFunction {
         self
     }
 }
+
+#[derive(Debug)]
+pub struct BytecodeArrowFunction {
+    pub code: Rc<BytecodeFunctionCode>,
+    pub this: Value,
+    pub is_async: bool,
+    pub is_generator: bool,
+}
+
+impl FunctionCode for BytecodeArrowFunction {
+    fn call(&self, realm: &mut Realm, scope: &mut Scope, _: Value) -> RuntimeResult {
+        let scope = Scope::with_parent_this(scope, self.this.copy())?;
+
+        if self.is_async {
+            return Ok(BytecodeAsyncTask::new(Rc::clone(&self.code), realm, scope)?.into());
+        }
+
+        let mut vm = BorrowedVM::with_scope(&self.code.instructions, &self.code.ds, realm, scope);
+
+        vm.run()?;
+
+        Ok(vm.acc())
+    }
+
+    fn function_any(&self) -> &dyn Any {
+        self
+    }
+}
