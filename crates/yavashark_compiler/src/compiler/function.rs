@@ -1,7 +1,6 @@
 use crate::{Compiler, Res};
 use std::rc::Rc;
-use anyhow::anyhow;
-use swc_ecma_ast::{Function, Pat};
+use swc_ecma_ast::Function;
 use yavashark_bytecode::data::{ConstIdx, DataSection};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, FunctionBlueprint};
 
@@ -20,16 +19,6 @@ impl Compiler {
 
     pub fn create_bytecode(f: &Function) -> Res<BytecodeFunctionCode> {
         let mut this = Self::new();
-        
-        for param in &f.params {
-            if let Pat::Ident(ident) = &param.pat {
-                this.variables.push(ident.id.sym.to_string());
-            } else {
-                return Err(anyhow!(
-                    "Only identifiers are supported as function parameters"
-                ));
-            }
-        }
 
         if let Some(body) = &f.body {
             this.compile_block(body)?;
