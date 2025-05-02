@@ -37,21 +37,40 @@ impl Reflect {
         target.call(realm, args, this)
     }
 
+    //28.1.2 Reflect.construct ( target, argumentsList [ , newTarget ] ), https://tc39.es/ecma262/#sec-reflection
     pub fn construct(
         target: &ObjectHandle,
         args: Value,
-        new_target: &ObjectHandle,
+        new_target: &Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        if !new_target.is_constructor() {
+        //This function performs the following steps when called:
+
+        //     1. If IsConstructor(target) is false, throw a TypeError exception.
+        if !target.is_constructor() {
             return Err(Error::ty_error(format!(
                 "{} is not a constructor",
-                new_target.name()
+                target.name()
             )));
         }
+        //     2. If newTarget is not present, set newTarget to target.
+        let new_target = if let Some(new_target) = new_target {
+            //     3. Else if IsConstructor(newTarget) is false, throw a TypeError exception.
+            if !new_target.is_constructor() {
+                return Err(Error::ty_error(format!(
+                    "{} is not a constructor",
+                    new_target.name()
+                )));
+            }
+            new_target
+        } else {
+            target
+        };
 
+        //     4. Let args be ? CreateListFromArrayLike(argumentsList).
         let args = ArrayLike::new(args, realm)?.to_vec(realm)?;
 
+        //     5. Return ? Construct(target, args, newTarget).
         let val = target.construct(realm, args)?;
 
         if let Some(proto) = new_target.resolve_property(&"prototype".into(), realm)? {
