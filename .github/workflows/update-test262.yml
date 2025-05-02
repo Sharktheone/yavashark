@@ -38,11 +38,6 @@ jobs:
         run: |
           cargo build --release
 
-      - name: Run Test262 Runner
-        working-directory: crates/yavashark_test262
-        run: |
-          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test
-
       - name: Checkout data repository
         uses: actions/checkout@v3
         with:
@@ -50,6 +45,10 @@ jobs:
           token: ${{ secrets.YAVASHARK_DATA_PAT }}
           path: data
           persist-credentials: 'true'
+      - name: Run Test262 Runner
+        working-directory: crates/yavashark_test262
+        run: |
+          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test
 
       - name: Update results
         working-directory: data
