@@ -109,16 +109,24 @@ impl Reflect {
         target.delete_property(prop).is_ok()
     }
 
+    //28.1.5 Reflect.get ( target, propertyKey [ , receiver ] ), https://tc39.es/ecma262/#sec-reflection
     pub fn get(
         target: ObjectHandle,
         prop: &Value,
         receiver: Option<Value>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
+        //This function performs the following steps when called:
+        //1. If target is not an Object, throw a TypeError exception. - done by the caller
+        //2. Let key be ? ToPropertyKey(propertyKey). TODO
         let prop = target.get_property(prop)?;
 
+        //3. If receiver is not present, then
+        //    a. Set receiver to target.
         let receiver = receiver.unwrap_or_else(|| target.into());
+        
 
+        //4. Return ? target.[[Get]](key, receiver).
         prop.resolve(receiver, realm)
     }
 
