@@ -734,6 +734,10 @@ impl<C: Realm> Value<C> {
     // }
 
     pub fn normal_eq(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
+        if let (Self::Object(lhs), Self::Object(rhs)) = (self, rhs) {
+            return Ok(lhs == rhs);
+        }
+
         let lhs = self.to_primitive(None, realm)?;
         let rhs = rhs.to_primitive(None, realm)?;
 
