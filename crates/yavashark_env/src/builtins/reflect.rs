@@ -86,9 +86,15 @@ impl Reflect {
         Ok(val)
     }
 
+    //28.1.3 Reflect.defineProperty ( target, propertyKey, attributes ), https://tc39.es/ecma262/#sec-reflection
     #[prop("defineProperty")]
     #[must_use]
     pub fn define_property(target: ObjectHandle, prop: Value, desc: &ObjectHandle) -> bool {
+        //This function performs the following steps when called:
+        //1. If target is not an Object, throw a TypeError exception. - done by the caller
+        //2. Let key be ? ToPropertyKey(propertyKey). TODO
+        //3. Let desc be ? ToPropertyDescriptor(attributes).
+        //4. Return ? target.[[DefineOwnProperty]](key, desc).
         ObjectConstructor::define_property(target, prop, desc).is_ok()
     }
 
