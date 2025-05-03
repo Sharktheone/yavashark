@@ -57,7 +57,7 @@ impl ArrayLike {
             return Ok(None);
         }
 
-        let val = self.val.get_property(&idx.into(), realm)?;
+        let val = self.val.get_property_opt(&idx.into(), realm)?.unwrap_or(Value::Undefined);
 
         self.idx.set(idx + 1);
 
