@@ -84,7 +84,17 @@ impl ObjectConstructor {
 
         let var = Variable::new_with_attributes(value, writable, enumerable, configurable);
 
-        obj.define_variable(key, var)?;
+        obj.define_variable(key.copy(), var)?;
+        
+        //TODO: there should be a obj.define_property which takes a descriptor
+        if let Some(get) = descriptor.resolve_property_no_get_set(&"get".into())? {
+            obj.define_getter(key.copy(), get.value)?;
+        }
+        
+        if let Some(set) = descriptor.resolve_property_no_get_set(&"set".into())? {
+            obj.define_setter(key.copy(), set.value)?;
+        }
+        
 
         Ok(obj.into())
     }
