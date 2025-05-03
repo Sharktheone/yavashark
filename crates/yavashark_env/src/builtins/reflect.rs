@@ -98,9 +98,14 @@ impl Reflect {
         ObjectConstructor::define_property(target, prop, desc).is_ok()
     }
 
+    //28.1.4 Reflect.deleteProperty ( target, propertyKey ), https://tc39.es/ecma262/#sec-reflection
     #[prop("deleteProperty")]
     #[must_use]
     pub fn delete_property(target: &ObjectHandle, prop: &Value) -> bool {
+        //This function performs the following steps when called:
+        //1. If target is not an Object, throw a TypeError exception. - done by the caller
+        //2. Let key be ? ToPropertyKey(propertyKey). TODO
+        //3. Return ? target.[[Delete]](key). 
         target.delete_property(prop).is_ok()
     }
 
