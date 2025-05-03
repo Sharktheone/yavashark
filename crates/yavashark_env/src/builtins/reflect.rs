@@ -26,14 +26,20 @@ impl Reflect {
 
 #[properties_new(raw)]
 impl Reflect {
+    //28.1.1 Reflect.apply ( target, thisArgument, argumentsList ), https://tc39.es/ecma262/#sec-reflection
     pub fn apply(
         target: &Value,
         this: Value,
         args: Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
+        //This function performs the following steps when called:
+        //1. If IsCallable(target) is false, throw a TypeError exception. - done by `target.call()`
+        //2. Let args be ? CreateListFromArrayLike(argumentsList).
         let args = ArrayLike::new(args, realm)?.to_vec(realm)?;
+        //3. Perform PrepareForTailCall(). TODO
 
+        //4. Return ? Call(target, thisArgument, args).
         target.call(realm, args, this)
     }
 
