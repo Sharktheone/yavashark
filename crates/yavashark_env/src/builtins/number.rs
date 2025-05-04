@@ -261,7 +261,7 @@ pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
             }))
         },
         realm,
-        1
+        1,
     )
 }
 
@@ -277,7 +277,7 @@ pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
             }))
         },
         realm,
-        1
+        1,
     )
 }
 
@@ -299,7 +299,7 @@ pub fn get_parse_int(realm: &Realm) -> ObjectHandle {
             Ok(Value::Number(NumberConstructor::parse_int(&str, radix)))
         },
         realm,
-        2
+        2,
     )
 }
 
@@ -316,6 +316,6 @@ pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
             Ok(Value::Number(NumberConstructor::parse_float(&str)))
         },
         realm,
-        1
+        1,
     )
 }

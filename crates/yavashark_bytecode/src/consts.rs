@@ -73,7 +73,6 @@ pub struct ArrowFunctionBlueprint {
     pub code: Rc<BytecodeFunctionCode>,
     pub is_async: bool,
     pub is_generator: bool,
-
 }
 
 impl From<&str> for ConstValue {

@@ -156,20 +156,19 @@ impl Array {
 
         Ok(Value::Undefined)
     }
-    
+
     pub fn to_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
-        
+
         let len = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
-        
+
         let mut vec = vec![Value::Undefined; len];
-        
+
         for (idx, value) in &inner.object.array {
             vec[*idx] = value.value.clone();
         }
-        
-        Ok(vec)
 
+        Ok(vec)
     }
 }
 

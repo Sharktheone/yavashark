@@ -1,6 +1,6 @@
+use crate::array::Array;
 use crate::{ObjectHandle, Realm, Res, Symbol, Value};
 use std::cell::Cell;
-use crate::array::Array;
 
 pub struct ValueIterator(Value);
 
@@ -43,7 +43,7 @@ impl ArrayLike {
     pub fn new(val: Value, realm: &mut Realm) -> Res<Self> {
         if let Some(array) = val.downcast::<Array>()? {
             let values = array.to_vec()?;
-            
+
             return Ok(Self {
                 val: Value::Undefined,
                 len: Cell::new(values.len()),
@@ -52,10 +52,10 @@ impl ArrayLike {
                 iter: None,
             });
         }
-        
+
         if let Some(iter) = val.get_property_opt(&Symbol::ITERATOR.into(), realm)? {
             let iter = iter.call(realm, Vec::new(), val)?.to_object()?;
-            
+
             return Ok(Self {
                 val: Value::Undefined,
                 len: Cell::new(0),
@@ -64,10 +64,7 @@ impl ArrayLike {
                 iter: Some(iter),
             });
         }
-        
-        
-        
-        
+
         let len = val
             .get_property(&"length".into(), realm)?
             .to_number(realm)?;
@@ -93,30 +90,29 @@ impl ArrayLike {
 
             return Ok(Some(val));
         }
-        
+
         if let Some(iter) = &self.iter {
             let next = iter.call_method(&"next".into(), realm, Vec::new())?;
             let next = next.as_object()?;
-            
+
             let done = next
                 .get_property(&"done".into())?
                 .resolve(iter.clone().into(), realm)?
                 .is_truthy();
-            
+
             if done {
                 return Ok(None);
             }
-            
+
             let val = next
                 .get_property(&"value".into())?
                 .resolve(iter.clone().into(), realm)?;
-            
+
             self.idx.set(self.idx.get() + 1);
-            
+
             return Ok(Some(val));
         }
-        
-        
+
         let idx = self.idx();
         let len = self.len();
 
@@ -124,7 +120,10 @@ impl ArrayLike {
             return Ok(None);
         }
 
-        let val = self.val.get_property_opt(&idx.into(), realm)?.unwrap_or(Value::Undefined);
+        let val = self
+            .val
+            .get_property_opt(&idx.into(), realm)?
+            .unwrap_or(Value::Undefined);
 
         self.idx.set(idx + 1);
 

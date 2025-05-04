@@ -388,11 +388,9 @@ impl<C: Realm> Value<C> {
         }
     }
 
-
     pub fn get_property_opt(&self, name: &Self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
         match self {
-            Self::Object(o) => o
-                .resolve_property(name, realm),
+            Self::Object(o) => o.resolve_property(name, realm),
             _ => Err(Error::ty("Value is not an object")),
         }
     }

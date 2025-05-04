@@ -439,8 +439,7 @@ impl<C: Realm> Object<C> {
                 Ok(name) => name,
                 Err(e) => return e,
             };
-            
-            
+
             Error::reference_error(format!(
                 "Cannot call {} on {}",
                 name,

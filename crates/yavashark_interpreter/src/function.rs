@@ -5,6 +5,7 @@ use std::cell::RefCell;
 use std::iter;
 use swc_ecma_ast::{BlockStmt, Param, Pat};
 use yavashark_env::array::Array;
+use yavashark_env::builtins::Arguments;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::realm::Realm;
 use yavashark_env::scope::Scope;
@@ -12,7 +13,6 @@ use yavashark_env::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, Res, RuntimeResult, Value, ValueResult,
     Variable,
 };
-use yavashark_env::builtins::Arguments;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_value::{

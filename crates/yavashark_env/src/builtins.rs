@@ -1,3 +1,4 @@
+mod arguments;
 mod arraybuffer;
 mod bigint;
 mod boolean;
@@ -15,8 +16,8 @@ mod set;
 mod string;
 mod symbol;
 mod temporal;
-mod arguments;
 
+pub use arguments::*;
 pub use arraybuffer::*;
 pub use bigint::*;
 pub use boolean::*;
@@ -34,4 +35,3 @@ pub use set::*;
 pub use string::*;
 pub use symbol::*;
 pub use temporal::*;
-pub use arguments::*;

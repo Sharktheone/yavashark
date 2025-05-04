@@ -89,7 +89,6 @@ fn value_path() -> syn::Path {
     }
 }
 
-
 fn deref_type(ty: &syn::Type) -> &syn::Type {
     match ty {
         syn::Type::Reference(r) => deref_type(&r.elem),

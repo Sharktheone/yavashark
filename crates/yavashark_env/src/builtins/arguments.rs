@@ -1,7 +1,7 @@
+use crate::{MutObject, ObjectProperty, Realm, Res, Value, Variable};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
 use yavashark_value::{Error, MutObj, ObjectImpl};
-use crate::{MutObject, Realm, Res, Value, ObjectProperty, Variable};
 
 #[derive(Debug)]
 pub struct Arguments {
@@ -11,9 +11,9 @@ pub struct Arguments {
     pub args: RefCell<Vec<Value>>,
 }
 
-
 impl Arguments {
-    #[must_use] pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
+    #[must_use]
+    pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutObject::new(realm)),
             callee,
@@ -35,22 +35,20 @@ impl Arguments {
     }
 }
 
-
 impl ObjectImpl<Realm> for Arguments {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
         self.inner.borrow_mut()
     }
 
-    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
         self.inner.borrow()
     }
 
-    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }
-
 
     fn define_property(&self, name: Value, value: Value) -> Res<()> {
         if let Value::Number(idx) = &name {
@@ -59,7 +57,7 @@ impl ObjectImpl<Realm> for Arguments {
                 return Ok(());
             }
         }
-        
+
         if let Value::String(s) = &name {
             if s == "length" {
                 *self.length.borrow_mut() = value;
@@ -77,7 +75,7 @@ impl ObjectImpl<Realm> for Arguments {
                 return Ok(());
             }
         }
-        
+
         if let Value::String(s) = &name {
             if s == "length" {
                 *self.length.borrow_mut() = value.value;
@@ -105,7 +103,6 @@ impl ObjectImpl<Realm> for Arguments {
         }
 
         self.get_wrapped_object().resolve_property(name)
-
     }
 
     fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {

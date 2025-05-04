@@ -105,7 +105,7 @@ impl Reflect {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
-        //3. Return ? target.[[Delete]](key). 
+        //3. Return ? target.[[Delete]](key).
         target.delete_property(prop).is_ok()
     }
 
@@ -124,7 +124,6 @@ impl Reflect {
         //3. If receiver is not present, then
         //    a. Set receiver to target.
         let receiver = receiver.unwrap_or_else(|| target.into());
-        
 
         //4. Return ? target.[[Get]](key, receiver).
         prop.resolve(receiver, realm)

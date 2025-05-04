@@ -1,10 +1,10 @@
 use crate::config::Config;
+use crate::deref_type;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
 use syn::{Expr, ImplItem};
-use crate::deref_type;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -448,15 +448,22 @@ impl Method {
             length -= 1;
         }
 
-        let optionals = self.args.iter().filter(|arg| {
-            if let syn::Type::Path(path) = deref_type(arg) {
-                path.path.segments.first().map(|seg| &seg.ident.to_string() == "Option").unwrap_or(false)
-            } else {
-                false
-            }
-        }).count();
+        let optionals = self
+            .args
+            .iter()
+            .filter(|arg| {
+                if let syn::Type::Path(path) = deref_type(arg) {
+                    path.path
+                        .segments
+                        .first()
+                        .map(|seg| &seg.ident.to_string() == "Option")
+                        .unwrap_or(false)
+                } else {
+                    false
+                }
+            })
+            .count();
 
-        
         length -= optionals;
 
         quote! {
