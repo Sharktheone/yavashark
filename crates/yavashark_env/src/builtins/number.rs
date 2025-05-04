@@ -251,8 +251,8 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
 
 #[must_use]
 pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
-    NativeFunction::new(
-        "isNan",
+    NativeFunction::with_len(
+        "isNaN",
         |args, _, realm| {
             Ok(Value::Boolean(if let Some(val) = args.first() {
                 val.to_number(realm)?.is_nan()
@@ -261,12 +261,13 @@ pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
             }))
         },
         realm,
+        1
     )
 }
 
 #[must_use]
 pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "isFinite",
         |args, _, realm| {
             Ok(Value::Boolean(if let Some(val) = args.first() {
@@ -276,12 +277,13 @@ pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
             }))
         },
         realm,
+        1
     )
 }
 
 #[must_use]
 pub fn get_parse_int(realm: &Realm) -> ObjectHandle {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "parseInt",
         |args, _, realm| {
             let radix = args
@@ -297,12 +299,13 @@ pub fn get_parse_int(realm: &Realm) -> ObjectHandle {
             Ok(Value::Number(NumberConstructor::parse_int(&str, radix)))
         },
         realm,
+        2
     )
 }
 
 #[must_use]
 pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "parseFloat",
         |args, _, realm| {
             let str = args
@@ -313,5 +316,6 @@ pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
             Ok(Value::Number(NumberConstructor::parse_float(&str)))
         },
         realm,
+        1
     )
 }
