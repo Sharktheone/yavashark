@@ -6,7 +6,7 @@ use yavashark_value::{BoxedObj, Constructor, CustomName, Func, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::utils::ValueIterator;
+use crate::utils::{ArrayLike, ValueIterator};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 
@@ -1239,6 +1239,9 @@ impl ArrayConstructor {
 
 #[properties_new(raw)]
 impl ArrayConstructor {
+    #[prop("length")]
+    const LENGTH: usize = 1;
+
     #[prop("isArray")]
     fn is_array(test: Value) -> bool {
         let this: Res<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
@@ -1251,6 +1254,17 @@ impl ArrayConstructor {
         let array = Array::with_elements(realm, args)?;
 
         Ok(array.into_value())
+    }
+
+    fn from(
+        items: Value,
+        _mapper: Option<ObjectHandle>,
+        _this_arg: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let array = ArrayLike::new(items, realm)?.to_vec(realm)?;
+
+        Ok(Array::with_elements(realm, array)?.into_object())
     }
 }
 
