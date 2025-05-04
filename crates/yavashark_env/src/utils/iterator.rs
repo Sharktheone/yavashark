@@ -44,7 +44,6 @@ impl ArrayLike {
         if let Some(array) = val.downcast::<Array>()? {
             let values = array.to_vec()?;
             
-            
             return Ok(Self {
                 val: Value::Undefined,
                 len: Cell::new(values.len()),
@@ -92,6 +91,28 @@ impl ArrayLike {
 
             self.idx.set(self.idx.get() + 1);
 
+            return Ok(Some(val));
+        }
+        
+        if let Some(iter) = &self.iter {
+            let next = iter.call_method(&"next".into(), realm, Vec::new())?;
+            let next = next.as_object()?;
+            
+            let done = next
+                .get_property(&"done".into())?
+                .resolve(iter.clone().into(), realm)?
+                .is_truthy();
+            
+            if done {
+                return Ok(None);
+            }
+            
+            let val = next
+                .get_property(&"value".into())?
+                .resolve(iter.clone().into(), realm)?;
+            
+            self.idx.set(self.idx.get() + 1);
+            
             return Ok(Some(val));
         }
         
