@@ -48,8 +48,7 @@ impl Uint8Array {
         let standard = if let Some(options) = options {
             options
                 .resolve_property(&"alphabet".into(), realm)?
-                .map(|x| x.normal_eq(&"base64url".into(), realm))
-                .unwrap_or(Ok(false))?
+                .map_or(Ok(false), |x| x.normal_eq(&"base64url".into(), realm))?
         } else {
             false
         };
@@ -90,8 +89,7 @@ impl Uint8Array {
         let standard = if let Some(options) = options {
             options
                 .resolve_property(&"alphabet".into(), realm)?
-                .map(|x| x.normal_eq(&"base64url".into(), realm))
-                .unwrap_or(Ok(false))?
+                .map_or(Ok(false), |x| x.normal_eq(&"base64url".into(), realm))?
         } else {
             false
         };
@@ -122,8 +120,7 @@ impl Uint8Array {
         let standard = if let Some(options) = options {
             options
                 .resolve_property(&"alphabet".into(), realm)?
-                .map(|x| x.normal_eq(&"base64url".into(), realm))
-                .unwrap_or(Ok(false))?
+                .map_or(Ok(false), |x| x.normal_eq(&"base64url".into(), realm))?
         } else {
             false
         };

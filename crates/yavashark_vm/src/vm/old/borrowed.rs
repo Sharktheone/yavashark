@@ -132,7 +132,7 @@ impl<'a> OldBorrowedVM<'a> {
                     self.try_stack.pop();
                 }
                 self.offset_pc(catch);
-                self.set_acc(ErrorObj::error_to_value(err, &self.realm));
+                self.set_acc(ErrorObj::error_to_value(err, self.realm));
             } else if let Some(finally) = tb.finally.take() {
                 self.throw = Some(err);
                 self.offset_pc(finally);

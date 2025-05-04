@@ -18,7 +18,7 @@ pub struct SleepDuration {
 // impl Unpin for SleepDuration {}
 
 impl SleepDuration {
-    pub fn new(duration: Duration) -> Self {
+    pub const fn new(duration: Duration) -> Self {
         Self {
             dur: duration,
             sleep: None,

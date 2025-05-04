@@ -191,13 +191,7 @@ fn main() {
         }
     }
 
-    let config = conf::Conf {
-        ast,
-        interpreter,
-        bytecode,
-        instructions,
-        old_bytecode,
-    };
+    let config = conf::Conf { ast, interpreter, bytecode, old_bytecode, instructions };
 
     if shell && shellold {
         println!("Cannot run both shells");

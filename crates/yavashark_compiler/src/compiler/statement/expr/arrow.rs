@@ -20,7 +20,7 @@ impl Compiler {
                 this.compile_block(block)?;
             }
             BlockStmtOrExpr::Expr(expr) => {
-                let out = this.compile_expr_data_acc(&*expr)?;
+                let out = this.compile_expr_data_acc(expr)?;
                 
                 this.instructions.push(Instruction::return_value(out));
             }

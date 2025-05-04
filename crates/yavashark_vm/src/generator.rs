@@ -134,7 +134,7 @@ impl Generator {
             realm.intrinsics.func.clone().into(),
         )?;
 
-        let g = Generator::initialize_proto(
+        let g = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
             realm.intrinsics.func.clone().into(),
         )?;

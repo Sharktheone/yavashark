@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
-use yavashark_value::{Error, MutObj, Obj, ObjectImpl};
+use yavashark_value::{Error, MutObj, ObjectImpl};
 use crate::{MutObject, Realm, Res, Value, ObjectProperty, Variable};
 
 #[derive(Debug)]
@@ -13,7 +13,7 @@ pub struct Arguments {
 
 
 impl Arguments {
-    pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
+    #[must_use] pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutObject::new(realm)),
             callee,

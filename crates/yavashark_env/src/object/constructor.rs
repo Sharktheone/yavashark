@@ -61,7 +61,7 @@ impl ObjectConstructor {
     #[prop("defineProperty")]
     pub fn define_property(
         obj: ObjectHandle,
-        key: Value,
+        key: &Value,
         descriptor: &ObjectHandle,
     ) -> ValueResult {
         let value = descriptor
@@ -128,7 +128,7 @@ impl ObjectConstructor {
         for (key, value) in props.properties()? {
             let descriptor = value.as_object()?;
 
-            Self::define_property(obj.clone(), key, descriptor)?;
+            Self::define_property(obj.clone(), &key, descriptor)?;
         }
 
         Ok(obj.into())
