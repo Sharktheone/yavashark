@@ -1257,7 +1257,13 @@ impl ArrayConstructor {
     const LENGTH: usize = 1;
 
     #[prop("isArray")]
-    fn is_array(test: Value) -> bool {
+    fn is_array(test: Value, #[realm] realm: &Realm) -> bool {
+        let is_proto = test.as_object().is_ok_and(|o| *o == realm.intrinsics.array);
+        
+        if is_proto {
+            return true;
+        }
+        
         let this: Res<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
             yavashark_value::FromValue::from_value(test);
 
