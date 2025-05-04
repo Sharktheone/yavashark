@@ -427,6 +427,29 @@ impl<C: Realm> Object<C> {
 
         p.get(Value::Object(self.clone()), realm).map(Some)
     }
+
+    pub fn call_method(
+        &self,
+        name: &Value<C>,
+        realm: &mut C,
+        args: Vec<Value<C>>,
+    ) -> Result<Value<C>, Error<C>> {
+        let method = self.resolve_property(name, realm)?.ok_or_else(|| {
+            let name = match name.to_string(realm) {
+                Ok(name) => name,
+                Err(e) => return e,
+            };
+            
+            
+            Error::reference_error(format!(
+                "Cannot call {} on {}",
+                name,
+                self.to_string_internal().unwrap_or_default()
+            ))
+        })?;
+
+        method.call(realm, args, self.clone().into())
+    }
     pub fn resolve_property_no_get_set(
         &self,
         name: &Value<C>,
