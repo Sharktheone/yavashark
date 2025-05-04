@@ -1,5 +1,6 @@
-use crate::{Realm, Res, Symbol, Value};
+use crate::{ObjectHandle, Realm, Res, Symbol, Value};
 use std::cell::Cell;
+use crate::array::Array;
 
 pub struct ValueIterator(Value);
 
@@ -34,10 +35,40 @@ pub struct ArrayLike {
     val: Value,
     len: Cell<usize>,
     idx: Cell<usize>,
+    values: Option<Vec<Value>>,
+    iter: Option<ObjectHandle>,
 }
 
 impl ArrayLike {
     pub fn new(val: Value, realm: &mut Realm) -> Res<Self> {
+        if let Some(array) = val.downcast::<Array>()? {
+            let values = array.to_vec()?;
+            
+            
+            return Ok(Self {
+                val: Value::Undefined,
+                len: Cell::new(values.len()),
+                idx: Cell::new(0),
+                values: Some(values),
+                iter: None,
+            });
+        }
+        
+        if let Some(iter) = val.get_property_opt(&Symbol::ITERATOR.into(), realm)? {
+            let iter = iter.call(realm, Vec::new(), val)?.to_object()?;
+            
+            return Ok(Self {
+                val: Value::Undefined,
+                len: Cell::new(0),
+                idx: Cell::new(0),
+                values: None,
+                iter: Some(iter),
+            });
+        }
+        
+        
+        
+        
         let len = val
             .get_property(&"length".into(), realm)?
             .to_number(realm)?;
@@ -46,10 +77,25 @@ impl ArrayLike {
             val,
             len: Cell::new(len as usize),
             idx: Cell::new(0),
+            values: None,
+            iter: None,
         })
     }
 
-    pub fn next(&self, realm: &mut Realm) -> Res<Option<Value>> {
+    pub fn next(&mut self, realm: &mut Realm) -> Res<Option<Value>> {
+        if let Some(values) = &mut self.values {
+            if self.idx.get() >= values.len() {
+                return Ok(None);
+            }
+
+            let val = values[self.idx.get()].clone();
+
+            self.idx.set(self.idx.get() + 1);
+
+            return Ok(Some(val));
+        }
+        
+        
         let idx = self.idx();
         let len = self.len();
 
@@ -76,7 +122,7 @@ impl ArrayLike {
         self.idx.get()
     }
 
-    pub fn to_vec(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+    pub fn to_vec(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
         let mut res = Vec::with_capacity(self.len());
         let idx = self.idx();
         self.idx.set(0);
