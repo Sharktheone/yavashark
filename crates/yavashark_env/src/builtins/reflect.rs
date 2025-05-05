@@ -60,7 +60,7 @@ impl Reflect {
             )));
         }
         //     2. If newTarget is not present, set newTarget to target.
-        let new_target = if let Some(new_target) = new_target {
+        let proto = if let Some(new_target) = new_target {
             //     3. Else if IsConstructor(newTarget) is false, throw a TypeError exception.
             if !new_target.is_constructor() {
                 return Err(Error::ty_error(format!(
@@ -68,9 +68,15 @@ impl Reflect {
                     new_target.name()
                 )));
             }
-            new_target
+            let proto = new_target.get("prototype", realm)?;
+            
+            if proto.is_object() {
+                proto
+            } else {
+                target.get("prototype", realm)?
+            }
         } else {
-            target
+            target.get("prototype", realm)?
         };
 
         //     4. Let args be ? CreateListFromArrayLike(argumentsList).
@@ -79,9 +85,7 @@ impl Reflect {
         //     5. Return ? Construct(target, args, newTarget).
         let val = target.construct(realm, args)?;
 
-        if let Some(proto) = new_target.resolve_property(&"prototype".into(), realm)? {
-            val.as_object()?.set_prototype(proto.into())?;
-        }
+        val.as_object()?.set_prototype(proto.into())?;
 
         Ok(val)
     }
