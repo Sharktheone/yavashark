@@ -220,6 +220,10 @@ impl<C: Realm> Value<C> {
                 if o.is_function() | o.is_constructor() {
                     "function"
                 } else {
+                    if let Some(prim) = o.primitive() {
+                        return prim.type_of();
+                    }
+                    
                     "object"
                 }
             }
