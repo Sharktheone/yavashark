@@ -187,8 +187,12 @@ impl Array {
         self.length.get()
     }
 
-    fn at(#[this] this: &Value, idx: usize) -> ValueResult {
+    fn at(#[this] this: &Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
+        
+        let length = this.get("length", realm)?.to_int_or_null(realm)? as usize;
+        
+        let idx = convert_index(idx, length);
 
         let (_, val) = this.get_array_or_done(idx)?;
 
