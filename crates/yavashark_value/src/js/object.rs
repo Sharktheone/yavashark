@@ -503,7 +503,7 @@ impl<C: Realm> Object<C> {
         let name = name.into_value_ref();
 
         self.0
-            .get_property(name.as_ref())?
+            .resolve_property(name.as_ref())?
             .map_or(Ok(Value::Undefined), |x| {
                 x.get(Value::Object(self.clone()), realm)
             })
