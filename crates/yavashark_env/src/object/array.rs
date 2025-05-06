@@ -189,9 +189,9 @@ impl Array {
 
     fn at(#[this] this: &Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
-        
+
         let length = this.get("length", realm)?.to_int_or_null(realm)? as usize;
-        
+
         let idx = convert_index(idx, length);
 
         let (_, val) = this.get_array_or_done(idx)?;
@@ -1263,11 +1263,11 @@ impl ArrayConstructor {
     #[prop("isArray")]
     fn is_array(test: Value, #[realm] realm: &Realm) -> bool {
         let is_proto = test.as_object().is_ok_and(|o| *o == realm.intrinsics.array);
-        
+
         if is_proto {
             return true;
         }
-        
+
         let this: Res<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
             yavashark_value::FromValue::from_value(test);
 

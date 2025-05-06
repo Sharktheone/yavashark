@@ -223,7 +223,7 @@ impl<C: Realm> Value<C> {
                     if let Some(prim) = o.primitive() {
                         return prim.type_of();
                     }
-                    
+
                     "object"
                 }
             }

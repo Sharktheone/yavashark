@@ -69,7 +69,7 @@ impl Reflect {
                 )));
             }
             let proto = new_target.get("prototype", realm)?;
-            
+
             if proto.is_object() {
                 proto
             } else {
