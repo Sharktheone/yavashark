@@ -7,7 +7,9 @@ impl Interpreter {
     pub fn run_unary(realm: &mut Realm, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
         if stmt.op == UnaryOp::Delete {
             match &*stmt.arg {
-                Expr::Ident(i) => return Ok(false.into()),
+                Expr::Ident(i) => {
+                    return Ok(scope.resolve(i.sym.as_str())?.is_none().into());
+                },
                 Expr::Member(m) => {
                     let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
                     if let Value::Object(obj) = obj {
