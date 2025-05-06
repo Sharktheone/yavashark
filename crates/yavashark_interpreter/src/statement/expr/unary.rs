@@ -24,6 +24,11 @@ impl Interpreter {
                         return Ok(obj.delete_property(&name)?.is_some().into());
                     }
                 }
+                Expr::Call(call) => {
+                    Self::run_call(realm, call, scope)?;
+                    
+                    return Ok(true.into());
+                }
                 _ => {}
             }
         }
