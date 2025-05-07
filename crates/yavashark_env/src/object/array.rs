@@ -38,11 +38,28 @@ impl Array {
         Ok(array)
     }
 
+    pub fn from_string(realm: &mut Realm, string: &str) -> Res<Self> {
+        let elements = string
+            .chars()
+            .map(|c| c.to_string().into())
+            .collect::<Vec<Value>>();
+
+        let array = Self::with_elements(realm, elements)?;
+
+        Ok(array)
+    }
+
     pub fn from_array_like(realm: &mut Realm, array_like: Value) -> Res<Self> {
-        let Value::Object(array_like) = array_like else {
-            return Err(Error::ty_error(format!(
-                "Expected object, found {array_like:?}"
-            )));
+        let array_like = match array_like {
+            Value::Object(obj) => obj,
+            Value::String(s) => {
+                return Self::from_string(realm, &s);
+            }
+            _ => {
+                return Err(Error::ty_error(format!(
+                    "Expected object or string, found {array_like:?}"
+                )));
+            }
         };
 
         let array = Self::new(realm.intrinsics.array.clone().into());
@@ -1286,6 +1303,11 @@ impl ArrayConstructor {
         _this_arg: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
+        if let Value::String(str) = &items {
+            return Ok(Array::from_string(realm, str)?.into_object());
+        }
+
+
         let array = ArrayLike::new(items, realm)?.to_vec(realm)?;
 
         Ok(Array::with_elements(realm, array)?.into_object())
