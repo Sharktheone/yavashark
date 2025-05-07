@@ -8,6 +8,7 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
+use crate::utils::ArrayLike;
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -132,34 +133,65 @@ impl StringConstructor {
     }
     
     fn raw(
-        template: String,
+        template: ObjectHandle,
         #[variadic] args: &[Value],
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
         //Let substitutionCount be the number of elements in substitutions.
+        let substitution_count = args.len();
+        
         // 2. Let cooked be ? ToObject(template).
+        let cooked = template;
+        
         // 3. Let literals be ? ToObject(? Get(cooked, "raw")).
+        let literals = cooked.get("raw", realm)?;
+        let mut literals = ArrayLike::new(literals, realm)?;
+        
         // 4. Let literalCount be ? LengthOfArrayLike(literals).
+        let literal_count = literals.len();
+        
         // 5. If literalCount ≤ 0, return the empty String.
+        if literal_count == 0 { //length from ArrayLike.len can't be under 0
+            return Ok(Value::String(String::new()));
+        }
+        
         // 6. Let R be the empty String.
+        let mut r = String::new();
+        
         // 7. Let nextIndex be 0.
+        let mut next_index = 0;
+        
         // 8. Repeat,
-        // 
-        //     a. Let nextLiteralVal be ? Get(literals, ! ToString(𝔽(nextIndex))).
-        //     b. Let nextLiteral be ? ToString(nextLiteralVal).
-        //     c. Set R to the string-concatenation of R and nextLiteral.
-        //     d. If nextIndex + 1 = literalCount, return R.
-        //     e. If nextIndex < substitutionCount, then
-        //         i. Let nextSubVal be substitutions[nextIndex].
-        //         ii. Let nextSub be ? ToString(nextSubVal).
-        //         iii. Set R to the string-concatenation of R and nextSub.
-        //     f. Set nextIndex to nextIndex + 1.
-        
-        Ok(Value::Undefined)
-        
-    }
+        loop {
+            //a. Let nextLiteralVal be ? Get(literals, ! ToString(𝔽(nextIndex))).
+            let next_literal_val = literals.next(realm)?.unwrap_or(Value::Undefined);
+            
+            //b. Let nextLiteral be ? ToString(nextLiteralVal).
+            let next_literal = next_literal_val.to_string(realm)?;
+            // c. Set R to the string-concatenation of R and nextLiteral.
+            r.push_str(&next_literal);
+            
+            //d. If nextIndex + 1 = literalCount, return R.
+            if next_index + 1 == literal_count {
+                return Ok(r.into());
+            }
+            
+            //e. If nextIndex < substitutionCount, then
+            if next_index < substitution_count {
+                //i. Let nextSubVal be substitutions[nextIndex].
+                let next_sub_val = args.get(next_index).unwrap_or(&Value::Undefined);
 
-    //TODO: String.raw
+                //ii. Let nextSub be ? ToString(nextSubVal).
+                let next_sub = next_sub_val.to_string(realm)?;
+
+                //iii. Set R to the string-concatenation of R and nextSub.
+                r.push_str(&next_sub);
+            }
+            
+            //f. Set nextIndex to nextIndex + 1.
+            next_index += 1;
+        }
+    }
 }
 
 impl Constructor<Realm> for StringConstructor {
