@@ -130,6 +130,34 @@ impl StringConstructor {
             .filter_map(std::char::from_u32)
             .collect::<String>()
     }
+    
+    fn raw(
+        template: String,
+        #[variadic] args: &[Value],
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        //Let substitutionCount be the number of elements in substitutions.
+        // 2. Let cooked be ? ToObject(template).
+        // 3. Let literals be ? ToObject(? Get(cooked, "raw")).
+        // 4. Let literalCount be ? LengthOfArrayLike(literals).
+        // 5. If literalCount ≤ 0, return the empty String.
+        // 6. Let R be the empty String.
+        // 7. Let nextIndex be 0.
+        // 8. Repeat,
+        // 
+        //     a. Let nextLiteralVal be ? Get(literals, ! ToString(𝔽(nextIndex))).
+        //     b. Let nextLiteral be ? ToString(nextLiteralVal).
+        //     c. Set R to the string-concatenation of R and nextLiteral.
+        //     d. If nextIndex + 1 = literalCount, return R.
+        //     e. If nextIndex < substitutionCount, then
+        //         i. Let nextSubVal be substitutions[nextIndex].
+        //         ii. Let nextSub be ? ToString(nextSubVal).
+        //         iii. Set R to the string-concatenation of R and nextSub.
+        //     f. Set nextIndex to nextIndex + 1.
+        
+        Ok(Value::Undefined)
+        
+    }
 
     //TODO: String.raw
 }
