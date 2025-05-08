@@ -1307,7 +1307,6 @@ impl ArrayConstructor {
             return Ok(Array::from_string(realm, str)?.into_object());
         }
 
-
         let array = ArrayLike::new(items, realm)?.to_vec(realm)?;
 
         Ok(Array::with_elements(realm, array)?.into_object())

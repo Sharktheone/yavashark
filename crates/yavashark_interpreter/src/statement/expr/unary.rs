@@ -9,7 +9,7 @@ impl Interpreter {
             match &*stmt.arg {
                 Expr::Ident(i) => {
                     return Ok(scope.resolve(i.sym.as_str())?.is_none().into());
-                },
+                }
                 Expr::Member(m) => {
                     let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
                     if let Value::Object(obj) = obj {
@@ -28,7 +28,7 @@ impl Interpreter {
                 }
                 Expr::Call(call) => {
                     Self::run_call(realm, call, scope)?;
-                    
+
                     return Ok(true.into());
                 }
                 _ => {}

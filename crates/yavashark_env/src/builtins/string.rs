@@ -1,4 +1,5 @@
 use crate::array::Array;
+use crate::utils::ArrayLike;
 use crate::{
     Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
 };
@@ -8,7 +9,6 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
-use crate::utils::ArrayLike;
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -131,7 +131,7 @@ impl StringConstructor {
             .filter_map(std::char::from_u32)
             .collect::<String>()
     }
-    
+
     fn raw(
         template: ObjectHandle,
         #[variadic] args: &[Value],
@@ -139,43 +139,44 @@ impl StringConstructor {
     ) -> ValueResult {
         //Let substitutionCount be the number of elements in substitutions.
         let substitution_count = args.len();
-        
+
         // 2. Let cooked be ? ToObject(template).
         let cooked = template;
-        
+
         // 3. Let literals be ? ToObject(? Get(cooked, "raw")).
         let literals = cooked.get("raw", realm)?;
         let mut literals = ArrayLike::new(literals, realm)?;
-        
+
         // 4. Let literalCount be ? LengthOfArrayLike(literals).
         let literal_count = literals.len();
-        
+
         // 5. If literalCount ≤ 0, return the empty String.
-        if literal_count == 0 { //length from ArrayLike.len can't be under 0
+        if literal_count == 0 {
+            //length from ArrayLike.len can't be under 0
             return Ok(Value::String(String::new()));
         }
-        
+
         // 6. Let R be the empty String.
         let mut r = String::new();
-        
+
         // 7. Let nextIndex be 0.
         let mut next_index = 0;
-        
+
         // 8. Repeat,
         loop {
             //a. Let nextLiteralVal be ? Get(literals, ! ToString(𝔽(nextIndex))).
             let next_literal_val = literals.next(realm)?.unwrap_or(Value::Undefined);
-            
+
             //b. Let nextLiteral be ? ToString(nextLiteralVal).
             let next_literal = next_literal_val.to_string(realm)?;
             // c. Set R to the string-concatenation of R and nextLiteral.
             r.push_str(&next_literal);
-            
+
             //d. If nextIndex + 1 = literalCount, return R.
             if next_index + 1 == literal_count {
                 return Ok(r.into());
             }
-            
+
             //e. If nextIndex < substitutionCount, then
             if next_index < substitution_count {
                 //i. Let nextSubVal be substitutions[nextIndex].
@@ -187,7 +188,7 @@ impl StringConstructor {
                 //iii. Set R to the string-concatenation of R and nextSub.
                 r.push_str(&next_sub);
             }
-            
+
             //f. Set nextIndex to nextIndex + 1.
             next_index += 1;
         }
