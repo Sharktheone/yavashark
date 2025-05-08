@@ -520,18 +520,22 @@ impl<C: Realm> Object<C> {
 
         let to_prim = self.resolve_property(&Symbol::TO_PRIMITIVE.into(), realm)?;
 
-        if let Some(Value::Object(to_prim)) = to_prim {
-            if to_prim.is_function() {
-                return to_prim
-                    .call(
-                        realm,
-                        vec![Value::String(
-                            hint.take().unwrap_or_else(|| "default".to_string()),
-                        )],
-                        self.clone().into(),
-                    )?
-                    .assert_no_object();
+        match to_prim {
+            Some(Value::Object(to_prim)) => {
+                if to_prim.is_function() {
+                    return to_prim
+                        .call(
+                            realm,
+                            vec![Value::String(
+                                hint.take().unwrap_or_else(|| "default".to_string()),
+                            )],
+                            self.clone().into(),
+                        )?
+                        .assert_no_object();
+                }
             }
+            Some(to_prim) => return Ok(to_prim),
+            None => {}
         }
 
         if hint.as_deref() == Some("string") {
