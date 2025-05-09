@@ -434,12 +434,36 @@ impl MutObj<Realm> for MutObject {
         Ok(())
     }
 
-    fn get_getter(&self, _name: &Value) -> Result<Option<Value>, Error> {
-        todo!("I guess, this can't be removed?")
+    fn get_getter(&self, name: &Value) -> Result<Option<Value>, Error> {
+        if name == &Value::String("__proto__".to_string()) {
+            return Ok(None);
+        }
+
+        if let Value::Number(n) = name {
+            return Ok(self.get_array(*n as usize).map(|v| v.get.clone()));
+        }
+
+        if let Some(prop) = self.properties.get(name) {
+            return Ok(Some(prop.get.clone()));
+        }
+
+        Ok(None)
     }
 
-    fn get_setter(&self, _name: &Value) -> Result<Option<Value>, Error> {
-        todo!("I guess, this can't be removed?")
+    fn get_setter(&self, name: &Value) -> Result<Option<Value>, Error> {
+        if name == &Value::String("__proto__".to_string()) {
+            return Ok(None);
+        }
+
+        if let Value::Number(n) = name {
+            return Ok(self.get_array(*n as usize).map(|v| v.set.clone()));
+        }
+
+        if let Some(prop) = self.properties.get(name) {
+            return Ok(Some(prop.set.clone()));
+        }
+
+        Ok(None)
     }
 
     fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {
