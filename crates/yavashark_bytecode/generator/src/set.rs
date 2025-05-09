@@ -9,17 +9,29 @@ pub enum ArgumentType {
     Acc,
     Stack,
     Const,
+    F32,
+    I32,
+    U32,
+    Boolean,
+    Null,
+    Undefined,
     Other(String),
 }
 
 impl ArgumentType {
-    const NUM_TYPES: usize = 5;
+    const NUM_TYPES: usize = 11;
     const TYPES: [ArgumentType; Self::NUM_TYPES] = [
         ArgumentType::Variable,
         ArgumentType::Reg,
         ArgumentType::Acc,
         ArgumentType::Stack,
         ArgumentType::Const,
+        ArgumentType::F32,
+        ArgumentType::I32,
+        ArgumentType::U32,
+        ArgumentType::Boolean,
+        ArgumentType::Null,
+        ArgumentType::Undefined,
     ];
 
     fn to_str(&self) -> &str {
@@ -29,6 +41,12 @@ impl ArgumentType {
             ArgumentType::Acc => "Acc",
             ArgumentType::Stack => "Stack",
             ArgumentType::Const => "Const",
+            ArgumentType::F32 => "F32",
+            ArgumentType::I32 => "I32",
+            ArgumentType::U32 => "U32",
+            ArgumentType::Boolean => "Bool",
+            ArgumentType::Null => "Null",
+            ArgumentType::Undefined => "Undefined",
             ArgumentType::Other(s) => s.as_str(),
         }
     }
@@ -40,6 +58,12 @@ impl ArgumentType {
             ArgumentType::Acc => syn::parse_quote! { Acc },
             ArgumentType::Stack => syn::parse_quote! { Stack },
             ArgumentType::Const => syn::parse_quote! { ConstIdx },
+            ArgumentType::F32 => syn::parse_quote! { F32 },
+            ArgumentType::I32 => syn::parse_quote! { I32 },
+            ArgumentType::U32 => syn::parse_quote! { U32 },
+            ArgumentType::Boolean => syn::parse_quote! { Boolean },
+            ArgumentType::Null => syn::parse_quote! { Null },
+            ArgumentType::Undefined => syn::parse_quote! { Undefined },
             ArgumentType::Other(s) => syn::parse_str(s).unwrap(),
         }
     }

@@ -63,7 +63,7 @@ pub fn generate_instruction_enum() {
 #![allow(unknown_lints)]
 #![cfg_attr(rustfmt, rustfmt_skip)]
 
-use crate::data::{Acc, ConstIdx, Reg, Stack, VarName, Label, ControlIdx};
+use crate::data::{Acc, ConstIdx, Reg, Stack, VarName, Label, ControlIdx, F32, I32, U32, Boolean, Null, Undefined};
 use crate::{JmpOffset, JmpAddr}; 
 
 

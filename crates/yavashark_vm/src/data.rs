@@ -1,5 +1,5 @@
 use crate::VM;
-use yavashark_bytecode::data::{Acc, ConstIdx, Reg, Stack, VarName};
+use yavashark_bytecode::data::{Acc, Boolean, ConstIdx, Null, Reg, Stack, Undefined, VarName, F32, I32, U32};
 use yavashark_env::{Error, Res, Value};
 
 pub trait Data: Copy + yavashark_bytecode::data::Data {
@@ -41,6 +41,44 @@ impl Data for VarName {
         vm.get_variable(self.0)
     }
 }
+
+impl Data for F32 {
+    fn get(self, _: &mut impl VM) -> Res<Value> {
+        Ok(Value::Number(self.0.into()))
+    }
+}
+
+impl Data for I32 {
+    fn get(self, _: &mut impl VM) -> Res<Value> {
+        Ok(Value::Number(self.0.into()))
+    }
+}
+
+impl Data for U32 {
+    fn get(self, _: &mut impl VM) -> Res<Value> {
+        Ok(Value::Number(self.0.into()))
+    }
+}
+
+impl Data for Boolean {
+    fn get(self, _: &mut impl VM) -> Res<Value> {
+        Ok(Value::Boolean(self.0))
+    }
+}
+
+impl Data for Null {
+    fn get(self, _: &mut impl VM) -> Res<Value> {
+        Ok(Value::Null)
+    }
+}
+
+impl Data for Undefined {
+    fn get(self, _: &mut impl VM) -> Res<Value> {
+        Ok(Value::Undefined)
+    }
+}
+
+
 
 impl OutputData for VarName {
     fn set(self, value: Value, vm: &mut impl VM) -> Res {

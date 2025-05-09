@@ -2,7 +2,7 @@ use crate::data::DataType;
 use crate::instructions::Instruction;
 use crate::{JmpAddr, JmpOffset};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Test {
     Always,
     Never,

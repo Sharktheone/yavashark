@@ -26,13 +26,19 @@ impl DataSection {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DataType {
     Acc(Acc),
     Reg(Reg),
     Var(VarName),
     Const(ConstIdx),
     Stack(Stack),
+    F32(F32),
+    I32(I32),
+    U32(U32),
+    Boolean(Boolean),
+    Null(Null),
+    Undefined(Undefined),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -93,7 +99,7 @@ impl TryFrom<DataType> for OutputDataType {
             DataType::Reg(reg) => Ok(Self::Reg(reg)),
             DataType::Var(var) => Ok(Self::Var(var)),
             DataType::Stack(stack) => Ok(Self::Stack(stack)),
-            DataType::Const(_) => Err(()),
+            _ => Err(()),
         }
     }
 }
@@ -116,6 +122,30 @@ pub trait Data: Copy {
     }
 
     fn stack(self) -> Option<Stack> {
+        None
+    }
+
+    fn f32(self) -> Option<F32> {
+        None
+    }
+
+    fn i32(self) -> Option<I32> {
+        None
+    }
+
+    fn u32(self) -> Option<U32> {
+        None
+    }
+
+    fn boolean(self) -> Option<Boolean> {
+        None
+    }
+
+    fn null(self) -> Option<Null> {
+        None
+    }
+
+    fn undefined(self) -> Option<Undefined> {
         None
     }
 
@@ -143,6 +173,26 @@ pub struct Stack(pub u32);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Label(pub u32);
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct F32(pub f32);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct I32(pub i32);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct U32(pub u32);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Boolean(pub bool);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Null;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Undefined;
+
+
 
 impl Data for Acc {
     fn acc(self) -> Option<Acc> {
@@ -190,6 +240,44 @@ impl Data for Stack {
     }
 }
 
+
+impl Data for F32 {
+    fn data_type(self) -> DataType {
+        DataType::F32(self)
+    }
+}
+
+impl Data for I32 {
+    fn data_type(self) -> DataType {
+        DataType::I32(self)
+    }
+}
+
+impl Data for U32 {
+    fn data_type(self) -> DataType {
+        DataType::U32(self)
+    }
+}
+
+impl Data for Boolean {
+    fn data_type(self) -> DataType {
+        DataType::Boolean(self)
+    }
+}
+
+impl Data for Null {
+    fn data_type(self) -> DataType {
+        DataType::Null(self)
+    }
+}
+
+impl Data for Undefined {
+    fn data_type(self) -> DataType {
+        DataType::Undefined(self)
+    }
+}
+
+
 impl Data for DataType {
     fn acc(self) -> Option<Acc> {
         match self {
@@ -222,6 +310,48 @@ impl Data for DataType {
     fn stack(self) -> Option<Stack> {
         match self {
             Self::Stack(stack) => Some(stack),
+            _ => None,
+        }
+    }
+
+    fn f32(self) -> Option<F32> {
+        match self {
+            Self::F32(f) => Some(f),
+            _ => None,
+        }
+    }
+
+    fn i32(self) -> Option<I32> {
+        match self {
+            Self::I32(i) => Some(i),
+            _ => None,
+        }
+    }
+
+    fn u32(self) -> Option<U32> {
+        match self {
+            Self::U32(u) => Some(u),
+            _ => None,
+        }
+    }
+
+    fn boolean(self) -> Option<Boolean> {
+        match self {
+            Self::Boolean(b) => Some(b),
+            _ => None,
+        }
+    }
+
+    fn null(self) -> Option<Null> {
+        match self {
+            Self::Null(n) => Some(n),
+            _ => None,
+        }
+    }
+
+    fn undefined(self) -> Option<Undefined> {
+        match self {
+            Self::Undefined(u) => Some(u),
             _ => None,
         }
     }

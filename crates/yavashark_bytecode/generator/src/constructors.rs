@@ -170,6 +170,54 @@ fn gen_match_input(
 
         out
     };
+    
+    let f32 = {
+        prev.push(ArgumentType::F32);
+        let out = gen_match(name, prev, input, out, args);
+        prev.pop();
+
+        out
+    };
+    
+    let i32 = {
+        prev.push(ArgumentType::I32);
+        let out = gen_match(name, prev, input, out, args);
+        prev.pop();
+
+        out
+    };
+    
+    let u32 = {
+        prev.push(ArgumentType::U32);
+        let out = gen_match(name, prev, input, out, args);
+        prev.pop();
+
+        out
+    };
+    
+    let boolean = {
+        prev.push(ArgumentType::Boolean);
+        let out = gen_match(name, prev, input, out, args);
+        prev.pop();
+
+        out
+    };
+    
+    let null = {
+        prev.push(ArgumentType::Null);
+        let out = gen_match(name, prev, input, out, args);
+        prev.pop();
+
+        out
+    };
+    
+    let undefined = {
+        prev.push(ArgumentType::Undefined);
+        let out = gen_match(name, prev, input, out, args);
+        prev.pop();
+
+        out
+    };
 
     quote! {
         match #arg_name.data_type() {
@@ -178,6 +226,12 @@ fn gen_match_input(
             DataType::Reg(#arg_name) => #reg,
             DataType::Stack(#arg_name) => #stack,
             DataType::Var(#arg_name) => #var,
+            DataType::F32(#arg_name) => #f32,
+            DataType::I32(#arg_name) => #i32,
+            DataType::U32(#arg_name) => #u32,
+            DataType::Boolean(#arg_name) => #boolean,
+            DataType::Null(#arg_name) => #null,
+            DataType::Undefined(#arg_name) => #undefined,
         }
     }
 }
@@ -235,6 +289,54 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
+    
+    let f32 = {
+        prev.push(ArgumentType::F32);
+        let out = get_enum_variant(name, prev);
+        prev.pop();
+
+        out
+    };
+    
+    let i32 = {
+        prev.push(ArgumentType::I32);
+        let out = get_enum_variant(name, prev);
+        prev.pop();
+
+        out
+    };
+    
+    let u32 = {
+        prev.push(ArgumentType::U32);
+        let out = get_enum_variant(name, prev);
+        prev.pop();
+
+        out
+    };
+    
+    let boolean = {
+        prev.push(ArgumentType::Boolean);
+        let out = get_enum_variant(name, prev);
+        prev.pop();
+
+        out
+    };
+    
+    let null = {
+        prev.push(ArgumentType::Null);
+        let out = get_enum_variant(name, prev);
+        prev.pop();
+
+        out
+    };
+    
+    let undefined = {
+        prev.push(ArgumentType::Undefined);
+        let out = get_enum_variant(name, prev);
+        prev.pop();
+
+        out
+    };
 
     quote! {
         match #arg_name.data_type() {
@@ -243,6 +345,12 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
             DataType::Reg(#arg_name) => Self::#reg(#(#args),*),
             DataType::Stack(#arg_name) => Self::#stack(#(#args),*),
             DataType::Var(#arg_name) => Self::#var(#(#args),*),
+            DataType::F32(#arg_name) => Self::#f32(#(#args),*),
+            DataType::I32(#arg_name) => Self::#i32(#(#args),*),
+            DataType::U32(#arg_name) => Self::#u32(#(#args),*),
+            DataType::Boolean(#arg_name) => Self::#boolean(#(#args),*),
+            DataType::Null(#arg_name) => Self::#null(#(#args),*),
+            DataType::Undefined(#arg_name) => Self::#undefined(#(#args),*),
         }
     }
 }
@@ -278,6 +386,12 @@ fn get_enum_variant(name: &str, prev: &[ArgumentType]) -> Ident {
             ArgumentType::Reg => out.push_str("Reg"),
             ArgumentType::Stack => out.push_str("Stack"),
             ArgumentType::Variable => out.push_str("Var"),
+            ArgumentType::F32 => out.push_str("F32"),
+            ArgumentType::I32 => out.push_str("I32"),
+            ArgumentType::U32 => out.push_str("U32"),
+            ArgumentType::Boolean => out.push_str("Bool"),
+            ArgumentType::Null => out.push_str("Null"),
+            ArgumentType::Undefined => out.push_str("Undefined"),
             ArgumentType::Other(_) => {}
         }
     }
@@ -295,6 +409,12 @@ fn get_enum_variant_out(name: &str, prev: &[ArgumentType], output: ReturnType) -
             ArgumentType::Reg => out.push_str("Reg"),
             ArgumentType::Stack => out.push_str("Stack"),
             ArgumentType::Variable => out.push_str("Var"),
+            ArgumentType::F32 => out.push_str("F32"),
+            ArgumentType::I32 => out.push_str("I32"),
+            ArgumentType::U32 => out.push_str("U32"),
+            ArgumentType::Boolean => out.push_str("Bool"),
+            ArgumentType::Null => out.push_str("Null"),
+            ArgumentType::Undefined => out.push_str("Undefined"),
             ArgumentType::Other(_) => {}
         }
     }
