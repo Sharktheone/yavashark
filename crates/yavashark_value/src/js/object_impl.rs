@@ -35,13 +35,6 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         self.get_wrapped_object().define_setter(name, value)
     }
-    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
-        self.get_wrapped_object().get_getter(name)
-    }
-    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
-        self.get_wrapped_object().get_setter(name)
-    }
-
     fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
         self.get_wrapped_object().delete_property(name)
     }
@@ -169,14 +162,6 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
 
     fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>> {
         ObjectImpl::define_setter(self, name, value)
-    }
-
-    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
-        ObjectImpl::get_getter(self, name)
-    }
-
-    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {
-        ObjectImpl::get_setter(self, name)
     }
 
     fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>> {

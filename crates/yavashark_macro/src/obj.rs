@@ -341,16 +341,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                 #obj_path.define_setter(name, value)
             }
 
-            fn get_getter(&self, name: &#value) -> Result<Option<#value>, #error> {
-                let inner = self.inner.borrow();
-                #obj_path.get_getter(name)
-            }
-
-            fn get_setter(&self, name: &#value) -> Result<Option<#value>, #error> {
-                let inner = self.inner.borrow();
-                #obj_path.get_setter(name)
-            }
-
             fn delete_property(&self, name: &#value) -> Result<Option<#value>, #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_delete

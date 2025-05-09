@@ -113,14 +113,6 @@ impl Obj<Realm> for Object {
         self.inner_mut()?.define_setter(name, value)
     }
 
-    fn get_getter(&self, name: &Value) -> Result<Option<Value>, Error> {
-        self.inner()?.get_getter(name)
-    }
-
-    fn get_setter(&self, name: &Value) -> Result<Option<Value>, Error> {
-        self.inner()?.get_setter(name)
-    }
-
     fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error> {
         self.inner_mut()?.delete_property(name)
     }
@@ -432,38 +424,6 @@ impl MutObj<Realm> for MutObject {
         self.properties.insert(name, ObjectProperty::setter(value));
 
         Ok(())
-    }
-
-    fn get_getter(&self, name: &Value) -> Result<Option<Value>, Error> {
-        if name == &Value::String("__proto__".to_string()) {
-            return Ok(None);
-        }
-
-        if let Value::Number(n) = name {
-            return Ok(self.get_array(*n as usize).map(|v| v.get.clone()));
-        }
-
-        if let Some(prop) = self.properties.get(name) {
-            return Ok(Some(prop.get.clone()));
-        }
-
-        Ok(None)
-    }
-
-    fn get_setter(&self, name: &Value) -> Result<Option<Value>, Error> {
-        if name == &Value::String("__proto__".to_string()) {
-            return Ok(None);
-        }
-
-        if let Value::Number(n) = name {
-            return Ok(self.get_array(*n as usize).map(|v| v.set.clone()));
-        }
-
-        if let Some(prop) = self.properties.get(name) {
-            return Ok(Some(prop.set.clone()));
-        }
-
-        Ok(None)
     }
 
     fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {

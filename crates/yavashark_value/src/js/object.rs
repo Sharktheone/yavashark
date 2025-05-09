@@ -41,9 +41,6 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
 
     fn define_getter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
     fn define_setter(&self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
-    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
-    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
-
     fn delete_property(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
 
     fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
@@ -169,9 +166,6 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
 
     fn define_getter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
     fn define_setter(&mut self, name: Value<R>, value: Value<R>) -> Result<(), Error<R>>;
-    fn get_getter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
-    fn get_setter(&self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
-
     fn delete_property(&mut self, name: &Value<R>) -> Result<Option<Value<R>>, Error<R>>;
 
     fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {

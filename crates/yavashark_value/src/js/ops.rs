@@ -914,20 +914,6 @@ mod tests {
             Ok(())
         }
 
-        fn get_getter(
-            &self,
-            name: &crate::Value<()>,
-        ) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
-            Ok(Value::Undefined.into())
-        }
-
-        fn get_setter(
-            &self,
-            name: &crate::Value<()>,
-        ) -> Result<Option<crate::Value<()>>, crate::Error<()>> {
-            Ok(Value::Undefined.into())
-        }
-
         fn delete_property(
             &self,
             name: &crate::Value<()>,

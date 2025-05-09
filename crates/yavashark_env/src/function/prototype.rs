@@ -272,16 +272,6 @@ impl Obj<Realm> for FunctionPrototype {
         this.object.define_setter(name, value)
     }
 
-    fn get_getter(&self, name: &Value) -> Res<Option<Value>, Error> {
-        let this = self.inner.try_borrow()?;
-        this.object.get_getter(name)
-    }
-
-    fn get_setter(&self, name: &Value) -> Res<Option<Value>> {
-        let this = self.inner.try_borrow()?;
-        this.object.get_setter(name)
-    }
-
     fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
         let mut this = self.inner.try_borrow_mut()?;
 
