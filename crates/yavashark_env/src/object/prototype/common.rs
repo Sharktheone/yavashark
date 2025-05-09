@@ -57,10 +57,6 @@ pub fn lookup_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     Ok(this.resolve_property_no_get_set(name)?.map_or(Value::Undefined, |p| p.set))
 }
 
-pub fn object_constructor(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    todo!("Object constructor")
-}
-
 pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.is_empty() {
         return Ok(Value::Boolean(false));
