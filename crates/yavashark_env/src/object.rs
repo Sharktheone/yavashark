@@ -452,8 +452,11 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let Entry::Occupied(occ) = self.properties.entry(name.clone()) {
-            if occ.get().attributes.is_configurable() {
-                return Ok(Some(occ.shift_remove().value));
+            return if occ.get().attributes.is_configurable() {
+                Ok(Some(occ.shift_remove().value))
+            } else {
+                // Err(Error::ty("Property is not configurable")) // this is only in strict mode
+                Ok(None)
             }
         }
 
