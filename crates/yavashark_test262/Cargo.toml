@@ -12,6 +12,8 @@ yavashark_interpreter = { path = "../yavashark_interpreter", features = ["vm"] }
 yavashark_vm = { path = "../yavashark_vm" }
 
 
+
+
 swc_common = "6.1.1"
 swc_ecma_parser = "8.0.2"
 swc_ecma_ast = "6.1.0"
