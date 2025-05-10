@@ -19,10 +19,10 @@ members = [
 swc_common = "6.1.1"
 swc_ecma_parser = "8.0.2"
 yavashark_interpreter = { path = "crates/yavashark_interpreter" }
-yavashark_codegen = { path = "crates/yavashark_codegen" }
-yavashark_vm = { path = "crates/yavashark_vm" }
+yavashark_codegen = { path = "crates/yavashark_codegen", optional = true }
+yavashark_vm = { path = "crates/yavashark_vm", optional = true }
 yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments"]}
-yavashark_compiler = { path = "crates/yavashark_compiler" }
+yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
 tokio = { version = "1.10.0", features = ["full"] }
 
 
@@ -43,6 +43,10 @@ rustyline-derive = "0.11.0"
 
 [lib]
 crate-type = ["cdylib"]
+
+[features]
+default = []
+vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler"]
 
 
 [profile.release]

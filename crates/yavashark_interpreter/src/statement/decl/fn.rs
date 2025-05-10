@@ -4,7 +4,6 @@ use std::any::{type_name_of_val, Any, TypeId};
 use std::cell::RefCell;
 use std::mem;
 use swc_ecma_ast::FnDecl;
-use yavashark_bytecode_interpreter::ByteCodeInterpreter;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
 use yavashark_env::{optimizer::OptimFunction, Realm, Res, Value};
@@ -30,7 +29,20 @@ impl Interpreter {
 
         let name = stmt.ident.sym.to_string();
         let function = if stmt.function.is_async || stmt.function.is_generator {
-            ByteCodeInterpreter::compile_fn(&stmt.function, name.clone(), fn_scope, realm)?
+            #[cfg(feature = "vm")]
+            let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(&stmt.function, name.clone(), fn_scope, realm)?;
+
+            #[cfg(not(feature = "vm"))]
+            let f = JSFunction::new(
+                name.clone(),
+                stmt.function.params.clone(),
+                stmt.function.body.clone(),
+                fn_scope,
+                realm,
+            )?;
+
+            f
+
         } else {
             JSFunction::new(
                 name.clone(),

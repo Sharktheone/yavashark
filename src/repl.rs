@@ -2,7 +2,6 @@ mod helper;
 
 use crate::conf;
 use crate::conf::Conf;
-use crate::optimizer::define_optimizer;
 use crate::repl::helper::ReplHelper;
 use crate::simplerepl::Repl;
 use rustyline::error::ReadlineError;
@@ -12,31 +11,32 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::{Builder, Runtime};
-use yavashark_codegen::ByteCodegen;
-use yavashark_compiler::Compiler;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
-use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::{BorrowedVM, OldBorrowedVM, VM};
 
 pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
 
     let mut interpreter_realm = Realm::new()?;
-    define_optimizer(&interpreter_realm)?;
+
+    #[cfg(feature = "vm")]
+    crate::optimizer::define_optimizer(&interpreter_realm)?;
+    #[cfg(feature = "vm")]
     yavashark_vm::init(&mut interpreter_realm)?;
     interpreter_realm.set_eval(InterpreterEval)?;
     let mut interpreter_scope = Scope::global(&interpreter_realm, path.to_path_buf());
 
     let mut vm_realm = Realm::new()?;
     vm_realm.set_eval(InterpreterEval)?;
+    #[cfg(feature = "vm")]
     yavashark_vm::init(&mut vm_realm)?;
     let vm_scope = Scope::global(&vm_realm, path.to_path_buf());
 
     let mut old_vm_realm = Realm::new()?;
     old_vm_realm.set_eval(InterpreterEval)?;
+    #[cfg(feature = "vm")]
     yavashark_vm::init(&mut old_vm_realm)?;
     let old_vm_scope = Scope::global(&old_vm_realm, path.to_path_buf());
 
@@ -168,8 +168,9 @@ fn run_input(
         rt.block_on(interpreter_realm.run_event_loop());
     }
 
+    #[cfg(feature = "vm")]
     if conf.bytecode || conf.instructions {
-        let bc = match Compiler::compile(&script.body) {
+        let bc = match yavashark_compiler::Compiler::compile(&script.body) {
             Ok(bc) => bc,
             Err(e) => {
                 eprintln!("Failed to compile code: {e:?}");
@@ -181,7 +182,10 @@ fn run_input(
             println!("{bc:#?}");
         }
 
+        #[cfg(feature = "vm")]
         if conf.bytecode {
+            use yavashark_vm::yavashark_bytecode::data::DataSection;
+            use yavashark_vm::{BorrowedVM, OldBorrowedVM, VM};
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
             let mut vm =
                 BorrowedVM::with_scope(&bc.instructions, &data, vm_realm, vm_scope.clone());
@@ -196,8 +200,9 @@ fn run_input(
         }
     }
 
+    #[cfg(feature = "vm")]
     if conf.old_bytecode {
-        let bc = match ByteCodegen::compile(&script.body) {
+        let bc = match yavashark_codegen::ByteCodegen::compile(&script.body) {
             Ok(bc) => bc,
             Err(e) => {
                 eprintln!("Failed to compile code: {e:?}");
@@ -209,7 +214,10 @@ fn run_input(
             println!("{bc:#?}");
         }
 
+        #[cfg(feature = "vm")]
         if conf.old_bytecode {
+            use yavashark_vm::yavashark_bytecode::data::DataSection;
+            use yavashark_vm::{BorrowedVM, OldBorrowedVM, VM};
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
             let mut vm = OldBorrowedVM::with_scope(

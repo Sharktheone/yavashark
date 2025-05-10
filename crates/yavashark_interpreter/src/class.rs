@@ -1,7 +1,6 @@
 use crate::function::{JSFunction, RawJSFunction};
 use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, Param, ParamOrTsParamProp, PropName};
-use yavashark_bytecode_interpreter::ByteCodeInterpreter;
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
 };
@@ -151,12 +150,15 @@ fn create_method(
 ) -> Res<(Value, Value), Error> {
     let name = prop_name_to_value(name, realm, span, scope)?;
 
-    if func.is_async || func.is_generator {
-        let name_str = name.to_string(realm)?;
-        return Ok((
-            name,
-            (ByteCodeInterpreter::compile_fn(func, name_str, scope.clone(), realm)?.into()),
-        ));
+    #[cfg(feature = "vm")]
+    {
+        if func.is_async || func.is_generator {
+            let name_str = name.to_string(realm)?;
+            return Ok((
+                name,
+                (yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(func, name_str, scope.clone(), realm)?.into()),
+            ));
+        }
     }
 
     let func = JSFunction::new(

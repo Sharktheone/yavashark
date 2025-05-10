@@ -1,4 +1,5 @@
 mod conf;
+#[cfg(feature = "vm")]
 mod optimizer;
 mod repl;
 mod simplerepl;
@@ -9,13 +10,9 @@ use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::Builder;
-use yavashark_codegen::ByteCodegen;
-use yavashark_compiler::Compiler;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::Realm;
-use yavashark_vm::yavashark_bytecode::data::DataSection;
-use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -152,14 +149,17 @@ fn main() {
             rt.block_on(realm.run_event_loop());
         }
 
+        #[cfg(feature = "vm")]
         if bytecode {
-            let bc = Compiler::compile(&script.body).unwrap();
+            let bc = yavashark_compiler::Compiler::compile(&script.body).unwrap();
 
             if instructions {
                 println!("{bc:#?}");
             }
 
             if bytecode {
+                use yavashark_vm::yavashark_bytecode::data::DataSection;
+                use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
@@ -171,14 +171,19 @@ fn main() {
             }
         }
 
+        #[cfg(feature = "vm")]
         if old_bytecode || instructions {
-            let bc = ByteCodegen::compile(&script.body).unwrap();
+            let bc = yavashark_codegen::ByteCodegen::compile(&script.body).unwrap();
 
             if instructions {
                 println!("{bc:#?}");
             }
 
+
+            #[cfg(feature = "vm")]
             if old_bytecode {
+                use yavashark_vm::yavashark_bytecode::data::DataSection;
+                use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
                 let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();

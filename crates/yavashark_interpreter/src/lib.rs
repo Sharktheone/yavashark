@@ -27,6 +27,7 @@ pub struct Interpreter;
 impl Interpreter {
     pub fn run(script: &Vec<Stmt>, file: PathBuf) -> Res<Value> {
         let mut realm = &mut Realm::new()?;
+        #[cfg(feature = "vm")]
         yavashark_vm::init(realm)?;
         let mut scope = Scope::global(realm, file);
 

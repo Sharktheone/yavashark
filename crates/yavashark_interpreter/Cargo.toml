@@ -13,11 +13,15 @@ yavashark_macro = { path = "../yavashark_macro" }
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_env = { path = "../yavashark_env", features = ["tests"] }
 yavashark_value = { path = "../yavashark_value" }
-yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter" }
-yavashark_vm = { path = "../yavashark_vm" }
+yavashark_bytecode_interpreter = { path = "../yavashark_bytecode_interpreter", optional = true }
+yavashark_vm = { path = "../yavashark_vm", optional = true }
 log = "0.4.21"
 env_logger = "0.11.3"
 
+
+[features]
+default = []
+vm = ["dep:yavashark_vm", "dep:yavashark_bytecode_interpreter"]
 
 [lints]
 workspace = true

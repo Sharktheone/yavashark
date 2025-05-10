@@ -1,7 +1,6 @@
 use crate::function::JSFunction;
 use crate::Interpreter;
 use swc_ecma_ast::FnExpr;
-use yavashark_bytecode_interpreter::ByteCodeInterpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult};
 
@@ -17,6 +16,7 @@ impl Interpreter {
             .map_or("anonymous".to_string(), |i| i.sym.to_string());
 
         if stmt.function.is_async || stmt.function.is_generator {
+            #[cfg(feature = "vm")]
             return Ok(
                 ByteCodeInterpreter::compile_fn(&stmt.function, name, fn_scope, realm)?.into(),
             );

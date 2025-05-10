@@ -1,6 +1,5 @@
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
-use yavashark_bytecode_interpreter::ByteCodeInterpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 
@@ -57,12 +56,25 @@ impl Interpreter {
                             let name = key.to_string(realm)?; // TODO, what should the name be here? (and wrong to_string function)
                             let function =
                                 if method.function.is_async || method.function.is_generator {
-                                    ByteCodeInterpreter::compile_fn(
+                                    #[cfg(feature = "vm")]
+                                    let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                                         &method.function,
                                         name.clone(),
                                         fn_scope,
                                         realm,
-                                    )?
+                                    )?;
+
+                                    #[cfg(not(feature = "vm"))]
+                                    let f = JSFunction::new(
+                                        name.clone(),
+                                        method.function.params.clone(),
+                                        method.function.body.clone(),
+                                        fn_scope,
+                                        realm,
+                                    )?;
+
+
+                                    f
                                 } else {
                                     JSFunction::new(
                                         name.clone(),
