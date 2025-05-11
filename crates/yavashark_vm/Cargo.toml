@@ -13,5 +13,11 @@ tokio = { version = "1.10.0", features = ["sync"] }
 log = "0.4.25"
 swc_ecma_ast = "9.0.0"
 
+
+[features]
+default = []
+simple_bytecode = ["yavashark_bytecode/simple_bytecode"]
+
+
 [lints]
 workspace = true

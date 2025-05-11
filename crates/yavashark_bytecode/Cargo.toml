@@ -9,5 +9,10 @@ bincode = "2.0.0-rc.3"
 num-bigint = "0.4.6"
 swc_ecma_ast = "9.0.0"
 
+
+[features]
+default = []
+simple_bytecode = []
+
 [lints]
 workspace = true

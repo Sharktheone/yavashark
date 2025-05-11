@@ -16,6 +16,7 @@ pub trait Execute {
 
 
 
+#[cfg(not(feature = "simple_bytecode"))]
 impl Execute for Instruction {
     fn execute(self, vm: &mut impl VM) -> ControlResult {
         match self {
@@ -49891,6 +49892,234 @@ impl Execute for Instruction {
             Self::PatArrayMoveVarUndefined(arg0) => {
                 instruction::pat_array_move_var(arg0, vm)?
             }
+        }
+        Ok(())
+    }
+}
+#[cfg(feature = "simple_bytecode")]
+impl Execute for Instruction {
+    fn execute(self, vm: &mut impl VM) -> ControlResult {
+        match self {
+            Self::Add(arg0, arg1, output) => instruction::add(arg0, arg1, output, vm)?,
+            Self::Sub(arg0, arg1, output) => instruction::sub(arg0, arg1, output, vm)?,
+            Self::Mul(arg0, arg1, output) => instruction::mul(arg0, arg1, output, vm)?,
+            Self::Div(arg0, arg1, output) => instruction::div(arg0, arg1, output, vm)?,
+            Self::Mod(arg0, arg1, output) => instruction::mod_(arg0, arg1, output, vm)?,
+            Self::LNot(arg0, output) => instruction::l_not(arg0, output, vm)?,
+            Self::LOr(arg0, arg1, output) => instruction::l_or(arg0, arg1, output, vm)?,
+            Self::LAnd(arg0, arg1, output) => instruction::l_and(arg0, arg1, output, vm)?,
+            Self::BXor(arg0, arg1, output) => instruction::b_xor(arg0, arg1, output, vm)?,
+            Self::BOr(arg0, arg1, output) => instruction::b_or(arg0, arg1, output, vm)?,
+            Self::BAnd(arg0, arg1, output) => instruction::b_and(arg0, arg1, output, vm)?,
+            Self::Eq(arg0, arg1, output) => instruction::eq(arg0, arg1, output, vm)?,
+            Self::Ne(arg0, arg1, output) => instruction::ne(arg0, arg1, output, vm)?,
+            Self::StrictEq(arg0, arg1, output) => {
+                instruction::strict_eq(arg0, arg1, output, vm)?
+            }
+            Self::StrictNe(arg0, arg1, output) => {
+                instruction::strict_ne(arg0, arg1, output, vm)?
+            }
+            Self::Lt(arg0, arg1, output) => instruction::lt(arg0, arg1, output, vm)?,
+            Self::LtEq(arg0, arg1, output) => instruction::lt_eq(arg0, arg1, output, vm)?,
+            Self::Gt(arg0, arg1, output) => instruction::gt(arg0, arg1, output, vm)?,
+            Self::GtEq(arg0, arg1, output) => instruction::gt_eq(arg0, arg1, output, vm)?,
+            Self::LShift(arg0, arg1, output) => {
+                instruction::l_shift(arg0, arg1, output, vm)?
+            }
+            Self::RShift(arg0, arg1, output) => {
+                instruction::r_shift(arg0, arg1, output, vm)?
+            }
+            Self::ZeroFillRShift(arg0, arg1, output) => {
+                instruction::zero_fill_r_shift(arg0, arg1, output, vm)?
+            }
+            Self::In(arg0, arg1, output) => instruction::in_(arg0, arg1, output, vm)?,
+            Self::InstanceOf(arg0, arg1, output) => {
+                instruction::instance_of(arg0, arg1, output, vm)?
+            }
+            Self::Exp(arg0, arg1, output) => instruction::exp(arg0, arg1, output, vm)?,
+            Self::NullishCoalescing(arg0, arg1, output) => {
+                instruction::nullish_coalescing(arg0, arg1, output, vm)?
+            }
+            Self::Dec(arg0, output) => instruction::dec(arg0, output, vm)?,
+            Self::Inc(arg0, output) => instruction::inc(arg0, output, vm)?,
+            Self::PushScope => instruction::push_scope(vm)?,
+            Self::PopScope => instruction::pop_scope(vm)?,
+            Self::Call(arg0, output) => instruction::call(arg0, output, vm)?,
+            Self::CallNoOutput(arg0) => instruction::call_no_output(arg0, vm)?,
+            Self::CallMember(arg0, arg1, output) => {
+                instruction::call_member(arg0, arg1, output, vm)?
+            }
+            Self::CallMemberNoOutput(arg0, arg1) => {
+                instruction::call_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallSuper(output) => instruction::call_super(output, vm)?,
+            Self::CallSuperNoOutput => instruction::call_super_no_output(vm)?,
+            Self::Construct(arg0, output) => instruction::construct(arg0, output, vm)?,
+            Self::ConstructNoOutput(arg0) => instruction::construct_no_output(arg0, vm)?,
+            Self::PushCall(arg0) => instruction::push_call(arg0, vm)?,
+            Self::SpreadCall(arg0) => instruction::spread_call(arg0, vm)?,
+            Self::Jmp(arg0) => instruction::jmp(arg0, vm)?,
+            Self::JmpIf(arg0, arg1) => instruction::jmp_if(arg0, arg1, vm)?,
+            Self::JmpIfNot(arg0, arg1) => instruction::jmp_if_not(arg0, arg1, vm)?,
+            Self::JmpIfNull(arg0, arg1) => instruction::jmp_if_null(arg0, arg1, vm)?,
+            Self::JmpIfNotNull(arg0, arg1) => {
+                instruction::jmp_if_not_null(arg0, arg1, vm)?
+            }
+            Self::JmpIfUndefined(arg0, arg1) => {
+                instruction::jmp_if_undefined(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefined(arg0, arg1) => {
+                instruction::jmp_if_not_undefined(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullish(arg0, arg1) => {
+                instruction::jmp_if_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullish(arg0, arg1) => {
+                instruction::jmp_if_not_nullish(arg0, arg1, vm)?
+            }
+            Self::JmpRel(arg0) => instruction::jmp_rel(arg0, vm)?,
+            Self::JmpIfRel(arg0, arg1) => instruction::jmp_if_rel(arg0, arg1, vm)?,
+            Self::JmpIfNotRel(arg0, arg1) => instruction::jmp_if_not_rel(arg0, arg1, vm)?,
+            Self::JmpIfNullRel(arg0, arg1) => {
+                instruction::jmp_if_null_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullRel(arg0, arg1) => {
+                instruction::jmp_if_not_null_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfUndefinedRel(arg0, arg1) => {
+                instruction::jmp_if_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotUndefinedRel(arg0, arg1) => {
+                instruction::jmp_if_not_undefined_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNullishRel(arg0, arg1) => {
+                instruction::jmp_if_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfNotNullishRel(arg0, arg1) => {
+                instruction::jmp_if_not_nullish_rel(arg0, arg1, vm)?
+            }
+            Self::JmpIfEq(arg0, arg1, arg2) => {
+                instruction::jmp_if_eq(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfNe(arg0, arg1, arg2) => {
+                instruction::jmp_if_ne(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfStrictEq(arg0, arg1, arg2) => {
+                instruction::jmp_if_strict_eq(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfStrictNe(arg0, arg1, arg2) => {
+                instruction::jmp_if_strict_ne(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfLt(arg0, arg1, arg2) => {
+                instruction::jmp_if_lt(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfLtEq(arg0, arg1, arg2) => {
+                instruction::jmp_if_lt_eq(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfGt(arg0, arg1, arg2) => {
+                instruction::jmp_if_gt(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfGtEq(arg0, arg1, arg2) => {
+                instruction::jmp_if_gt_eq(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfEqRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_eq_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfNeRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_ne_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfStrictEqRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_strict_eq_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfStrictNeRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_strict_ne_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfLtRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_lt_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfLtEqRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_lt_eq_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfGtRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_gt_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::JmpIfGtEqRel(arg0, arg1, arg2) => {
+                instruction::jmp_if_gt_eq_rel(arg0, arg1, arg2, vm)?
+            }
+            Self::LoadMember(arg0, arg1, output) => {
+                instruction::load_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadVar(arg0, output) => instruction::load_var(arg0, output, vm)?,
+            Self::TypeOf(arg0, output) => instruction::type_of(arg0, output, vm)?,
+            Self::Push(arg0) => instruction::push(arg0, vm)?,
+            Self::Pop => instruction::pop(vm)?,
+            Self::PopN(arg0) => instruction::pop_n(arg0, vm)?,
+            Self::PopTo(output) => instruction::pop_to(output, vm)?,
+            Self::Move(arg0, output) => instruction::move_(arg0, output, vm)?,
+            Self::Return => instruction::return_(vm)?,
+            Self::ReturnValue(arg0) => instruction::return_value(arg0, vm)?,
+            Self::Break => instruction::break_(vm)?,
+            Self::BreakLabel(arg0) => instruction::break_label(arg0, vm)?,
+            Self::Continue => instruction::continue_(vm)?,
+            Self::ContinueLabel(arg0) => instruction::continue_label(arg0, vm)?,
+            Self::Throw(arg0) => instruction::throw(arg0, vm)?,
+            Self::This(output) => instruction::this(output, vm)?,
+            Self::LoadSuper(output) => instruction::load_super(output, vm)?,
+            Self::LoadSuperConstructor(output) => {
+                instruction::load_super_constructor(output, vm)?
+            }
+            Self::Yield(arg0) => instruction::yield_(arg0, vm)?,
+            Self::Await(arg0, output) => instruction::await_(arg0, output, vm)?,
+            Self::AwaitNoOutput(arg0) => instruction::await_no_output(arg0, vm)?,
+            Self::Debugger => instruction::debugger(vm)?,
+            Self::With(arg0) => instruction::with(arg0, vm)?,
+            Self::EnterTry(arg0) => instruction::enter_try(arg0, vm)?,
+            Self::LeaveTry => instruction::leave_try(vm)?,
+            Self::AddAssign(arg0, output) => instruction::add_assign(arg0, output, vm)?,
+            Self::SubAssign(arg0, output) => instruction::sub_assign(arg0, output, vm)?,
+            Self::MulAssign(arg0, output) => instruction::mul_assign(arg0, output, vm)?,
+            Self::DivAssign(arg0, output) => instruction::div_assign(arg0, output, vm)?,
+            Self::RemAssign(arg0, output) => instruction::rem_assign(arg0, output, vm)?,
+            Self::LShiftAssign(arg0, output) => {
+                instruction::l_shift_assign(arg0, output, vm)?
+            }
+            Self::RShiftAssign(arg0, output) => {
+                instruction::r_shift_assign(arg0, output, vm)?
+            }
+            Self::ZeroFillRShiftAssign(arg0, output) => {
+                instruction::zero_fill_r_shift_assign(arg0, output, vm)?
+            }
+            Self::BAndAssign(arg0, output) => {
+                instruction::b_and_assign(arg0, output, vm)?
+            }
+            Self::BOrAssign(arg0, output) => instruction::b_or_assign(arg0, output, vm)?,
+            Self::BXorAssign(arg0, output) => {
+                instruction::b_xor_assign(arg0, output, vm)?
+            }
+            Self::ExpAssign(arg0, output) => instruction::exp_assign(arg0, output, vm)?,
+            Self::AndAssign(arg0, output) => instruction::and_assign(arg0, output, vm)?,
+            Self::OrAssign(arg0, output) => instruction::or_assign(arg0, output, vm)?,
+            Self::NullishAssign(arg0, output) => {
+                instruction::nullish_assign(arg0, output, vm)?
+            }
+            Self::DeclConst(arg0, arg1) => instruction::decl_const(arg0, arg1, vm)?,
+            Self::DeclVar(arg0, arg1) => instruction::decl_var(arg0, arg1, vm)?,
+            Self::DeclEmptyVar(arg0) => instruction::decl_empty_var(arg0, vm)?,
+            Self::DeclLet(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
+            Self::DeclEmptyLet(arg0) => instruction::decl_empty_let(arg0, vm)?,
+            Self::PatBeginRest(arg0) => instruction::pat_begin_rest(arg0, vm)?,
+            Self::PatVoidNext => instruction::pat_void_next(vm)?,
+            Self::PatMoveLet(arg0, arg1) => instruction::pat_move_let(arg0, arg1, vm)?,
+            Self::PatMoveConst(arg0, arg1) => {
+                instruction::pat_move_const(arg0, arg1, vm)?
+            }
+            Self::PatMoveVar(arg0, arg1) => instruction::pat_move_var(arg0, arg1, vm)?,
+            Self::PatRestLet(arg0) => instruction::pat_rest_let(arg0, vm)?,
+            Self::PatRestConst(arg0) => instruction::pat_rest_const(arg0, vm)?,
+            Self::PatRestVar(arg0) => instruction::pat_rest_var(arg0, vm)?,
+            Self::PatArrayMoveLet(arg0) => instruction::pat_array_move_let(arg0, vm)?,
+            Self::PatArrayMoveConst(arg0) => instruction::pat_array_move_const(arg0, vm)?,
+            Self::PatArrayMoveVar(arg0) => instruction::pat_array_move_var(arg0, vm)?,
         }
         Ok(())
     }

@@ -38,9 +38,27 @@ impl Type {
         }
     }
 
+    pub fn to_syn_val(&self) -> syn::Type {
+        match self {
+            Type::Data => syn::parse_quote! { DataType },
+            Type::JmpOffset => syn::parse_quote! { JmpOffset },
+            Type::JmpAddr => syn::parse_quote! { JmpAddr },
+            Type::Other(s) => syn::parse_str(s).unwrap(),
+        }
+    }
+
     pub fn to_syn_out(&self) -> syn::Type {
         match self {
             Type::Data => syn::parse_quote! { impl OutputData },
+            Type::JmpOffset => syn::parse_quote! { JmpOffset },
+            Type::JmpAddr => syn::parse_quote! { JmpAddr },
+            Type::Other(s) => syn::parse_str(s).unwrap(),
+        }
+    }
+
+    pub fn to_syn_out_val(&self) -> syn::Type {
+        match self {
+            Type::Data => syn::parse_quote! { OutputDataType },
             Type::JmpOffset => syn::parse_quote! { JmpOffset },
             Type::JmpAddr => syn::parse_quote! { JmpAddr },
             Type::Other(s) => syn::parse_str(s).unwrap(),

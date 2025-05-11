@@ -22,6 +22,7 @@ env_logger = "0.11.3"
 [features]
 default = []
 vm = ["dep:yavashark_vm", "dep:yavashark_bytecode_interpreter"]
+simple_bytecode = ["dep:yavashark_bytecode_interpreter", "yavashark_vm/simple_bytecode"]
 
 [lints]
 workspace = true

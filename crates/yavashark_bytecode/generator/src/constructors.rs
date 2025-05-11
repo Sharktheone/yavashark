@@ -7,7 +7,7 @@ use quote::quote;
 pub fn generate_constructors() {
     let defs = parse::instruction_def();
 
-    let mut constructors = Vec::new();
+    let mut constructors_all = Vec::new();
 
     for def in defs {
         let fn_name = Ident::new(&set::get_class(&def.name), proc_macro2::Span::call_site());
@@ -39,7 +39,7 @@ pub fn generate_constructors() {
             &call_args,
         );
 
-        constructors.push(quote! {
+        constructors_all.push(quote! {
             #[must_use]
             pub fn #fn_name(#(#fn_args),*) -> Self {
                 #matcher
@@ -47,7 +47,69 @@ pub fn generate_constructors() {
         })
     }
 
+    let mut constructors = Vec::new();
+
+    for def in defs {
+        let fn_name = Ident::new(&set::get_class(&def.name), proc_macro2::Span::call_site());
+
+        let args = def.inputs.iter().enumerate().map(|(i, input)| {
+            let id = Ident::new(&format!("arg{}", i), proc_macro2::Span::call_site());
+            let ty = input.to_syn();
+
+            let tok = match input {
+                Type::Data => quote! { #id.data_type() },
+                _ => quote! { #id },
+            };
+
+            (quote! { #id: #ty }, tok)
+        });
+
+        let args = args
+            .chain(def.output.iter().map(|output| {
+                let id = Ident::new("output", proc_macro2::Span::call_site());
+                let ty = output.to_syn_out();
+
+                let tok = match output {
+                    Type::Data => quote! { #id.data_type() },
+                    _ => quote! { #id },
+                };
+
+                (quote! { #id: #ty }, tok)
+            }))
+            .collect::<Vec<_>>();
+
+        let fn_args = args.iter().map(|(arg, _)| arg);
+        let call_args = args
+            .iter()
+            .map(|(_, id)| id)
+            .collect::<Vec<_>>();
+
+        let variant = Ident::new(&def.name, proc_macro2::Span::call_site());
+
+        if call_args.is_empty() {
+            constructors.push(quote! {
+                #[must_use]
+                pub fn #fn_name(#(#fn_args),*) -> Self {
+                    Self::#variant
+                }
+            })
+        } else {
+            constructors.push(quote! {
+                #[must_use]
+                pub fn #fn_name(#(#fn_args),*) -> Self {
+                    Self::#variant(#(#call_args),*)
+                }
+            })
+        }
+    }
+
     let output = quote! {
+        #[cfg(not(feature = "simple_bytecode"))]
+        impl Instruction {
+            #(#constructors_all)*
+        }
+
+        #[cfg(feature = "simple_bytecode")]
         impl Instruction {
             #(#constructors)*
         }
@@ -68,11 +130,7 @@ use crate::instructions::Instruction;
 
 "#;
 
-    let file = syn::File {
-        shebang: None,
-        attrs: Vec::new(),
-        items: vec![syn::parse2(output).unwrap()],
-    };
+    let file = syn::parse_file(&output.to_string()).unwrap();
 
     let out = prettyplease::unparse(&file);
 
@@ -170,7 +228,7 @@ fn gen_match_input(
 
         out
     };
-    
+
     let f32 = {
         prev.push(ArgumentType::F32);
         let out = gen_match(name, prev, input, out, args);
@@ -178,7 +236,7 @@ fn gen_match_input(
 
         out
     };
-    
+
     let i32 = {
         prev.push(ArgumentType::I32);
         let out = gen_match(name, prev, input, out, args);
@@ -186,7 +244,7 @@ fn gen_match_input(
 
         out
     };
-    
+
     let u32 = {
         prev.push(ArgumentType::U32);
         let out = gen_match(name, prev, input, out, args);
@@ -194,7 +252,7 @@ fn gen_match_input(
 
         out
     };
-    
+
     let boolean = {
         prev.push(ArgumentType::Boolean);
         let out = gen_match(name, prev, input, out, args);
@@ -202,7 +260,7 @@ fn gen_match_input(
 
         out
     };
-    
+
     let null = {
         prev.push(ArgumentType::Null);
         let out = gen_match(name, prev, input, out, args);
@@ -210,7 +268,7 @@ fn gen_match_input(
 
         out
     };
-    
+
     let undefined = {
         prev.push(ArgumentType::Undefined);
         let out = gen_match(name, prev, input, out, args);
@@ -289,7 +347,7 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
-    
+
     let f32 = {
         prev.push(ArgumentType::F32);
         let out = get_enum_variant(name, prev);
@@ -297,7 +355,7 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
-    
+
     let i32 = {
         prev.push(ArgumentType::I32);
         let out = get_enum_variant(name, prev);
@@ -305,7 +363,7 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
-    
+
     let u32 = {
         prev.push(ArgumentType::U32);
         let out = get_enum_variant(name, prev);
@@ -313,7 +371,7 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
-    
+
     let boolean = {
         prev.push(ArgumentType::Boolean);
         let out = get_enum_variant(name, prev);
@@ -321,7 +379,7 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
-    
+
     let null = {
         prev.push(ArgumentType::Null);
         let out = get_enum_variant(name, prev);
@@ -329,7 +387,7 @@ fn gen_last(name: &str, prev: &mut Vec<ArgumentType>, last: &Type, args: &[Ident
 
         out
     };
-    
+
     let undefined = {
         prev.push(ArgumentType::Undefined);
         let out = get_enum_variant(name, prev);

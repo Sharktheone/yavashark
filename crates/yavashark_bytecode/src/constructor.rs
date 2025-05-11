@@ -11,6 +11,7 @@ use crate::{JmpOffset, JmpAddr};
 use crate::instructions::Instruction; 
 
 
+#[cfg(not(feature = "simple_bytecode"))]
 impl Instruction {
     #[must_use]
     pub fn add(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
@@ -62231,5 +62232,556 @@ impl Instruction {
             DataType::Null(arg0) => Self::PatArrayMoveVarNull(arg0),
             DataType::Undefined(arg0) => Self::PatArrayMoveVarUndefined(arg0),
         }
+    }
+}
+#[cfg(feature = "simple_bytecode")]
+impl Instruction {
+    #[must_use]
+    pub fn add(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Add(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn sub(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Sub(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn mul(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Mul(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn div(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Div(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn mod_(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Mod(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn l_not(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::LNot(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn l_or(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::LOr(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn l_and(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::LAnd(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn b_xor(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::BXor(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn b_or(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::BOr(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn b_and(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::BAnd(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn eq(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Eq(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn ne(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Ne(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn strict_eq(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::StrictEq(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn strict_ne(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::StrictNe(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn lt(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Lt(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn lt_eq(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::LtEq(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn gt(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Gt(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn gt_eq(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::GtEq(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn l_shift(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::LShift(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn r_shift(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::RShift(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn zero_fill_r_shift(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::ZeroFillRShift(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn in_(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::In(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn instance_of(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::InstanceOf(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn exp(arg0: impl Data, arg1: impl Data, output: impl OutputData) -> Self {
+        Self::Exp(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn nullish_coalescing(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::NullishCoalescing(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn dec(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Dec(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn inc(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Inc(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn push_scope() -> Self {
+        Self::PushScope
+    }
+    #[must_use]
+    pub fn pop_scope() -> Self {
+        Self::PopScope
+    }
+    #[must_use]
+    pub fn call(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Call(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn call_no_output(arg0: impl Data) -> Self {
+        Self::CallNoOutput(arg0.data_type())
+    }
+    #[must_use]
+    pub fn call_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::CallMember(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn call_member_no_output(arg0: impl Data, arg1: impl Data) -> Self {
+        Self::CallMemberNoOutput(arg0.data_type(), arg1.data_type())
+    }
+    #[must_use]
+    pub fn call_super(output: impl OutputData) -> Self {
+        Self::CallSuper(output.data_type())
+    }
+    #[must_use]
+    pub fn call_super_no_output() -> Self {
+        Self::CallSuperNoOutput
+    }
+    #[must_use]
+    pub fn construct(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Construct(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn construct_no_output(arg0: impl Data) -> Self {
+        Self::ConstructNoOutput(arg0.data_type())
+    }
+    #[must_use]
+    pub fn push_call(arg0: impl Data) -> Self {
+        Self::PushCall(arg0.data_type())
+    }
+    #[must_use]
+    pub fn spread_call(arg0: impl Data) -> Self {
+        Self::SpreadCall(arg0.data_type())
+    }
+    #[must_use]
+    pub fn jmp(arg0: JmpAddr) -> Self {
+        Self::Jmp(arg0)
+    }
+    #[must_use]
+    pub fn jmp_if(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIf(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfNot(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_null(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfNull(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_null(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfNotNull(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_undefined(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfUndefined(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_undefined(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfNotUndefined(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_nullish(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfNullish(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_nullish(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::JmpIfNotNullish(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_rel(arg0: JmpOffset) -> Self {
+        Self::JmpRel(arg0)
+    }
+    #[must_use]
+    pub fn jmp_if_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfNotRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_null_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfNullRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_null_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfNotNullRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_undefined_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfUndefinedRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_undefined_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfNotUndefinedRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_nullish_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfNullishRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_not_nullish_rel(arg0: impl Data, arg1: JmpOffset) -> Self {
+        Self::JmpIfNotNullishRel(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn jmp_if_eq(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfEq(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_ne(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfNe(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_strict_eq(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfStrictEq(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_strict_ne(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfStrictNe(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_lt(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfLt(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_lt_eq(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfLtEq(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_gt(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfGt(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_gt_eq(arg0: impl Data, arg1: impl Data, arg2: JmpAddr) -> Self {
+        Self::JmpIfGtEq(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_eq_rel(arg0: impl Data, arg1: impl Data, arg2: JmpOffset) -> Self {
+        Self::JmpIfEqRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_ne_rel(arg0: impl Data, arg1: impl Data, arg2: JmpOffset) -> Self {
+        Self::JmpIfNeRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_strict_eq_rel(
+        arg0: impl Data,
+        arg1: impl Data,
+        arg2: JmpOffset,
+    ) -> Self {
+        Self::JmpIfStrictEqRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_strict_ne_rel(
+        arg0: impl Data,
+        arg1: impl Data,
+        arg2: JmpOffset,
+    ) -> Self {
+        Self::JmpIfStrictNeRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_lt_rel(arg0: impl Data, arg1: impl Data, arg2: JmpOffset) -> Self {
+        Self::JmpIfLtRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_lt_eq_rel(arg0: impl Data, arg1: impl Data, arg2: JmpOffset) -> Self {
+        Self::JmpIfLtEqRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_gt_rel(arg0: impl Data, arg1: impl Data, arg2: JmpOffset) -> Self {
+        Self::JmpIfGtRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn jmp_if_gt_eq_rel(arg0: impl Data, arg1: impl Data, arg2: JmpOffset) -> Self {
+        Self::JmpIfGtEqRel(arg0.data_type(), arg1.data_type(), arg2)
+    }
+    #[must_use]
+    pub fn load_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::LoadMember(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn load_var(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::LoadVar(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn type_of(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::TypeOf(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn push(arg0: impl Data) -> Self {
+        Self::Push(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pop() -> Self {
+        Self::Pop
+    }
+    #[must_use]
+    pub fn pop_n(arg0: u32) -> Self {
+        Self::PopN(arg0)
+    }
+    #[must_use]
+    pub fn pop_to(output: impl OutputData) -> Self {
+        Self::PopTo(output.data_type())
+    }
+    #[must_use]
+    pub fn move_(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Move(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn return_() -> Self {
+        Self::Return
+    }
+    #[must_use]
+    pub fn return_value(arg0: impl Data) -> Self {
+        Self::ReturnValue(arg0.data_type())
+    }
+    #[must_use]
+    pub fn break_() -> Self {
+        Self::Break
+    }
+    #[must_use]
+    pub fn break_label(arg0: Label) -> Self {
+        Self::BreakLabel(arg0)
+    }
+    #[must_use]
+    pub fn continue_() -> Self {
+        Self::Continue
+    }
+    #[must_use]
+    pub fn continue_label(arg0: Label) -> Self {
+        Self::ContinueLabel(arg0)
+    }
+    #[must_use]
+    pub fn throw(arg0: impl Data) -> Self {
+        Self::Throw(arg0.data_type())
+    }
+    #[must_use]
+    pub fn this(output: impl OutputData) -> Self {
+        Self::This(output.data_type())
+    }
+    #[must_use]
+    pub fn load_super(output: impl OutputData) -> Self {
+        Self::LoadSuper(output.data_type())
+    }
+    #[must_use]
+    pub fn load_super_constructor(output: impl OutputData) -> Self {
+        Self::LoadSuperConstructor(output.data_type())
+    }
+    #[must_use]
+    pub fn yield_(arg0: impl Data) -> Self {
+        Self::Yield(arg0.data_type())
+    }
+    #[must_use]
+    pub fn await_(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Await(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn await_no_output(arg0: impl Data) -> Self {
+        Self::AwaitNoOutput(arg0.data_type())
+    }
+    #[must_use]
+    pub fn debugger() -> Self {
+        Self::Debugger
+    }
+    #[must_use]
+    pub fn with(arg0: impl Data) -> Self {
+        Self::With(arg0.data_type())
+    }
+    #[must_use]
+    pub fn enter_try(arg0: ControlIdx) -> Self {
+        Self::EnterTry(arg0)
+    }
+    #[must_use]
+    pub fn leave_try() -> Self {
+        Self::LeaveTry
+    }
+    #[must_use]
+    pub fn add_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::AddAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn sub_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::SubAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn mul_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::MulAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn div_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::DivAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn rem_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::RemAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn l_shift_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::LShiftAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn r_shift_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::RShiftAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn zero_fill_r_shift_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::ZeroFillRShiftAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn b_and_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::BAndAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn b_or_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::BOrAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn b_xor_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::BXorAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn exp_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::ExpAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn and_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::AndAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn or_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::OrAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn nullish_assign(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::NullishAssign(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn decl_const(arg0: impl Data, arg1: VarName) -> Self {
+        Self::DeclConst(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn decl_var(arg0: impl Data, arg1: VarName) -> Self {
+        Self::DeclVar(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn decl_empty_var(arg0: VarName) -> Self {
+        Self::DeclEmptyVar(arg0)
+    }
+    #[must_use]
+    pub fn decl_let(arg0: impl Data, arg1: VarName) -> Self {
+        Self::DeclLet(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn decl_empty_let(arg0: VarName) -> Self {
+        Self::DeclEmptyLet(arg0)
+    }
+    #[must_use]
+    pub fn pat_begin_rest(arg0: usize) -> Self {
+        Self::PatBeginRest(arg0)
+    }
+    #[must_use]
+    pub fn pat_void_next() -> Self {
+        Self::PatVoidNext
+    }
+    #[must_use]
+    pub fn pat_move_let(arg0: impl Data, arg1: impl Data) -> Self {
+        Self::PatMoveLet(arg0.data_type(), arg1.data_type())
+    }
+    #[must_use]
+    pub fn pat_move_const(arg0: impl Data, arg1: impl Data) -> Self {
+        Self::PatMoveConst(arg0.data_type(), arg1.data_type())
+    }
+    #[must_use]
+    pub fn pat_move_var(arg0: impl Data, arg1: impl Data) -> Self {
+        Self::PatMoveVar(arg0.data_type(), arg1.data_type())
+    }
+    #[must_use]
+    pub fn pat_rest_let(arg0: impl Data) -> Self {
+        Self::PatRestLet(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_rest_const(arg0: impl Data) -> Self {
+        Self::PatRestConst(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_rest_var(arg0: impl Data) -> Self {
+        Self::PatRestVar(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_array_move_let(arg0: impl Data) -> Self {
+        Self::PatArrayMoveLet(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_array_move_const(arg0: impl Data) -> Self {
+        Self::PatArrayMoveConst(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_array_move_var(arg0: impl Data) -> Self {
+        Self::PatArrayMoveVar(arg0.data_type())
     }
 }

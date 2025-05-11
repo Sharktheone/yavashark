@@ -8,7 +8,7 @@ yavashark_env = { path = "../yavashark_env" }
 yavashark_macro = { path = "../yavashark_macro" }
 yavashark_value = { path = "../yavashark_value", features = ["display_object"] }
 yavashark_garbage = { path = "../yavashark_garbage" }
-yavashark_interpreter = { path = "../yavashark_interpreter", features = ["vm"] }
+yavashark_interpreter = { path = "../yavashark_interpreter", features = ["vm", "simple_bytecode"] }
 yavashark_vm = { path = "../yavashark_vm" }
 
 

@@ -1,11 +1,12 @@
-use crate::set;
+use crate::{parse, set};
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
+use crate::set::get_class;
 
 pub fn generate_execute() {
     let instructions = set::instructions();
 
-    let mut variants = Vec::new();
+    let mut variants_all = Vec::new();
 
     for inst in instructions {
         let mut args = Vec::with_capacity(inst.inputs.len());
@@ -31,12 +32,59 @@ pub fn generate_execute() {
 
         args.push(quote! { vm });
 
-        variants.push(quote! {
+        variants_all.push(quote! {
             Self::#name #match_args => instruction::#execute_fn(#(#args),*)?,
         });
     }
 
+    let defs = parse::instruction_def();
+
+    let mut variants = Vec::new();
+
+    for def in defs {
+        let mut args = Vec::with_capacity(def.inputs.len());
+
+        for input in 0..def.inputs.len() {
+            let id = Ident::new(&format!("arg{}", input), proc_macro2::Span::call_site());
+
+            args.push(quote! { #id });
+        }
+
+        let name = Ident::new(&def.name, proc_macro2::Span::call_site());
+        let execute_fn = Ident::new(&get_class(&def.name), proc_macro2::Span::call_site());
+
+        if def.output.is_some() {
+            args.push(quote! { output });
+        }
+
+        let match_args = if args.is_empty() {
+            TokenStream::new()
+        } else {
+            quote! { (#(#args),*) }
+        };
+
+        args.push(quote! { vm });
+
+        variants.push(quote! {
+            Self::#name #match_args => instruction::#execute_fn(#(#args),*)?,
+        });
+
+    }
+
     let output = quote! {
+        #[cfg(not(feature = "simple_bytecode"))]
+        impl Execute for Instruction {
+            fn execute(self, vm: &mut impl VM) -> ControlResult {
+                match self {
+                    #(#variants_all)*
+                }
+
+                Ok(())
+            }
+        }
+
+
+        #[cfg(feature = "simple_bytecode")]
         impl Execute for Instruction {
             fn execute(self, vm: &mut impl VM) -> ControlResult {
                 match self {
@@ -68,11 +116,7 @@ pub trait Execute {
 
 "#;
 
-    let file = syn::File {
-        shebang: None,
-        attrs: Vec::new(),
-        items: vec![syn::parse2(output).unwrap()],
-    };
+    let file = syn::parse_file(&output.to_string()).unwrap();
 
     let file = prettyplease::unparse(&file);
 
