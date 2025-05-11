@@ -185,7 +185,7 @@ fn run_input(
         #[cfg(feature = "vm")]
         if conf.bytecode {
             use yavashark_vm::yavashark_bytecode::data::DataSection;
-            use yavashark_vm::{BorrowedVM, OldBorrowedVM, VM};
+            use yavashark_vm::{BorrowedVM, VM};
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
             let mut vm =
                 BorrowedVM::with_scope(&bc.instructions, &data, vm_realm, vm_scope.clone());
@@ -217,7 +217,7 @@ fn run_input(
         #[cfg(feature = "vm")]
         if conf.old_bytecode {
             use yavashark_vm::yavashark_bytecode::data::DataSection;
-            use yavashark_vm::{BorrowedVM, OldBorrowedVM, VM};
+            use yavashark_vm::OldBorrowedVM;
             let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
             let mut vm = OldBorrowedVM::with_scope(

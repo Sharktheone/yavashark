@@ -159,7 +159,7 @@ fn main() {
 
             if bytecode {
                 use yavashark_vm::yavashark_bytecode::data::DataSection;
-                use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
+                use yavashark_vm::{OwnedVM, VM};
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
@@ -183,7 +183,7 @@ fn main() {
             #[cfg(feature = "vm")]
             if old_bytecode {
                 use yavashark_vm::yavashark_bytecode::data::DataSection;
-                use yavashark_vm::{OldOwnedVM, OwnedVM, VM};
+                use yavashark_vm::OldOwnedVM;
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals, Vec::new());
 
                 let mut vm = OldOwnedVM::new(bc.instructions, data, path).unwrap();
