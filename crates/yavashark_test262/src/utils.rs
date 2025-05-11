@@ -1,4 +1,4 @@
-use crate::metadata::{Flags, Metadata, NegativePhase};
+use crate::metadata::{Metadata, NegativePhase};
 use std::path::Path;
 use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCommentsMap};
 use swc_common::input::StringInput;
@@ -18,34 +18,7 @@ pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
 
     let c = EsSyntax::default();
 
-    let metadata;
-
-    {
-        let end = input
-            .find("\n---*/\n")
-            .map(|x| x + 7)
-            .unwrap_or(input.len());
-
-        let input = &input[..end];
-        let max = BytePos(input.len() as u32);
-
-        let input = StringInput::new(&input[..end], BytePos(0), max);
-
-        let comments = SingleThreadedComments::default();
-
-        let mut p = Parser::new(Syntax::Es(c), input, Some(&comments));
-
-        _ = p.parse_script();
-
-        let (leading, trailing) = comments.take_all();
-
-        let mut meta = process_comments(leading);
-        let mut trailing = process_comments(trailing);
-
-        meta.append(&mut trailing);
-
-        metadata = meta.first().map(Metadata::parse).unwrap_or_default();
-    };
+    let metadata = parse_metadata(&input);
 
     let end = BytePos(input.len() as u32 - 1);
 
@@ -82,6 +55,49 @@ pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
     };
 
     (s, metadata)
+}
+
+fn parse_metadata(input: &str) -> Metadata {
+    let Some(start) = input.find("\n/*---\n").map(|x| x + 7) else {
+        return parse_metadata_comments(input);
+    };
+    let Some(end) = input.find("\n---*/\n") else {
+        return parse_metadata_comments(input);
+    };
+
+    let input = &input[start..end];
+
+
+    YamlDecoder::read(input.as_bytes()).decode().ok().as_ref().and_then(|x| x.first()).map(Metadata::parse).unwrap_or_default()
+}
+
+fn parse_metadata_comments(input: &str) -> Metadata {
+    let end = input
+        .find("\n---*/\n")
+        .map(|x| x + 7)
+        .unwrap_or(input.len());
+
+    let input = &input[..end];
+    let max = BytePos(input.len() as u32);
+
+    let input = StringInput::new(&input[..end], BytePos(0), max);
+
+    let comments = SingleThreadedComments::default();
+
+    let c = EsSyntax::default();
+
+    let mut p = Parser::new(Syntax::Es(c), input, Some(&comments));
+
+    _ = p.parse_script();
+
+    let (leading, trailing) = comments.take_all();
+
+    let mut meta = process_comments(leading);
+    let mut trailing = process_comments(trailing);
+
+    meta.append(&mut trailing);
+
+    meta.first().map(Metadata::parse).unwrap_or_default()
 }
 
 fn process_comments(map: SingleThreadedCommentsMap) -> Vec<Yaml> {
