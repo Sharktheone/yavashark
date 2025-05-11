@@ -11,7 +11,7 @@ yavashark_bytecode = { path = "../yavashark_bytecode" }
 yavashark_garbage = { path = "../yavashark_garbage" }
 tokio = { version = "1.10.0", features = ["sync"] }
 log = "0.4.25"
-swc_ecma_ast = "6.1.0"
+swc_ecma_ast = "9.0.0"
 
 [lints]
 workspace = true

@@ -7,7 +7,7 @@ edition = "2021"
 yavashark_value = { path = "../yavashark_value" }
 bincode = "2.0.0-rc.3"
 num-bigint = "0.4.6"
-swc_ecma_ast = "6.1.0"
+swc_ecma_ast = "9.0.0"
 
 [lints]
 workspace = true

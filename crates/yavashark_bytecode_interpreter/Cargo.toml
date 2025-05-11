@@ -9,7 +9,7 @@ yavashark_vm = { path = "../yavashark_vm" }
 yavashark_codegen = { path = "../yavashark_codegen" }
 yavashark_compiler = { path = "../yavashark_compiler" }
 yavashark_bytecode = { path = "../yavashark_bytecode" }
-swc_ecma_ast = "6.1.0"
+swc_ecma_ast = "9.0.0"
 
 
 

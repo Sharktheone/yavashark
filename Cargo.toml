@@ -16,8 +16,8 @@ members = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-swc_common = "6.1.1"
-swc_ecma_parser = "8.0.2"
+swc_common = "9.1.0"
+swc_ecma_parser = "12.0.0"
 yavashark_interpreter = { path = "crates/yavashark_interpreter" }
 yavashark_codegen = { path = "crates/yavashark_codegen", optional = true }
 yavashark_vm = { path = "crates/yavashark_vm", optional = true }
@@ -32,7 +32,7 @@ wasm-bindgen = "0.2.73"
 console_error_panic_hook = "0.1.7"
 console_log = "1.0.0"
 js-sys = "0.3.77"
-swc_ecma_ast = "6.1.0"
+swc_ecma_ast = "9.0.0"
 getrandom = { version = "0.2.15", features = ["js", "js-sys"] }
 
 
