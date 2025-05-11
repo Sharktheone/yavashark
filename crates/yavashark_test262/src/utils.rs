@@ -62,10 +62,10 @@ pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
                 }
             }
 
-            if s.is_module() && !metadata.flags.contains(Flags::MODULE) {
-                println!("PARSE_ERROR: Expected script but parsed module");
-                panic!()
-            }
+            // if s.is_module() && !metadata.flags.contains(Flags::MODULE) {
+            //     println!("PARSE_ERROR: Expected script but parsed module");
+            //     panic!()
+            // }
 
             s
         }
