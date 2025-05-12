@@ -180,7 +180,7 @@ impl NativeFunction {
 
         let handle = ObjectHandle::new(this);
         let _ = handle.define_variable("name".into(), Variable::config(name.into()));
-        let _ = handle.define_variable("length".into(), Variable::new_read_only(len.into()));
+        let _ = handle.define_variable("length".into(), Variable::config(len.into()));
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
