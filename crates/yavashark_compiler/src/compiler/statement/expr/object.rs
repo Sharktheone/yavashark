@@ -1,9 +1,10 @@
+use std::rc::Rc;
 use super::MoveOptimization;
 use crate::{Compiler, Res};
 use swc_ecma_ast::{ObjectLit, Prop, PropName, PropOrSpread};
-use yavashark_bytecode::data::OutputData;
+use yavashark_bytecode::data::{OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
-use yavashark_bytecode::{ConstValue, DataTypeValue, ObjectLiteralBlueprint};
+use yavashark_bytecode::{ConstValue, DataTypeValue, FunctionBlueprint, ObjectLiteralBlueprint};
 
 impl Compiler {
     pub fn compile_object(
@@ -28,19 +29,7 @@ impl Compiler {
                         properties.push((id, dt));
                     }
                     Prop::KeyValue(kv) => {
-                        let prop = match &kv.key {
-                            PropName::Ident(id) => DataTypeValue::String(id.sym.to_string()),
-                            PropName::Str(s) => DataTypeValue::String(s.value.to_string()),
-                            PropName::Num(n) => DataTypeValue::Number(n.value),
-                            PropName::Computed(c) => {
-                                let reg = self.alloc_reg_or_stack();
-                                self.compile_expr_data_certain(&c.expr, reg);
-                                dealloc.push(reg);
-
-                                reg.into()
-                            }
-                            PropName::BigInt(b) => DataTypeValue::BigInt((*b.value).clone()),
-                        };
+                        let prop = self.convert_prop_name(&kv.key, &mut dealloc);
 
                         let storage = self.alloc_reg_or_stack();
                         dealloc.push(storage);
@@ -48,6 +37,25 @@ impl Compiler {
                         self.compile_expr_data_certain(&kv.value, storage);
                         properties.push((prop, storage.into()));
                     }
+                    Prop::Getter(_) => {},
+                    Prop::Setter(_) => {},
+                    Prop::Method(m) => {
+                        let prop = self.convert_prop_name(&m.key, &mut dealloc);
+
+                        let storage = self.alloc_reg_or_stack();
+                        dealloc.push(storage);
+
+                        let bp = FunctionBlueprint {
+                            name: None,
+                            params: m.function.params.clone(),
+                            is_async: m.function.is_async,
+                            is_generator: m.function.is_generator,
+                            code: Rc::new(Self::create_bytecode(&m.function)?),
+                        };
+
+                        properties.push((prop, bp.into()));
+
+                    },
                     _ => todo!(),
                 },
                 PropOrSpread::Spread(_) => {
@@ -65,4 +73,21 @@ impl Compiler {
 
         Ok(Some(m))
     }
+
+    pub fn convert_prop_name(&mut self, key: &PropName, dealloc: &mut Vec<OutputDataType>) -> DataTypeValue {
+        match key {
+            PropName::Ident(id) => DataTypeValue::String(id.sym.to_string()),
+            PropName::Str(s) => DataTypeValue::String(s.value.to_string()),
+            PropName::Num(n) => DataTypeValue::Number(n.value),
+            PropName::Computed(c) => {
+                let reg = self.alloc_reg_or_stack();
+                self.compile_expr_data_certain(&c.expr, reg);
+                dealloc.push(reg);
+
+                reg.into()
+            }
+            PropName::BigInt(b) => DataTypeValue::BigInt((*b.value).clone()),
+        }
+    }
+
 }
