@@ -101,7 +101,7 @@ impl Compiler {
                             code: Rc::new(Self::create_bytecode(&m.function)?),
                         };
 
-                        properties.push((prop, bp.into()));
+                        properties.push((prop, DataTypeValue::Function(bp)));
                     }
                     _ => todo!(),
                 },
