@@ -87,6 +87,53 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
         let obj = Object::new(vm.get_realm_ref());
 
         for (key, value) in self.properties {
+            match value {
+                DataTypeValue::Get(bp) => {
+                    let func: RefCell<Box<dyn FunctionCode>> =
+                        RefCell::new(Box::new(BytecodeFunction {
+                            code: bp.code,
+                            is_async: bp.is_async,
+                            is_generator: bp.is_generator,
+                        }));
+
+                    let optim = OptimFunction::new(
+                        bp.name.unwrap_or("anonymous".to_string()),
+                        bp.params,
+                        Some(func),
+                        vm.get_scope().clone(),
+                        vm.get_realm_ref(),
+                    )?;
+
+                    obj.define_getter(key.into_value(vm)?, optim.into())?;
+
+                    continue;
+                }
+
+                DataTypeValue::Set(bp) => {
+                    let func: RefCell<Box<dyn FunctionCode>> =
+                        RefCell::new(Box::new(BytecodeFunction {
+                            code: bp.code,
+                            is_async: bp.is_async,
+                            is_generator: bp.is_generator,
+                        }));
+
+                    let optim = OptimFunction::new(
+                        bp.name.unwrap_or("anonymous".to_string()),
+                        bp.params,
+                        Some(func),
+                        vm.get_scope().clone(),
+                        vm.get_realm_ref(),
+                    )?;
+
+                    obj.define_setter(key.into_value(vm)?, optim.into())?;
+
+                    continue;
+                }
+
+                _ => {}
+            }
+
+
             obj.define_property(key.into_value(vm)?, value.into_value(vm)?)?;
         }
 
@@ -105,6 +152,42 @@ impl ConstIntoValue for DataTypeValue {
             Self::Object(obj) => obj.into_value(vm)?,
             Self::Array(array) => array.into_value(vm)?,
             Self::Function(bp) => {
+                let func: RefCell<Box<dyn FunctionCode>> =
+                    RefCell::new(Box::new(BytecodeFunction {
+                        code: bp.code,
+                        is_async: bp.is_async,
+                        is_generator: bp.is_generator,
+                    }));
+
+                let optim = OptimFunction::new(
+                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.params,
+                    Some(func),
+                    vm.get_scope().clone(),
+                    vm.get_realm_ref(),
+                )?;
+
+                optim.into()
+            }
+            Self::Set(bp) => {
+                let func: RefCell<Box<dyn FunctionCode>> =
+                    RefCell::new(Box::new(BytecodeFunction {
+                        code: bp.code,
+                        is_async: bp.is_async,
+                        is_generator: bp.is_generator,
+                    }));
+
+                let optim = OptimFunction::new(
+                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.params,
+                    Some(func),
+                    vm.get_scope().clone(),
+                    vm.get_realm_ref(),
+                )?;
+
+                optim.into()
+            }
+            Self::Get(bp) => {
                 let func: RefCell<Box<dyn FunctionCode>> =
                     RefCell::new(Box::new(BytecodeFunction {
                         code: bp.code,
