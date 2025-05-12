@@ -31,6 +31,8 @@ pub enum DataTypeValue {
     Object(ObjectLiteralBlueprint),
     Array(ArrayLiteralBlueprint),
     Function(FunctionBlueprint),
+    Get(FunctionBlueprint),
+    Set(FunctionBlueprint),
     ArrowFunction(ArrowFunctionBlueprint),
     BigInt(BigInt),
     Regex(String, String),

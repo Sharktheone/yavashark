@@ -1,6 +1,6 @@
 use crate::{Compiler, Res};
 use std::rc::Rc;
-use swc_ecma_ast::Function;
+use swc_ecma_ast::{BlockStmt, Function};
 use yavashark_bytecode::data::{ConstIdx, DataSection};
 use yavashark_bytecode::{BytecodeFunctionCode, ConstValue, FunctionBlueprint};
 
@@ -18,11 +18,17 @@ impl Compiler {
     }
 
     pub fn create_bytecode(f: &Function) -> Res<BytecodeFunctionCode> {
+        if let Some(body) = &f.body {
+            return Self::create_bytecode_from_block(body);
+        }
+
+        Ok(BytecodeFunctionCode::default())
+    }
+
+    pub fn create_bytecode_from_block(b: &BlockStmt) -> Res<BytecodeFunctionCode> {
         let mut this = Self::new();
 
-        if let Some(body) = &f.body {
-            this.compile_block(body)?;
-        }
+        this.compile_block(b)?;
 
         let ds = DataSection::new(this.variables, this.labeled, this.literals, this.control);
 
