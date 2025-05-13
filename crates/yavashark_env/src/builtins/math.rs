@@ -75,7 +75,7 @@ impl Math {
     }
 
     const fn clz32(value: f64) -> f64 {
-        value.to_bits().leading_zeros() as f64
+        (value as i64 as u32).leading_zeros() as f64
     }
 
     fn cos(value: f64) -> f64 {
