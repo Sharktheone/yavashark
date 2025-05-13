@@ -4,7 +4,7 @@ use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{Expr, ImplItem};
+use syn::{Expr, ImplItem, Path};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Mode {
@@ -25,6 +25,7 @@ enum Type {
 pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let mut mode = Mode::Prototype;
     let mut constructor = None;
+    let mut proto_default = None;
 
     let attr_parser = syn::meta::parser(|meta| {
         if meta.path.is_ident("prototype") {
@@ -39,6 +40,22 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
                 Ok(())
             });
+            Ok(())
+        } else if meta.path.is_ident("default") {
+            meta.parse_nested_meta(|meta| {
+                proto_default = Some((meta.path, false));
+
+                Ok(())
+            });
+
+            Ok(())
+        } else if meta.path.is_ident("default_null") {
+            meta.parse_nested_meta(|meta| {
+                proto_default = Some((meta.path, true));
+
+                Ok(())
+            });
+
             Ok(())
         } else {
             Err(meta.error("Unknown attribute"))
@@ -247,7 +264,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     for prop in props {
         let (prop_tokens, name, js_name, ty, variable_fn) = match prop {
             Prop::Method(method) => (
-                method.init_tokens(&config),
+                method.init_tokens(&config, proto_default.as_ref()),
                 method.name,
                 method.js_name,
                 method.ty,
@@ -375,7 +392,7 @@ struct Constant {
 }
 
 impl Method {
-    fn init_tokens(&self, config: &Config) -> TokenStream {
+    fn init_tokens(&self, config: &Config, proto_default: Option<&(Path, bool)>) -> TokenStream {
         let native_function = &config.native_function;
 
         let name = &self.name;
@@ -426,9 +443,37 @@ impl Method {
         };
 
         let prepare_receiver = if self.has_receiver {
-            quote! {
-                let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
+
+            if let Some((def, null)) = proto_default {
+                let env = &config.env_path;
+                
+                let f = if *null {
+                    quote! {null_proto_default}
+                } else {
+                    quote! {proto_default}
+                };
+                
+                
+                quote! {
+                    let mut guard = None;
+                    let mut def = None::<Self>;
+                    
+                    let this = if this.as_object() == Ok(&realm.intrinsics.#def) {
+                        &*def.insert(#env::utils::ProtoDefault::#f())
+                    } else {
+                        let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
+                        
+                        &*guard.insert(this)
+                    };
+                }
+
+            } else {
+                quote! {
+                    let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
+                }
             }
+
+
         } else {
             TokenStream::new()
         };
