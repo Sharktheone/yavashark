@@ -195,6 +195,10 @@ impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
         let Some(val) = self.values.next() else {
             return Ok(None);
         };
+        
+        if val.is_undefined() {
+            return Ok(None);
+        }
 
         let val = mem::replace(val, Value::Undefined);
 

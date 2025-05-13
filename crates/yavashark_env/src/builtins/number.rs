@@ -197,7 +197,35 @@ impl NumberObj {
 #[properties_new(default_null(number), constructor(NumberConstructor::new))]
 impl NumberObj {
     #[prop("toString")]
-    fn to_string(&self, radix: Option<u32>) -> crate::Res<String> {
+    fn to_string(&self, radix: Option<u32>) -> Res<String> {
+        let inner = self.inner.try_borrow()?;
+
+        let num = inner.number;
+
+        if num.is_nan() {
+            check_radix_opt(radix)?;
+
+            return Ok("NaN".to_owned());
+        }
+
+        if num.is_infinite() {
+            check_radix_opt(radix)?;
+
+            return Ok(if num.is_sign_positive() {
+                "Infinity".to_owned()
+            } else {
+                "-Infinity".to_owned()
+            });
+        }
+
+        radix.map_or_else(
+            || Ok(num.to_string()),
+            |radix| float_to_string_with_radix(num, radix),
+        )
+    }
+
+    #[prop("toExponential")]
+    fn to_exponential(&self, fraction_digits: Option<u32>) -> Res<String> {
         let inner = self.inner.try_borrow()?;
 
         let num = inner.number;
@@ -214,10 +242,101 @@ impl NumberObj {
             });
         }
 
-        radix.map_or_else(
-            || Ok(num.to_string()),
-            |radix| float_to_string_with_radix(num, radix),
-        )
+        let fraction_digits = fraction_digits.unwrap_or(0);
+
+        let result = format!("{:.1$e}", num, fraction_digits as usize);
+
+        let result = result.replace('e', "e+");
+
+        Ok(result)
+    }
+
+    #[prop("toFixed")]
+    fn to_fixed(&self, fraction_digits: Option<u32>) -> Res<String> {
+        let inner = self.inner.try_borrow()?;
+
+        let num = inner.number;
+
+        if num.is_nan() {
+            return Ok("NaN".to_owned());
+        }
+
+        if num.is_infinite() {
+            return Ok(if num.is_sign_positive() {
+                "Infinity".to_owned()
+            } else {
+                "-Infinity".to_owned()
+            });
+        }
+
+        let fraction_digits = fraction_digits.unwrap_or(0);
+        let result = format!("{:.1$}", num, fraction_digits as usize);
+
+        Ok(result)
+    }
+
+    #[prop("toPrecision")]
+    fn to_precision(&self, precision: Option<u32>) -> Res<String> {
+        let inner = self.inner.try_borrow()?;
+
+        let num = inner.number;
+
+        if num.is_nan() {
+            return Ok("NaN".to_owned());
+        }
+
+        if num.is_infinite() {
+            return Ok(if num.is_sign_positive() {
+                "Infinity".to_owned()
+            } else {
+                "-Infinity".to_owned()
+            });
+        }
+
+        let Some(precision) = precision else {
+            return Ok(num.to_string());
+        };
+
+        if num > 10f64.powi(precision as i32) {
+            let result = format!("{:.1$e}", num, precision.saturating_sub(1) as usize);
+
+            let result = result.replace('e', "e+");
+
+            return Ok(result);
+        }
+
+        let num_digits = num.log10().ceil() as i32;
+        
+        let precision = if num_digits.is_negative() {
+            precision + num_digits.unsigned_abs()
+        } else {
+            precision.saturating_sub(num_digits as u32)
+        };
+
+        let result = format!("{:.1$}", num, precision as usize);
+
+        Ok(result)
+    }
+
+    #[prop("valueOf")]
+    fn value_of(&self) -> f64 {
+        let inner = self.inner.borrow();
+
+        inner.number
+    }
+}
+
+fn check_radix_opt(radix: Option<u32>) -> Res {
+    radix.map_or_else(|| Ok(()), check_radix)
+}
+
+fn check_radix(radix: u32) -> Res {
+    if (2..=36).contains(&radix) {
+        Ok(())
+    } else {
+        Err(crate::Error::range(
+            "toString() radix argument must be between 2 and 36",
+        ))
     }
 }
 
@@ -225,11 +344,7 @@ impl NumberObj {
 fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
     const PRECISION: usize = 5;
 
-    if !(2..=36).contains(&radix) {
-        return Err(crate::Error::range(
-            "toString() radix argument must be between 2 and 36",
-        ));
-    }
+    check_radix(radix)?;
 
     let is_negative = value < 0.0;
     let value = value.abs();
