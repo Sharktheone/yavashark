@@ -4,6 +4,7 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
+use crate::utils::ProtoDefault;
 
 #[object]
 #[derive(Debug)]
@@ -11,6 +12,26 @@ pub struct NumberObj {
     #[mutable]
     #[primitive]
     number: f64,
+}
+
+impl ProtoDefault for NumberObj {
+    fn proto_default(realm: &Realm) -> Self {
+        Self {
+            inner: RefCell::new(MutableNumberObj {
+                object: MutObject::with_proto(realm.intrinsics.number.clone().into()),
+                number: 0.0,
+            }),
+        }
+    }
+
+    fn null_proto_default() -> Self {
+        Self {
+            inner: RefCell::new(MutableNumberObj {
+                object: MutObject::null(),
+                number: 0.0,
+            }),
+        }
+    }
 }
 
 #[object(constructor, function, to_string)]
@@ -173,7 +194,7 @@ impl NumberObj {
     }
 }
 
-#[properties_new(constructor(NumberConstructor::new))]
+#[properties_new(default_null(number), constructor(NumberConstructor::new))]
 impl NumberObj {
     #[prop("toString")]
     fn to_string(&self, radix: Option<u32>) -> crate::Res<String> {
