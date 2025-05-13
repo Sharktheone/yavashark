@@ -184,6 +184,15 @@ impl MutObject {
     }
 
     #[must_use]
+    pub fn null() -> Self {
+        Self {
+            properties: IndexMap::new(),
+            prototype: Value::Null.into(),
+            array: Vec::new(),
+        }
+    }
+
+    #[must_use]
     pub fn with_proto(proto: Value) -> Self {
         Self {
             properties: IndexMap::new(),

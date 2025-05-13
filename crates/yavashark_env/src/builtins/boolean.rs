@@ -2,6 +2,7 @@ use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
+use crate::utils::ProtoDefault;
 
 #[object]
 #[derive(Debug)]
@@ -9,6 +10,26 @@ pub struct BooleanObj {
     #[mutable]
     #[primitive]
     boolean: bool,
+}
+
+impl ProtoDefault for BooleanObj {
+    fn proto_default(realm: &Realm) -> Self {
+        Self {
+            inner: RefCell::new(MutableBooleanObj {
+                object: MutObject::with_proto(realm.intrinsics.boolean.clone().into()),
+                boolean: false,
+            }),
+        }
+    }
+
+    fn null_proto_default() -> Self {
+        Self {
+            inner: RefCell::new(MutableBooleanObj {
+                object: MutObject::null(),
+                boolean: false,
+            }),
+        }
+    }
 }
 
 #[object(constructor, function, to_string)]
@@ -66,7 +87,7 @@ impl BooleanObj {
     }
 }
 
-#[properties_new(constructor(BooleanConstructor::new))]
+#[properties_new(default_null(boolean), constructor(BooleanConstructor::new))]
 impl BooleanObj {
     #[prop("valueOf")]
     fn value_of(&self) -> bool {
