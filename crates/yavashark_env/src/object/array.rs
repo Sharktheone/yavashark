@@ -207,7 +207,7 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
         idx as usize
     }
 }
-#[properties_new(default_null, constructor(ArrayConstructor::new))]
+#[properties_new(default_null(array), constructor(ArrayConstructor::new))]
 impl Array {
     #[get("length")]
     fn get_length(&self) -> usize {

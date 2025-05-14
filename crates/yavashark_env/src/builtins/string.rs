@@ -292,7 +292,7 @@ impl StringObj {
     }
 }
 
-#[properties_new(default_null, constructor(StringConstructor::new))]
+#[properties_new(default_null(string), constructor(StringConstructor::new))]
 impl StringObj {
     #[get("length")]
     fn get_length(&self) -> usize {
