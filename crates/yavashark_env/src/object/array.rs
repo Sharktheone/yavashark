@@ -6,7 +6,7 @@ use yavashark_value::{BoxedObj, Constructor, CustomName, Func, Obj};
 
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::utils::{ArrayLike, ValueIterator};
+use crate::utils::{ArrayLike, ProtoDefault, ValueIterator};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 
@@ -14,6 +14,16 @@ use crate::{MutObject, ObjectProperty};
 #[derive(Debug)]
 pub struct Array {
     length: Cell<usize>,
+}
+
+impl ProtoDefault for Array {
+    fn proto_default(realm: &Realm) -> Self {
+        Self::new(realm.intrinsics.array.clone().into())
+    }
+
+    fn null_proto_default() -> Self {
+        Self::new(Value::Null)
+    }
 }
 
 impl Array {
@@ -197,7 +207,7 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
         idx as usize
     }
 }
-#[properties_new(constructor(ArrayConstructor::new))]
+#[properties_new(default_null, constructor(ArrayConstructor::new))]
 impl Array {
     #[get("length")]
     fn get_length(&self) -> usize {
