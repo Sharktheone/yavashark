@@ -22,7 +22,7 @@ impl Constructor<Realm> for ObjectConstructor {
         Ok(match value {
             Value::Object(obj) => obj.into(),
             Value::Number(num) => NumberObj::with_number(realm, num)?.into(),
-            Value::String(string) => StringObj::with_string(realm, string)?.into(),
+            Value::String(string) => Obj::into_value(StringObj::with_string(realm, string)),
             Value::Boolean(boolean) => BooleanObj::new(realm, boolean).into(),
             Value::Symbol(symbol) => SymbolObj::new(realm, symbol).into(),
             Value::BigInt(bigint) => BigIntObj::new(realm, bigint).into(),
