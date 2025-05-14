@@ -54,8 +54,17 @@ impl ObjectConstructor {
 
 #[properties_new(raw)]
 impl ObjectConstructor {
-    fn create(proto: ObjectHandle) -> ObjectHandle {
-        Object::with_proto(proto.into())
+    fn create(proto: ObjectHandle, properties: Option<ObjectHandle>) -> Res<ObjectHandle> {
+        let obj = Object::with_proto(proto.into());
+        
+        
+        if let Some(props) = properties {
+            for (key, value) in props.properties()? {
+                obj.define_property(key, value)?;
+            }
+        }
+        
+        Ok(obj)
     }
 
     #[prop("defineProperty")]
