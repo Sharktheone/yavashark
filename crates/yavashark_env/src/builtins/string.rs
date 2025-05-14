@@ -1,5 +1,5 @@
 use crate::array::Array;
-use crate::utils::ArrayLike;
+use crate::utils::{ArrayLike, ProtoDefault};
 use crate::{
     Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
 };
@@ -13,6 +13,21 @@ use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
 #[derive(Debug)]
 pub struct StringObj {
     pub inner: RefCell<MutableStringObj>,
+}
+
+impl ProtoDefault for StringObj {
+    fn proto_default(realm: &Realm) -> Self {
+        Self::with_string(realm, String::new())
+    }
+
+    fn null_proto_default() -> Self {
+        Self {
+            inner: RefCell::new(MutableStringObj {
+                object: MutObject::null(),
+                string: String::new(),
+            }),
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -202,9 +217,9 @@ impl Constructor<Realm> for StringConstructor {
             None => String::new(),
         };
 
-        let obj = StringObj::with_string(realm, str)?;
+        let obj = StringObj::with_string(realm, str);
 
-        Ok(obj.into())
+        Ok(Obj::into_value(obj))
     }
 }
 
@@ -221,19 +236,17 @@ impl Func<Realm> for StringConstructor {
 
 impl StringObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
-    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
-        Self::with_string(realm, String::new())
+    pub fn new(realm: &Realm) -> ObjectHandle {
+        Obj::into_object(Self::with_string(realm, String::new()))
     }
 
-    pub fn with_string(realm: &Realm, string: String) -> crate::Res<ObjectHandle> {
-        let this = Self {
+    pub fn with_string(realm: &Realm, string: String) -> Self {
+        Self {
             inner: RefCell::new(MutableStringObj {
                 object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
                 string,
             }),
-        };
-
-        Ok(this.into_object())
+        }
     }
 
     pub fn get(&self, index: isize, to: isize) -> Option<String> {
@@ -279,7 +292,7 @@ impl StringObj {
     }
 }
 
-#[properties_new(constructor(StringConstructor::new))]
+#[properties_new(default_null(string), constructor(StringConstructor::new))]
 impl StringObj {
     #[get("length")]
     fn get_length(&self) -> usize {

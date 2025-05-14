@@ -443,14 +443,22 @@ impl Method {
         };
 
         let prepare_receiver = if self.has_receiver {
-
+            
+            
+            let realm_arg = if let Some(i) = self.realm {
+                let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
+                quote! {#argname}
+            } else {
+                quote! {realm}
+            };
+            
             if let Some((def, null)) = proto_default {
                 let env = &config.env_path;
                 
                 let f = if *null {
-                    quote! {null_proto_default}
+                    quote! {null_proto_default()}
                 } else {
-                    quote! {proto_default}
+                    quote! {proto_default(#realm_arg)}
                 };
                 
                 
@@ -458,8 +466,8 @@ impl Method {
                     let mut guard = None;
                     let mut def = None::<Self>;
                     
-                    let this = if this.as_object() == Ok(&realm.intrinsics.#def) {
-                        &*def.insert(#env::utils::ProtoDefault::#f())
+                    let this = if this.as_object() == Ok(&#realm_arg.intrinsics.#def) {
+                        &*def.insert(#env::utils::ProtoDefault::#f)
                     } else {
                         let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
                         

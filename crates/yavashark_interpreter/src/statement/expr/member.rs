@@ -4,6 +4,7 @@ use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
+use yavashark_value::Obj;
 
 impl Interpreter {
     pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -52,7 +53,7 @@ impl Interpreter {
                 "Cannot read property '{name}' of null",
             ))),
             Value::String(s) => {
-                let str = StringObj::with_string(realm, s)?;
+                let str = Obj::into_object(StringObj::with_string(realm, s));
 
                 Ok((
                     str.resolve_property(&name, realm)?
