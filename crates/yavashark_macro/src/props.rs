@@ -408,8 +408,10 @@ impl Method {
             let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
 
             if Some(i) == self.this {
+                let from_value_out = &config.from_value_output;
+                
                 arg_prepare.extend(quote! {
-                    let #argname = this.copy();
+                    let #argname = <#ty as #from_value_out>::from_value_out(this.copy())?;
                 });
             } else if Some(i) == self.realm {
                 arg_prepare.extend(quote! {
