@@ -69,7 +69,9 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
         if let Value::Number(n) = name {
             let index = *n as isize;
 
-            return Ok(Some(self.at(index).into()));
+            let inner = self.inner.borrow();
+
+            return Ok(Some(Self::at(&inner.string, index).into()));
         }
 
         self.get_wrapped_object().resolve_property(name)
@@ -79,7 +81,9 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
         if let Value::Number(n) = name {
             let index = *n as isize;
 
-            return Ok(Some(self.at(index).into()));
+            let inner = self.inner.borrow();
+
+            return Ok(Some(Self::at(&inner.string, index).into()));
         }
 
         self.get_wrapped_object().get_property(name)
@@ -290,6 +294,24 @@ impl StringObj {
 
         string.map(ToString::to_string)
     }
+
+
+
+    pub fn get_single_str(str: &str, index: isize) -> Option<String> {
+        let len = str.len() as isize;
+
+        let start = if index < 0 {
+            (len + index) as usize
+        } else {
+            index as usize
+        };
+
+        let end = start + 1;
+
+        let string = str.get(start..end);
+
+        string.map(ToString::to_string)
+    }
 }
 
 #[properties_new(default_null(string), constructor(StringConstructor::new))]
@@ -299,57 +321,54 @@ impl StringObj {
         self.inner.borrow().string.len()
     }
 
-    pub fn anchor(&self, name: &str) -> ValueResult {
+    pub fn anchor(#[this] string: &str, name: &str) -> ValueResult {
         Ok(format!(
             "<a name=\"{}\">{}</a>",
             name.replace('"', "&quot;"),
-            self.inner.borrow().string
+            string,
         )
         .into())
     }
 
-    pub fn at(&self, index: isize) -> Value {
-        self.get_single(index).map_or(Value::Undefined, Into::into)
+    pub fn at(#[this] str: &str, index: isize) -> Value {
+        Self::get_single_str(str, index).map_or(Value::Undefined, Into::into)
     }
 
-    pub fn big(&self) -> ValueResult {
-        Ok(format!("<big>{}</big>", self.inner.borrow().string).into())
+    pub fn big(#[this] str: &str) -> ValueResult {
+        Ok(format!("<big>{str}</big>").into())
     }
 
-    pub fn blink(&self) -> ValueResult {
-        Ok(format!("<blink>{}</blink>", self.inner.borrow().string).into())
+    pub fn blink(#[this] str: &str) -> ValueResult {
+        Ok(format!("<blink>{str}</blink>").into())
     }
 
-    pub fn bold(&self) -> ValueResult {
-        Ok(format!("<b>{}</b>", self.inner.borrow().string).into())
+    pub fn bold(#[this] str: &str) -> ValueResult {
+        Ok(format!("<b>{str}</b>").into())
     }
 
     #[prop("charAt")]
-    pub fn char_at(&self, index: isize) -> Value {
-        self.get_single(index).map_or(Value::Undefined, Into::into)
+    pub fn char_at(#[this] str: &str, index: isize) -> Value {
+        Self::get_single_str(str, index).map_or(Value::Undefined, Into::into)
     }
 
     #[prop("charCodeAt")]
-    pub fn char_code_at(&self, index: isize) -> Value {
-        self.get_single(index)
+    pub fn char_code_at(#[this] str: &str, index: isize) -> Value {
+        Self::get_single_str(str, index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
             .into()
     }
 
     #[prop("codePointAt")]
-    pub fn code_point_at(&self, index: isize) -> Value {
-        self.get_single(index)
+    pub fn code_point_at(#[this] str: &str, index: isize) -> Value {
+        Self::get_single_str(str, index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
             .into()
     }
 
     #[prop("concat")]
-    pub fn concat(&self, args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
-        let inner = self.inner.borrow();
-        let mut string = inner.string.clone();
-
+    pub fn concat(#[this] mut string: String, args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
         for arg in args {
             string.push_str(&arg.to_string(realm)?);
         }
@@ -358,97 +377,83 @@ impl StringObj {
     }
 
     #[prop("endsWith")]
-    pub fn ends_with(&self, search: &str) -> Value {
-        let inner = self.inner.borrow();
-
-        inner.string.ends_with(&search).into()
+    pub fn ends_with(#[this] str: &str, search: &str) -> Value {
+        str.ends_with(&search).into()
     }
 
     #[prop("fixed")]
-    pub fn fixed(&self) -> ValueResult {
-        Ok(format!("<tt>{}</tt>", self.inner.borrow().string).into())
+    pub fn fixed(#[this] str: &str) -> ValueResult {
+        Ok(format!("<tt>{str}</tt>").into())
     }
 
     #[prop("fontcolor")]
-    pub fn font_color(&self, color: &str) -> ValueResult {
+    pub fn font_color(#[this] str: &str, color: &str) -> ValueResult {
         Ok(format!(
-            "<font color=\"{}\">{}</font>",
-            color,
-            self.inner.borrow().string
+            "<font color=\"{color}\">{str}</font>",
         )
         .into())
     }
 
     #[prop("fontsize")]
-    pub fn font_size(&self, size: &str) -> ValueResult {
+    pub fn font_size(#[this] str: &str, size: &str) -> ValueResult {
         Ok(format!(
-            "<font size=\"{}\">{}</font>",
-            size,
-            self.inner.borrow().string
+            "<font size=\"{size}\">{str}</font>",
         )
         .into())
     }
 
     #[prop("includes")]
-    pub fn includes(&self, search: &str) -> bool {
-        let inner = self.inner.borrow();
-
-        inner.string.contains(search)
+    pub fn includes(#[this] str: &str, search: &str) -> bool {
+        str.contains(search)
     }
 
     #[prop("indexOf")]
-    pub fn index_of(&self, search: &str, from: Option<isize>) -> isize {
+    pub fn index_of(#[this] str: &str, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(0);
-        let inner = self.inner.borrow();
 
         let from = if from < 0 {
-            (inner.string.len() as isize + from) as usize
+            (str.len() as isize + from) as usize
         } else {
             from as usize
         };
 
-        inner
-            .string
+        str
             .get(from..)
             .and_then(|s| s.find(search))
             .map_or(-1, |i| i as isize + from as isize)
     }
 
     #[prop("isWellFormed")]
-    pub fn is_well_formed(&self) -> bool {
+    pub fn is_well_formed(#[this] str: &str) -> bool {
         // check if we have any lone surrogates => between 0xD800-0xDFFF or 0xDC00-0xDFFF
-        self.inner
-            .borrow()
-            .string
+            str
             .chars()
             .all(|c| !is_lone_surrogate(c))
     }
 
     #[prop("italics")]
-    pub fn italics(&self) -> ValueResult {
-        Ok(format!("<i>{}</i>", self.inner.borrow().string).into())
+    pub fn italics(#[this] str: &str) -> ValueResult {
+        Ok(format!("<i>{str}</i>").into())
     }
 
     #[prop("lastIndexOf")]
-    pub fn last_index_of(&self, search: &str, from: Option<isize>) -> isize {
-        let inner = self.inner.borrow();
-
+    pub fn last_index_of(#[this] str: &str, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(-1);
 
         let from = if from < 0 {
-            (inner.string.len() as isize + from) as usize
+            (str.len() as isize + from) as usize
         } else {
             from as usize
         };
 
-        inner.string[..from]
+        str[..from]
             .rfind(&search)
             .map_or(-1, |i| i as isize)
     }
 
     #[prop("link")]
-    pub fn link(&self, url: &str) -> ValueResult {
-        Ok(format!("<a href=\"{}\">{}</a>", url, self.inner.borrow().string).into())
+    pub fn link(#[this] str: &str, url: &str) -> ValueResult {
+        Ok(format!("<a href=\"{url}\">{str}</a>").into())
     }
 
     // #[prop("localeCompare")]
@@ -469,14 +474,12 @@ impl StringObj {
     //     //TODO
     // }
 
-    pub fn normalize(&self, form: &str) -> ValueResult {
-        let inner = self.inner.borrow();
-
+    pub fn normalize(#[this] str: &str, form: &str) -> ValueResult {
         let form = match form {
-            "NFC" => inner.string.nfc().to_string(),
-            "NFD" => inner.string.nfd().to_string(),
-            "NFKC" => inner.string.nfkc().to_string(),
-            "NFKD" => inner.string.nfkd().to_string(),
+            "NFC" => str.nfc().to_string(),
+            "NFD" => str.nfd().to_string(),
+            "NFKC" => str.nfkc().to_string(),
+            "NFKD" => str.nfkd().to_string(),
             _ => return Err(Error::range("Invalid normalization form")),
         };
 
@@ -484,41 +487,33 @@ impl StringObj {
     }
 
     #[prop("padEnd")]
-    pub fn pad_end(&self, target_length: usize, pad_string: &Option<String>) -> ValueResult {
-        let inner = self.inner.borrow();
-
+    pub fn pad_end(#[this] str: &str, target_length: usize, pad_string: &Option<String>) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
-        let pad_len = target_length.saturating_sub(inner.string.len());
+        let pad_len = target_length.saturating_sub(str.len());
 
         let pad = pad_string.repeat(pad_len);
 
-        Ok(format!("{}{}", inner.string, pad).into())
+        Ok(format!("{str}{pad}").into())
     }
 
     #[prop("padStart")]
-    pub fn pad_start(&self, target_length: usize, pad_string: &Option<String>) -> ValueResult {
-        let inner = self.inner.borrow();
-
+    pub fn pad_start(#[this] str: &str, target_length: usize, pad_string: &Option<String>) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
-        let pad_len = target_length.saturating_sub(inner.string.len());
+        let pad_len = target_length.saturating_sub(str.len());
 
         let pad = pad_string.repeat(pad_len);
 
-        Ok(format!("{}{}", pad, inner.string).into())
+        Ok(format!("{pad}{str}").into())
     }
 
-    pub fn repeat(&self, count: usize) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.repeat(count).into())
+    pub fn repeat(#[this] str: &str, count: usize) -> ValueResult {
+        Ok(str.repeat(count).into())
     }
 
-    pub fn replace(&self, search: &str, replace: &str) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.replace(search, replace).into())
+    pub fn replace(#[this] str: &str, search: &str, replace: &str) -> ValueResult {
+        Ok(str.replace(search, replace).into())
     }
 
     // pub fn search(&self, pattern: &RegExp, #[realm] realm: &mut Realm) -> ValueResult {
@@ -532,46 +527,42 @@ impl StringObj {
     //         .into())
     // }
 
-    pub fn slice(&self, start: isize, end: Option<isize>) -> ValueResult {
-        let inner = self.inner.borrow();
-
+    pub fn slice(#[this] str: &str, start: isize, end: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
-            (inner.string.len() as isize + start) as usize
+            (str.len() as isize + start) as usize
         } else {
             start as usize
         };
 
-        let end = end.map_or(inner.string.len(), |end| {
+        let end = end.map_or(str.len(), |end| {
             if end < 0 {
-                (inner.string.len() as isize + end) as usize
+                (str.len() as isize + end) as usize
             } else {
                 end as usize
             }
         });
 
-        let end = cmp::min(end, inner.string.len());
+        let end = cmp::min(end, str.len());
 
-        let string = inner.string.get(start..end);
+        let string = str.get(start..end);
 
         Ok(string.unwrap_or_default().into())
     }
 
-    pub fn small(&self) -> ValueResult {
-        Ok(format!("<small>{}</small>", self.inner.borrow().string).into())
+    pub fn small(#[this] str: &str) -> ValueResult {
+        Ok(format!("<small>{str}</small>").into())
     }
 
     pub fn split(
-        &self,
+        #[this] str: &str,
         separator: &str,
         limit: Option<usize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let inner = self.inner.borrow();
-
         let limit = limit.unwrap_or(usize::MAX);
 
-        let parts = inner.string.splitn(limit, separator);
+        let parts = str.splitn(limit, separator);
 
         let mut array = Vec::new();
 
@@ -583,93 +574,82 @@ impl StringObj {
     }
 
     #[prop("startsWith")]
-    pub fn starts_with(&self, search: &str) -> bool {
-        let inner = self.inner.borrow();
-
-        inner.string.starts_with(search)
+    pub fn starts_with(#[this] str: &str, search: &str) -> bool {
+        str.starts_with(search)
     }
 
-    pub fn strike(&self) -> ValueResult {
-        Ok(format!("<strike>{}</strike>", self.inner.borrow().string).into())
+    pub fn strike(#[this] str: &str) -> ValueResult {
+        Ok(format!("<strike>{str}</strike>").into())
     }
 
-    pub fn sub(&self) -> ValueResult {
-        Ok(format!("<sub>{}</sub>", self.inner.borrow().string).into())
+    pub fn sub(#[this] str: &str) -> ValueResult {
+        Ok(format!("<sub>{str}</sub>").into())
     }
 
-    pub fn substr(&self, start: isize, len: Option<isize>) -> ValueResult {
-        let inner = self.inner.borrow();
-
+    pub fn substr(#[this] str: &str, start: isize, len: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
-            (inner.string.len() as isize + start) as usize
+            (str.len() as isize + start) as usize
         } else {
             start as usize
         };
 
-        let end = len.map_or(inner.string.len(), |len| start + len as usize);
+        let end = len.map_or(str.len(), |len| start + len as usize);
 
-        let end = cmp::min(end, inner.string.len());
+        let end = cmp::min(end, str.len());
 
-        let string = inner.string.get(start..end);
+        let string = str.get(start..end);
 
         Ok(string.unwrap_or_default().into())
     }
 
-    pub fn substring(&self, start: isize, end: Option<isize>) -> ValueResult {
-        let inner = self.inner.borrow();
-
+    pub fn substring(#[this] str: &str, start: isize, end: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
-            (inner.string.len() as isize + start) as usize
+            (str.len() as isize + start) as usize
         } else {
             start as usize
         };
 
-        let end = end.map_or(inner.string.len(), |end| {
+        let end = end.map_or(str.len(), |end| {
             if end < 0 {
-                (inner.string.len() as isize + end) as usize
+                (str.len() as isize + end) as usize
             } else {
                 end as usize
             }
         });
 
-        let end = cmp::min(end, inner.string.len());
+        let end = cmp::min(end, str.len());
 
-        let string = inner.string.get(start..end);
+        let string = str.get(start..end);
 
         Ok(string.unwrap_or_default().into())
     }
 
-    pub fn sup(&self) -> ValueResult {
-        Ok(format!("<sup>{}</sup>", self.inner.borrow().string).into())
+    pub fn sup(#[this] str: &str) -> ValueResult {
+        Ok(format!("<sup>{str}</sup>").into())
     }
 
     #[prop("toLowerCase")]
-    pub fn to_lower_case(&self) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.to_lowercase().into())
+    pub fn _to_lower_case(#[this] str: &str) -> ValueResult {
+        Ok(str.to_lowercase().into())
     }
 
     #[prop("toString")]
-    pub fn to_string(&self) -> Value {
-        self.inner.borrow().string.clone().into()
+    #[must_use]
+    pub fn _to_string(#[this] str: String) -> Value {
+        str.into()
     }
 
     #[prop("toUpperCase")]
-    pub fn to_upper_case(&self) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.to_uppercase().into())
+    pub fn _to_upper_case(#[this] str: &str) -> ValueResult {
+        Ok(str.to_uppercase().into())
     }
 
     #[prop("toWellFormed")]
-    pub fn to_well_formed(&self) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        let well_formed = inner
-            .string
+    pub fn _to_well_formed(#[this] str: &str) -> ValueResult {
+        let well_formed =
+            str
             .chars()
             .map(|c| if is_lone_surrogate(c) { '\u{FFFD}' } else { c })
             .collect::<String>();
@@ -677,29 +657,23 @@ impl StringObj {
         Ok(well_formed.into())
     }
 
-    pub fn trim(&self) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.trim().into())
+    pub fn trim(#[this] str: &str) -> ValueResult {
+        Ok(str.trim().into())
     }
 
     #[prop("trimEnd")]
-    pub fn trim_end(&self) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.trim_end().into())
+    pub fn trim_end(#[this] str: &str) -> ValueResult {
+        Ok(str.trim_end().into())
     }
 
     #[prop("trimStart")]
-    pub fn trim_start(&self) -> ValueResult {
-        let inner = self.inner.borrow();
-
-        Ok(inner.string.trim_start().into())
+    pub fn trim_start(#[this] str: &str) -> ValueResult {
+        Ok(str.trim_start().into())
     }
 
     #[prop("valueOf")]
-    pub fn value_of(&self) -> Value {
-        self.inner.borrow().string.clone().into()
+    pub fn value_of(#[this] str: String) -> Value {
+        str.into()
     }
 }
 
