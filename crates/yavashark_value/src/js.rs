@@ -470,7 +470,13 @@ impl<C: Realm> Value<C> {
 
     pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {
         Ok(match self {
-            Self::Object(o) => o.to_string(realm)?,
+            Self::Object(o) => {
+                if let Some(prim) = o.primitive() {
+                    return prim.to_string(realm);
+                }
+                
+                o.to_string(realm)?
+            },
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => fmt_num(*n),
@@ -483,7 +489,13 @@ impl<C: Realm> Value<C> {
 
     pub fn to_string_no_realm(&self) -> Result<String, Error<C>> {
         Ok(match self {
-            Self::Object(o) => o.to_string_internal()?,
+            Self::Object(o) => {
+                if let Some(prim) = o.primitive() {
+                    return prim.to_string_no_realm()
+                }
+                
+                o.to_string_internal()?
+            },
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => fmt_num(*n),
@@ -496,7 +508,13 @@ impl<C: Realm> Value<C> {
 
     pub fn into_string(self, realm: &mut C) -> Result<String, Error<C>> {
         Ok(match self {
-            Self::Object(o) => o.to_string(realm)?,
+            Self::Object(o) => {
+                if let Some(prim) = o.primitive() {
+                    return prim.into_string(realm)
+                }
+                
+                o.to_string(realm)?
+            },
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => fmt_num(n),
