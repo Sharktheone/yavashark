@@ -27,7 +27,8 @@ impl Constructor<Realm> for Class {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let inner = self.inner.try_borrow()?;
 
-        let this = Object::raw_with_proto(inner.prototype.value.clone()).into_value();
+        let this = ClassInstance::new_with_proto(inner.prototype.value.clone(), self.name.clone()).into_value();
+
         drop(inner);
 
         self.constructor.construct(args, this.copy(), realm)?;
@@ -144,6 +145,18 @@ impl ClassInstance {
     pub fn get_private_prop(&self, key: &str) -> Res<Option<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(inner.private_props.get(key).cloned())
+        let mut prop = inner.private_props.get(key).cloned();
+
+        if prop.is_none() {
+            let proto = inner.object.prototype.value.clone();
+
+            drop(inner);
+
+            if let Some(class) = proto.downcast::<Self>()? {
+                prop = class.get_private_prop(key)?;
+            }
+        }
+
+        Ok(prop)
     }
 }
