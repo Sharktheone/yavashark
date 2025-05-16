@@ -123,4 +123,25 @@ impl ObjectImpl<Realm> for Arguments {
 
         self.get_wrapped_object().get_property(name)
     }
+
+    fn name(&self) -> String {
+        "Arguments".to_string()
+    }
+
+    fn to_string(&self, _: &mut Realm) -> Result<String, Error<Realm>> {
+        Ok("[object Arguments]".to_string())
+    }
+    
+    fn to_string_internal(&self) -> Result<String, Error<Realm>> {
+        Ok("[object Arguments]".to_string())
+    }
+
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error<Realm>> {
+        let args = self.args.borrow();
+        if index < args.len() {
+            Ok((true, Some(args[index].clone())))
+        } else {
+            Ok((false, None))
+        }
+    }
 }
