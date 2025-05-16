@@ -1,5 +1,5 @@
 use swc_common::Spanned;
-use swc_ecma_ast::Stmt;
+use swc_ecma_ast::{Decl, Stmt};
 
 use yavashark_env::{scope::Scope, Realm, RuntimeResult, Value};
 
@@ -65,13 +65,33 @@ impl Interpreter {
         script: &Vec<Stmt>,
         scope: &mut Scope,
     ) -> RuntimeResult {
+        for stmt in script {
+            if let Stmt::Decl(decl) = stmt {
+                Self::hoist_decl(realm, decl, scope)?;
+            }
+        }
+        
+        
         let mut last_value = Value::Undefined;
         for stmt in script {
+            if stmt.skip_statements() {
+                continue;
+            }
             let x = Self::run_statement(realm, stmt, scope);
 
             last_value = x?;
         }
 
         Ok(last_value)
+    }
+}
+
+trait IsHoistable {
+    fn skip_statements(&self) -> bool;
+}
+
+impl IsHoistable for Stmt {
+    fn skip_statements(&self) -> bool {
+        matches!(self, Stmt::Decl(Decl::Fn(_)))
     }
 }

@@ -277,6 +277,7 @@ impl ObjectOrVariables {
 pub struct ScopeInternal {
     parent: Option<Gc<RefCell<ScopeInternal>>>,
     variables: ObjectOrVariables,
+    hoisted: HashSet<String>,
     pub available_labels: Vec<String>,
     pub last_label_is_current: bool,
     pub state: ScopeState,
@@ -322,6 +323,7 @@ impl ScopeInternal {
         Self {
             parent: None,
             variables: ObjectOrVariables::Object(global),
+            hoisted: HashSet::new(),
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::new(),
@@ -337,6 +339,7 @@ impl ScopeInternal {
         Self {
             parent: None,
             variables: ObjectOrVariables::Object(realm.global.clone()),
+            hoisted: HashSet::new(),
             available_labels: Vec::new(),
             last_label_is_current: false,
             state: ScopeState::STATE_NONE,
@@ -386,6 +389,7 @@ impl ScopeInternal {
         Ok(Self {
             parent: Some(parent),
             variables: ObjectOrVariables::Variables(variables),
+            hoisted: HashSet::new(),
             available_labels,
             last_label_is_current: false,
             state,
@@ -441,6 +445,10 @@ impl ScopeInternal {
     pub fn resolve(&self, name: &str) -> Res<Option<Value>> {
         if let Some(v) = self.variables.get(name) {
             return Ok(Some(v.copy()));
+        }
+        
+        if self.hoisted.contains(name) {
+            return Err(Error::reference_error(format!("Cannot access {name} before initialization")));
         }
 
         match &self.parent {
@@ -661,6 +669,14 @@ impl ScopeInternal {
 
         Ok(variables)
     }
+    
+    pub fn hoist(&mut self, name: String) {
+        self.hoisted.insert(name);
+    }
+    
+    pub fn is_hoisted(&self, name: &str) -> bool {
+        self.hoisted.contains(name)
+    }
 }
 
 impl Scope {
@@ -696,6 +712,7 @@ impl Scope {
             scope: Gc::new(RefCell::new(ScopeInternal {
                 parent: Some(Gc::clone(&parent.scope)),
                 variables: ObjectOrVariables::Object(object),
+                hoisted: HashSet::new(),
                 available_labels: Vec::new(),
                 last_label_is_current: false,
                 state: ScopeState::new(),
@@ -894,6 +911,15 @@ impl Scope {
             scope: self,
             module: Module::default(),
         }
+    }
+    
+    pub fn hoist(&self, name: String) -> Res {
+        self.scope.borrow_mut()?.hoist(name);
+        Ok(())
+    }
+    
+    pub fn is_hoisted(&self, name: &str) -> Res<bool> {
+        Ok(self.scope.borrow()?.is_hoisted(name))
     }
 }
 
