@@ -61,7 +61,7 @@ pub fn create_class(
             }
             ClassMember::PrivateMethod(method) => {
                 let (name, func) = create_method(
-                    &PropName::Ident(format!("#{}", method.key.name).as_str().into()),
+                    &PropName::Ident(method.key.name.as_str().into()),
                     &method.function,
                     scope,
                     realm,
@@ -76,7 +76,7 @@ pub fn create_class(
             }
 
             ClassMember::PrivateProp(o) => {
-                let key = format!("#{}", o.key.name);
+                let key = o.key.name.as_str();
                 let value = if let Some(value) = &o.value {
                     Interpreter::run_expr(realm, value, stmt.span, scope)?
                 } else {
