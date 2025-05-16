@@ -96,6 +96,20 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
     fn primitive(&self) -> Option<yavashark_value::Value<Realm>> {
         Some(self.inner.borrow().string.clone().into())
     }
+
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+        let inner = self.inner.borrow();
+
+        if index >= inner.string.len() {
+            return Ok((false, None));
+        }
+
+        let c = inner.string.chars().nth(index).unwrap_or_default();
+
+        let value = c.to_string().into();
+
+        Ok((true, Some(value)))
+    }
 }
 
 #[object(constructor, function, to_string, name)]
