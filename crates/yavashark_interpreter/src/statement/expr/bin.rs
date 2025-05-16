@@ -1,7 +1,7 @@
-use swc_ecma_ast::{BinExpr, BinaryOp};
+use swc_ecma_ast::{BinExpr, BinaryOp, Expr, PrivateName};
 
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, RuntimeResult, Value};
+use yavashark_env::{Class, ClassInstance, Realm, Res, RuntimeResult, Value};
 
 use crate::Interpreter;
 
@@ -126,6 +126,12 @@ impl Interpreter {
                 return Ok(right);
             }
             BinaryOp::In => {
+                if let Expr::PrivateName(pn) = &*stmt.left {
+                    let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
+                    return Ok(Self::contains_private_name(realm, pn, &right)?.into());
+                }
+
+
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
                 right.contains_key(&left)?.into()
@@ -150,5 +156,13 @@ impl Interpreter {
                 }
             }
         })
+    }
+
+    pub fn contains_private_name(
+        realm: &mut Realm,
+        pn: &PrivateName,
+        val: &Value,
+    ) -> Res<bool> {
+        Ok(val.downcast::<ClassInstance>()?.is_some_and(|c| c.get_private_prop(pn.name.as_str()).is_ok_and(|v| v.is_some())))
     }
 }
