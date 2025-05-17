@@ -1,8 +1,10 @@
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
+use std::ops::{Deref, DerefMut};
+use swc_ecma_ast::VarDecl;
 use yavashark_garbage::OwningGcGuard;
-use yavashark_macro::{object, properties, properties_new};
-use yavashark_value::{BoxedObj, Constructor, CustomName, Func, Obj};
+use yavashark_macro::{object, properties, properties_new, props};
+use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
 
 use crate::object::Object;
 use crate::realm::Realm;
@@ -10,10 +12,118 @@ use crate::utils::{ArrayLike, ProtoDefault, ValueIterator};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 
-#[object(to_string)]
 #[derive(Debug)]
 pub struct Array {
+    inner: RefCell<MutObject>,
     length: Cell<usize>,
+}
+
+impl ObjectImpl<Realm> for Array {
+    type Inner = MutObject;
+
+    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+        self.inner.borrow_mut()
+    }
+
+    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+        self.inner.borrow()
+    }
+
+    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+        self.inner.borrow_mut()
+    }
+
+    
+    fn define_property(&self, name: Value, value: Value) -> Res<()> {
+        if matches!(&name, Value::String(s) if s == "length") {
+            let length = value.as_number() as usize;
+            
+            self.set_len(length)?;
+            
+            return Ok(());
+        }
+
+        self.get_wrapped_object().define_property(name, value)
+    }
+
+    fn define_variable(&self, name: Value, value: Variable) -> Res {
+        if matches!(&name, Value::String(s) if s == "length") {
+            let length = value.value.as_number() as usize;
+            
+            self.set_len(length)?;
+            
+            return Ok(());
+        }
+
+        self.get_wrapped_object().define_variable(name, value)
+    }
+
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        if matches!(&name, Value::String(s) if s == "length") {
+            return Ok(Some(Variable::write(self.length.get().into()).into()));
+        }
+
+        self.get_wrapped_object().resolve_property(name)
+
+    }
+
+
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        if matches!(&name, Value::String(s) if s == "length") { 
+            return Ok(Some(self.length.get().into()));
+        }
+        
+        
+        self.get_wrapped_object().get_property(name)
+    }
+
+
+    fn contains_key(&self, name: &Value) -> Res<bool> {
+        if matches!(&name, Value::String(s) if s == "length") {
+            return Ok(true);
+        }
+
+        self.get_wrapped_object().contains_key(name)
+    }
+
+    fn name(&self) -> String {
+        "Array".to_string()
+    }
+    
+    fn to_string(&self, realm: &mut Realm) -> Res<String> {
+        let mut buf = String::new();
+
+        let inner = self.inner.try_borrow()?;
+
+        for (_, value) in &inner.array {
+            buf.push_str(&value.value.to_string(realm)?);
+            buf.push_str(", ");
+        }
+
+        buf.pop();
+        buf.pop();
+
+        Ok(buf)
+    } 
+    
+    fn to_string_internal(&self) -> Res<String> {
+        use std::fmt::Write as _;
+
+        let mut buf = String::new();
+
+        let inner = self.inner.try_borrow()?;
+
+        for (_, value) in &inner.array {
+            let _ = write!(buf, "{}", value.value);
+
+            buf.push_str(", ");
+        }
+
+        buf.pop();
+        buf.pop();
+
+        Ok(buf)
+    }
 }
 
 impl ProtoDefault for Array {
@@ -33,7 +143,7 @@ impl Array {
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
 
-        inner.object.set_array(elements);
+        inner.set_array(elements);
 
         drop(inner);
 
@@ -85,7 +195,7 @@ impl Array {
             let (_, val) = array_like.get_array_or_done(idx)?;
 
             if let Some(val) = val {
-                inner.object.array.push((idx, Variable::new(val).into()));
+                inner.array.push((idx, Variable::new(val).into()));
             }
         }
 
@@ -99,9 +209,7 @@ impl Array {
     #[must_use]
     pub fn new(proto: Value) -> Self {
         Self {
-            inner: RefCell::new(MutableArray {
-                object: MutObject::with_proto(proto),
-            }),
+            inner: RefCell::new(MutObject::with_proto(proto)),
             length: Cell::new(0),
         }
     }
@@ -111,45 +219,12 @@ impl Array {
         Self::new(realm.intrinsics.array.clone().into())
     }
 
-    pub fn override_to_string(&self, realm: &mut Realm) -> Res<String> {
-        let mut buf = String::new();
-
-        let inner = self.inner.try_borrow()?;
-
-        for (_, value) in &inner.object.array {
-            buf.push_str(&value.value.to_string(realm)?);
-            buf.push_str(", ");
-        }
-
-        buf.pop();
-        buf.pop();
-
-        Ok(buf)
-    }
-
-    pub fn override_to_string_internal(&self) -> Res<String> {
-        use std::fmt::Write as _;
-
-        let mut buf = String::new();
-
-        let inner = self.inner.try_borrow()?;
-
-        for (_, value) in &inner.object.array {
-            let _ = write!(buf, "{}", value.value);
-
-            buf.push_str(", ");
-        }
-
-        buf.pop();
-        buf.pop();
-
-        Ok(buf)
-    }
+   
 
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
         let mut inner = self.inner.try_borrow_mut()?;
 
-        inner.object.insert_array(idx, val.into());
+        inner.insert_array(idx, val.into());
         let len = self.length.get();
 
         if idx >= len {
@@ -163,7 +238,6 @@ impl Array {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner
-            .object
             .array
             .iter()
             .map(|(_, v)| v.value.clone())
@@ -173,10 +247,9 @@ impl Array {
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
 
-        let index = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
+        let index = inner.array.last().map_or(0, |(i, _)| *i + 1);
 
         inner
-            .object
             .array
             .push((index, Variable::new(value).into()));
         self.length.set(index + 1);
@@ -187,15 +260,23 @@ impl Array {
     pub fn to_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        let len = inner.object.array.last().map_or(0, |(i, _)| *i + 1);
+        let len = inner.array.last().map_or(0, |(i, _)| *i + 1);
 
         let mut vec = vec![Value::Undefined; len];
 
-        for (idx, value) in &inner.object.array {
+        for (idx, value) in &inner.array {
             vec[*idx] = value.value.clone();
         }
 
         Ok(vec)
+    }
+    
+    pub fn set_len(&self, len: usize) -> Res {
+        self.length.set(len);
+        
+        self.inner.try_borrow_mut()?.resize_array(len);
+        
+        Ok(())
     }
 }
 
@@ -209,11 +290,11 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
 }
 #[properties_new(default_null(array), constructor(ArrayConstructor::new))]
 impl Array {
-    #[get("length")]
-    fn get_length(&self) -> usize {
-        self.length.get()
-    }
-
+    
+    #[prop("length")]
+    pub const LENGTH: usize = 0;
+    
+    
     fn at(#[this] this: &Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
@@ -252,7 +333,7 @@ impl Array {
             push_to(arg)?;
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     #[prop("copyWithin")]
@@ -367,7 +448,7 @@ impl Array {
         let len = len.as_number() as usize;
 
         let array = Self::from_realm(realm);
-        
+
         let this_arg = this_arg.unwrap_or(realm.global.clone().into());
 
         for idx in 0..len {
@@ -386,7 +467,7 @@ impl Array {
             }
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     fn find(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
@@ -557,7 +638,7 @@ impl Array {
             }
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     #[prop("flatMap")]
@@ -601,7 +682,7 @@ impl Array {
             }
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     #[prop("forEach")]
@@ -789,7 +870,7 @@ impl Array {
             }
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     fn pop(#[this] this: &Value, #[realm] realm: &mut Realm) -> ValueResult {
@@ -985,7 +1066,7 @@ impl Array {
             }
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     fn some(#[this] this: &Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
@@ -1068,7 +1149,7 @@ impl Array {
 
         this.define_property("length".into(), new_len.into())?;
 
-        Ok(Self::with_elements(realm, deleted)?.into_value())
+        Ok(Obj::into_value(Self::with_elements(realm, deleted)?))
     }
 
     #[prop("toReversed")]
@@ -1091,7 +1172,7 @@ impl Array {
             }
         }
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     #[prop("toSorted")]
@@ -1135,7 +1216,7 @@ impl Array {
             values.sort_by_key(|a| a.to_string(realm).unwrap_or_default());
         }
 
-        Ok(Self::with_elements(realm, values)?.into_value())
+        Ok(Obj::into_value(Self::with_elements(realm, values)?))
     }
 
     fn unshift(#[this] this: &Value, args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
@@ -1203,7 +1284,7 @@ impl Array {
             }
         }
 
-        Ok(Self::with_elements(realm, vals)?.into_value())
+        Ok(Obj::into_value(Self::with_elements(realm, vals)?))
     }
 
     #[prop(crate::Symbol::ITERATOR)]
@@ -1229,7 +1310,7 @@ impl Array {
 
     #[prop("toString")]
     fn to_string_js(&self, #[realm] realm: &mut Realm) -> Res<String> {
-        self.override_to_string(realm)
+        Obj::to_string(self, realm)
     }
 }
 
@@ -1241,7 +1322,7 @@ impl Constructor<Realm> for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         if args.len() == 1 {
             if let Value::Number(num) = &args[0] {
-                return Ok(Array::with_len(realm, *num as usize)?.into_value());
+                return Ok(Obj::into_value(Array::with_len(realm, *num as usize)?));
             }
         }
 
@@ -1255,12 +1336,12 @@ impl Constructor<Realm> for ArrayConstructor {
 
         let mut inner = this.inner.try_borrow_mut()?;
 
-        inner.object.array = values;
-        this.length.set(inner.object.array.len());
+        inner.array = values;
+        this.length.set(inner.array.len());
 
         drop(inner);
 
-        Ok(this.into_object().into())
+        Ok(Obj::into_value(this))
     }
 }
 
@@ -1307,7 +1388,7 @@ impl ArrayConstructor {
     fn of(#[realm] realm: &Realm, args: Vec<Value>) -> ValueResult {
         let array = Array::with_elements(realm, args)?;
 
-        Ok(array.into_value())
+        Ok(Obj::into_value(array))
     }
 
     fn from(
@@ -1317,12 +1398,12 @@ impl ArrayConstructor {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
-            return Ok(Array::from_string(realm, str)?.into_object());
+            return Ok(Obj::into_object(Array::from_string(realm, str)?));
         }
 
         let array = ArrayLike::new(items, realm)?.to_vec(realm)?;
 
-        Ok(Array::with_elements(realm, array)?.into_object())
+        Ok(Obj::into_object(Array::with_elements(realm, array)?))
     }
 }
 

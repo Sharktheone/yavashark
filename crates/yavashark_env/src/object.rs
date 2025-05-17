@@ -302,6 +302,17 @@ impl MutObject {
 
         found
     }
+    
+    pub fn resize_array(&mut self, new_len: usize) {
+        let len = self.array.last().map_or(0, |v| v.0 + 1);
+        
+        if len > new_len {
+            let (idx, _) = self.array_position(new_len);
+            
+            
+            self.array.truncate(idx);
+        } 
+    }
 
     pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<Self, Error> {
         let mut object = Self::new(realm);
