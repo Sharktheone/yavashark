@@ -318,7 +318,7 @@ impl Array {
     }
 
     fn concat(#[this] this: Value, #[realm] realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let array = if let Some(array) = this.downcast::<Array>()? {
+        let array = if let Some(array) = this.downcast::<Self>()? {
             array.shallow_clone(realm)?
         } else {
             let items = ArrayLike::new(this, realm)?.to_vec(realm)?;
@@ -328,7 +328,16 @@ impl Array {
 
 
         for arg in args {
-            array.push(arg)?;
+            if ArrayLike::is_array_like(&arg)? {
+                let items = ArrayLike::new(arg, realm)?.to_vec(realm)?;
+
+                for item in items {
+                    array.push(item)?;
+                }
+            } else {
+                array.push(arg)?;
+            }
+
         }
 
         Ok(Obj::into_value(array))

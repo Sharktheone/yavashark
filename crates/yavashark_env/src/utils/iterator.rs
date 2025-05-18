@@ -40,6 +40,30 @@ pub struct ArrayLike {
 }
 
 impl ArrayLike {
+    pub fn is_array_like(val: &Value) -> Res<bool> {
+        if let Ok(Some(_)) = val.downcast::<Array>() {
+            return Ok(true)
+        };
+        
+        
+        let Value::Object(o) = val else {
+            return Ok(false)
+        };
+        
+        if o.contains_key(&Symbol::ITERATOR.into())? {
+            return Ok(true)
+        }
+        
+        if o.contains_key(&"length".into())? {
+            return Ok(true)
+        }
+        
+        
+        Ok(false)
+        
+        
+    }
+    
     pub fn new(val: Value, realm: &mut Realm) -> Res<Self> {
         if let Some(array) = val.downcast::<Array>()? {
             let values = array.to_vec()?;
