@@ -33,13 +33,13 @@ impl ObjectImpl<Realm> for Array {
         self.inner.borrow_mut()
     }
 
-    
+
     fn define_property(&self, name: Value, value: Value) -> Res<()> {
         if matches!(&name, Value::String(s) if s == "length") {
             let length = value.as_number() as usize;
-            
+
             self.set_len(length)?;
-            
+
             return Ok(());
         }
 
@@ -49,9 +49,9 @@ impl ObjectImpl<Realm> for Array {
     fn define_variable(&self, name: Value, value: Variable) -> Res {
         if matches!(&name, Value::String(s) if s == "length") {
             let length = value.value.as_number() as usize;
-            
+
             self.set_len(length)?;
-            
+
             return Ok(());
         }
 
@@ -69,11 +69,11 @@ impl ObjectImpl<Realm> for Array {
 
 
     fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if matches!(&name, Value::String(s) if s == "length") { 
+        if matches!(&name, Value::String(s) if s == "length") {
             return Ok(Some(self.length.get().into()));
         }
-        
-        
+
+
         self.get_wrapped_object().get_property(name)
     }
 
@@ -89,7 +89,7 @@ impl ObjectImpl<Realm> for Array {
     fn name(&self) -> String {
         "Array".to_string()
     }
-    
+
     fn to_string(&self, realm: &mut Realm) -> Res<String> {
         let mut buf = String::new();
 
@@ -104,8 +104,8 @@ impl ObjectImpl<Realm> for Array {
         buf.pop();
 
         Ok(buf)
-    } 
-    
+    }
+
     fn to_string_internal(&self) -> Res<String> {
         use std::fmt::Write as _;
 
@@ -219,7 +219,7 @@ impl Array {
         Self::new(realm.intrinsics.array.clone().into())
     }
 
-   
+
 
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
         let mut inner = self.inner.try_borrow_mut()?;
@@ -270,13 +270,23 @@ impl Array {
 
         Ok(vec)
     }
-    
+
     pub fn set_len(&self, len: usize) -> Res {
         self.length.set(len);
-        
+
         self.inner.try_borrow_mut()?.resize_array(len);
-        
+
         Ok(())
+    }
+
+    pub fn shallow_clone(&self, realm: &Realm) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.array.clone().into());
+
+        array.inner.try_borrow_mut()?.array.clone_from(&self.inner.try_borrow()?.array);
+
+        array.length.set(self.length.get());
+
+        Ok(array)
     }
 }
 
@@ -290,11 +300,11 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
 }
 #[properties_new(default_null(array), constructor(ArrayConstructor::new))]
 impl Array {
-    
+
     #[prop("length")]
     pub const LENGTH: usize = 0;
-    
-    
+
+
     fn at(#[this] this: &Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
 
@@ -308,29 +318,17 @@ impl Array {
     }
 
     fn concat(#[this] this: Value, #[realm] realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let array = Self::from_realm(realm);
+        let array = if let Some(array) = this.downcast::<Array>()? {
+            array.shallow_clone(realm)?
+        } else {
+            let items = ArrayLike::new(this, realm)?.to_vec(realm)?;
 
-        let mut push_to = |val: Value| -> Res {
-            if let Value::Object(obj) = &val {
-                if obj.has_key(&"length".into())? {
-                    let iter = ValueIterator::new(&val, realm)?;
-
-                    while let Some(val) = iter.next(realm)? {
-                        array.push(val)?;
-                    }
-                    return Ok(());
-                }
-            }
-
-            array.push(val)?;
-
-            Ok(())
+            Self::with_elements(realm, items)?
         };
 
-        push_to(this)?;
 
         for arg in args {
-            push_to(arg)?;
+            array.push(arg)?;
         }
 
         Ok(Obj::into_value(array))
