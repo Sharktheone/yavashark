@@ -24,7 +24,7 @@ impl ConstIntoValue for ConstValue {
             Self::Boolean(b) => Value::Boolean(b),
             Self::Object(obj) => obj.into_value(vm)?,
             Self::Array(array) => array.into_value(vm)?,
-            Self::Symbol(s) => Value::Symbol(s.into()),
+            Self::Symbol(ref s) => Value::Symbol(s.into()),
             Self::Function(bp) => {
                 let func: RefCell<Box<dyn FunctionCode>> =
                     RefCell::new(Box::new(BytecodeFunction {
@@ -228,7 +228,7 @@ impl ConstIntoValue for DataTypeValue {
             Self::Regex(exp, flags) => {
                 RegExp::new_from_str_with_flags(vm.get_realm_ref(), &exp, &flags)?.into()
             }
-            Self::Symbol(s) => Value::Symbol(s.into()),
+            Self::Symbol(ref s) => Value::Symbol(s.into()),
             Self::Acc(_) => vm.acc(),
             Self::Reg(reg) => vm.get_register(reg.0)?,
             Self::Var(var) => vm.get_variable(var.0)?,

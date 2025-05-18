@@ -78,7 +78,7 @@ impl Func<Realm> for SymbolConstructor {
             .first()
             .map_or(Ok(String::new()), |v| v.to_string(realm))?;
 
-        Ok(Symbol::from(sym).into())
+        Ok(Symbol::new_str(&sym).into())
     }
 }
 
