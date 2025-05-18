@@ -143,6 +143,10 @@ impl ArrayLike {
     }
 
     pub fn to_vec(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
+        if let Some(values) = &mut self.values {
+            return Ok(values.clone());
+        }
+        
         let mut res = Vec::with_capacity(self.len());
         let idx = self.idx();
         self.idx.set(0);
