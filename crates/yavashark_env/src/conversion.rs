@@ -144,6 +144,7 @@ macro_rules! impl_from_value_output {
                     match value {
                         Value::Number(n) => Ok(n as $t),
                         Value::String(ref s) => s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}"))),
+                        Value::Boolean(b) => Ok(b.into()),
                         #[allow(clippy::cast_lossless)]
                         Value::Undefined => Ok(0 as $t),
                         #[allow(clippy::cast_lossless)]
