@@ -1,6 +1,8 @@
+use std::fmt::Display;
 use crate::{Error, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use std::mem;
+use std::ops::{Deref, DerefMut};
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
@@ -133,6 +135,69 @@ impl FromValueOutput for &BigInt {
         BigInt::from_value_out(value)
     }
 }
+
+
+pub struct ActualString(String);
+
+impl Deref for ActualString {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for ActualString {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Display for ActualString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl From<ActualString> for String {
+    fn from(value: ActualString) -> Self {
+        value.0
+    }
+}
+
+impl From<ActualString> for Value {
+    fn from(value: ActualString) -> Self {
+        value.0.into()
+    }
+}
+
+impl FromValueOutput for ActualString {
+    type Output = Self;
+
+    fn from_value_out(value: Value) -> Res<Self::Output> {
+        match value {
+            Value::Object(ref o) => {
+                if let Some(Value::String(s)) = o.primitive() {
+                    return Ok(Self(s));
+                }
+            }
+            Value::String(s) => return Ok(Self(s)),
+            _ => {}
+        }
+
+        Err(Error::ty_error(format!("Expected string, found {value:?}")))
+    }
+}
+
+
+impl FromValueOutput for &ActualString {
+    type Output = ActualString;
+
+    fn from_value_out(value: Value) -> Res<Self::Output> {
+        ActualString::from_value_out(value)
+    }
+}
+
 
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {

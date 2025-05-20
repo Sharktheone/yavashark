@@ -9,6 +9,7 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
+use crate::conversion::ActualString;
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -71,7 +72,10 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
 
             let inner = self.inner.borrow();
 
-            return Ok(Some(Self::at(&inner.string, index).into()));
+
+            let chr = Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+
+            return Ok(Some(chr.into()));
         }
 
         self.get_wrapped_object().resolve_property(name)
@@ -82,8 +86,10 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
             let index = *n as isize;
 
             let inner = self.inner.borrow();
+            
+            let chr = Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
 
-            return Ok(Some(Self::at(&inner.string, index).into()));
+            return Ok(Some(chr.into()));
         }
 
         self.get_wrapped_object().get_property(name)
@@ -335,7 +341,7 @@ impl StringObj {
         self.inner.borrow().string.len()
     }
 
-    pub fn anchor(#[this] string: &str, name: &str) -> ValueResult {
+    pub fn anchor(#[this] string: &ActualString, name: &str) -> ValueResult {
         Ok(format!(
             "<a name=\"{}\">{}</a>",
             name.replace('"', "&quot;"),
@@ -344,29 +350,29 @@ impl StringObj {
         .into())
     }
 
-    pub fn at(#[this] str: &str, index: isize) -> Value {
+    pub fn at(#[this] str: &ActualString, index: isize) -> Value {
         Self::get_single_str(str, index).map_or(Value::Undefined, Into::into)
     }
 
-    pub fn big(#[this] str: &str) -> ValueResult {
+    pub fn big(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<big>{str}</big>").into())
     }
 
-    pub fn blink(#[this] str: &str) -> ValueResult {
+    pub fn blink(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<blink>{str}</blink>").into())
     }
 
-    pub fn bold(#[this] str: &str) -> ValueResult {
+    pub fn bold(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<b>{str}</b>").into())
     }
 
     #[prop("charAt")]
-    pub fn char_at(#[this] str: &str, index: isize) -> Value {
+    pub fn char_at(#[this] str: &ActualString, index: isize) -> Value {
         Self::get_single_str(str, index).map_or(Value::Undefined, Into::into)
     }
 
     #[prop("charCodeAt")]
-    pub fn char_code_at(#[this] str: &str, index: isize) -> Value {
+    pub fn char_code_at(#[this] str: &ActualString, index: isize) -> Value {
         Self::get_single_str(str, index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
@@ -374,7 +380,7 @@ impl StringObj {
     }
 
     #[prop("codePointAt")]
-    pub fn code_point_at(#[this] str: &str, index: isize) -> Value {
+    pub fn code_point_at(#[this] str: &ActualString, index: isize) -> Value {
         Self::get_single_str(str, index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
@@ -391,17 +397,17 @@ impl StringObj {
     }
 
     #[prop("endsWith")]
-    pub fn ends_with(#[this] str: &str, search: &str) -> Value {
+    pub fn ends_with(#[this] str: &ActualString, search: &str) -> Value {
         str.ends_with(&search).into()
     }
 
     #[prop("fixed")]
-    pub fn fixed(#[this] str: &str) -> ValueResult {
+    pub fn fixed(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<tt>{str}</tt>").into())
     }
 
     #[prop("fontcolor")]
-    pub fn font_color(#[this] str: &str, color: &str) -> ValueResult {
+    pub fn font_color(#[this] str: &ActualString, color: &str) -> ValueResult {
         Ok(format!(
             "<font color=\"{color}\">{str}</font>",
         )
@@ -409,7 +415,7 @@ impl StringObj {
     }
 
     #[prop("fontsize")]
-    pub fn font_size(#[this] str: &str, size: &str) -> ValueResult {
+    pub fn font_size(#[this] str: &ActualString, size: &str) -> ValueResult {
         Ok(format!(
             "<font size=\"{size}\">{str}</font>",
         )
@@ -417,12 +423,12 @@ impl StringObj {
     }
 
     #[prop("includes")]
-    pub fn includes(#[this] str: &str, search: &str) -> bool {
+    pub fn includes(#[this] str: &ActualString, search: &str) -> bool {
         str.contains(search)
     }
 
     #[prop("indexOf")]
-    pub fn index_of(#[this] str: &str, search: &str, from: Option<isize>) -> isize {
+    pub fn index_of(#[this] str: &ActualString, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(0);
 
         let from = if from < 0 {
@@ -438,7 +444,7 @@ impl StringObj {
     }
 
     #[prop("isWellFormed")]
-    pub fn is_well_formed(#[this] str: &str) -> bool {
+    pub fn is_well_formed(#[this] str: &ActualString) -> bool {
         // check if we have any lone surrogates => between 0xD800-0xDFFF or 0xDC00-0xDFFF
             str
             .chars()
@@ -446,12 +452,12 @@ impl StringObj {
     }
 
     #[prop("italics")]
-    pub fn italics(#[this] str: &str) -> ValueResult {
+    pub fn italics(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<i>{str}</i>").into())
     }
 
     #[prop("lastIndexOf")]
-    pub fn last_index_of(#[this] str: &str, search: &str, from: Option<isize>) -> isize {
+    pub fn last_index_of(#[this] str: &ActualString, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(-1);
 
         let from = if from < 0 {
@@ -466,7 +472,7 @@ impl StringObj {
     }
 
     #[prop("link")]
-    pub fn link(#[this] str: &str, url: &str) -> ValueResult {
+    pub fn link(#[this] str: &ActualString, url: &str) -> ValueResult {
         Ok(format!("<a href=\"{url}\">{str}</a>").into())
     }
 
@@ -488,7 +494,7 @@ impl StringObj {
     //     //TODO
     // }
 
-    pub fn normalize(#[this] str: &str, form: &str) -> ValueResult {
+    pub fn normalize(#[this] str: &ActualString, form: &str) -> ValueResult {
         let form = match form {
             "NFC" => str.nfc().to_string(),
             "NFD" => str.nfd().to_string(),
@@ -501,7 +507,7 @@ impl StringObj {
     }
 
     #[prop("padEnd")]
-    pub fn pad_end(#[this] str: &str, target_length: usize, pad_string: &Option<String>) -> ValueResult {
+    pub fn pad_end(#[this] str: &ActualString, target_length: usize, pad_string: &Option<String>) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
         let pad_len = target_length.saturating_sub(str.len());
@@ -512,7 +518,7 @@ impl StringObj {
     }
 
     #[prop("padStart")]
-    pub fn pad_start(#[this] str: &str, target_length: usize, pad_string: &Option<String>) -> ValueResult {
+    pub fn pad_start(#[this] str: &ActualString, target_length: usize, pad_string: &Option<String>) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
         let pad_len = target_length.saturating_sub(str.len());
@@ -522,11 +528,11 @@ impl StringObj {
         Ok(format!("{pad}{str}").into())
     }
 
-    pub fn repeat(#[this] str: &str, count: usize) -> ValueResult {
+    pub fn repeat(#[this] str: &ActualString, count: usize) -> ValueResult {
         Ok(str.repeat(count).into())
     }
 
-    pub fn replace(#[this] str: &str, search: &str, replace: &str) -> ValueResult {
+    pub fn replace(#[this] str: &ActualString, search: &str, replace: &str) -> ValueResult {
         Ok(str.replace(search, replace).into())
     }
 
@@ -541,7 +547,7 @@ impl StringObj {
     //         .into())
     // }
 
-    pub fn slice(#[this] str: &str, start: isize, end: Option<isize>) -> ValueResult {
+    pub fn slice(#[this] str: &ActualString, start: isize, end: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
             (str.len() as isize + start) as usize
@@ -564,12 +570,12 @@ impl StringObj {
         Ok(string.unwrap_or_default().into())
     }
 
-    pub fn small(#[this] str: &str) -> ValueResult {
+    pub fn small(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<small>{str}</small>").into())
     }
 
     pub fn split(
-        #[this] str: &str,
+        #[this] str: &ActualString,
         separator: &str,
         limit: Option<usize>,
         #[realm] realm: &mut Realm,
@@ -588,19 +594,19 @@ impl StringObj {
     }
 
     #[prop("startsWith")]
-    pub fn starts_with(#[this] str: &str, search: &str) -> bool {
+    pub fn starts_with(#[this] str: &ActualString, search: &str) -> bool {
         str.starts_with(search)
     }
 
-    pub fn strike(#[this] str: &str) -> ValueResult {
+    pub fn strike(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<strike>{str}</strike>").into())
     }
 
-    pub fn sub(#[this] str: &str) -> ValueResult {
+    pub fn sub(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<sub>{str}</sub>").into())
     }
 
-    pub fn substr(#[this] str: &str, start: isize, len: Option<isize>) -> ValueResult {
+    pub fn substr(#[this] str: &ActualString, start: isize, len: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
             (str.len() as isize + start) as usize
@@ -617,7 +623,7 @@ impl StringObj {
         Ok(string.unwrap_or_default().into())
     }
 
-    pub fn substring(#[this] str: &str, start: isize, end: Option<isize>) -> ValueResult {
+    pub fn substring(#[this] str: &ActualString, start: isize, end: Option<isize>) -> ValueResult {
         // negative numbers are counted from the end of the string
         let start = if start < 0 {
             (str.len() as isize + start) as usize
@@ -640,28 +646,28 @@ impl StringObj {
         Ok(string.unwrap_or_default().into())
     }
 
-    pub fn sup(#[this] str: &str) -> ValueResult {
+    pub fn sup(#[this] str: &ActualString) -> ValueResult {
         Ok(format!("<sup>{str}</sup>").into())
     }
 
     #[prop("toLowerCase")]
-    pub fn _to_lower_case(#[this] str: &str) -> ValueResult {
+    pub fn _to_lower_case(#[this] str: &ActualString) -> ValueResult {
         Ok(str.to_lowercase().into())
     }
 
     #[prop("toString")]
     #[must_use]
-    pub fn _to_string(#[this] str: String) -> Value {
+    pub fn _to_string(#[this] str: ActualString) -> Value {
         str.into()
     }
 
     #[prop("toUpperCase")]
-    pub fn _to_upper_case(#[this] str: &str) -> ValueResult {
+    pub fn _to_upper_case(#[this] str: &ActualString) -> ValueResult {
         Ok(str.to_uppercase().into())
     }
 
     #[prop("toWellFormed")]
-    pub fn _to_well_formed(#[this] str: &str) -> ValueResult {
+    pub fn _to_well_formed(#[this] str: &ActualString) -> ValueResult {
         let well_formed =
             str
             .chars()
@@ -671,22 +677,22 @@ impl StringObj {
         Ok(well_formed.into())
     }
 
-    pub fn trim(#[this] str: &str) -> ValueResult {
+    pub fn trim(#[this] str: &ActualString) -> ValueResult {
         Ok(str.trim().into())
     }
 
     #[prop("trimEnd")]
-    pub fn trim_end(#[this] str: &str) -> ValueResult {
+    pub fn trim_end(#[this] str: &ActualString) -> ValueResult {
         Ok(str.trim_end().into())
     }
 
     #[prop("trimStart")]
-    pub fn trim_start(#[this] str: &str) -> ValueResult {
+    pub fn trim_start(#[this] str: &ActualString) -> ValueResult {
         Ok(str.trim_start().into())
     }
 
     #[prop("valueOf")]
-    pub fn value_of(#[this] str: String) -> Value {
+    pub fn value_of(#[this] str: ActualString) -> Value {
         str.into()
     }
 }
