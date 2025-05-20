@@ -5,7 +5,7 @@ use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
-use yavashark_value::{BoxedObj, FromValue, IntoValue, Obj};
+use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self) -> ValueResult;
@@ -137,6 +137,70 @@ impl FromValueOutput for &BigInt {
 }
 
 
+pub struct Stringable(String);
+
+impl Deref for Stringable {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Stringable {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Display for Stringable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl From<Stringable> for String {
+    fn from(value: Stringable) -> Self {
+        value.0
+    }
+}
+
+impl From<Stringable> for Value {
+    fn from(value: Stringable) -> Self {
+        value.0.into()
+    }
+}
+
+impl FromValueOutput for Stringable {
+    type Output = Self;
+
+    fn from_value_out(value: Value) -> Res<Self::Output> {
+        match value {
+            Value::Object(ref o) => {
+                if let Some(p) = o.primitive() {
+                    return Self::from_value_out(p);
+                }
+            }
+            Value::String(s) => return Ok(Self(s)),
+            Value::Number(n) => return Ok(Self(fmt_num(n))),
+            Value::Boolean(b) => return Ok(Self(b.to_string())),
+            _ => {}
+        }
+
+        Err(Error::ty_error(format!("Expected string, found {value:?}")))
+    }
+}
+
+
+impl FromValueOutput for &Stringable {
+    type Output = Stringable;
+
+    fn from_value_out(value: Value) -> Res<Self::Output> {
+        Stringable::from_value_out(value)
+    }
+}
+
+
 pub struct ActualString(String);
 
 impl Deref for ActualString {
@@ -177,11 +241,13 @@ impl FromValueOutput for ActualString {
     fn from_value_out(value: Value) -> Res<Self::Output> {
         match value {
             Value::Object(ref o) => {
-                if let Some(Value::String(s)) = o.primitive() {
-                    return Ok(Self(s));
+                if let Some(p) = o.primitive() {
+                    return Self::from_value_out(p);
                 }
             }
             Value::String(s) => return Ok(Self(s)),
+            Value::Number(n) => return Ok(Self(n.to_string())),
+            Value::Boolean(b) => return Ok(Self(b.to_string())),
             _ => {}
         }
 

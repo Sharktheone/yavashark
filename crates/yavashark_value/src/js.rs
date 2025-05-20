@@ -526,7 +526,8 @@ impl<C: Realm> Value<C> {
     }
 }
 
-fn fmt_num(n: f64) -> String {
+#[must_use] 
+pub fn fmt_num(n: f64) -> String {
     if n.is_nan() {
         "NaN".to_string()
     } else if n == 0.0 {
