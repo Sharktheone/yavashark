@@ -692,6 +692,7 @@ impl StringObj {
     }
 
     #[prop("valueOf")]
+    #[must_use]
     pub fn value_of(#[this] str: ActualString) -> Value {
         str.into()
     }

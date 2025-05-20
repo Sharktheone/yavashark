@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, Object, ObjectProperty, Res, Value, ValueResult};
+use crate::{Error, MutObject, ObjectProperty, Res, Value, ValueResult};
 use yavashark_macro::{object, properties};
 use yavashark_value::{Constructor, ConstructorFn, CustomName, Func, NoOpConstructorFn, Obj};
 

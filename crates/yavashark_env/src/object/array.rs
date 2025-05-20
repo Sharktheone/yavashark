@@ -1,9 +1,8 @@
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
-use swc_ecma_ast::VarDecl;
 use yavashark_garbage::OwningGcGuard;
-use yavashark_macro::{object, properties, properties_new, props};
+use yavashark_macro::{object, properties, properties_new};
 use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
 
 use crate::object::Object;

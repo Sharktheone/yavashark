@@ -152,7 +152,6 @@ impl VM for OwnedVM {
             .ok_or(Error::reference("Variable not found"))
     }
 
-    #[must_use]
     fn var_name(&self, name: VarName) -> Option<&str> {
         self.data.var_names.get(name as usize).map(String::as_str)
     }
@@ -208,7 +207,6 @@ impl VM for OwnedVM {
         val.clone().into_value(self)
     }
 
-    #[must_use]
     fn get_stack(&self, idx: u32) -> Option<Value> {
         self.stack.get(idx as usize).cloned()
     }
