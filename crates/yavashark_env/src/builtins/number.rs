@@ -135,7 +135,7 @@ impl NumberConstructor {
     #[prop("parseFloat")]
     #[must_use]
     pub fn parse_float(string: &str) -> f64 {
-        string.trim().parse().unwrap_or(f64::NAN)
+        parse_float(string)
     }
 
     #[prop("parseInt")]
@@ -385,6 +385,46 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
     Ok(result)
 }
 
+
+fn parse_float(string: &str) -> f64 {
+    let string = string.trim();
+
+    if string.is_empty() {
+        return f64::NAN;
+    }
+
+    let mut idx = 0;
+
+    for c in string.chars() {
+        if ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', '-', '+'].contains(&c) {
+            idx += c.len_utf8();
+        } else {
+
+            if idx > 0 {
+                let Some(Ok(x)) = string.get(..idx).map(str::parse) else {
+                    return f64::NAN;
+                };
+
+                return x
+            }
+
+
+            break;
+        }
+    }
+
+
+    if string.starts_with("Infinity") {
+        return f64::INFINITY;
+    }
+
+    if string.starts_with("-Infinity") {
+        return f64::NEG_INFINITY;
+    }
+
+    f64::NAN
+}
+
 #[must_use]
 pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
     NativeFunction::with_len(
@@ -455,3 +495,5 @@ pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
         1,
     )
 }
+
+
