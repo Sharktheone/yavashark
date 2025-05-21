@@ -436,23 +436,28 @@ fn parse_int(string: &str, radix: Option<u32>) -> f64 {
     let mut idx = 0;
 
     for c in string.chars() {
-        if ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+'].contains(&c) {
+        if c.is_numeric() || c == '-' || c == '+' {
             idx += c.len_utf8();
         } else {
-
             if idx > 0 {
                 let Some(Ok(x)) = string.get(..idx).map(|s| i32::from_str_radix(s, radix)) else {
                     return f64::NAN;
                 };
 
-                return f64::from(x)
+                return f64::from(x);
             }
-
 
             break;
         }
     }
+    
+    if idx > 0 {
+        let Some(Ok(x)) = string.get(..idx).map(|s| i32::from_str_radix(s, radix)) else {
+            return f64::NAN;
+        };
 
+        return f64::from(x);
+    }
 
     f64::NAN
 }
