@@ -1,10 +1,10 @@
+use crate::utils::ProtoDefault;
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::Sign;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
-use crate::utils::ProtoDefault;
 
 #[object]
 #[derive(Debug)]
@@ -299,7 +299,7 @@ impl NumberObj {
         }
 
         let num_digits = num.log10().ceil() as i32;
-        
+
         let precision = if num_digits.is_negative() {
             precision + num_digits.unsigned_abs()
         } else {
@@ -378,7 +378,6 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
     Ok(result)
 }
 
-
 fn parse_float(string: &str) -> f64 {
     let string = string.trim();
 
@@ -389,23 +388,28 @@ fn parse_float(string: &str) -> f64 {
     let mut idx = 0;
 
     for c in string.chars() {
-        if ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', ',', '-', '+'].contains(&c) {
+        if c.is_numeric() || ['.', ',', '-', '+'].contains(&c) {
             idx += c.len_utf8();
         } else {
-
             if idx > 0 {
                 let Some(Ok(x)) = string.get(..idx).map(str::parse) else {
                     return f64::NAN;
                 };
 
-                return x
+                return x;
             }
-
 
             break;
         }
     }
 
+    if idx > 0 {
+        let Some(Ok(x)) = string.get(..idx).map(str::parse) else {
+            return f64::NAN;
+        };
+
+        return x;
+    }
 
     if string.starts_with("Infinity") {
         return f64::INFINITY;
@@ -523,5 +527,3 @@ pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
         1,
     )
 }
-
-
