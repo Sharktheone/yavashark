@@ -141,14 +141,7 @@ impl NumberConstructor {
     #[prop("parseInt")]
     #[must_use]
     pub fn parse_int(string: &str, radix: Option<u32>) -> f64 {
-        let radix = radix.unwrap_or(10);
-        let radix = if (2..=36).contains(&radix) { radix } else { 10 };
-
-        let string = string.trim();
-
-        i64::from_str_radix(string, radix)
-            .map(|n| n as f64)
-            .unwrap_or(f64::NAN)
+        parse_int(string, radix)
     }
 }
 
@@ -421,6 +414,41 @@ fn parse_float(string: &str) -> f64 {
     if string.starts_with("-Infinity") {
         return f64::NEG_INFINITY;
     }
+
+    f64::NAN
+}
+
+fn parse_int(string: &str, radix: Option<u32>) -> f64 {
+    let radix = radix.unwrap_or(10);
+
+    let radix = if (2..=36).contains(&radix) { radix } else { 10 };
+
+    let string = string.trim();
+
+    if string.is_empty() {
+        return f64::NAN;
+    }
+
+    let mut idx = 0;
+
+    for c in string.chars() {
+        if ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+'].contains(&c) {
+            idx += c.len_utf8();
+        } else {
+
+            if idx > 0 {
+                let Some(Ok(x)) = string.get(..idx).map(|s| i32::from_str_radix(s, radix)) else {
+                    return f64::NAN;
+                };
+
+                return f64::from(x)
+            }
+
+
+            break;
+        }
+    }
+
 
     f64::NAN
 }
