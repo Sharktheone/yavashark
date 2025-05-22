@@ -1,6 +1,6 @@
-use std::fmt::Display;
 use crate::{Error, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
+use std::fmt::Display;
 use std::mem;
 use std::ops::{Deref, DerefMut};
 use std::slice::IterMut;
@@ -124,6 +124,17 @@ impl FromValueOutput for BigInt {
     fn from_value_out(value: Value) -> Res<Self::Output> {
         match value {
             Value::BigInt(n) => Ok(n),
+            Value::Number(n) => {
+                if n.is_nan() || n.is_infinite() {
+                    return Err(Error::ty_error(format!("Cannot convert {n} to BigInt")));
+                }
+                Ok(Self::from(n as u128))
+            }
+            Value::String(s) => s.trim().parse::<u128>().map_or_else(
+                |_| Err(Error::ty_error(format!("Cannot convert {s} to BigInt"))),
+                |n| Ok(Self::from(n)),
+            ),
+            Value::Boolean(b) => Ok(Self::from(u8::from(b))),
             _ => Err(Error::ty_error(format!("Expected bigint, found {value:?}"))),
         }
     }
@@ -135,7 +146,6 @@ impl FromValueOutput for &BigInt {
         BigInt::from_value_out(value)
     }
 }
-
 
 pub struct Stringable(String);
 
@@ -191,7 +201,6 @@ impl FromValueOutput for Stringable {
     }
 }
 
-
 impl FromValueOutput for &Stringable {
     type Output = Stringable;
 
@@ -199,7 +208,6 @@ impl FromValueOutput for &Stringable {
         Stringable::from_value_out(value)
     }
 }
-
 
 pub struct ActualString(String);
 
@@ -255,7 +263,6 @@ impl FromValueOutput for ActualString {
     }
 }
 
-
 impl FromValueOutput for &ActualString {
     type Output = ActualString;
 
@@ -263,7 +270,6 @@ impl FromValueOutput for &ActualString {
         ActualString::from_value_out(value)
     }
 }
-
 
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
@@ -327,7 +333,7 @@ impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
         let Some(val) = self.values.next() else {
             return Ok(None);
         };
-        
+
         if val.is_undefined() {
             return Ok(None);
         }
