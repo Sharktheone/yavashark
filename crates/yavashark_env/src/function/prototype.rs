@@ -73,7 +73,11 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
         return Err(Error::new("Not enough arguments"));
     }
 
-    let new_this = &args[0];
+    let mut new_this = args[0].copy();
+    
+    if new_this.is_nullish() {
+        new_this = realm.global.clone().into();
+    }
 
     let args = if let Some(arr) = args.get(1) {
         let array = Array::from_array_like(realm, arr.copy())?;
@@ -83,7 +87,7 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
         vec![]
     };
 
-    this.call(realm, args, new_this.copy())
+    this.call(realm, args, new_this)
 }
 
 #[allow(unused)]
