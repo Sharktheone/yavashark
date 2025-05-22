@@ -3,6 +3,7 @@ use num_bigint::BigInt;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Error, Func, Obj};
+use crate::builtins::check_radix;
 
 #[object]
 #[derive(Debug)]
@@ -65,10 +66,16 @@ impl BigIntObj {
 #[properties_new(constructor(BigIntConstructor::new))]
 impl BigIntObj {
     #[prop("toString")]
-    fn to_string(&self) -> ValueResult {
+    fn to_string(&self, radix: Option<u32>) -> ValueResult {
         let inner = self.inner.try_borrow()?;
-
-        Ok(inner.big_int.to_string().into())
+        
+        Ok(if let Some(radix) = radix {
+            check_radix(radix)?;
+            
+            inner.big_int.to_str_radix(radix)
+        } else {
+            inner.big_int.to_string()
+        }.into())
     }
 
     #[prop("valueOf")]

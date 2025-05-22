@@ -319,11 +319,11 @@ impl NumberObj {
     }
 }
 
-fn check_radix_opt(radix: Option<u32>) -> Res {
+pub fn check_radix_opt(radix: Option<u32>) -> Res {
     radix.map_or_else(|| Ok(()), check_radix)
 }
 
-fn check_radix(radix: u32) -> Res {
+pub fn check_radix(radix: u32) -> Res {
     if (2..=36).contains(&radix) {
         Ok(())
     } else {
