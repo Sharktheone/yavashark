@@ -1,9 +1,9 @@
 use crate::{Error, MutObject, ObjectHandle, Realm, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::object;
-use yavashark_value::Func;
+use yavashark_value::{Constructor, Func};
 
-#[object(function)]
+#[object(function, constructor)]
 #[derive(Debug)]
 pub struct BoundFunction {
     #[gc]
@@ -17,6 +17,12 @@ pub struct BoundFunction {
 impl Func<Realm> for BoundFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         self.func.call(realm, args, self.bound_this.copy())
+    }
+}
+
+impl Constructor<Realm> for BoundFunction {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        self.func.as_object()?.construct(realm, args)
     }
 }
 
