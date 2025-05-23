@@ -15,7 +15,7 @@ mod xor;
 
 use crate::{Error, Realm};
 use num_bigint::BigInt;
-use num_traits::{ToPrimitive, Zero};
+use num_traits::{FromPrimitive, Num, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::str::FromStr;
 
@@ -40,6 +40,18 @@ impl ToNumber for String {
         if self.is_empty() {
             0.0
         } else {
+            if self.starts_with("0x") || self.starts_with("0X") {
+                return f64::from_str_radix(&self[2..], 16).unwrap_or(f64::NAN);
+            }
+
+            if self.starts_with("0b") || self.starts_with("0B") {
+                return f64::from_str_radix(&self[2..], 2).unwrap_or(f64::NAN);
+            }
+
+            if self.starts_with("0o") || self.starts_with("0O") {
+                return f64::from_str_radix(&self[2..], 8).unwrap_or(f64::NAN);
+            }
+
             self.parse().unwrap_or(f64::NAN)
         }
     }
