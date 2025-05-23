@@ -15,10 +15,10 @@ mod xor;
 
 use crate::{Error, Realm};
 use num_bigint::BigInt;
-use num_traits::{FromPrimitive, Num, ToPrimitive, Zero};
+use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::str::FromStr;
-
+use num_traits::real::Real;
 use super::Value;
 
 trait ToNumber {
@@ -111,6 +111,40 @@ impl<C: Realm> Value<C> {
         })
     }
 
+
+    pub fn to_big_int(&self, realm: &mut C) -> Result<BigInt, Error<C>> {
+        Ok(match self {
+            Self::Number(n) => {
+                if n.fract() > 0.0 {
+                    return Err(Error::ty("Cannot convert non-integer number to BigInt"));
+                }
+
+                BigInt::from_f64(*n)
+                    .ok_or_else(|| Error::ty("Cannot convert number to BigInt"))?
+            },
+            Self::Undefined => return Err(Error::ty("Cannot convert undefined to BigInt")),
+            Self::Null => return Err(Error::ty("Cannot convert null to BigInt")),
+            Self::Boolean(b) => {
+                if *b {
+                    BigInt::one()
+                } else {
+                    BigInt::zero()
+                }
+            },
+            Self::String(s) => parse_big_int(s)?,
+            Self::Object(_) => {
+                let v = self
+                    .to_primitive(Some("number".to_owned()), realm)?
+                    .assert_no_object()?;
+
+                return v.to_big_int(realm)
+            }
+            Self::Symbol(_) | Self::BigInt(_) => {
+                return Err(Error::ty("Cannot convert BigInt or Symbol to number"))
+            }
+        })
+    }
+
     pub fn to_int_or_null(&self, realm: &mut C) -> Result<i64, Error<C>> {
         Ok(match self {
             Self::Number(n) => *n as i64,
@@ -124,6 +158,29 @@ impl<C: Realm> Value<C> {
             _ => 0,
         })
     }
+}
+
+fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
+    if s.is_empty() {
+        return Err(Error::ty("Cannot convert empty string to BigInt"));
+    }
+
+    if s.starts_with("0x") || s.starts_with("0X") {
+        return BigInt::from_str_radix(&s[2..], 16)
+            .map_err(|_| Error::ty("Cannot convert hex string to BigInt"));
+    }
+
+    if s.starts_with("0b") || s.starts_with("0B") {
+        return BigInt::from_str_radix(&s[2..], 2)
+            .map_err(|_| Error::ty("Cannot convert binary string to BigInt"));
+    }
+
+    if s.starts_with("0o") || s.starts_with("0O") {
+        return BigInt::from_str_radix(&s[2..], 8)
+            .map_err(|_| Error::ty("Cannot convert octal string to BigInt"));
+    }
+
+    BigInt::from_str(s).map_err(|_| Error::ty("Cannot convert string to BigInt"))
 }
 
 // impl<C: Realm> Add for Value<C> {

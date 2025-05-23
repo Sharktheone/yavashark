@@ -2,7 +2,7 @@ use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use num_bigint::BigInt;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Error, Func, Obj};
+use yavashark_value::{Func, Obj};
 use crate::builtins::check_radix;
 
 #[object]
@@ -36,16 +36,16 @@ impl Func<Realm> for BigIntConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let first = args.first().unwrap_or(&Value::Undefined);
 
-        let num = first.to_number(realm)?;
+        Ok(first.to_big_int(realm)?.into())
 
-        if num.is_nan() || num.is_infinite() {
-            return Err(Error::ty_error(format!(
-                "Cannot convert {} to BigInt",
-                first.to_string(realm)?
-            )));
-        }
+        // if num.is_nan() || num.is_infinite() {
+        //     return Err(Error::ty_error(format!(
+        //         "Cannot convert {} to BigInt",
+        //         first.to_string(realm)?
+        //     )));
+        // }
 
-        Ok(BigInt::from(num as u128).into())
+        // Ok(BigInt::from(num as u128).into())
     }
 }
 
