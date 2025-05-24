@@ -1,15 +1,21 @@
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, Obj};
+use yavashark_value::{Constructor, CustomName, Func, Obj};
 use crate::utils::ProtoDefault;
 
-#[object]
+#[object(name)]
 #[derive(Debug)]
 pub struct BooleanObj {
     #[mutable]
     #[primitive]
     boolean: bool,
+}
+
+impl CustomName for BooleanObj {
+    fn custom_name(&self) -> String {
+        "Boolean".to_string()
+    }
 }
 
 impl ProtoDefault for BooleanObj {
@@ -32,9 +38,15 @@ impl ProtoDefault for BooleanObj {
     }
 }
 
-#[object(constructor, function, to_string)]
+#[object(constructor, function, to_string, name)]
 #[derive(Debug)]
 pub struct BooleanConstructor {}
+
+impl CustomName for BooleanConstructor {
+    fn custom_name(&self) -> String {
+        "Boolean".to_string()
+    }
+}
 
 impl BooleanConstructor {
     #[allow(clippy::new_ret_no_self)]
