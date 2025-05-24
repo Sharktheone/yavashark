@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use crate::compiler::statement::expr::MoveOptimization;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
@@ -33,7 +34,7 @@ pub fn lit_to_const_value(lit: &Lit) -> Res<ConstValue> {
         Lit::Num(n) => ConstValue::Number(n.value),
         Lit::Bool(b) => ConstValue::Boolean(b.value),
         Lit::Null(_) => ConstValue::Null,
-        Lit::BigInt(b) => ConstValue::BigInt((*b.value).clone()),
+        Lit::BigInt(b) => ConstValue::BigInt(Rc::new((*b.value).clone())),
         Lit::Regex(r) => ConstValue::Regex(r.exp.to_string(), r.flags.to_string()),
         Lit::JSXText(_) => return Err(anyhow!("Unsupported literal")),
     })

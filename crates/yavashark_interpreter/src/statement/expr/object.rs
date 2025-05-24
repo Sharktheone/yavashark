@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
@@ -142,7 +143,7 @@ impl Interpreter {
             PropName::Str(str_) => Value::String(str_.value.to_string()),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
-            PropName::BigInt(b) => Value::BigInt((*b.value).clone()),
+            PropName::BigInt(b) => Value::BigInt(Rc::new((*b.value).clone())),
         })
     }
 }

@@ -18,9 +18,9 @@ impl<R: Realm> Value<R> {
                 };
 
                 if right.is_negative() {
-                    Self::from(left >> (-right) as usize)
+                    Self::from(&*left >> (-right) as usize)
                 } else {
-                    Self::from(left << right as usize)
+                    Self::from(&*left << right as usize)
                 }
             }
 

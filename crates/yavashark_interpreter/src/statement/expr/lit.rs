@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use crate::Interpreter;
 use swc_ecma_ast::Lit;
 use yavashark_env::builtins::RegExp;
@@ -10,7 +11,7 @@ impl Interpreter {
             Lit::Bool(b) => Value::Boolean(b.value),
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),
-            Lit::BigInt(b) => Value::BigInt(*b.value.clone()),
+            Lit::BigInt(b) => Value::BigInt(Rc::new(*b.value.clone())),
             Lit::Regex(r) => Value::Object(RegExp::new_from_str_with_flags(
                 realm,
                 r.exp.as_str(),

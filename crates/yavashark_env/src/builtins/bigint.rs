@@ -1,6 +1,7 @@
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use num_bigint::BigInt;
 use std::cell::RefCell;
+use std::rc::Rc;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Func, Obj};
 use crate::builtins::check_radix;
@@ -10,7 +11,7 @@ use crate::builtins::check_radix;
 pub struct BigIntObj {
     #[mutable]
     #[primitive]
-    big_int: BigInt,
+    big_int: Rc<BigInt>,
 }
 
 #[object(function)]
@@ -52,7 +53,7 @@ impl Func<Realm> for BigIntConstructor {
 impl BigIntObj {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
-    pub fn new(realm: &Realm, big_int: BigInt) -> ObjectHandle {
+    pub fn new(realm: &Realm, big_int: Rc<BigInt>) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableBigIntObj {
                 object: MutObject::with_proto(realm.intrinsics.bigint.clone().into()),

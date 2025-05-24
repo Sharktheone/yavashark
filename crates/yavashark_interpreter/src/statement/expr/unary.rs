@@ -47,7 +47,7 @@ impl Interpreter {
             UnaryOp::Plus => Value::Number(value.to_number(realm)?),
             UnaryOp::Minus => {
                 if let Value::BigInt(b) = value {
-                    Value::BigInt(-b)
+                    (-(&*b)).into()
                 } else {
                     Value::Number(-value.to_number(realm)?)
                 }

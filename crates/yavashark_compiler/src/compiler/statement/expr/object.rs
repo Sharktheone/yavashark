@@ -137,7 +137,7 @@ impl Compiler {
 
                 reg.into()
             }
-            PropName::BigInt(b) => DataTypeValue::BigInt((*b.value).clone()),
+            PropName::BigInt(b) => DataTypeValue::BigInt(Rc::new((*b.value).clone())),
         }
     }
 }

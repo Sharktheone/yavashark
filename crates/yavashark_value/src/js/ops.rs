@@ -17,6 +17,7 @@ use crate::{Error, Realm};
 use num_bigint::BigInt;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
+use std::rc::Rc;
 use std::str::FromStr;
 use num_traits::real::Real;
 use super::Value;
@@ -58,7 +59,7 @@ impl ToNumber for String {
 }
 
 pub enum BigIntOrNumber {
-    BigInt(BigInt),
+    BigInt(Rc<BigInt>),
     Number(f64),
 }
 
@@ -87,7 +88,7 @@ impl<C: Realm> Value<C> {
 
                 return v.to_numeric(realm);
             }
-            Self::BigInt(b) => return Ok(BigIntOrNumber::BigInt(b.clone())),
+            Self::BigInt(b) => return Ok(BigIntOrNumber::BigInt(Rc::clone(b))),
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to numeric value")),
         }))
     }

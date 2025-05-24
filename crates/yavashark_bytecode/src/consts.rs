@@ -16,7 +16,7 @@ pub enum ConstValue {
     Array(ArrayLiteralBlueprint),
     Function(FunctionBlueprint),
     ArrowFunction(ArrowFunctionBlueprint),
-    BigInt(BigInt),
+    BigInt(Rc<BigInt>),
     Regex(String, String),
     Symbol(ConstString),
 }
@@ -34,7 +34,7 @@ pub enum DataTypeValue {
     Get(FunctionBlueprint),
     Set(FunctionBlueprint),
     ArrowFunction(ArrowFunctionBlueprint),
-    BigInt(BigInt),
+    BigInt(Rc<BigInt>),
     Regex(String, String),
     Symbol(ConstString),
 

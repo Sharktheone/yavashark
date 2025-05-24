@@ -2,6 +2,7 @@ use crate::{BoxedObj, Error, Object, Realm, Symbol, Value};
 use half::f16;
 use num_bigint::BigInt;
 use std::any::type_name;
+use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
 
 impl<C: Realm> From<&str> for Value<C> {
@@ -114,9 +115,17 @@ impl<C: Realm> From<f32> for Value<C> {
 
 impl<C: Realm> From<BigInt> for Value<C> {
     fn from(n: BigInt) -> Self {
+        Self::BigInt(Rc::new(n))
+    }
+}
+
+impl<C: Realm> From<Rc<BigInt>> for Value<C> {
+    fn from(n: Rc<BigInt>) -> Self {
         Self::BigInt(n)
     }
 }
+
+
 
 impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
     fn from(value: Value<C>) -> Self {
@@ -189,13 +198,15 @@ impl<C: Realm> FromValue<C> for bool {
 impl<C: Realm> FromValue<C> for BigInt {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
-            Value::BigInt(n) => Ok(n),
+            Value::BigInt(n) => Ok((*n).clone()),
             _ => Err(Error::ty_error(format!(
                 "Expected a BigInt, found {value:?}"
             ))),
         }
     }
 }
+
+
 
 impl<C: Realm> FromValue<C> for Object<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
@@ -244,6 +255,13 @@ impl<C: Realm> IntoValue<C> for Object<C> {
 }
 
 impl<C: Realm> IntoValue<C> for BigInt {
+    fn into_value(self) -> Value<C> {
+        Value::BigInt(Rc::new(self))
+    }
+}
+
+
+impl<C: Realm> IntoValue<C> for Rc<BigInt> {
     fn into_value(self) -> Value<C> {
         Value::BigInt(self)
     }

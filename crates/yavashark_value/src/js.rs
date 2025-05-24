@@ -9,6 +9,7 @@ pub use object::*;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
+use std::rc::Rc;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
@@ -61,7 +62,7 @@ pub enum Value<C: Realm> {
     Boolean(bool),
     Object(Object<C>),
     Symbol(Symbol),
-    BigInt(BigInt),
+    BigInt(Rc<BigInt>),
 }
 
 impl<C: Realm> Clone for Value<C> {

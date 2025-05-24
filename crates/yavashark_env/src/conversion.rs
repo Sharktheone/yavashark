@@ -3,6 +3,7 @@ use num_bigint::BigInt;
 use std::fmt::Display;
 use std::mem;
 use std::ops::{Deref, DerefMut};
+use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
@@ -123,7 +124,7 @@ impl FromValueOutput for BigInt {
     type Output = Self;
     fn from_value_out(value: Value) -> Res<Self::Output> {
         match value {
-            Value::BigInt(n) => Ok(n),
+            Value::BigInt(n) => Ok((*n).clone()),
             Value::Number(n) => {
                 if n.is_nan() || n.is_infinite() {
                     return Err(Error::ty_error(format!("Cannot convert {n} to BigInt")));
@@ -141,9 +142,24 @@ impl FromValueOutput for BigInt {
 }
 
 impl FromValueOutput for &BigInt {
-    type Output = BigInt;
+    type Output = Rc<BigInt>;
     fn from_value_out(value: Value) -> Res<Self::Output> {
-        BigInt::from_value_out(value)
+        match value {
+            Value::BigInt(n) => Ok(n),
+            Value::Number(n) => {
+                if n.is_nan() || n.is_infinite() {
+                    return Err(Error::ty_error(format!("Cannot convert {n} to BigInt")));
+                }
+                Ok(Rc::new(BigInt::from(n as u128)))
+            }
+            Value::String(s) => Ok(Rc::new(s.trim().parse::<u128>().map_or_else(
+                |_| Err(Error::ty_error(format!("Cannot convert {s} to BigInt"))),
+                |n| Ok(BigInt::from(n)),
+            )?)),
+            Value::Boolean(b) => Ok(Rc::new(BigInt::from(u8::from(b)))),
+                
+            _ => Err(Error::ty_error(format!("Expected bigint, found {value:?}"))),
+        }
     }
 }
 

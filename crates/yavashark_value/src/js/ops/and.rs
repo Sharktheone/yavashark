@@ -12,7 +12,7 @@ impl<R: Realm> Value<R> {
                 Self::from(left as i64 & right as i64)
             }
             (BigIntOrNumber::BigInt(left), BigIntOrNumber::BigInt(right)) => {
-                Self::from(left & right)
+                Self::from((&*left) & (&*right))
             }
 
             _ => return Err(Error::ty("cannot mix BigInt and Number")),

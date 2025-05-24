@@ -17,7 +17,7 @@ impl<R: Realm> Value<R> {
                     return Err(Error::range("Division by zero"));
                 }
 
-                Self::from(left / right)
+                Self::from((&*left) / (&*right))
             }
 
             _ => return Err(Error::ty("cannot mix BigInt and Number")),
