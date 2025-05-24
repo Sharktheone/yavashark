@@ -132,7 +132,12 @@ impl ObjectConstructor {
     }
 
     #[prop("defineProperties")]
-    fn define_properties(obj: ObjectHandle, props: &ObjectHandle) -> ValueResult {
+    fn define_properties(obj: ObjectHandle, props: &Value) -> ValueResult {
+        let Ok(props) = props.as_object() else {
+            return Ok(obj.into());
+        };
+        
+        
         for (key, value) in props.properties()? {
             let descriptor = value.as_object()?;
 
