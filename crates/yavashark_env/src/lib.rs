@@ -27,6 +27,7 @@ pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
+mod native_obj;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;
