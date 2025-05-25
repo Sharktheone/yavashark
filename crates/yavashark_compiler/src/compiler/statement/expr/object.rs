@@ -69,7 +69,7 @@ impl Compiler {
                         let param = Param {
                             span: s.span,
                             decorators: vec![],
-                            pat: (*s.param).clone()
+                            pat: (*s.param).clone(),
                         };
 
                         let bp = FunctionBlueprint {

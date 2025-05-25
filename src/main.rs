@@ -179,7 +179,6 @@ fn main() {
                 println!("{bc:#?}");
             }
 
-
             #[cfg(feature = "vm")]
             if old_bytecode {
                 use yavashark_vm::yavashark_bytecode::data::DataSection;

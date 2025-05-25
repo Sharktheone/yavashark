@@ -42,28 +42,24 @@ pub struct ArrayLike {
 impl ArrayLike {
     pub fn is_array_like(val: &Value) -> Res<bool> {
         if let Ok(Some(_)) = val.downcast::<Array>() {
-            return Ok(true)
+            return Ok(true);
         };
-        
-        
+
         let Value::Object(o) = val else {
-            return Ok(false)
+            return Ok(false);
         };
-        
+
         if o.contains_key(&Symbol::ITERATOR.into())? {
-            return Ok(true)
+            return Ok(true);
         }
-        
+
         if o.contains_key(&"length".into())? {
-            return Ok(true)
+            return Ok(true);
         }
-        
-        
+
         Ok(false)
-        
-        
     }
-    
+
     pub fn new(val: Value, realm: &mut Realm) -> Res<Self> {
         if let Some(array) = val.downcast::<Array>()? {
             let values = array.to_vec()?;
@@ -170,7 +166,7 @@ impl ArrayLike {
         if let Some(values) = &mut self.values {
             return Ok(values.clone());
         }
-        
+
         let mut res = Vec::with_capacity(self.len());
         let idx = self.idx();
         self.idx.set(0);

@@ -74,7 +74,7 @@ fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     }
 
     let mut new_this = args[0].copy();
-    
+
     if new_this.is_nullish() {
         new_this = realm.global.clone().into();
     }
@@ -105,7 +105,7 @@ fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
         realm.global.clone().into()
     } else {
         let val = args.remove(0);
-        
+
         if val.is_nullish() {
             realm.global.clone().into()
         } else {

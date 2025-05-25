@@ -1,5 +1,8 @@
 use crate::VM;
-use yavashark_bytecode::data::{Acc, Boolean, ConstIdx, DataType, Null, OutputDataType, Reg, Stack, Undefined, VarName, F32, I32, U32};
+use yavashark_bytecode::data::{
+    Acc, Boolean, ConstIdx, DataType, Null, OutputDataType, Reg, Stack, Undefined, VarName, F32,
+    I32, U32,
+};
 use yavashark_env::{Error, Res, Value};
 
 pub trait Data: Copy + yavashark_bytecode::data::Data {
@@ -96,8 +99,6 @@ impl Data for DataType {
     }
 }
 
-
-
 impl OutputData for VarName {
     fn set(self, value: Value, vm: &mut impl VM) -> Res {
         vm.set_variable(self.0, value)
@@ -123,8 +124,6 @@ impl OutputData for Stack {
     }
 }
 
-
-
 impl Data for OutputDataType {
     fn get(self, vm: &mut impl VM) -> Res<Value> {
         match self {
@@ -134,7 +133,6 @@ impl Data for OutputDataType {
             OutputDataType::Stack(stack) => stack.get(vm),
         }
     }
-
 }
 
 impl OutputData for OutputDataType {
@@ -146,5 +144,4 @@ impl OutputData for OutputDataType {
             OutputDataType::Stack(stack) => stack.set(value, vm),
         }
     }
-
 }

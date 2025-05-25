@@ -67,8 +67,13 @@ fn parse_metadata(input: &str) -> Metadata {
 
     let input = &input[start..end];
 
-
-    YamlDecoder::read(input.as_bytes()).decode().ok().as_ref().and_then(|x| x.first()).map(Metadata::parse).unwrap_or_default()
+    YamlDecoder::read(input.as_bytes())
+        .decode()
+        .ok()
+        .as_ref()
+        .and_then(|x| x.first())
+        .map(Metadata::parse)
+        .unwrap_or_default()
 }
 
 fn parse_metadata_comments(input: &str) -> Metadata {

@@ -55,9 +55,10 @@ impl Interpreter {
                             fn_scope.state_set_function();
 
                             let name = key.to_string(realm)?; // TODO, what should the name be here? (and wrong to_string function)
-                            let function =
-                                if method.function.is_async || method.function.is_generator {
-                                    #[cfg(feature = "vm")]
+                            let function = if method.function.is_async
+                                || method.function.is_generator
+                            {
+                                #[cfg(feature = "vm")]
                                     let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                                         &method.function,
                                         name.clone(),
@@ -65,26 +66,25 @@ impl Interpreter {
                                         realm,
                                     )?;
 
-                                    #[cfg(not(feature = "vm"))]
-                                    let f = JSFunction::new(
-                                        name.clone(),
-                                        method.function.params.clone(),
-                                        method.function.body.clone(),
-                                        fn_scope,
-                                        realm,
-                                    )?;
+                                #[cfg(not(feature = "vm"))]
+                                let f = JSFunction::new(
+                                    name.clone(),
+                                    method.function.params.clone(),
+                                    method.function.body.clone(),
+                                    fn_scope,
+                                    realm,
+                                )?;
 
-
-                                    f
-                                } else {
-                                    JSFunction::new(
-                                        name.clone(),
-                                        method.function.params.clone(),
-                                        method.function.body.clone(),
-                                        fn_scope,
-                                        realm,
-                                    )?
-                                };
+                                f
+                            } else {
+                                JSFunction::new(
+                                    name.clone(),
+                                    method.function.params.clone(),
+                                    method.function.body.clone(),
+                                    fn_scope,
+                                    realm,
+                                )?
+                            };
 
                             let value = function.into();
 

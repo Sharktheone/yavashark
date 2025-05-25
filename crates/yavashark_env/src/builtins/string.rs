@@ -1,4 +1,5 @@
 use crate::array::Array;
+use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::{
     Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
@@ -9,7 +10,6 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
-use crate::conversion::{ActualString, Stringable};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -72,8 +72,8 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
 
             let inner = self.inner.borrow();
 
-
-            let chr = Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+            let chr =
+                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
@@ -87,7 +87,8 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
 
             let inner = self.inner.borrow();
 
-            let chr = Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+            let chr =
+                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }
@@ -315,8 +316,6 @@ impl StringObj {
         string.map(ToString::to_string)
     }
 
-
-
     pub fn get_single_str(str: &str, index: isize) -> Option<String> {
         let len = str.len() as isize;
 
@@ -342,12 +341,7 @@ impl StringObj {
     }
 
     pub fn anchor(#[this] string: &Stringable, name: &str) -> ValueResult {
-        Ok(format!(
-            "<a name=\"{}\">{}</a>",
-            name.replace('"', "&quot;"),
-            string,
-        )
-        .into())
+        Ok(format!("<a name=\"{}\">{}</a>", name.replace('"', "&quot;"), string,).into())
     }
 
     pub fn at(#[this] str: &Stringable, index: isize) -> Value {
@@ -388,7 +382,11 @@ impl StringObj {
     }
 
     #[prop("concat")]
-    pub fn concat(#[this] mut string: String, args: &[Value], #[realm] realm: &mut Realm) -> ValueResult {
+    pub fn concat(
+        #[this] mut string: String,
+        args: &[Value],
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         for arg in args {
             string.push_str(&arg.to_string(realm)?);
         }
@@ -408,18 +406,12 @@ impl StringObj {
 
     #[prop("fontcolor")]
     pub fn font_color(#[this] str: &Stringable, color: &str) -> ValueResult {
-        Ok(format!(
-            "<font color=\"{color}\">{str}</font>",
-        )
-        .into())
+        Ok(format!("<font color=\"{color}\">{str}</font>",).into())
     }
 
     #[prop("fontsize")]
     pub fn font_size(#[this] str: &Stringable, size: &str) -> ValueResult {
-        Ok(format!(
-            "<font size=\"{size}\">{str}</font>",
-        )
-        .into())
+        Ok(format!("<font size=\"{size}\">{str}</font>",).into())
     }
 
     #[prop("includes")]
@@ -437,8 +429,7 @@ impl StringObj {
             from as usize
         };
 
-        str
-            .get(from..)
+        str.get(from..)
             .and_then(|s| s.find(search))
             .map_or(-1, |i| i as isize + from as isize)
     }
@@ -446,9 +437,7 @@ impl StringObj {
     #[prop("isWellFormed")]
     pub fn is_well_formed(#[this] str: &Stringable) -> bool {
         // check if we have any lone surrogates => between 0xD800-0xDFFF or 0xDC00-0xDFFF
-            str
-            .chars()
-            .all(|c| !is_lone_surrogate(c))
+        str.chars().all(|c| !is_lone_surrogate(c))
     }
 
     #[prop("italics")]
@@ -466,9 +455,7 @@ impl StringObj {
             from as usize
         };
 
-        str[..from]
-            .rfind(&search)
-            .map_or(-1, |i| i as isize)
+        str[..from].rfind(&search).map_or(-1, |i| i as isize)
     }
 
     #[prop("link")]
@@ -507,7 +494,11 @@ impl StringObj {
     }
 
     #[prop("padEnd")]
-    pub fn pad_end(#[this] str: &Stringable, target_length: usize, pad_string: &Option<String>) -> ValueResult {
+    pub fn pad_end(
+        #[this] str: &Stringable,
+        target_length: usize,
+        pad_string: &Option<String>,
+    ) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
         let pad_len = target_length.saturating_sub(str.len());
@@ -518,7 +509,11 @@ impl StringObj {
     }
 
     #[prop("padStart")]
-    pub fn pad_start(#[this] str: &Stringable, target_length: usize, pad_string: &Option<String>) -> ValueResult {
+    pub fn pad_start(
+        #[this] str: &Stringable,
+        target_length: usize,
+        pad_string: &Option<String>,
+    ) -> ValueResult {
         let pad_string = pad_string.as_deref().unwrap_or(" ");
 
         let pad_len = target_length.saturating_sub(str.len());
@@ -668,8 +663,7 @@ impl StringObj {
 
     #[prop("toWellFormed")]
     pub fn _to_well_formed(#[this] str: &Stringable) -> ValueResult {
-        let well_formed =
-            str
+        let well_formed = str
             .chars()
             .map(|c| if is_lone_surrogate(c) { '\u{FFFD}' } else { c })
             .collect::<String>();

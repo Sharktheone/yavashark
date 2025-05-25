@@ -125,8 +125,6 @@ impl<C: Realm> From<Rc<BigInt>> for Value<C> {
     }
 }
 
-
-
 impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
     fn from(value: Value<C>) -> Self {
         Ok(value)
@@ -206,8 +204,6 @@ impl<C: Realm> FromValue<C> for BigInt {
     }
 }
 
-
-
 impl<C: Realm> FromValue<C> for Object<C> {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
@@ -259,7 +255,6 @@ impl<C: Realm> IntoValue<C> for BigInt {
         Value::BigInt(Rc::new(self))
     }
 }
-
 
 impl<C: Realm> IntoValue<C> for Rc<BigInt> {
     fn into_value(self) -> Value<C> {

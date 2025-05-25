@@ -1,8 +1,8 @@
+use crate::utils::ProtoDefault;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, CustomName, Func, Obj};
-use crate::utils::ProtoDefault;
 
 #[object(name)]
 #[derive(Debug)]

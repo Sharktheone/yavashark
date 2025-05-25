@@ -70,8 +70,7 @@ impl Interpreter {
                 Self::hoist_decl(realm, decl, scope)?;
             }
         }
-        
-        
+
         let mut last_value = Value::Undefined;
         for stmt in script {
             if stmt.skip_statements() {

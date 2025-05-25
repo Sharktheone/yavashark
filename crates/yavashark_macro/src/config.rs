@@ -114,7 +114,7 @@ impl Config {
         extract_value
             .segments
             .push(PathSegment::from(Ident::new("ExtractValue", span)));
-        
+
         let mut from_value_output = env_path.clone();
         from_value_output
             .segments
@@ -122,7 +122,6 @@ impl Config {
         from_value_output
             .segments
             .push(PathSegment::from(Ident::new("FromValueOutput", span)));
-        
 
         Self {
             env_path,

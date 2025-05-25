@@ -10,7 +10,6 @@ macro_rules! symbol {
     };
 }
 
-
 #[derive(Debug, Clone, Eq)]
 pub enum SymbolInner {
     Static(&'static str),
@@ -19,12 +18,10 @@ pub enum SymbolInner {
 
 impl PartialEq for SymbolInner {
     fn eq(&self, other: &Self) -> bool {
-        
-        
-        match (self, other) { 
+        match (self, other) {
             (Self::Static(s1), Self::Static(s2)) => ptr::eq(*s1, *s2),
             (Self::Str(s1), Self::Str(s2)) => Rc::ptr_eq(s1, s2),
-            _ => false
+            _ => false,
         }
     }
 }
@@ -88,7 +85,7 @@ impl Symbol {
             inner: SymbolInner::Static(s),
         }
     }
-    
+
     #[must_use]
     pub fn new_str(s: &str) -> Self {
         Self {

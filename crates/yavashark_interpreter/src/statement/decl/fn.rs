@@ -30,7 +30,12 @@ impl Interpreter {
         let name = stmt.ident.sym.to_string();
         let function = if stmt.function.is_async || stmt.function.is_generator {
             #[cfg(feature = "vm")]
-            let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(&stmt.function, name.clone(), fn_scope, realm)?;
+            let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
+                &stmt.function,
+                name.clone(),
+                fn_scope,
+                realm,
+            )?;
 
             #[cfg(not(feature = "vm"))]
             let f = JSFunction::new(
@@ -42,7 +47,6 @@ impl Interpreter {
             )?;
 
             f
-
         } else {
             JSFunction::new(
                 name.clone(),

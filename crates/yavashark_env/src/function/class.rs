@@ -27,7 +27,8 @@ impl Constructor<Realm> for Class {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let inner = self.inner.try_borrow()?;
 
-        let this = ClassInstance::new_with_proto(inner.prototype.value.clone(), self.name.clone()).into_value();
+        let this = ClassInstance::new_with_proto(inner.prototype.value.clone(), self.name.clone())
+            .into_value();
 
         drop(inner);
 

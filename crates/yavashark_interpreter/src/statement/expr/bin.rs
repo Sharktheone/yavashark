@@ -131,7 +131,6 @@ impl Interpreter {
                     return Ok(Self::contains_private_name(realm, pn, &right)?.into());
                 }
 
-
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
                 right.contains_key(&left)?.into()
@@ -158,11 +157,10 @@ impl Interpreter {
         })
     }
 
-    pub fn contains_private_name(
-        realm: &mut Realm,
-        pn: &PrivateName,
-        val: &Value,
-    ) -> Res<bool> {
-        Ok(val.downcast::<ClassInstance>()?.is_some_and(|c| c.get_private_prop(pn.name.as_str()).is_ok_and(|v| v.is_some())))
+    pub fn contains_private_name(realm: &mut Realm, pn: &PrivateName, val: &Value) -> Res<bool> {
+        Ok(val.downcast::<ClassInstance>()?.is_some_and(|c| {
+            c.get_private_prop(pn.name.as_str())
+                .is_ok_and(|v| v.is_some())
+        }))
     }
 }

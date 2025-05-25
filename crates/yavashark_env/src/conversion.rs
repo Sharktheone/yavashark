@@ -157,7 +157,7 @@ impl FromValueOutput for &BigInt {
                 |n| Ok(BigInt::from(n)),
             )?)),
             Value::Boolean(b) => Ok(Rc::new(BigInt::from(u8::from(b)))),
-                
+
             _ => Err(Error::ty_error(format!("Expected bigint, found {value:?}"))),
         }
     }

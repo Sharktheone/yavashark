@@ -18,7 +18,13 @@ impl Interpreter {
         if stmt.function.is_async || stmt.function.is_generator {
             #[cfg(feature = "vm")]
             return Ok(
-                yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(&stmt.function, name, fn_scope, realm)?.into(),
+                yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
+                    &stmt.function,
+                    name,
+                    fn_scope,
+                    realm,
+                )?
+                .into(),
             );
         }
 

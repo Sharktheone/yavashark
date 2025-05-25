@@ -133,7 +133,6 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                 _ => {}
             }
 
-
             obj.define_property(key.into_value(vm)?, value.into_value(vm)?)?;
         }
 

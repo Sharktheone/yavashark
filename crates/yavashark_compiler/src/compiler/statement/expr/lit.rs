@@ -1,7 +1,7 @@
-use std::rc::Rc;
 use crate::compiler::statement::expr::MoveOptimization;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
+use std::rc::Rc;
 use swc_ecma_ast::Lit;
 use yavashark_bytecode::ConstValue;
 use yavashark_bytecode::data::OutputData;

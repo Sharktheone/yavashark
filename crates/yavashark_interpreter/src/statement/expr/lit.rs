@@ -1,5 +1,5 @@
-use std::rc::Rc;
 use crate::Interpreter;
+use std::rc::Rc;
 use swc_ecma_ast::Lit;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};

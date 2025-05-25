@@ -1,7 +1,7 @@
+use crate::set::get_class;
 use crate::{parse, set};
 use proc_macro2::{Ident, TokenStream};
 use quote::quote;
-use crate::set::get_class;
 
 pub fn generate_execute() {
     let instructions = set::instructions();
@@ -68,7 +68,6 @@ pub fn generate_execute() {
         variants.push(quote! {
             Self::#name #match_args => instruction::#execute_fn(#(#args),*)?,
         });
-
     }
 
     let output = quote! {

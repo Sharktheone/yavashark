@@ -13,14 +13,14 @@ mod sub;
 mod ushr;
 mod xor;
 
+use super::Value;
 use crate::{Error, Realm};
 use num_bigint::BigInt;
+use num_traits::real::Real;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::rc::Rc;
 use std::str::FromStr;
-use num_traits::real::Real;
-use super::Value;
 
 trait ToNumber {
     fn num(&self) -> f64;
@@ -112,7 +112,6 @@ impl<C: Realm> Value<C> {
         })
     }
 
-
     pub fn to_big_int(&self, realm: &mut C) -> Result<BigInt, Error<C>> {
         Ok(match self {
             Self::Number(n) => {
@@ -120,9 +119,8 @@ impl<C: Realm> Value<C> {
                     return Err(Error::ty("Cannot convert non-integer number to BigInt"));
                 }
 
-                BigInt::from_f64(*n)
-                    .ok_or_else(|| Error::ty("Cannot convert number to BigInt"))?
-            },
+                BigInt::from_f64(*n).ok_or_else(|| Error::ty("Cannot convert number to BigInt"))?
+            }
             Self::Undefined => return Err(Error::ty("Cannot convert undefined to BigInt")),
             Self::Null => return Err(Error::ty("Cannot convert null to BigInt")),
             Self::Boolean(b) => {
@@ -131,14 +129,14 @@ impl<C: Realm> Value<C> {
                 } else {
                     BigInt::zero()
                 }
-            },
+            }
             Self::String(s) => parse_big_int(s)?,
             Self::Object(_) => {
                 let v = self
                     .to_primitive(Some("number".to_owned()), realm)?
                     .assert_no_object()?;
 
-                return v.to_big_int(realm)
+                return v.to_big_int(realm);
             }
             Self::Symbol(_) | Self::BigInt(_) => {
                 return Err(Error::ty("Cannot convert BigInt or Symbol to number"))

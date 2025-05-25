@@ -156,7 +156,13 @@ fn create_method(
             let name_str = name.to_string(realm)?;
             return Ok((
                 name,
-                (yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(func, name_str, scope.clone(), realm)?.into()),
+                (yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
+                    func,
+                    name_str,
+                    scope.clone(),
+                    realm,
+                )?
+                .into()),
             ));
         }
     }

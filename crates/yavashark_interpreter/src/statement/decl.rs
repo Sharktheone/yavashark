@@ -52,7 +52,11 @@ impl Interpreter {
     }
 
     pub fn hoist_var(realm: &mut Realm, var: &VarDecl, scope: &mut Scope) -> Res {
-        let decls = var.decls.iter().flat_map(|v| pat_idents(&v.name)).collect::<Vec<_>>();
+        let decls = var
+            .decls
+            .iter()
+            .flat_map(|v| pat_idents(&v.name))
+            .collect::<Vec<_>>();
 
         if var.kind == VarDeclKind::Var {
             for decl in decls {
@@ -65,24 +69,30 @@ impl Interpreter {
         }
 
         Ok(())
-
     }
 }
-
 
 fn pat_idents(pat: &Pat) -> Vec<String> {
     match pat {
         Pat::Ident(ident) => vec![ident.id.sym.to_string()],
-        Pat::Array(array) => array.elems.iter().filter_map(|v| v.as_ref()).flat_map(pat_idents).collect(),
+        Pat::Array(array) => array
+            .elems
+            .iter()
+            .filter_map(|v| v.as_ref())
+            .flat_map(pat_idents)
+            .collect(),
         Pat::Rest(rest) => pat_idents(&rest.arg),
-        Pat::Object(obj) => obj.props.iter().flat_map(|v| match v {
-            ObjectPatProp::KeyValue(kv) => pat_idents(&kv.value),
-            ObjectPatProp::Assign(assign) => vec![assign.key.sym.to_string()],
-            ObjectPatProp::Rest(rest) => pat_idents(&rest.arg),
-        }).collect(),
+        Pat::Object(obj) => obj
+            .props
+            .iter()
+            .flat_map(|v| match v {
+                ObjectPatProp::KeyValue(kv) => pat_idents(&kv.value),
+                ObjectPatProp::Assign(assign) => vec![assign.key.sym.to_string()],
+                ObjectPatProp::Rest(rest) => pat_idents(&rest.arg),
+            })
+            .collect(),
         Pat::Assign(assign) => pat_idents(&assign.left),
 
-        _ => Vec::new()
+        _ => Vec::new(),
     }
-
 }

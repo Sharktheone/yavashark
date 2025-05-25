@@ -1,10 +1,10 @@
+use crate::builtins::check_radix;
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use num_bigint::BigInt;
 use std::cell::RefCell;
 use std::rc::Rc;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Func, Obj};
-use crate::builtins::check_radix;
 
 #[object]
 #[derive(Debug)]
@@ -69,14 +69,15 @@ impl BigIntObj {
     #[prop("toString")]
     fn to_string(&self, radix: Option<u32>) -> ValueResult {
         let inner = self.inner.try_borrow()?;
-        
+
         Ok(if let Some(radix) = radix {
             check_radix(radix)?;
-            
+
             inner.big_int.to_str_radix(radix)
         } else {
             inner.big_int.to_string()
-        }.into())
+        }
+        .into())
     }
 
     #[prop("valueOf")]

@@ -79,10 +79,7 @@ pub fn generate_constructors() {
             .collect::<Vec<_>>();
 
         let fn_args = args.iter().map(|(arg, _)| arg);
-        let call_args = args
-            .iter()
-            .map(|(_, id)| id)
-            .collect::<Vec<_>>();
+        let call_args = args.iter().map(|(_, id)| id).collect::<Vec<_>>();
 
         let variant = Ident::new(&def.name, proc_macro2::Span::call_site());
 

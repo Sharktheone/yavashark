@@ -131,7 +131,7 @@ impl ObjectImpl<Realm> for Arguments {
     fn to_string(&self, _: &mut Realm) -> Result<String, Error<Realm>> {
         Ok("[object Arguments]".to_string())
     }
-    
+
     fn to_string_internal(&self) -> Result<String, Error<Realm>> {
         Ok("[object Arguments]".to_string())
     }

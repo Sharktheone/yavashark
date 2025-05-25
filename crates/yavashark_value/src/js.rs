@@ -475,9 +475,9 @@ impl<C: Realm> Value<C> {
                 if let Some(prim) = o.primitive() {
                     return prim.to_string(realm);
                 }
-                
+
                 o.to_string(realm)?
-            },
+            }
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => fmt_num(*n),
@@ -492,11 +492,11 @@ impl<C: Realm> Value<C> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
-                    return prim.to_string_no_realm()
+                    return prim.to_string_no_realm();
                 }
-                
+
                 o.to_string_internal()?
-            },
+            }
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => fmt_num(*n),
@@ -511,11 +511,11 @@ impl<C: Realm> Value<C> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
-                    return prim.into_string(realm)
+                    return prim.into_string(realm);
                 }
-                
+
                 o.to_string(realm)?
-            },
+            }
             Self::Null => "null".to_string(),
             Self::Undefined => "undefined".to_string(),
             Self::Number(n) => fmt_num(n),
@@ -527,7 +527,7 @@ impl<C: Realm> Value<C> {
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn fmt_num(n: f64) -> String {
     if n.is_nan() {
         "NaN".to_string()

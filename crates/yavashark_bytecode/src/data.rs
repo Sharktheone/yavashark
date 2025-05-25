@@ -192,8 +192,6 @@ pub struct Null;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Undefined;
 
-
-
 impl Data for Acc {
     fn acc(self) -> Option<Acc> {
         Some(self)
@@ -240,7 +238,6 @@ impl Data for Stack {
     }
 }
 
-
 impl Data for F32 {
     fn data_type(self) -> DataType {
         DataType::F32(self)
@@ -276,7 +273,6 @@ impl Data for Undefined {
         DataType::Undefined(self)
     }
 }
-
 
 impl Data for DataType {
     fn acc(self) -> Option<Acc> {

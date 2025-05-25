@@ -56,14 +56,13 @@ impl ObjectConstructor {
 impl ObjectConstructor {
     fn create(proto: ObjectHandle, properties: Option<ObjectHandle>) -> Res<ObjectHandle> {
         let obj = Object::with_proto(proto.into());
-        
-        
+
         if let Some(props) = properties {
             for (key, value) in props.properties()? {
                 obj.define_property(key, value)?;
             }
         }
-        
+
         Ok(obj)
     }
 
@@ -136,8 +135,7 @@ impl ObjectConstructor {
         let Ok(props) = props.as_object() else {
             return Ok(obj.into());
         };
-        
-        
+
         for (key, value) in props.properties()? {
             let descriptor = value.as_object()?;
 

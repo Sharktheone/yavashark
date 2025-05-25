@@ -20,18 +20,17 @@ pub struct Array {
 impl ObjectImpl<Realm> for Array {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
         self.inner.borrow_mut()
     }
 
-    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
         self.inner.borrow()
     }
 
-    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }
-
 
     fn define_property(&self, name: Value, value: Value) -> Res<()> {
         if matches!(&name, Value::String(s) if s == "length") {
@@ -63,19 +62,15 @@ impl ObjectImpl<Realm> for Array {
         }
 
         self.get_wrapped_object().resolve_property(name)
-
     }
-
 
     fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         if matches!(&name, Value::String(s) if s == "length") {
             return Ok(Some(self.length.get().into()));
         }
 
-
         self.get_wrapped_object().get_property(name)
     }
-
 
     fn contains_key(&self, name: &Value) -> Res<bool> {
         if matches!(&name, Value::String(s) if s == "length") {
@@ -218,8 +213,6 @@ impl Array {
         Self::new(realm.intrinsics.array.clone().into())
     }
 
-
-
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
         let mut inner = self.inner.try_borrow_mut()?;
 
@@ -236,11 +229,7 @@ impl Array {
     pub fn as_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(inner
-            .array
-            .iter()
-            .map(|(_, v)| v.value.clone())
-            .collect())
+        Ok(inner.array.iter().map(|(_, v)| v.value.clone()).collect())
     }
 
     pub fn push(&self, value: Value) -> ValueResult {
@@ -248,9 +237,7 @@ impl Array {
 
         let index = inner.array.last().map_or(0, |(i, _)| *i + 1);
 
-        inner
-            .array
-            .push((index, Variable::new(value).into()));
+        inner.array.push((index, Variable::new(value).into()));
         self.length.set(index + 1);
 
         Ok(Value::Undefined)
@@ -281,7 +268,11 @@ impl Array {
     pub fn shallow_clone(&self, realm: &Realm) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
-        array.inner.try_borrow_mut()?.array.clone_from(&self.inner.try_borrow()?.array);
+        array
+            .inner
+            .try_borrow_mut()?
+            .array
+            .clone_from(&self.inner.try_borrow()?.array);
 
         array.length.set(self.length.get());
 
@@ -299,10 +290,8 @@ pub fn convert_index(idx: isize, len: usize) -> usize {
 }
 #[properties_new(default_null(array), constructor(ArrayConstructor::new))]
 impl Array {
-
     #[prop("length")]
     pub const LENGTH: usize = 0;
-
 
     fn at(#[this] this: &Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {
         let this = this.as_object()?;
@@ -325,7 +314,6 @@ impl Array {
             Self::with_elements(realm, items)?
         };
 
-
         for arg in args {
             if ArrayLike::is_array_like(&arg)? {
                 let items = ArrayLike::new(arg, realm)?.to_vec(realm)?;
@@ -336,7 +324,6 @@ impl Array {
             } else {
                 array.push(arg)?;
             }
-
         }
 
         Ok(Obj::into_value(array))

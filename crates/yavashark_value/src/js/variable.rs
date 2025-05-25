@@ -46,7 +46,7 @@ impl<C: Realm> Variable<C> {
     pub const fn write(value: Value<C>) -> Self {
         Self {
             value,
-            properties: Attributes::write()
+            properties: Attributes::write(),
         }
     }
 
@@ -173,7 +173,7 @@ impl Attributes {
     pub const fn write_config() -> Self {
         Self(Self::WRITABLE | Self::CONFIGURABLE)
     }
-    
+
     #[must_use]
     pub const fn write() -> Self {
         Self(Self::WRITABLE)

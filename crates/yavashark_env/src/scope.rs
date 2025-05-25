@@ -446,9 +446,11 @@ impl ScopeInternal {
         if let Some(v) = self.variables.get(name) {
             return Ok(Some(v.copy()));
         }
-        
+
         if self.hoisted.contains(name) {
-            return Err(Error::reference_error(format!("Cannot access {name} before initialization")));
+            return Err(Error::reference_error(format!(
+                "Cannot access {name} before initialization"
+            )));
         }
 
         match &self.parent {
@@ -669,11 +671,11 @@ impl ScopeInternal {
 
         Ok(variables)
     }
-    
+
     pub fn hoist(&mut self, name: String) {
         self.hoisted.insert(name);
     }
-    
+
     pub fn is_hoisted(&self, name: &str) -> bool {
         self.hoisted.contains(name)
     }
@@ -912,12 +914,12 @@ impl Scope {
             module: Module::default(),
         }
     }
-    
+
     pub fn hoist(&self, name: String) -> Res {
         self.scope.borrow_mut()?.hoist(name);
         Ok(())
     }
-    
+
     pub fn is_hoisted(&self, name: &str) -> Res<bool> {
         Ok(self.scope.borrow()?.is_hoisted(name))
     }
