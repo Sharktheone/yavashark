@@ -18,8 +18,6 @@ impl FunctionCode for OldBytecodeFunction {
     fn call(&self, realm: &mut Realm, scope: &mut Scope, this: Value) -> RuntimeResult {
         let scope = Scope::with_parent_this(scope, this)?;
 
-        println!("Running bytecode with VM!");
-
         let mut vm = OldBorrowedVM::with_scope(&self.instructions, &self.ds, realm, scope);
 
         vm.run()?;
