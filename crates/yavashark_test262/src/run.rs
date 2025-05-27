@@ -36,7 +36,7 @@ pub fn run_file_in(
 
     scope.set_path(file)?;
 
-    let mut res = Interpreter::run_program_in(&prog, realm, scope).and_then(|v| v.to_string(realm));
+    let mut res = Interpreter::run_program_in(&prog, realm, scope).and_then(|v| Ok(v.to_string(realm)?.to_string()));
 
     if let Some(negative) = metadata.negative {
         if negative.phase == NegativePhase::Runtime {
