@@ -1,11 +1,10 @@
-use crate::smallstring::SmallString;
 use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
-use std::{fmt, mem};
+use std::fmt;
 
 /// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
 #[repr(Rust, packed)]
@@ -140,10 +139,10 @@ impl<T: Clone> SmallVec<T> {
 
         wrap.extend_from_slice(slice);
     }
-    
+
     pub fn pop(&mut self) {
         let mut wrap = self.vec_wrapper();
-        
+
         wrap.pop();
     }
 }
@@ -181,10 +180,20 @@ impl<T> Drop for VecWrapper<'_, T> {
 }
 
 #[repr(Rust, packed)]
+#[derive(Clone, Copy)]
 pub struct SmallVecLenCap {
     len: UsizeSmall,
     shared: DoubleU4,
     cap: UsizeSmall,
+}
+
+impl Debug for SmallVecLenCap {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SmallVecLenCap")
+            .field("len", &self.len())
+            .field("cap", &self.cap())
+            .finish()
+    }
 }
 
 impl SmallVecLenCap {
@@ -195,7 +204,7 @@ impl SmallVecLenCap {
 
         let (len, len_shared) = uz_to_bytes(len);
         let (cap, cap_shared) = uz_to_bytes(cap);
-
+        
         let shared = DoubleU4::new(len_shared, cap_shared)?;
 
         Some(Self {
@@ -228,10 +237,8 @@ pub fn uz_to_bytes(uz: usize) -> ([u8; UZ_BYTES], u8) {
     let most_worth = bytes_full[UZ_BYTES];
 
     let mut res = [0; UZ_BYTES];
-
-    for i in 0..UZ_BYTES {
-        res[i] = bytes_full[UZ_BYTES - 1 - i];
-    }
+    
+    res.copy_from_slice(bytes_full[..UZ_BYTES].as_ref());
 
     (res, most_worth)
 }

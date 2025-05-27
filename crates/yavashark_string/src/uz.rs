@@ -1,7 +1,7 @@
 pub const UZ_BYTES: usize = size_of::<usize>() - 1;
 
 #[repr(Rust, packed)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct UsizeSmall {
     bytes: [u8; UZ_BYTES],
 }
