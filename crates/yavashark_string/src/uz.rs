@@ -39,7 +39,7 @@ impl UsizeSmall {
 
     pub fn to_usize(self) -> usize {
         let mut buf = [0; size_of::<usize>()];
-        buf.copy_from_slice(&self.bytes);
+        buf[..UZ_BYTES].copy_from_slice(&self.bytes);
 
         usize::from_le_bytes(buf)
     }
