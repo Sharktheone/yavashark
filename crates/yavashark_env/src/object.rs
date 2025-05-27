@@ -3,6 +3,7 @@ use indexmap::IndexMap;
 pub use prototype::*;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHasher};
 use yavashark_garbage::GcRef;
 use yavashark_value::{BoxedObj, MutObj, Obj};
 
@@ -22,7 +23,7 @@ pub struct Object {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MutObject {
-    pub properties: IndexMap<Value, ObjectProperty>,
+    pub properties: IndexMap<Value, ObjectProperty, FxBuildHasher>,
     pub array: Vec<(usize, ObjectProperty)>,
     pub prototype: ObjectProperty,
 }
@@ -177,7 +178,7 @@ impl MutObject {
         let prototype = realm.intrinsics.obj.clone().into();
 
         Self {
-            properties: IndexMap::new(),
+            properties: Default::default(),
             prototype,
             array: Vec::new(),
         }
@@ -186,7 +187,7 @@ impl MutObject {
     #[must_use]
     pub fn null() -> Self {
         Self {
-            properties: IndexMap::new(),
+            properties: Default::default(),
             prototype: Value::Null.into(),
             array: Vec::new(),
         }
@@ -195,7 +196,7 @@ impl MutObject {
     #[must_use]
     pub fn with_proto(proto: Value) -> Self {
         Self {
-            properties: IndexMap::new(),
+            properties: Default::default(),
             prototype: proto.into(),
             array: Vec::new(),
         }

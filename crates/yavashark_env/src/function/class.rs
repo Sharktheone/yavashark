@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
-
+use rustc_hash::FxHashMap;
 use crate::realm::Realm;
 use crate::{Error, MutObject, ObjectProperty, Res, Value, ValueResult};
 use yavashark_macro::{object, properties};
@@ -9,7 +9,7 @@ use yavashark_value::{Constructor, ConstructorFn, CustomName, Func, NoOpConstruc
 #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
 pub struct Class {
-    pub private_props: HashMap<String, Value>,
+    pub private_props: FxHashMap<String, Value>,
     pub name: String,
     #[gc(untyped)]
     pub constructor: Box<dyn ConstructorFn<Realm>>,
@@ -57,7 +57,7 @@ impl Class {
                 object: MutObject::with_proto(proto),
                 prototype: Value::Undefined.into(),
             }),
-            private_props: HashMap::new(),
+            private_props: FxHashMap::default(),
             constructor: Box::new(NoOpConstructorFn),
             name,
         }

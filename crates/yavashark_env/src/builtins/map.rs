@@ -2,6 +2,7 @@ use crate::utils::ValueIterator;
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use indexmap::IndexMap;
 use std::cell::RefCell;
+use rustc_hash::FxBuildHasher;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, MutObj, Obj};
 
@@ -10,7 +11,7 @@ use yavashark_value::{Constructor, MutObj, Obj};
 pub struct Map {
     // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
-    map: IndexMap<Value, Value>,
+    map: IndexMap<Value, Value, FxBuildHasher>,
 }
 
 #[object(constructor)]
@@ -19,7 +20,7 @@ pub struct MapConstructor {}
 
 impl Constructor<Realm> for MapConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let mut map = IndexMap::new();
+        let mut map = IndexMap::<_, _, FxBuildHasher>::default();
 
         if let Some(iter) = args.first() {
             let iter = ValueIterator::new(iter, realm)?;

@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
-
+use rustc_hash::FxHashMap;
 use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_value::CustomGcRefUntyped;
@@ -207,7 +207,7 @@ impl VariableOrRef {
 #[derive(Debug)]
 pub enum ObjectOrVariables {
     Object(ObjectHandle),
-    Variables(HashMap<String, VariableOrRef>),
+    Variables(FxHashMap<String, VariableOrRef>),
 }
 
 impl From<Variable> for VariableOrRef {
@@ -350,7 +350,7 @@ impl ScopeInternal {
     }
 
     pub fn with_parent(parent: Gc<RefCell<Self>>) -> Res<Self> {
-        let mut variables = HashMap::with_capacity(8);
+        let mut variables = FxHashMap::with_capacity_and_hasher(8, Default::default());
 
         variables.insert(
             "undefined".to_string(),
@@ -637,10 +637,10 @@ impl ScopeInternal {
         self.file = self.get_current_file().ok();
     }
 
-    pub fn get_variables(&self) -> Res<HashMap<String, Variable>> {
-        let mut variables: HashMap<String, Variable> = match &self.parent {
+    pub fn get_variables(&self) -> Res<FxHashMap<String, Variable>> {
+        let mut variables: FxHashMap<String, Variable> = match &self.parent {
             Some(p) => p.borrow()?.get_variables()?,
-            None => HashMap::new(),
+            None => FxHashMap::default(),
         };
 
         match &self.variables {
@@ -899,7 +899,7 @@ impl Scope {
         Ok(())
     }
 
-    pub fn get_variables(&self) -> Res<HashMap<String, Variable>> {
+    pub fn get_variables(&self) -> Res<FxHashMap<String, Variable>> {
         self.scope.borrow()?.get_variables()
     }
 
