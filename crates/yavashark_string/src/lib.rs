@@ -188,6 +188,7 @@ impl InlineString {
         };
 
         self.data[prev_len..new_len].copy_from_slice(str.as_bytes());
+        self.len = len;
 
         None
     }
@@ -534,6 +535,7 @@ impl YSString {
     pub fn push_str(&mut self, str: impl Into<Self>) {
         let inner = self.inner_mut();
         let str = str.into();
+
 
         let new = match inner {
             InnerString::Inline(inline) => inline.push_str(str),
