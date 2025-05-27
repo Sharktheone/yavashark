@@ -12,7 +12,7 @@ use std::cell::UnsafeCell;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
-use std::ops::{Deref, DerefMut};
+use std::ops::{Add, AddAssign, Deref, DerefMut};
 use std::rc::Rc;
 
 pub struct YSString {
@@ -191,6 +191,11 @@ impl InlineString {
 
         None
     }
+
+    fn pop(&mut self) {
+        self.len = InlineLen::from_usize(self.len().saturating_sub(1)).expect("unreachable");
+
+    }
 }
 
 impl InlineLen {
@@ -310,9 +315,9 @@ impl Default for YSString {
     }
 }
 
-impl From<&str> for YSString {
-    fn from(str: &str) -> Self {
-        Self::from_ref(str)
+impl From<&'static str> for YSString {
+    fn from(str: &'static str) -> Self {
+        Self::new_static(str)
     }
 }
 
@@ -526,8 +531,9 @@ impl YSString {
         }
     }
 
-    pub fn push_str(&mut self, str: Self) {
+    pub fn push_str(&mut self, str: impl Into<Self>) {
         let inner = self.inner_mut();
+        let str = str.into();
 
         let new = match inner {
             InnerString::Inline(inline) => inline.push_str(str),
@@ -555,6 +561,40 @@ impl YSString {
 
         if let Some(new) = new {
             *inner = InnerString::Rope(new);
+        }
+    }
+
+    fn pop(&mut self) {
+        match self.inner.get_mut() {
+            InnerString::Inline(inline) => inline.pop(),
+            InnerString::Static(static_str) => {
+                if !static_str.is_empty() {
+                    *static_str = &static_str[..static_str.len() - 1];
+                }
+            }
+            InnerString::Owned(owned) => owned.pop(),
+            InnerString::BoxedOwned(boxed) => {
+                boxed.pop();
+            },
+            InnerString::Rc(rc) => {
+                let mut str = rc.to_string();
+                str.pop();
+
+                let str = Self::from_string(str);
+
+                self.inner = str.inner
+            }
+
+            InnerString::Rope(rope) => {
+                let mut str = rope.as_string();
+                str.pop();
+
+                let str = Self::from_string(str);
+
+                self.inner = str.inner
+            }
+
+
         }
     }
 }
@@ -592,6 +632,12 @@ impl PartialEq for YSString {
     }
 }
 
+impl PartialEq<str> for YSString {
+    fn eq(&self, other: &str) -> bool {
+        self.as_str() == other
+    }
+}
+
 impl Eq for YSString {}
 
 impl PartialOrd for YSString {
@@ -603,5 +649,59 @@ impl PartialOrd for YSString {
 impl Ord for YSString {
     fn cmp(&self, other: &Self) -> Ordering {
         self.as_str().cmp(other.as_str())
+    }
+}
+
+impl Add<Self> for YSString {
+    type Output = Self;
+    fn add(mut self, rhs: Self) -> Self::Output {
+        self.push_str(rhs);
+
+        self
+
+    }
+}
+
+impl Add<&Self> for YSString {
+    type Output = Self;
+
+    fn add(mut self, rhs: &Self) -> Self::Output {
+        self.push_str(rhs.clone());
+        self
+    }
+}
+
+impl<T: Into<Self>> AddAssign<T> for YSString {
+    fn add_assign(&mut self, rhs: T) {
+        self.push_str(rhs.into());
+
+    }
+
+}
+
+
+pub trait ToYSString {
+    fn to_ys_string(&self) -> YSString;
+}
+
+impl ToYSString for &'static str {
+    fn to_ys_string(&self) -> YSString {
+        (*self).into()
+    }
+}
+
+impl ToYSString for String {
+    fn to_ys_string(&self) -> YSString {
+        YSString::from_ref(self)
+    }
+}
+
+impl ToYSString for bool {
+    fn to_ys_string(&self) -> YSString {
+        if *self {
+            YSString::new_static("true")
+        } else {
+            YSString::new_static("false")
+        }
     }
 }

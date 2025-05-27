@@ -140,6 +140,12 @@ impl<T: Clone> SmallVec<T> {
 
         wrap.extend_from_slice(slice);
     }
+    
+    pub fn pop(&mut self) {
+        let mut wrap = self.vec_wrapper();
+        
+        wrap.pop();
+    }
 }
 
 struct VecWrapper<'a, T>(ManuallyDrop<Vec<T>>, &'a mut SmallVec<T>);
