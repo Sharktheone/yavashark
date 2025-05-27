@@ -24,6 +24,7 @@ yavashark_vm = { path = "crates/yavashark_vm", optional = true }
 yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments"]}
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
 tokio = { version = "1.10.0", features = ["full"] }
+swc_ecma_ast = "9.0.0"
 
 
 
@@ -32,7 +33,6 @@ wasm-bindgen = "0.2.73"
 console_error_panic_hook = "0.1.7"
 console_log = "1.0.0"
 js-sys = "0.3.77"
-swc_ecma_ast = "9.0.0"
 getrandom = { version = "0.2.15", features = ["js", "js-sys"] }
 
 
