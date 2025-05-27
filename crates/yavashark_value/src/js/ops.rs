@@ -14,7 +14,7 @@ mod ushr;
 mod xor;
 
 use super::Value;
-use crate::{Error, Realm};
+use crate::{Error, Hint, Realm};
 use num_bigint::BigInt;
 use num_traits::real::Real;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
@@ -36,7 +36,7 @@ impl ToNumber for bool {
     }
 }
 
-impl ToNumber for String {
+impl ToNumber for &str {
     fn num(&self) -> f64 {
         if self.is_empty() {
             0.0
@@ -80,10 +80,10 @@ impl<C: Realm> Value<C> {
             Self::Undefined => f64::NAN,
             Self::Null => 0.0,
             Self::Boolean(b) => b.num(),
-            Self::String(s) => s.num(),
+            Self::String(s) => s.as_str().num(),
             Self::Object(_) => {
                 let v = self
-                    .to_primitive(Some("number".to_owned()), realm)?
+                    .to_primitive(Hint::Number, realm)?
                     .assert_no_object()?;
 
                 return v.to_numeric(realm);
@@ -98,10 +98,10 @@ impl<C: Realm> Value<C> {
             Self::Undefined => f64::NAN,
             Self::Null => 0.0,
             Self::Boolean(b) => b.num(),
-            Self::String(s) => s.num(),
+            Self::String(s) => s.as_str().num(),
             Self::Object(_) => {
                 let v = self
-                    .to_primitive(Some("number".to_owned()), realm)?
+                    .to_primitive(Hint::Number, realm)?
                     .assert_no_object()?;
 
                 return v.to_number(realm);
@@ -133,7 +133,7 @@ impl<C: Realm> Value<C> {
             Self::String(s) => parse_big_int(s)?,
             Self::Object(_) => {
                 let v = self
-                    .to_primitive(Some("number".to_owned()), realm)?
+                    .to_primitive(Hint::Number, realm)?
                     .assert_no_object()?;
 
                 return v.to_big_int(realm);
@@ -150,7 +150,7 @@ impl<C: Realm> Value<C> {
             Self::Boolean(b) => i64::from(*b),
             Self::String(s) => s.parse().unwrap_or(0),
             Self::Object(o) => o
-                .to_primitive(Some("number".to_owned()), realm)?
+                .to_primitive(Hint::Number, realm)?
                 .assert_no_object()?
                 .to_int_or_null(realm)?,
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to number")),
@@ -502,7 +502,7 @@ impl<C: Realm> PartialOrd for Value<C> {
                 a.partial_cmp(&b.num())
             }
             (Self::String(a), Self::Object(_)) => {
-                if a == "[object Object]" {
+                if a.as_str() == "[object Object]" {
                     Some(Ordering::Equal)
                 } else {
                     None
@@ -806,8 +806,8 @@ impl<C: Realm> Value<C> {
             return Ok(lhs == rhs);
         }
 
-        let lhs = self.to_primitive(None, realm)?;
-        let rhs = rhs.to_primitive(None, realm)?;
+        let lhs = self.to_primitive(Hint::None, realm)?;
+        let rhs = rhs.to_primitive(Hint::None, realm)?;
 
         Ok(match (lhs, rhs) {
             (Self::Null | Self::Undefined, Self::Null | Self::Undefined) => true,

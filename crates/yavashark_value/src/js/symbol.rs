@@ -3,10 +3,11 @@ use std::fmt::Display;
 use std::hash::Hash;
 use std::ptr;
 use std::rc::Rc;
+use yavashark_string::{ToYSString, YSString};
 
 macro_rules! symbol {
     ($name:ident, $symbol:ident) => {
-        pub const $name: Self = Self::new(stringify!($symbol));
+        pub const $name: &'static Self = &Self::new(stringify!($symbol));
     };
 }
 
@@ -78,6 +79,17 @@ impl From<&ConstString> for Symbol {
     }
 }
 
+impl ToYSString for Symbol {
+    fn to_ys_string(&self) -> YSString {
+        match &self.inner {
+            SymbolInner::Static(s) => YSString::new_static(*s),
+            SymbolInner::Str(s) => YSString::from_rc(Rc::clone(s)),
+            
+        }
+        
+    }
+}
+
 impl Symbol {
     #[must_use]
     pub const fn new(s: &'static str) -> Self {
@@ -91,6 +103,10 @@ impl Symbol {
         Self {
             inner: SymbolInner::Str(Rc::from(s)),
         }
+    }
+    
+    pub fn as_ref<'a>(&'a self) -> &'a str {
+        AsRef::as_ref(self)
     }
 }
 

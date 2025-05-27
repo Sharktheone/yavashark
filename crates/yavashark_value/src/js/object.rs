@@ -6,12 +6,12 @@ use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
 
+use super::Value;
 use crate::js::context::Realm;
 use crate::variable::Variable;
-use crate::{Attributes, Error, IntoValueRef, Symbol};
+use crate::{Attributes, Error, IntoValue, IntoValueRef, Symbol};
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
-
-use super::Value;
+use yavashark_string::{ToYSString, YSString};
 
 pub use super::object_impl::*;
 
@@ -53,8 +53,8 @@ pub trait Obj<R: Realm>: Debug + AsAny + Any + 'static {
 
     fn name(&self) -> String;
 
-    fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;
-    fn to_string_internal(&self) -> Result<String, Error<R>>;
+    fn to_string(&self, realm: &mut R) -> Result<YSString, Error<R>>;
+    fn to_string_internal(&self) -> Result<YSString, Error<R>>;
 
     #[allow(clippy::type_complexity)]
     fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>>;
@@ -174,8 +174,8 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
 
     fn name(&self) -> String;
 
-    fn to_string(&self, realm: &mut R) -> Result<String, Error<R>>;
-    fn to_string_internal(&self) -> Result<String, Error<R>>;
+    fn to_string(&self, realm: &mut R) -> Result<YSString, Error<R>>;
+    fn to_string_internal(&self) -> Result<YSString, Error<R>>;
 
     #[allow(clippy::type_complexity)]
     fn properties(&self) -> Result<Vec<(Value<R>, Value<R>)>, Error<R>>;
@@ -382,6 +382,17 @@ impl<C: Realm> Display for Object<C> {
     }
 }
 
+#[cfg(any(test, debug_assertions, feature = "display_object"))]
+impl<C: Realm> ToYSString for Object<C> {
+    fn to_ys_string(&self) -> YSString {
+        match self.to_string_internal() {
+            Ok(s) => s,
+            Err(_) => YSString::new_static("Error: error while converting object to string"),
+        }
+    }
+
+}
+
 #[cfg(feature = "dbg_object_gc")]
 impl<C: Realm> Drop for BoxedObj<C> {
     fn drop(&mut self) {
@@ -505,7 +516,7 @@ impl<C: Realm> Object<C> {
 
     pub fn to_primitive(
         &self,
-        mut hint: Option<String>,
+        mut hint: Hint,
         realm: &mut C,
     ) -> Result<Value<C>, Error<C>> {
         if let Some(prim) = self.primitive() {
@@ -520,9 +531,9 @@ impl<C: Realm> Object<C> {
                     return to_prim
                         .call(
                             realm,
-                            vec![Value::String(
-                                hint.take().unwrap_or_else(|| "default".to_string()),
-                            )],
+                            vec![
+                                hint.into_value()
+                            ],
                             self.clone().into(),
                         )?
                         .assert_no_object();
@@ -532,7 +543,7 @@ impl<C: Realm> Object<C> {
             None => {}
         }
 
-        if hint.as_deref() == Some("string") {
+        if hint == Hint::String {
             let to_string = self.resolve_property(&"toString".into(), realm)?;
 
             if let Some(Value::Object(to_string)) = to_string {
@@ -596,8 +607,25 @@ impl<C: Realm> Object<C> {
         Self(Gc::new(BoxedObj::new(Box::new(obj))))
     }
 
-    pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {
+    pub fn to_string(&self, realm: &mut C) -> Result<YSString, Error<C>> {
         self.0.to_string(realm)
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Hint {
+    Number,
+    String,
+    None
+}
+
+impl<C: Realm> IntoValue<C> for Hint {
+    fn into_value(self) -> Value<C> {
+        match self {
+            Hint::Number => "number".into(),
+            Hint::String => "string".into(),
+            Hint::None => Value::Undefined,
+        }
     }
 }
 

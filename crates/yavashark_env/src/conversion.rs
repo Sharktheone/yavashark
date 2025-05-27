@@ -6,6 +6,7 @@ use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
+use yavashark_string::YSString;
 use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
 
 pub trait TryIntoValue: Sized {
@@ -99,14 +100,23 @@ impl FromValueOutput for bool {
 impl FromValueOutput for String {
     type Output = Self;
     fn from_value_out(value: Value) -> Res<Self::Output> {
+        Ok(value.to_string_no_realm()?.to_string()) //TODO: this should be removed!
+    }
+}
+
+
+impl FromValueOutput for YSString {
+    type Output = Self;
+    fn from_value_out(value: Value) -> Res<Self::Output> {
         value.to_string_no_realm()
     }
 }
 
+
 impl FromValueOutput for &str {
-    type Output = String;
+    type Output = YSString;
     fn from_value_out(value: Value) -> Res<Self::Output> {
-        String::from_value_out(value)
+        YSString::from_value_out(value)
     }
 }
 
@@ -207,8 +217,8 @@ impl FromValueOutput for Stringable {
                     return Self::from_value_out(p);
                 }
             }
-            Value::String(s) => return Ok(Self(s)),
-            Value::Number(n) => return Ok(Self(fmt_num(n))),
+            Value::String(s) => return Ok(Self(s.to_string())),
+            Value::Number(n) => return Ok(Self(fmt_num(n).to_string())),
             Value::Boolean(b) => return Ok(Self(b.to_string())),
             _ => {}
         }
@@ -269,7 +279,7 @@ impl FromValueOutput for ActualString {
                     return Self::from_value_out(p);
                 }
             }
-            Value::String(s) => return Ok(Self(s)),
+            Value::String(s) => return Ok(Self(s.to_string())),
             Value::Number(n) => return Ok(Self(n.to_string())),
             Value::Boolean(b) => return Ok(Self(b.to_string())),
             _ => {}

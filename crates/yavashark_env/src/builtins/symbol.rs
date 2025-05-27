@@ -1,4 +1,4 @@
-use crate::{MutObject, Object, ObjectHandle, Realm, Symbol, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Func, Obj};
@@ -33,50 +33,50 @@ impl SymbolConstructor {
 #[properties_new(raw)]
 impl SymbolConstructor {
     #[prop("asyncIterator")]
-    const ASYNC_ITERATOR: Symbol = Symbol::ASYNC_ITERATOR;
+    const ASYNC_ITERATOR: &'static Symbol = Symbol::ASYNC_ITERATOR;
 
     #[prop("hasInstance")]
-    const HAS_INSTANCE: Symbol = Symbol::HAS_INSTANCE;
+    const HAS_INSTANCE: &'static Symbol = Symbol::HAS_INSTANCE;
 
     #[prop("isConcatSpreadable")]
-    const IS_CONCAT_SPREADABLE: Symbol = Symbol::IS_CONCAT_SPREADABLE;
+    const IS_CONCAT_SPREADABLE: &'static Symbol = Symbol::IS_CONCAT_SPREADABLE;
 
     #[prop("iterator")]
-    const ITERATOR: Symbol = Symbol::ITERATOR;
+    const ITERATOR: &'static Symbol = Symbol::ITERATOR;
 
     #[prop("match")]
-    const MATCH: Symbol = Symbol::MATCH;
+    const MATCH: &'static Symbol = Symbol::MATCH;
 
     #[prop("matchAll")]
-    const MATCH_ALL: Symbol = Symbol::MATCH_ALL;
+    const MATCH_ALL: &'static Symbol = Symbol::MATCH_ALL;
 
     #[prop("replace")]
-    const REPLACE: Symbol = Symbol::REPLACE;
+    const REPLACE: &'static Symbol = Symbol::REPLACE;
 
     #[prop("search")]
-    const SEARCH: Symbol = Symbol::SEARCH;
+    const SEARCH: &'static Symbol = Symbol::SEARCH;
 
     #[prop("species")]
-    const SPECIES: Symbol = Symbol::SPECIES;
+    const SPECIES: &'static Symbol = Symbol::SPECIES;
 
     #[prop("split")]
-    const SPLIT: Symbol = Symbol::SPLIT;
+    const SPLIT: &'static Symbol = Symbol::SPLIT;
 
     #[prop("toPrimitive")]
-    const TO_PRIMITIVE: Symbol = Symbol::TO_PRIMITIVE;
+    const TO_PRIMITIVE: &'static Symbol = Symbol::TO_PRIMITIVE;
 
     #[prop("toStringTag")]
-    const TO_STRING_TAG: Symbol = Symbol::TO_STRING_TAG;
+    const TO_STRING_TAG: &'static Symbol = Symbol::TO_STRING_TAG;
 
     #[prop("unscopables")]
-    const UNSCOPABLES: Symbol = Symbol::UNSCOPABLES;
+    const UNSCOPABLES: &'static Symbol = Symbol::UNSCOPABLES;
 }
 
 impl Func<Realm> for SymbolConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let sym = args
             .first()
-            .map_or(Ok(String::new()), |v| v.to_string(realm))?;
+            .map_or(Res::<String>::Ok(String::new()), |v| Ok(v.to_string(realm)?.to_string()))?;
 
         Ok(Symbol::new_str(&sym).into())
     }

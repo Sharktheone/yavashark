@@ -5096,6 +5096,7 @@ dependencies = [
  "unicode-normalization",
  "yavashark_garbage",
  "yavashark_macro",
+ "yavashark_string",
  "yavashark_value",
 ]
 
@@ -5128,6 +5129,7 @@ dependencies = [
  "yavashark_env",
  "yavashark_garbage",
  "yavashark_macro",
+ "yavashark_string",
  "yavashark_value",
  "yavashark_vm",
 ]
@@ -5197,6 +5199,7 @@ dependencies = [
  "num-traits",
  "rand 0.9.0",
  "yavashark_garbage",
+ "yavashark_string",
 ]
 
 [[package]]
@@ -5210,6 +5213,7 @@ dependencies = [
  "yavashark_env",
  "yavashark_garbage",
  "yavashark_macro",
+ "yavashark_string",
  "yavashark_value",
 ]
 

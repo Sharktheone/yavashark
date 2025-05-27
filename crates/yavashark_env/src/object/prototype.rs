@@ -4,6 +4,7 @@ use common::{
 };
 use std::any::Any;
 use std::cell::RefCell;
+use yavashark_string::YSString;
 use yavashark_value::{MutObj, Obj};
 
 use crate::object::constructor::ObjectConstructor;
@@ -306,12 +307,12 @@ impl Obj<Realm> for Prototype {
         "Object".to_string()
     }
 
-    fn to_string(&self, _realm: &mut Realm) -> Res<String, Error> {
-        Ok("[object Object]".to_string())
+    fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
+        Ok("[object Object]".into())
     }
 
-    fn to_string_internal(&self) -> Res<String> {
-        Ok("[object Prototype]".to_string())
+    fn to_string_internal(&self) -> Res<YSString> {
+        Ok("[object Prototype]".into())
     }
 
     fn properties(&self) -> Res<Vec<(Value, Value)>> {
@@ -319,51 +320,51 @@ impl Obj<Realm> for Prototype {
 
         let mut props = this.object.properties()?;
         props.push((
-            Value::String("__define_getter__".to_string()),
+            Value::string("__define_getter__"),
             this.defined_getter.value.copy(),
         ));
         props.push((
-            Value::String("__define_setter__".to_string()),
+            Value::string("__define_setter__"),
             this.defined_setter.value.copy(),
         ));
         props.push((
-            Value::String("__lookup_getter__".to_string()),
+            Value::string("__lookup_getter__"),
             this.lookup_getter.value.copy(),
         ));
         props.push((
-            Value::String("__lookup_setter__".to_string()),
+            Value::string("__lookup_setter__"),
             this.lookup_setter.value.copy(),
         ));
         props.push((
-            Value::String("constructor".to_string()),
+            Value::string("constructor"),
             this.constructor.value.copy(),
         ));
         props.push((
-            Value::String("hasOwnProperty".to_string()),
+            Value::string("hasOwnProperty"),
             this.has_own_property.value.copy(),
         ));
         props.push((
-            Value::String("getOwnPropertyDescriptor".to_string()),
+            Value::string("getOwnPropertyDescriptor"),
             this.get_own_property_descriptor.value.copy(),
         ));
         props.push((
-            Value::String("isPrototypeOf".to_string()),
+            Value::string("isPrototypeOf"),
             this.is_prototype_of.value.copy(),
         ));
         props.push((
-            Value::String("propertyIsEnumerable".to_string()),
+            Value::string("propertyIsEnumerable"),
             this.property_is_enumerable.value.copy(),
         ));
         props.push((
-            Value::String("toLocaleString".to_string()),
+            Value::string("toLocaleString"),
             this.to_locale_string.value.copy(),
         ));
         props.push((
-            Value::String("toString".to_string()),
+            Value::string("toString"),
             this.to_string.value.copy(),
         ));
         props.push((
-            Value::String("valueOf".to_string()),
+            Value::string("valueOf"),
             this.value_of.value.copy(),
         ));
 
@@ -374,18 +375,18 @@ impl Obj<Realm> for Prototype {
         let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
-        keys.push(Value::String("__define_getter__".to_string()));
-        keys.push(Value::String("__define_setter__".to_string()));
-        keys.push(Value::String("__lookup_getter__".to_string()));
-        keys.push(Value::String("__lookup_setter__".to_string()));
-        keys.push(Value::String("constructor".to_string()));
-        keys.push(Value::String("hasOwnProperty".to_string()));
-        keys.push(Value::String("getOwnPropertyDescriptor".to_string()));
-        keys.push(Value::String("isPrototypeOf".to_string()));
-        keys.push(Value::String("propertyIsEnumerable".to_string()));
-        keys.push(Value::String("toLocaleString".to_string()));
-        keys.push(Value::String("toString".to_string()));
-        keys.push(Value::String("valueOf".to_string()));
+        keys.push(Value::string("__define_getter__"));
+        keys.push(Value::string("__define_setter__"));
+        keys.push(Value::string("__lookup_getter__"));
+        keys.push(Value::string("__lookup_setter__"));
+        keys.push(Value::string("constructor"));
+        keys.push(Value::string("hasOwnProperty"));
+        keys.push(Value::string("getOwnPropertyDescriptor"));
+        keys.push(Value::string("isPrototypeOf"));
+        keys.push(Value::string("propertyIsEnumerable"));
+        keys.push(Value::string("toLocaleString"));
+        keys.push(Value::string("toString"));
+        keys.push(Value::string("valueOf"));
 
         Ok(keys)
     }

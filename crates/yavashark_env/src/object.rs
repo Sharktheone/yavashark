@@ -5,6 +5,7 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHasher};
 use yavashark_garbage::GcRef;
+use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, MutObj, Obj};
 
 use crate::realm::Realm;
@@ -127,11 +128,11 @@ impl Obj<Realm> for Object {
             .map_or_else(|_| "Object".to_string(), |i| i.name())
     }
 
-    fn to_string(&self, realm: &mut Realm) -> Result<String, Error> {
+    fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
         self.inner()?.to_string(realm)
     }
 
-    fn to_string_internal(&self) -> Result<String, Error> {
+    fn to_string_internal(&self) -> Result<YSString, Error> {
         self.inner()?.to_string_internal()
     }
 
@@ -386,7 +387,7 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        if name == &Value::String("__proto__".to_string()) {
+        if name == &Value::string("__proto__") {
             return Ok(Some(self.prototype.clone()));
         }
 
@@ -407,7 +408,7 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        if name == &Value::String("__proto__".to_string()) {
+        if name == &Value::string("__proto__") {
             return Ok(Some(self.prototype.copy()));
         }
 
@@ -447,7 +448,7 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {
-        if name == &Value::String("__proto__".to_string()) {
+        if name == &Value::string("__proto__") {
             return Ok(None);
         }
 
@@ -468,7 +469,7 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
-        if name == &Value::String("__proto__".to_string()) {
+        if name == &Value::string("__proto__") {
             return Ok(true);
         }
 
@@ -483,12 +484,12 @@ impl MutObj<Realm> for MutObject {
         "Object".to_string()
     }
 
-    fn to_string(&self, _realm: &mut Realm) -> Result<String, Error> {
-        Ok("[object Object]".to_string())
+    fn to_string(&self, _realm: &mut Realm) -> Result<YSString, Error> {
+        Ok("[object Object]".into())
     }
 
-    fn to_string_internal(&self) -> Result<String, Error> {
-        Ok("[object Object]".to_string())
+    fn to_string_internal(&self) -> Result<YSString, Error> {
+        Ok("[object Object]".into())
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
@@ -555,7 +556,7 @@ impl MutObj<Realm> for MutObject {
     fn constructor(&self) -> Result<ObjectProperty, Error> {
         if let Some(constructor) = self
             .properties
-            .get(&Value::String("constructor".to_string()))
+            .get(&Value::string("constructor"))
         {
             return Ok(constructor.clone());
         }
@@ -701,7 +702,7 @@ mod tests {
         let realm = Realm::new().unwrap();
         let object = Object::raw(&realm);
         object
-            .define_property(Value::String("key".to_string()), Value::Number(42.0))
+            .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
         assert_eq!(
@@ -709,7 +710,7 @@ mod tests {
                 .inner()
                 .unwrap()
                 .properties
-                .get(&Value::String("key".to_string()))
+                .get(&Value::string("key"))
                 .unwrap()
                 .value,
             Value::Number(42.0)
@@ -721,11 +722,11 @@ mod tests {
         let realm = Realm::new().unwrap();
         let object = Object::raw(&realm);
         object
-            .define_property(Value::String("key".to_string()), Value::Number(42.0))
+            .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
         let value = object
-            .resolve_property(&Value::String("key".to_string()))
+            .resolve_property(&Value::string("key"))
             .unwrap();
 
         assert_eq!(value, Some(Value::Number(42.0).into()));
@@ -736,11 +737,11 @@ mod tests {
         let realm = Realm::new().unwrap();
         let object = Object::raw(&realm);
         object
-            .define_property(Value::String("key".to_string()), Value::Number(42.0))
+            .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
         let value = object
-            .get_property(&Value::String("key".to_string()))
+            .get_property(&Value::string("key"))
             .unwrap();
 
         assert_eq!(value.unwrap().value, Value::Number(42.0));
@@ -751,11 +752,11 @@ mod tests {
         let realm = Realm::new().unwrap();
         let object = Object::raw(&realm);
         object
-            .define_property(Value::String("key".to_string()), Value::Number(42.0))
+            .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
         let contains = object
-            .contains_key(&Value::String("key".to_string()))
+            .contains_key(&Value::string("key"))
             .unwrap();
 
         assert!(contains);

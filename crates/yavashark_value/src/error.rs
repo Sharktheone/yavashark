@@ -1,9 +1,11 @@
-use crate::{Realm, Value};
+use crate::{IntoValue, Realm, Value};
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
+use num_traits::real::Real;
+use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Error<C: Realm> {
@@ -13,71 +15,71 @@ pub struct Error<C: Realm> {
 
 impl<C: Realm> Error<C> {
     #[must_use]
-    pub fn new(error: &str) -> Self {
+    pub const fn new(error: &'static str) -> Self {
         Self {
-            kind: ErrorKind::Runtime(error.to_string()),
+            kind: ErrorKind::Runtime(YSString::new_static(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn new_error(error: String) -> Self {
+    pub fn new_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::Runtime(error),
+            kind: ErrorKind::Runtime(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub fn reference(error: &str) -> Self {
+    pub const fn reference(error: &'static str) -> Self {
         Self {
-            kind: ErrorKind::Reference(error.to_string()),
+            kind: ErrorKind::Reference(YSString::new_static(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn reference_error(error: String) -> Self {
+    pub fn reference_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::Reference(error),
+            kind: ErrorKind::Reference(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub fn syn(error: &str) -> Self {
+    pub const fn syn(error: &'static str) -> Self {
         Self {
-            kind: ErrorKind::Syntax(error.to_string()),
+            kind: ErrorKind::Syntax(YSString::new_static(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn syn_error(error: String) -> Self {
+    pub fn syn_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::Syntax(error),
+            kind: ErrorKind::Syntax(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn eval_error(error: String) -> Self {
+    pub fn eval_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::Eval(error),
+            kind: ErrorKind::Eval(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn uri_error(error: String) -> Self {
+    pub fn uri_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::URI(error),
+            kind: ErrorKind::URI(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn unknown(error: Option<String>) -> Self {
+    pub const fn unknown(error: Option<YSString>) -> Self {
         Self {
             kind: ErrorKind::Error(error),
             stacktrace: StackTrace { frames: vec![] },
@@ -85,7 +87,7 @@ impl<C: Realm> Error<C> {
     }
 
     #[must_use]
-    pub const fn unknown_error(error: String) -> Self {
+    pub const fn unknown_error(error: YSString) -> Self {
         Self {
             kind: ErrorKind::Error(Some(error)),
             stacktrace: StackTrace { frames: vec![] },
@@ -93,33 +95,33 @@ impl<C: Realm> Error<C> {
     }
 
     #[must_use]
-    pub fn ty(error: &str) -> Self {
+    pub const fn ty(error: &'static str) -> Self {
         Self {
-            kind: ErrorKind::Type(error.to_string()),
+            kind: ErrorKind::Type(YSString::new_static(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn ty_error(error: String) -> Self {
+    pub fn ty_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::Type(error),
+            kind: ErrorKind::Type(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub fn range(error: &str) -> Self {
+    pub const fn range(error: &'static str) -> Self {
         Self {
-            kind: ErrorKind::Range(error.to_string()),
+            kind: ErrorKind::Range(YSString::new_static(error)),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
 
     #[must_use]
-    pub const fn range_error(error: String) -> Self {
+    pub fn range_error(error: String) -> Self {
         Self {
-            kind: ErrorKind::Range(error),
+            kind: ErrorKind::Range(error.into()),
             stacktrace: StackTrace { frames: vec![] },
         }
     }
@@ -133,7 +135,7 @@ impl<C: Realm> Error<C> {
     }
 
     #[must_use]
-    pub const fn name(&self) -> &str {
+    pub const fn name(&self) -> &'static str {
         match &self.kind {
             ErrorKind::Type(_) => "TypeError",
             ErrorKind::Reference(_) => "ReferenceError",
@@ -148,7 +150,7 @@ impl<C: Realm> Error<C> {
         }
     }
 
-    pub fn message(&self, realm: &mut C) -> Result<String, Self> {
+    pub fn message(&self, realm: &mut C) -> Result<YSString, Self> {
         Ok(match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -159,12 +161,12 @@ impl<C: Realm> Error<C> {
             | ErrorKind::URI(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(realm)?,
-            ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+            ErrorKind::Error(msg) => msg.clone().unwrap_or(YSString::new()),
         })
     }
 
     #[must_use]
-    pub fn message_internal(&self) -> String {
+    pub fn message_internal(&self) -> YSString {
         match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -174,8 +176,8 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Eval(msg)
             | ErrorKind::URI(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
-            ErrorKind::Throw(val) => format!("{val}"),
-            ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+            ErrorKind::Throw(val) => val.to_ys_string(),
+            ErrorKind::Error(msg) => msg.clone().unwrap_or(YSString::new()),
         }
     }
 
@@ -220,18 +222,36 @@ impl<C: Realm> Display for Error<C> {
     }
 }
 
+impl<C: Realm> ToYSString for Error<C> {
+    fn to_ys_string(&self) -> YSString {
+        let msg = self.message_internal();
+        let name = self.name();
+        
+        if msg.is_empty() {
+            YSString::new_static(name)
+            
+        } else {
+            format!("{}: {}\n{}", name, msg, self.stacktrace).into()
+        }
+        
+        
+    }
+    
+
+}
+
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum ErrorKind<C: Realm> {
-    Type(String),
-    Reference(String),
-    Range(String),
-    Internal(String),
-    Runtime(String),
-    Syntax(String),
-    Eval(String),
-    URI(String),
+    Type(YSString),
+    Reference(YSString),
+    Range(YSString),
+    Internal(YSString),
+    Runtime(YSString),
+    Syntax(YSString),
+    Eval(YSString),
+    URI(YSString),
     Throw(Value<C>),
-    Error(Option<String>),
+    Error(Option<YSString>),
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -285,6 +305,7 @@ impl Display for StackFrame {
         )
     }
 }
+
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Location {

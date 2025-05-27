@@ -2,6 +2,7 @@ use crate::Interpreter;
 use swc_ecma_ast::{Expr, UnaryExpr, UnaryOp};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult, Value};
+use yavashark_string::YSString;
 
 impl Interpreter {
     pub fn run_unary(realm: &mut Realm, stmt: &UnaryExpr, scope: &mut Scope) -> RuntimeResult {
@@ -14,9 +15,9 @@ impl Interpreter {
                     let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
                     if let Value::Object(obj) = obj {
                         let name = match &m.prop {
-                            swc_ecma_ast::MemberProp::Ident(i) => Value::String(i.sym.to_string()),
+                            swc_ecma_ast::MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
                             swc_ecma_ast::MemberProp::PrivateName(p) => {
-                                Value::String(p.name.to_string())
+                                Value::String(YSString::from_ref(&p.name))
                             }
                             swc_ecma_ast::MemberProp::Computed(c) => {
                                 Self::run_expr(realm, &c.expr, c.span, scope)?

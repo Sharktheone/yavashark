@@ -14,7 +14,7 @@ macro_rules! error {
                 |args, realm| {
                     let msg = args
                         .first()
-                        .map_or(Ok(String::new()), |x| x.to_string(realm))?;
+                        .map_or(Result::<String, Error>::Ok(String::new()), |x| Ok(x.to_string(realm)?.to_string()))?;
 
                     let obj = ErrorObj::raw(Error::$create(msg), realm);
 

@@ -13,7 +13,7 @@ use std::rc::Rc;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
-
+use yavashark_string::{ToYSString, YSString};
 use crate::Error;
 
 mod constructor;
@@ -58,12 +58,13 @@ pub enum Value<C: Realm> {
     Null,
     Undefined,
     Number(f64),
-    String(String),
+    String(YSString),
     Boolean(bool),
     Object(Object<C>),
     Symbol(Symbol),
     BigInt(Rc<BigInt>),
 }
+
 
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
@@ -160,8 +161,8 @@ impl<C: Realm> Value<C> {
     }
 
     #[must_use]
-    pub fn string(s: &str) -> Self {
-        Self::String(s.to_string())
+    pub fn string(s: &'static str) -> Self {
+        s.into()
     }
 
     #[must_use]
@@ -325,7 +326,7 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn to_primitive(&self, hint: Option<String>, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn to_primitive(&self, hint: Hint, realm: &mut C) -> Result<Self, Error<C>> {
         match self {
             Self::Object(o) => o.to_primitive(hint, realm),
             _ => Ok(self.copy()),
@@ -346,6 +347,23 @@ impl<C: Realm> Display for Value<C> {
             Self::Object(o) => write!(f, "{o}"),
             Self::Symbol(s) => write!(f, "{s}"),
             Self::BigInt(b) => write!(f, "{b}"),
+        }
+    }
+}
+
+
+impl<C: Realm> ToYSString for Value<C> {
+    fn to_ys_string(&self) -> YSString {
+        match self {
+            Self::Null => YSString::new_static("null"),
+            Self::Undefined => YSString::new_static("undefined"),
+            Self::Number(n) => YSString::from(n.to_string()),
+            Self::String(s) => s.clone(),
+            Self::Boolean(b) => b.to_ys_string(),
+            Self::Object(b) => b.to_ys_string(),
+            Self::Symbol(s) => s.to_ys_string(),
+            Self::BigInt(n) => YSString::from(n.to_string()),
+
         }
     }
 }
@@ -469,7 +487,7 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn to_string(&self, realm: &mut C) -> Result<String, Error<C>> {
+    pub fn to_string(&self, realm: &mut C) -> Result<YSString, Error<C>> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
@@ -478,17 +496,17 @@ impl<C: Realm> Value<C> {
 
                 o.to_string(realm)?
             }
-            Self::Null => "null".to_string(),
-            Self::Undefined => "undefined".to_string(),
+            Self::Null => "null".into(),
+            Self::Undefined => "undefined".into(),
             Self::Number(n) => fmt_num(*n),
             Self::String(s) => s.clone(),
-            Self::Boolean(b) => b.to_string(),
-            Self::Symbol(s) => s.to_string(),
-            Self::BigInt(b) => b.to_string(),
+            Self::Boolean(b) => b.to_ys_string(),
+            Self::Symbol(s) => s.to_ys_string(),
+            Self::BigInt(b) => b.to_string().into(),
         })
     }
 
-    pub fn to_string_no_realm(&self) -> Result<String, Error<C>> {
+    pub fn to_string_no_realm(&self) -> Result<YSString, Error<C>> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
@@ -497,17 +515,17 @@ impl<C: Realm> Value<C> {
 
                 o.to_string_internal()?
             }
-            Self::Null => "null".to_string(),
-            Self::Undefined => "undefined".to_string(),
+            Self::Null => YSString::new_static("null"),
+            Self::Undefined => YSString::new_static("undefined"),
             Self::Number(n) => fmt_num(*n),
             Self::String(s) => s.clone(),
-            Self::Boolean(b) => b.to_string(),
-            Self::Symbol(s) => s.to_string(),
-            Self::BigInt(b) => b.to_string(),
+            Self::Boolean(b) => b.to_ys_string(),
+            Self::Symbol(s) => s.to_ys_string(),
+            Self::BigInt(b) => b.to_string().into(),
         })
     }
 
-    pub fn into_string(self, realm: &mut C) -> Result<String, Error<C>> {
+    pub fn into_string(self, realm: &mut C) -> Result<YSString, Error<C>> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
@@ -516,35 +534,35 @@ impl<C: Realm> Value<C> {
 
                 o.to_string(realm)?
             }
-            Self::Null => "null".to_string(),
-            Self::Undefined => "undefined".to_string(),
+            Self::Null => YSString::new_static("null"),
+            Self::Undefined => YSString::new_static("undefined"),
             Self::Number(n) => fmt_num(n),
             Self::String(s) => s,
-            Self::Boolean(b) => b.to_string(),
-            Self::Symbol(s) => s.to_string(),
-            Self::BigInt(b) => b.to_string(),
+            Self::Boolean(b) => b.to_ys_string(),
+            Self::Symbol(s) => s.to_ys_string(),
+            Self::BigInt(b) => b.to_string().into(),
         })
     }
 }
 
 #[must_use]
-pub fn fmt_num(n: f64) -> String {
+pub fn fmt_num(n: f64) -> YSString {
     if n.is_nan() {
-        "NaN".to_string()
+        YSString::new_static("NaN")
     } else if n == 0.0 {
-        "0".to_string()
+        YSString::new_static("0")
     } else if n.is_infinite() {
         if n.is_sign_positive() {
-            "Infinity".to_string()
+            YSString::new_static("Infinity")
         } else {
-            "-Infinity".to_string()
+            YSString::new_static("-Infinity")
         }
     } else {
         let abs_n = n.abs();
         if (1e-6..1e21).contains(&abs_n) {
-            n.to_string()
+            YSString::from_string(n.to_string())
         } else {
-            format!("{n:e}")
+            YSString::from_string(format!("{n:e}"))
         }
     }
 }
@@ -552,6 +570,13 @@ pub fn fmt_num(n: f64) -> String {
 impl<C: Realm> From<Symbol> for Value<C> {
     fn from(s: Symbol) -> Self {
         Self::Symbol(s)
+    }
+}
+
+
+impl<C: Realm> From<&Symbol> for Value<C> {
+    fn from(s: &Symbol) -> Self {
+        Self::Symbol(s.clone())
     }
 }
 

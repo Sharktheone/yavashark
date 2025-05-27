@@ -2,6 +2,7 @@ use crate::{AsAny, BoxedObj, Error, MutObj, Obj, Object, ObjectProperty, Realm, 
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_garbage::GcRef;
+use yavashark_string::YSString;
 
 pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     type Inner;
@@ -47,10 +48,10 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
         self.get_wrapped_object().name()
     }
 
-    fn to_string(&self, realm: &mut R) -> Result<String, Error<R>> {
+    fn to_string(&self, realm: &mut R) -> Result<YSString, Error<R>> {
         self.get_wrapped_object().to_string(realm)
     }
-    fn to_string_internal(&self) -> Result<String, Error<R>> {
+    fn to_string_internal(&self) -> Result<YSString, Error<R>> {
         self.get_wrapped_object().to_string_internal()
     }
 
@@ -176,11 +177,11 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
         ObjectImpl::name(self)
     }
 
-    fn to_string(&self, realm: &mut R) -> Result<String, Error<R>> {
+    fn to_string(&self, realm: &mut R) -> Result<YSString, Error<R>> {
         ObjectImpl::to_string(self, realm)
     }
 
-    fn to_string_internal(&self) -> Result<String, Error<R>> {
+    fn to_string_internal(&self) -> Result<YSString, Error<R>> {
         ObjectImpl::to_string_internal(self)
     }
 

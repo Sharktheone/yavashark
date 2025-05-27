@@ -3,11 +3,12 @@ use std::rc::Rc;
 use swc_ecma_ast::Lit;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
+use yavashark_string::YSString;
 
 impl Interpreter {
     pub fn run_lit(realm: &mut Realm, stmt: &Lit) -> RuntimeResult {
         Ok(match stmt {
-            Lit::Str(s) => Value::String(s.value.as_str().to_owned()),
+            Lit::Str(s) => Value::String(YSString::from_ref(s.value.as_str())),
             Lit::Bool(b) => Value::Boolean(b.value),
             Lit::Null(_) => Value::Null,
             Lit::Num(n) => Value::Number(n.value),

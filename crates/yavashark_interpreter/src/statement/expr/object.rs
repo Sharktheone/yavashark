@@ -3,7 +3,7 @@ use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
-
+use yavashark_string::YSString;
 use crate::function::JSFunction;
 use crate::Interpreter;
 
@@ -68,7 +68,7 @@ impl Interpreter {
 
                                 #[cfg(not(feature = "vm"))]
                                 let f = JSFunction::new(
-                                    name.clone(),
+                                    name.clone().to_string(),
                                     method.function.params.clone(),
                                     method.function.body.clone(),
                                     fn_scope,
@@ -78,7 +78,7 @@ impl Interpreter {
                                 f
                             } else {
                                 JSFunction::new(
-                                    name.clone(),
+                                    name.clone().to_string(),
                                     method.function.params.clone(),
                                     method.function.body.clone(),
                                     fn_scope,
@@ -101,7 +101,7 @@ impl Interpreter {
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
-                                key.to_string(realm)?,
+                                key.to_string(realm)?.to_string(),
                                 params,
                                 set.body.clone(),
                                 fn_scope,
@@ -119,7 +119,7 @@ impl Interpreter {
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
-                                key.to_string(realm)?,
+                                key.to_string(realm)?.to_string(),
                                 vec![],
                                 get.body.clone(),
                                 fn_scope,
@@ -139,8 +139,8 @@ impl Interpreter {
 
     pub fn run_prop_name(realm: &mut Realm, prop: &PropName, scope: &mut Scope) -> RuntimeResult {
         Ok(match prop {
-            PropName::Ident(ident) => Value::String(ident.sym.to_string()),
-            PropName::Str(str_) => Value::String(str_.value.to_string()),
+            PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
+            PropName::Str(str_) => Value::String(YSString::from_ref(&str_.value)),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
             PropName::BigInt(b) => Value::BigInt(Rc::new((*b.value).clone())),

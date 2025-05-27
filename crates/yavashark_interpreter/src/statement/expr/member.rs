@@ -4,6 +4,7 @@ use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
+use yavashark_string::YSString;
 use yavashark_value::Obj;
 
 impl Interpreter {
@@ -31,7 +32,7 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> Result<(Value, Option<Value>), ControlFlow> {
         let name = match &prop {
-            MemberProp::Ident(i) => Value::String(i.sym.to_string()),
+            MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
             MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
             MemberProp::PrivateName(_) => {
                 return Err(ControlFlow::error(

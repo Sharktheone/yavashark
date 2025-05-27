@@ -236,22 +236,22 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let to_string = if args.to_string {
         quote! {
-            fn to_string(&self, realm: &mut #realm) -> Result<String, #error> {
+            fn to_string(&self, realm: &mut #realm) -> Result<yavashark_string::YSString, #error> {
                 self.override_to_string(realm)
             }
 
-            fn to_string_internal(&self) -> Result<String, #error> {
+            fn to_string_internal(&self) -> Result<yavashark_string::YSString, #error> {
                 self.override_to_string_internal()
             }
         }
     } else {
         quote! {
-            fn to_string(&self, realm: &mut #realm) -> Result<String, #error> {
-                Ok(format!("[object {}]", self.name()))
+            fn to_string(&self, realm: &mut #realm) -> Result<yavashark_string::YSString, #error> {
+                Ok(format!("[object {}]", self.name()).into())
             }
 
-            fn to_string_internal(&self) -> Result<String, #error> {
-                Ok(format!("[object {}]", self.name()))
+            fn to_string_internal(&self) -> Result<yavashark_string::YSString, #error> {
+                Ok(format!("[object {}]", self.name()).into())
             }
         }
     };

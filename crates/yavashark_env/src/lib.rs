@@ -55,26 +55,26 @@ pub enum ControlFlow {
 
 impl ControlFlow {
     #[must_use]
-    pub const fn error(e: String) -> Self {
+    pub fn error(e: String) -> Self {
         Self::Error(Error::new_error(e))
     }
 
     #[must_use]
-    pub const fn error_reference(e: String) -> Self {
+    pub fn error_reference(e: String) -> Self {
         Self::Error(Error::reference_error(e))
     }
     #[must_use]
-    pub fn error_syn(e: &str) -> Self {
+    pub const fn error_syn(e: &'static str) -> Self {
         Self::Error(Error::syn(e))
     }
 
     #[must_use]
-    pub const fn error_syntax(e: String) -> Self {
+    pub fn error_syntax(e: String) -> Self {
         Self::Error(Error::syn_error(e))
     }
 
     #[must_use]
-    pub const fn error_type(e: String) -> Self {
+    pub fn error_type(e: String) -> Self {
         Self::Error(Error::ty_error(e))
     }
 

@@ -1,7 +1,9 @@
+use std::alloc::System;
 use crate::realm::Realm;
 use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties};
+use yavashark_string::{ToYSString, YSString};
 use yavashark_value::{ErrorKind, Variable};
 
 pub fn get_error(realm: &Realm) -> ValueResult {
@@ -10,7 +12,7 @@ pub fn get_error(realm: &Realm) -> ValueResult {
         |args, realm| {
             let message = args
                 .first()
-                .map_or(String::new(), std::string::ToString::to_string);
+                .map_or(YSString::new(), ToYSString::to_ys_string);
 
             let obj: Value = ErrorObj::new(Error::unknown_error(message), realm).into();
 
@@ -33,6 +35,7 @@ pub fn get_error(realm: &Realm) -> ValueResult {
 }
 
 #[object(to_string)]
+
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct ErrorObj {
@@ -73,7 +76,7 @@ impl ErrorObj {
     }
 
     #[must_use]
-    pub fn new_from(message: String, realm: &Realm) -> ObjectHandle {
+    pub fn new_from(message: YSString, realm: &Realm) -> ObjectHandle {
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
@@ -105,7 +108,7 @@ impl ErrorObj {
     }
 
     #[must_use]
-    pub fn raw_from(message: String, realm: &Realm) -> Self {
+    pub fn raw_from(message: YSString, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableErrorObj {
                 object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
@@ -114,14 +117,14 @@ impl ErrorObj {
         }
     }
 
-    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
-        Ok(inner.error.to_string())
+        Ok(inner.error.to_ys_string())
     }
 
-    pub fn override_to_string_internal(&self) -> Res<String> {
+    pub fn override_to_string_internal(&self) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
-        Ok(inner.error.to_string())
+        Ok(inner.error.to_ys_string())
     }
 }
 

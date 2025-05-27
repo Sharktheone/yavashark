@@ -46,9 +46,9 @@ fn error_message_pretty_circular(error: &Error, not: &mut Vec<usize>) -> String 
         | ErrorKind::Runtime(msg)
         | ErrorKind::Eval(msg)
         | ErrorKind::URI(msg)
-        | ErrorKind::Syntax(msg) => msg.clone(),
+        | ErrorKind::Syntax(msg) => msg.to_string(),
         ErrorKind::Throw(val) => val.pretty_print_circular(not),
-        ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+        ErrorKind::Error(msg) => msg.as_ref().map(|m| m.to_string()).unwrap_or(String::new()),
     }
 }
 
@@ -61,8 +61,8 @@ fn error_message_pretty_circular_nl(error: &Error, not: &mut Vec<usize>) -> Stri
         | ErrorKind::Runtime(msg)
         | ErrorKind::Eval(msg)
         | ErrorKind::URI(msg)
-        | ErrorKind::Syntax(msg) => msg.clone(),
+        | ErrorKind::Syntax(msg) => msg.to_string(),
         ErrorKind::Throw(val) => val.pretty_print_circular_nl(not),
-        ErrorKind::Error(msg) => msg.clone().unwrap_or(String::new()),
+        ErrorKind::Error(msg) => msg.as_ref().map(|m| m.to_string()).unwrap_or(String::new()),
     }
 }

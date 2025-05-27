@@ -1,6 +1,7 @@
 use crate::{MutObject, ObjectProperty, Realm, Res, Value, Variable};
 use std::cell::RefCell;
 use std::ops::{Deref, DerefMut};
+use yavashark_string::YSString;
 use yavashark_value::{Error, MutObj, ObjectImpl};
 
 #[derive(Debug)]
@@ -128,12 +129,12 @@ impl ObjectImpl<Realm> for Arguments {
         "Arguments".to_string()
     }
 
-    fn to_string(&self, _: &mut Realm) -> Result<String, Error<Realm>> {
-        Ok("[object Arguments]".to_string())
+    fn to_string(&self, _: &mut Realm) -> Result<YSString, Error<Realm>> {
+        Ok("[object Arguments]".into())
     }
 
-    fn to_string_internal(&self) -> Result<String, Error<Realm>> {
-        Ok("[object Arguments]".to_string())
+    fn to_string_internal(&self) -> Result<YSString, Error<Realm>> {
+        Ok("[object Arguments]".into())
     }
 
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error<Realm>> {

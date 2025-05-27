@@ -15,7 +15,7 @@ impl Interpreter {
                 continue;
             };
 
-            scope.declare_var(key, value)?;
+            scope.declare_var(key.to_string(), value)?;
         }
 
         Self::run_statement(realm, &stmt.body, &mut scope)

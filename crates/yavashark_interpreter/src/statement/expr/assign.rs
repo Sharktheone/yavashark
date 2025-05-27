@@ -9,6 +9,7 @@ use swc_ecma_ast::{
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
+use yavashark_string::YSString;
 use yavashark_value::Obj;
 
 impl Interpreter {
@@ -70,8 +71,8 @@ impl Interpreter {
     ) -> Res {
         if let Value::Object(obj) = obj {
             let name = match m {
-                MemberProp::Ident(i) => Value::String(i.sym.to_string()),
-                MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
+                MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+                MemberProp::PrivateName(p) => Value::String(YSString::from_ref(&p.name)),
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
@@ -251,8 +252,8 @@ impl Interpreter {
     ) -> RuntimeResult {
         if let Value::Object(obj) = obj {
             let name = match m {
-                MemberProp::Ident(i) => Value::String(i.sym.to_string()),
-                MemberProp::PrivateName(p) => Value::String(p.name.to_string()),
+                MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+                MemberProp::PrivateName(p) => Value::String(YSString::from_ref(&p.name)),
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 

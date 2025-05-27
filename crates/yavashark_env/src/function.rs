@@ -8,6 +8,7 @@ use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
+use yavashark_string::{ToYSString, YSString};
 use yavashark_value::{MutObj, Obj, ObjectImpl};
 
 mod bound;
@@ -25,7 +26,7 @@ pub struct MutNativeFunction {
 }
 
 pub struct NativeFunction {
-    pub name: String,
+    pub name: &'static str,
     pub f: NativeFn,
     pub constructor: bool,
     inner: RefCell<MutNativeFunction>,
@@ -67,12 +68,12 @@ impl ObjectImpl<Realm> for NativeFunction {
         (self.f)(args, obj, realm)
     }
 
-    fn to_string(&self, _: &mut Realm) -> Result<String, yavashark_value::Error<Realm>> {
-        Ok(format!("function {}() {{ [native code] }}", self.name))
+    fn to_string(&self, _: &mut Realm) -> Result<YSString, yavashark_value::Error<Realm>> {
+        Ok(format!("function {}() {{ [native code] }}", self.name).into())
     }
 
-    fn to_string_internal(&self) -> Result<String, yavashark_value::Error<Realm>> {
-        Ok(format!("function {}() {{ [native code] }}", self.name))
+    fn to_string_internal(&self) -> Result<YSString, yavashark_value::Error<Realm>> {
+        Ok(format!("function {}() {{ [native code] }}", self.name).into())
     }
 
     fn is_function(&self) -> bool {
@@ -83,9 +84,9 @@ impl ObjectImpl<Realm> for NativeFunction {
 impl NativeFunction {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn new_boxed(name: String, f: NativeFn, realm: &Realm) -> ObjectHandle {
+    pub fn new_boxed(name: &'static str, f: NativeFn, realm: &Realm) -> ObjectHandle {
         let this = Self {
-            name: name.clone(),
+            name,
             f,
             constructor: false,
 
@@ -122,12 +123,12 @@ impl NativeFunction {
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn new(
-        name: &str,
+        name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         realm: &Realm,
     ) -> ObjectHandle {
         let this = Self {
-            name: name.to_string(),
+            name,
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
@@ -163,13 +164,13 @@ impl NativeFunction {
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn with_len(
-        name: &str,
+        name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         realm: &Realm,
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
-            name: name.to_string(),
+            name: name,
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
@@ -202,12 +203,12 @@ impl NativeFunction {
 
     #[allow(clippy::new_ret_no_self, clippy::missing_panics_doc)]
     pub fn special(
-        name: &str,
+        name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         realm: &Realm,
     ) -> ObjectHandle {
         let this = Self {
-            name: name.to_string(),
+            name,
             f: Box::new(f),
             constructor: true,
             inner: RefCell::new(MutNativeFunction {
@@ -242,12 +243,12 @@ impl NativeFunction {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
-        name: &str,
+        name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: Value,
     ) -> ObjectHandle {
         let this = Self {
-            name: name.to_string(),
+            name,
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
@@ -279,13 +280,13 @@ impl NativeFunction {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto_and_len(
-        name: &str,
+        name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: Value,
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
-            name: name.to_string(),
+            name,
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
@@ -318,12 +319,12 @@ impl NativeFunction {
 
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
-        name: &str,
+        name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: Value,
     ) -> ObjectHandle {
         let this = Self {
-            name: name.to_string(),
+            name,
             f: Box::new(f),
             constructor: true,
             inner: RefCell::new(MutNativeFunction {
@@ -360,7 +361,7 @@ impl NativeFunction {
     pub fn builder() -> NativeFunctionBuilder {
         NativeFunctionBuilder(
             Self {
-                name: String::new(),
+                name: "",
                 f: Box::new(|_, _, _| Ok(Value::Undefined)),
                 constructor: false,
                 inner: RefCell::new(MutNativeFunction {
@@ -375,8 +376,8 @@ impl NativeFunction {
 
 impl NativeFunctionBuilder {
     #[must_use]
-    pub fn name(mut self, name: &str) -> Self {
-        self.0.name = name.to_string();
+    pub fn name(mut self, name: &'static str) -> Self {
+        self.0.name = name;
         self
     }
 

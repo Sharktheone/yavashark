@@ -28,7 +28,7 @@ impl JSON {
             serde_json::Value::Null => Value::Null,
             serde_json::Value::Bool(b) => Value::Boolean(b),
             serde_json::Value::Number(n) => Value::Number(n.as_f64().unwrap_or(0.0)),
-            serde_json::Value::String(s) => Value::String(s),
+            serde_json::Value::String(s) => Value::String(s.into()),
             serde_json::Value::Array(a) => {
                 let values = a
                     .into_iter()
@@ -60,7 +60,7 @@ impl JSON {
             Value::Number(n) => {
                 serde_json::Value::Number(Number::from_f64(n).unwrap_or(Number::from(0u8)))
             }
-            Value::String(s) => serde_json::Value::String(s),
+            Value::String(s) => serde_json::Value::String(s.to_string()),
             Value::BigInt(_) => return Err(Error::ty("Do not know how to serialize a BigInt")),
             Value::Object(ref o) => {
                 if value.instance_of(&realm.intrinsics.array_constructor().value, realm)? {
@@ -104,7 +104,7 @@ impl JSON {
 
                     let k = k.to_string(realm)?;
 
-                    map.insert(k, val);
+                    map.insert(k.to_string(), val);
                 }
 
                 serde_json::Value::Object(map)

@@ -9,7 +9,8 @@ use std::cmp;
 use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
+use yavashark_string::YSString;
+use yavashark_value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -18,14 +19,14 @@ pub struct StringObj {
 
 impl ProtoDefault for StringObj {
     fn proto_default(realm: &Realm) -> Self {
-        Self::with_string(realm, String::new())
+        Self::with_string(realm, YSString::new())
     }
 
     fn null_proto_default() -> Self {
         Self {
             inner: RefCell::new(MutableStringObj {
                 object: MutObject::null(),
-                string: String::new(),
+                string: YSString::new(),
             }),
         }
     }
@@ -34,7 +35,7 @@ impl ProtoDefault for StringObj {
 #[derive(Debug)]
 pub struct MutableStringObj {
     pub object: MutObject,
-    string: String,
+    string: YSString,
 }
 
 impl Deref for MutableStringObj {
@@ -145,12 +146,12 @@ impl StringConstructor {
         Ok(this.into_object())
     }
 
-    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
-        Ok("function String() { [native code] }".to_string())
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
+        Ok("function String() { [native code] }".into())
     }
 
-    pub fn override_to_string_internal(&self) -> Res<String> {
-        Ok("function String() { [native code] }".to_string())
+    pub fn override_to_string_internal(&self) -> Res<YSString> {
+        Ok("function String() { [native code] }".into())
     }
 }
 
@@ -193,7 +194,7 @@ impl StringConstructor {
         // 5. If literalCount ≤ 0, return the empty String.
         if literal_count == 0 {
             //length from ArrayLike.len can't be under 0
-            return Ok(Value::String(String::new()));
+            return Ok(Value::String(YSString::new()));
         }
 
         // 6. Let R be the empty String.
@@ -239,7 +240,7 @@ impl Constructor<Realm> for StringConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,
-            None => String::new(),
+            None => YSString::new(),
         };
 
         let obj = StringObj::with_string(realm, str);
@@ -252,7 +253,7 @@ impl Func<Realm> for StringConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,
-            None => String::new(),
+            None => YSString::new(),
         };
 
         Ok(str.into())
@@ -262,10 +263,10 @@ impl Func<Realm> for StringConstructor {
 impl StringObj {
     #[allow(clippy::new_ret_no_self, dead_code)]
     pub fn new(realm: &Realm) -> ObjectHandle {
-        Obj::into_object(Self::with_string(realm, String::new()))
+        Obj::into_object(Self::with_string(realm, YSString::new()))
     }
 
-    pub fn with_string(realm: &Realm, string: String) -> Self {
+    pub fn with_string(realm: &Realm, string: YSString) -> Self {
         Self {
             inner: RefCell::new(MutableStringObj {
                 object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
@@ -562,7 +563,7 @@ impl StringObj {
 
         let string = str.get(start..end);
 
-        Ok(string.unwrap_or_default().into())
+        Ok(YSString::from_ref(string.unwrap_or_default()).into())
     }
 
     pub fn small(#[this] str: &Stringable) -> ValueResult {
@@ -582,7 +583,7 @@ impl StringObj {
         let mut array = Vec::new();
 
         for part in parts {
-            array.push(part.into());
+            array.push(YSString::from_ref(part).into());
         }
 
         Ok(Array::with_elements(realm, array)?.into_value())
@@ -615,7 +616,7 @@ impl StringObj {
 
         let string = str.get(start..end);
 
-        Ok(string.unwrap_or_default().into())
+        Ok(YSString::from_ref(string.unwrap_or_default()).into())
     }
 
     pub fn substring(#[this] str: &Stringable, start: isize, end: Option<isize>) -> ValueResult {
@@ -638,7 +639,7 @@ impl StringObj {
 
         let string = str.get(start..end);
 
-        Ok(string.unwrap_or_default().into())
+        Ok(YSString::from_ref(string.unwrap_or_default()).into())
     }
 
     pub fn sup(#[this] str: &Stringable) -> ValueResult {
@@ -672,17 +673,17 @@ impl StringObj {
     }
 
     pub fn trim(#[this] str: &Stringable) -> ValueResult {
-        Ok(str.trim().into())
+        Ok(YSString::from_ref(str.trim()).into())
     }
 
     #[prop("trimEnd")]
     pub fn trim_end(#[this] str: &Stringable) -> ValueResult {
-        Ok(str.trim_end().into())
+        Ok(YSString::from_ref(str.trim_end()).into())
     }
 
     #[prop("trimStart")]
     pub fn trim_start(#[this] str: &Stringable) -> ValueResult {
-        Ok(str.trim_start().into())
+        Ok(YSString::from_ref(str.trim_start()).into())
     }
 
     #[prop("valueOf")]

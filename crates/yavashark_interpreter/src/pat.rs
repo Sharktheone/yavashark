@@ -7,6 +7,7 @@ use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
+use yavashark_string::YSString;
 use yavashark_value::IntoValue;
 
 impl Interpreter {
@@ -161,8 +162,8 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> ValueResult {
         Ok(match prop {
-            PropName::Ident(ident) => Value::String(ident.sym.to_string()),
-            PropName::Str(str_) => Value::String(str_.value.to_string()),
+            PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
+            PropName::Str(str_) => Value::String(YSString::from_ref(&str_.value)),
             PropName::Num(num) => Value::Number(num.value),
             PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
             PropName::BigInt(_) => todo!(),

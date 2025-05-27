@@ -1,6 +1,7 @@
 #![allow(clippy::needless_pass_by_value)]
 
 use std::cell::RefCell;
+use yavashark_string::YSString;
 use yavashark_value::{MutObj, Obj};
 
 use crate::array::Array;
@@ -39,7 +40,7 @@ impl FunctionPrototype {
                 call: Value::Undefined.into(),
                 constructor: Value::Undefined.into(),
                 length: Value::Number(0.0).into(),
-                name: Value::String("Function".to_string()).into(),
+                name: Value::string("Function").into(),
                 to_string: Value::Undefined.into(),
             }),
         }
@@ -144,7 +145,7 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         return Err(Error::new("eval is not defined"));
     };
 
-    eval.call(realm, vec![Value::String(buf)], Value::Undefined)
+    eval.call(realm, vec![Value::String(buf.into())], Value::Undefined)
 }
 
 fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
@@ -348,32 +349,32 @@ impl Obj<Realm> for FunctionPrototype {
         "FunctionPrototype".to_string()
     }
 
-    fn to_string(&self, _realm: &mut Realm) -> Res<String, Error> {
-        Ok("function () { [Native code] } ".to_string())
+    fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
+        Ok("function () { [Native code] } ".into())
     }
 
-    fn to_string_internal(&self) -> Res<String> {
-        Ok("function () { [Native code <Function Prototype>] } ".to_string())
+    fn to_string_internal(&self) -> Res<YSString> {
+        Ok("function () { [Native code <Function Prototype>] } ".into())
     }
 
     fn properties(&self) -> Res<Vec<(Value, Value)>> {
         let this = self.inner.try_borrow()?;
 
         let mut props = this.object.properties()?;
-        props.push((Value::String("apply".to_string()), this.apply.value.copy()));
-        props.push((Value::String("bind".to_string()), this.bind.value.copy()));
-        props.push((Value::String("call".to_string()), this.call.value.copy()));
+        props.push((Value::String("apply".into()), this.apply.value.copy()));
+        props.push((Value::String("bind".into()), this.bind.value.copy()));
+        props.push((Value::String("call".into()), this.call.value.copy()));
         props.push((
-            Value::String("constructor".to_string()),
+            Value::String("constructor".into()),
             this.constructor.value.copy(),
         ));
         props.push((
-            Value::String("length".to_string()),
+            Value::String("length".into()),
             this.length.value.copy(),
         ));
-        props.push((Value::String("name".to_string()), this.name.value.copy()));
+        props.push((Value::String("name".into()), this.name.value.copy()));
         props.push((
-            Value::String("toString".to_string()),
+            Value::String("toString".into()),
             this.to_string.value.copy(),
         ));
 
@@ -384,13 +385,13 @@ impl Obj<Realm> for FunctionPrototype {
         let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
-        keys.push(Value::String("apply".to_string()));
-        keys.push(Value::String("bind".to_string()));
-        keys.push(Value::String("call".to_string()));
-        keys.push(Value::String("constructor".to_string()));
-        keys.push(Value::String("length".to_string()));
-        keys.push(Value::String("name".to_string()));
-        keys.push(Value::String("toString".to_string()));
+        keys.push(Value::string("apply"));
+        keys.push(Value::string("bind"));
+        keys.push(Value::string("call"));
+        keys.push(Value::string("constructor"));
+        keys.push(Value::string("length"));
+        keys.push(Value::string("name"));
+        keys.push(Value::string("toString"));
 
         Ok(keys)
     }
@@ -425,7 +426,7 @@ impl Obj<Realm> for FunctionPrototype {
         this.call = Value::Undefined.into();
         this.constructor = Value::Undefined.into();
         this.length = Value::Number(0.0).into();
-        this.name = Value::String("Function".to_string()).into();
+        this.name = Value::string("Function").into();
         this.to_string = Value::Undefined.into();
 
         Ok(())

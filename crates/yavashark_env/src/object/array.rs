@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
+use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
 
 use crate::object::Object;
@@ -84,23 +85,23 @@ impl ObjectImpl<Realm> for Array {
         "Array".to_string()
     }
 
-    fn to_string(&self, realm: &mut Realm) -> Res<String> {
+    fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
         let mut buf = String::new();
 
         let inner = self.inner.try_borrow()?;
 
         for (_, value) in &inner.array {
-            buf.push_str(&value.value.to_string(realm)?);
+            buf.push_str(value.value.to_string(realm)?.as_str());
             buf.push_str(", ");
         }
 
         buf.pop();
         buf.pop();
 
-        Ok(buf)
+        Ok(buf.into())
     }
 
-    fn to_string_internal(&self) -> Res<String> {
+    fn to_string_internal(&self) -> Res<YSString> {
         use std::fmt::Write as _;
 
         let mut buf = String::new();
@@ -116,7 +117,7 @@ impl ObjectImpl<Realm> for Array {
         buf.pop();
         buf.pop();
 
-        Ok(buf)
+        Ok(buf.into())
     }
 }
 
@@ -1302,7 +1303,7 @@ impl Array {
     }
 
     #[prop("toString")]
-    fn to_string_js(&self, #[realm] realm: &mut Realm) -> Res<String> {
+    fn to_string_js(&self, #[realm] realm: &mut Realm) -> Res<YSString> {
         Obj::to_string(self, realm)
     }
 }

@@ -1,11 +1,11 @@
 use crate::js::ops::BigIntOrNumber;
-use crate::{Error, Realm, Value};
+use crate::{Error, Hint, Realm, Value};
 
 impl<R: Realm> Value<R> {
     pub fn add(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
-        let left = self.to_primitive(None, realm)?;
-        let right = other.to_primitive(None, realm)?;
+        let left = self.to_primitive(Hint::None, realm)?;
+        let right = other.to_primitive(Hint::None, realm)?;
 
         Ok(if left.is_string() || right.is_string() {
             let left_str = left.into_string(realm)?;

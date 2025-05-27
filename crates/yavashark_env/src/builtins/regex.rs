@@ -3,6 +3,7 @@ use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Res, Value, Val
 use regex::{Regex, RegexBuilder};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use yavashark_string::YSString;
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
 
 #[object(direct(last_index(lastIndex), global))]
@@ -76,13 +77,13 @@ impl RegExpConstructor {
     }
 
     #[allow(clippy::unused_self)]
-    fn override_to_string_internal(&self) -> Res<String> {
-        Ok("function RegExp() { [native code] }".to_string())
+    fn override_to_string_internal(&self) -> Res<YSString> {
+        Ok("function RegExp() { [native code] }".into())
     }
 
     #[allow(clippy::unused_self)]
-    fn override_to_string(&self, _: &mut Realm) -> Res<String> {
-        Ok("function RegExp() { [native code] }".to_string())
+    fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
+        Ok("function RegExp() { [native code] }".into())
     }
 }
 
@@ -90,11 +91,11 @@ impl Constructor<Realm> for RegExpConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let regex = args
             .first()
-            .map_or(Ok(String::new()), |v| v.to_string(realm))?;
+            .map_or(Res::<String>::Ok(String::new()), |v| Ok(v.to_string(realm)?.to_string()))?;
 
         let flags = args
             .get(1)
-            .map_or(Ok(String::new()), |v| v.to_string(realm))?;
+            .map_or(Res::<String>::Ok(String::new()), |v| Ok(v.to_string(realm)?.to_string()))?;
 
         let obj = RegExp::new_from_str_with_flags(realm, &regex, &flags)?;
 

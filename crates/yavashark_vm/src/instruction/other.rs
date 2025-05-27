@@ -196,7 +196,7 @@ pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
             continue;
         };
 
-        scope.declare_var(key, value)?;
+        scope.declare_var(key.to_string(), value)?;
     }
 
     Ok(())

@@ -82,7 +82,7 @@ impl GeneratorFunction {
             return Err(Error::new("eval is not defined"));
         };
 
-        eval.call(realm, vec![Value::String(buf)], Value::Undefined)
+        eval.call(realm, vec![Value::String(buf.into())], Value::Undefined)
     }
 }
 

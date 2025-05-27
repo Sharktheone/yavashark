@@ -4,6 +4,7 @@ use num_bigint::Sign;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use yavashark_string::YSString;
 use yavashark_value::{Constructor, Func, Obj};
 
 #[object]
@@ -52,12 +53,12 @@ impl NumberConstructor {
         Ok(this.into_object())
     }
 
-    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
-        Ok("function Number() { [native code] }".to_string())
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
+        Ok("function Number() { [native code] }".into())
     }
 
-    pub fn override_to_string_internal(&self) -> Res<String> {
-        Ok("function Number() { [native code] }".to_string())
+    pub fn override_to_string_internal(&self) -> Res<YSString> {
+        Ok("function Number() { [native code] }".into())
     }
 
     fn construct_from(realm: &mut Realm, val: &Value) -> Res<f64> {

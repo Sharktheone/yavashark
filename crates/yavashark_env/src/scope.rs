@@ -5,6 +5,7 @@ use std::rc::Rc;
 use rustc_hash::FxHashMap;
 use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
+use yavashark_string::YSString;
 use yavashark_value::CustomGcRefUntyped;
 
 use crate::realm::Realm;
@@ -237,7 +238,7 @@ impl ObjectOrVariables {
     fn get(&self, name: &str) -> Option<Variable> {
         match self {
             Self::Object(o) => o
-                .resolve_property_no_get_set(&name.into())
+                .resolve_property_no_get_set(&YSString::from_ref(name).into())
                 .ok()
                 .flatten()
                 .map(|x| Variable::with_attributes(x.value, x.attributes)),
@@ -247,12 +248,12 @@ impl ObjectOrVariables {
 
     fn contains_key(&self, name: &str) -> bool {
         match self {
-            Self::Object(o) => o.contains_key(&name.into()).unwrap_or_default(),
+            Self::Object(o) => o.contains_key(&YSString::from_ref(name).into()).unwrap_or_default(),
             Self::Variables(v) => v.contains_key(name),
         }
     }
 
-    fn keys(&self) -> Vec<String> {
+    fn keys(&self) -> Vec<YSString> {
         match self {
             Self::Object(o) => o
                 .keys()
@@ -268,7 +269,7 @@ impl ObjectOrVariables {
                         .collect()
                 })
                 .unwrap_or_default(),
-            Self::Variables(v) => v.keys().cloned().collect(),
+            Self::Variables(v) => v.keys().map(|k| YSString::from_ref(k)).collect(),
         }
     }
 }
@@ -551,9 +552,10 @@ impl ScopeInternal {
     }
 
     pub fn update(&mut self, name: &str, value: Value) -> Res<bool> {
+
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
-                let name = name.into();
+                let name = YSString::from_ref(name).into();
                 if let Ok(Some(prop)) = obj.resolve_property_no_get_set(&name) {
                     if !prop.attributes.is_writable() {
                         return Ok(false);
@@ -647,7 +649,7 @@ impl ScopeInternal {
             ObjectOrVariables::Object(o) => {
                 for (k, v) in &o.properties()? {
                     if let Value::String(s) = k {
-                        variables.insert(s.clone(), v.clone().into());
+                        variables.insert(s.to_string(), v.clone().into());
                     }
                 }
             }
@@ -667,7 +669,7 @@ impl ScopeInternal {
             None => HashSet::new(),
         };
 
-        variables.extend(self.variables.keys());
+        variables.extend(self.variables.keys().iter().map(ToString::to_string));
 
         Ok(variables)
     }

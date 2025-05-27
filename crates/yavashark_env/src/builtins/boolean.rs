@@ -2,6 +2,7 @@ use crate::utils::ProtoDefault;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use yavashark_string::YSString;
 use yavashark_value::{Constructor, CustomName, Func, Obj};
 
 #[object(name)]
@@ -60,12 +61,12 @@ impl BooleanConstructor {
         Ok(this.into_object())
     }
 
-    pub fn override_to_string(&self, _: &mut Realm) -> Res<String> {
-        Ok("function Boolean() { [native code] }".to_string())
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
+        Ok("function Boolean() { [native code] }".into())
     }
 
-    pub fn override_to_string_internal(&self) -> Res<String> {
-        Ok("function Boolean() { [native code] }".to_string())
+    pub fn override_to_string_internal(&self) -> Res<YSString> {
+        Ok("function Boolean() { [native code] }".into())
     }
 }
 

@@ -4,21 +4,34 @@ use num_bigint::BigInt;
 use std::any::type_name;
 use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
+use yavashark_string::YSString;
 
-impl<C: Realm> From<&str> for Value<C> {
-    fn from(s: &str) -> Self {
-        Self::String(s.to_string())
+impl<C: Realm> From<&'static str> for Value<C> {
+    fn from(s: &'static str) -> Self {
+        Self::String(YSString::new_static(s))
     }
 }
 
 impl<C: Realm> From<String> for Value<C> {
     fn from(s: String) -> Self {
-        Self::String(s)
+        Self::String(YSString::from_string(s))
     }
 }
 
 impl<C: Realm> From<&String> for Value<C> {
     fn from(s: &String) -> Self {
+        Self::String(YSString::from_ref(&s))
+    }
+}
+
+impl<C: Realm> From<YSString>  for Value<C> {
+    fn from(s: YSString) -> Self {
+        Self::String(s)
+    }
+}
+
+impl<C: Realm> From<&YSString> for Value<C> {
+    fn from(s: &YSString) -> Self {
         Self::String(s.clone())
     }
 }
@@ -171,7 +184,7 @@ impl<C: Realm> FromValue<C> for Value<C> {
     }
 }
 
-impl<C: Realm> FromValue<C> for String {
+impl<C: Realm> FromValue<C> for YSString {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
         match value {
             Value::String(s) => Ok(s),
@@ -181,6 +194,18 @@ impl<C: Realm> FromValue<C> for String {
         }
     }
 }
+
+
+// impl<C: Realm> FromValue<C> for String {
+//     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+//         match value {
+//             Value::String(s) => Ok(s.to_string()),
+//             _ => Err(Error::ty_error(format!(
+//                 "Expected a string, found {value:?}"
+//             ))),
+//         }
+//     }
+// }
 
 impl<C: Realm> FromValue<C> for bool {
     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
@@ -228,13 +253,20 @@ impl<C: Realm> FromValue<C> for () {
 
 impl<C: Realm> IntoValue<C> for String {
     fn into_value(self) -> Value<C> {
+        Value::String(self.into())
+    }
+}
+
+
+impl<C: Realm> IntoValue<C> for YSString {
+    fn into_value(self) -> Value<C> {
         Value::String(self)
     }
 }
 
-impl<C: Realm> IntoValue<C> for &str {
+impl<C: Realm> IntoValue<C> for &'static str {
     fn into_value(self) -> Value<C> {
-        Value::String(self.to_owned())
+        Value::String(YSString::new_static(self))
     }
 }
 
@@ -265,6 +297,13 @@ impl<C: Realm> IntoValue<C> for Rc<BigInt> {
 impl<C: Realm> IntoValue<C> for Symbol {
     fn into_value(self) -> Value<C> {
         Value::Symbol(self)
+    }
+}
+
+
+impl<C: Realm> IntoValue<C> for &Symbol {
+    fn into_value(self) -> Value<C> {
+        Value::Symbol(self.clone())
     }
 }
 

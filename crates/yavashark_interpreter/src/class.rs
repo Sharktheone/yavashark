@@ -4,6 +4,7 @@ use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, Param, ParamOrTsPara
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
 };
+use yavashark_string::YSString;
 use yavashark_value::Obj;
 
 use crate::Interpreter;
@@ -83,7 +84,7 @@ pub fn create_class(
                     Value::Undefined
                 };
 
-                define_on_class(key.into(), value, &mut class, &mut proto, false, true);
+                define_on_class(YSString::from_ref(key).into(), value, &mut class, &mut proto, false, true);
             }
             ClassMember::Empty(_) => {}
             ClassMember::TsIndexSignature(_) => {
@@ -168,7 +169,7 @@ fn create_method(
     }
 
     let func = JSFunction::new(
-        name.to_string(realm)?,
+        name.to_string(realm)?.to_string(),
         func.params.clone(),
         func.body.clone(),
         scope.clone(),
@@ -211,7 +212,7 @@ fn define_on_class(
                 ));
             };
 
-            class.set_private_prop(name, value);
+            class.set_private_prop(name.to_string(), value);
         } else {
             let Value::String(name) = name else {
                 return Err(Error::new(
@@ -219,7 +220,7 @@ fn define_on_class(
                 ));
             };
 
-            proto.set_private_prop(name, value);
+            proto.set_private_prop(name.to_string(), value);
         }
     } else if is_static {
         if name == Value::String("prototype".into()) {
