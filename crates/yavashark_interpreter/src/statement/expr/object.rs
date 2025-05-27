@@ -61,7 +61,7 @@ impl Interpreter {
                                 #[cfg(feature = "vm")]
                                     let f = yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                                         &method.function,
-                                        name.clone(),
+                                        name.clone().to_string(),
                                         fn_scope,
                                         realm,
                                     )?;

@@ -159,7 +159,7 @@ fn create_method(
                 name,
                 (yavashark_bytecode_interpreter::ByteCodeInterpreter::compile_fn(
                     func,
-                    name_str,
+                    name_str.to_string(),
                     scope.clone(),
                     realm,
                 )?
