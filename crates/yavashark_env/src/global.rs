@@ -7,7 +7,7 @@ use crate::realm::Realm;
 use crate::Value;
 use crate::{get_console, ObjectHandle, Res, Variable};
 
-pub fn init_global_obj(handle: &ObjectHandle, realm: &Realm) -> Res {
+pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
     let obj = handle.guard();
 
     obj.define_variable(

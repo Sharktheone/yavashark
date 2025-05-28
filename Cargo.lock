@@ -5076,6 +5076,8 @@ dependencies = [
  "bytemuck",
  "chrono",
  "colored",
+ "eframe",
+ "egui",
  "futures",
  "getrandom 0.3.1",
  "half",

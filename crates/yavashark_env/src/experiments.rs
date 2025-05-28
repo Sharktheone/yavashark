@@ -9,8 +9,10 @@ mod io;
 mod tcp;
 mod time;
 mod timers;
+#[cfg(feature = "gui")]
+mod gui;
 
-pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
+pub fn init(obj: &ObjectHandle, realm: &mut Realm) -> Res {
     let obj = obj.guard();
 
     obj.define_variable("fs".into(), Fs::new(realm)?.into())?;
@@ -19,6 +21,9 @@ pub fn init(obj: &ObjectHandle, realm: &Realm) -> Res {
     obj.define_variable("io".into(), io::Io::new(realm)?.into())?;
     obj.define_variable("time".into(), time::Timer::new(realm)?.into())?;
     obj.define_variable("setTimeout".into(), timers::get_set_timeout(realm).into())?;
+    
+    #[cfg(feature = "gui")]
+    gui::init(realm)?;
 
     Ok(())
 }

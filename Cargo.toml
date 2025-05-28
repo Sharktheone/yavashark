@@ -21,7 +21,7 @@ swc_ecma_parser = "12.0.0"
 yavashark_interpreter = { path = "crates/yavashark_interpreter" }
 yavashark_codegen = { path = "crates/yavashark_codegen", optional = true }
 yavashark_vm = { path = "crates/yavashark_vm", optional = true }
-yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments"]}
+yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments", "gui"]}
 yavashark_compiler = { path = "crates/yavashark_compiler", optional = true }
 tokio = { version = "1.10.0", features = ["full"] }
 swc_ecma_ast = "9.0.0"

@@ -1,3 +1,5 @@
+use std::any::TypeId;
+use rustc_hash::FxHashMap;
 use crate::array::{Array, ArrayIterator};
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
@@ -19,7 +21,7 @@ use crate::builtins::{
     Promise, Reflect, RegExp, StringObj, SymbolObj, JSON,
 };
 use crate::error::ErrorObj;
-use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Value, Variable};
+use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Value, Variable};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -75,6 +77,8 @@ pub struct Intrinsics {
     pub promise: ObjectHandle,
     pub generator_function: ObjectHandle,
     pub generator: ObjectHandle,
+
+    pub other: FxHashMap<TypeId, ObjectHandle>,
 }
 
 macro_rules! constructor {
@@ -407,6 +411,16 @@ impl Intrinsics {
             promise,
             generator_function: Object::null(),
             generator: Object::null(),
+            other: FxHashMap::default(),
         })
+    }
+
+
+    pub fn get_of<T: 'static>(&self) -> Res<ObjectHandle> {
+        self.other.get(&TypeId::of::<T>()).cloned().ok_or(Error::new("Failed to get prototype"))
+    }
+    
+    pub fn insert<T: 'static>(&mut self, proto: ObjectHandle) {
+        self.other.insert(TypeId::of::<T>(), proto);
     }
 }

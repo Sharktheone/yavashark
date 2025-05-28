@@ -27,7 +27,7 @@ impl Realm {
 
         let global = Object::with_proto(intrinsics.obj.clone().into());
 
-        let realm = Self {
+        let mut realm = Self {
             env: Environment {
                 modules: HashMap::new(),
             },
@@ -36,7 +36,7 @@ impl Realm {
             queue: AsyncTaskQueue::new(),
         };
 
-        init_global_obj(&global, &realm)?;
+        init_global_obj(&global, &mut realm)?;
 
         Ok(realm)
     }
