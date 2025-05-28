@@ -3,7 +3,7 @@ use std::fmt::Debug;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 use crate::experiments::gui::runtime_lifetime::{RuntimeLifetime, RuntimeLifetimeGuard};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
 
 #[object]
 pub struct Ui {
@@ -57,5 +57,37 @@ impl Ui {
 
             Ok(())
         })
+    }
+    
+    fn label(&self, label: String) -> Res {
+        self.ui.with(move |ui| {
+            ui.label(label);
+            
+            Ok(())
+        })
+    }
+    
+    fn horizontal(&self, #[this] this: Value, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res {
+        self.ui.with(|ui| {
+            ui.horizontal(|ui| {
+                let x = self.ui.update(ui);
+                let global = realm.global.clone().into();
+                f.call(realm, vec![this], global)?;
+
+                drop(x);
+
+                Ok(())
+            }).inner
+        })
+    }
+    
+    fn text_edit_single_line(&self, mut test: String) -> Res<String> {
+        self.ui.with(|ui| {
+            ui.text_edit_singleline(&mut test);
+            
+            Ok(())
+        })?;
+        
+        Ok(test)
     }
 }
