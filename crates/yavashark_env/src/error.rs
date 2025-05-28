@@ -1,38 +1,10 @@
-use std::alloc::System;
 use crate::realm::Realm;
 use crate::{Error, MutObject, NativeConstructor, ObjectHandle, Res, Value, ValueResult};
 use std::cell::RefCell;
-use yavashark_macro::{object, properties};
+use yavashark_garbage::OwningGcGuard;
+use yavashark_macro::{object, props};
 use yavashark_string::{ToYSString, YSString};
-use yavashark_value::{ErrorKind, Variable};
-
-pub fn get_error(realm: &Realm) -> ValueResult {
-    let constr = NativeConstructor::special(
-        "error".to_string(),
-        |args, realm| {
-            let message = args
-                .first()
-                .map_or(YSString::new(), ToYSString::to_ys_string);
-
-            let obj: Value = ErrorObj::new(Error::unknown_error(message), realm).into();
-
-            Ok(obj)
-        },
-        realm,
-    );
-
-    realm
-        .intrinsics
-        .error
-        .define_property("constructor".into(), constr.clone().into())?;
-
-    constr.define_variable(
-        "prototype".into(),
-        Variable::new_read_only(realm.intrinsics.error.clone().into()),
-    )?;
-
-    Ok(constr.into())
-}
+use yavashark_value::{ErrorKind, FromValue, Variable};
 
 #[object(to_string)]
 
@@ -128,11 +100,27 @@ impl ErrorObj {
     }
 }
 
-#[properties]
+#[props]
 impl ErrorObj {
-    #[get(message)]
-    pub fn get_message(&self, _: Vec<Value>, realm: &mut Realm) -> ValueResult {
+
+    #[constructor]
+    pub fn construct(message: YSString, #[realm] realm: &mut Realm) -> ValueResult {
+        let obj = ErrorObj::new(Error::unknown_error(message), realm).into();
+
+        Ok(obj)
+
+    }
+
+    #[get("message")]
+    pub fn get_message(&self, #[realm] realm: &mut Realm) -> ValueResult {
         let inner = self.inner.try_borrow()?;
         Ok(inner.error.message(realm)?.into())
+    }
+
+    #[prop("isError")]
+    pub fn is_error(this: Value) -> bool {
+        let this: Res<OwningGcGuard<_, Self>> = FromValue::from_value(this);
+
+        this.is_ok()
     }
 }

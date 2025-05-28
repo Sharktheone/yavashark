@@ -2,7 +2,6 @@ use crate::builtins::{
     get_decode_uri, get_decode_uri_component, get_encode_uri, get_encode_uri_component, get_escape,
     get_is_finite, get_is_nan, get_parse_float, get_parse_int,
 };
-use crate::error::get_error;
 use crate::realm::Realm;
 use crate::Value;
 use crate::{get_console, ObjectHandle, Res, Variable};
@@ -31,7 +30,7 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
 
     obj.define_variable("console".into(), Variable::write_config(get_console(realm)))?;
 
-    obj.define_variable("Error".into(), Variable::write_config(get_error(realm)?))?;
+    obj.define_variable("Error".into(), Variable::write_config(realm.intrinsics.error_constructor().value))?;
 
     #[allow(clippy::expect_used)]
     obj.define_variable(
