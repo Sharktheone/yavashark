@@ -5078,6 +5078,7 @@ dependencies = [
  "colored",
  "eframe",
  "egui",
+ "egui_extras",
  "futures",
  "getrandom 0.3.1",
  "half",
