@@ -1,25 +1,44 @@
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::rc::Rc;
+use swc_ecma_ast::Bool;
 use crate::{Error, Res};
 
-pub struct RuntimeLifetime<T>(Rc<RefCell<Option<NonNull<T>>>>);
 
-pub struct RuntimeLifetimeGuard<'a, T>(Rc<RefCell<Option<NonNull<T>>>>, PhantomData<&'a mut T>);
+type Internal<T> = (Cell<Option<NonNull<T>>>, Cell<bool>);
+
+pub struct RuntimeLifetime<T>(Rc<Internal<T>>);
+
+pub struct RuntimeLifetimeGuard<'a, T>{
+    ptr: Rc<Internal<T>>,
+    old: Option<NonNull<T>>,
+    borrowed: bool,
+    _marker: PhantomData<&'a mut T>
+}
 
 impl<'a, T> Drop for RuntimeLifetimeGuard<'a, T> {
     fn drop(&mut self) {
-        *self.0.borrow_mut() = None;
+        if self.ptr.1.get() {
+            panic!("Cannot remove reference that is still borrowed")
+        }
+        
+        self.ptr.0.set(self.old);
+        self.ptr.1.set(self.borrowed)
     }
 }
 
 impl<T> RuntimeLifetime<T> {
     #[allow(elided_named_lifetimes)]
     pub fn new<'a>(r: &'a mut T) -> (Self, RuntimeLifetimeGuard<'a, T>) {
-        let rc = Rc::new(RefCell::new(Some(NonNull::from(r))));
+        let rc = Rc::new((Cell::new(Some(NonNull::from(r))), Cell::new(false)));
         
-        (Self(Rc::clone(&rc)), RuntimeLifetimeGuard(rc, PhantomData))
+        (Self(Rc::clone(&rc)), RuntimeLifetimeGuard {
+            ptr: rc, 
+            old: None,
+            borrowed: false,
+            _marker: PhantomData
+        })
     }
     
     pub fn empty() -> RuntimeLifetime<T> {
@@ -29,20 +48,36 @@ impl<T> RuntimeLifetime<T> {
 
 
     pub fn with<R>(&self, f: impl FnOnce(&mut T) -> Res<R>) -> Res<R> {
-        let r = self.0.try_borrow_mut()?;
+        if self.0.1.get() {
+            return Err(Error::new("Value already borrowed"))
+        }
+        
+        self.0.1.set(true);
+        
+        let r = self.0.0.get();
 
-        let Some(mut r) = *r else {
+        let Some(mut r) = r else {
             return Err(Error::new("Used value outside of its context"))
         };
 
         let r = unsafe { r.as_mut() };
 
-        f(r)
+        let res = f(r);
+        
+        self.0.1.set(false);
+        
+        res
     }
     
     pub fn update<'a>(&self, new: &'a mut T) -> RuntimeLifetimeGuard<'a, T> {
-        *self.0.borrow_mut() = Some(NonNull::from(new));
+        let old = self.0.0.replace(Some(NonNull::from(new)));
+        let borrowed = self.0.1.replace(false);
         
-        RuntimeLifetimeGuard(self.0.clone(), PhantomData)
+        RuntimeLifetimeGuard {
+            ptr: self.0.clone(),
+            old,
+            borrowed,
+            _marker: PhantomData
+        }
     }
 }
