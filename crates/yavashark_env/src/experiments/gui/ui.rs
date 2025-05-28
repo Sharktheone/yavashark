@@ -1,9 +1,12 @@
+use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt::Debug;
+use egui::Widget;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 use crate::experiments::gui::runtime_lifetime::{RuntimeLifetime, RuntimeLifetimeGuard};
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
+use super::jswidget::{JSWidget, DynWidget};
 
 #[object]
 pub struct Ui {
@@ -89,5 +92,31 @@ impl Ui {
         })?;
         
         Ok(test)
+    }
+    
+    fn add(&self, widget: ObjectHandle) -> Res {
+        let widget = unsafe {
+            let widget = widget.inner_downcast(TypeId::of::<DynWidget>()).ok_or(Error::ty("Expected Widget"))?.cast::<DynWidget>();
+            Box::from_raw(widget.as_ptr())
+        };
+
+
+        self.ui.with(|ui| {
+            unsafe {
+                widget.get_widget().ui(ui);
+
+            }
+
+            Ok(())
+        });
+
+        Ok(())
+    }
+
+    fn button(&self, label: String) -> Res<bool> {
+        self.ui.with(|ui| {
+            Ok(ui.button(label).clicked())
+        })
+
     }
 }
