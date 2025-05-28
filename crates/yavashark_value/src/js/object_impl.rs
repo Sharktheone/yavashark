@@ -1,6 +1,8 @@
+use std::any::TypeId;
 use crate::{AsAny, BoxedObj, Error, MutObj, Obj, Object, ObjectProperty, Realm, Value, Variable};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
+use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
 
@@ -138,6 +140,17 @@ pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     fn is_constructor(&self) -> bool {
         self.get_wrapped_object().is_constructor()
     }
+
+    /// # Safety
+    /// - Caller and implementer must ensure that the pointer is a valid pointer to the type which the type id represents
+    /// - Caller and implementer must ensure that the pointer is valid for the same lifetime of self
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        if ty == TypeId::of::<Self>() {
+            Some(NonNull::from(self).cast())
+        } else {
+            None
+        }
+    }
 }
 
 impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
@@ -262,5 +275,9 @@ impl<T: ObjectImpl<R>, R: Realm> Obj<R> for T {
 
     fn is_constructor(&self) -> bool {
         ObjectImpl::is_constructor(self)
+    }
+
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        ObjectImpl::inner_downcast(self, ty)
     }
 }
