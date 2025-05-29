@@ -468,6 +468,14 @@ impl<C: Realm> Object<C> {
                 "{name} does not exist on object"
             )))
     }
+    
+    pub fn get_property_opt(
+        &self,
+        name: &Value<C>,
+    ) -> Result<Option<ObjectProperty<C>>, Error<C>> {
+        self.0.get_property(name)
+    }
+    
 
     #[must_use]
     pub fn name(&self) -> String {

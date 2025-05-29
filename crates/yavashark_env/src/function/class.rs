@@ -1,48 +1,222 @@
+use crate::realm::Realm;
+use crate::{Error, Object, ObjectHandle, ObjectProperty, Res, Value, ValueResult};
+use rustc_hash::FxHashMap;
+use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use rustc_hash::FxHashMap;
-use crate::realm::Realm;
-use crate::{Error, MutObject, ObjectProperty, Res, Value, ValueResult};
-use yavashark_macro::{object, properties};
-use yavashark_value::{Constructor, ConstructorFn, CustomName, Func, NoOpConstructorFn, Obj};
+use std::ptr::NonNull;
+use yavashark_macro::properties;
+use yavashark_string::YSString;
+use yavashark_value::{Constructor, ConstructorFn, Func, MutObj, NoOpConstructorFn, Obj, ObjectImpl, Variable};
 
-#[object(function, constructor, direct(prototype))]
+// #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
 pub struct Class {
+    pub inner: ObjectHandle,
+    pub sup: Option<ObjectHandle>,
+
     pub private_props: FxHashMap<String, Value>,
     pub name: String,
-    #[gc(untyped)]
-    pub constructor: Box<dyn ConstructorFn<Realm>>,
+    // #[gc(untyped)]
+    pub prototype: RefCell<ObjectProperty>,
+    // #[gc(untyped)]
+    pub constructor: Option<Box<dyn ConstructorFn<Realm>>>,
 }
 
-impl Func<Realm> for Class {
-    fn call(&self, _realm: &mut Realm, _args: Vec<Value>, _this: Value) -> Res<Value, Error> {
+impl Obj<Realm> for Class {
+    fn define_property(&self, name: Value, value: Value) -> Res {
+        if matches!(&name, Value::String(s) if s.as_str() == "prototype") {
+            self.prototype.borrow_mut().value = value;
+            Ok(())
+        } else {
+            self.inner.define_property(name, value)
+        }
+    }
+
+    fn define_variable(&self, name: Value, value: Variable<Realm>) -> Res {
+        if matches!(&name, Value::String(s) if s.as_str() == "prototype") {
+            *self.prototype.borrow_mut() = value.into();
+
+            Ok(())
+        } else {
+            self.inner.define_variable(name, value)
+        }
+    }
+
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        if matches!(name, Value::String(s) if s.as_str() == "prototype") {
+            Ok(Some(self.prototype.borrow().clone()))
+        } else {
+            self.inner.resolve_property_no_get_set(name)
+        }
+    }
+
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        if matches!(name, Value::String(s) if s.as_str() == "prototype") {
+            Ok(Some(self.prototype.borrow().clone()))
+        } else {
+            self.inner.get_property_opt(name)
+        }
+    }
+
+    fn define_getter(&self, name: Value, value: Value) -> Res {
+        if matches!(&name, Value::String(s) if s.as_str() == "prototype") {
+            self.prototype.borrow_mut().get = value;
+            Ok(())
+        } else {
+            self.inner.define_getter(name, value)
+        }
+    }
+
+    fn define_setter(&self, name: Value, value: Value) -> Res {
+        if matches!(&name, Value::String(s) if s.as_str() == "prototype") {
+            self.prototype.borrow_mut().set = value;
+            Ok(())
+        } else {
+            self.inner.define_setter(name, value)
+        }
+    }
+
+    fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
+        if matches!(name, Value::String(s) if s.as_str() == "prototype") {
+            Ok(None)
+        } else {
+            self.inner.delete_property(name)
+        }
+    }
+
+    fn contains_key(&self, name: &Value) -> Res<bool> {
+        if matches!(name, Value::String(s) if s.as_str() == "prototype") {
+            Ok(true)
+        } else {
+            self.inner.contains_key(name)
+        }
+    }
+
+    fn has_key(&self, name: &Value) -> Res<bool> {
+        if matches!(name, Value::String(s) if s.as_str() == "prototype") {
+            Ok(true)
+        } else {
+            self.inner.has_key(name)
+        }
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
+        self.inner.to_string(realm)
+    }
+
+    fn to_string_internal(&self) -> Res<YSString> {
+        self.inner.to_string_internal()
+    }
+
+    fn properties(&self) -> Res<Vec<(Value, Value)>> {
+        let mut props = self.inner.properties()?;
+
+        props.push((Value::String("prototype".into()), self.prototype.borrow().value.clone()));
+
+        for (key, value) in &self.private_props {
+            props.push((Value::String(key.clone().into()), value.clone()));
+        }
+
+        Ok(props)
+    }
+
+    fn keys(&self) -> Res<Vec<Value>> {
+        let mut keys = self.inner.keys()?;
+
+        keys.push(Value::String("prototype".into()));
+
+        for key in self.private_props.keys() {
+            keys.push(Value::String(key.clone().into()));
+        }
+
+        Ok(keys)
+    }
+
+    fn values(&self) -> Res<Vec<Value>> {
+        let mut values = self.inner.values()?;
+
+        values.push(self.prototype.borrow().value.clone());
+
+        for value in self.private_props.values() {
+            values.push(value.clone());
+        }
+
+        Ok(values)
+    }
+
+    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
+        self.inner.get_array_or_done(index)
+    }
+
+    fn clear_values(&self) -> Res {
+        self.inner.clear_values()
+    }
+
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))
     }
-}
 
-impl Constructor<Realm> for Class {
+    fn is_function(&self) -> bool {
+        true
+    }
+
+    fn prototype(&self) -> Res<ObjectProperty> {
+        self.inner.prototype()
+    }
+
+    fn set_prototype(&self, proto: ObjectProperty) -> Res {
+        self.inner.set_prototype(proto)
+    }
+
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let inner = self.inner.try_borrow()?;
 
-        let this = ClassInstance::new_with_proto(inner.prototype.value.clone(), self.name.clone())
-            .into_value();
+        Ok(if let Some(constructor) = &self.constructor {
+            let this = ClassInstance::new_with_proto(self.prototype.try_borrow()?.value.clone(), self.name.clone())
+                .into_value();
 
-        drop(inner);
+            constructor.construct(args, this.copy(), realm)?;
 
-        self.constructor.construct(args, this.copy(), realm)?;
+            this
+        } else {
+            if let Some(sup) = &self.sup {
+                let c = sup.construct(realm, Vec::new())?.to_object()?;
+                
+                c.set_prototype(self.prototype.try_borrow()?.clone())?;
+                
+                ClassInstance {
+                    inner: RefCell::new(c),
+                    private_props: RefCell::new(HashMap::new()),
+                    name: self.name.clone(),
+                }.into_value()
+            } else {
+                ClassInstance::new_with_proto(self.prototype.try_borrow()?.value.clone(), self.name.clone())
+                    .into_value()
+            }
 
-        Ok(this)
+
+        })
     }
 
-    fn construct_proto(&self) -> Res<ObjectProperty> {
-        let inner = self.inner.try_borrow()?;
+    fn is_constructor(&self) -> bool {
+        true
+    }
 
-        Ok(inner.prototype.clone())
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        if ty == TypeId::of::<Self>() {
+            Some(NonNull::from(self).cast())
+        } else {
+            self.inner.inner_downcast(ty)
+        }
     }
 }
+
 
 impl Class {
     #[must_use]
@@ -53,13 +227,23 @@ impl Class {
     #[must_use]
     pub fn new_with_proto(proto: Value, name: String) -> Self {
         Self {
-            inner: RefCell::new(MutableClass {
-                object: MutObject::with_proto(proto),
-                prototype: Value::Undefined.into(),
-            }),
+            inner: Object::with_proto(proto),
+            sup: None,
             private_props: FxHashMap::default(),
-            constructor: Box::new(NoOpConstructorFn),
+            constructor: None,
             name,
+            prototype: RefCell::new(ObjectProperty::new(Value::Undefined)),
+        }
+    }
+
+    pub fn with_super(sup: ObjectHandle, name: String) -> Self {
+        Self {
+            inner: Object::with_proto(sup.clone().into()),
+            sup: Some(sup),
+            private_props: FxHashMap::default(),
+            constructor: None,
+            name,
+            prototype: RefCell::new(ObjectProperty::new(Value::Undefined)),
         }
     }
 
@@ -73,14 +257,13 @@ impl Class {
     }
 
     pub fn set_proto(&mut self, proto: ObjectProperty) -> Res<(), Error> {
-        let mut inner = self.inner.try_borrow_mut()?;
-        inner.prototype = proto;
+        *self.prototype.try_borrow_mut()? = proto;
 
         Ok(())
     }
 
     pub fn set_constructor(&mut self, constructor: impl ConstructorFn<Realm> + 'static) {
-        self.constructor = Box::new(constructor);
+        self.constructor = Some(Box::new(constructor));
     }
 }
 
@@ -103,55 +286,152 @@ impl Class {
     }
 }
 
-#[object(name)]
+// #[object(name)]
 #[derive(Debug)]
 pub struct ClassInstance {
-    #[mutable]
-    pub(crate) private_props: HashMap<String, Value>,
+    pub inner: RefCell<ObjectHandle>,
+    // #[mutable]
+    pub(crate) private_props: RefCell<HashMap<String, Value>>,
     name: String,
 }
 
-impl CustomName for ClassInstance {
-    fn custom_name(&self) -> String {
+
+impl Obj<Realm> for ClassInstance {
+    fn define_property(&self, name: Value, value: Value) -> Res {
+        self.inner.try_borrow()?.define_property(name, value)
+    }
+
+    fn define_variable(&self, name: Value, value: Variable<Realm>) -> Res {
+        self.inner.try_borrow()?.define_variable(name, value)
+    }
+
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        self.inner.try_borrow()?.resolve_property_no_get_set(name)
+    }
+
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        self.inner.try_borrow()?.get_property_opt(name)
+    }
+
+    fn define_getter(&self, name: Value, value: Value) -> Res {
+        self.inner.try_borrow()?.define_getter(name, value)
+    }
+
+    fn define_setter(&self, name: Value, value: Value) -> Res {
+        self.inner.try_borrow()?.define_setter(name, value)
+    }
+
+    fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
+        self.inner.try_borrow()?.delete_property(name)
+    }
+
+    fn contains_key(&self, name: &Value) -> Res<bool> {
+        self.inner.try_borrow()?.contains_key(name)
+    }
+
+    fn has_key(&self, name: &Value) -> Res<bool> {
+        self.inner.try_borrow()?.has_key(name)
+    }
+
+    fn name(&self) -> String {
         self.name.clone()
     }
+
+    fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
+        Obj::to_string(&****self.inner.try_borrow()?, realm)
+    }
+
+    fn to_string_internal(&self) -> Res<YSString> {
+        self.inner.try_borrow()?.to_string_internal()
+    }
+
+    fn properties(&self) -> Res<Vec<(Value, Value)>> {
+        let mut props = self.inner.try_borrow()?.properties()?;
+
+        for (key, value) in &*self.private_props.try_borrow()? {
+            props.push((Value::String(key.clone().into()), value.clone()));
+        }
+
+        Ok(props)
+    }
+
+    fn keys(&self) -> Res<Vec<Value>> {
+        let mut keys = self.inner.try_borrow()?.keys()?;
+
+        for key in self.private_props.try_borrow()?.keys() {
+            keys.push(Value::String(key.clone().into()));
+        }
+
+        Ok(keys)
+    }
+
+    fn values(&self) -> Res<Vec<Value>> {
+        let mut values = self.inner.try_borrow()?.values()?;
+
+        for value in self.private_props.try_borrow()?.values() {
+            values.push(value.clone());
+        }
+
+        Ok(values)
+    }
+
+    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
+        self.inner.try_borrow()?.get_array_or_done(index)
+    }
+
+    fn clear_values(&self) -> Res {
+        self.inner.try_borrow()?.clear_values()
+    }
+
+    fn prototype(&self) -> Res<ObjectProperty> {
+        self.inner.try_borrow()?.prototype()
+    }
+
+    fn set_prototype(&self, proto: ObjectProperty) -> Res {
+        self.inner.try_borrow()?.set_prototype(proto)
+    }
+
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        if ty == TypeId::of::<Self>() {
+            Some(NonNull::from(self).cast())
+        } else {
+            self.inner.borrow().inner_downcast(ty)
+        }
+    }
 }
+
 
 impl ClassInstance {
     #[must_use]
     pub fn new(realm: &Realm, name: String) -> Self {
         Self {
-            inner: RefCell::new(MutableClassInstance {
-                object: MutObject::new(realm),
-                private_props: HashMap::new(),
-            }),
+            inner: RefCell::new(Object::new(realm)),
+            private_props: RefCell::new(HashMap::new()),
             name,
         }
     }
+
     #[must_use]
     pub fn new_with_proto(proto: Value, name: String) -> Self {
         Self {
-            inner: RefCell::new(MutableClassInstance {
-                object: MutObject::with_proto(proto),
-                private_props: HashMap::new(),
-            }),
+            inner: RefCell::new(Object::with_proto(proto)),
+            private_props: RefCell::new(HashMap::new()),
             name,
         }
     }
 
+
     pub fn set_private_prop(&mut self, key: String, value: Value) {
-        self.inner.get_mut().private_props.insert(key, value);
+        self.private_props.borrow_mut().insert(key, value);
     }
 
     pub fn get_private_prop(&self, key: &str) -> Res<Option<Value>> {
-        let inner = self.inner.try_borrow()?;
+        let private_props = self.private_props.try_borrow()?;
 
-        let mut prop = inner.private_props.get(key).cloned();
+        let mut prop = private_props.get(key).cloned();
 
         if prop.is_none() {
-            let proto = inner.object.prototype.value.clone();
-
-            drop(inner);
+            let proto = self.inner.try_borrow()?.prototype()?.value;
 
             if let Some(class) = proto.downcast::<Self>()? {
                 prop = class.get_private_prop(key)?;

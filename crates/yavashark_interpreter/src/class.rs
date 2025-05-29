@@ -19,8 +19,9 @@ pub fn create_class(
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
         let p = super_class.get_property(&"prototype".into(), realm)?;
 
+
         (
-            JSClass::new_with_proto(super_class, name.clone()),
+            JSClass::with_super(super_class.to_object()?, name.clone()),
             ClassInstance::new_with_proto(p, name),
         )
     } else {
