@@ -321,7 +321,7 @@ macro_rules! impl_from_value_output {
     () => {};
 }
 
-impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, usize, isize, f32, f64);
+impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
 
 pub struct Extractor<'a> {
     values: IterMut<'a, Value>,

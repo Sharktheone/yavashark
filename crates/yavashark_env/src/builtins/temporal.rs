@@ -8,6 +8,7 @@ mod plain_time;
 mod plain_year_month;
 mod zoned_date_time;
 
+use temporal_rs::TemporalError;
 use crate::builtins::temporal::duration::Duration;
 use crate::builtins::temporal::instant::Instant;
 use crate::builtins::temporal::now::Now;
@@ -17,7 +18,7 @@ use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::PlainTime;
 use crate::builtins::temporal::plain_year_month::PlainYearMonth;
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
-use crate::{Object, ObjectHandle, Res, Value, Variable};
+use crate::{Error, Object, ObjectHandle, Res, Value, Variable};
 
 pub struct Protos {
     pub duration: ObjectHandle,

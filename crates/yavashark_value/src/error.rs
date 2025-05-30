@@ -1,10 +1,10 @@
+use std::borrow::Cow;
 use crate::{IntoValue, Realm, Value};
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
-use num_traits::real::Real;
 use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -254,7 +254,7 @@ pub enum ErrorKind<C: Realm> {
     Error(Option<YSString>),
 }
 
-#[derive(Debug, PartialEq, Eq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct StackTrace {
     pub frames: Vec<StackFrame>,
 }
@@ -440,5 +440,33 @@ mod anyhow_impl {
 impl<T: std::error::Error, C: Realm> From<T> for Error<C> {
     fn from(value: T) -> Self {
         Self::new_error(value.to_string())
+    }
+}
+
+
+#[cfg(feature = "temporal_rs")]
+impl<C: Realm> Error<C> {
+    pub fn from_temporal(err: temporal_rs::TemporalError) -> Self {
+        let kind = err.kind();
+        let msg = err.into_message();
+
+        let msg = match msg {
+            Cow::Borrowed(msg) => YSString::new_static(msg),
+            Cow::Owned(msg) => YSString::from(msg),
+        };
+
+        let err = match kind {
+            temporal_rs::error::ErrorKind::Generic => ErrorKind::Runtime,
+            temporal_rs::error::ErrorKind::Type => ErrorKind::Type,
+            temporal_rs::error::ErrorKind::Range => ErrorKind::Range,
+            temporal_rs::error::ErrorKind::Syntax => ErrorKind::Syntax,
+            temporal_rs::error::ErrorKind::Assert => ErrorKind::Internal,
+        }(msg);
+
+        Self {
+            kind: err,
+            stacktrace: StackTrace::default()
+        }
+
     }
 }

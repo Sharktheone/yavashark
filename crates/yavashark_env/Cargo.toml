@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-yavashark_value = { path = "../yavashark_value", features = ["js", "dbg_object_gc" , "display_object"], default-features = false }
+yavashark_value = { path = "../yavashark_value", features = ["js", "dbg_object_gc" , "display_object", "temporal_rs"], default-features = false }
 yavashark_string = { path = "../yavashark_string"}
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_macro = { path = "../yavashark_macro" }
@@ -29,6 +29,7 @@ tokio = { version = "1.44.1", features = ["sync"] } # tokio is just needed for `
 futures = "0.3.31"
 pin-project = "1.1.10"
 rustc-hash = "2.1.1"
+temporal_rs = "0.0.8"
 egui = { version = "0.31.1", optional = true}
 eframe = { version = "0.31.1", optional = true}
 egui_extras = { version = "0.31.1", optional = true}

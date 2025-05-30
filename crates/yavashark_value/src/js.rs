@@ -23,7 +23,7 @@ mod function;
 mod name;
 mod object;
 mod object_impl;
-mod ops;
+pub mod ops;
 mod symbol;
 pub mod variable;
 

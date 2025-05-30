@@ -154,7 +154,8 @@ impl PlainDateTime {
             None,
             None,
             None,
-            Some(duration as i64),
+            Some(duration as i128),
+            None,
             realm,
         )?
         .into_object())
@@ -176,7 +177,8 @@ impl PlainDateTime {
             None,
             None,
             None,
-            Some(duration as i64),
+            Some(duration as i128),
+            None,
             realm,
         )?
         .into_object())
@@ -185,16 +187,16 @@ impl PlainDateTime {
     pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let date = self.date.get();
 
-        let dur = chrono::Duration::from_std(duration.to_duration())
-            .map_err(|_| Error::range("Invalid duration"))?;
-
-        let date = if duration.is_negative() {
-            date.checked_sub_signed(dur)
-                .ok_or(Error::range("Invalid date"))?
-        } else {
-            date.checked_add_signed(dur)
-                .ok_or(Error::range("Invalid date"))?
-        };
+        // let dur = chrono::Duration::from_std(duration.to_duration())
+        //     .map_err(|_| Error::range("Invalid duration"))?;
+        //
+        // let date = if duration.is_negative() {
+        //     date.checked_sub_signed(dur)
+        //         .ok_or(Error::range("Invalid date"))?
+        // } else {
+        //     date.checked_add_signed(dur)
+        //         .ok_or(Error::range("Invalid date"))?
+        // };
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDateTime {
@@ -210,16 +212,16 @@ impl PlainDateTime {
     pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let date = self.date.get();
 
-        let dur = chrono::Duration::from_std(duration.to_duration())
-            .map_err(|_| Error::range("Invalid duration"))?;
-
-        let date = if duration.is_negative() {
-            date.checked_add_signed(dur)
-                .ok_or(Error::range("Invalid date"))?
-        } else {
-            date.checked_sub_signed(dur)
-                .ok_or(Error::range("Invalid date"))?
-        };
+        // let dur = chrono::Duration::from_std(duration.to_duration())
+        //     .map_err(|_| Error::range("Invalid duration"))?;
+        //
+        // let date = if duration.is_negative() {
+        //     date.checked_add_signed(dur)
+        //         .ok_or(Error::range("Invalid date"))?
+        // } else {
+        //     date.checked_sub_signed(dur)
+        //         .ok_or(Error::range("Invalid date"))?
+        // };
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDateTime {

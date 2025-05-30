@@ -13,6 +13,7 @@ use tokio::runtime::Builder;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::Realm;
+use yavashark_interpreter::eval::InterpreterEval;
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -133,6 +134,10 @@ fn main() {
         if interpreter {
             let mut realm = Realm::new().unwrap();
             let mut scope = Scope::global(&realm, path.clone());
+            realm.set_eval(InterpreterEval).unwrap();
+            yavashark_vm::init(&mut realm).unwrap();
+            
+            
             let result = match yavashark_interpreter::Interpreter::run_in(
                 &script.body,
                 &mut realm,
