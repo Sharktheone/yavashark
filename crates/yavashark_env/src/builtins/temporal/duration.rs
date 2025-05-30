@@ -181,8 +181,10 @@ impl Duration {
             .map_err(Error::from_temporal)? as i8)
     }
 
-    fn abs(&self) {
-        self.dur.set(self.dur.get().abs());
+    fn abs(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let res = self.dur.get().abs();
+        
+        Ok(Self::with_duration(realm, res).into_object())
     }
 
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
