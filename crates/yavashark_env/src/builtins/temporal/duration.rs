@@ -31,7 +31,7 @@ impl Duration {
     // pub fn from_duration(delta: TimeDelta, realm: &Realm) -> Res<Self> {
     //     Ok(Self::with_sign(realm, delta.to_std()?, false))
     // }
-    // 
+    //
     // fn from_secs(realm: &Realm, secs: i64) -> Self {
     //     Self::with_sign(
     //         realm,
@@ -77,6 +77,12 @@ impl Duration {
                 nanoseconds.map(|n| n as i128),
                 realm,
             )?));
+        } else if let Value::String(s) = info {
+            return Ok(RefOrOwned::Owned(
+                temporal_rs::Duration::from_str(s.as_str())
+                    .map_err(Error::from_temporal)
+                    .and_then(|dur| Ok(Self::with_duration(realm, dur)))?,
+            ));
         }
 
         Err(Error::ty("Invalid value for Duration"))
