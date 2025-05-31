@@ -47,10 +47,12 @@ impl Duration {
 
         if let Value::Object(obj) = info {
             let mut extract = |name: &'static str| {
-                Result::<Option<i64>, Error>::Ok(
-                    obj.resolve_property(&name.into(), realm)?
-                        .map(|v| v.to_number(realm).unwrap_or(0.0) as i64),
-                )
+                match obj.resolve_property(&name.into(), realm)?
+                    .map(|v| v.to_number(realm).map(|n| n as i64)) {
+                    Some(Ok(n)) => Ok(Some(n)),
+                    Some(Err(e)) => Err(e),
+                    None => Ok(None),
+                }
             };
 
             let years = extract("years")?;
@@ -134,8 +136,8 @@ impl Duration {
             microseconds,
             nanoseconds,
         )
-        .map_err(Error::from_temporal)
-        .map(|dur| Self::with_duration(realm, dur))
+            .map_err(Error::from_temporal)
+            .map(|dur| Self::with_duration(realm, dur))
     }
 }
 
@@ -169,7 +171,7 @@ impl Duration {
             nanoseconds,
             realm,
         )?
-        .into_object())
+            .into_object())
     }
 
     fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
