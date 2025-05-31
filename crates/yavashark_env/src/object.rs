@@ -1,9 +1,9 @@
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 pub use prototype::*;
+use rustc_hash::{FxBuildHasher, FxHashMap, FxHasher};
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
-use rustc_hash::{FxBuildHasher, FxHashMap, FxHasher};
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, MutObj, Obj};
@@ -554,10 +554,7 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn constructor(&self) -> Result<ObjectProperty, Error> {
-        if let Some(constructor) = self
-            .properties
-            .get(&Value::string("constructor"))
-        {
+        if let Some(constructor) = self.properties.get(&Value::string("constructor")) {
             return Ok(constructor.clone());
         }
 
@@ -725,9 +722,7 @@ mod tests {
             .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
-        let value = object
-            .resolve_property(&Value::string("key"))
-            .unwrap();
+        let value = object.resolve_property(&Value::string("key")).unwrap();
 
         assert_eq!(value, Some(Value::Number(42.0).into()));
     }
@@ -740,9 +735,7 @@ mod tests {
             .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
-        let value = object
-            .get_property(&Value::string("key"))
-            .unwrap();
+        let value = object.get_property(&Value::string("key")).unwrap();
 
         assert_eq!(value.unwrap().value, Value::Number(42.0));
     }
@@ -755,9 +748,7 @@ mod tests {
             .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
-        let contains = object
-            .contains_key(&Value::string("key"))
-            .unwrap();
+        let contains = object.contains_key(&Value::string("key")).unwrap();
 
         assert!(contains);
     }

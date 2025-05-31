@@ -66,13 +66,12 @@ impl Gui {
         let mut error = Rc::new(RefCell::new(None));
         let error2 = Rc::clone(&error);
 
-
         let (realm_ref, _) = RuntimeLifetime::new(realm);
 
         // let mut func = move |ctx, frame| {
         //     egui::CentralPanel::default().show(ctx, |ui| {
         //         ui_ref.update_ui(ui);
-        // 
+        //
         //         if let Err(e) = realm_ref.with(|realm| {
         //             let global = realm.global.clone();
         //             f.call(realm, vec![ui_ob.clone().into()], global.into())
@@ -82,12 +81,15 @@ impl Gui {
         //         }
         //     });
         // };
-        // 
+        //
         // let
 
-        eframe::run_native(&self.name, opts, Box::new(|_| {
-            Ok(Box::new(GuiApp::new(realm, error, f).unwrap()))
-        })).unwrap();
+        eframe::run_native(
+            &self.name,
+            opts,
+            Box::new(|_| Ok(Box::new(GuiApp::new(realm, error, f).unwrap()))),
+        )
+        .unwrap();
 
         // eframe::run_simple_native(&self.name, opts, func).unwrap();
 
@@ -108,18 +110,20 @@ pub struct GuiApp<'a> {
 }
 
 impl<'a> GuiApp<'a> {
-    fn new(realm: &'a mut Realm,  error: Rc<RefCell<Option<Error>>>, f: ObjectHandle) -> Res<GuiApp> {
+    fn new(
+        realm: &'a mut Realm,
+        error: Rc<RefCell<Option<Error>>>,
+        f: ObjectHandle,
+    ) -> Res<GuiApp> {
         let ui = Ui::new(realm)?;
         let ui_ref = <&Ui as FromValueOutput>::from_value_out(ui.clone().into())?;
-        
-        
-        
+
         Ok(Self {
             realm,
             ui,
             ui_ref,
             error,
-            f
+            f,
         })
     }
 }
@@ -146,7 +150,7 @@ impl<'a> App for GuiApp<'a> {
                 *self.error.borrow_mut() = Some(e);
                 ctx.send_viewport_cmd(ViewportCommand::Close);
             }
-            
+
             drop(x);
         });
     }

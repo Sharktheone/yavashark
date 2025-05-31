@@ -1,3 +1,4 @@
+use crate::Error;
 pub use constructor::*;
 pub use context::*;
 pub use conversion::*;
@@ -14,7 +15,6 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
 use yavashark_string::{ToYSString, YSString};
-use crate::Error;
 
 mod constructor;
 mod context;
@@ -64,7 +64,6 @@ pub enum Value<C: Realm> {
     Symbol(Symbol),
     BigInt(Rc<BigInt>),
 }
-
 
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
@@ -351,7 +350,6 @@ impl<C: Realm> Display for Value<C> {
     }
 }
 
-
 impl<C: Realm> ToYSString for Value<C> {
     fn to_ys_string(&self) -> YSString {
         match self {
@@ -363,7 +361,6 @@ impl<C: Realm> ToYSString for Value<C> {
             Self::Object(b) => b.to_ys_string(),
             Self::Symbol(s) => s.to_ys_string(),
             Self::BigInt(n) => YSString::from(n.to_string()),
-
         }
     }
 }
@@ -572,7 +569,6 @@ impl<C: Realm> From<Symbol> for Value<C> {
         Self::Symbol(s)
     }
 }
-
 
 impl<C: Realm> From<&Symbol> for Value<C> {
     fn from(s: &Symbol) -> Self {

@@ -104,14 +104,12 @@ impl FromValueOutput for String {
     }
 }
 
-
 impl FromValueOutput for YSString {
     type Output = Self;
     fn from_value_out(value: Value) -> Res<Self::Output> {
         value.to_string_no_realm()
     }
 }
-
 
 impl FromValueOutput for &str {
     type Output = YSString;

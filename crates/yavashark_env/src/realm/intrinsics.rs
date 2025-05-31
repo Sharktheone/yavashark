@@ -1,5 +1,3 @@
-use std::any::TypeId;
-use rustc_hash::FxHashMap;
 use crate::array::{Array, ArrayIterator};
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
@@ -22,6 +20,8 @@ use crate::builtins::{
 };
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Value, Variable};
+use rustc_hash::FxHashMap;
+use std::any::TypeId;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -415,11 +415,13 @@ impl Intrinsics {
         })
     }
 
-
     pub fn get_of<T: 'static>(&self) -> Res<ObjectHandle> {
-        self.other.get(&TypeId::of::<T>()).cloned().ok_or(Error::new("Failed to get prototype"))
+        self.other
+            .get(&TypeId::of::<T>())
+            .cloned()
+            .ok_or(Error::new("Failed to get prototype"))
     }
-    
+
     pub fn insert<T: 'static>(&mut self, proto: ObjectHandle) {
         self.other.insert(TypeId::of::<T>(), proto);
     }

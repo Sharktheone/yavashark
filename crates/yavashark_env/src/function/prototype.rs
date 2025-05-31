@@ -368,10 +368,7 @@ impl Obj<Realm> for FunctionPrototype {
             Value::String("constructor".into()),
             this.constructor.value.copy(),
         ));
-        props.push((
-            Value::String("length".into()),
-            this.length.value.copy(),
-        ));
+        props.push((Value::String("length".into()), this.length.value.copy()));
         props.push((Value::String("name".into()), this.name.value.copy()));
         props.push((
             Value::String("toString".into()),

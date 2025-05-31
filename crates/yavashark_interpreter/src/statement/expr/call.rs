@@ -22,8 +22,9 @@ impl Interpreter {
 
             Callee::Super(sup) => {
                 let this = scope.this()?;
-                let class = this.downcast::<ClassInstance>()?.ok_or(Error::ty("`super` can only be used in class constructor"))?;
-
+                let class = this
+                    .downcast::<ClassInstance>()?
+                    .ok_or(Error::ty("`super` can only be used in class constructor"))?;
 
                 let proto = class.prototype()?;
                 let sup = proto.value.prototype(realm)?;
@@ -57,13 +58,10 @@ impl Interpreter {
                         e.attach_function_stack(constructor.name(), get_location(stmt.span, scope));
 
                         e
-                    })?.to_object()?;
+                    })?
+                    .to_object()?;
 
                 *class.inner.try_borrow_mut()? = instance;
-
-
-
-
 
                 Ok(Value::Undefined)
             }

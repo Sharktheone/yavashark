@@ -1,5 +1,5 @@
-use std::ptr::NonNull;
 use crate::Res;
+use std::ptr::NonNull;
 
 pub trait JSWidget {
     fn ui(&self, ui: &mut egui::Ui) -> Res;

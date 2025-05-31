@@ -390,7 +390,6 @@ impl<C: Realm> ToYSString for Object<C> {
             Err(_) => YSString::new_static("Error: error while converting object to string"),
         }
     }
-
 }
 
 #[cfg(feature = "dbg_object_gc")]
@@ -468,14 +467,10 @@ impl<C: Realm> Object<C> {
                 "{name} does not exist on object"
             )))
     }
-    
-    pub fn get_property_opt(
-        &self,
-        name: &Value<C>,
-    ) -> Result<Option<ObjectProperty<C>>, Error<C>> {
+
+    pub fn get_property_opt(&self, name: &Value<C>) -> Result<Option<ObjectProperty<C>>, Error<C>> {
         self.0.get_property(name)
     }
-    
 
     #[must_use]
     pub fn name(&self) -> String {
@@ -522,11 +517,7 @@ impl<C: Realm> Object<C> {
             })
     }
 
-    pub fn to_primitive(
-        &self,
-        mut hint: Hint,
-        realm: &mut C,
-    ) -> Result<Value<C>, Error<C>> {
+    pub fn to_primitive(&self, mut hint: Hint, realm: &mut C) -> Result<Value<C>, Error<C>> {
         if let Some(prim) = self.primitive() {
             return prim.assert_no_object();
         }
@@ -537,13 +528,7 @@ impl<C: Realm> Object<C> {
             Some(Value::Object(to_prim)) => {
                 if to_prim.is_function() {
                     return to_prim
-                        .call(
-                            realm,
-                            vec![
-                                hint.into_value()
-                            ],
-                            self.clone().into(),
-                        )?
+                        .call(realm, vec![hint.into_value()], self.clone().into())?
                         .assert_no_object();
                 }
             }
@@ -624,7 +609,7 @@ impl<C: Realm> Object<C> {
 pub enum Hint {
     Number,
     String,
-    None
+    None,
 }
 
 impl<C: Realm> IntoValue<C> for Hint {

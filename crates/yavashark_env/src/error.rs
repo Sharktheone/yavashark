@@ -7,7 +7,6 @@ use yavashark_string::{ToYSString, YSString};
 use yavashark_value::{ErrorKind, FromValue, Variable};
 
 #[object(to_string)]
-
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct ErrorObj {
@@ -102,13 +101,11 @@ impl ErrorObj {
 
 #[props]
 impl ErrorObj {
-
     #[constructor]
     pub fn construct(message: YSString, #[realm] realm: &mut Realm) -> ValueResult {
         let obj = ErrorObj::new(Error::unknown_error(message), realm).into();
 
         Ok(obj)
-
     }
 
     #[get("message")]

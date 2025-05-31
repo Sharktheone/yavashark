@@ -89,13 +89,13 @@ impl RegExpConstructor {
 
 impl Constructor<Realm> for RegExpConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let regex = args
-            .first()
-            .map_or(Res::<String>::Ok(String::new()), |v| Ok(v.to_string(realm)?.to_string()))?;
+        let regex = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
+            Ok(v.to_string(realm)?.to_string())
+        })?;
 
-        let flags = args
-            .get(1)
-            .map_or(Res::<String>::Ok(String::new()), |v| Ok(v.to_string(realm)?.to_string()))?;
+        let flags = args.get(1).map_or(Res::<String>::Ok(String::new()), |v| {
+            Ok(v.to_string(realm)?.to_string())
+        })?;
 
         let obj = RegExp::new_from_str_with_flags(realm, &regex, &flags)?;
 

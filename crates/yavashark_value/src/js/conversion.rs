@@ -24,7 +24,7 @@ impl<C: Realm> From<&String> for Value<C> {
     }
 }
 
-impl<C: Realm> From<YSString>  for Value<C> {
+impl<C: Realm> From<YSString> for Value<C> {
     fn from(s: YSString) -> Self {
         Self::String(s)
     }
@@ -195,7 +195,6 @@ impl<C: Realm> FromValue<C> for YSString {
     }
 }
 
-
 // impl<C: Realm> FromValue<C> for String {
 //     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
 //         match value {
@@ -257,7 +256,6 @@ impl<C: Realm> IntoValue<C> for String {
     }
 }
 
-
 impl<C: Realm> IntoValue<C> for YSString {
     fn into_value(self) -> Value<C> {
         Value::String(self)
@@ -299,7 +297,6 @@ impl<C: Realm> IntoValue<C> for Symbol {
         Value::Symbol(self)
     }
 }
-
 
 impl<C: Realm> IntoValue<C> for &Symbol {
     fn into_value(self) -> Value<C> {

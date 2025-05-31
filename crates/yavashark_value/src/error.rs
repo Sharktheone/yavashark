@@ -1,5 +1,5 @@
-use std::borrow::Cow;
 use crate::{IntoValue, Realm, Value};
+use std::borrow::Cow;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -226,18 +226,13 @@ impl<C: Realm> ToYSString for Error<C> {
     fn to_ys_string(&self) -> YSString {
         let msg = self.message_internal();
         let name = self.name();
-        
+
         if msg.is_empty() {
             YSString::new_static(name)
-            
         } else {
             format!("{}: {}\n{}", name, msg, self.stacktrace).into()
         }
-        
-        
     }
-    
-
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -305,7 +300,6 @@ impl Display for StackFrame {
         )
     }
 }
-
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Location {
@@ -443,7 +437,6 @@ impl<T: std::error::Error, C: Realm> From<T> for Error<C> {
     }
 }
 
-
 #[cfg(feature = "temporal_rs")]
 impl<C: Realm> Error<C> {
     pub fn from_temporal(err: temporal_rs::TemporalError) -> Self {
@@ -465,8 +458,7 @@ impl<C: Realm> Error<C> {
 
         Self {
             kind: err,
-            stacktrace: StackTrace::default()
+            stacktrace: StackTrace::default(),
         }
-
     }
 }

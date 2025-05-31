@@ -10,8 +10,8 @@ use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::provider::NeverProvider;
 use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
-use yavashark_value::Obj;
 use yavashark_value::ops::BigIntOrNumber;
+use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
@@ -59,13 +59,12 @@ impl Instant {
     }
 
     pub fn now(realm: &Realm) -> Res<ObjectHandle> {
-        let now = std::time::SystemTime::now().duration_since(UNIX_EPOCH).
-            map_err(|_| Error::new("System time before UNIX epoch"))?;
+        let now = std::time::SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|_| Error::new("System time before UNIX epoch"))?;
 
-
-        
-        let i = temporal_rs::Instant::try_new(now.as_nanos() as i128)
-            .map_err(Error::from_temporal)?;
+        let i =
+            temporal_rs::Instant::try_new(now.as_nanos() as i128).map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
     }
@@ -93,14 +92,10 @@ impl Instant {
         let epoch = epoch.to_numeric(realm)?;
 
         match epoch {
-            BigIntOrNumber::BigInt(bigint) => {
-                Self::from_epoch_nanoseconds(&bigint, realm)
-            }
-            BigIntOrNumber::Number(num) => {
-                BigInt::from_f64(num).ok_or(Error::range("epoch out of range"))
-                    .and_then(|bigint| Self::from_epoch_nanoseconds(&bigint, realm))
-
-            }
+            BigIntOrNumber::BigInt(bigint) => Self::from_epoch_nanoseconds(&bigint, realm),
+            BigIntOrNumber::Number(num) => BigInt::from_f64(num)
+                .ok_or(Error::range("epoch out of range"))
+                .and_then(|bigint| Self::from_epoch_nanoseconds(&bigint, realm)),
         }
     }
 
@@ -108,7 +103,9 @@ impl Instant {
     fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
-        let i = temporal_rs::Instant::from(EpochNanoseconds::try_from(ns).map_err(Error::from_temporal)?);
+        let i = temporal_rs::Instant::from(
+            EpochNanoseconds::try_from(ns).map_err(Error::from_temporal)?,
+        );
 
         Ok(Self::from_stamp(i, realm).into_object())
     }
@@ -116,7 +113,10 @@ impl Instant {
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = Duration::from_value_ref(other, realm)?;
 
-        let i = self.stamp.get().add(other.dur.get())
+        let i = self
+            .stamp
+            .get()
+            .add(other.dur.get())
             .map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
@@ -131,7 +131,11 @@ impl Instant {
     }
 
     fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let res = self.stamp.get().since(&other.stamp.get(), DifferenceSettings::default()).map_err(Error::from_temporal)?;
+        let res = self
+            .stamp
+            .get()
+            .since(&other.stamp.get(), DifferenceSettings::default())
+            .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, res).into_object())
     }
@@ -139,25 +143,36 @@ impl Instant {
     pub fn subtract(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = Duration::from_value_ref(other, realm)?;
 
-        let i = self.stamp.get().subtract(other.dur.get()).map_err(Error::from_temporal)?;
+        let i = self
+            .stamp
+            .get()
+            .subtract(other.dur.get())
+            .map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
     }
 
     #[prop("toJSON")]
     fn to_json(&self) -> Res<String> {
-        self.stamp.get().to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &NeverProvider)
+        self.stamp
+            .get()
+            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &NeverProvider)
             .map_err(Error::from_temporal)
     }
 
     #[prop("toString")]
     fn to_string_js(&self) -> Res<String> {
-        self.stamp.get().to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &NeverProvider)
+        self.stamp
+            .get()
+            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &NeverProvider)
             .map_err(Error::from_temporal)
     }
 
     pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let dur = other.stamp.get().until(&self.stamp.get(), DifferenceSettings::default())
+        let dur = other
+            .stamp
+            .get()
+            .until(&self.stamp.get(), DifferenceSettings::default())
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())

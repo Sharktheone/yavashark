@@ -1,10 +1,10 @@
 use crate::uz::{DoubleU4, UsizeSmall, UZ_BYTES};
+use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::mem::ManuallyDrop;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
-use std::fmt;
 
 /// A 23 byte sized Vector that has a length and capacity of 60 bits (7.5bytes) each
 #[repr(Rust, packed)]
@@ -204,7 +204,7 @@ impl SmallVecLenCap {
 
         let (len, len_shared) = uz_to_bytes(len);
         let (cap, cap_shared) = uz_to_bytes(cap);
-        
+
         let shared = DoubleU4::new(len_shared, cap_shared)?;
 
         Some(Self {
@@ -237,7 +237,7 @@ pub fn uz_to_bytes(uz: usize) -> ([u8; UZ_BYTES], u8) {
     let most_worth = bytes_full[UZ_BYTES];
 
     let mut res = [0; UZ_BYTES];
-    
+
     res.copy_from_slice(bytes_full[..UZ_BYTES].as_ref());
 
     (res, most_worth)

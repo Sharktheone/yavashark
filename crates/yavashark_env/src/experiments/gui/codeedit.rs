@@ -1,4 +1,4 @@
-use super::jswidget::{JSWidget, DynWidget};
+use super::jswidget::{DynWidget, JSWidget};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};
 use egui::{Response, TextEdit, Ui, Widget};
 use std::any::TypeId;
@@ -75,12 +75,14 @@ impl JSCodeEditor {
 
         Ok(())
     }
-    
+
     pub fn new(realm: &Realm, code: String, lang: String) -> Res<Self> {
         let code = Rc::new(RefCell::new(code));
-        
+
         Ok(Self {
-            mut_object: RefCell::new(MutObject::with_proto(realm.intrinsics.get_of::<Self>()?.into())),
+            mut_object: RefCell::new(MutObject::with_proto(
+                realm.intrinsics.get_of::<Self>()?.into(),
+            )),
             code: Rc::clone(&code),
             editor: RefCell::new(Some(CodeEdit::new(lang, code))),
         })
@@ -133,7 +135,7 @@ impl JSCodeEditor {
     fn construct(#[realm] realm: &Realm, lang: String, code: String) -> Res<ObjectHandle> {
         Ok(Self::new(realm, code, lang)?.into_object())
     }
-    
+
     #[prop("getCode")]
     fn get_code(&self) -> String {
         self.code.borrow().clone()

@@ -1,5 +1,5 @@
-use std::any::TypeId;
 use crate::{AsAny, BoxedObj, Error, MutObj, Obj, Object, ObjectProperty, Realm, Value, Variable};
+use std::any::TypeId;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;

@@ -82,7 +82,6 @@ impl From<&ConstString> for Symbol {
 impl ToYSString for Symbol {
     fn to_ys_string(&self) -> YSString {
         format!("{self}").into()
-        
     }
 }
 
@@ -100,7 +99,7 @@ impl Symbol {
             inner: SymbolInner::Str(Rc::from(s)),
         }
     }
-    
+
     pub fn as_ref<'a>(&'a self) -> &'a str {
         AsRef::as_ref(self)
     }

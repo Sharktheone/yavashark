@@ -7,7 +7,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, ValueResult};
 use yavashark_interpreter::Interpreter;
 
-
 fn parse(input: &str) -> Res<Vec<Stmt>> {
     if input.is_empty() {
         return Ok(Vec::new());
@@ -19,7 +18,8 @@ fn parse(input: &str) -> Res<Vec<Stmt>> {
 
     let mut p = Parser::new(Syntax::Es(c), input, None);
 
-    let script = p.parse_script()
+    let script = p
+        .parse_script()
         .map_err(|e| Error::syn_error(format!("{e:?}")))?;
 
     Ok(script.body)
@@ -37,5 +37,5 @@ pub fn execute_fmt(code: &str) -> Res<String> {
     let mut scope = Scope::global(&realm, PathBuf::new());
 
     Interpreter::run_in(&parse(code)?, &mut realm, &mut scope)
-    .and_then(|v| Ok(v.to_string(&mut realm)?.to_string()))
+        .and_then(|v| Ok(v.to_string(&mut realm)?.to_string()))
 }

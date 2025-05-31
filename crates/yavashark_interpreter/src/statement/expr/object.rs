@@ -1,11 +1,11 @@
+use crate::function::JSFunction;
+use crate::Interpreter;
 use std::rc::Rc;
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
-use crate::function::JSFunction;
-use crate::Interpreter;
 
 impl Interpreter {
     pub fn run_object(realm: &mut Realm, stmt: &ObjectLit, scope: &mut Scope) -> RuntimeResult {

@@ -30,7 +30,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
 
     obj.define_variable("console".into(), Variable::write_config(get_console(realm)))?;
 
-    obj.define_variable("Error".into(), Variable::write_config(realm.intrinsics.error_constructor().value))?;
+    obj.define_variable(
+        "Error".into(),
+        Variable::write_config(realm.intrinsics.error_constructor().value),
+    )?;
 
     #[allow(clippy::expect_used)]
     obj.define_variable(

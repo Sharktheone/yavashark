@@ -1,8 +1,8 @@
+use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
-use rustc_hash::FxHashMap;
 use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_string::YSString;
@@ -248,7 +248,9 @@ impl ObjectOrVariables {
 
     fn contains_key(&self, name: &str) -> bool {
         match self {
-            Self::Object(o) => o.contains_key(&YSString::from_ref(name).into()).unwrap_or_default(),
+            Self::Object(o) => o
+                .contains_key(&YSString::from_ref(name).into())
+                .unwrap_or_default(),
             Self::Variables(v) => v.contains_key(name),
         }
     }
@@ -552,7 +554,6 @@ impl ScopeInternal {
     }
 
     pub fn update(&mut self, name: &str, value: Value) -> Res<bool> {
-
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name = YSString::from_ref(name).into();

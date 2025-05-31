@@ -82,9 +82,7 @@ impl<C: Realm> Value<C> {
             Self::Boolean(b) => b.num(),
             Self::String(s) => s.as_str().num(),
             Self::Object(_) => {
-                let v = self
-                    .to_primitive(Hint::Number, realm)?
-                    .assert_no_object()?;
+                let v = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
 
                 return v.to_numeric(realm);
             }
@@ -100,9 +98,7 @@ impl<C: Realm> Value<C> {
             Self::Boolean(b) => b.num(),
             Self::String(s) => s.as_str().num(),
             Self::Object(_) => {
-                let v = self
-                    .to_primitive(Hint::Number, realm)?
-                    .assert_no_object()?;
+                let v = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
 
                 return v.to_number(realm);
             }
@@ -132,9 +128,7 @@ impl<C: Realm> Value<C> {
             }
             Self::String(s) => parse_big_int(s)?,
             Self::Object(_) => {
-                let v = self
-                    .to_primitive(Hint::Number, realm)?
-                    .assert_no_object()?;
+                let v = self.to_primitive(Hint::Number, realm)?.assert_no_object()?;
 
                 return v.to_big_int(realm);
             }

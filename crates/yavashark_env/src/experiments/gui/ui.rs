@@ -1,16 +1,16 @@
+use super::jswidget::{DynWidget, JSWidget};
+use crate::experiments::gui::runtime_lifetime::{RuntimeLifetime, RuntimeLifetimeGuard};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
+use egui::Widget;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt::Debug;
-use egui::Widget;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
-use crate::experiments::gui::runtime_lifetime::{RuntimeLifetime, RuntimeLifetimeGuard};
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
-use super::jswidget::{JSWidget, DynWidget};
 
 #[object]
 pub struct Ui {
-    ui: RuntimeLifetime<egui::Ui>
+    ui: RuntimeLifetime<egui::Ui>,
 }
 
 impl Debug for Ui {
@@ -19,21 +19,17 @@ impl Debug for Ui {
     }
 }
 
-
 impl Ui {
-    
     pub fn init(realm: &mut Realm) -> Res {
         let proto = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
             realm.intrinsics.func.clone().into(),
         )?;
-        
-        realm.intrinsics.insert::<Self>(proto);
-        
-        Ok(())
-        
-    }
 
+        realm.intrinsics.insert::<Self>(proto);
+
+        Ok(())
+    }
 
     #[allow(clippy::new_ret_no_self)]
     pub fn new(realm: &Realm) -> Res<ObjectHandle> {
@@ -41,12 +37,12 @@ impl Ui {
             inner: RefCell::new(MutableUi {
                 object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?.into()),
             }),
-            ui:  RuntimeLifetime::empty(),
+            ui: RuntimeLifetime::empty(),
         };
 
         Ok(this.into_object())
     }
-    
+
     pub fn update_ui<'a>(&self, ui: &'a mut egui::Ui) -> RuntimeLifetimeGuard<'a, egui::Ui> {
         self.ui.update(ui)
     }
@@ -61,15 +57,15 @@ impl Ui {
             Ok(())
         })
     }
-    
+
     fn label(&self, label: String) -> Res {
         self.ui.with(move |ui| {
             ui.label(label);
-            
+
             Ok(())
         })
     }
-    
+
     fn horizontal(&self, #[this] this: Value, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res {
         self.ui.with(|ui| {
             ui.horizontal(|ui| {
@@ -80,31 +76,33 @@ impl Ui {
                 drop(x);
 
                 Ok(())
-            }).inner
+            })
+            .inner
         })
     }
-    
+
     fn text_edit_single_line(&self, mut test: String) -> Res<String> {
         self.ui.with(|ui| {
             ui.text_edit_singleline(&mut test);
-            
+
             Ok(())
         })?;
-        
+
         Ok(test)
     }
-    
+
     fn add(&self, widget: ObjectHandle) -> Res {
         let widget = unsafe {
-            let widget = widget.inner_downcast(TypeId::of::<DynWidget>()).ok_or(Error::ty("Expected Widget"))?.cast::<DynWidget>();
+            let widget = widget
+                .inner_downcast(TypeId::of::<DynWidget>())
+                .ok_or(Error::ty("Expected Widget"))?
+                .cast::<DynWidget>();
             Box::from_raw(widget.as_ptr())
         };
-
 
         self.ui.with(|ui| {
             unsafe {
                 widget.get_widget().ui(ui);
-
             }
 
             Ok(())
@@ -114,9 +112,6 @@ impl Ui {
     }
 
     fn button(&self, label: String) -> Res<bool> {
-        self.ui.with(|ui| {
-            Ok(ui.button(label).clicked())
-        })
-
+        self.ui.with(|ui| Ok(ui.button(label).clicked()))
     }
 }

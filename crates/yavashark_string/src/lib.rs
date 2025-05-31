@@ -195,7 +195,6 @@ impl InlineString {
 
     fn pop(&mut self) {
         self.len = InlineLen::from_usize(self.len().saturating_sub(1)).expect("unreachable");
-
     }
 }
 
@@ -536,7 +535,6 @@ impl YSString {
         let inner = self.inner_mut();
         let str = str.into();
 
-
         let new = match inner {
             InnerString::Inline(inline) => inline.push_str(str),
             InnerString::Static(static_str) => {
@@ -577,7 +575,7 @@ impl YSString {
             InnerString::Owned(owned) => owned.pop(),
             InnerString::BoxedOwned(boxed) => {
                 boxed.pop();
-            },
+            }
             InnerString::Rc(rc) => {
                 let mut str = rc.to_string();
                 str.pop();
@@ -595,8 +593,6 @@ impl YSString {
 
                 self.inner = str.inner
             }
-
-
         }
     }
 }
@@ -660,7 +656,6 @@ impl Add<Self> for YSString {
         self.push_str(rhs);
 
         self
-
     }
 }
 
@@ -676,11 +671,8 @@ impl Add<&Self> for YSString {
 impl<T: Into<Self>> AddAssign<T> for YSString {
     fn add_assign(&mut self, rhs: T) {
         self.push_str(rhs.into());
-
     }
-
 }
-
 
 pub trait ToYSString {
     fn to_ys_string(&self) -> YSString;

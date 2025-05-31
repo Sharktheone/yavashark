@@ -1,8 +1,8 @@
 use crate::utils::ValueIterator;
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use indexmap::IndexMap;
-use std::cell::RefCell;
 use rustc_hash::FxBuildHasher;
+use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, MutObj, Obj};
 

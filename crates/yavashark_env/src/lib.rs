@@ -20,6 +20,7 @@ pub mod conversion;
 pub mod experiments;
 mod function_conversion;
 mod global;
+mod native_obj;
 mod native_object;
 pub mod optimizer;
 pub mod realm;
@@ -27,7 +28,6 @@ pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-mod native_obj;
 
 use crate::error::ErrorObj;
 pub use crate::realm::Realm;

@@ -74,9 +74,9 @@ impl SymbolConstructor {
 
 impl Func<Realm> for SymbolConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        let sym = args
-            .first()
-            .map_or(Res::<String>::Ok(String::new()), |v| Ok(v.to_string(realm)?.to_string()))?;
+        let sym = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
+            Ok(v.to_string(realm)?.to_string())
+        })?;
 
         Ok(Symbol::new_str(&sym).into())
     }

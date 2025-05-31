@@ -7,7 +7,9 @@ use std::collections::HashMap;
 use std::ptr::NonNull;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, ConstructorFn, Func, MutObj, NoOpConstructorFn, Obj, ObjectImpl, Variable};
+use yavashark_value::{
+    Constructor, ConstructorFn, Func, MutObj, NoOpConstructorFn, Obj, ObjectImpl, Variable,
+};
 
 // #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
@@ -116,7 +118,10 @@ impl Obj<Realm> for Class {
     fn properties(&self) -> Res<Vec<(Value, Value)>> {
         let mut props = self.inner.properties()?;
 
-        props.push((Value::String("prototype".into()), self.prototype.borrow().value.clone()));
+        props.push((
+            Value::String("prototype".into()),
+            self.prototype.borrow().value.clone(),
+        ));
 
         for (key, value) in &self.private_props {
             props.push((Value::String(key.clone().into()), value.clone()));
@@ -176,10 +181,12 @@ impl Obj<Realm> for Class {
     }
 
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-
         Ok(if let Some(constructor) = &self.constructor {
-            let this = ClassInstance::new_with_proto(self.prototype.try_borrow()?.value.clone(), self.name.clone())
-                .into_value();
+            let this = ClassInstance::new_with_proto(
+                self.prototype.try_borrow()?.value.clone(),
+                self.name.clone(),
+            )
+            .into_value();
 
             constructor.construct(args, this.copy(), realm)?;
 
@@ -187,20 +194,22 @@ impl Obj<Realm> for Class {
         } else {
             if let Some(sup) = &self.sup {
                 let c = sup.construct(realm, Vec::new())?.to_object()?;
-                
+
                 c.set_prototype(self.prototype.try_borrow()?.clone())?;
-                
+
                 ClassInstance {
                     inner: RefCell::new(c),
                     private_props: RefCell::new(HashMap::new()),
                     name: self.name.clone(),
-                }.into_value()
+                }
+                .into_value()
             } else {
-                ClassInstance::new_with_proto(self.prototype.try_borrow()?.value.clone(), self.name.clone())
-                    .into_value()
+                ClassInstance::new_with_proto(
+                    self.prototype.try_borrow()?.value.clone(),
+                    self.name.clone(),
+                )
+                .into_value()
             }
-
-
         })
     }
 
@@ -216,7 +225,6 @@ impl Obj<Realm> for Class {
         }
     }
 }
-
 
 impl Class {
     #[must_use]
@@ -294,7 +302,6 @@ pub struct ClassInstance {
     pub(crate) private_props: RefCell<HashMap<String, Value>>,
     name: String,
 }
-
 
 impl Obj<Realm> for ClassInstance {
     fn define_property(&self, name: Value, value: Value) -> Res {
@@ -400,7 +407,6 @@ impl Obj<Realm> for ClassInstance {
     }
 }
 
-
 impl ClassInstance {
     #[must_use]
     pub fn new(realm: &Realm, name: String) -> Self {
@@ -419,7 +425,6 @@ impl ClassInstance {
             name,
         }
     }
-
 
     pub fn set_private_prop(&mut self, key: String, value: Value) {
         self.private_props.borrow_mut().insert(key, value);

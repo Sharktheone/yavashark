@@ -19,7 +19,6 @@ pub fn create_class(
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
         let p = super_class.get_property(&"prototype".into(), realm)?;
 
-
         (
             JSClass::with_super(super_class.to_object()?, name.clone()),
             ClassInstance::new_with_proto(p, name),
@@ -85,7 +84,14 @@ pub fn create_class(
                     Value::Undefined
                 };
 
-                define_on_class(YSString::from_ref(key).into(), value, &mut class, &mut proto, false, true);
+                define_on_class(
+                    YSString::from_ref(key).into(),
+                    value,
+                    &mut class,
+                    &mut proto,
+                    false,
+                    true,
+                );
             }
             ClassMember::Empty(_) => {}
             ClassMember::TsIndexSignature(_) => {

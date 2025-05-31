@@ -189,7 +189,7 @@ impl Duration {
 
     fn abs(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let res = self.dur.get().abs();
-        
+
         Ok(Self::with_duration(realm, res).into_object())
     }
 

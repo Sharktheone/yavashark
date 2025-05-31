@@ -136,8 +136,7 @@ fn main() {
             let mut scope = Scope::global(&realm, path.clone());
             realm.set_eval(InterpreterEval).unwrap();
             yavashark_vm::init(&mut realm).unwrap();
-            
-            
+
             let result = match yavashark_interpreter::Interpreter::run_in(
                 &script.body,
                 &mut realm,

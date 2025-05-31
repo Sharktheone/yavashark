@@ -335,10 +335,7 @@ impl Obj<Realm> for Prototype {
             Value::string("__lookup_setter__"),
             this.lookup_setter.value.copy(),
         ));
-        props.push((
-            Value::string("constructor"),
-            this.constructor.value.copy(),
-        ));
+        props.push((Value::string("constructor"), this.constructor.value.copy()));
         props.push((
             Value::string("hasOwnProperty"),
             this.has_own_property.value.copy(),
@@ -359,14 +356,8 @@ impl Obj<Realm> for Prototype {
             Value::string("toLocaleString"),
             this.to_locale_string.value.copy(),
         ));
-        props.push((
-            Value::string("toString"),
-            this.to_string.value.copy(),
-        ));
-        props.push((
-            Value::string("valueOf"),
-            this.value_of.value.copy(),
-        ));
+        props.push((Value::string("toString"), this.to_string.value.copy()));
+        props.push((Value::string("valueOf"), this.value_of.value.copy()));
 
         Ok(props)
     }

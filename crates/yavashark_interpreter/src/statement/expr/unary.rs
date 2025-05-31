@@ -15,7 +15,9 @@ impl Interpreter {
                     let obj = Self::run_expr(realm, &m.obj, m.span, scope)?;
                     if let Value::Object(obj) = obj {
                         let name = match &m.prop {
-                            swc_ecma_ast::MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
+                            swc_ecma_ast::MemberProp::Ident(i) => {
+                                Value::String(YSString::from_ref(&i.sym))
+                            }
                             swc_ecma_ast::MemberProp::PrivateName(p) => {
                                 Value::String(YSString::from_ref(&p.name))
                             }

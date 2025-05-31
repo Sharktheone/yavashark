@@ -87,7 +87,7 @@ impl SmallString {
     pub fn push_str(&mut self, s: &str) {
         self.inner.extend_from_slice(s.as_bytes());
     }
-    
+
     pub fn pop(&mut self) {
         self.inner.pop()
     }
