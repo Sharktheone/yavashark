@@ -48,7 +48,11 @@ impl Duration {
         if let Value::Object(obj) = info {
             let mut extract = |name: &'static str| {
                 match obj.resolve_property(&name.into(), realm)?
-                    .map(|v| v.to_number(realm).map(|n| n as i64)) {
+                    .map(|v| v.to_number(realm).and_then(|n| if n.is_infinite() || n.is_nan() || n.fract() != 0.0 {
+                        Err(Error::range("Invalid value for Duration"))
+                    } else {
+                        Ok(n as i64)
+                    })) {
                     Some(Ok(n)) => Ok(Some(n)),
                     Some(Err(e)) => Err(e),
                     None => Ok(None),
