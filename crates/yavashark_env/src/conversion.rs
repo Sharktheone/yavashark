@@ -295,6 +295,43 @@ impl FromValueOutput for &ActualString {
     }
 }
 
+
+pub struct NonFract<T>(pub T);
+
+
+// impl<T: From<f64>> FromValueOutput for NonFract<T> {
+//     type Output = T;
+//
+//     fn from_value_out(value: Value) -> Res<Self::Output> {
+//         match value {
+//             Value::Number(n) => {
+//                 if n.fract() != 0.0 {
+//                     return Err(Error::ty_error(format!("Expected an integer, found {value:?}")));
+//                 }
+//
+//
+//
+//                 Ok(T::from(n))
+//             }
+//             Value::String(ref s) => s.parse::<f64>()
+//                 .map_err(|_| Error::ty_error(format!("Expected an integer, found {value:?}")))
+//                 .and_then(|n| {
+//                     if n.fract() != 0.0 {
+//                         Err(Error::ty_error(format!("Expected an integer, found {value:?}")))
+//                     } else {
+//                         Ok(T::from(n))
+//                     }
+//                 }),
+//             Value::Boolean(b) => Ok(T::from(u8::from(b) as f64)),
+//             #[allow(clippy::cast_lossless)]
+//             Value::Undefined => Ok(T::from(0.0)),
+//             #[allow(clippy::cast_lossless)]
+//             Value::Null => Ok(T::from(0.0)),
+//             _ => Err(Error::ty_error(format!("Expected an integer, found {value:?}"))),
+//         }
+//     }
+// }
+
 macro_rules! impl_from_value_output {
     ($($t:ty),*) => {
         $(
@@ -316,10 +353,39 @@ macro_rules! impl_from_value_output {
             }
         )*
     };
+}
+
+macro_rules! impl_from_value_output_nonfract {
+    ($($t:ty),*) => {
+        $(
+            impl FromValueOutput for NonFract<$t> {
+                type Output = NonFract<$t>;
+
+                fn from_value_out(value: Value) -> Res<Self::Output> {
+                    match value {
+                        Value::Number(n) => {
+                            if n.fract() != 0.0 {
+                                return Err(Error::ty_error(format!("Expected an integer, found {value:?}")));
+                            }
+                            Ok(NonFract(n as $t))
+                        },
+                        Value::String(ref s) => Ok(NonFract(s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}")))?)),
+                        Value::Boolean(b) => Ok(NonFract(b.into())),
+                        #[allow(clippy::cast_lossless)]
+                        Value::Undefined => Ok(NonFract(0 as $t)),
+                        #[allow(clippy::cast_lossless)]
+                        Value::Null => Ok(NonFract(0 as $t)),
+                        _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
+                    }
+                }
+            }
+        )*
+    };
     () => {};
 }
 
 impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
+impl_from_value_output_nonfract!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
 
 pub struct Extractor<'a> {
     values: IterMut<'a, Value>,

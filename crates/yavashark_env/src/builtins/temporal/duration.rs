@@ -1,4 +1,4 @@
-use crate::conversion::FromValueOutput;
+use crate::conversion::{FromValueOutput, NonFract};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
@@ -160,18 +160,33 @@ impl Duration {
     #[constructor]
     #[allow(clippy::too_many_arguments)]
     pub fn construct(
-        years: Option<i64>,
-        months: Option<i64>,
-        weeks: Option<i64>,
-        days: Option<i64>,
-        hours: Option<i64>,
-        minutes: Option<i64>,
-        seconds: Option<i64>,
-        milliseconds: Option<i64>,
-        microseconds: Option<i128>,
-        nanoseconds: Option<i128>,
+        years: Option<NonFract<i64>>,
+        months: Option<NonFract<i64>>,
+        weeks: Option<NonFract<i64>>,
+        days: Option<NonFract<i64>>,
+        hours: Option<NonFract<i64>>,
+        minutes: Option<NonFract<i64>>,
+        seconds: Option<NonFract<i64>>,
+        milliseconds: Option<NonFract<i64>>,
+        microseconds: Option<NonFract<i128>>,
+        nanoseconds: Option<NonFract<i128>>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
+        
+        let years = years.map(|n| n.0);
+        let months = months.map(|n| n.0);
+        let weeks = weeks.map(|n| n.0);
+        let days = days.map(|n| n.0);
+        let hours = hours.map(|n| n.0);
+        let minutes = minutes.map(|n| n.0);
+        let seconds = seconds.map(|n| n.0);
+        let milliseconds = milliseconds.map(|n| n.0);
+        let microseconds = microseconds.map(|n| n.0);
+        let nanoseconds = nanoseconds.map(|n| n.0);
+        
+        
+        
+        
         Ok(Self::constructor(
             years,
             months,
