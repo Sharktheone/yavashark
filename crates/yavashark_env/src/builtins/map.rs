@@ -1,8 +1,9 @@
 use crate::utils::ValueIterator;
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Error};
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
+use indexmap::map::Entry;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, MutObj, Obj};
 
@@ -112,6 +113,44 @@ impl Map {
         }
 
         Ok(Value::Undefined)
+    }
+
+    #[prop("getOrInsert")]
+    fn get_or_insert(&self, key: Value, value: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        let mut inner = self.inner.borrow_mut();
+
+        Ok(inner.map.entry(key).or_insert(value).clone())
+    }
+
+
+
+    fn get_or_insert_computed(&self, key: Value, callback: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+        let mut inner = self.inner.borrow_mut();
+
+        if !callback.is_function() {
+            return Err(Error::ty("Callback must be a function"));
+        }
+
+
+        match inner.map.entry(key) {
+            Entry::Occupied(entry) => {
+                return Ok(entry.get().clone());
+            }
+
+            Entry::Vacant(entry) => {
+                let value = callback.call(
+                    realm,
+                    vec![entry.key().copy()],
+                    Value::Undefined,
+                )?;
+
+                if !value.is_undefined() {
+                    entry.insert(value.copy());
+                }
+
+                return Ok(value);
+            }
+        }
     }
 
     // fn entries(&self, #[realm] realm: &mut Realm) -> ValueResult {
