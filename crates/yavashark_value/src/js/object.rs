@@ -517,7 +517,7 @@ impl<C: Realm> Object<C> {
             })
     }
 
-    pub fn to_primitive(&self, mut hint: Hint, realm: &mut C) -> Result<Value<C>, Error<C>> {
+    pub fn to_primitive(&self, hint: Hint, realm: &mut C) -> Result<Value<C>, Error<C>> {
         if let Some(prim) = self.primitive() {
             return prim.assert_no_object();
         }

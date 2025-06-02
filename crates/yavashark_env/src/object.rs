@@ -1,7 +1,7 @@
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 pub use prototype::*;
-use rustc_hash::{FxBuildHasher, FxHashMap, FxHasher};
+use rustc_hash::FxBuildHasher;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;

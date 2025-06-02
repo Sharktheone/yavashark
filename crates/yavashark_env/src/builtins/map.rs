@@ -116,7 +116,7 @@ impl Map {
     }
 
     #[prop("getOrInsert")]
-    fn get_or_insert(&self, key: Value, value: Value, #[realm] realm: &mut Realm) -> ValueResult {
+    fn get_or_insert(&self, key: Value, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
         Ok(inner.map.entry(key).or_insert(value).clone())

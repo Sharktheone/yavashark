@@ -1,9 +1,8 @@
 use crate::{Error, Res};
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::rc::Rc;
-use swc_ecma_ast::Bool;
 
 type Internal<T> = (Cell<Option<NonNull<T>>>, Cell<bool>);
 
@@ -28,7 +27,7 @@ impl<'a, T> Drop for RuntimeLifetimeGuard<'a, T> {
 }
 
 impl<T> RuntimeLifetime<T> {
-    #[allow(elided_named_lifetimes)]
+    #[allow(elided_named_lifetimes, dead_code)]
     pub fn new<'a>(r: &'a mut T) -> (Self, RuntimeLifetimeGuard<'a, T>) {
         let rc = Rc::new((Cell::new(Some(NonNull::from(r))), Cell::new(false)));
 

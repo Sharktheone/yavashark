@@ -184,7 +184,7 @@ impl PlainDateTime {
         .into_object())
     }
 
-    pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn add(&self, _duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let date = self.date.get();
 
         // let dur = chrono::Duration::from_std(duration.to_duration())
@@ -209,7 +209,7 @@ impl PlainDateTime {
         .into_object())
     }
 
-    pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn subtract(&self, _duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let date = self.date.get();
 
         // let dur = chrono::Duration::from_std(duration.to_duration())

@@ -1,5 +1,4 @@
 use crate::conversion::FromValueOutput;
-use crate::experiments::gui::runtime_lifetime::RuntimeLifetime;
 use crate::experiments::gui::ui::Ui;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};
 use eframe::{App, Frame, NativeOptions};
@@ -33,7 +32,7 @@ impl Gui {
 
     #[allow(clippy::new_ret_no_self)]
     pub fn new(realm: &Realm, name: String, w: f32, h: f32) -> Res<ObjectHandle> {
-        let mut this = Self {
+        let this = Self {
             inner: RefCell::new(MutableGui {
                 object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?.into()),
             }),
@@ -63,10 +62,10 @@ impl Gui {
             ..Default::default()
         };
 
-        let mut error = Rc::new(RefCell::new(None));
+        let error = Rc::new(RefCell::new(None));
         let error2 = Rc::clone(&error);
 
-        let (realm_ref, _) = RuntimeLifetime::new(realm);
+        // let (realm_ref, _) = RuntimeLifetime::new(realm);
 
         // let mut func = move |ctx, frame| {
         //     egui::CentralPanel::default().show(ctx, |ui| {
@@ -114,7 +113,7 @@ impl<'a> GuiApp<'a> {
         realm: &'a mut Realm,
         error: Rc<RefCell<Option<Error>>>,
         f: ObjectHandle,
-    ) -> Res<GuiApp> {
+    ) -> Res<Self> {
         let ui = Ui::new(realm)?;
         let ui_ref = <&Ui as FromValueOutput>::from_value_out(ui.clone().into())?;
 
@@ -129,7 +128,7 @@ impl<'a> GuiApp<'a> {
 }
 
 impl<'a> App for GuiApp<'a> {
-    fn update(&mut self, ctx: &Context, frame: &mut Frame) {
+    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             let x = self.ui_ref.update_ui(ui);
 

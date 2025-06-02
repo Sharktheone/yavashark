@@ -8,7 +8,7 @@ use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
-use yavashark_string::{ToYSString, YSString};
+use yavashark_string::YSString;
 use yavashark_value::{MutObj, Obj, ObjectImpl};
 
 mod bound;
@@ -450,7 +450,7 @@ impl NativeFunctionBuilder {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
     pub fn build(self) -> ObjectHandle {
-        let name = self.0.name.clone();
+        let name = self.0.name;
         let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());

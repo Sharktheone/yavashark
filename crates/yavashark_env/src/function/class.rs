@@ -8,7 +8,7 @@ use std::ptr::NonNull;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
 use yavashark_value::{
-    Constructor, ConstructorFn, Func, MutObj, NoOpConstructorFn, Obj, ObjectImpl, Variable,
+    ConstructorFn, Obj, Variable,
 };
 
 // #[object(function, constructor, direct(prototype))]
@@ -162,7 +162,7 @@ impl Obj<Realm> for Class {
         self.inner.clear_values()
     }
 
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+    fn call(&self, _realm: &mut Realm, _args: Vec<Value>, _this: Value) -> ValueResult {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))

@@ -1,7 +1,6 @@
-use super::jswidget::{DynWidget, JSWidget};
+use super::jswidget::DynWidget;
 use crate::experiments::gui::runtime_lifetime::{RuntimeLifetime, RuntimeLifetimeGuard};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
-use egui::Widget;
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt::Debug;
@@ -33,7 +32,7 @@ impl Ui {
 
     #[allow(clippy::new_ret_no_self)]
     pub fn new(realm: &Realm) -> Res<ObjectHandle> {
-        let mut this = Self {
+        let this = Self {
             inner: RefCell::new(MutableUi {
                 object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?.into()),
             }),
@@ -102,13 +101,11 @@ impl Ui {
 
         self.ui.with(|ui| {
             unsafe {
-                widget.get_widget().ui(ui);
+                widget.get_widget().ui(ui)?;
             }
 
             Ok(())
-        });
-
-        Ok(())
+        })
     }
 
     fn button(&self, label: String) -> Res<bool> {

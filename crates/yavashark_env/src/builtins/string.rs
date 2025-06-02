@@ -10,7 +10,7 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj};
+use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
 
 #[derive(Debug)]
 pub struct StringObj {

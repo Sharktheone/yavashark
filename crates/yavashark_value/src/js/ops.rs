@@ -16,7 +16,6 @@ mod xor;
 use super::Value;
 use crate::{Error, Hint, Realm};
 use num_bigint::BigInt;
-use num_traits::real::Real;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::rc::Rc;
