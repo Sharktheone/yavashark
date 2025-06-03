@@ -55,8 +55,14 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 			return nil
 		}
 
+		p, err := filepath.Rel(testRoot, path)
+		if err != nil {
+			log.Printf("Failed to get relative path for %s: %v", path, err)
+			return nil
+		}
+
 		for _, skip := range SKIP {
-			if strings.HasPrefix(filepath.Join(testRoot, path), skip) {
+			if strings.HasPrefix(p, skip) {
 				log.Printf("Skipping %s", path)
 
 				resultsChan <- results.Result{
