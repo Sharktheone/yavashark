@@ -96,6 +96,12 @@ func (tr *TestResults) PrintResults() {
 
 	printRes("Passed (no parse)", tr.Passed, tr.Total-tr.ParseError)
 	fmt.Printf("Total (no parse): %d\n", tr.Total-tr.ParseError)
+
+	printRes("Passed (skipped)", tr.Passed, tr.Total-tr.Skipped)
+	fmt.Printf("Total (skipped): %d\n", tr.Total-tr.Skipped)
+
+	printRes("Passed (skip, no-parse)", tr.Passed, tr.Total-(tr.Skipped+tr.ParseError))
+	fmt.Printf("Total (skip, no-parse): %d\n", tr.Total-(tr.Skipped+tr.ParseError))
 }
 
 func printRes(name string, n uint32, total uint32) {

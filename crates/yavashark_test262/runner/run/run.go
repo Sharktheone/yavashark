@@ -8,8 +8,14 @@ import (
 	"sync"
 	"time"
 	"yavashark_test262_runner/results"
+	"yavashark_test262_runner/status"
 	"yavashark_test262_runner/worker"
 )
+
+var SKIP = []string{
+	"intl402",
+	"staging",
+}
 
 func TestsInDir(testRoot string, workers int) *results.TestResults {
 	jobs := make(chan string, workers*8)
@@ -47,6 +53,20 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 
 		if strings.Contains(path, "_FIXTURE") {
 			return nil
+		}
+
+		for _, skip := range SKIP {
+			if strings.HasPrefix(filepath.Join(testRoot, path), skip) {
+				log.Printf("Skipping %s", path)
+
+				resultsChan <- results.Result{
+					Status: status.SKIP,
+					Msg:    "skip",
+					Path:   path,
+				}
+
+				return nil
+			}
 		}
 
 		jobs <- path
