@@ -122,8 +122,7 @@ impl Map {
         Ok(inner.map.entry(key).or_insert(value).clone())
     }
 
-
-
+    #[prop("getOrInsertComputed")]
     fn get_or_insert_computed(&self, key: Value, callback: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
