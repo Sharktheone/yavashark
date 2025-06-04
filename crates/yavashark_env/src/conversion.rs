@@ -365,7 +365,7 @@ macro_rules! impl_from_value_output_nonfract {
                     match value {
                         Value::Number(n) => {
                             if n.fract() != 0.0 {
-                                return Err(Error::ty_error(format!("Expected an integer, found {value:?}")));
+                                return Err(Error::range("Expected integer, found a float"));
                             }
                             Ok(NonFract(n as $t))
                         },
