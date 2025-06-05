@@ -9,9 +9,14 @@ use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yaml_rust2::yaml::YamlDecoder;
 use yaml_rust2::Yaml;
 
+
+
 pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
     let input = std::fs::read_to_string(f).unwrap();
-
+    
+    parse_code(&input)
+}
+pub(crate) fn parse_code(input: &str)  -> (Program, Metadata) {
     if input.is_empty() {
         return (Program::Script(Script::dummy()), Metadata::default());
     }
