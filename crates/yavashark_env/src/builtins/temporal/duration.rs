@@ -74,7 +74,7 @@ impl Duration {
                 hours.is_none() && minutes.is_none() && seconds.is_none() &&
                 milliseconds.is_none() && microseconds.is_none() && nanoseconds.is_none()
             {
-                return Err(Error::range("At least one field must be provided for Duration"));
+                return Err(Error::ty("At least one field must be provided for Duration"));
             }
 
 
