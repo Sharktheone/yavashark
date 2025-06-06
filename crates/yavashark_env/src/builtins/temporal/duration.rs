@@ -2,8 +2,9 @@ use crate::conversion::{FromValueOutput, NonFract};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
-use temporal_rs::options::{RoundingOptions, Unit};
+use temporal_rs::options::{RelativeTo, RoundingOptions, Unit};
 use temporal_rs::provider::NeverProvider;
+use temporal_rs::{Calendar, PlainDate};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 
@@ -46,18 +47,20 @@ impl Duration {
         }
 
         if let Value::Object(obj) = info {
-            let mut extract = |name: &'static str| {
-                match obj.resolve_property(&name.into(), realm)?
-                    .map(|v| v.to_number(realm).and_then(|n| if n.is_infinite() || n.is_nan() || n.fract() != 0.0 {
-                        Err(Error::range("Invalid value for Duration"))
-                    } else {
-                        Ok(n as i64)
-                    })) {
+            let mut extract =
+                |name: &'static str| match obj.resolve_property(&name.into(), realm)?.map(|v| {
+                    v.to_number(realm).and_then(|n| {
+                        if n.is_infinite() || n.is_nan() || n.fract() != 0.0 {
+                            Err(Error::range("Invalid value for Duration"))
+                        } else {
+                            Ok(n as i64)
+                        }
+                    })
+                }) {
                     Some(Ok(n)) => Ok(Some(n)),
                     Some(Err(e)) => Err(e),
                     None => Ok(None),
-                }
-            };
+                };
 
             let years = extract("years")?;
             let months = extract("months")?;
@@ -69,16 +72,22 @@ impl Duration {
             let milliseconds = extract("milliseconds")?;
             let microseconds = extract("microseconds")?;
             let nanoseconds = extract("nanoseconds")?;
-            
-            if years.is_none() && months.is_none() && weeks.is_none() && days.is_none() &&
-                hours.is_none() && minutes.is_none() && seconds.is_none() &&
-                milliseconds.is_none() && microseconds.is_none() && nanoseconds.is_none()
+
+            if years.is_none()
+                && months.is_none()
+                && weeks.is_none()
+                && days.is_none()
+                && hours.is_none()
+                && minutes.is_none()
+                && seconds.is_none()
+                && milliseconds.is_none()
+                && microseconds.is_none()
+                && nanoseconds.is_none()
             {
-                return Err(Error::ty("At least one field must be provided for Duration"));
+                return Err(Error::ty(
+                    "At least one field must be provided for Duration",
+                ));
             }
-
-
-
 
             return Ok(RefOrOwned::Owned(Self::constructor(
                 years,
@@ -150,8 +159,8 @@ impl Duration {
             microseconds,
             nanoseconds,
         )
-            .map_err(Error::from_temporal)
-            .map(|dur| Self::with_duration(realm, dur))
+        .map_err(Error::from_temporal)
+        .map(|dur| Self::with_duration(realm, dur))
     }
 }
 
@@ -172,7 +181,6 @@ impl Duration {
         nanoseconds: Option<NonFract<i128>>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
-        
         let years = years.map(|n| n.0);
         let months = months.map(|n| n.0);
         let weeks = weeks.map(|n| n.0);
@@ -183,10 +191,7 @@ impl Duration {
         let milliseconds = milliseconds.map(|n| n.0);
         let microseconds = microseconds.map(|n| n.0);
         let nanoseconds = nanoseconds.map(|n| n.0);
-        
-        
-        
-        
+
         Ok(Self::constructor(
             years,
             months,
@@ -200,7 +205,7 @@ impl Duration {
             nanoseconds,
             realm,
         )?
-            .into_object())
+        .into_object())
     }
 
     fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -249,6 +254,8 @@ impl Duration {
 
         let mut opts = RoundingOptions::default();
 
+        let mut rel = None;
+
         if let Value::String(s) = unit {
             let smallest = Unit::from_str(s.as_str())
                 .map_err(|_| Error::range("Invalid unit for Duration.round"))?;
@@ -277,6 +284,52 @@ impl Duration {
                         .map_err(|_| Error::range("Invalid unit for Duration.round"))?,
                 )
             };
+
+            let r = obj.get_property_opt(&"relativeTo".into())?
+                .map(|v| v.value)
+                ;
+
+            rel = match r {
+                Some(Value::Object(obj)) => {
+                    let year = obj
+                        .get("year", realm)?
+                        .to_number(realm)
+                        .and_then(|n| if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        })?;
+
+                    let month = obj
+                        .get("month", realm)?
+                        .to_number(realm)
+                        .and_then(|n| if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        })?;
+
+                    let day = obj
+                        .get("day", realm)?
+                        .to_number(realm)
+                        .and_then(|n| if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        })?;
+
+                    let pd = PlainDate::new(year, month, day, Calendar::default())
+                        .map_err(Error::from_temporal)?;
+
+                    Some(pd.into())
+                }
+                Some(Value::String(str)) => Some(
+                    RelativeTo::try_from_str_with_provider(str.as_str(), &NeverProvider)
+                        .map_err(Error::from_temporal)?,
+                ),
+                
+                _ => None,
+            };
         } else {
             return Err(Error::ty("Invalid unit for Duration.round"));
         };
@@ -284,7 +337,7 @@ impl Duration {
         let dur = self
             .dur
             .get()
-            .round_with_provider(opts, None, &NeverProvider)
+            .round_with_provider(opts, rel, &NeverProvider)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::with_duration(realm, dur).into_object())
