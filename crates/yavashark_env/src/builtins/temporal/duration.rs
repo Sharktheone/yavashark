@@ -3,7 +3,7 @@ use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
 use temporal_rs::options::{RelativeTo, RoundingOptions, Unit};
-use temporal_rs::provider::NeverProvider;
+use temporal_rs::tzdb::FsTzdbProvider;
 use temporal_rs::{Calendar, PlainDate};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
@@ -12,6 +12,10 @@ use yavashark_value::Obj;
 #[derive(Debug)]
 pub struct Duration {
     pub dur: Cell<temporal_rs::Duration>,
+}
+
+thread_local! {
+    static TZ_PROVIDER: FsTzdbProvider = FsTzdbProvider::default();
 }
 
 impl Duration {
@@ -159,8 +163,8 @@ impl Duration {
             microseconds,
             nanoseconds,
         )
-        .map_err(Error::from_temporal)
-        .map(|dur| Self::with_duration(realm, dur))
+            .map_err(Error::from_temporal)
+            .map(|dur| Self::with_duration(realm, dur))
     }
 }
 
@@ -205,7 +209,7 @@ impl Duration {
             nanoseconds,
             realm,
         )?
-        .into_object())
+            .into_object())
     }
 
     fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -216,11 +220,15 @@ impl Duration {
         let left = Self::from_value_ref(left, realm)?;
         let right = Self::from_value_ref(right, realm)?;
 
-        Ok(left
-            .dur
-            .get()
-            .compare_with_provider(&right.dur.get(), None, &NeverProvider)
-            .map_err(Error::from_temporal)? as i8)
+        TZ_PROVIDER
+            .try_with(|provider| {
+                Ok(left
+                    .dur
+                    .get()
+                    .compare_with_provider(&right.dur.get(), None, provider)
+                    .map_err(Error::from_temporal)? as i8)
+            })
+            .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))?
     }
 
     fn abs(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
@@ -285,60 +293,62 @@ impl Duration {
                 )
             };
 
-            let r = obj.get_property_opt(&"relativeTo".into())?
-                .map(|v| v.value)
-                ;
+            let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
 
             rel = match r {
                 Some(Value::Object(obj)) => {
-                    let year = obj
-                        .get("year", realm)?
-                        .to_number(realm)
-                        .and_then(|n| if n.fract() == 0.0 {
+                    let year = obj.get("year", realm)?.to_number(realm).and_then(|n| {
+                        if n.fract() == 0.0 {
                             Ok(n as _)
                         } else {
                             Err(Error::range("Invalid year for PlainDate"))
-                        })?;
+                        }
+                    })?;
 
-                    let month = obj
-                        .get("month", realm)?
-                        .to_number(realm)
-                        .and_then(|n| if n.fract() == 0.0 {
+                    let month = obj.get("month", realm)?.to_number(realm).and_then(|n| {
+                        if n.fract() == 0.0 {
                             Ok(n as _)
                         } else {
                             Err(Error::range("Invalid year for PlainDate"))
-                        })?;
+                        }
+                    })?;
 
-                    let day = obj
-                        .get("day", realm)?
-                        .to_number(realm)
-                        .and_then(|n| if n.fract() == 0.0 {
+                    let day = obj.get("day", realm)?.to_number(realm).and_then(|n| {
+                        if n.fract() == 0.0 {
                             Ok(n as _)
                         } else {
                             Err(Error::range("Invalid year for PlainDate"))
-                        })?;
+                        }
+                    })?;
 
                     let pd = PlainDate::new(year, month, day, Calendar::default())
                         .map_err(Error::from_temporal)?;
 
-                    Some(pd.into())
+                    Some(RelativeTo::PlainDate(pd))
                 }
-                Some(Value::String(str)) => Some(
-                    RelativeTo::try_from_str_with_provider(str.as_str(), &NeverProvider)
-                        .map_err(Error::from_temporal)?,
-                ),
+                Some(Value::String(str)) =>  {
+                    Some(TZ_PROVIDER.try_with(|prov| {
+                        RelativeTo::try_from_str_with_provider(str.as_str(), prov)
+                            .map_err(Error::from_temporal)
+                    }).map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??)
+                },
                 
                 _ => None,
             };
         } else {
             return Err(Error::ty("Invalid unit for Duration.round"));
         };
+        
+        
 
-        let dur = self
-            .dur
-            .get()
-            .round_with_provider(opts, rel, &NeverProvider)
-            .map_err(Error::from_temporal)?;
+        let dur = TZ_PROVIDER.try_with(|provider| {
+                self
+                    .dur
+                    .get()
+                    .round_with_provider(opts, rel, provider)
+                    .map_err(Error::from_temporal)
+            })
+            .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
 
         Ok(Self::with_duration(realm, dur).into_object())
     }
@@ -372,18 +382,21 @@ impl Duration {
     fn total(&self, unit: &str) -> Res<f64> {
         let unit =
             Unit::from_str(unit).map_err(|_| Error::range("Invalid unit for Duration.total"))?;
-
-        let dur = self
-            .dur
-            .get()
-            .total_with_provider(unit, None, &NeverProvider)
-            .map_err(Error::from_temporal)?;
+        
+        let dur = TZ_PROVIDER.try_with(|provider| {
+            self
+                .dur
+                .get()
+                .total_with_provider(unit, None, provider)
+                .map_err(Error::from_temporal)
+        })
+        .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
 
         Ok(dur.as_inner())
     }
 
     #[nonstatic]
-    fn value_of() -> Res {
+    const fn value_of() -> Res {
         Err(Error::ty("Invalid value for Duration"))
     }
 
