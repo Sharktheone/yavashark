@@ -94,6 +94,7 @@ impl Duration {
                 realm,
             )?));
         } else if let Value::String(s) = info {
+            println!("Parsing Duration from string: {}", s);
             return Ok(RefOrOwned::Owned(
                 temporal_rs::Duration::from_str(s.as_str())
                     .map_err(Error::from_temporal)
@@ -227,7 +228,7 @@ impl Duration {
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = Self::from_value_ref(other, realm)?;
 
-        let dur = other
+        let dur = self
             .dur
             .get()
             .add(&other.dur.get())
