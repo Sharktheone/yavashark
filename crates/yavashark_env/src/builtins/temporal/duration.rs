@@ -2,9 +2,10 @@ use crate::conversion::{FromValueOutput, NonFract};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
-use temporal_rs::options::{RelativeTo, RoundingOptions, Unit};
+use temporal_rs::options::{RelativeTo, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::tzdb::FsTzdbProvider;
 use temporal_rs::{Calendar, PlainDate};
+use temporal_rs::parsers::Precision;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 
@@ -338,8 +339,8 @@ impl Duration {
         } else {
             return Err(Error::ty("Invalid unit for Duration.round"));
         };
-        
-        
+
+
 
         let dur = TZ_PROVIDER.try_with(|provider| {
                 self
@@ -373,16 +374,79 @@ impl Duration {
     }
 
     #[prop("toString")]
-    fn to_js_string(&self) -> String {
+    fn to_js_string(&self, obj: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<String> {
+        let mut opts = ToStringRoundingOptions::default();
+
+        let smallest = obj.get("smallestUnit", realm)?;
+
+        opts.smallest_unit = if smallest.is_undefined() {
+            None
+        } else {
+            let smallest = smallest.to_string(realm)?;
+
+            Some(
+                Unit::from_str(smallest.as_str())
+                    .map_err(|_| Error::range("Invalid unit for Duration.toString"))?,
+            )
+        };
+
+        let rm = obj.get("roundingMode", realm)?;
+
+        opts.rounding_mode = if rm.is_undefined() {
+            None
+        } else {
+            let rm = rm.to_string(realm)?;
+
+            Some(
+                temporal_rs::options::RoundingMode::from_str(rm.as_str())
+                    .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
+            )
+        };
+
+        let digits = obj.get("fractionalSecondDigits", realm)?;
+
+        let digits = if digits.is_undefined() | matches!(&digits, Value::String(s) if s.as_str() == "auto") {
+            None
+        } else {
+            let digits = digits.to_number(realm)?;
+
+            if digits.is_infinite() || digits.is_nan() {
+                return Err(Error::range("Invalid fractionalSecondDigits for Duration.toString"));
+            }
+
+            let mut digits = digits.floor();
+
+            if !(0.0..=9.0).contains(&digits) {
+                return Err(Error::range("fractionalSecondDigits must be between 0 and 9"));
+            }
+
+            Some(digits as u8)
+
+        };
+
+
+        opts.precision = match (opts.smallest_unit, digits) {
+            (Some(Unit::Minute), _) => Precision::Minute,
+            (Some(Unit::Second), _) => Precision::Digit(0),
+            (Some(Unit::Millisecond), _) => Precision::Digit(3),
+            (Some(Unit::Microsecond), _) => Precision::Digit(6),
+            (Some(Unit::Nanosecond), _) => Precision::Digit(9),
+            (_, None) => Precision::Auto,
+            (_, Some(d)) => Precision::Digit(d),
+        };
+
+
+
         let dur = self.dur.get();
 
-        dur.to_string()
+        dur.as_temporal_string(opts)
+            .map_err(Error::from_temporal)
     }
 
     fn total(&self, unit: &str) -> Res<f64> {
         let unit =
             Unit::from_str(unit).map_err(|_| Error::range("Invalid unit for Duration.total"))?;
-        
+
         let dur = TZ_PROVIDER.try_with(|provider| {
             self
                 .dur
