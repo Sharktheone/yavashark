@@ -217,16 +217,64 @@ impl Duration {
         Ok(Self::from_value(info, realm)?.into_object())
     }
 
-    fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
+    fn compare(left: Value, right: Value, obj: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<i8> {
         let left = Self::from_value_ref(left, realm)?;
         let right = Self::from_value_ref(right, realm)?;
+        
+        
+        let r = if let Some(obj) = obj {
+            obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value)
+        } else {
+            None
+        };
+
+        let rel = match r {
+            Some(Value::Object(obj)) => {
+                let year = obj.get("year", realm)?.to_number(realm).and_then(|n| {
+                    if n.fract() == 0.0 {
+                        Ok(n as _)
+                    } else {
+                        Err(Error::range("Invalid year for PlainDate"))
+                    }
+                })?;
+
+                let month = obj.get("month", realm)?.to_number(realm).and_then(|n| {
+                    if n.fract() == 0.0 {
+                        Ok(n as _)
+                    } else {
+                        Err(Error::range("Invalid year for PlainDate"))
+                    }
+                })?;
+
+                let day = obj.get("day", realm)?.to_number(realm).and_then(|n| {
+                    if n.fract() == 0.0 {
+                        Ok(n as _)
+                    } else {
+                        Err(Error::range("Invalid year for PlainDate"))
+                    }
+                })?;
+
+                let pd = PlainDate::new(year, month, day, Calendar::default())
+                    .map_err(Error::from_temporal)?;
+
+                Some(RelativeTo::PlainDate(pd))
+            }
+            Some(Value::String(str)) =>  {
+                Some(TZ_PROVIDER.try_with(|prov| {
+                    RelativeTo::try_from_str_with_provider(str.as_str(), prov)
+                        .map_err(Error::from_temporal)
+                }).map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??)
+            },
+
+            _ => None,
+        };
 
         TZ_PROVIDER
             .try_with(|provider| {
                 Ok(left
                     .dur
                     .get()
-                    .compare_with_provider(&right.dur.get(), None, provider)
+                    .compare_with_provider(&right.dur.get(), rel, provider)
                     .map_err(Error::from_temporal)? as i8)
             })
             .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))?
