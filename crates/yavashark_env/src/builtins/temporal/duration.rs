@@ -396,6 +396,7 @@ impl Duration {
     }
 
     #[nonstatic]
+    #[prop("valueOf")]
     const fn value_of() -> Res {
         Err(Error::ty("Invalid value for Duration"))
     }
