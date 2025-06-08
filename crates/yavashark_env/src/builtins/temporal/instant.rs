@@ -74,15 +74,19 @@ impl Instant {
     }
 
     #[prop("fromEpochMilliseconds")]
-    fn from_epoch_milliseconds(epoch: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn from_epoch_milliseconds(epoch: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let epoch = epoch.to_numeric(realm)?;
 
-        match epoch {
-            BigIntOrNumber::BigInt(bigint) => Self::from_epoch_nanoseconds(&bigint, realm),
-            BigIntOrNumber::Number(num) => BigInt::from_f64(num)
-                .ok_or(Error::range("epoch out of range"))
-                .and_then(|bigint| Self::from_epoch_nanoseconds(&bigint, realm)),
+        let stamp = match epoch {
+            BigIntOrNumber::BigInt(bigint) => temporal_rs::Instant::from_epoch_milliseconds(
+                bigint.to_i64().ok_or(Error::range("epoch out of range"))?,
+            ),
+            BigIntOrNumber::Number(num) => temporal_rs::Instant::from_epoch_milliseconds(num as i64),
         }
+        .map_err(Error::from_temporal)?;
+        
+        
+        Ok(Self::from_stamp(stamp, realm).into_object())
     }
 
     #[prop("fromEpochNanoseconds")]
