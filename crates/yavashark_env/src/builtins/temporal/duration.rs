@@ -3,9 +3,9 @@ use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
 use temporal_rs::options::{RelativeTo, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::parsers::Precision;
 use temporal_rs::tzdb::FsTzdbProvider;
 use temporal_rs::{Calendar, PlainDate};
-use temporal_rs::parsers::Precision;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 
@@ -164,8 +164,8 @@ impl Duration {
             microseconds,
             nanoseconds,
         )
-            .map_err(Error::from_temporal)
-            .map(|dur| Self::with_duration(realm, dur))
+        .map_err(Error::from_temporal)
+        .map(|dur| Self::with_duration(realm, dur))
     }
 }
 
@@ -210,17 +210,21 @@ impl Duration {
             nanoseconds,
             realm,
         )?
-            .into_object())
+        .into_object())
     }
 
     fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         Ok(Self::from_value(info, realm)?.into_object())
     }
 
-    fn compare(left: Value, right: Value, obj: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<i8> {
+    fn compare(
+        left: Value,
+        right: Value,
+        obj: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<i8> {
         let left = Self::from_value_ref(left, realm)?;
         let right = Self::from_value_ref(right, realm)?;
-
 
         let r = if let Some(obj) = obj {
             obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value)
@@ -230,47 +234,55 @@ impl Duration {
 
         let rel = match r {
             Some(Value::Object(obj)) => {
-                let year = obj.get_opt("year", realm)?
+                let year = obj
+                    .get_opt("year", realm)?
                     .ok_or(Error::ty("Invalid year for PlainDate"))?
-                    .to_number(realm).and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
+                    .to_number(realm)
+                    .and_then(|n| {
+                        if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        }
+                    })?;
 
-                let month = obj.get_opt("month", realm)?
+                let month = obj
+                    .get_opt("month", realm)?
                     .ok_or(Error::ty("Invalid month for PlainDate"))?
-                    .to_number(realm).and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
+                    .to_number(realm)
+                    .and_then(|n| {
+                        if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        }
+                    })?;
 
-                let day = obj.get_opt("day", realm)?
+                let day = obj
+                    .get_opt("day", realm)?
                     .ok_or(Error::ty("Invalid day for PlainDate"))?
-                    .to_number(realm).and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
+                    .to_number(realm)
+                    .and_then(|n| {
+                        if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        }
+                    })?;
 
                 let pd = PlainDate::new(year, month, day, Calendar::default())
                     .map_err(Error::from_temporal)?;
 
                 Some(RelativeTo::PlainDate(pd))
             }
-            Some(Value::String(str)) =>  {
-                Some(TZ_PROVIDER.try_with(|prov| {
-                    RelativeTo::try_from_str_with_provider(str.as_str(), prov)
-                        .map_err(Error::from_temporal)
-                }).map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??)
-            },
+            Some(Value::String(str)) => Some(
+                TZ_PROVIDER
+                    .try_with(|prov| {
+                        RelativeTo::try_from_str_with_provider(str.as_str(), prov)
+                            .map_err(Error::from_temporal)
+                    })
+                    .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??,
+            ),
 
             _ => None,
         };
@@ -381,24 +393,24 @@ impl Duration {
 
                     Some(RelativeTo::PlainDate(pd))
                 }
-                Some(Value::String(str)) =>  {
-                    Some(TZ_PROVIDER.try_with(|prov| {
-                        RelativeTo::try_from_str_with_provider(str.as_str(), prov)
-                            .map_err(Error::from_temporal)
-                    }).map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??)
-                },
-                
+                Some(Value::String(str)) => Some(
+                    TZ_PROVIDER
+                        .try_with(|prov| {
+                            RelativeTo::try_from_str_with_provider(str.as_str(), prov)
+                                .map_err(Error::from_temporal)
+                        })
+                        .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??,
+                ),
+
                 _ => None,
             };
         } else {
             return Err(Error::ty("Invalid unit for Duration.round"));
         };
 
-
-
-        let dur = TZ_PROVIDER.try_with(|provider| {
-                self
-                    .dur
+        let dur = TZ_PROVIDER
+            .try_with(|provider| {
+                self.dur
                     .get()
                     .round_with_provider(opts, rel, provider)
                     .map_err(Error::from_temporal)
@@ -428,87 +440,90 @@ impl Duration {
     }
 
     #[prop("toString")]
-    fn to_js_string(&self, obj: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<String> {
+    fn to_js_string(&self, obj: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let mut opts = ToStringRoundingOptions::default();
 
-        let smallest = obj.get("smallestUnit", realm)?;
+        if let Some(obj) = obj {
+            let smallest = obj.get("smallestUnit", realm)?;
 
-        opts.smallest_unit = if smallest.is_undefined() {
-            None
-        } else {
-            let smallest = smallest.to_string(realm)?;
+            opts.smallest_unit = if smallest.is_undefined() {
+                None
+            } else {
+                let smallest = smallest.to_string(realm)?;
 
-            Some(
-                Unit::from_str(smallest.as_str())
-                    .map_err(|_| Error::range("Invalid unit for Duration.toString"))?,
-            )
-        };
+                Some(
+                    Unit::from_str(smallest.as_str())
+                        .map_err(|_| Error::range("Invalid unit for Duration.toString"))?,
+                )
+            };
 
-        let rm = obj.get("roundingMode", realm)?;
+            let rm = obj.get("roundingMode", realm)?;
 
-        opts.rounding_mode = if rm.is_undefined() {
-            None
-        } else {
-            let rm = rm.to_string(realm)?;
+            opts.rounding_mode = if rm.is_undefined() {
+                None
+            } else {
+                let rm = rm.to_string(realm)?;
 
-            Some(
-                temporal_rs::options::RoundingMode::from_str(rm.as_str())
-                    .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
-            )
-        };
+                Some(
+                    temporal_rs::options::RoundingMode::from_str(rm.as_str())
+                        .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
+                )
+            };
 
-        let digits = obj.get("fractionalSecondDigits", realm)?;
+            let digits = obj.get("fractionalSecondDigits", realm)?;
 
-        let digits = if digits.is_undefined() | matches!(&digits, Value::String(s) if s.as_str() == "auto") {
-            None
-        } else {
-            let digits = digits.to_number(realm)?;
+            let digits = if digits.is_undefined()
+                | matches!(&digits, Value::String(s) if s.as_str() == "auto")
+            {
+                None
+            } else {
+                let digits = digits.to_number(realm)?;
 
-            if digits.is_infinite() || digits.is_nan() {
-                return Err(Error::range("Invalid fractionalSecondDigits for Duration.toString"));
-            }
+                if digits.is_infinite() || digits.is_nan() {
+                    return Err(Error::range(
+                        "Invalid fractionalSecondDigits for Duration.toString",
+                    ));
+                }
 
-            let mut digits = digits.floor();
+                let mut digits = digits.floor();
 
-            if !(0.0..=9.0).contains(&digits) {
-                return Err(Error::range("fractionalSecondDigits must be between 0 and 9"));
-            }
+                if !(0.0..=9.0).contains(&digits) {
+                    return Err(Error::range(
+                        "fractionalSecondDigits must be between 0 and 9",
+                    ));
+                }
 
-            Some(digits as u8)
+                Some(digits as u8)
+            };
 
-        };
-
-
-        opts.precision = match (opts.smallest_unit, digits) {
-            (Some(Unit::Minute), _) => Precision::Minute,
-            (Some(Unit::Second), _) => Precision::Digit(0),
-            (Some(Unit::Millisecond), _) => Precision::Digit(3),
-            (Some(Unit::Microsecond), _) => Precision::Digit(6),
-            (Some(Unit::Nanosecond), _) => Precision::Digit(9),
-            (_, None) => Precision::Auto,
-            (_, Some(d)) => Precision::Digit(d),
-        };
-
-
+            opts.precision = match (opts.smallest_unit, digits) {
+                (Some(Unit::Minute), _) => Precision::Minute,
+                (Some(Unit::Second), _) => Precision::Digit(0),
+                (Some(Unit::Millisecond), _) => Precision::Digit(3),
+                (Some(Unit::Microsecond), _) => Precision::Digit(6),
+                (Some(Unit::Nanosecond), _) => Precision::Digit(9),
+                (_, None) => Precision::Auto,
+                (_, Some(d)) => Precision::Digit(d),
+            };
+        }
 
         let dur = self.dur.get();
 
-        dur.as_temporal_string(opts)
-            .map_err(Error::from_temporal)
+        dur.as_temporal_string(opts).map_err(Error::from_temporal)
     }
 
     fn total(&self, unit: &str) -> Res<f64> {
         let unit =
             Unit::from_str(unit).map_err(|_| Error::range("Invalid unit for Duration.total"))?;
 
-        let dur = TZ_PROVIDER.try_with(|provider| {
-            self
-                .dur
-                .get()
-                .total_with_provider(unit, None, provider)
-                .map_err(Error::from_temporal)
-        })
-        .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
+        let dur = TZ_PROVIDER
+            .try_with(|provider| {
+                self.dur
+                    .get()
+                    .total_with_provider(unit, None, provider)
+                    .map_err(Error::from_temporal)
+            })
+            .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
 
         Ok(dur.as_inner())
     }
