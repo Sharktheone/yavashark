@@ -20,20 +20,6 @@ pub struct Instant {
 }
 
 impl Instant {
-    pub fn new(stamp: &BigInt, realm: &Realm) -> Res<Self> {
-        let stamp = stamp.to_i64().ok_or(Error::range("stamp out of range"))?;
-
-        let i =
-            temporal_rs::Instant::from_epoch_milliseconds(stamp).map_err(Error::from_temporal)?;
-
-        Ok(Self {
-            inner: RefCell::new(MutableInstant {
-                object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone().into()),
-            }),
-            stamp: Cell::new(i),
-        })
-    }
-
     pub fn from_stamp(stamp: temporal_rs::Instant, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableInstant {
@@ -74,7 +60,7 @@ impl Instant {
 impl Instant {
     #[constructor]
     fn construct(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        Ok(Self::new(epoch, realm)?.into_object())
+        Self::from_epoch_nanoseconds(epoch, realm)
     }
 
     #[allow(clippy::use_self)]
