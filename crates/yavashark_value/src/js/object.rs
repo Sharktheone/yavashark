@@ -517,6 +517,20 @@ impl<C: Realm> Object<C> {
             })
     }
 
+    pub fn get_opt(
+        &self,
+        name: impl IntoValueRef<C>,
+        realm: &mut C,
+    ) -> Result<Option<Value<C>>, Error<C>> {
+        let name = name.into_value_ref();
+
+        self.0
+            .resolve_property(name.as_ref())?
+            .map_or(Ok(None), |x| {
+                Ok(Some(x.get(Value::Object(self.clone()), realm)?))
+            })
+    }
+
     pub fn to_primitive(&self, hint: Hint, realm: &mut C) -> Result<Value<C>, Error<C>> {
         if let Some(prim) = self.primitive() {
             return prim.assert_no_object();
