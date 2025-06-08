@@ -2,11 +2,10 @@ use crate::conversion::{FromValueOutput, NonFract};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
-use temporal_rs::options::{RelativeTo, RoundingOptions, ToStringRoundingOptions, Unit};
-use temporal_rs::parsers::Precision;
-use temporal_rs::{Calendar, PlainDate};
+use temporal_rs::options::Unit;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
+use crate::builtins::temporal::utils::{opt_relative_to_wrap, rounding_options, string_rounding_mode_opts};
 
 #[object]
 #[derive(Debug)]
@@ -221,62 +220,7 @@ impl Duration {
         let left = Self::from_value_ref(left, realm)?;
         let right = Self::from_value_ref(right, realm)?;
 
-        let r = if let Some(obj) = obj {
-            obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value)
-        } else {
-            None
-        };
-
-        let rel = match r {
-            Some(Value::Object(obj)) => {
-                let year = obj
-                    .get_opt("year", realm)?
-                    .ok_or(Error::ty("Invalid year for PlainDate"))?
-                    .to_number(realm)
-                    .and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                let month = obj
-                    .get_opt("month", realm)?
-                    .ok_or(Error::ty("Invalid month for PlainDate"))?
-                    .to_number(realm)
-                    .and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                let day = obj
-                    .get_opt("day", realm)?
-                    .ok_or(Error::ty("Invalid day for PlainDate"))?
-                    .to_number(realm)
-                    .and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                let pd = PlainDate::new(year, month, day, Calendar::default())
-                    .map_err(Error::from_temporal)?;
-
-                Some(RelativeTo::PlainDate(pd))
-            }
-            Some(Value::String(str)) => Some(
-                RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
-                    .map_err(Error::from_temporal)?,
-            ),
-
-            _ => None,
-        };
+        let rel = opt_relative_to_wrap(obj, realm)?;
 
         Ok(left
             .dur
@@ -313,85 +257,10 @@ impl Duration {
         if unit.is_undefined() {
             return Err(Error::ty("Invalid unit for Duration.round"));
         }
+        
+        let (opts, rel) = rounding_options(unit, realm)?;
 
-        let mut opts = RoundingOptions::default();
-
-        let mut rel = None;
-
-        if let Value::String(s) = unit {
-            let smallest = Unit::from_str(s.as_str())
-                .map_err(|_| Error::range("Invalid unit for Duration.round"))?;
-
-            opts.smallest_unit = Some(smallest);
-        } else if let Value::Object(obj) = unit {
-            let smallest = obj.get("smallestUnit", realm)?;
-
-            opts.smallest_unit = if smallest.is_undefined() {
-                None
-            } else {
-                let smallest = smallest.to_string(realm)?;
-
-                Some(
-                    Unit::from_str(smallest.as_str())
-                        .map_err(|_| Error::range("Invalid unit for Duration.round"))?,
-                )
-            };
-
-            let largest = obj.get("largestUnit", realm)?;
-            opts.largest_unit = if largest.is_undefined() {
-                None
-            } else {
-                Some(
-                    Unit::from_str(largest.to_string(realm)?.as_str())
-                        .map_err(|_| Error::range("Invalid unit for Duration.round"))?,
-                )
-            };
-
-            let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
-
-            rel = match r {
-                Some(Value::Object(obj)) => {
-                    let year = obj.get("year", realm)?.to_number(realm).and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                    let month = obj.get("month", realm)?.to_number(realm).and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                    let day = obj.get("day", realm)?.to_number(realm).and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                    let pd = PlainDate::new(year, month, day, Calendar::default())
-                        .map_err(Error::from_temporal)?;
-
-                    Some(RelativeTo::PlainDate(pd))
-                }
-                Some(Value::String(str)) => Some(
-                            RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
-                                .map_err(Error::from_temporal)?
-                ),
-
-                _ => None,
-            };
-        } else {
-            return Err(Error::ty("Invalid unit for Duration.round"));
-        };
-
-        let dur = 
+        let dur =
                 self.dur
                     .get()
                     .round_with_provider(opts, rel, &realm.env.tz_provider)
@@ -421,71 +290,7 @@ impl Duration {
 
     #[prop("toString")]
     fn to_js_string(&self, obj: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
-        let mut opts = ToStringRoundingOptions::default();
-
-        if let Some(obj) = obj {
-            let smallest = obj.get("smallestUnit", realm)?;
-
-            opts.smallest_unit = if smallest.is_undefined() {
-                None
-            } else {
-                let smallest = smallest.to_string(realm)?;
-
-                Some(
-                    Unit::from_str(smallest.as_str())
-                        .map_err(|_| Error::range("Invalid unit for Duration.toString"))?,
-                )
-            };
-
-            let rm = obj.get("roundingMode", realm)?;
-
-            opts.rounding_mode = if rm.is_undefined() {
-                None
-            } else {
-                let rm = rm.to_string(realm)?;
-
-                Some(
-                    temporal_rs::options::RoundingMode::from_str(rm.as_str())
-                        .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
-                )
-            };
-
-            let digits = obj.get("fractionalSecondDigits", realm)?;
-
-            let digits = if digits.is_undefined()
-                | matches!(&digits, Value::String(s) if s.as_str() == "auto")
-            {
-                None
-            } else {
-                let digits = digits.to_number(realm)?;
-
-                if digits.is_infinite() || digits.is_nan() {
-                    return Err(Error::range(
-                        "Invalid fractionalSecondDigits for Duration.toString",
-                    ));
-                }
-
-                let digits = digits.floor();
-
-                if !(0.0..=9.0).contains(&digits) {
-                    return Err(Error::range(
-                        "fractionalSecondDigits must be between 0 and 9",
-                    ));
-                }
-
-                Some(digits as u8)
-            };
-
-            opts.precision = match (opts.smallest_unit, digits) {
-                (Some(Unit::Minute), _) => Precision::Minute,
-                (Some(Unit::Second), _) => Precision::Digit(0),
-                (Some(Unit::Millisecond), _) => Precision::Digit(3),
-                (Some(Unit::Microsecond), _) => Precision::Digit(6),
-                (Some(Unit::Nanosecond), _) => Precision::Digit(9),
-                (_, None) => Precision::Auto,
-                (_, Some(d)) => Precision::Digit(d),
-            };
-        }
+        let opts= string_rounding_mode_opts(obj, realm)?;
 
         let dur = self.dur.get();
 
@@ -511,52 +316,9 @@ impl Duration {
         let unit = Unit::from_str(unit.as_str())
             .map_err(|_| Error::range("Invalid unit for Duration.total"))?;
 
-        let rel = if let Some(obj) = obj {
-            let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
+        let rel = opt_relative_to_wrap(obj, realm)?;
 
-            match r {
-                Some(Value::Object(obj)) => {
-                    let year = obj.get("year", realm)?.to_number(realm).and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                    let month = obj.get("month", realm)?.to_number(realm).and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                    let day = obj.get("day", realm)?.to_number(realm).and_then(|n| {
-                        if n.fract() == 0.0 {
-                            Ok(n as _)
-                        } else {
-                            Err(Error::range("Invalid year for PlainDate"))
-                        }
-                    })?;
-
-                    let pd = PlainDate::new(year, month, day, Calendar::default())
-                        .map_err(Error::from_temporal)?;
-
-                    Some(RelativeTo::PlainDate(pd))
-                }
-                Some(Value::String(str)) => Some(
-                            RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
-                                .map_err(Error::from_temporal)?
-                ),
-
-                _ => None,
-            }
-        } else {
-            None
-        };
-
-        let dur = 
+        let dur =
                 self.dur
                     .get()
                     .total_with_provider(unit, rel, &realm.env.tz_provider)
