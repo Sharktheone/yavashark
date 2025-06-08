@@ -512,15 +512,79 @@ impl Duration {
         dur.as_temporal_string(opts).map_err(Error::from_temporal)
     }
 
-    fn total(&self, unit: &str) -> Res<f64> {
-        let unit =
-            Unit::from_str(unit).map_err(|_| Error::range("Invalid unit for Duration.total"))?;
+    fn total(
+        &self,
+        unit: Value,
+        obj: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<f64> {
+        let unit = if let Value::String(unit) = unit {
+            unit
+        } else if let Value::Object(obj) = unit {
+            let unit = obj.get("unit", realm)?;
+
+            unit.to_string(realm)?
+        } else {
+            return Err(Error::ty("Invalid unit for Duration.total"));
+        };
+
+        let unit = Unit::from_str(unit.as_str())
+            .map_err(|_| Error::range("Invalid unit for Duration.total"))?;
+
+        let rel = if let Some(obj) = obj {
+            let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
+
+            match r {
+                Some(Value::Object(obj)) => {
+                    let year = obj.get("year", realm)?.to_number(realm).and_then(|n| {
+                        if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        }
+                    })?;
+
+                    let month = obj.get("month", realm)?.to_number(realm).and_then(|n| {
+                        if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        }
+                    })?;
+
+                    let day = obj.get("day", realm)?.to_number(realm).and_then(|n| {
+                        if n.fract() == 0.0 {
+                            Ok(n as _)
+                        } else {
+                            Err(Error::range("Invalid year for PlainDate"))
+                        }
+                    })?;
+
+                    let pd = PlainDate::new(year, month, day, Calendar::default())
+                        .map_err(Error::from_temporal)?;
+
+                    Some(RelativeTo::PlainDate(pd))
+                }
+                Some(Value::String(str)) => Some(
+                    TZ_PROVIDER
+                        .try_with(|prov| {
+                            RelativeTo::try_from_str_with_provider(str.as_str(), prov)
+                                .map_err(Error::from_temporal)
+                        })
+                        .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??,
+                ),
+
+                _ => None,
+            }
+        } else {
+            None
+        };
 
         let dur = TZ_PROVIDER
             .try_with(|provider| {
                 self.dur
                     .get()
-                    .total_with_provider(unit, None, provider)
+                    .total_with_provider(unit, rel, provider)
                     .map_err(Error::from_temporal)
             })
             .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
