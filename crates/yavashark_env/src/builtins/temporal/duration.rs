@@ -4,7 +4,6 @@ use std::cell::{Cell, RefCell};
 use std::str::FromStr;
 use temporal_rs::options::{RelativeTo, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::parsers::Precision;
-use temporal_rs::tzdb::FsTzdbProvider;
 use temporal_rs::{Calendar, PlainDate};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
@@ -13,10 +12,6 @@ use yavashark_value::Obj;
 #[derive(Debug)]
 pub struct Duration {
     pub dur: Cell<temporal_rs::Duration>,
-}
-
-thread_local! {
-    static TZ_PROVIDER: FsTzdbProvider = FsTzdbProvider::default();
 }
 
 impl Duration {
@@ -276,26 +271,18 @@ impl Duration {
                 Some(RelativeTo::PlainDate(pd))
             }
             Some(Value::String(str)) => Some(
-                TZ_PROVIDER
-                    .try_with(|prov| {
-                        RelativeTo::try_from_str_with_provider(str.as_str(), prov)
-                            .map_err(Error::from_temporal)
-                    })
-                    .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??,
+                RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
+                    .map_err(Error::from_temporal)?,
             ),
 
             _ => None,
         };
 
-        TZ_PROVIDER
-            .try_with(|provider| {
-                Ok(left
-                    .dur
-                    .get()
-                    .compare_with_provider(&right.dur.get(), rel, provider)
-                    .map_err(Error::from_temporal)? as i8)
-            })
-            .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))?
+        Ok(left
+            .dur
+            .get()
+            .compare_with_provider(&right.dur.get(), rel, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)? as i8)
     }
 
     fn abs(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
@@ -394,12 +381,8 @@ impl Duration {
                     Some(RelativeTo::PlainDate(pd))
                 }
                 Some(Value::String(str)) => Some(
-                    TZ_PROVIDER
-                        .try_with(|prov| {
-                            RelativeTo::try_from_str_with_provider(str.as_str(), prov)
-                                .map_err(Error::from_temporal)
-                        })
-                        .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??,
+                            RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
+                                .map_err(Error::from_temporal)?
                 ),
 
                 _ => None,
@@ -408,14 +391,11 @@ impl Duration {
             return Err(Error::ty("Invalid unit for Duration.round"));
         };
 
-        let dur = TZ_PROVIDER
-            .try_with(|provider| {
+        let dur = 
                 self.dur
                     .get()
-                    .round_with_provider(opts, rel, provider)
-                    .map_err(Error::from_temporal)
-            })
-            .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
+                    .round_with_provider(opts, rel, &realm.env.tz_provider)
+                    .map_err(Error::from_temporal)?;
 
         Ok(Self::with_duration(realm, dur).into_object())
     }
@@ -485,7 +465,7 @@ impl Duration {
                     ));
                 }
 
-                let mut digits = digits.floor();
+                let digits = digits.floor();
 
                 if !(0.0..=9.0).contains(&digits) {
                     return Err(Error::range(
@@ -566,12 +546,8 @@ impl Duration {
                     Some(RelativeTo::PlainDate(pd))
                 }
                 Some(Value::String(str)) => Some(
-                    TZ_PROVIDER
-                        .try_with(|prov| {
-                            RelativeTo::try_from_str_with_provider(str.as_str(), prov)
-                                .map_err(Error::from_temporal)
-                        })
-                        .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??,
+                            RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
+                                .map_err(Error::from_temporal)?
                 ),
 
                 _ => None,
@@ -580,14 +556,11 @@ impl Duration {
             None
         };
 
-        let dur = TZ_PROVIDER
-            .try_with(|provider| {
+        let dur = 
                 self.dur
                     .get()
-                    .total_with_provider(unit, rel, provider)
-                    .map_err(Error::from_temporal)
-            })
-            .map_err(|_| Error::new("Failed to access TZ_PROVIDER"))??;
+                    .total_with_provider(unit, rel, &realm.env.tz_provider)
+                    .map_err(Error::from_temporal)?;
 
         Ok(dur.as_inner())
     }
