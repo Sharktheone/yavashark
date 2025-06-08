@@ -2,12 +2,11 @@ use crate::builtins::temporal::duration::Duration;
 use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
-use num_traits::{FromPrimitive, ToPrimitive};
+use num_traits::ToPrimitive;
 use std::cell::{Cell, RefCell};
 use std::str::FromStr;
 use std::time::UNIX_EPOCH;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
-use temporal_rs::provider::NeverProvider;
 use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
@@ -143,18 +142,18 @@ impl Instant {
     }
 
     #[prop("toJSON")]
-    fn to_json(&self) -> Res<String> {
+    fn to_json(&self, #[realm] realm: &Realm) -> Res<String> {
         self.stamp
             .get()
-            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &NeverProvider)
+            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
 
     #[prop("toString")]
-    fn to_string_js(&self) -> Res<String> {
+    fn to_string_js(&self, #[realm] realm: &Realm) -> Res<String> {
         self.stamp
             .get()
-            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &NeverProvider)
+            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
 
