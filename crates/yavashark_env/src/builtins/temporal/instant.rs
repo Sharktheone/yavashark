@@ -11,6 +11,7 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
+use crate::builtins::temporal::utils::string_rounding_mode_opts;
 
 #[object]
 #[derive(Debug)]
@@ -150,10 +151,12 @@ impl Instant {
     }
 
     #[prop("toString")]
-    fn to_string_js(&self, #[realm] realm: &Realm) -> Res<String> {
+    fn to_string_js(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
+        let opts = string_rounding_mode_opts(opts, realm)?;
+        
         self.stamp
             .get()
-            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &realm.env.tz_provider)
+            .to_ixdtf_string_with_provider(None, opts, &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
 
