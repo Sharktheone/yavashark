@@ -160,8 +160,8 @@ impl FromValueOutput for &BigInt {
                 }
                 Ok(Rc::new(BigInt::from(n as u128)))
             }
-            Value::String(s) => Ok(Rc::new(s.trim().parse::<u128>().map_or_else(
-                |_| Err(Error::ty_error(format!("Cannot convert {s} to BigInt"))),
+            Value::String(s) => Ok(Rc::new(s.trim().parse::<i128>().map_or_else(
+                |_| Err(Error::syn_error(format!("Cannot convert {s} to BigInt"))),
                 |n| Ok(BigInt::from(n)),
             )?)),
             Value::Boolean(b) => Ok(Rc::new(BigInt::from(u8::from(b)))),
