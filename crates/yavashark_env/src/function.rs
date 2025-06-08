@@ -79,6 +79,10 @@ impl ObjectImpl<Realm> for NativeFunction {
     fn is_function(&self) -> bool {
         true
     }
+
+    fn name(&self) -> String {
+        "Function".to_string()
+    }
 }
 
 impl NativeFunction {
