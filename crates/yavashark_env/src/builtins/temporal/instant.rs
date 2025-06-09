@@ -153,7 +153,7 @@ impl Instant {
     #[prop("toString")]
     fn to_string_js(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let opts = string_rounding_mode_opts(opts, realm)?;
-        
+
         self.stamp
             .get()
             .to_ixdtf_string_with_provider(None, opts, &realm.env.tz_provider)
@@ -161,10 +161,10 @@ impl Instant {
     }
 
     pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let dur = other
+        let dur = self
             .stamp
             .get()
-            .until(&self.stamp.get(), DifferenceSettings::default())
+            .until(&other.stamp.get(), DifferenceSettings::default())
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
