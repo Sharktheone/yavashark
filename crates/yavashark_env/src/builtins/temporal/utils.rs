@@ -1,10 +1,14 @@
-use std::str::FromStr;
-use temporal_rs::options::{RelativeTo, RoundingOptions, ToStringRoundingOptions, Unit};
-use temporal_rs::{Calendar, PlainDate};
-use temporal_rs::parsers::Precision;
+use std::num::{NonZero, NonZeroU32};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
+use std::str::FromStr;
+use temporal_rs::options::{DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::parsers::Precision;
+use temporal_rs::{Calendar, PlainDate};
 
-pub fn opt_relative_to_wrap(obj: Option<ObjectHandle>, realm: &mut Realm) -> Res<Option<RelativeTo>> {
+pub fn opt_relative_to_wrap(
+    obj: Option<ObjectHandle>,
+    realm: &mut Realm,
+) -> Res<Option<RelativeTo>> {
     obj.map_or_else(|| Ok(None), |obj| relative_to_wrap(&obj, realm))
 }
 
@@ -67,7 +71,10 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
     })
 }
 
-pub fn string_rounding_mode_opts(obj: Option<ObjectHandle>, realm: &mut Realm) -> Res<ToStringRoundingOptions> {
+pub fn string_rounding_mode_opts(
+    obj: Option<ObjectHandle>,
+    realm: &mut Realm,
+) -> Res<ToStringRoundingOptions> {
     let mut opts = ToStringRoundingOptions::default();
 
     if let Some(obj) = obj {
@@ -133,18 +140,20 @@ pub fn string_rounding_mode_opts(obj: Option<ObjectHandle>, realm: &mut Realm) -
             (_, Some(d)) => Precision::Digit(d),
         };
     }
-    
+
     Ok(opts)
 }
 
-pub fn rounding_options(unit: Value, realm: &mut Realm) -> Res<(RoundingOptions, Option<RelativeTo>)> {
+pub fn rounding_options(
+    unit: Value,
+    realm: &mut Realm,
+) -> Res<(RoundingOptions, Option<RelativeTo>)> {
     let mut opts = RoundingOptions::default();
 
     let mut rel = None;
 
     if let Value::String(s) = unit {
-        let smallest = Unit::from_str(s.as_str())
-            .map_err(|_| Error::range("Invalid unit"))?;
+        let smallest = Unit::from_str(s.as_str()).map_err(|_| Error::range("Invalid unit"))?;
 
         opts.smallest_unit = Some(smallest);
     } else if let Value::Object(obj) = unit {
@@ -155,10 +164,7 @@ pub fn rounding_options(unit: Value, realm: &mut Realm) -> Res<(RoundingOptions,
         } else {
             let smallest = smallest.to_string(realm)?;
 
-            Some(
-                Unit::from_str(smallest.as_str())
-                    .map_err(|_| Error::range("Invalid unit"))?,
-            )
+            Some(Unit::from_str(smallest.as_str()).map_err(|_| Error::range("Invalid unit"))?)
         };
 
         let largest = obj.get("largestUnit", realm)?;
@@ -206,7 +212,7 @@ pub fn rounding_options(unit: Value, realm: &mut Realm) -> Res<(RoundingOptions,
             }
             Some(Value::String(str)) => Some(
                 RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
-                    .map_err(Error::from_temporal)?
+                    .map_err(Error::from_temporal)?,
             ),
 
             _ => None,
@@ -214,6 +220,62 @@ pub fn rounding_options(unit: Value, realm: &mut Realm) -> Res<(RoundingOptions,
     } else {
         return Err(Error::ty("Invalid unit"));
     };
+
+    Ok((opts, rel))
+}
+
+pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<DifferenceSettings> {
+    let mut opts = DifferenceSettings::default();
+
+    let smallest = obj.get("smallestUnit", realm)?;
+
+    opts.smallest_unit = if smallest.is_undefined() {
+        None
+    } else {
+        let smallest = smallest.to_string(realm)?;
+
+        Some(Unit::from_str(smallest.as_str()).map_err(|_| Error::range("Invalid unit"))?)
+    };
+
+    let largest = obj.get("largestUnit", realm)?;
+    opts.largest_unit = if largest.is_undefined() {
+        None
+    } else {
+        Some(
+            Unit::from_str(largest.to_string(realm)?.as_str())
+                .map_err(|_| Error::range("Invalid unit"))?,
+        )
+    };
+
+    let r = obj
+        .get_property_opt(&"roundingMode".into())?
+        .map(|v| v.value);
+
+    let rm = obj.get("roundingMode", realm)?;
+
+    opts.rounding_mode = if rm.is_undefined() {
+        None
+    } else {
+        let rm = rm.to_string(realm)?;
+
+        Some(
+            temporal_rs::options::RoundingMode::from_str(rm.as_str())
+                .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
+        )
+    };
     
-    Ok((opts,rel))
+    
+    
+    let increment = obj.get("roundingIncrement", realm)?;
+    
+    opts.increment = if increment.is_undefined() {
+        None
+    } else {
+        let increment = increment.to_number(realm)?;
+
+        Some(RoundingIncrement::try_from(increment)
+            .map_err(Error::from_temporal)?)
+    };
+
+    Ok(opts)
 }

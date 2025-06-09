@@ -11,7 +11,7 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
-use crate::builtins::temporal::utils::string_rounding_mode_opts;
+use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
 
 #[object]
 #[derive(Debug)]
@@ -160,7 +160,7 @@ impl Instant {
             .map_err(Error::from_temporal)
     }
 
-    pub fn until(&self, other: Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn until(&self, other: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = match other {
             Value::Object(obj) => {
                 let other_instant = <&Self>::from_value_out(obj.into())?;
@@ -176,11 +176,16 @@ impl Instant {
         };
         
         
-        
+        let opts = if let Some(opts) = opts {
+            difference_settings(opts, realm)?
+        } else {
+            DifferenceSettings::default()
+        };
+
         let dur = self
             .stamp
             .get()
-            .until(&other, DifferenceSettings::default())
+            .until(&other, opts)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
