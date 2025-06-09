@@ -295,9 +295,7 @@ impl FromValueOutput for &ActualString {
     }
 }
 
-
 pub struct NonFract<T>(pub T);
-
 
 // impl<T: From<f64>> FromValueOutput for NonFract<T> {
 //     type Output = T;
@@ -385,7 +383,9 @@ macro_rules! impl_from_value_output_nonfract {
 }
 
 impl_from_value_output!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
-impl_from_value_output_nonfract!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
+impl_from_value_output_nonfract!(
+    u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64
+);
 
 pub struct Extractor<'a> {
     values: IterMut<'a, Value>,

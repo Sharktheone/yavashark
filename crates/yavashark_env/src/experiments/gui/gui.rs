@@ -109,11 +109,7 @@ pub struct GuiApp<'a> {
 }
 
 impl<'a> GuiApp<'a> {
-    fn new(
-        realm: &'a mut Realm,
-        error: Rc<RefCell<Option<Error>>>,
-        f: ObjectHandle,
-    ) -> Res<Self> {
+    fn new(realm: &'a mut Realm, error: Rc<RefCell<Option<Error>>>, f: ObjectHandle) -> Res<Self> {
         let ui = Ui::new(realm)?;
         let ui_ref = <&Ui as FromValueOutput>::from_value_out(ui.clone().into())?;
 

@@ -7,9 +7,7 @@ use std::collections::HashMap;
 use std::ptr::NonNull;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
-use yavashark_value::{
-    ConstructorFn, Obj, Variable,
-};
+use yavashark_value::{ConstructorFn, Obj, Variable};
 
 // #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]

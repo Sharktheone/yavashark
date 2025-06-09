@@ -1,9 +1,9 @@
 use crate::utils::ValueIterator;
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult, Error};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
-use indexmap::map::Entry;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, MutObj, Obj};
 
@@ -123,13 +123,17 @@ impl Map {
     }
 
     #[prop("getOrInsertComputed")]
-    fn get_or_insert_computed(&self, key: Value, callback: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+    fn get_or_insert_computed(
+        &self,
+        key: Value,
+        callback: ObjectHandle,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
         if !callback.is_function() {
             return Err(Error::ty("Callback must be a function"));
         }
-
 
         match inner.map.entry(key) {
             Entry::Occupied(entry) => {
@@ -137,11 +141,7 @@ impl Map {
             }
 
             Entry::Vacant(entry) => {
-                let value = callback.call(
-                    realm,
-                    vec![entry.key().copy()],
-                    Value::Undefined,
-                )?;
+                let value = callback.call(realm, vec![entry.key().copy()], Value::Undefined)?;
 
                 if !value.is_undefined() {
                     entry.insert(value.copy());

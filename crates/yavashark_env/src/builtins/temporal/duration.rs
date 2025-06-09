@@ -1,3 +1,6 @@
+use crate::builtins::temporal::utils::{
+    opt_relative_to_wrap, rounding_options, string_rounding_mode_opts,
+};
 use crate::conversion::{FromValueOutput, NonFract};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::{Cell, RefCell};
@@ -5,7 +8,6 @@ use std::str::FromStr;
 use temporal_rs::options::Unit;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
-use crate::builtins::temporal::utils::{opt_relative_to_wrap, rounding_options, string_rounding_mode_opts};
 
 #[object]
 #[derive(Debug)]
@@ -257,14 +259,14 @@ impl Duration {
         if unit.is_undefined() {
             return Err(Error::ty("Invalid unit for Duration.round"));
         }
-        
+
         let (opts, rel) = rounding_options(unit, realm)?;
 
-        let dur =
-                self.dur
-                    .get()
-                    .round_with_provider(opts, rel, &realm.env.tz_provider)
-                    .map_err(Error::from_temporal)?;
+        let dur = self
+            .dur
+            .get()
+            .round_with_provider(opts, rel, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
 
         Ok(Self::with_duration(realm, dur).into_object())
     }
@@ -290,7 +292,7 @@ impl Duration {
 
     #[prop("toString")]
     fn to_js_string(&self, obj: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
-        let opts= string_rounding_mode_opts(obj, realm)?;
+        let opts = string_rounding_mode_opts(obj, realm)?;
 
         let dur = self.dur.get();
 
@@ -318,11 +320,11 @@ impl Duration {
 
         let rel = opt_relative_to_wrap(obj, realm)?;
 
-        let dur =
-                self.dur
-                    .get()
-                    .total_with_provider(unit, rel, &realm.env.tz_provider)
-                    .map_err(Error::from_temporal)?;
+        let dur = self
+            .dur
+            .get()
+            .total_with_provider(unit, rel, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
 
         Ok(dur.as_inner())
     }

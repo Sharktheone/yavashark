@@ -131,7 +131,6 @@ fn main() {
 
         let rt = Builder::new_current_thread().enable_all().build().unwrap();
 
-
         if interpreter {
             let mut realm = Realm::new().unwrap();
             let mut scope = Scope::global(&realm, path.clone());

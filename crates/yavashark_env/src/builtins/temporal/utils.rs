@@ -1,7 +1,10 @@
-use std::num::{NonZero, NonZeroU32};
 use crate::{Error, ObjectHandle, Realm, Res, Value};
+use std::num::{NonZero, NonZeroU32};
 use std::str::FromStr;
-use temporal_rs::options::{DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::options::{
+    DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions,
+    Unit,
+};
 use temporal_rs::parsers::Precision;
 use temporal_rs::{Calendar, PlainDate};
 
@@ -263,18 +266,15 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
                 .map_err(|_| Error::range("Invalid rounding mode for Duration.toString"))?,
         )
     };
-    
-    
-    
+
     let increment = obj.get("roundingIncrement", realm)?;
-    
+
     opts.increment = if increment.is_undefined() {
         None
     } else {
         let increment = increment.to_number(realm)?;
 
-        Some(RoundingIncrement::try_from(increment)
-            .map_err(Error::from_temporal)?)
+        Some(RoundingIncrement::try_from(increment).map_err(Error::from_temporal)?)
     };
 
     Ok(opts)

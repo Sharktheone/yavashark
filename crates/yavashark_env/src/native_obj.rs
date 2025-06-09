@@ -1,6 +1,5 @@
 #![allow(unused)]
 
-
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 
 pub struct NativeObject<N: NativeObj> {

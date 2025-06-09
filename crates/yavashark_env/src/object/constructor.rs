@@ -295,7 +295,7 @@ impl ObjectConstructor {
 
         Ok(obj.into())
     }
-    
+
     #[prop("isExtensible")]
     const fn is_extensible(_: &ObjectHandle) -> bool {
         true
