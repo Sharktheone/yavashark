@@ -172,7 +172,7 @@ impl Instant {
 
     #[prop("valueOf")]
     #[nonstatic]
-    fn value_of() -> Res {
+    const fn value_of() -> Res {
         Err(Error::ty("Called valueOf on a Temporal.Instant object"))
     }
 
