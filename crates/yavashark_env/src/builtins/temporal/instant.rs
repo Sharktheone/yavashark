@@ -121,16 +121,20 @@ impl Instant {
         Ok(Self::from_stamp(self.stamp.get(), realm).into_object())
     }
 
-    fn since(&self, other: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        
+    fn since(
+        &self,
+        other: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let other = value_to_instant(other)?;
-        
+
         let opts = if let Some(opts) = opts {
             difference_settings(opts, realm)?
         } else {
             DifferenceSettings::default()
         };
-        
+
         let res = self
             .stamp
             .get()
@@ -181,7 +185,6 @@ impl Instant {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let other = value_to_instant(other)?;
-       
 
         let opts = if let Some(opts) = opts {
             difference_settings(opts, realm)?
