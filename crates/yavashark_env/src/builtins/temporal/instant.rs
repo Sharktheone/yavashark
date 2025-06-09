@@ -160,11 +160,27 @@ impl Instant {
             .map_err(Error::from_temporal)
     }
 
-    pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn until(&self, other: Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let other = match other {
+            Value::Object(obj) => {
+                let other_instant = <&Self>::from_value_out(obj.into())?;
+                other_instant.stamp.get()
+            }
+            Value::String(s) => {
+                temporal_rs::Instant::from_str(s.as_str())
+                    .map_err(|_| Error::ty("Invalid date"))?
+            }
+            _ => {
+                return Err(Error::ty("Expected a Temporal.Instant object"));
+            }
+        };
+        
+        
+        
         let dur = self
             .stamp
             .get()
-            .until(&other.stamp.get(), DifferenceSettings::default())
+            .until(&other, DifferenceSettings::default())
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
