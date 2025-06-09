@@ -113,8 +113,11 @@ impl Instant {
         Ok(Self::from_stamp(i, realm).into_object())
     }
 
-    fn equals(&self, other: &Self) -> bool {
-        self.stamp == other.stamp
+    fn equals(&self, other: Value) -> Res<bool> {
+        let other = value_to_instant(other)?;
+        
+        
+        Ok(self.stamp.get() == other)
     }
 
     fn round(&self, _opts: Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
