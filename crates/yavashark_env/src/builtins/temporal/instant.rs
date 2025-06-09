@@ -1,4 +1,5 @@
 use crate::builtins::temporal::duration::Duration;
+use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
 use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -11,7 +12,6 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
-use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
 
 #[object]
 #[derive(Debug)]
@@ -81,11 +81,12 @@ impl Instant {
             BigIntOrNumber::BigInt(bigint) => temporal_rs::Instant::from_epoch_milliseconds(
                 bigint.to_i64().ok_or(Error::range("epoch out of range"))?,
             ),
-            BigIntOrNumber::Number(num) => temporal_rs::Instant::from_epoch_milliseconds(num as i64),
+            BigIntOrNumber::Number(num) => {
+                temporal_rs::Instant::from_epoch_milliseconds(num as i64)
+            }
         }
         .map_err(Error::from_temporal)?;
-        
-        
+
         Ok(Self::from_stamp(stamp, realm).into_object())
     }
 
@@ -120,11 +121,20 @@ impl Instant {
         Ok(Self::from_stamp(self.stamp.get(), realm).into_object())
     }
 
-    fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    fn since(&self, other: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        
+        let other = value_to_instant(other)?;
+        
+        let opts = if let Some(opts) = opts {
+            difference_settings(opts, realm)?
+        } else {
+            DifferenceSettings::default()
+        };
+        
         let res = self
             .stamp
             .get()
-            .since(&other.stamp.get(), DifferenceSettings::default())
+            .since(&other, opts)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, res).into_object())
@@ -146,7 +156,11 @@ impl Instant {
     fn to_json(&self, #[realm] realm: &Realm) -> Res<String> {
         self.stamp
             .get()
-            .to_ixdtf_string_with_provider(None, ToStringRoundingOptions::default(), &realm.env.tz_provider)
+            .to_ixdtf_string_with_provider(
+                None,
+                ToStringRoundingOptions::default(),
+                &realm.env.tz_provider,
+            )
             .map_err(Error::from_temporal)
     }
 
@@ -160,22 +174,15 @@ impl Instant {
             .map_err(Error::from_temporal)
     }
 
-    pub fn until(&self, other: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let other = match other {
-            Value::Object(obj) => {
-                let other_instant = <&Self>::from_value_out(obj.into())?;
-                other_instant.stamp.get()
-            }
-            Value::String(s) => {
-                temporal_rs::Instant::from_str(s.as_str())
-                    .map_err(|_| Error::ty("Invalid date"))?
-            }
-            _ => {
-                return Err(Error::ty("Expected a Temporal.Instant object"));
-            }
-        };
-        
-        
+    pub fn until(
+        &self,
+        other: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let other = value_to_instant(other)?;
+       
+
         let opts = if let Some(opts) = opts {
             difference_settings(opts, realm)?
         } else {
@@ -205,5 +212,18 @@ impl Instant {
     #[get("epochMilliseconds")]
     fn epoch_milliseconds(&self) -> i64 {
         self.stamp.get().epoch_milliseconds()
+    }
+}
+
+pub fn value_to_instant(value: Value) -> Res<temporal_rs::Instant> {
+    match value {
+        Value::Object(obj) => {
+            let other_instant = <&Instant>::from_value_out(obj.into())?;
+            Ok(other_instant.stamp.get())
+        }
+        Value::String(s) => {
+            temporal_rs::Instant::from_str(s.as_str()).map_err(Error::from_temporal)
+        }
+        _ => Err(Error::ty("Expected a Temporal.Instant object")),
     }
 }
