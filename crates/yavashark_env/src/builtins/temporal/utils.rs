@@ -179,6 +179,16 @@ pub fn rounding_options(
             )
         };
 
+        let increment = obj.get("roundingIncrement", realm)?;
+
+        opts.increment = if increment.is_undefined() {
+            None
+        } else {
+            let increment = increment.to_number(realm)?;
+
+            Some(RoundingIncrement::try_from(increment).map_err(Error::from_temporal)?)
+        };
+
         let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
 
         rel = match r {
