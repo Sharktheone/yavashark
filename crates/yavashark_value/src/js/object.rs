@@ -615,6 +615,17 @@ impl<C: Realm> Object<C> {
     }
 
     pub fn to_string(&self, realm: &mut C) -> Result<YSString, Error<C>> {
+        if let Some(to_string) = self.resolve_property(&"toString".into(), realm)? {
+            if to_string.is_function() {
+                return Ok(to_string
+                    .call(realm, Vec::new(), self.clone().into())?
+                    .assert_no_object()?
+                    .to_ys_string());
+            }
+        }
+        
+        
+        
         self.0.to_string(realm)
     }
 }
