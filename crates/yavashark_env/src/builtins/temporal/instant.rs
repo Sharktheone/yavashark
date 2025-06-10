@@ -64,11 +64,11 @@ impl Instant {
     }
 
     #[allow(clippy::use_self)]
-    fn compare(left: Value, right: Value) -> Res<i8> {
-        let left = value_to_instant(left)?;
-        let right = value_to_instant(right)?;
-        
-        
+    fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
+        let left = value_to_instant(left, realm)?;
+        let right = value_to_instant(right, realm)?;
+
+
         Ok(left.cmp(&right) as i8)
     }
 
@@ -117,10 +117,10 @@ impl Instant {
         Ok(Self::from_stamp(i, realm).into_object())
     }
 
-    fn equals(&self, other: Value) -> Res<bool> {
-        let other = value_to_instant(other)?;
-        
-        
+    fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
+        let other = value_to_instant(other, realm)?;
+
+
         Ok(self.stamp.get() == other)
     }
 
@@ -134,7 +134,7 @@ impl Instant {
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let other = value_to_instant(other)?;
+        let other = value_to_instant(other, realm)?;
 
         let opts = if let Some(opts) = opts {
             difference_settings(opts, realm)?
@@ -191,7 +191,7 @@ impl Instant {
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let other = value_to_instant(other)?;
+        let other = value_to_instant(other, realm)?;
 
         let opts = if let Some(opts) = opts {
             difference_settings(opts, realm)?
@@ -225,11 +225,17 @@ impl Instant {
     }
 }
 
-pub fn value_to_instant(value: Value) -> Res<temporal_rs::Instant> {
+pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Instant> {
     match value {
         Value::Object(obj) => {
-            let other_instant = <&Instant>::from_value_out(obj.into())?;
-            Ok(other_instant.stamp.get())
+            if let Some(other_instant) = obj.downcast::<Instant>() {
+
+                Ok(other_instant.stamp.get())
+            } else {
+                let str = obj.to_string(realm)?;
+
+                temporal_rs::Instant::from_str(str.as_str()).map_err(Error::from_temporal)
+            }
         }
         Value::String(s) => {
             temporal_rs::Instant::from_str(s.as_str()).map_err(Error::from_temporal)
