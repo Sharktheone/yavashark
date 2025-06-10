@@ -64,8 +64,12 @@ impl Instant {
     }
 
     #[allow(clippy::use_self)]
-    fn compare(left: &Instant, right: &Instant) -> i8 {
-        left.stamp.cmp(&right.stamp) as i8
+    fn compare(left: Value, right: Value) -> Res<i8> {
+        let left = value_to_instant(left)?;
+        let right = value_to_instant(right)?;
+        
+        
+        Ok(left.cmp(&right) as i8)
     }
 
     #[prop("from")]
