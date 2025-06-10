@@ -188,6 +188,19 @@ pub fn rounding_options(
 
             Some(RoundingIncrement::try_from(increment).map_err(Error::from_temporal)?)
         };
+        
+        let rounding_mode = obj.get("roundingMode", realm)?;
+        
+        opts.rounding_mode = if rounding_mode.is_undefined() {
+            None
+        } else {
+            let rounding_mode = rounding_mode.to_string(realm)?;
+
+            Some(
+                temporal_rs::options::RoundingMode::from_str(rounding_mode.as_str())
+                    .map_err(|_| Error::range("Invalid rounding mode"))?,
+            )
+        };
 
         let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
 
