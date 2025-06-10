@@ -232,6 +232,11 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
 
                 Ok(other_instant.stamp.get())
             } else {
+                if obj.eq(&realm.intrinsics.temporal_instant) {
+                    return Err(Error::ty("Expected a Temporal.Instant object"));
+                    
+                }
+                
                 let str = obj.to_string(realm)?;
 
                 temporal_rs::Instant::from_str(str.as_str()).map_err(Error::from_temporal)
