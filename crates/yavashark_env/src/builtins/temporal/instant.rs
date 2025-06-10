@@ -41,7 +41,7 @@ impl Instant {
 
         temporal_rs::Instant::from_str(str.as_str())
             .map(|dt| Self::from_stamp(dt, realm))
-            .map_err(|_| Error::ty("Invalid date"))
+            .map_err(Error::from_temporal)
     }
 
     pub fn now(realm: &Realm) -> Res<ObjectHandle> {
