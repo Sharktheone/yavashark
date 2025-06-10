@@ -517,7 +517,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => fmt_num(*n),
             Self::String(s) => s.clone(),
             Self::Boolean(b) => b.to_ys_string(),
-            Self::Symbol(s) => return Err(Error::ty("Cannot convert Symbol to string")),
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to string")),
             Self::BigInt(b) => b.to_string().into(),
         })
     }

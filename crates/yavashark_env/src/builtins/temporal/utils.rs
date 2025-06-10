@@ -1,5 +1,4 @@
 use crate::{Error, ObjectHandle, Realm, Res, Value};
-use std::num::{NonZero, NonZeroU32};
 use std::str::FromStr;
 use temporal_rs::options::{
     DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions,
@@ -249,10 +248,6 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
                 .map_err(|_| Error::range("Invalid unit"))?,
         )
     };
-
-    let r = obj
-        .get_property_opt(&"roundingMode".into())?
-        .map(|v| v.value);
 
     let rm = obj.get("roundingMode", realm)?;
 
