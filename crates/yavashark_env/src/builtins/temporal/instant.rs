@@ -1,5 +1,5 @@
 use crate::builtins::temporal::duration::Duration;
-use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
+use crate::builtins::temporal::utils::{difference_settings, rounding_options, string_rounding_mode_opts};
 use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -124,8 +124,13 @@ impl Instant {
         Ok(self.stamp.get() == other)
     }
 
-    fn round(&self, _opts: Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        Ok(Self::from_stamp(self.stamp.get(), realm).into_object())
+    fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let (opts, _) = rounding_options(opts, realm)?;
+        
+        let stamp = self.stamp.get().round(opts)
+            .map_err(Error::from_temporal)?;
+        
+        Ok(Self::from_stamp(stamp, realm).into_object())
     }
 
     fn since(
