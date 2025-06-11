@@ -16,7 +16,7 @@ use yavashark_value::Obj;
 #[object]
 #[derive(Debug)]
 pub struct Instant {
-    stamp: Cell<temporal_rs::Instant>,
+    stamp: temporal_rs::Instant,
 }
 
 impl Instant {
@@ -25,7 +25,7 @@ impl Instant {
             inner: RefCell::new(MutableInstant {
                 object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone().into()),
             }),
-            stamp: Cell::new(stamp),
+            stamp,
         }
     }
 
@@ -34,7 +34,7 @@ impl Instant {
         if let Value::Object(obj) = &value {
             let instant = <&Self>::from_value_out(value)?;
 
-            return Ok(Self::from_stamp(instant.stamp.get(), realm));
+            return Ok(Self::from_stamp(instant.stamp, realm));
         }
 
         let str = value.to_string(realm)?;
@@ -110,7 +110,7 @@ impl Instant {
 
         let i = self
             .stamp
-            .get()
+            
             .add(other.dur)
             .map_err(Error::from_temporal)?;
 
@@ -121,13 +121,13 @@ impl Instant {
         let other = value_to_instant(other, realm)?;
 
 
-        Ok(self.stamp.get() == other)
+        Ok(self.stamp == other)
     }
 
     fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let (opts, _) = rounding_options(opts, realm)?;
         
-        let stamp = self.stamp.get().round(opts)
+        let stamp = self.stamp.round(opts)
             .map_err(Error::from_temporal)?;
         
         Ok(Self::from_stamp(stamp, realm).into_object())
@@ -149,7 +149,7 @@ impl Instant {
 
         let res = self
             .stamp
-            .get()
+            
             .since(&other, opts)
             .map_err(Error::from_temporal)?;
 
@@ -161,7 +161,7 @@ impl Instant {
 
         let i = self
             .stamp
-            .get()
+            
             .subtract(other.dur)
             .map_err(Error::from_temporal)?;
 
@@ -171,7 +171,7 @@ impl Instant {
     #[prop("toJSON")]
     fn to_json(&self, #[realm] realm: &Realm) -> Res<String> {
         self.stamp
-            .get()
+            
             .to_ixdtf_string_with_provider(
                 None,
                 ToStringRoundingOptions::default(),
@@ -185,7 +185,7 @@ impl Instant {
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.stamp
-            .get()
+            
             .to_ixdtf_string_with_provider(None, opts, &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
@@ -206,7 +206,7 @@ impl Instant {
 
         let dur = self
             .stamp
-            .get()
+            
             .until(&other, opts)
             .map_err(Error::from_temporal)?;
 
@@ -221,12 +221,12 @@ impl Instant {
 
     #[get("epochNanoseconds")]
     fn epoch_nanoseconds(&self) -> BigInt {
-        BigInt::from(self.stamp.get().epoch_nanoseconds().as_i128())
+        BigInt::from(self.stamp.epoch_nanoseconds().as_i128())
     }
 
     #[get("epochMilliseconds")]
     fn epoch_milliseconds(&self) -> i64 {
-        self.stamp.get().epoch_milliseconds()
+        self.stamp.epoch_milliseconds()
     }
 }
 
@@ -235,7 +235,7 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
         Value::Object(obj) => {
             if let Some(other_instant) = obj.downcast::<Instant>() {
 
-                Ok(other_instant.stamp.get())
+                Ok(other_instant.stamp)
             } else {
                 if obj.eq(&realm.intrinsics.temporal_instant) {
                     return Err(Error::ty("Expected a Temporal.Instant object"));
