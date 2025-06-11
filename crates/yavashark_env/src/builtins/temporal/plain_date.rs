@@ -1,9 +1,7 @@
 use crate::builtins::temporal::duration::Duration;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use chrono::Datelike;
 use std::cell::RefCell;
 use std::str::FromStr;
-use temporal_rs::options::DifferenceSettings;
 use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
@@ -153,7 +151,7 @@ impl PlainDate {
     }
 
     #[prop("valueOf")]
-    pub fn value_of() -> Res {
+    pub const fn value_of() -> Res {
         Err(Error::ty("Called valueOf on a Temporal.PlainDate object"))
     }
 
@@ -164,7 +162,8 @@ impl PlainDate {
 
     #[get("dayOfWeek")]
     pub fn day_of_week(&self) -> Res<u16> {
-        Ok(self.date.day_of_week().map_err(Error::from_temporal)?)
+        self.date.day_of_week()
+            .map_err(Error::from_temporal)
     }
 
     #[get("dayOfYear")]
@@ -191,16 +190,14 @@ impl PlainDate {
     pub fn era(&self) -> Value {
         self.date
             .era()
-            .map(|era| YSString::from_ref(era.as_str()).into())
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, |era| YSString::from_ref(era.as_str()).into())
     }
 
     #[get("eraYear")]
     pub fn era_year(&self) -> Value {
         self.date
             .era_year()
-            .map(|year| year.into())
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, Into::into)
     }
 
     #[get("month")]
@@ -222,8 +219,7 @@ impl PlainDate {
     pub fn week_of_year(&self) -> Value {
         self.date
             .week_of_year()
-            .map(|week| week.into())
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, Into::into)
     }
 
     #[get("year")]
@@ -235,7 +231,6 @@ impl PlainDate {
     pub fn year_of_week(&self) -> Value {
         self.date
             .year_of_week()
-            .map(|year| year.into())
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, Into::into)
     }
 }
