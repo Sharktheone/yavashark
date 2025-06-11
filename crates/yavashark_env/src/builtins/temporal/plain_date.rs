@@ -1,4 +1,5 @@
 use crate::builtins::temporal::duration::Duration;
+use crate::builtins::temporal::utils::difference_settings;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -6,7 +7,6 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::utils::difference_settings;
 
 #[object]
 #[derive(Debug)]
@@ -54,40 +54,9 @@ impl PlainDate {
     }
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        if let Value::String(str) = &info {
-            let date = temporal_rs::PlainDate::from_str(str).map_err(Error::from_temporal)?;
+        let date = value_to_plain_date(info, realm)?;
 
-            return Ok(Self::new(date, realm).into_object());
-        }
-
-        let obj = info.to_object()?;
-
-        if let Some(this) = obj.downcast::<Self>() {
-            return Ok(Self::new(this.date.clone(), realm).into_object());
-        }
-
-        if obj.contains_key(&"year".into())?
-            || obj.contains_key(&"month".into())?
-            || obj.contains_key(&"day".into())?
-        {
-            let year = obj
-                .resolve_property(&"year".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
-            let month = obj
-                .resolve_property(&"month".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-            let day = obj
-                .resolve_property(&"day".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-
-            let calendar = obj
-                .resolve_property(&"calendar".into(), realm)?
-                .and_then(|v| v.to_string(realm).ok());
-
-            return Self::construct(year, month, day, calendar, realm);
-        }
-
-        Err(Error::ty("Invalid date")) //TODO
+        Ok(Self::new(date, realm).into_object())
     }
 
     #[allow(clippy::use_self)]
@@ -99,12 +68,17 @@ impl PlainDate {
         self.date == other.date
     }
 
-    pub fn since(&self, other: &Self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let settings = opts.map(|s| difference_settings(s, realm))
+    pub fn since(
+        &self,
+        other: &Self,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let settings = opts
+            .map(|s| difference_settings(s, realm))
             .transpose()?
             .unwrap_or_default();
-        
-        
+
         let dur = self
             .date
             .since(&other.date, settings)
@@ -113,12 +87,17 @@ impl PlainDate {
         Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-    pub fn until(&self, other: &Self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn until(
+        &self,
+        other: &Self,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?
             .unwrap_or_default();
-        
+
         let dur = self
             .date
             .until(&other.date, settings)
@@ -162,8 +141,7 @@ impl PlainDate {
 
     #[get("dayOfWeek")]
     pub fn day_of_week(&self) -> Res<u16> {
-        self.date.day_of_week()
-            .map_err(Error::from_temporal)
+        self.date.day_of_week().map_err(Error::from_temporal)
     }
 
     #[get("dayOfYear")]
@@ -188,16 +166,14 @@ impl PlainDate {
 
     #[get("era")]
     pub fn era(&self) -> Value {
-        self.date
-            .era()
-            .map_or(Value::Undefined, |era| YSString::from_ref(era.as_str()).into())
+        self.date.era().map_or(Value::Undefined, |era| {
+            YSString::from_ref(era.as_str()).into()
+        })
     }
 
     #[get("eraYear")]
     pub fn era_year(&self) -> Value {
-        self.date
-            .era_year()
-            .map_or(Value::Undefined, Into::into)
+        self.date.era_year().map_or(Value::Undefined, Into::into)
     }
 
     #[get("month")]
@@ -233,4 +209,48 @@ impl PlainDate {
             .year_of_week()
             .map_or(Value::Undefined, Into::into)
     }
+}
+
+pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDate> {
+    if let Value::String(str) = &info {
+        let date = temporal_rs::PlainDate::from_str(str).map_err(Error::from_temporal)?;
+
+        return Ok(date);
+    }
+
+    let obj = info.to_object()?;
+
+    if let Some(this) = obj.downcast::<PlainDate>() {
+        return Ok(this.date.clone());
+    }
+
+    if obj.contains_key(&"year".into())?
+        || obj.contains_key(&"month".into())?
+        || obj.contains_key(&"day".into())?
+    {
+        let year = obj
+            .resolve_property(&"year".into(), realm)?
+            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
+        let month = obj
+            .resolve_property(&"month".into(), realm)?
+            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+        let day = obj
+            .resolve_property(&"day".into(), realm)?
+            .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+
+        let calendar = obj
+            .resolve_property(&"calendar".into(), realm)?
+            .and_then(|v| v.to_string(realm).ok());
+
+        let calendar = calendar.as_deref().map(Calendar::from_str)
+            .transpose()
+            .map_err(Error::from_temporal)?
+            .unwrap_or_default();
+        
+        return  temporal_rs::PlainDate::new(year, month, day, calendar)
+            .map_err(Error::from_temporal);
+        
+    }
+
+    Err(Error::ty("Invalid date")) //TODO
 }
