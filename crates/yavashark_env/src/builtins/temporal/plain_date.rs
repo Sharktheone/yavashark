@@ -35,11 +35,10 @@ impl PlainDate {
         calendar: Option<YSString>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = if let Some(cal) = calendar {
-            Calendar::from_str(&cal).map_err(Error::from_temporal)?
-        } else {
-            Calendar::default()
-        };
+        let calendar = calendar.as_deref().map(Calendar::from_str)
+            .transpose()
+            .map_err(Error::from_temporal)?
+            .unwrap_or_default();
 
         let date = temporal_rs::PlainDate::new(year, month, day, calendar)
             .map_err(Error::from_temporal)?;
