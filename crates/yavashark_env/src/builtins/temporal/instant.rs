@@ -4,7 +4,7 @@ use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::str::FromStr;
 use std::time::UNIX_EPOCH;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
