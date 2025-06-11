@@ -35,7 +35,9 @@ impl PlainDate {
         calendar: Option<YSString>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = calendar.as_deref().map(Calendar::from_str)
+        let calendar = calendar
+            .as_deref()
+            .map(Calendar::from_str)
             .transpose()
             .map_err(Error::from_temporal)?
             .unwrap_or_default();
@@ -74,12 +76,11 @@ impl PlainDate {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let other = value_to_plain_date(other.clone(), realm)?;
-        
+
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?
             .unwrap_or_default();
-        
 
         let dur = self
             .date
@@ -96,7 +97,7 @@ impl PlainDate {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let other = value_to_plain_date(other.clone(), realm)?;
-        
+
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?
@@ -246,14 +247,15 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
             .resolve_property(&"calendar".into(), realm)?
             .and_then(|v| v.to_string(realm).ok());
 
-        let calendar = calendar.as_deref().map(Calendar::from_str)
+        let calendar = calendar
+            .as_deref()
+            .map(Calendar::from_str)
             .transpose()
             .map_err(Error::from_temporal)?
             .unwrap_or_default();
-        
-        return  temporal_rs::PlainDate::new(year, month, day, calendar)
+
+        return temporal_rs::PlainDate::new(year, month, day, calendar)
             .map_err(Error::from_temporal);
-        
     }
 
     Err(Error::ty("Invalid date")) //TODO
