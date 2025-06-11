@@ -1,14 +1,29 @@
 use crate::builtins::temporal::duration::Duration;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use chrono::{Datelike, NaiveDate};
-use std::cell::{Cell, RefCell};
+use chrono::Datelike;
+use std::cell::RefCell;
+use std::str::FromStr;
+use temporal_rs::options::DifferenceSettings;
+use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
+use yavashark_string::YSString;
 use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
 pub struct PlainDate {
-    date: Cell<NaiveDate>,
+    date: temporal_rs::PlainDate,
+}
+
+impl PlainDate {
+    pub fn new(date: temporal_rs::PlainDate, realm: &Realm) -> Self {
+        Self {
+            inner: RefCell::new(MutablePlainDate {
+                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date.clone().into()),
+            }),
+            date,
+        }
+    }
 }
 
 #[props]
@@ -16,38 +31,41 @@ impl PlainDate {
     #[constructor]
     pub fn construct(
         year: i32,
-        month: u32,
-        day: u32,
-        _calendar: Option<String>,
+        month: u8,
+        day: u8,
+        calendar: Option<YSString>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
-        let date = NaiveDate::from_ymd_opt(year, month, day).ok_or(Error::ty("Invalid date"))?;
+        let calendar = if let Some(cal) = calendar {
+            Calendar::from_str(&cal).map_err(Error::from_temporal)?
+        } else {
+            Calendar::default()
+        };
+
+        let date = temporal_rs::PlainDate::new(year, month, day, calendar)
+            .map_err(Error::from_temporal)?;
 
         Ok(Self {
             inner: RefCell::new(MutablePlainDate {
                 object: MutObject::with_proto(realm.intrinsics.temporal_plain_date.clone().into()),
             }),
-            date: Cell::new(date),
+            date,
         }
         .into_object())
     }
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         if let Value::String(str) = &info {
-            return Ok(NaiveDate::parse_from_str(str, "%Y-%m-%d")
-                .map(|date| Self {
-                    inner: RefCell::new(MutablePlainDate {
-                        object: MutObject::with_proto(
-                            realm.intrinsics.temporal_plain_date.clone().into(),
-                        ),
-                    }),
-                    date: Cell::new(date),
-                })
-                .map_err(|_| Error::ty("Invalid date"))?
-                .into_object());
+            let date = temporal_rs::PlainDate::from_str(str).map_err(Error::from_temporal)?;
+
+            return Ok(Self::new(date, realm).into_object());
         }
 
         let obj = info.to_object()?;
+
+        if let Some(this) = obj.downcast::<Self>() {
+            return Ok(Self::new(this.date.clone(), realm).into_object());
+        }
 
         if obj.contains_key(&"year".into())?
             || obj.contains_key(&"month".into())?
@@ -58,131 +76,69 @@ impl PlainDate {
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
             let month = obj
                 .resolve_property(&"month".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
             let day = obj
                 .resolve_property(&"day".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
 
-            return Ok(Self {
-                inner: RefCell::new(MutablePlainDate {
-                    object: MutObject::with_proto(
-                        realm.intrinsics.temporal_plain_date.clone().into(),
-                    ),
-                }),
-                date: Cell::new(
-                    NaiveDate::from_ymd_opt(year, month, day).ok_or(Error::ty("Invalid date"))?,
-                ),
-            }
-            .into_object());
+            let calendar = obj
+                .resolve_property(&"calendar".into(), realm)?
+                .and_then(|v| v.to_string(realm).ok());
+
+            return Self::construct(year, month, day, calendar, realm);
         }
 
         Err(Error::ty("Invalid date")) //TODO
     }
 
     #[allow(clippy::use_self)]
-    pub fn compare(left: &PlainDate, right: &PlainDate) -> i32 {
-        left.date.get().cmp(&right.date.get()) as i32
+    pub fn compare(left: &PlainDate, right: &PlainDate) -> i8 {
+        left.date.compare_iso(&right.date) as i8
     }
 
     pub fn equals(&self, other: &Self) -> bool {
-        self.date.get() == other.date.get()
+        self.date == other.date
     }
 
     pub fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let hours = self
+        let dur = self
             .date
-            .get()
-            .signed_duration_since(other.date.get())
-            .num_hours();
+            .since(&other.date, DifferenceSettings::default())
+            .map_err(Error::from_temporal)?;
 
-        Ok(Duration::constructor(
-            None,
-            None,
-            None,
-            None,
-            Some(hours),
-            None,
-            None,
-            None,
-            None,
-            None,
-            realm,
-        )?
-        .into_object())
+        Ok(Duration::with_duration(realm, dur).into_object())
     }
 
     pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let hours = other
+        let dur = self
             .date
-            .get()
-            .signed_duration_since(self.date.get())
-            .num_hours();
+            .until(&other.date, DifferenceSettings::default())
+            .map_err(Error::from_temporal)?;
 
-        Ok(Duration::constructor(
-            None,
-            None,
-            None,
-            None,
-            Some(hours),
-            None,
-            None,
-            None,
-            None,
-            None,
-            realm,
-        )?
-        .into_object())
+        Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-    pub fn add(&self, _duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.get();
+    pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let date = self
+            .date
+            .add(&duration.dur, None)
+            .map_err(Error::from_temporal)?;
 
-        // let dur = chrono::Duration::from_std(duration.to_duration())
-        //     .map_err(|_| Error::ty("Invalid duration"))?;
-        //
-        // let date = if duration.is_negative() {
-        //     date.checked_sub_signed(dur)
-        //         .ok_or(Error::ty("Invalid date"))?
-        // } else {
-        //     date.checked_add_signed(dur)
-        //         .ok_or(Error::ty("Invalid date"))?
-        // };
-
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date.clone().into()),
-            }),
-            date: Cell::new(date),
-        }
-        .into_object())
+        Ok(Self::new(date, realm).into_object())
     }
 
-    pub fn subtract(&self, _duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.get();
+    pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let date = self
+            .date
+            .subtract(&duration.dur, None)
+            .map_err(Error::from_temporal)?;
 
-        // let dur = chrono::Duration::from_std(duration.to_duration())
-        //     .map_err(|_| Error::ty("Invalid duration"))?;
-        //
-        // let date = if duration.is_negative() {
-        //     date.checked_add_signed(dur)
-        //         .ok_or(Error::ty("Invalid date"))?
-        // } else {
-        //     date.checked_sub_signed(dur)
-        //         .ok_or(Error::ty("Invalid date"))?
-        // };
-
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDate {
-                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date.clone().into()),
-            }),
-            date: Cell::new(date),
-        }
-        .into_object())
+        Ok(Self::new(date, realm).into_object())
     }
 
     #[prop("toJSON")]
     pub fn to_json(&self) -> String {
-        self.date.get().to_string()
+        self.date.to_string()
     }
 
     #[prop("valueOf")]
@@ -191,94 +147,84 @@ impl PlainDate {
     }
 
     #[get("day")]
-    pub fn day(&self) -> u32 {
-        self.date.get().day()
+    pub fn day(&self) -> u8 {
+        self.date.day()
     }
 
     #[get("dayOfWeek")]
-    pub fn day_of_week(&self) -> u32 {
-        self.date.get().weekday().num_days_from_monday()
+    pub fn day_of_week(&self) -> Res<u16> {
+        Ok(self.date.day_of_week().map_err(Error::from_temporal)?)
     }
 
     #[get("dayOfYear")]
-    pub fn day_of_year(&self) -> u32 {
-        self.date.get().ordinal0()
+    pub fn day_of_year(&self) -> u16 {
+        self.date.day_of_year()
     }
 
     #[get("daysInMonth")]
-    pub fn days_in_month(&self) -> u32 {
-        let month = self.date.get().month();
-        let year = self.date.get().year();
-
-        if month == 2 {
-            if year % 4 == 0 {
-                29
-            } else {
-                28
-            }
-        } else if month == 4 || month == 6 || month == 9 || month == 11 {
-            30
-        } else {
-            31
-        }
+    pub fn days_in_month(&self) -> u16 {
+        self.date.days_in_month()
     }
 
     #[get("daysInWeek")]
-    #[nonstatic]
-    pub const fn days_in_week() -> u32 {
-        7
+    pub fn days_in_week(&self) -> Res<u16> {
+        self.date.days_in_week().map_err(Error::from_temporal)
     }
 
     #[get("daysInYear")]
-    pub fn days_in_year(&self) -> u32 {
-        if self.date.get().year() % 4 == 0 {
-            366
-        } else {
-            365
-        }
+    pub fn days_in_year(&self) -> u16 {
+        self.date.days_in_year()
     }
 
     #[get("era")]
-    #[nonstatic]
-    pub const fn era() -> Value {
-        Value::Undefined
+    pub fn era(&self) -> Value {
+        self.date
+            .era()
+            .map(|era| YSString::from_ref(era.as_str()).into())
+            .unwrap_or(Value::Undefined)
     }
 
     #[get("eraYear")]
-    #[nonstatic]
-    pub const fn era_year() -> Value {
-        Value::Undefined
+    pub fn era_year(&self) -> Value {
+        self.date
+            .era_year()
+            .map(|year| year.into())
+            .unwrap_or(Value::Undefined)
     }
 
     #[get("month")]
-    pub fn month(&self) -> u32 {
-        self.date.get().month()
+    pub fn month(&self) -> u8 {
+        self.date.month()
     }
 
     #[get("monthCode")]
-    pub fn month_code(&self) -> String {
-        format!("M{:2}", self.date.get().month())
+    pub fn month_code(&self) -> YSString {
+        YSString::from_ref(self.date.month_code().as_str())
     }
 
     #[get("monthsInYear")]
-    #[nonstatic]
-    pub const fn months_in_year() -> u32 {
-        12
+    pub fn months_in_year(&self) -> u16 {
+        self.date.months_in_year()
     }
 
     #[get("weekOfYear")]
-    pub fn week_of_year(&self) -> u32 {
-        self.date.get().iso_week().week()
+    pub fn week_of_year(&self) -> Value {
+        self.date
+            .week_of_year()
+            .map(|week| week.into())
+            .unwrap_or(Value::Undefined)
     }
 
     #[get("year")]
     pub fn year(&self) -> i32 {
-        self.date.get().year()
+        self.date.year()
     }
 
     #[get("yearOfWeek")]
-    pub fn year_of_week(&self) -> i32 {
-        // honestly, WHAT THE FUCK?
-        self.date.get().year()
+    pub fn year_of_week(&self) -> Value {
+        self.date
+            .year_of_week()
+            .map(|year| year.into())
+            .unwrap_or(Value::Undefined)
     }
 }
