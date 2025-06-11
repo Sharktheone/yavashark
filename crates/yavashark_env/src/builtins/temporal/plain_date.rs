@@ -8,6 +8,7 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::utils::difference_settings;
 
 #[object]
 #[derive(Debug)]
@@ -100,19 +101,29 @@ impl PlainDate {
         self.date == other.date
     }
 
-    pub fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn since(&self, other: &Self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let settings = opts.map(|s| difference_settings(s, realm))
+            .transpose()?
+            .unwrap_or_default();
+        
+        
         let dur = self
             .date
-            .since(&other.date, DifferenceSettings::default())
+            .since(&other.date, settings)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-    pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn until(&self, other: &Self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let settings = opts
+            .map(|s| difference_settings(s, realm))
+            .transpose()?
+            .unwrap_or_default();
+        
         let dur = self
             .date
-            .until(&other.date, DifferenceSettings::default())
+            .until(&other.date, settings)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
