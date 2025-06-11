@@ -69,18 +69,21 @@ impl PlainDate {
 
     pub fn since(
         &self,
-        other: &Self,
+        other: &Value,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
+        let other = value_to_plain_date(other.clone(), realm)?;
+        
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?
             .unwrap_or_default();
+        
 
         let dur = self
             .date
-            .since(&other.date, settings)
+            .since(&other, settings)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
@@ -88,10 +91,12 @@ impl PlainDate {
 
     pub fn until(
         &self,
-        other: &Self,
+        other: &Value,
         opts: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
+        let other = value_to_plain_date(other.clone(), realm)?;
+        
         let settings = opts
             .map(|s| difference_settings(s, realm))
             .transpose()?
@@ -99,7 +104,7 @@ impl PlainDate {
 
         let dur = self
             .date
-            .until(&other.date, settings)
+            .until(&other, settings)
             .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, dur).into_object())
