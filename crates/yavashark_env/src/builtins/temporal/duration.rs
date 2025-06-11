@@ -3,7 +3,7 @@ use crate::builtins::temporal::utils::{
 };
 use crate::conversion::{FromValueOutput, NonFract};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::Unit;
 use yavashark_macro::{object, props};
@@ -12,7 +12,7 @@ use yavashark_value::Obj;
 #[object]
 #[derive(Debug)]
 pub struct Duration {
-    pub dur: Cell<temporal_rs::Duration>,
+    pub dur: temporal_rs::Duration,
 }
 
 impl Duration {
@@ -26,7 +26,7 @@ impl Duration {
             inner: RefCell::new(MutableDuration {
                 object: MutObject::with_proto(realm.intrinsics.temporal_duration.clone().into()),
             }),
-            dur: Cell::new(duration),
+            dur: duration,
         }
     }
 
@@ -117,7 +117,7 @@ impl Duration {
     fn from_value(info: Value, realm: &mut Realm) -> Res<Self> {
         Ok(match Self::from_value_ref(info, realm)? {
             RefOrOwned::Ref(r) => {
-                return Ok(Self::with_duration(realm, r.dur.get()));
+                return Ok(Self::with_duration(realm, r.dur));
             }
             RefOrOwned::Owned(o) => o,
         })
@@ -226,13 +226,12 @@ impl Duration {
 
         Ok(left
             .dur
-            .get()
-            .compare_with_provider(&right.dur.get(), rel, &realm.env.tz_provider)
+            .compare_with_provider(&right.dur, rel, &realm.env.tz_provider)
             .map_err(Error::from_temporal)? as i8)
     }
 
     fn abs(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let res = self.dur.get().abs();
+        let res = self.dur.abs();
 
         Ok(Self::with_duration(realm, res).into_object())
     }
@@ -240,17 +239,13 @@ impl Duration {
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = Self::from_value_ref(other, realm)?;
 
-        let dur = self
-            .dur
-            .get()
-            .add(&other.dur.get())
-            .map_err(Error::from_temporal)?;
+        let dur = self.dur.add(&other.dur).map_err(Error::from_temporal)?;
 
         Ok(Self::with_duration(realm, dur).into_object())
     }
 
     fn negated(&self, #[realm] realm: &Realm) -> ObjectHandle {
-        let neg = self.dur.get().negated();
+        let neg = self.dur.negated();
 
         Self::with_duration(realm, neg).into_object()
     }
@@ -264,7 +259,6 @@ impl Duration {
 
         let dur = self
             .dur
-            .get()
             .round_with_provider(opts, rel, &realm.env.tz_provider)
             .map_err(Error::from_temporal)?;
 
@@ -276,8 +270,7 @@ impl Duration {
 
         let dur = self
             .dur
-            .get()
-            .subtract(&other.dur.get())
+            .subtract(&other.dur)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::with_duration(realm, dur).into_object())
@@ -285,7 +278,7 @@ impl Duration {
 
     #[prop("toJSON")]
     fn to_json(&self) -> String {
-        let dur = self.dur.get();
+        let dur = self.dur;
 
         dur.to_string()
     }
@@ -294,7 +287,7 @@ impl Duration {
     fn to_js_string(&self, obj: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let opts = string_rounding_mode_opts(obj, realm)?;
 
-        let dur = self.dur.get();
+        let dur = self.dur;
 
         dur.as_temporal_string(opts).map_err(Error::from_temporal)
     }
@@ -322,7 +315,6 @@ impl Duration {
 
         let dur = self
             .dur
-            .get()
             .total_with_provider(unit, rel, &realm.env.tz_provider)
             .map_err(Error::from_temporal)?;
 
@@ -337,61 +329,61 @@ impl Duration {
 
     #[get("blank")]
     fn blank(&self) -> bool {
-        self.dur.get().is_zero()
+        self.dur.is_zero()
     }
 
     #[get("days")]
     fn days(&self) -> i64 {
-        self.dur.get().days()
+        self.dur.days()
     }
 
     #[get("hours")]
     fn hours(&self) -> i64 {
-        self.dur.get().hours()
+        self.dur.hours()
     }
 
     #[get("microseconds")]
     fn microseconds(&self) -> i128 {
-        self.dur.get().microseconds()
+        self.dur.microseconds()
     }
 
     #[get("milliseconds")]
     fn milliseconds(&self) -> i64 {
-        self.dur.get().milliseconds()
+        self.dur.milliseconds()
     }
 
     #[get("minutes")]
     fn minutes(&self) -> i64 {
-        self.dur.get().minutes()
+        self.dur.minutes()
     }
 
     #[get("months")]
     fn months(&self) -> i64 {
-        self.dur.get().months()
+        self.dur.months()
     }
 
     #[get("nanoseconds")]
     fn nanoseconds(&self) -> i128 {
-        self.dur.get().nanoseconds()
+        self.dur.nanoseconds()
     }
 
     #[get("seconds")]
     fn seconds(&self) -> i64 {
-        self.dur.get().seconds()
+        self.dur.seconds()
     }
 
     #[get("sign")]
     fn sign(&self) -> i8 {
-        self.dur.get().sign() as i8
+        self.dur.sign() as i8
     }
 
     #[get("weeks")]
     fn weeks(&self) -> i64 {
-        self.dur.get().weeks()
+        self.dur.weeks()
     }
 
     #[get("years")]
     fn years(&self) -> i64 {
-        self.dur.get().years()
+        self.dur.years()
     }
 }

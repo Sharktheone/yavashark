@@ -111,7 +111,7 @@ impl Instant {
         let i = self
             .stamp
             .get()
-            .add(other.dur.get())
+            .add(other.dur)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
@@ -162,7 +162,7 @@ impl Instant {
         let i = self
             .stamp
             .get()
-            .subtract(other.dur.get())
+            .subtract(other.dur)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
