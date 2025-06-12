@@ -69,8 +69,10 @@ impl PlainDate {
         Ok(left.compare_iso(&right) as i8)
     }
 
-    pub fn equals(&self, other: &Self) -> bool {
-        self.date == other.date
+    pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
+        let other = value_to_plain_date(other, realm)?;
+        
+        Ok(self.date == other)
     }
 
     pub fn since(
@@ -94,7 +96,7 @@ impl PlainDate {
         Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-    
+
     pub fn until(
         &self,
         other: &Value,
