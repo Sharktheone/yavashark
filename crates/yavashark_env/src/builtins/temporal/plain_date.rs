@@ -61,8 +61,12 @@ impl PlainDate {
     }
 
     #[allow(clippy::use_self)]
-    pub fn compare(left: &PlainDate, right: &PlainDate) -> i8 {
-        left.date.compare_iso(&right.date) as i8
+    pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
+        let left = value_to_plain_date(left, realm)?;
+        let right = value_to_plain_date(right, realm)?;
+        
+        
+        Ok(left.compare_iso(&right) as i8)
     }
 
     pub fn equals(&self, other: &Self) -> bool {
