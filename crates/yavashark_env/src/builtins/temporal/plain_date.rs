@@ -230,6 +230,11 @@ impl PlainDate {
             .year_of_week()
             .map_or(Value::Undefined, Into::into)
     }
+
+    #[get("calendarId")]
+    pub fn calendar_id(&self) -> &'static str {
+        self.date.calendar().identifier()
+    }
 }
 
 pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDate> {
