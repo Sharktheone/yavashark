@@ -387,3 +387,21 @@ impl Duration {
         self.dur.years()
     }
 }
+
+
+pub fn value_to_duration(value: Value, realm: &mut Realm) -> Res<temporal_rs::Duration> {
+    match value {
+        Value::Object(obj) => {
+            if let Some(duration) = obj.downcast::<Duration>() {
+                return Ok(duration.dur);
+            } else if obj.eq(&realm.intrinsics.temporal_duration) {
+                return Err(Error::ty("Expected a Temporal.Duration object"));
+            }
+
+            let str = obj.to_string(realm)?;
+            temporal_rs::Duration::from_str(str.as_str()).map_err(Error::from_temporal)
+        }
+        Value::String(s) => temporal_rs::Duration::from_str(s.as_str()).map_err(Error::from_temporal),
+        _ => Err(Error::ty("Invalid value for Duration")),
+    }
+}

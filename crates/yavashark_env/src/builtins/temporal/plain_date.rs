@@ -1,4 +1,4 @@
-use crate::builtins::temporal::duration::Duration;
+use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::utils::difference_settings;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
@@ -7,6 +7,7 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::instant::value_to_instant;
 
 #[object]
 #[derive(Debug)]
@@ -118,19 +119,23 @@ impl PlainDate {
         Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-    pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn add(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let dur = value_to_duration(duration, realm)?;
+        
         let date = self
             .date
-            .add(&duration.dur, None)
+            .add(&dur, None)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
     }
 
-    pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn subtract(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let dur = value_to_duration(duration, realm)?;
+        
         let date = self
             .date
-            .subtract(&duration.dur, None)
+            .subtract(&dur, None)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
