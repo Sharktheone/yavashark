@@ -388,7 +388,6 @@ impl Duration {
     }
 }
 
-
 pub fn value_to_duration(value: Value, realm: &mut Realm) -> Res<temporal_rs::Duration> {
     Ok(Duration::from_value_ref(value, realm)?.dur)
 }

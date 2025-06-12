@@ -64,14 +64,13 @@ impl PlainDate {
     pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
         let left = value_to_plain_date(left, realm)?;
         let right = value_to_plain_date(right, realm)?;
-        
-        
+
         Ok(left.compare_iso(&right) as i8)
     }
 
     pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
         let other = value_to_plain_date(other, realm)?;
-        
+
         Ok(self.date == other)
     }
 
@@ -96,7 +95,6 @@ impl PlainDate {
         Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-
     pub fn until(
         &self,
         other: &Value,
@@ -120,18 +118,15 @@ impl PlainDate {
 
     pub fn add(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
-        let date = self
-            .date
-            .add(&dur, None)
-            .map_err(Error::from_temporal)?;
+
+        let date = self.date.add(&dur, None).map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
     }
 
     pub fn subtract(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
+
         let date = self
             .date
             .subtract(&dur, None)
@@ -192,7 +187,7 @@ impl PlainDate {
     pub fn era_year(&self) -> Value {
         self.date.era_year().map_or(Value::Undefined, Into::into)
     }
-    
+
     #[get("inLeapYear")]
     pub fn in_leap_year(&self) -> bool {
         self.date.in_leap_year()
@@ -261,8 +256,7 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
         let month = obj
             .resolve_property(&"month".into(), realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-        
-        
+
         let month = if month == 0 {
             obj.resolve_property(&"monthCode".into(), realm)?
                 .and_then(|v| v.to_string(realm).ok())
@@ -277,7 +271,7 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
         } else {
             month
         };
-        
+
         let day = obj
             .resolve_property(&"day".into(), realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;

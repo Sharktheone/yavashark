@@ -1,5 +1,7 @@
 use crate::builtins::temporal::duration::Duration;
-use crate::builtins::temporal::utils::{difference_settings, rounding_options, string_rounding_mode_opts};
+use crate::builtins::temporal::utils::{
+    difference_settings, rounding_options, string_rounding_mode_opts,
+};
 use crate::conversion::FromValueOutput;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -68,7 +70,6 @@ impl Instant {
         let left = value_to_instant(left, realm)?;
         let right = value_to_instant(right, realm)?;
 
-
         Ok(left.cmp(&right) as i8)
     }
 
@@ -108,11 +109,7 @@ impl Instant {
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = Duration::from_value_ref(other, realm)?;
 
-        let i = self
-            .stamp
-            
-            .add(other.dur)
-            .map_err(Error::from_temporal)?;
+        let i = self.stamp.add(other.dur).map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
     }
@@ -120,16 +117,14 @@ impl Instant {
     fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
         let other = value_to_instant(other, realm)?;
 
-
         Ok(self.stamp == other)
     }
 
     fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let (opts, _) = rounding_options(opts, realm)?;
-        
-        let stamp = self.stamp.round(opts)
-            .map_err(Error::from_temporal)?;
-        
+
+        let stamp = self.stamp.round(opts).map_err(Error::from_temporal)?;
+
         Ok(Self::from_stamp(stamp, realm).into_object())
     }
 
@@ -149,7 +144,6 @@ impl Instant {
 
         let res = self
             .stamp
-            
             .since(&other, opts)
             .map_err(Error::from_temporal)?;
 
@@ -161,7 +155,6 @@ impl Instant {
 
         let i = self
             .stamp
-            
             .subtract(other.dur)
             .map_err(Error::from_temporal)?;
 
@@ -171,7 +164,6 @@ impl Instant {
     #[prop("toJSON")]
     fn to_json(&self, #[realm] realm: &Realm) -> Res<String> {
         self.stamp
-            
             .to_ixdtf_string_with_provider(
                 None,
                 ToStringRoundingOptions::default(),
@@ -185,7 +177,6 @@ impl Instant {
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.stamp
-            
             .to_ixdtf_string_with_provider(None, opts, &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
@@ -206,7 +197,6 @@ impl Instant {
 
         let dur = self
             .stamp
-            
             .until(&other, opts)
             .map_err(Error::from_temporal)?;
 
@@ -234,14 +224,12 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
     match value {
         Value::Object(obj) => {
             if let Some(other_instant) = obj.downcast::<Instant>() {
-
                 Ok(other_instant.stamp)
             } else {
                 if obj.eq(&realm.intrinsics.temporal_instant) {
                     return Err(Error::ty("Expected a Temporal.Instant object"));
-                    
                 }
-                
+
                 let str = obj.to_string(realm)?;
 
                 temporal_rs::Instant::from_str(str.as_str()).map_err(Error::from_temporal)

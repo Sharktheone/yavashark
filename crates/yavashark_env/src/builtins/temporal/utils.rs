@@ -188,9 +188,9 @@ pub fn rounding_options(
 
             Some(RoundingIncrement::try_from(increment).map_err(Error::from_temporal)?)
         };
-        
+
         let rounding_mode = obj.get("roundingMode", realm)?;
-        
+
         opts.rounding_mode = if rounding_mode.is_undefined() {
             None
         } else {
