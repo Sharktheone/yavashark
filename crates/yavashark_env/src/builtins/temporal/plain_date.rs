@@ -187,6 +187,11 @@ impl PlainDate {
     pub fn era_year(&self) -> Value {
         self.date.era_year().map_or(Value::Undefined, Into::into)
     }
+    
+    #[get("inLeapYear")]
+    pub fn in_leap_year(&self) -> bool {
+        self.date.in_leap_year()
+    }
 
     #[get("month")]
     pub fn month(&self) -> u8 {
