@@ -146,6 +146,7 @@ impl PlainDate {
     }
 
     #[prop("valueOf")]
+    #[nonstatic]
     pub const fn value_of() -> Res {
         Err(Error::ty("Called valueOf on a Temporal.PlainDate object"))
     }
