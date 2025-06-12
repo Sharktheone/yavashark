@@ -333,42 +333,42 @@ impl Duration {
     }
 
     #[get("days")]
-    fn days(&self) -> i64 {
+    const fn days(&self) -> i64 {
         self.dur.days()
     }
 
     #[get("hours")]
-    fn hours(&self) -> i64 {
+    const fn hours(&self) -> i64 {
         self.dur.hours()
     }
 
     #[get("microseconds")]
-    fn microseconds(&self) -> i128 {
+    const fn microseconds(&self) -> i128 {
         self.dur.microseconds()
     }
 
     #[get("milliseconds")]
-    fn milliseconds(&self) -> i64 {
+    const fn milliseconds(&self) -> i64 {
         self.dur.milliseconds()
     }
 
     #[get("minutes")]
-    fn minutes(&self) -> i64 {
+    const fn minutes(&self) -> i64 {
         self.dur.minutes()
     }
 
     #[get("months")]
-    fn months(&self) -> i64 {
+    const fn months(&self) -> i64 {
         self.dur.months()
     }
 
     #[get("nanoseconds")]
-    fn nanoseconds(&self) -> i128 {
+    const fn nanoseconds(&self) -> i128 {
         self.dur.nanoseconds()
     }
 
     #[get("seconds")]
-    fn seconds(&self) -> i64 {
+    const fn seconds(&self) -> i64 {
         self.dur.seconds()
     }
 
@@ -378,12 +378,12 @@ impl Duration {
     }
 
     #[get("weeks")]
-    fn weeks(&self) -> i64 {
+    const fn weeks(&self) -> i64 {
         self.dur.weeks()
     }
 
     #[get("years")]
-    fn years(&self) -> i64 {
+    const fn years(&self) -> i64 {
         self.dur.years()
     }
 }
