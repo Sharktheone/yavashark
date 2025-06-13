@@ -326,6 +326,24 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
                 .resolve_property(&"nanosecond".into(), realm)?
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
             
+            let calendar = obj
+                .resolve_property(&"calendar".into(), realm)?
+                .and_then(|v| v.to_string(realm).ok())
+                .and_then(|s| {
+                    if s.is_empty() {
+                        None
+                    } else {
+                        Some(s.as_str().to_string())
+                    }
+                });
+            
+            let calendar = calendar
+                .as_deref()
+                .map(Calendar::from_str)
+                .transpose()
+                .map_err(Error::from_temporal)?
+                .unwrap_or_default();
+            
             
             let datetime = temporal_rs::PlainDateTime::new(
                 year,
@@ -337,7 +355,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
                 millisecond,
                 microsecond,
                 nanosecond,
-                Calendar::default()
+                calendar,
             ).map_err(Error::from_temporal)?;
 
             return Ok(datetime);
