@@ -88,15 +88,19 @@ impl PlainDateTime {
         Ok(self.date == other)
     }
 
-    pub fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let duration = self.date.since(&other.date, DifferenceSettings::default())
+    pub fn since(&self, other: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let other = value_to_plain_date_time(other.clone(), realm)?;
+        
+        let duration = self.date.since(&other, DifferenceSettings::default())
             .map_err(Error::from_temporal)?;
         
         Ok(Duration::with_duration(realm, duration).into_object())
     }
 
-    pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let duration = other.date.until(&self.date, DifferenceSettings::default())
+    pub fn until(&self, other: &Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let other = value_to_plain_date_time(other.clone(), realm)?;
+        
+        let duration = other.until(&self.date, DifferenceSettings::default())
             .map_err(Error::from_temporal)?;
         
         Ok(Duration::with_duration(realm, duration).into_object())
