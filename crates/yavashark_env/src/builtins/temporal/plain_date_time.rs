@@ -1,4 +1,4 @@
-use crate::builtins::temporal::duration::Duration;
+use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 use std::cell::{Cell, RefCell};
@@ -122,15 +122,19 @@ impl PlainDateTime {
         Ok(Duration::with_duration(realm, duration).into_object())
     }
 
-    pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.add(&duration.dur, None)
+    pub fn add(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let dur = value_to_duration(duration, realm)?;
+        
+        let date = self.date.add(&dur, None)
             .map_err(Error::from_temporal)?;
         
         Ok(Self::new(date, realm).into_object())
     }
 
-    pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.subtract(&duration.dur, None)
+    pub fn subtract(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let dur = value_to_duration(duration, realm)?;
+        
+        let date = self.date.subtract(&dur, None)
             .map_err(Error::from_temporal)?;
         
         Ok(Self::new(date, realm).into_object())
