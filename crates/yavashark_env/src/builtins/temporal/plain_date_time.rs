@@ -2,13 +2,29 @@ use crate::builtins::temporal::duration::Duration;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 use std::cell::{Cell, RefCell};
+use std::str::FromStr;
+use temporal_rs::Calendar;
+use temporal_rs::options::DifferenceSettings;
 use yavashark_macro::{object, props};
+use yavashark_string::YSString;
 use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
 pub struct PlainDateTime {
-    date: Cell<NaiveDateTime>,
+    date: temporal_rs::PlainDateTime,
+}
+
+
+impl PlainDateTime {
+    pub fn new(date: temporal_rs::PlainDateTime, realm: &Realm) -> Self {
+        Self {
+            inner: RefCell::new(MutablePlainDateTime {
+                object: MutObject::with_proto(realm.intrinsics.temporal_plain_date_time.clone().into()),
+            }),
+            date,
+        }
+    }
 }
 
 #[props]
@@ -17,14 +33,14 @@ impl PlainDateTime {
     #[allow(clippy::too_many_arguments)]
     pub fn construct(
         year: i32,
-        month: u32,
-        day: u32,
-        hour: Option<u32>,
-        minute: Option<u32>,
-        second: Option<u32>,
-        millisecond: Option<u32>,
-        microsecond: Option<u32>,
-        nanosecond: Option<u32>,
+        month: u8,
+        day: u8,
+        hour: Option<u8>,
+        minute: Option<u8>,
+        second: Option<u8>,
+        millisecond: Option<u16>,
+        microsecond: Option<u16>,
+        nanosecond: Option<u16>,
         _calendar: Option<String>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
@@ -34,37 +50,29 @@ impl PlainDateTime {
         let millisecond = millisecond.unwrap_or(0);
         let microsecond = microsecond.unwrap_or(0);
         let nanosecond = nanosecond.unwrap_or(0);
-
-        let date = NaiveDateTime::new(
-            NaiveDate::from_ymd_opt(year, month, day).ok_or(Error::range("Invalid date"))?,
-            NaiveTime::from_hms_micro_opt(hour, minute, second, millisecond * 1000 + microsecond)
-                .ok_or(Error::range("Invalid time"))?
-                .with_nanosecond(nanosecond)
-                .ok_or(Error::range("Invalid time"))?,
-        );
-
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_date_time.clone().into(),
-                ),
-            }),
-            date: Cell::new(date),
-        }
-        .into_object())
+        
+        
+        let datetime = temporal_rs::PlainDateTime::new(
+            year,
+            month,
+            day,
+            hour,
+            minute,
+            second,
+            millisecond,
+            microsecond,
+            nanosecond,
+            Calendar::default()
+        ).map_err(Error::from_temporal)?;
+        
+        Ok(Self::new(datetime, realm).into_object())
     }
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         if let Value::String(str) = &info {
-            return Ok(NaiveDateTime::parse_from_str(str, "%Y-%m-%dT%H:%M:%S%.f")
-                .map(|date| Self {
-                    inner: RefCell::new(MutablePlainDateTime {
-                        object: MutObject::with_proto(
-                            realm.intrinsics.temporal_plain_date_time.clone().into(),
-                        ),
-                    }),
-                    date: Cell::new(date),
-                })
+            return Ok(temporal_rs::PlainDateTime::from_str(str.as_str())
+                .map_err(Error::from_temporal)
+                .map(|date| Self::new(date, realm))
                 .map_err(|_| Error::range("Invalid date"))?
                 .into_object());
         }
@@ -80,168 +88,95 @@ impl PlainDateTime {
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
             let month = obj
                 .resolve_property(&"month".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
             let day = obj
                 .resolve_property(&"day".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
             let hour = obj
                 .resolve_property(&"hour".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
             let minute = obj
                 .resolve_property(&"minute".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
             let second = obj
                 .resolve_property(&"second".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
             let millisecond = obj
                 .resolve_property(&"millisecond".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
             let microsecond = obj
                 .resolve_property(&"microsecond".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
             let nanosecond = obj
                 .resolve_property(&"nanosecond".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u32))?;
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
+            
+            
+            let datetime = temporal_rs::PlainDateTime::new(
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+                millisecond,
+                microsecond,
+                nanosecond,
+                Calendar::default()
+            ).map_err(Error::from_temporal)?;
 
-            return Ok(Self {
-                inner: RefCell::new(MutablePlainDateTime {
-                    object: MutObject::with_proto(
-                        realm.intrinsics.temporal_plain_date_time.clone().into(),
-                    ),
-                }),
-                date: Cell::new(NaiveDateTime::new(
-                    NaiveDate::from_ymd_opt(year, month, day)
-                        .ok_or(Error::range("Invalid date"))?,
-                    NaiveTime::from_hms_micro_opt(
-                        hour,
-                        minute,
-                        second,
-                        millisecond * 1000 + microsecond,
-                    )
-                    .ok_or(Error::range("Invalid time"))?
-                    .with_nanosecond(nanosecond)
-                    .ok_or(Error::range("Invalid time"))?,
-                )),
-            }
-            .into_object());
+            return Ok(Self::new(datetime, realm).into_object());
         }
 
         Err(Error::range("Invalid date")) //TODO
     }
 
     #[allow(clippy::use_self)]
-    pub fn compare(left: &PlainDateTime, right: &PlainDateTime) -> i32 {
-        left.date.get().cmp(&right.date.get()) as i32
+    pub fn compare(left: &PlainDateTime, right: &PlainDateTime) -> i8 {
+        left.date.compare_iso(&right.date) as i8
     }
 
     pub fn equals(&self, other: &Self) -> bool {
-        self.date.get() == other.date.get()
+        self.date == other.date
     }
 
     pub fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let duration = self.date.get().signed_duration_since(other.date.get());
-        let duration = duration
-            .num_microseconds()
-            .ok_or(Error::range("Invalid duration"))?;
-        let duration = duration as f64 / 1_000_000.0;
-
-        Ok(Duration::constructor(
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(duration as i128),
-            None,
-            realm,
-        )?
-        .into_object())
+        let duration = self.date.since(&other.date, DifferenceSettings::default())
+            .map_err(Error::from_temporal)?;
+        
+        Ok(Duration::with_duration(realm, duration).into_object())
     }
 
     pub fn until(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let duration = other.date.get().signed_duration_since(self.date.get());
-        let duration = duration
-            .num_microseconds()
-            .ok_or(Error::range("Invalid duration"))?;
-        let duration = duration as f64 / 1_000_000.0;
-
-        Ok(Duration::constructor(
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            Some(duration as i128),
-            None,
-            realm,
-        )?
-        .into_object())
+        let duration = other.date.until(&self.date, DifferenceSettings::default())
+            .map_err(Error::from_temporal)?;
+        
+        Ok(Duration::with_duration(realm, duration).into_object())
     }
 
-    pub fn add(&self, _duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.get();
-
-        // let dur = chrono::Duration::from_std(duration.to_duration())
-        //     .map_err(|_| Error::range("Invalid duration"))?;
-        //
-        // let date = if duration.is_negative() {
-        //     date.checked_sub_signed(dur)
-        //         .ok_or(Error::range("Invalid date"))?
-        // } else {
-        //     date.checked_add_signed(dur)
-        //         .ok_or(Error::range("Invalid date"))?
-        // };
-
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_date_time.clone().into(),
-                ),
-            }),
-            date: Cell::new(date),
-        }
-        .into_object())
+    pub fn add(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let date = self.date.add(&duration.dur, None)
+            .map_err(Error::from_temporal)?;
+        
+        Ok(Self::new(date, realm).into_object())
     }
 
-    pub fn subtract(&self, _duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.get();
-
-        // let dur = chrono::Duration::from_std(duration.to_duration())
-        //     .map_err(|_| Error::range("Invalid duration"))?;
-        //
-        // let date = if duration.is_negative() {
-        //     date.checked_add_signed(dur)
-        //         .ok_or(Error::range("Invalid date"))?
-        // } else {
-        //     date.checked_sub_signed(dur)
-        //         .ok_or(Error::range("Invalid date"))?
-        // };
-
-        Ok(Self {
-            inner: RefCell::new(MutablePlainDateTime {
-                object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_date_time.clone().into(),
-                ),
-            }),
-            date: Cell::new(date),
-        }
-        .into_object())
+    pub fn subtract(&self, duration: &Duration, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let date = self.date.subtract(&duration.dur, None)
+            .map_err(Error::from_temporal)?;
+        
+        Ok(Self::new(date, realm).into_object())
+        
     }
 
     #[prop("toJSON")]
     pub fn to_json(&self) -> String {
-        self.date.get().to_string()
+        self.date.to_string()
     }
 
     #[prop("toString")]
     pub fn to_string_js(&self) -> String {
-        self.date.get().to_string()
+        self.date.to_string()
     }
 
     #[prop("valueOf")]
@@ -252,128 +187,119 @@ impl PlainDateTime {
     }
 
     #[get("day")]
-    pub fn day(&self) -> u32 {
-        self.date.get().day()
+    pub fn day(&self) -> u8 {
+        self.date.day()
     }
 
     #[get("dayOfWeek")]
-    pub fn day_of_week(&self) -> u32 {
-        self.date.get().weekday().num_days_from_monday()
+    pub fn day_of_week(&self) -> Res<u16> {
+        self.date.day_of_week()
+            .map_err(Error::from_temporal)
     }
 
     #[get("dayOfYear")]
-    pub fn day_of_year(&self) -> u32 {
-        self.date.get().ordinal()
+    pub fn day_of_year(&self) -> u16 {
+        self.date.day_of_year()
     }
 
     #[get("daysInMonth")]
-    pub fn days_in_month(&self) -> u32 {
-        let month = self.date.get().month();
-
-        if month == 2 {
-            if self.date.get().year() % 4 == 0 {
-                29
-            } else {
-                28
-            }
-        } else if month == 4 || month == 6 || month == 9 || month == 11 {
-            30
-        } else {
-            31
-        }
+    pub fn days_in_month(&self) -> u16 {
+        self.date.days_in_month()
     }
 
     #[get("daysInWeek")]
-    #[nonstatic]
-    pub const fn days_in_week() -> u32 {
-        7
+    pub fn days_in_week(&self) -> Res<u16> {
+        self.date.days_in_week()
+            .map_err(Error::from_temporal)
     }
 
     #[get("daysInYear")]
-    pub fn days_in_year(&self) -> u32 {
-        if self.date.get().date().year() % 4 == 0 {
-            366
-        } else {
-            365
-        }
+    pub fn days_in_year(&self) -> u16 {
+        self.date.days_in_year()
     }
 
     #[get("era")]
-    #[nonstatic]
-    pub const fn era() -> Value {
-        Value::Undefined
+    pub fn era(&self) -> Value {
+        self.date.era()
+            .map(|era| YSString::from_ref(era.as_str()).into())
+            .unwrap_or(Value::Undefined)
+            
     }
 
     #[get("eraYear")]
-    #[nonstatic]
-    pub const fn era_year() -> Value {
-        Value::Undefined
+    pub fn era_year(&self) -> Value {
+        self.date.era_year()
+            .map(Into::into)
+            .unwrap_or(Value::Undefined)
+        
     }
 
     #[get("inLeapYear")]
     pub fn in_leap_year(&self) -> bool {
-        self.date.get().date().year() % 4 == 0
+        self.date.in_leap_year()
     }
 
     #[get("hour")]
-    pub fn hour(&self) -> u32 {
-        self.date.get().hour()
+    pub fn hour(&self) -> u8 {
+        self.date.hour()
     }
 
     #[get("microsecond")]
-    pub fn microsecond(&self) -> u32 {
-        self.date.get().nanosecond() * 1_000
+    pub fn microsecond(&self) -> u16 {
+        self.date.microsecond()
     }
 
     #[get("millisecond")]
-    pub fn millisecond(&self) -> u32 {
-        self.date.get().nanosecond() * 1_000_000
+    pub fn millisecond(&self) -> u16 {
+        self.date.millisecond()
     }
 
     #[get("minute")]
-    pub fn minute(&self) -> u32 {
-        self.date.get().minute()
+    pub fn minute(&self) -> u8 {
+        self.date.minute()
     }
 
     #[get("month")]
-    pub fn month(&self) -> u32 {
-        self.date.get().month()
+    pub fn month(&self) -> u8 {
+        self.date.month()
     }
 
     #[get("monthCode")]
-    pub fn month_code(&self) -> String {
-        format!("M{:2}", self.date.get().month())
+    pub fn month_code(&self) -> YSString {
+        YSString::from_ref(self.date.month_code().as_str())
     }
 
     #[get("monthsInYear")]
-    #[nonstatic]
-    pub const fn months_in_year() -> u32 {
-        12
+    pub fn months_in_year(&self) -> u16 {
+        self.date.months_in_year()
     }
 
     #[get("nanosecond")]
-    pub fn nanosecond(&self) -> u32 {
-        self.date.get().nanosecond()
+    pub fn nanosecond(&self) -> u16 {
+        self.date.nanosecond()
     }
 
     #[get("second")]
-    pub fn second(&self) -> u32 {
-        self.date.get().second()
+    pub fn second(&self) -> u8 {
+        self.date.second()
     }
 
     #[get("weekOfYear")]
-    pub fn week_of_year(&self) -> u32 {
-        self.date.get().iso_week().week()
+    pub fn week_of_year(&self) -> Value {
+        self.date.week_of_year()
+            .map(Into::into)
+            .unwrap_or(Value::Undefined)
     }
 
     #[get("year")]
     pub fn year(&self) -> i32 {
-        self.date.get().year()
+        self.date.year()
     }
 
     #[get("yearOfWeek")]
-    pub fn year_of_week(&self) -> i32 {
-        // honestly, WHAT THE FUCK?
-        self.date.get().year()
+    pub fn year_of_week(&self) -> Value {
+        self.date.year_of_week()
+            .map(Into::into)
+            .unwrap_or(Value::Undefined)
     }
 }
