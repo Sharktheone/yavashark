@@ -263,6 +263,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
 
         if obj.contains_key(&"year".into())?
             || obj.contains_key(&"month".into())?
+            || obj.contains_key(&"monthCode".into())?
             || obj.contains_key(&"day".into())?
         {
             let year = obj
@@ -271,6 +272,22 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
             let month = obj
                 .resolve_property(&"month".into(), realm)?
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+
+            let month = if month == 0 {
+                obj.resolve_property(&"monthCode".into(), realm)?
+                    .and_then(|v| v.to_string(realm).ok())
+                    .and_then(|s| {
+                        if s.is_empty() {
+                            None
+                        } else {
+                            s.as_str()[1..].parse::<u8>().ok()
+                        }
+                    })
+                    .unwrap_or(0)
+            } else {
+                month
+            };
+            
             let day = obj
                 .resolve_property(&"day".into(), realm)?
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
