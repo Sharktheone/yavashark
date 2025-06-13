@@ -75,12 +75,17 @@ impl PlainDateTime {
     }
 
     #[allow(clippy::use_self)]
-    pub fn compare(left: &PlainDateTime, right: &PlainDateTime) -> i8 {
-        left.date.compare_iso(&right.date) as i8
+    pub fn compare(left: &Value, right: &Value, #[realm] relam: &mut Realm) -> Res<i8> {
+        let left = value_to_plain_date_time(left.clone(), relam)?;
+        let right = value_to_plain_date_time(right.clone(), relam)?;
+        
+        Ok(left.compare_iso(&right) as i8)
     }
 
-    pub fn equals(&self, other: &Self) -> bool {
-        self.date == other.date
+    pub fn equals(&self, other: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
+        let other = value_to_plain_date_time(other.clone(), realm)?;
+        
+        Ok(self.date == other)
     }
 
     pub fn since(&self, other: &Self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
