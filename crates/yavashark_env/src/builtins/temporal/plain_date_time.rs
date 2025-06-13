@@ -40,8 +40,8 @@ impl PlainDateTime {
         second: Option<u8>,
         millisecond: Option<u16>,
         microsecond: Option<u16>,
-        nanosecond: Option<u16>,
-        _calendar: Option<String>,
+        nanosecond: Option<u16>, 
+        calendar: Option<String>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
         let hour = hour.unwrap_or(0);
@@ -50,6 +50,13 @@ impl PlainDateTime {
         let millisecond = millisecond.unwrap_or(0);
         let microsecond = microsecond.unwrap_or(0);
         let nanosecond = nanosecond.unwrap_or(0);
+        
+        let calendar = calendar
+            .as_deref()
+            .map(Calendar::from_str)
+            .transpose()
+            .map_err(Error::from_temporal)?
+            .unwrap_or_default();
         
         
         let datetime = temporal_rs::PlainDateTime::new(
@@ -62,7 +69,7 @@ impl PlainDateTime {
             millisecond,
             microsecond,
             nanosecond,
-            Calendar::default()
+            calendar,
         ).map_err(Error::from_temporal)?;
         
         Ok(Self::new(datetime, realm).into_object())
