@@ -69,66 +69,9 @@ impl PlainDateTime {
     }
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        if let Value::String(str) = &info {
-            return Ok(temporal_rs::PlainDateTime::from_str(str.as_str())
-                .map_err(Error::from_temporal)
-                .map(|date| Self::new(date, realm))
-                .map_err(|_| Error::range("Invalid date"))?
-                .into_object());
-        }
-
-        let obj = info.to_object()?;
-
-        if obj.contains_key(&"year".into())?
-            || obj.contains_key(&"month".into())?
-            || obj.contains_key(&"day".into())?
-        {
-            let year = obj
-                .resolve_property(&"year".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
-            let month = obj
-                .resolve_property(&"month".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-            let day = obj
-                .resolve_property(&"day".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-            let hour = obj
-                .resolve_property(&"hour".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-            let minute = obj
-                .resolve_property(&"minute".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-            let second = obj
-                .resolve_property(&"second".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
-            let millisecond = obj
-                .resolve_property(&"millisecond".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
-            let microsecond = obj
-                .resolve_property(&"microsecond".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
-            let nanosecond = obj
-                .resolve_property(&"nanosecond".into(), realm)?
-                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
-            
-            
-            let datetime = temporal_rs::PlainDateTime::new(
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                second,
-                millisecond,
-                microsecond,
-                nanosecond,
-                Calendar::default()
-            ).map_err(Error::from_temporal)?;
-
-            return Ok(Self::new(datetime, realm).into_object());
-        }
-
-        Err(Error::range("Invalid date")) //TODO
+        let date = value_to_plain_date_time(info, realm)?;
+        
+        Ok(Self::new(date, realm).into_object())
     }
 
     #[allow(clippy::use_self)]
@@ -302,4 +245,70 @@ impl PlainDateTime {
             .map(Into::into)
             .unwrap_or(Value::Undefined)
     }
+}
+
+pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
+    if let Value::Object(obj) = &info {
+        if let Some(date) = obj.downcast::<PlainDateTime>() {
+            return Ok(date.date.clone());
+        }
+    }
+
+    if let Value::String(str) = &info {
+            return temporal_rs::PlainDateTime::from_str(str.as_str())
+                .map_err(Error::from_temporal);
+        }
+
+        let obj = info.to_object()?;
+
+        if obj.contains_key(&"year".into())?
+            || obj.contains_key(&"month".into())?
+            || obj.contains_key(&"day".into())?
+        {
+            let year = obj
+                .resolve_property(&"year".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
+            let month = obj
+                .resolve_property(&"month".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+            let day = obj
+                .resolve_property(&"day".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+            let hour = obj
+                .resolve_property(&"hour".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+            let minute = obj
+                .resolve_property(&"minute".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+            let second = obj
+                .resolve_property(&"second".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
+            let millisecond = obj
+                .resolve_property(&"millisecond".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
+            let microsecond = obj
+                .resolve_property(&"microsecond".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
+            let nanosecond = obj
+                .resolve_property(&"nanosecond".into(), realm)?
+                .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
+            
+            
+            let datetime = temporal_rs::PlainDateTime::new(
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+                millisecond,
+                microsecond,
+                nanosecond,
+                Calendar::default()
+            ).map_err(Error::from_temporal)?;
+
+            return Ok(datetime);
+        }
+
+        Err(Error::range("Invalid date")) //TODO
 }
