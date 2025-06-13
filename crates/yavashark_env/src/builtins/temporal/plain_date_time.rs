@@ -97,10 +97,10 @@ impl PlainDateTime {
         Ok(Duration::with_duration(realm, duration).into_object())
     }
 
-    pub fn until(&self, other: &Value, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+    pub fn until(&self, other: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = value_to_plain_date_time(other.clone(), realm)?;
         
-        let duration = other.until(&self.date, DifferenceSettings::default())
+        let duration = self.date.until(&other, DifferenceSettings::default())
             .map_err(Error::from_temporal)?;
         
         Ok(Duration::with_duration(realm, duration).into_object())
