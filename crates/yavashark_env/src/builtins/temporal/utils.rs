@@ -302,6 +302,10 @@ pub fn overflow_options(obj: ObjectHandle, realm: &mut Realm) -> Res<Option<Arit
         return Ok(None);
     };
     
+    if overflow.is_undefined() {
+        return Ok(None);
+    }
+    
     let overflow = overflow.to_string(realm)?;
 
     let overflow = match overflow.as_str() {
