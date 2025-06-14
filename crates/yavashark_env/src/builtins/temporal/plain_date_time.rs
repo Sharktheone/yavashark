@@ -6,7 +6,7 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::utils::difference_settings;
+use crate::builtins::temporal::utils::{difference_settings, overflow_options};
 
 #[object]
 #[derive(Debug)]
@@ -120,19 +120,27 @@ impl PlainDateTime {
         Ok(Duration::with_duration(realm, duration).into_object())
     }
 
-    pub fn add(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn add(&self, duration: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
+        
+        let opts = opts.map(|s| overflow_options(s, realm))
+            .transpose()?
+            .flatten();
 
-        let date = self.date.add(&dur, None)
+        let date = self.date.add(&dur, opts)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
     }
 
-    pub fn subtract(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn subtract(&self, duration: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
 
-        let date = self.date.subtract(&dur, None)
+        let opts = opts.map(|s| overflow_options(s, realm))
+            .transpose()?
+            .flatten();
+
+        let date = self.date.subtract(&dur, opts)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
