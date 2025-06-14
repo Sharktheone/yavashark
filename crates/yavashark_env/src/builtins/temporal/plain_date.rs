@@ -7,6 +7,7 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::plain_date_time::PlainDateTime;
 
 #[object]
 #[derive(Debug)]
@@ -250,6 +251,14 @@ impl PlainDate {
     #[get("calendarId")]
     pub fn calendar_id(&self) -> &'static str {
         self.date.calendar().identifier()
+    }
+    
+    #[prop("toPlainDateTime")]
+    pub fn to_plain_date_time(&self, _time: Option<Value>, #[realm] realm: &Realm) -> Res<ObjectHandle> {
+        let date_time = self.date.to_plain_date_time(None)
+            .map_err(Error::from_temporal)?;
+        
+        Ok(PlainDateTime::new(date_time, realm).into_object())
     }
 }
 
