@@ -1,6 +1,9 @@
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::options::{
+    ArithmeticOverflow, DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions,
+    ToStringRoundingOptions, Unit,
+};
 use temporal_rs::parsers::Precision;
 use temporal_rs::{Calendar, PlainDate};
 
@@ -301,11 +304,11 @@ pub fn overflow_options(obj: ObjectHandle, realm: &mut Realm) -> Res<Option<Arit
     let Some(overflow) = overflow else {
         return Ok(None);
     };
-    
+
     if overflow.is_undefined() {
         return Ok(None);
     }
-    
+
     let overflow = overflow.to_string(realm)?;
 
     let overflow = match overflow.as_str() {
@@ -313,6 +316,6 @@ pub fn overflow_options(obj: ObjectHandle, realm: &mut Realm) -> Res<Option<Arit
         "reject" => ArithmeticOverflow::Reject,
         _ => return Err(Error::range("Invalid overflow option")),
     };
-    
+
     Ok(Some(overflow))
 }

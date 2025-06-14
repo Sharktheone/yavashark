@@ -116,10 +116,16 @@ impl PlainDate {
         Ok(Duration::with_duration(realm, dur).into_object())
     }
 
-    pub fn add(&self, duration: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn add(
+        &self,
+        duration: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
-        let opts = opts.map(|s| overflow_options(s, realm))
+
+        let opts = opts
+            .map(|s| overflow_options(s, realm))
             .transpose()?
             .flatten();
 
@@ -128,10 +134,16 @@ impl PlainDate {
         Ok(Self::new(date, realm).into_object())
     }
 
-    pub fn subtract(&self, duration: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn subtract(
+        &self,
+        duration: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
-        let opts = opts.map(|s| overflow_options(s, realm))
+
+        let opts = opts
+            .map(|s| overflow_options(s, realm))
             .transpose()?
             .flatten();
 
