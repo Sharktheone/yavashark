@@ -168,7 +168,7 @@ impl PlainDateTime {
     }
 
     #[prop("valueOf")]
-    pub fn value_of() -> Res {
+    pub const fn value_of() -> Res {
         Err(Error::ty(
             "Called valueOf on a Temporal.PlainDateTime object",
         ))
@@ -209,16 +209,14 @@ impl PlainDateTime {
     #[get("era")]
     pub fn era(&self) -> Value {
         self.date.era()
-            .map(|era| YSString::from_ref(era.as_str()).into())
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, |era| YSString::from_ref(era.as_str()).into())
 
     }
 
     #[get("eraYear")]
     pub fn era_year(&self) -> Value {
         self.date.era_year()
-            .map(Into::into)
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, Into::into)
 
     }
 
@@ -275,8 +273,7 @@ impl PlainDateTime {
     #[get("weekOfYear")]
     pub fn week_of_year(&self) -> Value {
         self.date.week_of_year()
-            .map(Into::into)
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, Into::into)
     }
 
     #[get("year")]
@@ -287,8 +284,7 @@ impl PlainDateTime {
     #[get("yearOfWeek")]
     pub fn year_of_week(&self) -> Value {
         self.date.year_of_week()
-            .map(Into::into)
-            .unwrap_or(Value::Undefined)
+            .map_or(Value::Undefined, Into::into)
     }
 
 
