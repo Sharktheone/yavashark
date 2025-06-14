@@ -6,7 +6,7 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::utils::{difference_settings, overflow_options};
+use crate::builtins::temporal::utils::{difference_settings, overflow_options, rounding_options};
 
 #[object]
 #[derive(Debug)]
@@ -122,7 +122,7 @@ impl PlainDateTime {
 
     pub fn add(&self, duration: Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
+
         let opts = opts.map(|s| overflow_options(s, realm))
             .transpose()?
             .flatten();
@@ -144,7 +144,17 @@ impl PlainDateTime {
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
+    }
 
+    pub fn round(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+
+        let (opts, _) = rounding_options(opts, realm)?;
+
+
+        let date = self.date.round(opts)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
     }
 
     #[prop("toJSON")]
