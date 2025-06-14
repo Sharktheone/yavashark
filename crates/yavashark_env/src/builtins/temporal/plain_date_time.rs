@@ -1,10 +1,8 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use chrono::{Datelike, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::Calendar;
-use temporal_rs::options::DifferenceSettings;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
@@ -41,7 +39,7 @@ impl PlainDateTime {
         second: Option<u8>,
         millisecond: Option<u16>,
         microsecond: Option<u16>,
-        nanosecond: Option<u16>, 
+        nanosecond: Option<u16>,
         calendar: Option<String>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
@@ -51,15 +49,15 @@ impl PlainDateTime {
         let millisecond = millisecond.unwrap_or(0);
         let microsecond = microsecond.unwrap_or(0);
         let nanosecond = nanosecond.unwrap_or(0);
-        
+
         let calendar = calendar
             .as_deref()
             .map(Calendar::from_str)
             .transpose()
             .map_err(Error::from_temporal)?
             .unwrap_or_default();
-        
-        
+
+
         let datetime = temporal_rs::PlainDateTime::new(
             year,
             month,
@@ -72,13 +70,13 @@ impl PlainDateTime {
             nanosecond,
             calendar,
         ).map_err(Error::from_temporal)?;
-        
+
         Ok(Self::new(datetime, realm).into_object())
     }
 
     pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let date = value_to_plain_date_time(info, realm)?;
-        
+
         Ok(Self::new(date, realm).into_object())
     }
 
@@ -86,59 +84,59 @@ impl PlainDateTime {
     pub fn compare(left: &Value, right: &Value, #[realm] relam: &mut Realm) -> Res<i8> {
         let left = value_to_plain_date_time(left.clone(), relam)?;
         let right = value_to_plain_date_time(right.clone(), relam)?;
-        
+
         Ok(left.compare_iso(&right) as i8)
     }
 
     pub fn equals(&self, other: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
         let other = value_to_plain_date_time(other.clone(), realm)?;
-        
+
         Ok(self.date == other)
     }
 
     pub fn since(&self, other: &Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = value_to_plain_date_time(other.clone(), realm)?;
-        
+
         let opts = opts.map(|s| difference_settings(s, realm))
             .transpose()?
             .unwrap_or_default();
-        
+
         let duration = self.date.since(&other, opts)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(Duration::with_duration(realm, duration).into_object())
     }
 
     pub fn until(&self, other: &Value, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = value_to_plain_date_time(other.clone(), realm)?;
-        
+
         let opts = opts.map(|s| difference_settings(s, realm))
             .transpose()?
             .unwrap_or_default();
-        
+
         let duration = self.date.until(&other, opts)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(Duration::with_duration(realm, duration).into_object())
     }
 
     pub fn add(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
+
         let date = self.date.add(&dur, None)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(Self::new(date, realm).into_object())
     }
 
     pub fn subtract(&self, duration: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(duration, realm)?;
-        
+
         let date = self.date.subtract(&dur, None)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(Self::new(date, realm).into_object())
-        
+
     }
 
     #[prop("toJSON")]
@@ -195,7 +193,7 @@ impl PlainDateTime {
         self.date.era()
             .map(|era| YSString::from_ref(era.as_str()).into())
             .unwrap_or(Value::Undefined)
-            
+
     }
 
     #[get("eraYear")]
@@ -203,7 +201,7 @@ impl PlainDateTime {
         self.date.era_year()
             .map(Into::into)
             .unwrap_or(Value::Undefined)
-        
+
     }
 
     #[get("inLeapYear")]
@@ -274,6 +272,12 @@ impl PlainDateTime {
             .map(Into::into)
             .unwrap_or(Value::Undefined)
     }
+
+
+    #[get("calendarId")]
+    pub fn calendar_id(&self) -> &'static str {
+        self.date.calendar().identifier()
+    }
 }
 
 pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
@@ -316,7 +320,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
             } else {
                 month
             };
-            
+
             let day = obj
                 .resolve_property(&"day".into(), realm)?
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
@@ -338,7 +342,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
             let nanosecond = obj
                 .resolve_property(&"nanosecond".into(), realm)?
                 .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
-            
+
             let calendar = obj
                 .resolve_property(&"calendar".into(), realm)?
                 .and_then(|v| v.to_string(realm).ok())
@@ -349,15 +353,15 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
                         Some(s.as_str().to_string())
                     }
                 });
-            
+
             let calendar = calendar
                 .as_deref()
                 .map(Calendar::from_str)
                 .transpose()
                 .map_err(Error::from_temporal)?
                 .unwrap_or_default();
-            
-            
+
+
             let datetime = temporal_rs::PlainDateTime::new(
                 year,
                 month,
