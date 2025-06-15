@@ -1,4 +1,5 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::utils::{difference_settings, overflow_options};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
@@ -7,7 +8,6 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::plain_date_time::PlainDateTime;
 
 #[object]
 #[derive(Debug)]
@@ -252,12 +252,18 @@ impl PlainDate {
     pub fn calendar_id(&self) -> &'static str {
         self.date.calendar().identifier()
     }
-    
+
     #[prop("toPlainDateTime")]
-    pub fn to_plain_date_time(&self, _time: Option<Value>, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date_time = self.date.to_plain_date_time(None)
+    pub fn to_plain_date_time(
+        &self,
+        _time: Option<Value>,
+        #[realm] realm: &Realm,
+    ) -> Res<ObjectHandle> {
+        let date_time = self
+            .date
+            .to_plain_date_time(None)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(PlainDateTime::new(date_time, realm).into_object())
     }
 }

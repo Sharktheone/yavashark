@@ -1,14 +1,14 @@
-use std::cell::RefCell;
-use std::str::FromStr;
-use temporal_rs::Calendar;
-use temporal_rs::options::ArithmeticOverflow;
-use temporal_rs::partial::PartialDate;
-use yavashark_macro::{object, props};
-use yavashark_string::YSString;
-use yavashark_value::{Obj};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{calendar_opt, overflow_options};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use std::cell::RefCell;
+use std::str::FromStr;
+use temporal_rs::options::ArithmeticOverflow;
+use temporal_rs::partial::PartialDate;
+use temporal_rs::Calendar;
+use yavashark_macro::{object, props};
+use yavashark_string::YSString;
+use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
@@ -19,7 +19,7 @@ pub struct PlainMonthDay {
 impl PlainMonthDay {
     pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &crate::Realm) -> Self {
         Self {
-            inner: RefCell::new(MutablePlainMonthDay{
+            inner: RefCell::new(MutablePlainMonthDay {
                 object: MutObject::with_proto(
                     realm.intrinsics.temporal_plain_month_day.clone().into(),
                 ),
@@ -41,27 +41,33 @@ impl PlainMonthDay {
     ) -> Res<ObjectHandle> {
         let calendar = calendar_opt(calendar)?;
 
-        let month_day = temporal_rs::PlainMonthDay::new_with_overflow(month, day, calendar, ArithmeticOverflow::Constrain, ref_year)
-            .map_err(Error::from_temporal)?;
+        let month_day = temporal_rs::PlainMonthDay::new_with_overflow(
+            month,
+            day,
+            calendar,
+            ArithmeticOverflow::Constrain,
+            ref_year,
+        )
+        .map_err(Error::from_temporal)?;
 
         Ok(Self::new(month_day, realm).into_object())
     }
 
-    pub fn from(info: Value, options: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let overflow = options.map(|o| overflow_options(o, realm))
+    pub fn from(
+        info: Value,
+        options: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let overflow = options
+            .map(|o| overflow_options(o, realm))
             .transpose()?
             .flatten();
-        
-        
+
         let month_day = value_to_plain_month_day(info, realm, overflow)?;
         Ok(Self::new(month_day, realm).into_object())
     }
 
-    pub fn equals(
-        &self,
-        other: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<bool> {
+    pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
         let other = value_to_plain_month_day(other, realm, None)?;
 
         Ok(self.month_day == other)
@@ -80,7 +86,9 @@ impl PlainMonthDay {
     ) -> Res<ObjectHandle> {
         let date = value_to_partial_date(info, realm)?;
 
-        let plain_date = self.month_day.to_plain_date(Some(date))
+        let plain_date = self
+            .month_day
+            .to_plain_date(Some(date))
             .map_err(Error::from_temporal)?;
 
         Ok(PlainDate::new(plain_date, realm).into_object())
@@ -94,7 +102,9 @@ impl PlainMonthDay {
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
-        Err(Error::ty("Called valueOf on a Temporal.PlainMonthDay object"))
+        Err(Error::ty(
+            "Called valueOf on a Temporal.PlainMonthDay object",
+        ))
     }
 
     #[get("calendarId")]
@@ -107,14 +117,11 @@ impl PlainMonthDay {
         self.month_day.day()
     }
 
-
     #[get("monthCode")]
     pub fn month_code(&self) -> YSString {
         YSString::from_ref(self.month_day.month_code().as_str())
     }
 }
-
-
 
 pub fn value_to_plain_month_day(
     value: Value,
@@ -126,7 +133,7 @@ pub fn value_to_plain_month_day(
             if let Some(plain_month_day) = obj.downcast::<PlainMonthDay>() {
                 return Ok(plain_month_day.month_day.clone());
             }
-            
+
             let overflow = overflow.unwrap_or(ArithmeticOverflow::Constrain);
 
             if (obj.contains_key(&"month".into())? || obj.contains_key(&"monthCode".into())?)
@@ -171,11 +178,15 @@ pub fn value_to_plain_month_day(
                     .map_err(Error::from_temporal)?
                     .unwrap_or_default();
 
-                return temporal_rs::PlainMonthDay::new_with_overflow(month, day, calendar, overflow, year)
-                    .map_err(Error::from_temporal);
+                return temporal_rs::PlainMonthDay::new_with_overflow(
+                    month, day, calendar, overflow, year,
+                )
+                .map_err(Error::from_temporal);
             }
 
-            Err(Error::ty("Expected PlainMonthDay object with year, month, and day properties"))
+            Err(Error::ty(
+                "Expected PlainMonthDay object with year, month, and day properties",
+            ))
         }
         Value::String(s) => {
             let month_day = temporal_rs::PlainMonthDay::from_str(&s.to_string())
@@ -186,10 +197,7 @@ pub fn value_to_plain_month_day(
     }
 }
 
-pub fn value_to_partial_date(
-    value: ObjectHandle,
-    realm: &mut Realm,
-) -> Res<PartialDate> {
+pub fn value_to_partial_date(value: ObjectHandle, realm: &mut Realm) -> Res<PartialDate> {
     let mut partial_date = PartialDate::new();
 
     if let Some(era) = value.get_opt("era", realm)? {
@@ -199,7 +207,6 @@ pub fn value_to_partial_date(
 
         partial_date = partial_date.with_era(Some(str));
     }
-
 
     if let Some(era_year) = value.get_opt("eraYear", realm)? {
         let era_year = era_year.to_number(realm)?;
@@ -212,7 +219,6 @@ pub fn value_to_partial_date(
 
         partial_date = partial_date.with_year(Some(year as i32));
     }
-
 
     Ok(partial_date)
 }
