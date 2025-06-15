@@ -5,7 +5,7 @@ use temporal_rs::options::{
     ToStringRoundingOptions, Unit,
 };
 use temporal_rs::parsers::Precision;
-use temporal_rs::{Calendar, PlainDate};
+use temporal_rs::Calendar;
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 
 pub fn opt_relative_to_wrap(
