@@ -25,7 +25,7 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
     Ok(match rel {
         Value::Object(obj) => {
             let plain_date = value_to_plain_date(obj.into(), realm)?;
-            
+
             Some(RelativeTo::PlainDate(plain_date))
         }
         Value::String(str) => Some(

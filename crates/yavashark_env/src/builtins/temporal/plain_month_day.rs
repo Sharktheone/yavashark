@@ -8,7 +8,7 @@ use yavashark_string::YSString;
 use yavashark_value::{Obj};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::calendar_opt;
+use crate::builtins::temporal::utils::{calendar_opt, overflow_options};
 
 #[object]
 #[derive(Debug)]
@@ -47,8 +47,13 @@ impl PlainMonthDay {
         Ok(Self::new(month_day, realm).into_object())
     }
 
-    pub fn from(info: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let month_day = value_to_plain_month_day(info, realm)?;
+    pub fn from(info: Value, options: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow = options.map(|o| overflow_options(o, realm))
+            .transpose()?
+            .flatten();
+        
+        
+        let month_day = value_to_plain_month_day(info, realm, overflow)?;
         Ok(Self::new(month_day, realm).into_object())
     }
 
@@ -57,7 +62,7 @@ impl PlainMonthDay {
         other: Value,
         #[realm] realm: &mut Realm,
     ) -> Res<bool> {
-        let other = value_to_plain_month_day(other, realm)?;
+        let other = value_to_plain_month_day(other, realm, None)?;
 
         Ok(self.month_day == other)
     }
@@ -91,18 +96,18 @@ impl PlainMonthDay {
     pub const fn value_of() -> Res<()> {
         Err(Error::ty("Called valueOf on a Temporal.PlainMonthDay object"))
     }
-    
+
     #[get("calendarId")]
     pub fn calendar_id(&self) -> &'static str {
         self.month_day.calendar_id()
     }
-    
+
     #[get("day")]
     pub fn day(&self) -> u8 {
         self.month_day.day()
     }
-    
-    
+
+
     #[get("monthCode")]
     pub fn month_code(&self) -> YSString {
         YSString::from_ref(self.month_day.month_code().as_str())
@@ -114,12 +119,15 @@ impl PlainMonthDay {
 pub fn value_to_plain_month_day(
     value: Value,
     realm: &mut Realm,
+    overflow: Option<ArithmeticOverflow>,
 ) -> Res<temporal_rs::PlainMonthDay> {
     match value {
         Value::Object(obj) => {
             if let Some(plain_month_day) = obj.downcast::<PlainMonthDay>() {
                 return Ok(plain_month_day.month_day.clone());
             }
+            
+            let overflow = overflow.unwrap_or(ArithmeticOverflow::Constrain);
 
             if (obj.contains_key(&"month".into())? || obj.contains_key(&"monthCode".into())?)
                 && obj.contains_key(&"day".into())?
@@ -163,7 +171,7 @@ pub fn value_to_plain_month_day(
                     .map_err(Error::from_temporal)?
                     .unwrap_or_default();
 
-                return temporal_rs::PlainMonthDay::new_with_overflow(month, day, calendar, ArithmeticOverflow::Constrain, year)
+                return temporal_rs::PlainMonthDay::new_with_overflow(month, day, calendar, overflow, year)
                     .map_err(Error::from_temporal);
             }
 
