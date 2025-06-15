@@ -258,3 +258,12 @@ pub fn overflow_options(obj: ObjectHandle, realm: &mut Realm) -> Res<Option<Arit
 
     Ok(Some(overflow))
 }
+
+pub fn calendar_opt(cal: Option<String>) -> Res<Calendar> {
+    Ok(cal
+        .as_deref()
+        .map(temporal_rs::Calendar::from_str)
+        .transpose()
+        .map_err(crate::Error::from_temporal)?
+        .unwrap_or_default())
+}
