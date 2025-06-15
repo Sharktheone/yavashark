@@ -6,6 +6,7 @@ use temporal_rs::options::{
 };
 use temporal_rs::parsers::Precision;
 use temporal_rs::{Calendar, PlainDate};
+use crate::builtins::temporal::plain_date::value_to_plain_date;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -23,46 +24,9 @@ pub fn relative_to_wrap(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Rel
 pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
     Ok(match rel {
         Value::Object(obj) => {
-            let year = obj
-                .get_opt("year", realm)?
-                .ok_or(Error::ty("Invalid year for PlainDate"))?
-                .to_number(realm)
-                .and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
-
-            let month = obj
-                .get_opt("month", realm)?
-                .ok_or(Error::ty("Invalid month for PlainDate"))?
-                .to_number(realm)
-                .and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
-
-            let day = obj
-                .get_opt("day", realm)?
-                .ok_or(Error::ty("Invalid day for PlainDate"))?
-                .to_number(realm)
-                .and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
-
-            let pd = PlainDate::new(year, month, day, Calendar::default())
-                .map_err(Error::from_temporal)?;
-
-            Some(RelativeTo::PlainDate(pd))
+            let plain_date = value_to_plain_date(obj.into(), realm)?;
+            
+            Some(RelativeTo::PlainDate(plain_date))
         }
         Value::String(str) => Some(
             RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
@@ -206,34 +170,9 @@ pub fn rounding_options(
 
         rel = match r {
             Some(Value::Object(obj)) => {
-                let year = obj.get("year", realm)?.to_number(realm).and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
+                let plain_date = value_to_plain_date(obj.into(), realm)?;
 
-                let month = obj.get("month", realm)?.to_number(realm).and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
-
-                let day = obj.get("day", realm)?.to_number(realm).and_then(|n| {
-                    if n.fract() == 0.0 {
-                        Ok(n as _)
-                    } else {
-                        Err(Error::range("Invalid year for PlainDate"))
-                    }
-                })?;
-
-                let pd = PlainDate::new(year, month, day, Calendar::default())
-                    .map_err(Error::from_temporal)?;
-
-                Some(RelativeTo::PlainDate(pd))
+                Some(RelativeTo::PlainDate(plain_date))
             }
             Some(Value::String(str)) => Some(
                 RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
