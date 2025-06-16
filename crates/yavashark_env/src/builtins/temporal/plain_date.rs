@@ -1,6 +1,6 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::utils::{difference_settings, overflow_options};
+use crate::builtins::temporal::utils::{calendar_opt, difference_settings, display_calendar, overflow_options};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -265,6 +265,14 @@ impl PlainDate {
             .map_err(Error::from_temporal)?;
 
         Ok(PlainDateTime::new(date_time, realm).into_object())
+    }
+
+    #[prop("toString")]
+    pub fn to_string(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
+        let calendar = display_calendar(opts.as_ref(), realm)?;
+
+
+        Ok(self.date.to_ixdtf_string(calendar))
     }
 }
 
