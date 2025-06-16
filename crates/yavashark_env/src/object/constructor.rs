@@ -59,7 +59,7 @@ impl ObjectConstructor {
 
         if let Some(props) = properties {
             for (key, value) in props.properties()? {
-                obj.define_property(key, value)?;
+                Self::define_property(obj.clone(), &key, value.as_object()?)?;
             }
         }
 
