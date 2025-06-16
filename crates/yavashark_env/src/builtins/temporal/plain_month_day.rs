@@ -1,5 +1,5 @@
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{calendar_opt, overflow_options};
+use crate::builtins::temporal::utils::{calendar_opt, display_calendar, overflow_options};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -95,8 +95,10 @@ impl PlainMonthDay {
     }
 
     #[prop("toString")]
-    pub fn to_js_string(&self) -> String {
-        self.month_day.to_string()
+    pub fn to_js_string(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
+        let calendar = display_calendar(opts.as_ref(), realm)?;
+        
+        Ok(self.month_day.to_ixdtf_string(calendar))
     }
 
     #[prop("valueOf")]
