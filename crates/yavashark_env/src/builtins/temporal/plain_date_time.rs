@@ -1,6 +1,6 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{difference_settings, overflow_options, rounding_options};
+use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options, rounding_options, string_rounding_mode_opts};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -191,8 +191,12 @@ impl PlainDateTime {
     }
 
     #[prop("toString")]
-    pub fn to_string_js(&self) -> String {
-        self.date.to_string()
+    pub fn to_string_js(&self, options: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
+        let display_calendar = display_calendar(options.as_ref(), realm)?;
+        let opts = string_rounding_mode_opts(options, realm)?;
+        
+        self.date.to_ixdtf_string(opts, display_calendar)
+            .map_err(Error::from_temporal)
     }
 
     #[prop("valueOf")]

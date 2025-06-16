@@ -1,10 +1,7 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::options::{
-    ArithmeticOverflow, DifferenceSettings, RelativeTo, RoundingIncrement, RoundingOptions,
-    ToStringRoundingOptions, Unit,
-};
+use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, DisplayCalendar, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::parsers::Precision;
 use temporal_rs::Calendar;
 
@@ -266,4 +263,15 @@ pub fn calendar_opt(cal: Option<String>) -> Res<Calendar> {
         .transpose()
         .map_err(crate::Error::from_temporal)?
         .unwrap_or_default())
+}
+
+pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayCalendar>{
+    let Some(cal) = cal else {
+        return Ok(DisplayCalendar::default());
+    };
+    
+    let cal = cal.get("calendarName", realm)?.to_string(realm)?;
+    
+    DisplayCalendar::from_str(&cal)
+        .map_err(Error::from_temporal)
 }
