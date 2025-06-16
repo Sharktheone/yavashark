@@ -3,7 +3,7 @@ use crate::properties_new::{MaybeConstructor, Type};
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
-use syn::Expr;
+use syn::{Expr, Lit};
 
 #[derive(Clone)]
 pub struct Method {
@@ -14,6 +14,7 @@ pub struct Method {
     pub realm: Option<usize>,
     pub has_receiver: bool,
     pub ty: Type,
+    pub length: Option<usize>,
 }
 
 impl Method {
@@ -80,32 +81,37 @@ impl Method {
             .clone()
             .map(|js| quote! { #js })
             .unwrap_or_else(|| quote! { stringify!(#name_ident) });
-        let mut length = self.args.len();
 
-        if self.this.is_some() {
-            length -= 1;
-        }
-        if self.realm.is_some() {
-            length -= 1;
-        }
+        let length = self.length.unwrap_or_else(|| {
+            let mut length = self.args.len();
 
-        let optionals = self
-            .args
-            .iter()
-            .filter(|arg| {
-                if let syn::Type::Path(path) = deref_type(arg) {
-                    path.path
-                        .segments
-                        .first()
-                        .map(|seg| &seg.ident.to_string() == "Option")
-                        .unwrap_or(false)
-                } else {
-                    false
-                }
-            })
-            .count();
+            if self.this.is_some() {
+                length -= 1;
+            }
+            if self.realm.is_some() {
+                length -= 1;
+            }
 
-        length -= optionals;
+            let optionals = self
+                .args
+                .iter()
+                .filter(|arg| {
+                    if let syn::Type::Path(path) = deref_type(arg) {
+                        path.path
+                            .segments
+                            .first()
+                            .map(|seg| &seg.ident.to_string() == "Option")
+                            .unwrap_or(false)
+                    } else {
+                        false
+                    }
+                })
+                .count();
+
+            length -= optionals;
+
+            length
+        });
 
         quote! {
             #native_function::with_proto_and_len(#js_name.as_ref(), |mut args, mut this, realm| {
@@ -198,6 +204,7 @@ pub fn parse_method(
     let mut realm = None;
     let mut has_receiver = false;
     let mut ty = Type::Normal;
+    let mut length = None;
 
     let mut maybe_static = MethodType::Static;
 
@@ -307,6 +314,17 @@ pub fn parse_method(
             }
 
             return false;
+        } else if attr.path().is_ident("length") {
+            if let Ok(Lit::Int(l)) = attr.parse_args::<Lit>() {
+                if let Ok(len) = l.base10_parse::<usize>() {
+                    length = Some(len);
+                } else {
+                    encountered_error = Some(syn::Error::new(l.span(), "Length must be a usize"));
+                }
+            } else {
+                encountered_error = Some(syn::Error::new(attr.span(), "Length must be a usize"));
+            }
+            return false;
         }
 
         true
@@ -355,6 +373,7 @@ pub fn parse_method(
             realm,
             has_receiver,
             ty,
+            length,
         }),
         has_receiver,
     ))
