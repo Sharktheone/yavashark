@@ -12,7 +12,7 @@ use yavashark_value::Obj;
 #[object]
 #[derive(Debug)]
 pub struct PlainDateTime {
-    date: temporal_rs::PlainDateTime,
+    pub date: temporal_rs::PlainDateTime,
 }
 
 impl PlainDateTime {
