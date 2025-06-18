@@ -270,6 +270,16 @@ impl RegExp {
         
         source
     }
+    
+    #[get("global")]
+    pub const fn global(&self) -> bool {
+        self.flags.global
+    }
+    
+    #[get("lastIndex")]
+    pub fn last_index(&self) -> usize {
+        self.last_index.get()
+    }
 }
 
 #[must_use]
