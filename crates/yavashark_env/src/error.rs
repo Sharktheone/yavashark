@@ -4,9 +4,9 @@ use std::cell::RefCell;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 use yavashark_string::{ToYSString, YSString};
-use yavashark_value::{ErrorKind, FromValue};
+use yavashark_value::{CustomName, ErrorKind, FromValue};
 
-#[object(to_string)]
+#[object(to_string, name)]
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct ErrorObj {
@@ -99,11 +99,20 @@ impl ErrorObj {
     }
 }
 
+impl CustomName for ErrorObj {
+    fn custom_name(&self) -> String {
+        "Error".to_string()
+    }
+}
+
 #[props]
 impl ErrorObj {
+    #[prop("name")]
+    const NAME: &'static str = "Error";
+
     #[constructor]
     pub fn construct(message: YSString, #[realm] realm: &mut Realm) -> ValueResult {
-        let obj = ErrorObj::new(Error::unknown_error(message), realm).into();
+        let obj = Self::new(Error::unknown_error(message), realm).into();
 
         Ok(obj)
     }
