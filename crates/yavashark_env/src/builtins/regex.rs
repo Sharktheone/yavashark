@@ -18,6 +18,7 @@ pub struct RegExp {
 }
 
 #[derive(Debug, Copy, Clone, Default)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct Flags {
     pub icase: bool,
     pub multiline: bool,
@@ -30,15 +31,15 @@ pub struct Flags {
     pub has_indecies: bool,
 }
 
-impl Into<regress::Flags> for Flags {
-    fn into(self) -> regress::Flags {
-        regress::Flags {
-            icase: self.icase,
-            multiline: self.multiline,
-            dot_all: self.dot_all,
-            no_opt: self.no_opt,
-            unicode: self.unicode,
-            unicode_sets: self.unicode_sets,
+impl From<Flags> for regress::Flags {
+    fn from(value: Flags) -> Self {
+        Self {
+            icase: value.icase,
+            multiline: value.multiline,
+            dot_all: value.dot_all,
+            no_opt: value.no_opt,
+            unicode: value.unicode,
+            unicode_sets: value.unicode_sets,
         }
     }
 }
