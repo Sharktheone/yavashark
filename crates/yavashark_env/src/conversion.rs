@@ -137,9 +137,9 @@ impl FromValueOutput for BigInt {
                 if n.is_nan() || n.is_infinite() {
                     return Err(Error::ty_error(format!("Cannot convert {n} to BigInt")));
                 }
-                Ok(Self::from(n as u128))
+                Ok(Self::from(n as i128))
             }
-            Value::String(s) => s.trim().parse::<u128>().map_or_else(
+            Value::String(s) => s.trim().parse::<i128>().map_or_else(
                 |_| Err(Error::ty_error(format!("Cannot convert {s} to BigInt"))),
                 |n| Ok(Self::from(n)),
             ),
@@ -158,7 +158,7 @@ impl FromValueOutput for &BigInt {
                 if n.is_nan() || n.is_infinite() {
                     return Err(Error::ty_error(format!("Cannot convert {n} to BigInt")));
                 }
-                Ok(Rc::new(BigInt::from(n as u128)))
+                Ok(Rc::new(BigInt::from(n as i128)))
             }
             Value::String(s) => Ok(Rc::new(s.trim().parse::<i128>().map_or_else(
                 |_| Err(Error::syn_error(format!("Cannot convert {s} to BigInt"))),
