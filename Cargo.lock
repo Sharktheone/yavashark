@@ -1809,6 +1809,8 @@ version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 dependencies = [
+ "allocator-api2",
+ "equivalent",
  "foldhash",
 ]
 
@@ -3291,6 +3293,16 @@ name = "regex-syntax"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
+
+[[package]]
+name = "regress"
+version = "0.10.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "78ef7fa9ed0256d64a688a3747d0fef7a88851c18a5e1d57f115f38ec2e09366"
+dependencies = [
+ "hashbrown 0.15.2",
+ "memchr",
+]
 
 [[package]]
 name = "renderdoc-sys"
@@ -5276,7 +5288,7 @@ dependencies = [
  "paste",
  "pin-project",
  "rand 0.9.0",
- "regex",
+ "regress",
  "rustc-hash 2.1.1",
  "serde",
  "serde_json",
@@ -5348,6 +5360,10 @@ dependencies = [
  "slotmap",
  "yavashark_lexer",
 ]
+
+[[package]]
+name = "yavashark_realm"
+version = "0.1.0"
 
 [[package]]
 name = "yavashark_string"

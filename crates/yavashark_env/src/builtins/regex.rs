@@ -1,53 +1,101 @@
 use crate::array::Array;
-use crate::{ControlFlow, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
-use regex::{Regex, RegexBuilder};
-use std::cell::RefCell;
+use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use regress::{Range, Regex};
+use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, Func, IntoValue, Obj};
+use yavashark_value::{Constructor, Func, Obj};
 
-#[object(direct(last_index(lastIndex), global))]
+#[object()]
 #[derive(Debug)]
 pub struct RegExp {
     regex: Regex,
-    global: bool,
+    flags: Flags,
+
+    last_index: Cell<usize>,
+    source: YSString,
+    flags_str: YSString,
+}
+
+#[derive(Debug, Copy, Clone, Default)]
+pub struct Flags {
+    pub icase: bool,
+    pub multiline: bool,
+    pub dot_all: bool,
+    pub no_opt: bool,
+    pub unicode: bool,
+    pub unicode_sets: bool,
+    pub global: bool,
+    pub sticky: bool,
+    pub has_indecies: bool,
+}
+
+impl Into<regress::Flags> for Flags {
+    fn into(self) -> regress::Flags {
+        regress::Flags {
+            icase: self.icase,
+            multiline: self.multiline,
+            dot_all: self.dot_all,
+            no_opt: self.no_opt,
+            unicode: self.unicode,
+            unicode_sets: self.unicode_sets,
+        }
+    }
+}
+
+impl From<&str> for Flags {
+    fn from(flags: &str) -> Self {
+        let mut flags_obj = Flags::default();
+
+        for c in flags.chars() {
+            match c {
+                'i' => flags_obj.icase = true,
+                'm' => flags_obj.multiline = true,
+                's' => flags_obj.dot_all = true,
+                'n' => flags_obj.no_opt = true,
+                'u' => flags_obj.unicode = true,
+                'v' => flags_obj.unicode_sets = true,
+                'g' => flags_obj.global = true,
+                'y' => flags_obj.sticky = true,
+                'd' => flags_obj.has_indecies = true,
+                _ => {}
+            }
+        }
+
+        flags_obj
+    }
 }
 
 impl RegExp {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
-    pub fn new(realm: &Realm, regex: Regex, global: bool) -> ObjectHandle {
+    pub fn new(realm: &Realm, regex: Regex, flags: Flags, source: YSString, flags_str: YSString) -> ObjectHandle {
         Self {
             regex,
             inner: RefCell::new(MutableRegExp {
                 object: MutObject::with_proto(realm.intrinsics.regexp.clone().into()),
-                last_index: Value::from(0u8).into(),
-                global: global.into(),
             }),
-            global,
+            flags,
+            source,
+            flags_str,
+            last_index: Cell::new(0),
         }
         .into_object()
     }
 
-    pub fn new_from_str(realm: &Realm, regex: &str) -> Res<ObjectHandle> {
-        let regex = Regex::new(regex).map_err(|e| ControlFlow::error(e.to_string()))?;
+    pub fn new_from_str(realm: &Realm, source: &str) -> Res<ObjectHandle> {
+        let regex = Regex::new(source).map_err(|e| ControlFlow::error(e.to_string()))?;
 
-        Ok(Self::new(realm, regex, false))
+        Ok(Self::new(realm, regex, Flags::default(), YSString::from_ref(source), YSString::new()))
     }
 
-    pub fn new_from_str_with_flags(realm: &Realm, regex: &str, flags: &str) -> Res<ObjectHandle> {
-        let regex = RegexBuilder::new(regex)
-            .case_insensitive(flags.contains('i'))
-            .multi_line(flags.contains('m'))
-            .dot_matches_new_line(flags.contains('s'))
-            .ignore_whitespace(flags.contains('x'))
-            .unicode(flags.contains('u'))
-            .build()
-            .map_err(|e| ControlFlow::error_syntax(e.to_string()))?;
+    pub fn new_from_str_with_flags(realm: &Realm, source: &str, flags_str: &str) -> Res<ObjectHandle> {
+        let flags = Flags::from(flags_str);
 
-        let global = flags.contains('g');
+        let regex = Regex::from_unicode(source.chars().map(u32::from), flags)
+            .map_err(|e| Error::syn_error(e.text))?;
 
-        Ok(Self::new(realm, regex, global))
+        Ok(Self::new(realm, regex, flags, YSString::from_ref(source), YSString::from_ref(flags_str)))
     }
 }
 
@@ -58,7 +106,7 @@ pub struct RegExpConstructor {}
 #[properties_new(raw)]
 impl RegExpConstructor {
     fn escape(value: &str) -> String {
-        regex::escape(value)
+        escape(value)
     }
 }
 
@@ -112,54 +160,134 @@ impl Func<Realm> for RegExpConstructor {
 #[properties_new(constructor(RegExpConstructor::new))]
 impl RegExp {
     #[prop("exec")]
-    pub fn exec(&self, value: &str, #[realm] realm: &mut Realm) -> ValueResult {
-        if self.global {
-            let mut inner = self.inner.borrow_mut();
-
-            let mut last_index = inner.last_index.value.to_number(realm)? as usize;
-
-            let value = value.get(last_index..).unwrap_or_default();
-
-            let value = self.regex.find(value).map(|m| {
-                last_index += m.end();
-
-                m.as_str().to_string()
-            });
-
-            let Some(value) = value else {
-                inner.last_index.value = Value::from(0u8);
-
-                return Ok(Value::Null);
-            };
-
-            inner.last_index.value = Value::from(last_index);
-
-            let array = Array::with_elements(realm, vec![value.into_value()])?;
-
-            return Ok(array.into_value());
+    pub fn exec(&self, value: YSString, #[realm] realm: &mut Realm) -> ValueResult {
+        if !self.flags.global && !self.flags.sticky {
+            self.last_index.set(0);
         }
 
-        let value = self
-            .regex
-            .find(value)
-            .map_or_else(String::new, |m| m.as_str().to_string());
+        let input = value.as_str();
 
-        Ok(value.into_value())
+        let full_unicode = self.flags.unicode || self.flags.unicode_sets;
+
+        if self.last_index.get() > input.len() {
+            self.last_index.set(0);
+        }
+
+        let Some(m) = self.regex.find_from(input, self.last_index.get()).next() else {
+            if self.flags.global || self.flags.sticky {
+                self.last_index.set(0);
+            }
+
+            return Ok(Value::Undefined);
+        };
+
+        if self.flags.sticky && m.start() != self.last_index.get() {
+            self.last_index.set(0);
+
+            return Ok(Value::Undefined);
+        }
+
+        self.last_index.set(m.start());
+
+        if self.flags.global || self.flags.sticky {
+            self.last_index.set(m.end());
+        }
+
+        let a = Array::with_len(realm, m.captures.len() + 1)?;
+
+        a.define_property("index".into(), self.last_index.get().into())?;
+        a.define_property("input".into(), value.clone().into())?;
+
+        let matches = Array::with_elements(realm, vec![m.start().into(), m.end().into()])?;
+
+        let indices = Array::with_len(realm, m.captures.len() + 1)?;
+
+        indices.push(matches.into_value())?;
+
+        let mut named_groups = m.named_groups().collect::<Vec<(&str, Option<Range>)>>();
+        named_groups.sort_by(|(a, _), (b, _)| a.cmp(b));
+
+        let (groups, group_names) = if named_groups.is_empty() {
+            (Value::Undefined, Value::Undefined)
+        } else {
+            todo!();
+        };
+
+        indices.define_property("groups".into(), groups)?;
+        indices.define_property("groupNames".into(), group_names)?;
+
+        for i in 1..=m.captures.len() {
+            let capture = m.group(i);
+
+            let captured = capture
+                .clone()
+                .and_then(|c| input.get(c))
+                .map_or(Value::Undefined, |s| YSString::from_ref(s).into());
+
+            a.push(captured)?;
+
+            if self.flags.has_indecies {
+                let range = capture
+                    .map(|range| {
+                        Array::with_elements(realm, vec![range.start.into(), range.end.into()])
+                    })
+                    .transpose()?
+                    .map_or(Value::Undefined, Obj::into_value);
+                
+                indices.push(range)?;
+            }
+        }
+        
+        if self.flags.has_indecies {
+            a.define_property("indices".into(), indices.into_value())?;
+        }
+
+        Ok(a.into_value())
     }
 
     #[prop("test")]
     pub fn test(&self, value: &str) -> bool {
-        self.regex.is_match(value)
+        self.regex
+            .find_from(value, self.last_index.get())
+            .next().is_some_and(|m| {
+                if self.flags.sticky && m.start() != self.last_index.get() {
+                    return false;
+                }
+
+                if self.flags.global || self.flags.sticky {
+                    self.last_index.set(m.end());
+                }
+
+                true
+            })
     }
 
     #[prop("toString")]
-    pub fn js_to_string(&self) -> String {
-        let str = self.regex.to_string();
-
-        if str.is_empty() {
-            return "/(?:)/".to_string();
-        }
-
-        format!("/{}/{}", str, if self.global { "g" } else { "" })
+    pub fn js_to_string(&self) -> YSString {
+        let mut source = self.source.clone();
+        
+        source.push_str(self.flags_str.clone());
+        
+        source
     }
+}
+
+#[must_use]
+pub fn escape(text: &str) -> String {
+    let mut buf = String::with_capacity(text.len());
+
+    for c in text.chars() {
+        if is_meta_character(c) {
+            buf.push('\\');
+        }
+        buf.push(c);
+    }
+
+    buf
+}
+
+#[must_use]
+pub const fn is_meta_character(c: char) -> bool {
+    matches!(c, '\\' | '.' | '+' | '*' | '?' | '(' | ')' | '|' | '[' | ']' | '{' | '}' | '^' | '$'
+        | '#' | '&' | '-' | '~')
 }
