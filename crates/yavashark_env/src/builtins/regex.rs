@@ -168,8 +168,6 @@ impl RegExp {
 
         let input = value.as_str();
 
-        let full_unicode = self.flags.unicode || self.flags.unicode_sets;
-
         if self.last_index.get() > input.len() {
             self.last_index.set(0);
         }

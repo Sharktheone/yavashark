@@ -1,6 +1,6 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::utils::{calendar_opt, difference_settings, display_calendar, overflow_options};
+use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;

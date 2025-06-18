@@ -1,7 +1,6 @@
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use std::panic::resume_unwind;
 use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
 use yavashark_macro::{object, props};
