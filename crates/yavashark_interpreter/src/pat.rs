@@ -92,7 +92,7 @@ impl Interpreter {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
                             let value =
-                                object.get_property(&key, realm).unwrap_or(Value::Undefined);
+                                object.get_property(&key, realm)?;
 
                             Self::run_pat(realm, &kv.value, scope, &mut iter::once(value), cb)?;
                             rest_not_props.push(key);
@@ -100,8 +100,7 @@ impl Interpreter {
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
                             let mut value = object
-                                .get_property(&key.clone().into(), realm)
-                                .unwrap_or(Value::Undefined);
+                                .get_property(&key.clone().into(), realm)?;
 
                             if let Some(val_expr) = &assign.value {
                                 if value.is_nullish() {
