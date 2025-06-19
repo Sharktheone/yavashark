@@ -6,6 +6,7 @@ use yavashark_env::{Error, Realm, Res, Value};
 
 use crate::Interpreter;
 
+#[derive(Debug)]
 pub enum Variable {
     Var(String, Value),
     Let(String, Value),
@@ -69,7 +70,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            |scope, name, value| {
+                            &mut |scope, name, value|{
                                 let var = Variable::Var(name, value);
 
                                 cb(scope, var)
@@ -82,7 +83,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(Value::Undefined),
                             DUMMY_SP,
-                            |scope, name, value| {
+                            &mut |scope, name, value| {
                                 let var = Variable::Var(name, value);
 
                                 cb(scope, var)
@@ -104,7 +105,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            |scope, name, value| {
+                            &mut |scope, name, value| {
                                 let var = Variable::Let(name, value);
 
                                 cb(scope, var)
@@ -117,7 +118,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(Value::Undefined),
                             DUMMY_SP,
-                            |scope, name, value| {
+                            &mut |scope, name, value| {
                                 let var = Variable::Let(name, value);
 
                                 cb(scope, var)
@@ -138,7 +139,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            |scope, name, value| {
+                            &mut |scope, name, value| {
                                 let var = Variable::Const(name, value);
 
                                 cb(scope, var)

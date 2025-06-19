@@ -16,11 +16,9 @@ impl Interpreter {
         stmt: &Pat,
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
+        mut cb: &mut impl FnMut(&mut Scope, String, Value) -> Res,
     ) -> Res {
-        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP, |scope, name, value| {
-            scope.declare_var(name, value);
-            Ok(())
-        })
+        Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP, cb)
     }
 
     #[allow(clippy::missing_panics_doc)] //Again, cannot panic in the real world
@@ -30,7 +28,7 @@ impl Interpreter {
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
         span: Span,
-        mut cb: impl FnMut(&mut Scope, String, Value) -> Res,
+        mut cb: &mut impl FnMut(&mut Scope, String, Value) -> Res,
     ) -> Res {
         match stmt {
             Pat::Ident(id) => {
@@ -59,30 +57,25 @@ impl Interpreter {
                         while let Some(res) = iter.next(realm)? {
                             elems.push(res);
                         }
-
-                        Self::run_pat(realm, rest, scope, &mut elems.into_iter())?;
+                        
+                        Self::run_pat(realm, rest, scope, &mut elems.into_iter(), cb)?;
                         let assert_last = true;
                     } else {
                         let next = iter.next(realm)?.unwrap_or(Value::Undefined);
 
                         if let Some(elem) = elem {
-                            Self::run_pat(realm, elem, scope, &mut iter::once(next))?;
+                            Self::run_pat(realm, elem, scope, &mut iter::once(next), cb)?;
                         }
                     }
 
-                    let next = iter.next(realm)?.unwrap_or(Value::Undefined);
-
-                    if let Some(elem) = elem {
-                        Self::run_pat(realm, elem, scope, &mut iter::once(next))?;
-                    }
                 }
             }
             Pat::Rest(rest) => {
                 let collect = value.collect::<Vec<_>>();
 
                 let array = Array::with_elements(realm, collect)?.into_value();
-
-                Self::run_pat(realm, &rest.arg, scope, &mut iter::once(array))?;
+                
+                Self::run_pat(realm, &rest.arg, scope, &mut iter::once(array), cb)?;
             }
             Pat::Object(obj) => {
                 let mut rest_not_props = Vec::with_capacity(obj.props.len());
@@ -101,7 +94,7 @@ impl Interpreter {
                             let value =
                                 object.get_property(&key, realm).unwrap_or(Value::Undefined);
 
-                            Self::run_pat(realm, &kv.value, scope, &mut iter::once(value))?;
+                            Self::run_pat(realm, &kv.value, scope, &mut iter::once(value), cb)?;
                             rest_not_props.push(key);
                         }
                         ObjectPatProp::Assign(assign) => {
@@ -135,6 +128,7 @@ impl Interpreter {
                                 &rest.arg,
                                 scope,
                                 &mut iter::once(rest_obj.into_value()),
+                                cb
                             )?;
                         }
                     }
@@ -149,7 +143,7 @@ impl Interpreter {
                     Self::run_expr(realm, &assign.right, assign.span, scope)?
                 };
 
-                Self::run_pat(realm, &assign.left, scope, &mut iter::once(val))?;
+                Self::run_pat(realm, &assign.left, scope, &mut iter::once(val), cb)?;
             }
             Pat::Expr(expr) => {
                 Self::assign_expr(realm, expr, value.next().unwrap_or(Value::Undefined), scope)?;

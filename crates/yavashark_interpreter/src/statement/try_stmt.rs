@@ -28,7 +28,10 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
             if let Some(param) = &catch.param {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                Interpreter::run_pat(realm, param, scope, &mut iter::once(err));
+                Interpreter::run_pat(realm, param, scope, &mut iter::once(err), &mut |scope, name, value| {
+                    scope.declare_var(name, value)?;
+                    Ok(())
+                })?;
             }
 
             Interpreter::run_block(realm, &catch.body, scope)

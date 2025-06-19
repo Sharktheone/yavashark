@@ -1,6 +1,6 @@
 use crate::Interpreter;
 use std::iter;
-use swc_ecma_ast::{ForHead, ForInStmt};
+use swc_ecma_ast::{ForHead, ForInStmt, VarDeclKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{ControlFlow, Error, Realm, Res, RuntimeResult, Value};
@@ -56,17 +56,30 @@ impl Interpreter {
     pub fn run_for_head(realm: &mut Realm, decl: ForHead, scope: &mut Scope, value: &Value) -> Res {
         match decl {
             ForHead::VarDecl(decl) => {
+                let kind = decl.kind;
                 //TODO: respect var decl kind
-                for decl in decl.decls {
+                for d in decl.decls {
                     let value = if value.is_truthy() {
                         value.clone()
-                    } else if let Some(init) = &decl.init {
-                        Self::run_expr(realm, init, decl.span, scope)?
+                    } else if let Some(init) = &d.init {
+                        Self::run_expr(realm, init, d.span, scope)?
                     } else {
                         value.clone()
                     };
 
-                    Self::run_pat(realm, &decl.name, scope, &mut iter::once(value.clone()))?;
+                    Self::run_pat(realm, &d.name, scope, &mut iter::once(value.clone()), &mut |scope, name, value| {
+                        match kind {
+                            VarDeclKind::Var => {
+                                scope.declare_global_var(name, value)
+                            }
+                            VarDeclKind::Let => {
+                                scope.declare_var(name, value)
+                            }
+                            VarDeclKind::Const => {
+                                scope.declare_read_only_var(name, value)
+                            }
+                        }
+                    })?;
                 }
             }
             ForHead::UsingDecl(decl) => {
@@ -79,11 +92,15 @@ impl Interpreter {
                         value.clone()
                     };
 
-                    Self::run_pat(realm, &decl.name, scope, &mut iter::once(value.clone()))?;
+                    Self::run_pat(realm, &decl.name, scope, &mut iter::once(value.clone()), &mut |scope, name, value| {
+                        scope.declare_var(name, value)
+                    })?;
                 }
             }
             ForHead::Pat(pat) => {
-                Self::run_pat(realm, &pat, scope, &mut iter::once(value.clone()))?;
+                Self::run_pat(realm, &pat, scope, &mut iter::once(value.clone()), &mut |scope, name, value| {
+                    scope.declare_var(name, value)
+                })?;
             }
         }
         Ok(())

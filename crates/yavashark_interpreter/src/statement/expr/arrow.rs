@@ -30,7 +30,13 @@ impl Func<Realm> for ArrowFunction {
         let mut args_iter = args.into_iter();
 
         for pat in &self.expr.params {
-            Interpreter::run_pat(realm, pat, scope, &mut args_iter)?;
+            Interpreter::run_pat(
+                realm,
+                pat,
+                scope,
+                &mut args_iter,
+                &mut |scope, name, value| scope.declare_var(name, value),
+            )?;
         }
 
         let scope = &mut scope.child()?;
