@@ -62,6 +62,12 @@ impl Interpreter {
 
                         Self::run_pat(realm, rest, scope, &mut elems.into_iter())?;
                         let assert_last = true;
+                    } else {
+                        let next = iter.next(realm)?.unwrap_or(Value::Undefined);
+
+                        if let Some(elem) = elem {
+                            Self::run_pat(realm, elem, scope, &mut iter::once(next))?;
+                        }
                     }
 
                     let next = iter.next(realm)?.unwrap_or(Value::Undefined);
