@@ -1,10 +1,14 @@
-use crate::builtins::temporal::utils::{calendar_opt, overflow_options};
+use crate::builtins::temporal::utils::{calendar_opt, difference_settings, display_calendar, overflow_options};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
+use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::plain_date::PlainDate;
+use crate::builtins::temporal::plain_month_day::value_to_partial_date;
 
 #[object]
 #[derive(Debug)]
@@ -42,7 +46,7 @@ impl PlainYearMonth {
 
         Ok(Self::new(year_month, realm).into_object())
     }
-    
+
     pub fn compare(
         left: Value,
         right: Value,
@@ -53,7 +57,7 @@ impl PlainYearMonth {
 
         Ok(left.compare_iso(&right) as i8)
     }
-    
+
     pub fn from(
         value: Value,
         opts: Option<ObjectHandle>,
@@ -62,6 +66,138 @@ impl PlainYearMonth {
         let year_month = value_to_plain_year_month(value, opts, realm)?;
         Ok(Self::new(year_month, realm).into_object())
     }
+
+    pub fn add(
+        &self,
+        duration: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let opts = opts
+            .map(|opts| overflow_options(opts, realm))
+            .transpose()?
+            .flatten()
+            .unwrap_or_default();
+
+        let duration = value_to_duration(duration, realm)?;
+
+        let year_month = self
+            .year_month
+            .add(&duration, opts)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(year_month, realm).into_object())
+    }
+
+    pub fn equals(
+        &self,
+        other: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<bool> {
+        let other = value_to_plain_year_month(other, None, realm)?;
+
+        Ok(self.year_month == other)
+    }
+
+    pub fn since(
+        &self,
+        other: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let opts = opts
+            .map(|opts| difference_settings(opts, realm))
+            .transpose()?
+            .unwrap_or_default();
+
+        let other = value_to_plain_year_month(other, None, realm)?;
+
+        let duration = self
+            .year_month
+            .since(&other, opts)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Duration::with_duration(realm, duration).into_object())
+    }
+
+    pub fn subtract(
+        &self,
+        duration: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let opts = opts
+            .map(|opts| overflow_options(opts, realm))
+            .transpose()?
+            .flatten()
+            .unwrap_or_default();
+
+        let duration = value_to_duration(duration, realm)?;
+
+        let year_month = self
+            .year_month
+            .subtract(&duration, opts)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(year_month, realm).into_object())
+    }
+
+    #[prop("toJSON")]
+    pub fn to_json(&self) -> Res<String> {
+        Ok(self.year_month.to_string())
+    }
+
+    #[prop("toPlainDate")]
+    pub fn to_plain_date(&self, day_info: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+
+        let day_info = day_info
+            .map(|info| value_to_partial_date(info, realm))
+            .transpose()?;
+
+        let plain_date = self.year_month.to_plain_date(day_info).map_err(Error::from_temporal)?;
+
+        Ok(PlainDate::new(plain_date, realm).into_object())
+    }
+
+    #[prop("toString")]
+    pub fn to_js_string(
+        &self,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<String> {
+        let calendar = display_calendar(opts.as_ref(), realm)?;
+
+        Ok(self.year_month.to_ixdtf_string(calendar))
+    }
+    
+    pub fn until(
+        &self,
+        other: Value,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let opts = opts
+            .map(|opts| difference_settings(opts, realm))
+            .transpose()?
+            .unwrap_or_default();
+
+        let other = value_to_plain_year_month(other, None, realm)?;
+
+        let duration = self
+            .year_month
+            .until(&other, opts)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Duration::with_duration(realm, duration).into_object())
+    }
+    
+    #[prop("valueOf")]
+    #[nonstatic]
+    pub const fn value_of() -> Res<()> {
+        Err(Error::ty("`valueOf` is not supported for PlainYearMonth"))
+    }
+    
+    
 }
 
 pub fn value_to_plain_year_month(
@@ -90,7 +226,7 @@ pub fn value_to_plain_year_month(
             //     .get_property_opt(&"era".into())?
             //     .map(|v| v.value)
             //     .and_then(|v| v.to_string(realm).ok());
-            // 
+            //
             // let era_year = obj
             //     .get_property_opt(&"eraYear".into())?
             //     .map(|v| v.value)
@@ -121,7 +257,7 @@ pub fn value_to_plain_year_month(
             let year = obj.get_property(&"year".into())?.value.to_number(realm)?;
 
             let year = year as i32;
-            
+
             let calendar = calendar_opt(calendar.as_deref())?;
 
             temporal_rs::PlainYearMonth::new_with_overflow(year, month, None, calendar, opts)
