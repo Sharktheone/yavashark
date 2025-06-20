@@ -35,11 +35,11 @@ impl PlainMonthDay {
     pub fn construct(
         month: u8,
         day: u8,
-        calendar: Option<String>,
+        calendar: Option<YSString>,
         ref_year: Option<i32>,
         #[realm] realm: &Realm,
     ) -> Res<ObjectHandle> {
-        let calendar = calendar_opt(calendar)?;
+        let calendar = calendar_opt(calendar.as_deref())?;
 
         let month_day = temporal_rs::PlainMonthDay::new_with_overflow(
             month,
