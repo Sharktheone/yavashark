@@ -1,14 +1,15 @@
-use crate::builtins::temporal::utils::{calendar_opt, difference_settings, display_calendar, overflow_options};
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
-use std::cell::RefCell;
-use std::str::FromStr;
-use temporal_rs::Calendar;
-use yavashark_macro::{object, props};
-use yavashark_string::YSString;
-use yavashark_value::Obj;
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_month_day::value_to_partial_date;
+use crate::builtins::temporal::utils::{
+    calendar_opt, difference_settings, display_calendar, overflow_options,
+};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use std::cell::RefCell;
+use std::str::FromStr;
+use yavashark_macro::{object, props};
+use yavashark_string::YSString;
+use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
@@ -47,11 +48,7 @@ impl PlainYearMonth {
         Ok(Self::new(year_month, realm).into_object())
     }
 
-    pub fn compare(
-        left: Value,
-        right: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<i8> {
+    pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
         let left = value_to_plain_year_month(left, None, realm)?;
         let right = value_to_plain_year_month(right, None, realm)?;
 
@@ -89,11 +86,7 @@ impl PlainYearMonth {
         Ok(Self::new(year_month, realm).into_object())
     }
 
-    pub fn equals(
-        &self,
-        other: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<bool> {
+    pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
         let other = value_to_plain_year_month(other, None, realm)?;
 
         Ok(self.year_month == other)
@@ -148,13 +141,19 @@ impl PlainYearMonth {
     }
 
     #[prop("toPlainDate")]
-    pub fn to_plain_date(&self, day_info: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-
+    pub fn to_plain_date(
+        &self,
+        day_info: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let day_info = day_info
             .map(|info| value_to_partial_date(info, realm))
             .transpose()?;
 
-        let plain_date = self.year_month.to_plain_date(day_info).map_err(Error::from_temporal)?;
+        let plain_date = self
+            .year_month
+            .to_plain_date(day_info)
+            .map_err(Error::from_temporal)?;
 
         Ok(PlainDate::new(plain_date, realm).into_object())
     }
@@ -169,7 +168,7 @@ impl PlainYearMonth {
 
         Ok(self.year_month.to_ixdtf_string(calendar))
     }
-    
+
     pub fn until(
         &self,
         other: Value,
@@ -190,14 +189,68 @@ impl PlainYearMonth {
 
         Ok(Duration::with_duration(realm, duration).into_object())
     }
-    
+
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
         Err(Error::ty("`valueOf` is not supported for PlainYearMonth"))
     }
-    
-    
+
+    #[get("calendarId")]
+    pub fn calendar_id(&self) -> &'static str {
+        self.year_month.calendar_id()
+    }
+
+    #[get("daysInMonth")]
+    pub fn days_in_month(&self) -> u16 {
+        self.year_month.days_in_month()
+    }
+
+    #[get("daysInYear")]
+    pub fn days_in_year(&self) -> u16 {
+        self.year_month.days_in_year()
+    }
+
+    #[get("era")]
+    pub fn era(&self) -> Value {
+        self.year_month
+            .era()
+            .as_deref()
+            .map(YSString::from_ref)
+            .map_or(Value::Undefined, Value::String)
+    }
+
+    #[get("eraYear")]
+    pub fn era_year(&self) -> Value {
+        self.year_month
+            .era_year()
+            .map_or(Value::Undefined, |v| Value::Number(v as f64))
+    }
+
+    #[get("inLeapYear")]
+    pub fn in_leap_year(&self) -> bool {
+        self.year_month.in_leap_year()
+    }
+
+    #[get("month")]
+    pub fn month(&self) -> u8 {
+        self.year_month.month()
+    }
+
+    #[get("monthCode")]
+    pub fn month_code(&self) -> YSString {
+        YSString::from_ref(self.year_month.month_code().as_str())
+    }
+
+    #[get("monthsInYear")]
+    pub fn months_in_year(&self) -> u16 {
+        self.year_month.months_in_year()
+    }
+
+    #[get("year")]
+    pub fn year(&self) -> i32 {
+        self.year_month.year()
+    }
 }
 
 pub fn value_to_plain_year_month(
