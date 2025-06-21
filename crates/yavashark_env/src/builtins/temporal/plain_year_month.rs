@@ -38,7 +38,7 @@ impl PlainYearMonth {
         month: u8,
         calendar: Option<YSString>,
         reference_day: Option<u8>,
-        #[realm] realm: &Realm,
+        realm: &Realm,
     ) -> Res<ObjectHandle> {
         let calendar = calendar_opt(calendar.as_deref())?;
 
@@ -224,7 +224,7 @@ impl PlainYearMonth {
     pub fn era_year(&self) -> Value {
         self.year_month
             .era_year()
-            .map_or(Value::Undefined, |v| Value::Number(v as f64))
+            .map_or(Value::Undefined, |v| Value::Number(f64::from(v)))
     }
 
     #[get("inLeapYear")]
