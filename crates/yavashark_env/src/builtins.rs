@@ -16,6 +16,7 @@ mod set;
 mod string;
 mod symbol;
 mod temporal;
+pub mod signal;
 
 pub use arguments::*;
 pub use arraybuffer::*;

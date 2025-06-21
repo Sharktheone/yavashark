@@ -77,6 +77,9 @@ pub struct Intrinsics {
     pub promise: ObjectHandle,
     pub generator_function: ObjectHandle,
     pub generator: ObjectHandle,
+    pub signal: ObjectHandle,
+    pub signal_state: ObjectHandle,
+    pub signal_computed: ObjectHandle,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
@@ -352,6 +355,11 @@ impl Intrinsics {
 
         let (temporal, temporal_protos) =
             get_temporal(obj_prototype.clone(), func_prototype.clone())?;
+        
+        let (signal, signal_protos) = crate::builtins::signal::get_signal(
+            obj_prototype.clone(),
+            func_prototype.clone(),
+        )?;
 
         let promise = Promise::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
@@ -411,6 +419,9 @@ impl Intrinsics {
             promise,
             generator_function: Object::null(),
             generator: Object::null(),
+            signal,
+            signal_state: signal_protos.state,
+            signal_computed: signal_protos.computed,
             other: FxHashMap::default(),
         })
     }
