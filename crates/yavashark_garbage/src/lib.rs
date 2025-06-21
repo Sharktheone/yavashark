@@ -89,6 +89,12 @@ pub struct Weak<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
+impl<T: Collectable> Debug for Weak<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "(Weak)")
+    }
+}
+
 ///Function to completely deallocate the value, including freeing the memory!
 type DeallocFn = unsafe fn(NonNull<[(); 0]>);
 
