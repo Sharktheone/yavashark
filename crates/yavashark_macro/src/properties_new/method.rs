@@ -3,7 +3,7 @@ use crate::properties_new::{MaybeConstructor, Type};
 use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use syn::spanned::Spanned;
-use syn::{Expr, Lit};
+use syn::{Expr, Lit, Pat};
 
 #[derive(Clone)]
 pub struct Method {
@@ -196,6 +196,7 @@ enum MethodType {
     CallAndConstructor,
 }
 
+
 pub fn parse_method(
     func: &mut syn::ImplItemFn,
 ) -> Result<(MaybeConstructor<Method>, bool), syn::Error> {
@@ -216,6 +217,18 @@ pub fn parse_method(
                 maybe_static = MethodType::Impl;
             }
             syn::FnArg::Typed(pat) => {
+                if matches!(&*pat.pat, Pat::Ident(id) if id.ident == "realm") {
+                    realm = Some(args.len());
+                } else if matches!(&*pat.pat, Pat::Ident(id) if id.ident == "this") {
+                    this = Some(args.len());
+                }
+                
+                if let syn::Type::Path(type_path) = deref_type(&pat.ty) {
+                    if type_path.path.segments.last().is_some_and(|seg| seg.ident == "Realm") {
+                        realm = Some(args.len());
+                    }
+                }
+                
                 pat.attrs.retain_mut(|attr| {
                     if attr.path().is_ident("this") {
                         this = Some(args.len());
@@ -223,10 +236,20 @@ pub fn parse_method(
                     } else if attr.path().is_ident("realm") {
                         realm = Some(args.len());
                         return false;
+                    } else if attr.path().is_ident("nonrealm") {
+                        realm = None;
+                        return false;
+                    } else if attr.path().is_ident("nonthis") {
+                        this = None;
+                        return false;
                     }
 
                     true
                 });
+                
+                
+                
+                
                 args.push((*pat.ty).clone());
             }
         }
