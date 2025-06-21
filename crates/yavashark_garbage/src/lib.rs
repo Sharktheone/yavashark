@@ -85,6 +85,10 @@ impl<T: Collectable + Debug> Debug for Gc<T> {
     }
 }
 
+pub struct Weak<T: Collectable> {
+    inner: NonNull<GcBox<T>>,
+}
+
 ///Function to completely deallocate the value, including freeing the memory!
 type DeallocFn = unsafe fn(NonNull<[(); 0]>);
 
@@ -450,6 +454,49 @@ impl<T: Collectable> Gc<T> {
 
             GcRef { ptr }
         }
+    }
+    
+    #[must_use] 
+    pub fn downgrade(&self) -> Weak<T> {
+        let inner = self.inner;
+
+        // Increment the weak reference count
+        unsafe { (*inner.as_ptr()).refs.weak.fetch_add(1, Ordering::Relaxed) };
+
+        Weak { inner }
+    }
+}
+
+impl<T: Collectable> Weak<T> {
+    #[must_use]
+    pub fn upgrade(&self) -> Option<Gc<T>> {
+        let inner = self.inner;
+
+        // Check if the strong reference count is greater than 0
+        if unsafe { (*inner.as_ptr()).refs.strong() } > 0 {
+            Some(Gc { inner })
+        } else {
+            None
+        }
+    }
+}
+
+impl<T: Collectable> Drop for Weak<T> {
+    fn drop(&mut self) {
+        // Decrement the weak reference count
+        unsafe {
+            (*self.inner.as_ptr()).refs.weak.fetch_sub(1, Ordering::Relaxed);
+        }
+        
+        // If the weak reference count reaches 0 and the strong ref count is 0, we can deallocate the GcBox
+        if unsafe { (*self.inner.as_ptr()).refs.weak() } == 0
+            && unsafe { (*self.inner.as_ptr()).refs.strong() } == 0
+        {
+            unsafe {
+                let _ = Box::from_raw(self.inner.as_ptr());
+            }
+        }
+        
     }
 }
 
