@@ -126,7 +126,8 @@ impl PlainDate {
         let dur = value_to_duration(duration, realm)?;
 
         let opts = opts
-            .map(|s| overflow_options(s, realm))
+            .as_ref()
+            .map(|s| overflow_options(&s, realm))
             .transpose()?
             .flatten();
 
@@ -144,6 +145,7 @@ impl PlainDate {
         let dur = value_to_duration(duration, realm)?;
 
         let opts = opts
+            .as_ref()
             .map(|s| overflow_options(s, realm))
             .transpose()?
             .flatten();

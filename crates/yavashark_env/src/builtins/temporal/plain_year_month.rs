@@ -71,6 +71,7 @@ impl PlainYearMonth {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let opts = opts
+            .as_ref()
             .map(|opts| overflow_options(opts, realm))
             .transpose()?
             .flatten()
@@ -120,6 +121,7 @@ impl PlainYearMonth {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let opts = opts
+            .as_ref()
             .map(|opts| overflow_options(opts, realm))
             .transpose()?
             .flatten()
@@ -265,6 +267,7 @@ pub fn value_to_plain_year_month(
             }
 
             let opts = opts
+                .as_ref()
                 .map(|opts| overflow_options(opts, realm))
                 .transpose()?
                 .flatten()

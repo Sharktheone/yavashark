@@ -1,7 +1,7 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, DisplayCalendar, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::parsers::Precision;
 use temporal_rs::Calendar;
 
@@ -234,7 +234,7 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
     Ok(opts)
 }
 
-pub fn overflow_options(obj: ObjectHandle, realm: &mut Realm) -> Res<Option<ArithmeticOverflow>> {
+pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<ArithmeticOverflow>> {
     let overflow = obj.get_opt("overflow", realm)?;
 
     let Some(overflow) = overflow else {
@@ -256,6 +256,16 @@ pub fn overflow_options(obj: ObjectHandle, realm: &mut Realm) -> Res<Option<Arit
     Ok(Some(overflow))
 }
 
+pub fn overflow_options_opt(
+    obj: Option<&ObjectHandle>,
+    realm: &mut Realm,
+) -> Res<Option<ArithmeticOverflow>> {
+    Ok(match obj {
+        Some(obj) => overflow_options(obj, realm)?,
+        None => None,
+    })
+}
+
 pub fn calendar_opt(cal: Option<&str>) -> Res<Calendar> {
     Ok(cal
         .map(temporal_rs::Calendar::from_str)
@@ -273,4 +283,50 @@ pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Di
     
     DisplayCalendar::from_str(&cal)
         .map_err(Error::from_temporal)
+}
+
+
+pub fn disambiguation_opt(
+    obj: Option<&ObjectHandle>,
+    realm: &mut Realm,
+) -> Res<Option<Disambiguation>> {
+    let Some(obj) = obj else {
+        return Ok(None);
+    };
+
+    let disambiguation = obj.get("disambiguation", realm)?;
+
+    if disambiguation.is_undefined() {
+        return Ok(None);
+    }
+
+    let disambiguation = disambiguation.to_string(realm)?;
+
+    
+    Ok(Some(
+        Disambiguation::from_str(&disambiguation)
+        .map_err(|_| Error::range("Invalid disambiguation option"))?
+    ))
+}
+
+pub fn offset_disambiguation_opt(
+    obj: Option<&ObjectHandle>,
+    realm: &mut Realm,
+) -> Res<Option<OffsetDisambiguation>> {
+    let Some(obj) = obj else {
+        return Ok(None);
+    };
+
+    let disambiguation = obj.get("offsetDisambiguation", realm)?;
+
+    if disambiguation.is_undefined() {
+        return Ok(None);
+    }
+
+    let disambiguation = disambiguation.to_string(realm)?;
+
+    Ok(Some(
+        OffsetDisambiguation::from_str(&disambiguation)
+        .map_err(|_| Error::range("Invalid offsetDisambiguation option"))?
+    ))
 }

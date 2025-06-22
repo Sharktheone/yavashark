@@ -59,6 +59,7 @@ impl PlainMonthDay {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let overflow = options
+            .as_ref()
             .map(|o| overflow_options(o, realm))
             .transpose()?
             .flatten();

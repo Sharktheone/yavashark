@@ -62,6 +62,23 @@ pub enum BigIntOrNumber {
     Number(f64),
 }
 
+impl BigIntOrNumber {
+    #[must_use]
+    pub fn to_f64(&self) -> Option<f64> {
+        match self {
+            Self::BigInt(b) => b.to_f64(),
+            Self::Number(n) => Some(*n),
+        }
+    }
+    
+    pub fn to_big_int(&self) -> Option<Rc<BigInt>> {
+        match self {
+            Self::BigInt(b) => Some(Rc::clone(b)),
+            Self::Number(n) => BigInt::from_f64(*n).map(Rc::new)
+        }
+    }
+}
+
 impl<C: Realm> Value<C> {
     #[must_use]
     pub fn to_number_or_null(&self) -> f64 {
