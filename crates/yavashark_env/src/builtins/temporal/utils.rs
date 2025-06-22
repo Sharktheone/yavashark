@@ -4,6 +4,7 @@ use std::str::FromStr;
 use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::parsers::Precision;
 use temporal_rs::Calendar;
+use temporal_rs::provider::TransitionDirection;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -329,4 +330,24 @@ pub fn offset_disambiguation_opt(
         OffsetDisambiguation::from_str(&disambiguation)
         .map_err(|_| Error::range("Invalid offsetDisambiguation option"))?
     ))
+}
+
+pub fn transition_direction(
+    obj: &Value, 
+    realm: &mut Realm,
+) -> Res<TransitionDirection> {
+    match obj {
+        Value::Object(obj) => {
+            let direction = obj.get("direction", realm)?;
+            let direction = direction.to_string(realm)?;
+
+            TransitionDirection::from_str(&direction)
+                .map_err(|_| Error::range("Invalid transition direction"))
+        }
+        Value::String(s) => {
+            TransitionDirection::from_str(s.as_str())
+                .map_err(|_| Error::range("Invalid transition direction"))
+        }
+        _ => Err(Error::ty("Expected an object or string for transition direction")),
+    }
 }

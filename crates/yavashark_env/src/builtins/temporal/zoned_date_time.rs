@@ -9,7 +9,8 @@ use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 use yavashark_value::ops::BigIntOrNumber;
-use crate::builtins::temporal::utils::{disambiguation_opt, offset_disambiguation_opt, overflow_options_opt};
+use crate::builtins::temporal::duration::value_to_duration;
+use crate::builtins::temporal::utils::{disambiguation_opt, offset_disambiguation_opt, overflow_options_opt, transition_direction};
 
 #[object]
 #[derive(Debug)]
@@ -77,6 +78,53 @@ impl ZonedDateTime {
         let date = value_to_zoned_date_time(value, options, realm)?;
 
         Ok(Self::new(date, realm).into_object())
+    }
+    
+    fn add(
+        &self,
+        duration: Value,
+        options: Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let options = options
+            .as_ref()
+            .map(|opts| overflow_options_opt(opts, realm))
+            .transpose()?
+            .flatten();
+
+        let duration = value_to_duration(duration, realm)?;
+
+        let date = self.date.add_with_provider(
+            &duration,
+            options,
+            &realm.env.tz_provider,
+        )
+        .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+    
+    fn equals(&self, other: Value, realm: &mut Realm) -> Res<bool> {
+        let other = value_to_zoned_date_time(&other, None, realm)?;
+
+        Ok(self.date == other)
+    }
+    
+    
+    #[prop("getTimeZoneTransition")]
+    pub fn get_time_zone_transition(
+        &self,
+        options: &Value,
+        realm: &mut Realm,
+    ) -> Res<Value> {
+        let direction = transition_direction(options, realm)?;
+
+        let Some(transition) = self.date.get_time_zone_transition_with_provider(direction, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)? else {
+            return Ok(Value::Null)
+        };
+
+        Ok(Self::new(transition, realm).into_value())
     }
 }
 
