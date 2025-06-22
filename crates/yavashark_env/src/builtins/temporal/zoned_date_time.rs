@@ -57,8 +57,17 @@ impl ZonedDateTime {
 
         Ok(Self::new(date, realm).into_object())
     }
-    
-    
+
+    fn compare(
+        left: &Value,
+        right: &Value,
+        realm: &mut Realm,
+    ) -> Res<i8> {
+        let left = value_to_zoned_date_time(left, None, realm)?;
+        let right = value_to_zoned_date_time(right, None, realm)?;
+
+        Ok(left.compare_instant(&right) as i8)
+    }
 
     fn from(
         value: &Value,
