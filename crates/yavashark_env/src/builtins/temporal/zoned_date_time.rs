@@ -5,10 +5,11 @@ use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
 use crate::builtins::temporal::utils::{
     difference_settings, disambiguation_opt, display_calendar, display_offset, display_timezone,
-    offset_disambiguation_opt, overflow_options, overflow_options_opt, rounding_options,
-    string_rounding_mode_opts, transition_direction,
+    offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts,
+    transition_direction,
 };
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
+use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -262,21 +263,16 @@ impl ZonedDateTime {
 
         Ok(Duration::with_duration(realm, dur).into_object())
     }
-    
+
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
         Err(Error::ty("ZonedDateTime does not support valueOf"))
     }
-    
+
     #[prop("withCalendar")]
-    pub fn with_calendar(
-        &self,
-        calendar: &str,
-        realm: &Realm,
-    ) -> Res<ObjectHandle> {
-        let calendar = Calendar::from_str(calendar)
-            .map_err(Error::from_temporal)?;
+    pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
+        let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
 
         let date = self
             .date
@@ -285,13 +281,9 @@ impl ZonedDateTime {
 
         Ok(Self::new(date, realm).into_object())
     }
-    
+
     #[prop("withPlainTime")]
-    pub fn with_plain_time(
-        &self,
-        time: Value,
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn with_plain_time(&self, time: Value, realm: &mut Realm) -> Res<ObjectHandle> {
         let time = value_to_plain_time(time, realm)?;
 
         let date = self
@@ -301,23 +293,226 @@ impl ZonedDateTime {
 
         Ok(Self::new(date, realm).into_object())
     }
-    
+
     #[prop("withTimeZone")]
-    pub fn with_time_zone(
-        &self,
-        time_zone: &Value,
-        realm: &mut Realm,
-    ) -> Res<Value> {
+    pub fn with_time_zone(&self, time_zone: &Value, realm: &mut Realm) -> Res<Value> {
         let dir = transition_direction(time_zone, realm)?;
 
         let Some(date) = self
             .date
             .get_time_zone_transition_with_provider(dir, &realm.env.tz_provider)
-            .map_err(Error::from_temporal)? else {
+            .map_err(Error::from_temporal)?
+        else {
             return Ok(Value::Null);
         };
 
         Ok(Self::new(date, realm).into_value())
+    }
+
+    #[get("calendarId")]
+    pub fn calendar_id(&self) -> &'static str {
+        self.date.calendar().identifier()
+    }
+
+    #[get("day")]
+    pub fn day(&self, realm: &Realm) -> Res<u8> {
+        self.date
+            .day_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("dayOfWeek")]
+    pub fn day_of_week(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .day_of_week_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("dayOfYear")]
+    pub fn day_of_year(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .day_of_year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("daysInMonth")]
+    pub fn days_in_month(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .days_in_month_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("daysInWeek")]
+    pub fn days_in_week(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .days_in_week_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("daysInYear")]
+    pub fn days_in_year(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .days_in_year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("epochMilliseconds")]
+    pub fn epoch_milliseconds(&self) -> i64 {
+        self.date.epoch_milliseconds()
+    }
+
+    #[get("epochNanoseconds")]
+    pub fn epoch_nanoseconds(&self) -> BigInt {
+        BigInt::from(self.date.epoch_nanoseconds().as_i128())
+    }
+
+    #[get("era")]
+    pub fn era(&self, realm: &Realm) -> Res<Value> {
+        Ok(self
+            .date
+            .era_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?
+            .map(|era| YSString::from(era.to_string()))
+            .map(Into::into)
+            .unwrap_or(Value::Undefined))
+    }
+
+    #[get("eraYear")]
+    pub fn era_year(&self, realm: &Realm) -> Res<Value> {
+        Ok(self
+            .date
+            .era_year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?
+            .map(Into::into)
+            .unwrap_or(Value::Undefined))
+    }
+
+    #[get("hour")]
+    pub fn hour(&self, realm: &Realm) -> Res<u8> {
+        self.date
+            .hour_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("hoursInDay")]
+    pub fn hours_in_day(&self, realm: &Realm) -> Res<u8> {
+        self.date
+            .hours_in_day_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("inLeapYear")]
+    pub fn in_leap_year(&self, realm: &Realm) -> Res<bool> {
+        self.date
+            .in_leap_year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("microsecond")]
+    pub fn microsecond(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .microsecond_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("millisecond")]
+    pub fn millisecond(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .millisecond_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("minute")]
+    pub fn minute(&self, realm: &Realm) -> Res<u8> {
+        self.date
+            .minute_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("month")]
+    pub fn month(&self, realm: &Realm) -> Res<u8> {
+        self.date
+            .month_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("monthCode")]
+    pub fn month_code(&self, realm: &Realm) -> Res<YSString> {
+        self.date
+            .month_code_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+            .map(|code| YSString::from_ref(code.as_str()))
+    }
+
+    #[get("monthsInYear")]
+    pub fn months_in_year(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .months_in_year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("nanosecond")]
+    pub fn nanosecond(&self, realm: &Realm) -> Res<u16> {
+        self.date
+            .nanosecond_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("offset")]
+    pub fn offset(&self, realm: &Realm) -> Res<YSString> {
+        self.date
+            .offset_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+            .map(|offset| YSString::from_ref(offset.to_string().as_str()))
+    }
+
+    #[get("offsetNanoseconds")]
+    pub fn offset_nanoseconds(&self, realm: &Realm) -> Res<i64> {
+        self.date
+            .offset_nanoseconds_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("second")]
+    pub fn second(&self, realm: &Realm) -> Res<u8> {
+        self.date
+            .second_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("timeZoneId")]
+    pub fn time_zone_id(&self, realm: &Realm) -> Res<String> {
+        self.date
+            .timezone()
+            .identifier()
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("weekOfYear")]
+    pub fn week_of_year(&self, realm: &Realm) -> Res<Value> {
+        Ok(self
+            .date
+            .week_of_year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?
+            .map(Into::into)
+            .unwrap_or(Value::Undefined))
+    }
+
+    #[get("year")]
+    pub fn year(&self, realm: &Realm) -> Res<i32> {
+        self.date
+            .year_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[get("yearOfWeek")]
+    pub fn year_of_week(&self, realm: &Realm) -> Res<Value> {
+        Ok(self
+            .date
+            .year_of_week_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?
+            .map(Into::into)
+            .unwrap_or(Value::Undefined))
     }
 }
 
