@@ -1,16 +1,24 @@
+use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::instant::Instant;
+use crate::builtins::temporal::plain_date::PlainDate;
+use crate::builtins::temporal::plain_date_time::PlainDateTime;
+use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
+use crate::builtins::temporal::utils::{
+    difference_settings, disambiguation_opt, display_calendar, display_offset, display_timezone,
+    offset_disambiguation_opt, overflow_options, overflow_options_opt, rounding_options,
+    string_rounding_mode_opts, transition_direction,
+};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use std::str::FromStr;
-use temporal_rs::{Calendar, MonthCode, TimeZone, TinyAsciiStr, UtcOffset};
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
+use temporal_rs::{Calendar, MonthCode, TimeZone, TinyAsciiStr, UtcOffset};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use yavashark_value::Obj;
 use yavashark_value::ops::BigIntOrNumber;
-use crate::builtins::temporal::duration::value_to_duration;
-use crate::builtins::temporal::utils::{disambiguation_opt, offset_disambiguation_opt, overflow_options_opt, transition_direction};
+use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
@@ -38,7 +46,7 @@ impl ZonedDateTime {
         ns: &BigIntOrNumber,
         tz: &str,
         calendar: Option<YSString>,
-        realm: &Realm
+        realm: &Realm,
     ) -> Res<ObjectHandle> {
         let nanos = ns
             .to_big_int()
@@ -59,92 +67,272 @@ impl ZonedDateTime {
         Ok(Self::new(date, realm).into_object())
     }
 
-    fn compare(
-        left: &Value,
-        right: &Value,
-        realm: &mut Realm,
-    ) -> Res<i8> {
+    fn compare(left: &Value, right: &Value, realm: &mut Realm) -> Res<i8> {
         let left = value_to_zoned_date_time(left, None, realm)?;
         let right = value_to_zoned_date_time(right, None, realm)?;
 
         Ok(left.compare_instant(&right) as i8)
     }
 
-    fn from(
-        value: &Value,
-        options: Option<ObjectHandle>,
-        realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    fn from(value: &Value, options: Option<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
         let date = value_to_zoned_date_time(value, options, realm)?;
 
         Ok(Self::new(date, realm).into_object())
     }
-    
+
     fn add(
         &self,
         duration: Value,
         options: Option<ObjectHandle>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let options = options
-            .as_ref()
-            .map(|opts| overflow_options_opt(opts, realm))
-            .transpose()?
-            .flatten();
+        let options = overflow_options_opt(options.as_ref(), realm)?;
 
         let duration = value_to_duration(duration, realm)?;
 
-        let date = self.date.add_with_provider(
-            &duration,
-            options,
-            &realm.env.tz_provider,
-        )
-        .map_err(Error::from_temporal)?;
+        let date = self
+            .date
+            .add_with_provider(&duration, options, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
     }
-    
+
     fn equals(&self, other: Value, realm: &mut Realm) -> Res<bool> {
         let other = value_to_zoned_date_time(&other, None, realm)?;
 
         Ok(self.date == other)
     }
-    
-    
+
     #[prop("getTimeZoneTransition")]
-    pub fn get_time_zone_transition(
-        &self,
-        options: &Value,
-        realm: &mut Realm,
-    ) -> Res<Value> {
+    pub fn get_time_zone_transition(&self, options: &Value, realm: &mut Realm) -> Res<Value> {
         let direction = transition_direction(options, realm)?;
 
-        let Some(transition) = self.date.get_time_zone_transition_with_provider(direction, &realm.env.tz_provider)
-            .map_err(Error::from_temporal)? else {
-            return Ok(Value::Null)
+        let Some(transition) = self
+            .date
+            .get_time_zone_transition_with_provider(direction, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?
+        else {
+            return Ok(Value::Null);
         };
 
         Ok(Self::new(transition, realm).into_value())
     }
-}
 
+    pub fn round(&self, unit: Value, realm: &mut Realm) -> Res<ObjectHandle> {
+        let (opts, _) = rounding_options(unit, realm)?;
+
+        let date = self
+            .date
+            .round_with_provider(opts, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+
+    pub fn since(
+        &self,
+        other: &Value,
+        options: Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let other = value_to_zoned_date_time(other, None, realm)?;
+
+        let settings = options
+            .map(|opts| difference_settings(opts, realm))
+            .transpose()?
+            .unwrap_or_default();
+
+        let dur = self
+            .date
+            .since_with_provider(&other, settings, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Duration::with_duration(realm, dur).into_object())
+    }
+
+    #[prop("startOfDay")]
+    pub fn start_of_day(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        let date = self
+            .date
+            .start_of_day_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+
+    pub fn subtract(
+        &self,
+        duration: Value,
+        options: Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let options = overflow_options_opt(options.as_ref(), realm)?;
+
+        let duration = value_to_duration(duration, realm)?;
+
+        let date = self
+            .date
+            .subtract_with_provider(&duration, options, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+
+    #[prop("toInstant")]
+    pub fn to_instant(&self, realm: &Realm) -> Res<ObjectHandle> {
+        let instant = self.date.to_instant();
+
+        Ok(Instant::from_stamp(instant, realm).into_object())
+    }
+
+    #[prop("toJSON")]
+    pub fn to_json(&self, realm: &Realm) -> Res<String> {
+        self.date
+            .to_string_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    #[prop("toPlainDate")]
+    pub fn to_plain_date(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        let date = self
+            .date
+            .to_plain_date_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(PlainDate::new(date, realm).into_object())
+    }
+
+    #[prop("toPlainDateTime")]
+    pub fn to_plain_date_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        let date = self
+            .date
+            .to_plain_datetime_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(PlainDateTime::new(date, realm).into_object())
+    }
+
+    #[prop("toPlainTime")]
+    pub fn to_plain_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        let date = self
+            .date
+            .to_plain_time_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(PlainTime::new(date, realm).into_object())
+    }
+
+    #[prop("toString")]
+    pub fn to_js_string(&self, options: Option<ObjectHandle>, realm: &mut Realm) -> Res<String> {
+        let display_offset = display_offset(options.as_ref(), realm)?;
+        let display_timezone = display_timezone(options.as_ref(), realm)?;
+        let display_calendar = display_calendar(options.as_ref(), realm)?;
+
+        let options = string_rounding_mode_opts(options, realm)?;
+
+        self.date
+            .to_ixdtf_string_with_provider(
+                display_offset,
+                display_timezone,
+                display_calendar,
+                options,
+                &realm.env.tz_provider,
+            )
+            .map_err(Error::from_temporal)
+    }
+
+    pub fn until(
+        &self,
+        other: &Value,
+        options: Option<ObjectHandle>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let other = value_to_zoned_date_time(other, None, realm)?;
+
+        let settings = options
+            .map(|opts| difference_settings(opts, realm))
+            .transpose()?
+            .unwrap_or_default();
+
+        let dur = self
+            .date
+            .until_with_provider(&other, settings, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Duration::with_duration(realm, dur).into_object())
+    }
+    
+    #[prop("valueOf")]
+    #[nonstatic]
+    pub const fn value_of() -> Res<()> {
+        Err(Error::ty("ZonedDateTime does not support valueOf"))
+    }
+    
+    #[prop("withCalendar")]
+    pub fn with_calendar(
+        &self,
+        calendar: &str,
+        realm: &Realm,
+    ) -> Res<ObjectHandle> {
+        let calendar = Calendar::from_str(calendar)
+            .map_err(Error::from_temporal)?;
+
+        let date = self
+            .date
+            .with_calendar(calendar)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+    
+    #[prop("withPlainTime")]
+    pub fn with_plain_time(
+        &self,
+        time: Value,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let time = value_to_plain_time(time, realm)?;
+
+        let date = self
+            .date
+            .with_plain_time_and_provider(time, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+    
+    #[prop("withTimeZone")]
+    pub fn with_time_zone(
+        &self,
+        time_zone: &Value,
+        realm: &mut Realm,
+    ) -> Res<Value> {
+        let dir = transition_direction(time_zone, realm)?;
+
+        let Some(date) = self
+            .date
+            .get_time_zone_transition_with_provider(dir, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)? else {
+            return Ok(Value::Null);
+        };
+
+        Ok(Self::new(date, realm).into_value())
+    }
+}
 
 pub fn value_to_zoned_date_time(
     value: &Value,
     options: Option<ObjectHandle>,
     realm: &mut Realm,
 ) -> Res<temporal_rs::ZonedDateTime> {
-
     let disambiguation = disambiguation_opt(options.as_ref(), realm)?;
     let offset_disambiguation = offset_disambiguation_opt(options.as_ref(), realm)?;
-
-
-
 
     Ok(match value {
         Value::Object(obj) => {
             if let Some(zdt) = obj.downcast::<ZonedDateTime>() {
-                return Ok(zdt.date.clone())
+                return Ok(zdt.date.clone());
             }
 
             let overflow = overflow_options_opt(options.as_ref(), realm)?;
@@ -156,17 +344,14 @@ pub fn value_to_zoned_date_time(
                 overflow,
                 disambiguation,
                 offset_disambiguation,
-                &realm.env.tz_provider
+                &realm.env.tz_provider,
             )
             .map_err(Error::from_temporal)?
-
-
         }
         Value::String(str) => {
             let disambiguation = disambiguation.unwrap_or_default();
-            let offset_disambiguation = offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
-
-
+            let offset_disambiguation =
+                offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
 
             temporal_rs::ZonedDateTime::from_str_with_provider(
                 &str,
@@ -180,16 +365,12 @@ pub fn value_to_zoned_date_time(
     })
 }
 
-pub fn partial_zoned_date_time(
-    obj: &ObjectHandle,
-    realm: &mut Realm,
-) -> Res<PartialZonedDateTime> {
+pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<PartialZonedDateTime> {
     let mut partial = PartialZonedDateTime::new();
 
     if let Some(calendar) = obj.get_opt("calendar", realm)? {
         let calendar = calendar.to_string(realm)?;
-        let calendar = Calendar::from_str(&calendar)
-            .map_err(Error::from_temporal)?;
+        let calendar = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
 
         partial.date = partial.date.with_calendar(calendar);
     }
@@ -198,13 +379,11 @@ pub fn partial_zoned_date_time(
 
     if let Some(ns) = obj.get_opt("era", realm)? {
         let era = ns.to_string(realm)?;
-        let era = TinyAsciiStr::try_from_str(&era)
-            .map_err(|_| Error::ty("Invalid era string"))?;
+        let era = TinyAsciiStr::try_from_str(&era).map_err(|_| Error::ty("Invalid era string"))?;
 
         partial.date = partial.date.with_era(Some(era));
         has_year = true;
     }
-
 
     if let Some(era_year) = obj.get_opt("eraYear", realm)? {
         let era_year = era_year.to_number(realm)?;
@@ -233,8 +412,8 @@ pub fn partial_zoned_date_time(
     if let Some(month_code) = obj.get_opt("monthCode", realm)? {
         let month_code = month_code.to_string(realm)?;
 
-        let month_code = MonthCode::from_str(&month_code)
-            .map_err(|_| Error::ty("Invalid month code"))?;
+        let month_code =
+            MonthCode::from_str(&month_code).map_err(|_| Error::ty("Invalid month code"))?;
 
         partial.date = partial.date.with_month_code(Some(month_code));
         has_month = true;
@@ -283,8 +462,7 @@ pub fn partial_zoned_date_time(
 
     if let Some(time_zone) = obj.get_opt("timeZone", realm)? {
         let time_zone = time_zone.to_string(realm)?;
-        let time_zone = TimeZone::try_from_str(&time_zone)
-            .map_err(Error::from_temporal)?;
+        let time_zone = TimeZone::try_from_str(&time_zone).map_err(Error::from_temporal)?;
 
         partial.timezone = Some(time_zone);
     } else {
@@ -293,18 +471,12 @@ pub fn partial_zoned_date_time(
 
     if let Some(offset) = obj.get_opt("offset", realm)? {
         let offset = offset.to_string(realm)?;
-        let offset = UtcOffset::from_str(&offset)
-            .map_err(Error::from_temporal)?;
+        let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
 
         partial.offset = Some(offset);
     } else {
         return Err(Error::ty("Expected offset to be defined"));
     }
 
-
-
     Ok(partial)
 }
-
-
-

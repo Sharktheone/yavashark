@@ -1,9 +1,9 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset, DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::parsers::Precision;
-use temporal_rs::Calendar;
+use temporal_rs::{Calendar, TemporalError};
 use temporal_rs::provider::TransitionDirection;
 
 pub fn opt_relative_to_wrap(
@@ -284,6 +284,44 @@ pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Di
     
     DisplayCalendar::from_str(&cal)
         .map_err(Error::from_temporal)
+}
+
+pub fn display_offset(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayOffset> {
+    let Some(cal) = cal else {
+        return Ok(DisplayOffset::default());
+    };
+
+    let display_offset = cal.get("displayOffset", realm)?;
+
+    if display_offset.is_undefined() {
+        return Ok(DisplayOffset::default());
+    }
+    
+    let display_offset = display_offset.to_string(realm)?;
+
+    let display_offset = DisplayOffset::from_str(&display_offset)
+        .map_err(Error::from_temporal)?;
+
+    Ok(display_offset)
+}
+
+pub fn display_timezone(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayTimeZone> {
+    let Some(cal) = cal else {
+        return Ok(DisplayTimeZone::default());
+    };
+
+    let display_timezone = cal.get("displayTimezone", realm)?;
+
+    if display_timezone.is_undefined() {
+        return Ok(DisplayTimeZone::default());
+    }
+
+    let display_timezone = display_timezone.to_string(realm)?;
+
+    let display_timezone = DisplayTimeZone::from_str(&display_timezone)
+        .map_err(Error::from_temporal)?;
+
+    Ok(display_timezone)
 }
 
 
