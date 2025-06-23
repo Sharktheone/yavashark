@@ -1,6 +1,7 @@
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
+use yavashark_string::{ToYSString, YSString};
 use yavashark_value::{Func, Obj};
 
 #[object]
@@ -70,6 +71,13 @@ impl SymbolConstructor {
 
     #[prop("unscopables")]
     const UNSCOPABLES: &'static Symbol = Symbol::UNSCOPABLES;
+    
+    #[prop("keyFor")]
+    fn key_for(symbol: Symbol) -> YSString {
+        symbol.to_ys_string()
+        
+        
+    }
 }
 
 impl Func<Realm> for SymbolConstructor {
