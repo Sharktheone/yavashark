@@ -14,7 +14,10 @@ pub struct SymbolObj {
 
 #[object(function)]
 #[derive(Debug)]
-pub struct SymbolConstructor {}
+pub struct SymbolConstructor {
+    #[mutable]
+    symbols: Vec<Symbol>,
+}
 
 impl SymbolConstructor {
     #[allow(clippy::new_ret_no_self)]
@@ -22,12 +25,17 @@ impl SymbolConstructor {
         let mut this = Self {
             inner: RefCell::new(MutableSymbolConstructor {
                 object: MutObject::with_proto(func.copy()),
+                symbols: Vec::new(),
             }),
         };
 
         this.initialize(func.copy())?;
 
         Ok(this.into_object())
+    }
+    
+    pub fn find_symbol(&self, symbol: &str) -> Option<Symbol> {
+        self.inner.borrow().symbols.iter().find(|s| s.as_ref() == symbol).cloned()
     }
 }
 
@@ -75,8 +83,18 @@ impl SymbolConstructor {
     #[prop("keyFor")]
     fn key_for(symbol: Symbol) -> YSString {
         symbol.to_ys_string()
+    }
+    
+    #[prop("for")]
+    fn for_(&self, key: &str) -> Symbol {
+        if let Some(sym) = self.find_symbol(key) {
+            return sym.into();
+        }
+
+        let new_symbol = Symbol::new_str(key);
+        self.inner.borrow_mut().symbols.push(new_symbol.clone());
         
-        
+        new_symbol
     }
 }
 
@@ -86,7 +104,11 @@ impl Func<Realm> for SymbolConstructor {
             Ok(v.to_string(realm)?.to_string())
         })?;
 
-        Ok(Symbol::new_str(&sym).into())
+        let sym = Symbol::new_str(&sym);
+        
+        self.inner.borrow_mut().symbols.push(sym.clone());
+        
+        Ok(sym.into())
     }
 }
 
