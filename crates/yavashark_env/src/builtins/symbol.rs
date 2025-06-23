@@ -2,7 +2,7 @@ use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueRes
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::{ToYSString, YSString};
-use yavashark_value::{Func, Obj};
+use yavashark_value::{Func, IntoValue, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -81,8 +81,14 @@ impl SymbolConstructor {
     const UNSCOPABLES: &'static Symbol = Symbol::UNSCOPABLES;
     
     #[prop("keyFor")]
-    fn key_for(symbol: Symbol) -> YSString {
-        symbol.to_ys_string()
+    fn key_for(symbol: Symbol) -> Value {
+        let str = symbol.to_ys_string();
+        
+        if str.is_empty() {
+            return Value::Undefined;
+        }
+        
+        str.into_value()
     }
     
     #[prop("for")]
