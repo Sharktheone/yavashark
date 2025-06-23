@@ -81,7 +81,10 @@ impl From<&ConstString> for Symbol {
 
 impl ToYSString for Symbol {
     fn to_ys_string(&self) -> YSString {
-        format!("{self}").into()
+        match &self.inner {
+            SymbolInner::Static(s) => YSString::new_static(s),
+            SymbolInner::Str(s) => YSString::from_rc(Rc::clone(s)),
+        }
     }
 }
 
