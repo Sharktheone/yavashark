@@ -140,6 +140,11 @@ impl SymbolObj {
 
         inner.symbol.clone()
     }
+    
+    #[get("description")]
+    fn description(&self) -> Value {
+        SymbolConstructor::key_for(self.inner.borrow().symbol.clone())
+    }
 
     #[prop("toString")]
     fn to_js_string(&self) -> String {
