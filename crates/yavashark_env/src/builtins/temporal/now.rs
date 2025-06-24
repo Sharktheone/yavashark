@@ -74,13 +74,19 @@ impl Now {
     #[prop("timeZoneId")]
     fn time_zone_id() -> Res<String> {
         let now = Self::get_now()?;
-        
+
         now.time_zone().identifier()
             .map_err(Error::from_temporal)
     }
-    
+
     #[prop("zonedDateTimeISO")]
-    fn zoned_date_time_iso(realm: &Realm) -> Res<ObjectHandle> {
-        ZonedDateTime::now_obj(realm)
+    fn zoned_date_time_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+        let tz = tz
+            .as_deref()
+            .map(|tz| TimeZone::try_from_str(tz))
+            .transpose()
+            .map_err(Error::from_temporal)?;
+
+        ZonedDateTime::now_obj(realm, tz)
     }
 }

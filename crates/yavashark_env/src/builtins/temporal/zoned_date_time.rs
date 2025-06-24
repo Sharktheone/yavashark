@@ -39,20 +39,20 @@ impl ZonedDateTime {
             date,
         }
     }
-    
-    pub fn now() -> Res<temporal_rs::ZonedDateTime> {
+
+    pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::ZonedDateTime> {
         Now::get_now()?
-            .zoned_date_time_iso(None)
+            .zoned_date_time_iso(tz)
             .map_err(Error::from_temporal)
     }
-    
-    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
-        let date = Self::now()?;
+
+    pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+        let date = Self::now(tz)?;
 
         Ok(Self::new(date, realm).into_object())
     }
-    
-    
+
+
 }
 
 #[props]
