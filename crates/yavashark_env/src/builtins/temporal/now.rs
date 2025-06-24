@@ -5,6 +5,7 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use crate::builtins::temporal::instant::Instant;
 use crate::{Error, ObjectHandle, Realm, Res};
 use yavashark_macro::{object, props};
+use yavashark_string::YSString;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::PlainTime;
@@ -49,8 +50,14 @@ impl Now {
     }
 
     #[prop("plainDateTimeISO")]
-    fn plain_date_time_iso(realm: &Realm) -> Res<ObjectHandle> {
-        PlainDateTime::now_obj(realm)
+    fn plain_date_time_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+        let tz = tz
+            .as_deref()
+            .map(|tz| TimeZone::try_from_str(tz))
+            .transpose()
+            .map_err(Error::from_temporal)?;
+
+        PlainDateTime::now_obj(realm, tz)
     }
 
     #[prop("plainTimeISO")]
