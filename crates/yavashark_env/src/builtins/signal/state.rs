@@ -1,5 +1,5 @@
 use std::cell::RefCell;
-use yavashark_garbage::{OwningGcGuard, Weak};
+use yavashark_garbage::{Weak};
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};

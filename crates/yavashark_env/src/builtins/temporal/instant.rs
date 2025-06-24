@@ -8,7 +8,6 @@ use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use std::str::FromStr;
-use std::time::UNIX_EPOCH;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};

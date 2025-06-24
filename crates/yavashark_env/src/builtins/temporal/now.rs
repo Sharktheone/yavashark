@@ -48,7 +48,7 @@ impl Now {
     fn plain_date_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
         let tz = tz
             .as_deref()
-            .map(|tz| TimeZone::try_from_str(tz))
+            .map(TimeZone::try_from_str)
             .transpose()
             .map_err(Error::from_temporal)?;
 
@@ -59,7 +59,7 @@ impl Now {
     fn plain_date_time_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
         let tz = tz
             .as_deref()
-            .map(|tz| TimeZone::try_from_str(tz))
+            .map(TimeZone::try_from_str)
             .transpose()
             .map_err(Error::from_temporal)?;
 
@@ -70,7 +70,7 @@ impl Now {
     fn plain_time_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
         let tz = tz
             .as_deref()
-            .map(|tz| TimeZone::try_from_str(tz))
+            .map(TimeZone::try_from_str)
             .transpose()
             .map_err(Error::from_temporal)?;
 
@@ -89,7 +89,7 @@ impl Now {
     fn zoned_date_time_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
         let tz = tz
             .as_deref()
-            .map(|tz| TimeZone::try_from_str(tz))
+            .map(TimeZone::try_from_str)
             .transpose()
             .map_err(Error::from_temporal)?;
 

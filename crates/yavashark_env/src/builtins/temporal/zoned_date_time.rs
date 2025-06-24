@@ -496,7 +496,7 @@ impl ZonedDateTime {
     }
 
     #[get("timeZoneId")]
-    pub fn time_zone_id(&self, realm: &Realm) -> Res<String> {
+    pub fn time_zone_id(&self) -> Res<String> {
         self.date
             .timezone()
             .identifier()
@@ -509,8 +509,8 @@ impl ZonedDateTime {
             .date
             .week_of_year_with_provider(&realm.env.tz_provider)
             .map_err(Error::from_temporal)?
-            .map(Into::into)
-            .unwrap_or(Value::Undefined))
+            .map_or(Value::Undefined, Into::into)
+        )
     }
 
     #[get("year")]
