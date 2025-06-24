@@ -669,8 +669,6 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
 
         partial.offset = Some(offset);
-    } else {
-        return Err(Error::ty("Expected offset to be defined"));
     }
 
     Ok(partial)
