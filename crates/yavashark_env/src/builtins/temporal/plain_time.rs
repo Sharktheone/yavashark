@@ -3,6 +3,7 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
+use temporal_rs::TimeZone;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
@@ -25,14 +26,14 @@ impl PlainTime {
         }
     }
     
-    pub fn now(realm: &Realm) -> Res<temporal_rs::PlainTime> {
+    pub fn now(realm: &Realm, tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
         Now::get_now()?
-            .plain_time_with_provider(None, &realm.env.tz_provider)
+            .plain_time_with_provider(tz, &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
     
-    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
-        let time = Self::now(realm)?;
+    pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
+        let time = Self::now(realm, tz)?;
 
         Ok(Self::new(time, realm).into_object())
         

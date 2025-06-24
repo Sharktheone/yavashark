@@ -61,10 +61,16 @@ impl Now {
     }
 
     #[prop("plainTimeISO")]
-    fn plain_time_iso(realm: &Realm) -> Res<ObjectHandle> {
-        PlainTime::now_obj(realm)
+    fn plain_time_iso(realm: &Realm, tz: Option<YSString>) -> Res<ObjectHandle> {
+        let tz = tz
+            .as_deref()
+            .map(|tz| TimeZone::try_from_str(tz))
+            .transpose()
+            .map_err(Error::from_temporal)?;
+
+        PlainTime::now_obj(realm, tz)
     }
-    
+
     #[prop("timeZoneId")]
     fn time_zone_id() -> Res<String> {
         let now = Self::get_now()?;
