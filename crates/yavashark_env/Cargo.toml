@@ -33,6 +33,7 @@ temporal_rs = { version = "0.0.8", features = ["tzdb"] }
 egui = { version = "0.31.1", optional = true}
 eframe = { version = "0.31.1", optional = true}
 egui_extras = { version = "0.31.1", optional = true}
+iana-time-zone = "0.1.63"
 
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]

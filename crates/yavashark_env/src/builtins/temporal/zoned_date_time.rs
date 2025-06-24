@@ -20,6 +20,7 @@ use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
+use crate::builtins::temporal::now::Now;
 
 #[object]
 #[derive(Debug)]
@@ -38,6 +39,20 @@ impl ZonedDateTime {
             date,
         }
     }
+    
+    pub fn now() -> Res<temporal_rs::ZonedDateTime> {
+        Now::get_now()?
+            .zoned_date_time_iso(None)
+            .map_err(Error::from_temporal)
+    }
+    
+    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
+        let date = Self::now()?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+    
+    
 }
 
 #[props]

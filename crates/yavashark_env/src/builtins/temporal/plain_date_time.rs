@@ -8,6 +8,7 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::now::Now;
 
 #[object]
 #[derive(Debug)]
@@ -25,6 +26,18 @@ impl PlainDateTime {
             }),
             date,
         }
+    }
+
+    pub fn now(realm: &Realm) -> Res<temporal_rs::PlainDateTime> {
+        Now::get_now()?
+            .plain_date_time_iso_with_provider(None, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
+    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
+        let date = Self::now(realm)?;
+
+        Ok(Self::new(date, realm).into_object())
     }
 }
 

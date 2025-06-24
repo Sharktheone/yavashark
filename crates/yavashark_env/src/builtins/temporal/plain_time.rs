@@ -6,6 +6,7 @@ use temporal_rs::options::ToStringRoundingOptions;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
 
 #[object]
@@ -22,6 +23,19 @@ impl PlainTime {
             }),
             time,
         }
+    }
+    
+    pub fn now(realm: &Realm) -> Res<temporal_rs::PlainTime> {
+        Now::get_now()?
+            .plain_time_with_provider(None, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+    
+    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
+        let time = Self::now(realm)?;
+
+        Ok(Self::new(time, realm).into_object())
+        
     }
 }
 

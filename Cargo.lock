@@ -5281,6 +5281,7 @@ dependencies = [
  "getrandom 0.3.1",
  "half",
  "hex",
+ "iana-time-zone",
  "indexmap",
  "log",
  "num-bigint",

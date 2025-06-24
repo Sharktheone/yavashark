@@ -14,6 +14,7 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
+use crate::builtins::temporal::now::Now;
 
 #[object]
 #[derive(Debug)]
@@ -46,14 +47,15 @@ impl Instant {
             .map_err(Error::from_temporal)
     }
 
-    pub fn now(realm: &Realm) -> Res<ObjectHandle> {
-        let now = std::time::SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|_| Error::new("System time before UNIX epoch"))?;
+    pub fn now() -> Res<temporal_rs::Instant> {
+        Now::get_now()?
+            .instant()
+            .map_err(Error::from_temporal)
+    }
 
-        let i =
-            temporal_rs::Instant::try_new(now.as_nanos() as i128).map_err(Error::from_temporal)?;
-
+    pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
+        let i = Self::now()?;
+        
         Ok(Self::from_stamp(i, realm).into_object())
     }
 }
