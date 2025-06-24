@@ -1,10 +1,14 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::options::{ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset, DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::options::{
+    ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset,
+    DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions,
+    ToStringRoundingOptions, Unit,
+};
 use temporal_rs::parsers::Precision;
-use temporal_rs::{Calendar, TemporalError};
 use temporal_rs::provider::TransitionDirection;
+use temporal_rs::Calendar;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -275,15 +279,20 @@ pub fn calendar_opt(cal: Option<&str>) -> Res<Calendar> {
         .unwrap_or_default())
 }
 
-pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayCalendar>{
+pub fn display_calendar(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayCalendar> {
     let Some(cal) = cal else {
         return Ok(DisplayCalendar::default());
     };
-    
-    let cal = cal.get("calendarName", realm)?.to_string(realm)?;
-    
-    DisplayCalendar::from_str(&cal)
-        .map_err(Error::from_temporal)
+
+    let cal = cal.get_opt("calendarName", realm)?;
+
+    let Some(cal) = cal else {
+        return Ok(DisplayCalendar::default());
+    };
+
+    let cal = cal.to_string(realm)?;
+
+    DisplayCalendar::from_str(&cal).map_err(Error::from_temporal)
 }
 
 pub fn display_offset(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<DisplayOffset> {
@@ -296,11 +305,10 @@ pub fn display_offset(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Disp
     if display_offset.is_undefined() {
         return Ok(DisplayOffset::default());
     }
-    
+
     let display_offset = display_offset.to_string(realm)?;
 
-    let display_offset = DisplayOffset::from_str(&display_offset)
-        .map_err(Error::from_temporal)?;
+    let display_offset = DisplayOffset::from_str(&display_offset).map_err(Error::from_temporal)?;
 
     Ok(display_offset)
 }
@@ -318,12 +326,11 @@ pub fn display_timezone(cal: Option<&ObjectHandle>, realm: &mut Realm) -> Res<Di
 
     let display_timezone = display_timezone.to_string(realm)?;
 
-    let display_timezone = DisplayTimeZone::from_str(&display_timezone)
-        .map_err(Error::from_temporal)?;
+    let display_timezone =
+        DisplayTimeZone::from_str(&display_timezone).map_err(Error::from_temporal)?;
 
     Ok(display_timezone)
 }
-
 
 pub fn disambiguation_opt(
     obj: Option<&ObjectHandle>,
@@ -341,11 +348,9 @@ pub fn disambiguation_opt(
 
     let disambiguation = disambiguation.to_string(realm)?;
 
-    
-    Ok(Some(
-        Disambiguation::from_str(&disambiguation)
-        .map_err(|_| Error::range("Invalid disambiguation option"))?
-    ))
+    Ok(Some(Disambiguation::from_str(&disambiguation).map_err(
+        |_| Error::range("Invalid disambiguation option"),
+    )?))
 }
 
 pub fn offset_disambiguation_opt(
@@ -366,14 +371,11 @@ pub fn offset_disambiguation_opt(
 
     Ok(Some(
         OffsetDisambiguation::from_str(&disambiguation)
-        .map_err(|_| Error::range("Invalid offsetDisambiguation option"))?
+            .map_err(|_| Error::range("Invalid offsetDisambiguation option"))?,
     ))
 }
 
-pub fn transition_direction(
-    obj: &Value, 
-    realm: &mut Realm,
-) -> Res<TransitionDirection> {
+pub fn transition_direction(obj: &Value, realm: &mut Realm) -> Res<TransitionDirection> {
     match obj {
         Value::Object(obj) => {
             let direction = obj.get("direction", realm)?;
@@ -382,10 +384,10 @@ pub fn transition_direction(
             TransitionDirection::from_str(&direction)
                 .map_err(|_| Error::range("Invalid transition direction"))
         }
-        Value::String(s) => {
-            TransitionDirection::from_str(s.as_str())
-                .map_err(|_| Error::range("Invalid transition direction"))
-        }
-        _ => Err(Error::ty("Expected an object or string for transition direction")),
+        Value::String(s) => TransitionDirection::from_str(s.as_str())
+            .map_err(|_| Error::range("Invalid transition direction")),
+        _ => Err(Error::ty(
+            "Expected an object or string for transition direction",
+        )),
     }
 }
