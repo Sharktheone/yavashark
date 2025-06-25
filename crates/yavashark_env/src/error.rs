@@ -125,8 +125,11 @@ impl ErrorObj {
 
     #[prop("isError")]
     pub fn is_error(this: Value) -> bool {
-        let this: Res<OwningGcGuard<_, Self>> = FromValue::from_value(this);
-
-        this.is_ok()
+        let Value::Object(this) = this else {
+            return false;
+        };
+        
+        
+        this.downcast::<Self>().is_some()
     }
 }
