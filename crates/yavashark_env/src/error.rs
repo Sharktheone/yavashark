@@ -124,8 +124,8 @@ impl ErrorObj {
     }
 
     #[prop("isError")]
-    pub fn is_error(this: Value) -> bool {
-        let Value::Object(this) = this else {
+    pub fn is_error(that: Value) -> bool {
+        let Value::Object(this) = that else {
             return false;
         };
         
