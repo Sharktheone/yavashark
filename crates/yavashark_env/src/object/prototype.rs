@@ -76,13 +76,13 @@ impl Prototype {
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter =
-            NativeFunction::with_proto("__define_getter__", define_getter, func.copy()).into();
+            NativeFunction::with_proto("__defineGetter__", define_getter, func.copy()).into();
         this_borrow.defined_setter =
-            NativeFunction::with_proto("__define_setter__", define_setter, func.copy()).into();
+            NativeFunction::with_proto("__defineSetter__", define_setter, func.copy()).into();
         this_borrow.lookup_getter =
-            NativeFunction::with_proto("__lookup_getter__", lookup_getter, func.copy()).into();
+            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.copy()).into();
         this_borrow.lookup_setter =
-            NativeFunction::with_proto("__lookup_setter__", lookup_setter, func.copy()).into();
+            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.copy()).into();
         this_borrow.constructor = obj_constructor.into();
 
         this_borrow
@@ -114,10 +114,10 @@ impl Prototype {
     }
 
     const DIRECT_PROPERTIES: &'static [&'static str] = &[
-        "__define_getter__",
-        "__define_setter__",
-        "__lookup_getter__",
-        "__lookup_setter__",
+        "__defineGetter__",
+        "__defineSetter__",
+        "__lookupGetter__",
+        "__lookupSetter__",
         "constructor",
         "hasOwnProperty",
         "isPrototypeOf",
@@ -134,21 +134,21 @@ impl Obj<Realm> for Prototype {
 
         if let Value::String(name) = &name {
             match name.as_str() {
-                "__define_getter__" => {
+                "__defineGetter__" => {
                     this.defined_getter = value.into();
                     return Ok(());
                 }
-                "__define_setter__" => {
+                "__defineSetter__" => {
                     this.defined_setter = value.into();
                     return Ok(());
                 }
 
-                "__lookup_getter__" => {
+                "__lookupGetter__" => {
                     this.lookup_getter = value.into();
                     return Ok(());
                 }
 
-                "__lookup_setter__" => {
+                "__lookupSetter__" => {
                     this.lookup_setter = value.into();
                     return Ok(());
                 }
@@ -211,10 +211,10 @@ impl Obj<Realm> for Prototype {
 
         if let Value::String(name) = name {
             match name.as_str() {
-                "__define_getter__" => return Ok(Some(this.defined_getter.copy())),
-                "__define_setter__" => return Ok(Some(this.defined_setter.copy())),
-                "__lookup_getter__" => return Ok(Some(this.lookup_getter.copy())),
-                "__lookup_setter__" => return Ok(Some(this.lookup_setter.copy())),
+                "__defineGetter__" => return Ok(Some(this.defined_getter.copy())),
+                "__defineSetter__" => return Ok(Some(this.defined_setter.copy())),
+                "__lookupGetter__" => return Ok(Some(this.lookup_getter.copy())),
+                "__lookupSetter__" => return Ok(Some(this.lookup_setter.copy())),
                 "constructor" => return Ok(Some(this.constructor.copy())),
                 "hasOwnProperty" => return Ok(Some(this.has_own_property.copy())),
                 "getOwnPropertyDescriptor" => {
@@ -236,10 +236,10 @@ impl Obj<Realm> for Prototype {
 
         if let Value::String(name) = name {
             match name.as_str() {
-                "__define_getter__" => return Ok(Some(this.defined_getter.copy())),
-                "__define_setter__" => return Ok(Some(this.defined_setter.copy())),
-                "__lookup_getter__" => return Ok(Some(this.lookup_getter.copy())),
-                "__lookup_setter__" => return Ok(Some(this.lookup_setter.copy())),
+                "__defineGetter__" => return Ok(Some(this.defined_getter.copy())),
+                "__defineSetter__" => return Ok(Some(this.defined_setter.copy())),
+                "__lookupGetter__" => return Ok(Some(this.lookup_getter.copy())),
+                "__lookupSetter__" => return Ok(Some(this.lookup_setter.copy())),
                 "constructor" => return Ok(Some(this.constructor.copy())),
                 "hasOwnProperty" => return Ok(Some(this.has_own_property.copy())),
                 "getOwnPropertyDescriptor" => {
@@ -283,10 +283,10 @@ impl Obj<Realm> for Prototype {
     fn contains_key(&self, name: &Value) -> Res<bool> {
         if let Value::String(name) = name {
             match name.as_str() {
-                "__define_getter__"
-                | "__define_setter__"
-                | "__lookup_getter__"
-                | "__lookup_setter__"
+                "__defineGetter__"
+                | "__defineSetter__"
+                | "__lookupGetter__"
+                | "__lookupSetter__"
                 | "constructor"
                 | "hasOwnProperty"
                 | "getOwnPropertyDescriptor"
@@ -320,19 +320,19 @@ impl Obj<Realm> for Prototype {
 
         let mut props = this.object.properties()?;
         props.push((
-            Value::string("__define_getter__"),
+            Value::string("__defineGetter__"),
             this.defined_getter.value.copy(),
         ));
         props.push((
-            Value::string("__define_setter__"),
+            Value::string("__defineSetter__"),
             this.defined_setter.value.copy(),
         ));
         props.push((
-            Value::string("__lookup_getter__"),
+            Value::string("__lookupGetter__"),
             this.lookup_getter.value.copy(),
         ));
         props.push((
-            Value::string("__lookup_setter__"),
+            Value::string("__lookupSetter__"),
             this.lookup_setter.value.copy(),
         ));
         props.push((Value::string("constructor"), this.constructor.value.copy()));
@@ -366,10 +366,10 @@ impl Obj<Realm> for Prototype {
         let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
-        keys.push(Value::string("__define_getter__"));
-        keys.push(Value::string("__define_setter__"));
-        keys.push(Value::string("__lookup_getter__"));
-        keys.push(Value::string("__lookup_setter__"));
+        keys.push(Value::string("__defineGetter__"));
+        keys.push(Value::string("__defineSetter__"));
+        keys.push(Value::string("__lookupGetter__"));
+        keys.push(Value::string("__lookupSetter__"));
         keys.push(Value::string("constructor"));
         keys.push(Value::string("hasOwnProperty"));
         keys.push(Value::string("getOwnPropertyDescriptor"));
