@@ -76,13 +76,13 @@ impl Prototype {
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter =
-            NativeFunction::with_proto("__defineGetter__", define_getter, func.copy()).into();
+            Variable::write_config(NativeFunction::with_proto("__defineGetter__", define_getter, func.copy()).into()).into();
         this_borrow.defined_setter =
-            NativeFunction::with_proto("__defineSetter__", define_setter, func.copy()).into();
+            Variable::write_config(NativeFunction::with_proto("__defineSetter__", define_setter, func.copy()).into()).into();
         this_borrow.lookup_getter =
-            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.copy()).into();
+            Variable::write_config(NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.copy()).into()).into();
         this_borrow.lookup_setter =
-            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.copy()).into();
+            Variable::write_config(NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.copy()).into()).into();
         this_borrow.constructor = obj_constructor.into();
 
         this_borrow
