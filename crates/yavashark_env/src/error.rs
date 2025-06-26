@@ -1,10 +1,9 @@
 use crate::realm::Realm;
 use crate::{Error, MutObject, ObjectHandle, Res, Value, ValueResult};
 use std::cell::RefCell;
-use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 use yavashark_string::{ToYSString, YSString};
-use yavashark_value::{CustomName, ErrorKind, FromValue};
+use yavashark_value::{CustomName, ErrorKind};
 
 #[object(to_string, name)]
 #[derive(Debug)]
