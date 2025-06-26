@@ -75,14 +75,22 @@ impl Prototype {
 
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
-        this_borrow.defined_getter =
-            Variable::write_config(NativeFunction::with_proto("__defineGetter__", define_getter, func.copy()).into()).into();
-        this_borrow.defined_setter =
-            Variable::write_config(NativeFunction::with_proto("__defineSetter__", define_setter, func.copy()).into()).into();
-        this_borrow.lookup_getter =
-            Variable::write_config(NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.copy()).into()).into();
-        this_borrow.lookup_setter =
-            Variable::write_config(NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.copy()).into()).into();
+        this_borrow.defined_getter = Variable::write_config(
+            NativeFunction::with_proto("__defineGetter__", define_getter, func.copy()).into(),
+        )
+        .into();
+        this_borrow.defined_setter = Variable::write_config(
+            NativeFunction::with_proto("__defineSetter__", define_setter, func.copy()).into(),
+        )
+        .into();
+        this_borrow.lookup_getter = Variable::write_config(
+            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.copy()).into(),
+        )
+        .into();
+        this_borrow.lookup_setter = Variable::write_config(
+            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.copy()).into(),
+        )
+        .into();
         this_borrow.constructor = obj_constructor.into();
 
         this_borrow
@@ -271,10 +279,72 @@ impl Obj<Realm> for Prototype {
 
     fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
         if let Value::String(name) = name {
-            if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
-                return Ok(None);
+            match name.as_str() {
+                "__defineGetter__" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.defined_getter = Value::Undefined.into();
+                    return Ok(Some(Value::Undefined));
+                }
+                "__defineSetter__" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.defined_setter = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "__lookupGetter__" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.lookup_getter = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "__lookupSetter__" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.lookup_setter = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "constructor" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.constructor = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "hasOwnProperty" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.has_own_property = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "getOwnPropertyDescriptor" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.get_own_property_descriptor = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "isPrototypeOf" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.is_prototype_of = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "propertyIsEnumerable" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.property_is_enumerable = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "toLocaleString" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.to_locale_string = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "toString" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.to_string = Value::Undefined.into();
+                    return Ok(None);
+                }
+                "valueOf" => {
+                    let mut this = self.inner.try_borrow_mut()?;
+                    this.value_of = Value::Undefined.into();
+                    return Ok(None);
+                }
+                
+                _ => {}
             }
         }
+        
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.delete_property(name)
