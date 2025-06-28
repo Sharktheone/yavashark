@@ -142,9 +142,9 @@ impl ObjectImpl<Realm> for Arguments {
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error<Realm>> {
         let args = self.args.borrow();
         if index < args.len() {
-            Ok((true, Some(args[index].clone())))
+            Ok((false, Some(args[index].clone())))
         } else {
-            Ok((false, None))
+            Ok((true, None))
         }
     }
 }
