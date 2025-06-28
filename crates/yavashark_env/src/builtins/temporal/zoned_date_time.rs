@@ -386,8 +386,7 @@ impl ZonedDateTime {
             .era_with_provider(&realm.env.tz_provider)
             .map_err(Error::from_temporal)?
             .map(|era| YSString::from(era.to_string()))
-            .map(Into::into)
-            .unwrap_or(Value::Undefined))
+            .map_or(Value::Undefined, Into::into))
     }
 
     #[get("eraYear")]
@@ -396,8 +395,7 @@ impl ZonedDateTime {
             .date
             .era_year_with_provider(&realm.env.tz_provider)
             .map_err(Error::from_temporal)?
-            .map(Into::into)
-            .unwrap_or(Value::Undefined))
+            .map_or(Value::Undefined, Into::into))
     }
 
     #[get("hour")]
@@ -476,7 +474,7 @@ impl ZonedDateTime {
         self.date
             .offset_with_provider(&realm.env.tz_provider)
             .map_err(Error::from_temporal)
-            .map(|offset| YSString::from_ref(offset.to_string().as_str()))
+            .map(|offset| YSString::from_ref(offset.as_str()))
     }
 
     #[get("offsetNanoseconds")]
@@ -523,8 +521,7 @@ impl ZonedDateTime {
             .date
             .year_of_week_with_provider(&realm.env.tz_provider)
             .map_err(Error::from_temporal)?
-            .map(Into::into)
-            .unwrap_or(Value::Undefined))
+            .map_or(Value::Undefined, Into::into))
     }
 }
 
@@ -561,7 +558,7 @@ pub fn value_to_zoned_date_time(
                 offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
 
             temporal_rs::ZonedDateTime::from_str_with_provider(
-                &str,
+                str,
                 disambiguation,
                 offset_disambiguation,
                 &realm.env.tz_provider,

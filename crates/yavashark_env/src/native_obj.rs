@@ -31,7 +31,7 @@ impl DynNativeObj for Bar {
 }
 
 impl<N: DynNativeObj> NativeObject<N> {
-    pub fn new(inner: MutObject, native_inner: N) -> Self {
+    pub const fn new(inner: MutObject, native_inner: N) -> Self {
         Self {
             inner,
             native_inner,

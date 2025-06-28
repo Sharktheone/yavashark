@@ -16,7 +16,7 @@ pub struct CodeEdit {
 }
 
 impl CodeEdit {
-    pub fn new(lang: String, code: Rc<RefCell<String>>) -> Self {
+    pub const fn new(lang: String, code: Rc<RefCell<String>>) -> Self {
         Self { lang, code }
     }
 }
@@ -45,7 +45,7 @@ impl Widget for CodeEdit {
         };
 
         let mut code = self.code.borrow_mut();
-        let e = TextEdit::multiline(code.deref_mut())
+        let e = TextEdit::multiline(&mut *code)
             .font(egui::TextStyle::Monospace) // for cursor height
             .code_editor()
             .desired_rows(10)

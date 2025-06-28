@@ -53,8 +53,7 @@ impl Compiler {
                             code: Rc::new(
                                 g.body
                                     .as_ref()
-                                    .map(Self::create_bytecode_from_block)
-                                    .unwrap_or(Ok(BytecodeFunctionCode::default()))?,
+                                    .map_or(Ok(BytecodeFunctionCode::default()), Self::create_bytecode_from_block)?,
                             ),
                         };
 
@@ -80,8 +79,7 @@ impl Compiler {
                             code: Rc::new(
                                 s.body
                                     .as_ref()
-                                    .map(Self::create_bytecode_from_block)
-                                    .unwrap_or(Ok(BytecodeFunctionCode::default()))?,
+                                    .map_or(Ok(BytecodeFunctionCode::default()), Self::create_bytecode_from_block)?,
                             ),
                         };
 

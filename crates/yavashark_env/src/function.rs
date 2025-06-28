@@ -174,7 +174,7 @@ impl NativeFunction {
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
-            name: name,
+            name,
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
@@ -380,7 +380,7 @@ impl NativeFunction {
 
 impl NativeFunctionBuilder {
     #[must_use]
-    pub fn name(mut self, name: &'static str) -> Self {
+    pub const fn name(mut self, name: &'static str) -> Self {
         self.0.name = name;
         self
     }

@@ -89,7 +89,7 @@ impl SmallString {
     }
 
     pub fn pop(&mut self) {
-        self.inner.pop()
+        self.inner.pop();
     }
 }
 

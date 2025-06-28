@@ -582,7 +582,7 @@ impl YSString {
 
                 let str = Self::from_string(str);
 
-                self.inner = str.inner
+                self.inner = str.inner;
             }
 
             InnerString::Rope(rope) => {
@@ -591,7 +591,7 @@ impl YSString {
 
                 let str = Self::from_string(str);
 
-                self.inner = str.inner
+                self.inner = str.inner;
             }
         }
     }

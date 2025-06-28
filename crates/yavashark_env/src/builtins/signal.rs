@@ -16,7 +16,7 @@ pub fn get_signal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
 ) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.clone().into());
+    let obj = Object::with_proto(obj_proto.into());
 
     let protos = Protos {
         state: Object::null(),

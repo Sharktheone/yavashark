@@ -123,7 +123,7 @@ impl<'a> GuiApp<'a> {
     }
 }
 
-impl<'a> App for GuiApp<'a> {
+impl App for GuiApp<'_> {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             let x = self.ui_ref.update_ui(ui);

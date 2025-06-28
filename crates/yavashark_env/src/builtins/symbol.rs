@@ -99,7 +99,7 @@ impl SymbolConstructor {
     #[prop("for")]
     fn for_(&self, key: &str) -> Symbol {
         if let Some(sym) = self.find_symbol(key) {
-            return sym.into();
+            return sym;
         }
 
         let new_symbol = Symbol::new_str(key);

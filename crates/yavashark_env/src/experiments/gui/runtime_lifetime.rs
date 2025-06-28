@@ -15,20 +15,18 @@ pub struct RuntimeLifetimeGuard<'a, T> {
     _marker: PhantomData<&'a mut T>,
 }
 
-impl<'a, T> Drop for RuntimeLifetimeGuard<'a, T> {
+impl<T> Drop for RuntimeLifetimeGuard<'_, T> {
     fn drop(&mut self) {
-        if self.ptr.1.get() {
-            panic!("Cannot remove reference that is still borrowed")
-        }
+        assert!(!self.ptr.1.get(), "Cannot remove reference that is still borrowed");
 
         self.ptr.0.set(self.old);
-        self.ptr.1.set(self.borrowed)
+        self.ptr.1.set(self.borrowed);
     }
 }
 
 impl<T> RuntimeLifetime<T> {
     #[allow(elided_named_lifetimes, dead_code)]
-    pub fn new<'a>(r: &'a mut T) -> (Self, RuntimeLifetimeGuard<'a, T>) {
+    pub fn new(r: &mut T) -> (Self, RuntimeLifetimeGuard<'_, T>) {
         let rc = Rc::new((Cell::new(Some(NonNull::from(r))), Cell::new(false)));
 
         (
@@ -42,7 +40,7 @@ impl<T> RuntimeLifetime<T> {
         )
     }
 
-    pub fn empty() -> RuntimeLifetime<T> {
+    pub fn empty() -> Self {
         Self(Rc::default())
     }
 

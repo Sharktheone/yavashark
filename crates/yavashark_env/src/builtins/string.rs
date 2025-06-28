@@ -367,7 +367,7 @@ impl StringObj {
     }
 
     #[prop("charCodeAt")]
-    pub fn char_code_at(#[this] str: &Stringable, index: isize) -> Value {
+    #[must_use] pub fn char_code_at(#[this] str: &Stringable, index: isize) -> Value {
         Self::get_single_str(str, index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
@@ -375,7 +375,7 @@ impl StringObj {
     }
 
     #[prop("codePointAt")]
-    pub fn code_point_at(#[this] str: &Stringable, index: isize) -> Value {
+    #[must_use] pub fn code_point_at(#[this] str: &Stringable, index: isize) -> Value {
         Self::get_single_str(str, index)
             .map(|s| s.chars().next().map(|c| c as u32).unwrap_or_default())
             .unwrap_or_default()
@@ -396,7 +396,7 @@ impl StringObj {
     }
 
     #[prop("endsWith")]
-    pub fn ends_with(#[this] str: &Stringable, search: &str) -> Value {
+    #[must_use] pub fn ends_with(#[this] str: &Stringable, search: &str) -> Value {
         str.ends_with(&search).into()
     }
 
@@ -416,12 +416,12 @@ impl StringObj {
     }
 
     #[prop("includes")]
-    pub fn includes(#[this] str: &Stringable, search: &str) -> bool {
+    #[must_use] pub fn includes(#[this] str: &Stringable, search: &str) -> bool {
         str.contains(search)
     }
 
     #[prop("indexOf")]
-    pub fn index_of(#[this] str: &Stringable, search: &str, from: Option<isize>) -> isize {
+    #[must_use] pub fn index_of(#[this] str: &Stringable, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(0);
 
         let from = if from < 0 {
@@ -436,7 +436,7 @@ impl StringObj {
     }
 
     #[prop("isWellFormed")]
-    pub fn is_well_formed(#[this] str: &Stringable) -> bool {
+    #[must_use] pub fn is_well_formed(#[this] str: &Stringable) -> bool {
         // check if we have any lone surrogates => between 0xD800-0xDFFF or 0xDC00-0xDFFF
         str.chars().all(|c| !is_lone_surrogate(c))
     }
@@ -447,7 +447,7 @@ impl StringObj {
     }
 
     #[prop("lastIndexOf")]
-    pub fn last_index_of(#[this] str: &Stringable, search: &str, from: Option<isize>) -> isize {
+    #[must_use] pub fn last_index_of(#[this] str: &Stringable, search: &str, from: Option<isize>) -> isize {
         let from = from.unwrap_or(-1);
 
         let from = if from < 0 {
@@ -590,7 +590,7 @@ impl StringObj {
     }
 
     #[prop("startsWith")]
-    pub fn starts_with(#[this] str: &Stringable, search: &str) -> bool {
+    #[must_use] pub fn starts_with(#[this] str: &Stringable, search: &str) -> bool {
         str.starts_with(search)
     }
 

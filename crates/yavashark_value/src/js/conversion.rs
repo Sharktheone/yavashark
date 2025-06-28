@@ -20,7 +20,7 @@ impl<C: Realm> From<String> for Value<C> {
 
 impl<C: Realm> From<&String> for Value<C> {
     fn from(s: &String) -> Self {
-        Self::String(YSString::from_ref(&s))
+        Self::String(YSString::from_ref(s))
     }
 }
 

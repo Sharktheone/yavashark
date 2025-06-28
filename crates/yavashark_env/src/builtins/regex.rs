@@ -46,7 +46,7 @@ impl From<Flags> for regress::Flags {
 
 impl From<&str> for Flags {
     fn from(flags: &str) -> Self {
-        let mut flags_obj = Flags::default();
+        let mut flags_obj = Self::default();
 
         for c in flags.chars() {
             match c {

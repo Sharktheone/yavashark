@@ -139,7 +139,7 @@ impl PlainDate {
 
         let opts = opts
             .as_ref()
-            .map(|s| overflow_options(&s, realm))
+            .map(|s| overflow_options(s, realm))
             .transpose()?
             .flatten();
 

@@ -99,15 +99,14 @@ impl Duration {
                 minutes,
                 seconds,
                 milliseconds,
-                microseconds.map(|n| n as i128),
-                nanoseconds.map(|n| n as i128),
+                microseconds.map(i128::from),
+                nanoseconds.map(i128::from),
                 realm,
             )?));
         } else if let Value::String(s) = info {
             return Ok(RefOrOwned::Owned(
                 temporal_rs::Duration::from_str(s.as_str())
-                    .map_err(Error::from_temporal)
-                    .and_then(|dur| Ok(Self::with_duration(realm, dur)))?,
+                    .map_err(Error::from_temporal).map(|dur| Self::with_duration(realm, dur))?,
             ));
         }
 

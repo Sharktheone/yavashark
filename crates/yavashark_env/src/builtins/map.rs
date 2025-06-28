@@ -137,7 +137,7 @@ impl Map {
 
         match inner.map.entry(key) {
             Entry::Occupied(entry) => {
-                return Ok(entry.get().clone());
+                Ok(entry.get().clone())
             }
 
             Entry::Vacant(entry) => {
@@ -147,7 +147,7 @@ impl Map {
                     entry.insert(value.copy());
                 }
 
-                return Ok(value);
+                Ok(value)
             }
         }
     }

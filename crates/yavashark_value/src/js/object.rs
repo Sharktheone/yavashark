@@ -629,9 +629,9 @@ pub enum Hint {
 impl<C: Realm> IntoValue<C> for Hint {
     fn into_value(self) -> Value<C> {
         match self {
-            Hint::Number => "number".into(),
-            Hint::String => "string".into(),
-            Hint::None => Value::Undefined,
+            Self::Number => "number".into(),
+            Self::String => "string".into(),
+            Self::None => Value::Undefined,
         }
     }
 }

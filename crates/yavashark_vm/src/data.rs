@@ -84,17 +84,17 @@ impl Data for Undefined {
 impl Data for DataType {
     fn get(self, vm: &mut impl VM) -> Res<Value> {
         match self {
-            DataType::Acc(acc) => acc.get(vm),
-            DataType::Reg(reg) => reg.get(vm),
-            DataType::Var(var_name) => var_name.get(vm),
-            DataType::Const(const_idx) => const_idx.get(vm),
-            DataType::Stack(stack) => stack.get(vm),
-            DataType::F32(f32) => f32.get(vm),
-            DataType::I32(i32) => i32.get(vm),
-            DataType::U32(u32) => u32.get(vm),
-            DataType::Boolean(boolean) => boolean.get(vm),
-            DataType::Null(null) => null.get(vm),
-            DataType::Undefined(undefined) => undefined.get(vm),
+            Self::Acc(acc) => acc.get(vm),
+            Self::Reg(reg) => reg.get(vm),
+            Self::Var(var_name) => var_name.get(vm),
+            Self::Const(const_idx) => const_idx.get(vm),
+            Self::Stack(stack) => stack.get(vm),
+            Self::F32(f32) => f32.get(vm),
+            Self::I32(i32) => i32.get(vm),
+            Self::U32(u32) => u32.get(vm),
+            Self::Boolean(boolean) => boolean.get(vm),
+            Self::Null(null) => null.get(vm),
+            Self::Undefined(undefined) => undefined.get(vm),
         }
     }
 }
@@ -127,10 +127,10 @@ impl OutputData for Stack {
 impl Data for OutputDataType {
     fn get(self, vm: &mut impl VM) -> Res<Value> {
         match self {
-            OutputDataType::Acc(acc) => acc.get(vm),
-            OutputDataType::Reg(reg) => reg.get(vm),
-            OutputDataType::Var(var_name) => var_name.get(vm),
-            OutputDataType::Stack(stack) => stack.get(vm),
+            Self::Acc(acc) => acc.get(vm),
+            Self::Reg(reg) => reg.get(vm),
+            Self::Var(var_name) => var_name.get(vm),
+            Self::Stack(stack) => stack.get(vm),
         }
     }
 }
@@ -138,10 +138,10 @@ impl Data for OutputDataType {
 impl OutputData for OutputDataType {
     fn set(self, value: Value, vm: &mut impl VM) -> Res {
         match self {
-            OutputDataType::Acc(acc) => acc.set(value, vm),
-            OutputDataType::Reg(reg) => reg.set(value, vm),
-            OutputDataType::Var(var_name) => var_name.set(value, vm),
-            OutputDataType::Stack(stack) => stack.set(value, vm),
+            Self::Acc(acc) => acc.set(value, vm),
+            Self::Reg(reg) => reg.set(value, vm),
+            Self::Var(var_name) => var_name.set(value, vm),
+            Self::Stack(stack) => stack.set(value, vm),
         }
     }
 }

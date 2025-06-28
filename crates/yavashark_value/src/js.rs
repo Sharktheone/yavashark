@@ -245,7 +245,7 @@ impl<C: Realm> Value<C> {
         proto.resolve(self.copy(), realm)
     }
 
-    pub fn as_object(&self) -> Result<&Object<C>, Error<C>> {
+    pub const fn as_object(&self) -> Result<&Object<C>, Error<C>> {
         let Self::Object(obj) = &self else {
             return Err(Error::ty("expected object"));
         };

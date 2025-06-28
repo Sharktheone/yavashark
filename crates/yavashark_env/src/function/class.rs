@@ -189,25 +189,23 @@ impl Obj<Realm> for Class {
             constructor.construct(args, this.copy(), realm)?;
 
             this
-        } else {
-            if let Some(sup) = &self.sup {
-                let c = sup.construct(realm, Vec::new())?.to_object()?;
+        } else if let Some(sup) = &self.sup {
+            let c = sup.construct(realm, Vec::new())?.to_object()?;
 
-                c.set_prototype(self.prototype.try_borrow()?.clone())?;
+            c.set_prototype(self.prototype.try_borrow()?.clone())?;
 
-                ClassInstance {
-                    inner: RefCell::new(c),
-                    private_props: RefCell::new(HashMap::new()),
-                    name: self.name.clone(),
-                }
-                .into_value()
-            } else {
-                ClassInstance::new_with_proto(
-                    self.prototype.try_borrow()?.value.clone(),
-                    self.name.clone(),
-                )
-                .into_value()
+            ClassInstance {
+                inner: RefCell::new(c),
+                private_props: RefCell::new(HashMap::new()),
+                name: self.name.clone(),
             }
+            .into_value()
+        } else {
+            ClassInstance::new_with_proto(
+                self.prototype.try_borrow()?.value.clone(),
+                self.name.clone(),
+            )
+            .into_value()
         })
     }
 
