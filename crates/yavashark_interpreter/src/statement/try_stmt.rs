@@ -67,7 +67,7 @@ mod tests {
             "#,
             1,
             Vec::<Vec<Value>>::new(),
-            Value::String("error message".to_string())
+            Value::String("error message".into())
         );
     }
 
@@ -87,7 +87,7 @@ mod tests {
             "#,
             1,
             Vec::<Vec<Value>>::new(),
-            Value::String("error message".to_string())
+            Value::String("error message".into())
         );
     }
 
@@ -103,7 +103,7 @@ mod tests {
             "#,
             0,
             Vec::<Vec<Value>>::new(),
-            Value::String("no error".to_string())
+            Value::String("no error".into())
         );
     }
 
@@ -127,7 +127,7 @@ mod tests {
             "#,
             0,
             Vec::<Vec<Value>>::new(),
-            Value::String("finalizer executed".to_string())
+            Value::String("finalizer executed".into())
         );
     }
 
@@ -151,7 +151,7 @@ mod tests {
             "#,
             0,
             Vec::<Vec<Value>>::new(),
-            Value::String("finalizer executed".to_string())
+            Value::String("finalizer executed".into())
         );
     }
 
@@ -169,7 +169,7 @@ mod tests {
             "#,
             0,
             Vec::<Vec<Value>>::new(),
-            Value::String("no error".to_string())
+            Value::String("no error".into())
         );
     }
 
@@ -193,7 +193,7 @@ mod tests {
 
         assert_eq!(
             err.kind,
-            ErrorKind::Error(Some("error message".to_string()))
+            ErrorKind::Error(Some("error message".into()))
         );
 
         let state = value.borrow();

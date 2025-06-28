@@ -54,6 +54,6 @@ mod jsf__k {
 
     #[test]
     fn test_empty_string() {
-        expr!("([]+[])", Value::String(String::new()));
+        expr!("([]+[])", Value::String("".into()));
     }
 }

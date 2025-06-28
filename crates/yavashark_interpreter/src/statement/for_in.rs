@@ -133,8 +133,8 @@ mod tests {
 
         let values = &values.borrow().got_values;
 
-        assert!(values.contains(&vec![Value::String("a".to_string())]));
-        assert!(values.contains(&vec![Value::String("b".to_string())]));
-        assert!(values.contains(&vec![Value::String("c".to_string())]));
+        assert!(values.contains(&vec![Value::String("a".into())]));
+        assert!(values.contains(&vec![Value::String("b".into())]));
+        assert!(values.contains(&vec![Value::String("c".into())]));
     }
 }

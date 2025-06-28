@@ -37,7 +37,7 @@ mod tests {
             "#,
             0,
             Vec::<Vec<Value>>::new(),
-            Value::String("hello".to_owned())
+            Value::String("hello".into())
         );
     }
 
