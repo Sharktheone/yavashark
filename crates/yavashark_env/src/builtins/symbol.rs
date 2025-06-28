@@ -33,9 +33,14 @@ impl SymbolConstructor {
 
         Ok(this.into_object())
     }
-    
+
     pub fn find_symbol(&self, symbol: &str) -> Option<Symbol> {
-        self.inner.borrow().symbols.iter().find(|s| s.as_ref() == symbol).cloned()
+        self.inner
+            .borrow()
+            .symbols
+            .iter()
+            .find(|s| s.as_ref() == symbol)
+            .cloned()
     }
 }
 
@@ -79,18 +84,18 @@ impl SymbolConstructor {
 
     #[prop("unscopables")]
     const UNSCOPABLES: &'static Symbol = Symbol::UNSCOPABLES;
-    
+
     #[prop("keyFor")]
     fn key_for(symbol: Symbol) -> Value {
         let str = symbol.to_ys_string();
-        
+
         if str.is_empty() {
             return Value::Undefined;
         }
-        
+
         str.into_value()
     }
-    
+
     #[prop("for")]
     fn for_(&self, key: &str) -> Symbol {
         if let Some(sym) = self.find_symbol(key) {
@@ -99,7 +104,7 @@ impl SymbolConstructor {
 
         let new_symbol = Symbol::new_str(key);
         self.inner.borrow_mut().symbols.push(new_symbol.clone());
-        
+
         new_symbol
     }
 }
@@ -111,9 +116,9 @@ impl Func<Realm> for SymbolConstructor {
         })?;
 
         let sym = Symbol::new_str(&sym);
-        
+
         self.inner.borrow_mut().symbols.push(sym.clone());
-        
+
         Ok(sym.into())
     }
 }
@@ -140,7 +145,7 @@ impl SymbolObj {
 
         inner.symbol.clone()
     }
-    
+
     #[get("description")]
     fn description(&self) -> Value {
         SymbolConstructor::key_for(self.inner.borrow().symbol.clone())

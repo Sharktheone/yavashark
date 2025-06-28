@@ -1,9 +1,9 @@
+use crate::builtins::signal::notify_dependent;
+use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use yavashark_garbage::{Weak};
+use yavashark_garbage::Weak;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
-use crate::{MutObject, ObjectHandle, Realm, Res, Value};
-use crate::builtins::signal::notify_dependent;
 
 #[object]
 #[derive(Debug)]
@@ -44,17 +44,16 @@ impl State {
 
     pub fn set(&self, value: Value, realm: &mut Realm) -> Res<()> {
         let mut inner = self.inner.try_borrow_mut()?;
-        
+
         inner.value = value;
-        
+
         let mut err = None;
-        
+
         inner.dependents.retain(|dep| {
             if err.is_some() {
                 return false;
             }
-            
-            
+
             dep.upgrade().is_some_and(|dep| {
                 if let Err(error) = notify_dependent(dep, realm) {
                     err = Some(error);
@@ -63,7 +62,7 @@ impl State {
                 true
             })
         });
-        
+
         err.map_or(Ok(()), Err)
     }
 }

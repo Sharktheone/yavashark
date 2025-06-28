@@ -1,4 +1,5 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -8,7 +9,6 @@ use temporal_rs::{Calendar, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::now::Now;
 
 #[object]
 #[derive(Debug)]
@@ -284,7 +284,6 @@ impl PlainDate {
     #[prop("toString")]
     pub fn to_string(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let calendar = display_calendar(opts.as_ref(), realm)?;
-
 
         Ok(self.date.to_ixdtf_string(calendar))
     }

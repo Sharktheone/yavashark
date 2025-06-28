@@ -7,8 +7,8 @@ use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
-use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
 use yavashark_value::ops::BigIntOrNumber;
+use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self) -> ValueResult;
@@ -180,16 +180,24 @@ impl FromValueOutput for BigIntOrNumber {
             Value::BigInt(n) => Ok(Self::BigInt(n)),
             Value::Number(n) => {
                 if n.is_nan() || n.is_infinite() {
-                    return Err(Error::ty_error(format!("Cannot convert {n} to BigIntOrNumber")));
+                    return Err(Error::ty_error(format!(
+                        "Cannot convert {n} to BigIntOrNumber"
+                    )));
                 }
                 Ok(Self::Number(n))
             }
             Value::String(s) => s.trim().parse::<i128>().map_or_else(
-                |_| Err(Error::ty_error(format!("Cannot convert {s} to BigIntOrNumber"))),
+                |_| {
+                    Err(Error::ty_error(format!(
+                        "Cannot convert {s} to BigIntOrNumber"
+                    )))
+                },
                 |n| Ok(Self::BigInt(Rc::new(BigInt::from(n)))),
             ),
             Value::Boolean(b) => Ok(Self::Number(f64::from(b))),
-            _ => Err(Error::ty_error(format!("Expected bigint or number, found {value:?}"))),
+            _ => Err(Error::ty_error(format!(
+                "Expected bigint or number, found {value:?}"
+            ))),
         }
     }
 }
@@ -201,7 +209,6 @@ impl FromValueOutput for &BigIntOrNumber {
         BigIntOrNumber::from_value_out(value)
     }
 }
-
 
 pub struct Stringable(String);
 

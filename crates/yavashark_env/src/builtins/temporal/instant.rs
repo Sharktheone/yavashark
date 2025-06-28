@@ -1,4 +1,5 @@
 use crate::builtins::temporal::duration::Duration;
+use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::utils::{
     difference_settings, rounding_options, string_rounding_mode_opts,
 };
@@ -13,7 +14,6 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
-use crate::builtins::temporal::now::Now;
 
 #[object]
 #[derive(Debug)]
@@ -47,14 +47,12 @@ impl Instant {
     }
 
     pub fn now() -> Res<temporal_rs::Instant> {
-        Now::get_now()?
-            .instant()
-            .map_err(Error::from_temporal)
+        Now::get_now()?.instant().map_err(Error::from_temporal)
     }
 
     pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
         let i = Self::now()?;
-        
+
         Ok(Self::from_stamp(i, realm).into_object())
     }
 }

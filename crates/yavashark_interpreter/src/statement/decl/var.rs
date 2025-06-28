@@ -70,7 +70,7 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            &mut |scope, name, value|{
+                            &mut |scope, name, value| {
                                 let var = Variable::Var(name, value);
 
                                 cb(scope, var)

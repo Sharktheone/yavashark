@@ -177,16 +177,24 @@ impl Interpreter {
             AssignTargetPat::Array(arr) => {
                 let pat = Pat::Array(arr.clone());
 
-                Self::run_pat(realm, &pat, scope, &mut iter::once(value), &mut |scope, name, value| {
-                    scope.update_or_define(name, value)
-                })?;
+                Self::run_pat(
+                    realm,
+                    &pat,
+                    scope,
+                    &mut iter::once(value),
+                    &mut |scope, name, value| scope.update_or_define(name, value),
+                )?;
             }
             AssignTargetPat::Object(expr) => {
                 let pat = Pat::Object(expr.clone());
 
-                Self::run_pat(realm, &pat, scope, &mut iter::once(value), &mut |scope, name, value| {
-                    scope.update_or_define(name, value)
-                })?;
+                Self::run_pat(
+                    realm,
+                    &pat,
+                    scope,
+                    &mut iter::once(value),
+                    &mut |scope, name, value| scope.update_or_define(name, value),
+                )?;
             }
             AssignTargetPat::Invalid(_) => {
                 return Err(Error::syn("Invalid left-hand side in assignment"))
@@ -385,18 +393,30 @@ impl Interpreter {
             AssignTargetPat::Array(arr) => {
                 let pat = Pat::Array(arr.clone());
 
-                Self::run_pat(realm, &pat, scope, &mut iter::once(left.copy()), &mut |scope, name, value| {
-                    scope.update_or_define(name, value);
-                    Ok(())
-                })?;
+                Self::run_pat(
+                    realm,
+                    &pat,
+                    scope,
+                    &mut iter::once(left.copy()),
+                    &mut |scope, name, value| {
+                        scope.update_or_define(name, value);
+                        Ok(())
+                    },
+                )?;
             }
             AssignTargetPat::Object(expr) => {
                 let pat = Pat::Object(expr.clone());
 
-                Self::run_pat(realm, &pat, scope, &mut iter::once(left.copy()), &mut |scope, name, value| {
-                    scope.update_or_define(name, value);
-                    Ok(())
-                })?;
+                Self::run_pat(
+                    realm,
+                    &pat,
+                    scope,
+                    &mut iter::once(left.copy()),
+                    &mut |scope, name, value| {
+                        scope.update_or_define(name, value);
+                        Ok(())
+                    },
+                )?;
             }
             AssignTargetPat::Invalid(_) => {
                 return Err(Error::syn("Invalid left-hand side in assignment").into())

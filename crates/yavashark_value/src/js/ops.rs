@@ -70,11 +70,11 @@ impl BigIntOrNumber {
             Self::Number(n) => Some(*n),
         }
     }
-    
+
     pub fn to_big_int(&self) -> Option<Rc<BigInt>> {
         match self {
             Self::BigInt(b) => Some(Rc::clone(b)),
-            Self::Number(n) => BigInt::from_f64(*n).map(Rc::new)
+            Self::Number(n) => BigInt::from_f64(*n).map(Rc::new),
         }
     }
 }

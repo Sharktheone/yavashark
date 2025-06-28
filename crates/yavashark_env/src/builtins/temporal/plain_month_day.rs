@@ -96,9 +96,13 @@ impl PlainMonthDay {
     }
 
     #[prop("toString")]
-    pub fn to_js_string(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
+    pub fn to_js_string(
+        &self,
+        opts: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<String> {
         let calendar = display_calendar(opts.as_ref(), realm)?;
-        
+
         Ok(self.month_day.to_ixdtf_string(calendar))
     }
 

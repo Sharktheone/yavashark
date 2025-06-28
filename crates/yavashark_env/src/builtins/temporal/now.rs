@@ -1,15 +1,15 @@
-use std::time::UNIX_EPOCH;
-use temporal_rs::{now, TimeZone};
-use temporal_rs::now::NowBuilder;
-use temporal_rs::unix_time::EpochNanoseconds;
 use crate::builtins::temporal::instant::Instant;
-use crate::{Error, ObjectHandle, Realm, Res};
-use yavashark_macro::{object, props};
-use yavashark_string::YSString;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::PlainTime;
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
+use crate::{Error, ObjectHandle, Realm, Res};
+use std::time::UNIX_EPOCH;
+use temporal_rs::now::NowBuilder;
+use temporal_rs::unix_time::EpochNanoseconds;
+use temporal_rs::{now, TimeZone};
+use yavashark_macro::{object, props};
+use yavashark_string::YSString;
 
 #[object]
 #[derive(Debug)]
@@ -24,12 +24,10 @@ impl Now {
         let nanos = EpochNanoseconds::try_from(now.as_nanos() as i128)
             .map_err(|_| Error::new("Failed to convert system time to nanoseconds"))?;
 
-        let tz = iana_time_zone::get_timezone()
-            .map_err(|e| Error::new_error(e.to_string()))?;
+        let tz = iana_time_zone::get_timezone().map_err(|e| Error::new_error(e.to_string()))?;
 
-        let tz = TimeZone::try_from_identifier_str(&tz)
-            .map_err(|e| Error::new_error(e.to_string()))?;
-
+        let tz =
+            TimeZone::try_from_identifier_str(&tz).map_err(|e| Error::new_error(e.to_string()))?;
 
         Ok(NowBuilder::default()
             .with_system_nanoseconds(nanos)
@@ -81,8 +79,7 @@ impl Now {
     fn time_zone_id() -> Res<String> {
         let now = Self::get_now()?;
 
-        now.time_zone().identifier()
-            .map_err(Error::from_temporal)
+        now.time_zone().identifier().map_err(Error::from_temporal)
     }
 
     #[prop("zonedDateTimeISO")]

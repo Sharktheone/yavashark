@@ -70,7 +70,13 @@ impl From<&str> for Flags {
 impl RegExp {
     #[allow(clippy::new_ret_no_self)]
     #[must_use]
-    pub fn new(realm: &Realm, regex: Regex, flags: Flags, source: YSString, flags_str: YSString) -> ObjectHandle {
+    pub fn new(
+        realm: &Realm,
+        regex: Regex,
+        flags: Flags,
+        source: YSString,
+        flags_str: YSString,
+    ) -> ObjectHandle {
         Self {
             regex,
             inner: RefCell::new(MutableRegExp {
@@ -87,16 +93,32 @@ impl RegExp {
     pub fn new_from_str(realm: &Realm, source: &str) -> Res<ObjectHandle> {
         let regex = Regex::new(source).map_err(|e| ControlFlow::error(e.to_string()))?;
 
-        Ok(Self::new(realm, regex, Flags::default(), YSString::from_ref(source), YSString::new()))
+        Ok(Self::new(
+            realm,
+            regex,
+            Flags::default(),
+            YSString::from_ref(source),
+            YSString::new(),
+        ))
     }
 
-    pub fn new_from_str_with_flags(realm: &Realm, source: &str, flags_str: &str) -> Res<ObjectHandle> {
+    pub fn new_from_str_with_flags(
+        realm: &Realm,
+        source: &str,
+        flags_str: &str,
+    ) -> Res<ObjectHandle> {
         let flags = Flags::from(flags_str);
 
         let regex = Regex::from_unicode(source.chars().map(u32::from), flags)
             .map_err(|e| Error::syn_error(e.text))?;
 
-        Ok(Self::new(realm, regex, flags, YSString::from_ref(source), YSString::from_ref(flags_str)))
+        Ok(Self::new(
+            realm,
+            regex,
+            flags,
+            YSString::from_ref(source),
+            YSString::from_ref(flags_str),
+        ))
     }
 }
 
@@ -232,11 +254,11 @@ impl RegExp {
                     })
                     .transpose()?
                     .map_or(Value::Undefined, Obj::into_value);
-                
+
                 indices.push(range)?;
             }
         }
-        
+
         if self.flags.has_indecies {
             a.define_property("indices".into(), indices.into_value())?;
         }
@@ -248,7 +270,8 @@ impl RegExp {
     pub fn test(&self, value: &str) -> bool {
         self.regex
             .find_from(value, self.last_index.get())
-            .next().is_some_and(|m| {
+            .next()
+            .is_some_and(|m| {
                 if self.flags.sticky && m.start() != self.last_index.get() {
                     return false;
                 }
@@ -264,17 +287,17 @@ impl RegExp {
     #[prop("toString")]
     pub fn js_to_string(&self) -> YSString {
         let mut source = self.source.clone();
-        
+
         source.push_str(self.flags_str.clone());
-        
+
         source
     }
-    
+
     #[get("global")]
     pub const fn global(&self) -> bool {
         self.flags.global
     }
-    
+
     #[get("lastIndex")]
     pub fn last_index(&self) -> usize {
         self.last_index.get()
@@ -297,6 +320,24 @@ pub fn escape(text: &str) -> String {
 
 #[must_use]
 pub const fn is_meta_character(c: char) -> bool {
-    matches!(c, '\\' | '.' | '+' | '*' | '?' | '(' | ')' | '|' | '[' | ']' | '{' | '}' | '^' | '$'
-        | '#' | '&' | '-' | '~')
+    matches!(
+        c,
+        '\\' | '.'
+            | '+'
+            | '*'
+            | '?'
+            | '('
+            | ')'
+            | '|'
+            | '['
+            | ']'
+            | '{'
+            | '}'
+            | '^'
+            | '$'
+            | '#'
+            | '&'
+            | '-'
+            | '~'
+    )
 }

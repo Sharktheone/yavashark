@@ -461,8 +461,8 @@ impl<T: Collectable> Gc<T> {
             GcRef { ptr }
         }
     }
-    
-    #[must_use] 
+
+    #[must_use]
     pub fn downgrade(&self) -> Weak<T> {
         let inner = self.inner;
 
@@ -491,9 +491,12 @@ impl<T: Collectable> Drop for Weak<T> {
     fn drop(&mut self) {
         // Decrement the weak reference count
         unsafe {
-            (*self.inner.as_ptr()).refs.weak.fetch_sub(1, Ordering::Relaxed);
+            (*self.inner.as_ptr())
+                .refs
+                .weak
+                .fetch_sub(1, Ordering::Relaxed);
         }
-        
+
         // If the weak reference count reaches 0 and the strong ref count is 0, we can deallocate the GcBox
         if unsafe { (*self.inner.as_ptr()).refs.weak() } == 0
             && unsafe { (*self.inner.as_ptr()).refs.strong() } == 0
@@ -502,7 +505,6 @@ impl<T: Collectable> Drop for Weak<T> {
                 let _ = Box::from_raw(self.inner.as_ptr());
             }
         }
-        
     }
 }
 

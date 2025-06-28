@@ -125,10 +125,16 @@ impl RawJSFunction {
         let mut iter = args.clone().into_iter();
 
         for p in &self.params {
-            Interpreter::run_pat(realm, &p.pat, scope, &mut iter, &mut |scope, name, value| {
-                scope.declare_var(name, value);
-                Ok(())
-            })?;
+            Interpreter::run_pat(
+                realm,
+                &p.pat,
+                scope,
+                &mut iter,
+                &mut |scope, name, value| {
+                    scope.declare_var(name, value);
+                    Ok(())
+                },
+            )?;
         }
 
         let scope = &mut Scope::with_parent(scope)?;

@@ -57,7 +57,7 @@ impl Interpreter {
                         while let Some(res) = iter.next(realm)? {
                             elems.push(res);
                         }
-                        
+
                         Self::run_pat(realm, rest, scope, &mut elems.into_iter(), cb)?;
                         let assert_last = true;
                     } else {
@@ -67,14 +67,13 @@ impl Interpreter {
                             Self::run_pat(realm, elem, scope, &mut iter::once(next), cb)?;
                         }
                     }
-
                 }
             }
             Pat::Rest(rest) => {
                 let collect = value.collect::<Vec<_>>();
 
                 let array = Array::with_elements(realm, collect)?.into_value();
-                
+
                 Self::run_pat(realm, &rest.arg, scope, &mut iter::once(array), cb)?;
             }
             Pat::Object(obj) => {
@@ -91,8 +90,8 @@ impl Interpreter {
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
-                            let value =
-                                object.get_property_opt(&key, realm)?
+                            let value = object
+                                .get_property_opt(&key, realm)?
                                 .unwrap_or(Value::Undefined);
 
                             Self::run_pat(realm, &kv.value, scope, &mut iter::once(value), cb)?;
@@ -129,7 +128,7 @@ impl Interpreter {
                                 &rest.arg,
                                 scope,
                                 &mut iter::once(rest_obj.into_value()),
-                                cb
+                                cb,
                             )?;
                         }
                     }

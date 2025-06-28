@@ -340,11 +340,11 @@ impl Obj<Realm> for Prototype {
                     this.value_of = Value::Undefined.into();
                     return Ok(None);
                 }
-                
+
                 _ => {}
             }
         }
-        
+
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.delete_property(name)

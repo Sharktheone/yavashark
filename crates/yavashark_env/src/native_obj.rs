@@ -22,7 +22,6 @@ pub trait DynNativeObj: 'static {
     }
 }
 
-
 pub struct Bar;
 
 impl DynNativeObj for Bar {
@@ -33,19 +32,18 @@ impl DynNativeObj for Bar {
 
 impl<N: DynNativeObj> NativeObject<N> {
     pub fn new(inner: MutObject, native_inner: N) -> Self {
-        Self { inner, native_inner }
+        Self {
+            inner,
+            native_inner,
+        }
     }
-    
-    pub fn as_dyn(self) -> Box<DynNativeObject>  {
+
+    pub fn as_dyn(self) -> Box<DynNativeObject> {
         Box::new(self)
     }
-
 }
 
-
-
 pub type DynNativeObject = NativeObject<dyn DynNativeObj>;
-
 
 // pub struct NativeObject2 {
 //     inner: MutObject,

@@ -1,4 +1,7 @@
+use crate::builtins::temporal::duration::{value_to_duration, Duration};
+use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
+use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -6,9 +9,6 @@ use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::TimeZone;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
-use crate::builtins::temporal::duration::{value_to_duration, Duration};
-use crate::builtins::temporal::now::Now;
-use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
 
 #[object]
 #[derive(Debug)]
@@ -25,18 +25,17 @@ impl PlainTime {
             time,
         }
     }
-    
+
     pub fn now(realm: &Realm, tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
         Now::get_now()?
             .plain_time_with_provider(tz, &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
-    
+
     pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
         let time = Self::now(realm, tz)?;
 
         Ok(Self::new(time, realm).into_object())
-        
     }
 }
 
@@ -59,11 +58,7 @@ impl PlainTime {
         Ok(Self::new(time, realm).into_object())
     }
 
-    pub fn compare(
-        left: Value,
-        right: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<i8> {
+    pub fn compare(left: Value, right: Value, #[realm] realm: &mut Realm) -> Res<i8> {
         let left_time = value_to_plain_time(left, realm)?;
         let right_time = value_to_plain_time(right, realm)?;
 
@@ -72,20 +67,13 @@ impl PlainTime {
         Ok(result as i8)
     }
 
-    pub fn from(
-        value: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn from(value: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let time = value_to_plain_time(value, realm)?;
 
         Ok(Self::new(time, realm).into_object())
     }
 
-    pub fn add(
-        &self,
-        dur: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn add(&self, dur: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(dur, realm)?;
 
         let new_time = self.time.add(&dur).map_err(Error::from_temporal)?;
@@ -93,26 +81,17 @@ impl PlainTime {
         Ok(Self::new(new_time, realm).into_object())
     }
 
-    pub fn equals(
-        &self,
-        other: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<bool> {
+    pub fn equals(&self, other: Value, #[realm] realm: &mut Realm) -> Res<bool> {
         let other_time = value_to_plain_time(other, realm)?;
 
         Ok(self.time == other_time)
     }
 
-    pub fn round(
-        &self,
-        _opts: Option<Value>,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
-        
+    pub fn round(&self, _opts: Option<Value>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         //TODO
         Ok(Self::new(self.time, realm).into_object())
     }
-    
+
     pub fn since(
         &self,
         other: Value,
@@ -120,45 +99,44 @@ impl PlainTime {
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let other_time = value_to_plain_time(other, realm)?;
-        
-        let opts = opts.map(|opts| difference_settings(opts, realm))
+
+        let opts = opts
+            .map(|opts| difference_settings(opts, realm))
             .transpose()?
             .unwrap_or_default();
 
-        let duration = self.time.since(&other_time, opts).map_err(Error::from_temporal)?;
+        let duration = self
+            .time
+            .since(&other_time, opts)
+            .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, duration).into_object())
     }
-    
-    pub fn subtract(
-        &self,
-        dur: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+
+    pub fn subtract(&self, dur: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let dur = value_to_duration(dur, realm)?;
 
         let new_time = self.time.subtract(&dur).map_err(Error::from_temporal)?;
 
         Ok(Self::new(new_time, realm).into_object())
     }
-    
+
     #[prop("toJSON")]
     pub fn to_json(&self) -> Res<String> {
-        self.time.to_ixdtf_string(ToStringRoundingOptions::default())
+        self.time
+            .to_ixdtf_string(ToStringRoundingOptions::default())
             .map_err(Error::from_temporal)
     }
-    
+
     #[prop("toString")]
-    pub fn to_string(
-        &self,
-        opts: Option<ObjectHandle>,
-        #[realm] realm: &mut Realm,
-    ) -> Res<String> {
+    pub fn to_string(&self, opts: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let opts = string_rounding_mode_opts(opts, realm)?;
 
-        self.time.to_ixdtf_string(opts).map_err(Error::from_temporal)
-    } 
-    
+        self.time
+            .to_ixdtf_string(opts)
+            .map_err(Error::from_temporal)
+    }
+
     pub fn until(
         &self,
         other: Value,
@@ -167,46 +145,50 @@ impl PlainTime {
     ) -> Res<ObjectHandle> {
         let other_time = value_to_plain_time(other, realm)?;
 
-        let opts = opts.map(|opts| difference_settings(opts, realm))
+        let opts = opts
+            .map(|opts| difference_settings(opts, realm))
             .transpose()?
             .unwrap_or_default();
 
-        let duration = self.time.until(&other_time, opts).map_err(Error::from_temporal)?;
+        let duration = self
+            .time
+            .until(&other_time, opts)
+            .map_err(Error::from_temporal)?;
 
         Ok(Duration::with_duration(realm, duration).into_object())
     }
-    
+
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
         Err(Error::ty("Called valueOf on a Temporal.PlainTime object"))
     }
-    
+
     #[get("hour")]
     pub const fn hour(&self) -> u8 {
         self.time.hour()
     }
-    
+
     #[get("minute")]
     pub const fn minute(&self) -> u8 {
         self.time.minute()
     }
-    
+
     #[get("second")]
     pub const fn second(&self) -> u8 {
         self.time.second()
     }
-    
+
     #[get("millisecond")]
     pub const fn millisecond(&self) -> u16 {
         self.time.millisecond()
     }
-    
+
     #[get("microsecond")]
     pub const fn microsecond(&self) -> u16 {
         self.time.microsecond()
     }
-    
+
     #[get("nanosecond")]
     pub const fn nanosecond(&self) -> u16 {
         self.time.nanosecond()

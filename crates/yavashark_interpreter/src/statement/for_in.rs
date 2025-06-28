@@ -67,19 +67,17 @@ impl Interpreter {
                         value.clone()
                     };
 
-                    Self::run_pat(realm, &d.name, scope, &mut iter::once(value.clone()), &mut |scope, name, value| {
-                        match kind {
-                            VarDeclKind::Var => {
-                                scope.declare_global_var(name, value)
-                            }
-                            VarDeclKind::Let => {
-                                scope.declare_var(name, value)
-                            }
-                            VarDeclKind::Const => {
-                                scope.declare_read_only_var(name, value)
-                            }
-                        }
-                    })?;
+                    Self::run_pat(
+                        realm,
+                        &d.name,
+                        scope,
+                        &mut iter::once(value.clone()),
+                        &mut |scope, name, value| match kind {
+                            VarDeclKind::Var => scope.declare_global_var(name, value),
+                            VarDeclKind::Let => scope.declare_var(name, value),
+                            VarDeclKind::Const => scope.declare_read_only_var(name, value),
+                        },
+                    )?;
                 }
             }
             ForHead::UsingDecl(decl) => {
@@ -92,15 +90,23 @@ impl Interpreter {
                         value.clone()
                     };
 
-                    Self::run_pat(realm, &decl.name, scope, &mut iter::once(value.clone()), &mut |scope, name, value| {
-                        scope.declare_var(name, value)
-                    })?;
+                    Self::run_pat(
+                        realm,
+                        &decl.name,
+                        scope,
+                        &mut iter::once(value.clone()),
+                        &mut |scope, name, value| scope.declare_var(name, value),
+                    )?;
                 }
             }
             ForHead::Pat(pat) => {
-                Self::run_pat(realm, &pat, scope, &mut iter::once(value.clone()), &mut |scope, name, value| {
-                    scope.declare_var(name, value)
-                })?;
+                Self::run_pat(
+                    realm,
+                    &pat,
+                    scope,
+                    &mut iter::once(value.clone()),
+                    &mut |scope, name, value| scope.declare_var(name, value),
+                )?;
             }
         }
         Ok(())

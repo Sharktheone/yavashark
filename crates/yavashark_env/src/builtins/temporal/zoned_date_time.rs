@@ -1,5 +1,6 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::instant::Instant;
+use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
@@ -20,7 +21,6 @@ use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::Obj;
-use crate::builtins::temporal::now::Now;
 
 #[object]
 #[derive(Debug)]
@@ -51,8 +51,6 @@ impl ZonedDateTime {
 
         Ok(Self::new(date, realm).into_object())
     }
-
-
 }
 
 #[props]
@@ -509,8 +507,7 @@ impl ZonedDateTime {
             .date
             .week_of_year_with_provider(&realm.env.tz_provider)
             .map_err(Error::from_temporal)?
-            .map_or(Value::Undefined, Into::into)
-        )
+            .map_or(Value::Undefined, Into::into))
     }
 
     #[get("year")]

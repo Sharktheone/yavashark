@@ -127,8 +127,7 @@ impl ErrorObj {
         let Value::Object(this) = that else {
             return false;
         };
-        
-        
+
         this.downcast::<Self>().is_some()
     }
 }

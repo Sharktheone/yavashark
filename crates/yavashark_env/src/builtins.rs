@@ -13,10 +13,10 @@ mod promise;
 mod reflect;
 mod regex;
 mod set;
+pub mod signal;
 mod string;
 mod symbol;
 mod temporal;
-pub mod signal;
 
 pub use arguments::*;
 pub use arraybuffer::*;
