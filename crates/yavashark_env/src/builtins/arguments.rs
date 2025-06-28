@@ -1,8 +1,10 @@
-use crate::{MutObject, ObjectProperty, Realm, Res, Value, Variable};
-use std::cell::RefCell;
+use crate::{MutObject, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
+use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
+use yavashark_macro::props;
 use yavashark_string::YSString;
-use yavashark_value::{Error, MutObj, ObjectImpl};
+use yavashark_value::{Error, MutObj, Obj, ObjectImpl};
+use crate::array::{ArrayIterator, MutableArrayIterator};
 
 #[derive(Debug)]
 pub struct Arguments {
@@ -16,7 +18,7 @@ impl Arguments {
     #[must_use]
     pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
         Self {
-            inner: RefCell::new(MutObject::new(realm)),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.arguments.clone().into())),
             callee,
             length: RefCell::new(args.len().into()),
             args: RefCell::new(args),
@@ -144,5 +146,30 @@ impl ObjectImpl<Realm> for Arguments {
         } else {
             Ok((false, None))
         }
+    }
+}
+
+
+#[props]
+impl Arguments {
+    #[prop(crate::Symbol::ITERATOR)]
+    #[nonstatic]
+    fn iterator(realm: &Realm, this: Value) -> ValueResult {
+        let Value::Object(obj) = this else {
+            return Err(crate::Error::ty_error(format!("Expected object, found {this:?}")));
+        };
+        
+        let iter = ArrayIterator {
+            inner: RefCell::new(MutableArrayIterator {
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+            }),
+            array: obj,
+            next: Cell::new(0),
+            done: Cell::new(false),
+        };
+
+        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
+
+        Ok(iter.into())
     }
 }
