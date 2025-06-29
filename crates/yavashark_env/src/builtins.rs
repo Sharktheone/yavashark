@@ -17,6 +17,7 @@ pub mod signal;
 mod string;
 mod symbol;
 mod temporal;
+mod proxy;
 
 pub use arguments::*;
 pub use arraybuffer::*;
