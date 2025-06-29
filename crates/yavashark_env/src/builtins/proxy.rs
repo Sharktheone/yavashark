@@ -82,7 +82,20 @@ impl Obj<Realm> for Proxy {
     }
 
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
-        todo!()
+        if let Some(apply) = self.handler.get_opt("apply", realm)? {
+            let apply = apply.to_object()?;
+            
+            let arguments = Array::with_elements(realm, args)?;
+            apply.call(
+                realm,
+                vec![self.inner.clone().into(), this, arguments.into_value()],
+                self.handler.clone().into(),
+            )
+            
+            
+        } else {
+            self.inner.call(realm, args, this)
+        }
     }
 
     fn is_function(&self) -> bool {
@@ -102,7 +115,7 @@ impl Obj<Realm> for Proxy {
     }
 
     fn constructor(&self) -> Result<ObjectProperty, Error> {
-        todo!()
+        self.inner.constructor()
     }
 
     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
@@ -114,7 +127,17 @@ impl Obj<Realm> for Proxy {
     }
 
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<Value, Error> {
-        todo!()
+        if let Some(construct) = self.handler.get_opt("construct", realm)? {
+            let construct = construct.to_object()?;
+            let arguments = Array::with_elements(realm, args)?;
+            construct.call(
+                realm,
+                vec![self.inner.clone().into(), arguments.into_value()],
+                self.handler.clone().into(),
+            )
+        } else {
+            self.inner.construct(realm, args)
+        }
     }
 
     fn is_constructor(&self) -> bool {
