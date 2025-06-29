@@ -16,6 +16,7 @@ pub mod array;
 pub mod constructor;
 
 pub mod prototype;
+mod prealloc;
 
 #[derive(Debug)]
 pub struct Object {
