@@ -119,7 +119,10 @@ impl Obj<Realm> for Proxy {
     }
 
     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
-        todo!()
+        vec![
+            self.inner.get_ref(),
+            self.handler.get_ref(),
+        ]
     }
 
     fn class_name(&self) -> &'static str {
