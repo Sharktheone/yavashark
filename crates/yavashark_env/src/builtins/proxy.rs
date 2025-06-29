@@ -2,8 +2,9 @@ use std::any::TypeId;
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
-use yavashark_value::{BoxedObj, Obj, ObjectImpl};
-use crate::{Error, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, Variable};
+use yavashark_value::{BoxedObj, Obj};
+use crate::{Error, ObjectHandle, ObjectProperty, Realm, Res, Value, Variable};
+use crate::array::Array;
 
 #[derive(Debug)]
 pub struct Proxy {
@@ -14,39 +15,39 @@ pub struct Proxy {
 
 impl Obj<Realm> for Proxy {
     fn define_property(&self, name: Value, value: Value) -> Res {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn define_variable(&self, name: Value, value: Variable) -> Res {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn define_getter(&self, name: Value, value: Value) -> Res {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn define_setter(&self, name: Value, value: Value) -> Res {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn has_key(&self, name: &Value) -> Result<bool, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn name(&self) -> String {
@@ -62,23 +63,23 @@ impl Obj<Realm> for Proxy {
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn keys(&self) -> Result<Vec<Value>, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn values(&self) -> Result<Vec<Value>, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn clear_values(&self) -> Res {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
@@ -107,11 +108,11 @@ impl Obj<Realm> for Proxy {
     }
 
     fn prototype(&self) -> Result<ObjectProperty, Error> {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn set_prototype(&self, proto: ObjectProperty) -> Res {
-        todo!()
+        Err(Error::new("not yet implemented"))
     }
 
     fn constructor(&self) -> Result<ObjectProperty, Error> {
