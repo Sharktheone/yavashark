@@ -1,6 +1,8 @@
+#![allow(unused)]
 use std::any::TypeId;
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
+use yavashark_macro::props;
 use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, Obj};
 use crate::{Error, ObjectHandle, ObjectProperty, Realm, Res, Value, Variable};
@@ -151,4 +153,18 @@ impl Obj<Realm> for Proxy {
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
         self.inner.inner_downcast(ty)
     }
+}
+
+#[props]
+impl Proxy {
+    #[constructor]
+    pub fn construct(target: ObjectHandle, handler: ObjectHandle) -> ObjectHandle {
+        Self {
+            inner: target,
+            handler,
+        }
+            .into_object()
+    }
+    
+    
 }

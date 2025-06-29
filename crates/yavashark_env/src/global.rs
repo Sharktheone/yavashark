@@ -218,6 +218,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         Variable::write_config(realm.intrinsics.reflect_obj().value),
     )?;
     obj.define_variable(
+        "Proxy".into(),
+        Variable::write_config(realm.intrinsics.proxy_constructor().value),
+    )?;
+    obj.define_variable(
         "Temporal".into(),
         Variable::write_config(realm.intrinsics.temporal_obj().value),
     )?;
