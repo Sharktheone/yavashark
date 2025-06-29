@@ -137,10 +137,10 @@ impl Interpreter {
             Pat::Assign(assign) => {
                 let val = value.next().unwrap_or(Value::Undefined);
 
-                let val = if val.is_truthy() {
-                    val
-                } else {
+                let val = if val.is_undefined() {
                     Self::run_expr(realm, &assign.right, assign.span, scope)?
+                } else {
+                    val
                 };
 
                 Self::run_pat(realm, &assign.left, scope, &mut iter::once(val), cb)?;
