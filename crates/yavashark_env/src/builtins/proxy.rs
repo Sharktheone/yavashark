@@ -50,15 +50,15 @@ impl Obj<Realm> for Proxy {
     }
 
     fn name(&self) -> String {
-        todo!()
+        self.inner.name()
     }
 
     fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
-        todo!()
+        self.inner.to_string(realm)
     }
 
     fn to_string_internal(&self) -> Result<YSString, Error> {
-        todo!()
+        self.inner.to_string_internal()
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
@@ -86,11 +86,11 @@ impl Obj<Realm> for Proxy {
     }
 
     fn is_function(&self) -> bool {
-        todo!()
+        self.inner.is_function()
     }
 
     fn primitive(&self) -> Option<Value> {
-        todo!()
+        self.inner.primitive()
     }
 
     fn prototype(&self) -> Result<ObjectProperty, Error> {
@@ -110,7 +110,7 @@ impl Obj<Realm> for Proxy {
     }
 
     fn class_name(&self) -> &'static str {
-        todo!()
+        self.inner.class_name()
     }
 
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<Value, Error> {
@@ -118,10 +118,10 @@ impl Obj<Realm> for Proxy {
     }
 
     fn is_constructor(&self) -> bool {
-        todo!()
+        self.inner.is_constructor()
     }
 
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
-        todo!()
+        self.inner.inner_downcast(ty)
     }
 }
