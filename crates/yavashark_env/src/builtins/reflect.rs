@@ -168,8 +168,8 @@ impl Reflect {
     }
 
     #[prop("ownKeys")]
-    pub fn own_keys(target: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
-        ObjectConstructor::keys_js(target, realm)
+    pub fn own_keys(target: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
+        ObjectConstructor::keys_js(&target.into(), realm)
     }
 
     #[prop("preventExtensions")]

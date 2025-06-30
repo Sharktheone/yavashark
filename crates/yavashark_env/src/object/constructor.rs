@@ -250,7 +250,12 @@ impl ObjectConstructor {
     }
 
     #[prop("keys")]
-    pub fn keys_js(obj: &ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
+    pub fn keys_js(obj: &Value, #[realm] realm: &Realm) -> ValueResult {
+        let Value::Object(obj) = obj else {
+            return Ok(Array::from_realm(realm).into_value());
+        };
+        
+        
         let keys = obj
             .keys()?
             .iter()
