@@ -282,6 +282,10 @@ impl<C: Realm> Value<C> {
     pub const fn is_undefined(&self) -> bool {
         matches!(self, Self::Undefined)
     }
+    
+    pub const fn is_null(&self) -> bool {
+        matches!(self, Self::Null)
+    }
 
     #[must_use]
     pub const fn is_number(&self) -> bool {
