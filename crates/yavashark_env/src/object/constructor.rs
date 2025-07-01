@@ -1,11 +1,11 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, Obj};
+use yavashark_value::{Constructor, Func, IntoValue, Obj};
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -295,8 +295,14 @@ impl ObjectConstructor {
     }
 
     #[prop("setPrototypeOf")]
-    fn set_prototype_of(obj: ObjectHandle, proto: Value) -> ValueResult {
-        obj.set_prototype(proto.into())?;
+    fn set_prototype_of(obj: Value, proto: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        if obj.instance_of(&proto, realm)? {
+            return Err(Error::ty("Cannot set prototype to itself"));
+        }
+
+
+
+        obj.as_object()?.set_prototype(proto.into())?;
 
         Ok(obj.into())
     }
