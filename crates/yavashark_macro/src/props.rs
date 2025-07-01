@@ -319,7 +319,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         (
             quote! {
                 let constructor = #constructor(&obj, &func_proto)?;
-                obj.define_variable("constructor".into(), #variable::new(constructor.clone().into()))?;
+                obj.define_variable("constructor".into(), #variable::write_config(constructor.clone().into()))?;
 
             },
             quote! {

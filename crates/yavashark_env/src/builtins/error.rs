@@ -32,7 +32,7 @@ macro_rules! error {
             )?;
             constr.define_property("name".into(), stringify!($name).into())?;
 
-            proto.define_property("constructor".into(), constr.into())?;
+            proto.define_variable("constructor".into(), Variable::write_config(constr.into()))?;
 
             Ok(proto.into())
         }

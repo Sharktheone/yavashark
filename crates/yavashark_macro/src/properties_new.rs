@@ -324,7 +324,7 @@ fn init_constructor(
     let init_tokens = quote! {
         let constructor = #name::new(#constr_proto)?;
 
-        obj.define_variable("constructor".into(), constructor.clone().into())?;
+        obj.define_variable("constructor".into(), #variable::write_config(constructor.clone().into()))?;
 
         constructor.define_variable("prototype".into(), #variable::new_read_only(obj.clone().into()))?;
 
