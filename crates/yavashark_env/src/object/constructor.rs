@@ -5,7 +5,7 @@ use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResu
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, IntoValue, Obj};
+use yavashark_value::{Constructor, Func, Obj};
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -304,7 +304,7 @@ impl ObjectConstructor {
 
         obj.as_object()?.set_prototype(proto.into())?;
 
-        Ok(obj.into())
+        Ok(obj)
     }
 
     #[prop("isExtensible")]

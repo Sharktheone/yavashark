@@ -352,22 +352,12 @@ impl Obj<Realm> for Prototype {
 
     fn contains_key(&self, name: &Value) -> Res<bool> {
         if let Value::String(name) = name {
-            match name.as_str() {
-                "__defineGetter__"
-                | "__defineSetter__"
-                | "__lookupGetter__"
-                | "__lookupSetter__"
-                | "constructor"
-                | "hasOwnProperty"
-                | "getOwnPropertyDescriptor"
-                | "isPrototypeOf"
-                | "propertyIsEnumerable"
-                | "toLocaleString"
-                | "toString"
-                | "valueOf" => return Ok(true),
-                _ => {}
+            
+            if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
+                return Ok(true);
             }
         }
+        
         let this = self.inner.try_borrow()?;
 
         this.object.contains_key(name)
@@ -436,18 +426,11 @@ impl Obj<Realm> for Prototype {
         let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
-        keys.push(Value::string("__defineGetter__"));
-        keys.push(Value::string("__defineSetter__"));
-        keys.push(Value::string("__lookupGetter__"));
-        keys.push(Value::string("__lookupSetter__"));
-        keys.push(Value::string("constructor"));
-        keys.push(Value::string("hasOwnProperty"));
-        keys.push(Value::string("getOwnPropertyDescriptor"));
-        keys.push(Value::string("isPrototypeOf"));
-        keys.push(Value::string("propertyIsEnumerable"));
-        keys.push(Value::string("toLocaleString"));
-        keys.push(Value::string("toString"));
-        keys.push(Value::string("valueOf"));
+        
+        
+        for key in Self::DIRECT_PROPERTIES {
+            keys.push(Value::string(key));
+        }
 
         Ok(keys)
     }
