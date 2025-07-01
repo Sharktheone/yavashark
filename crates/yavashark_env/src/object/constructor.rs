@@ -54,8 +54,13 @@ impl ObjectConstructor {
 
 #[properties_new(raw)]
 impl ObjectConstructor {
-    fn create(proto: ObjectHandle, properties: Option<ObjectHandle>) -> Res<ObjectHandle> {
-        let obj = Object::with_proto(proto.into());
+    fn create(proto: Value, properties: Option<ObjectHandle>) -> Res<ObjectHandle> {
+        if !proto.is_object() || !proto.is_null() {
+            return Err(Error::ty("Object prototype must be an object or null"));
+        }
+
+
+        let obj = Object::with_proto(proto);
 
         if let Some(props) = properties {
             for (key, value) in props.properties()? {
