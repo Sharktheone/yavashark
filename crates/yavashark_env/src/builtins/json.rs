@@ -3,7 +3,7 @@ use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::Obj;
+use yavashark_value::{Hint, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -119,8 +119,13 @@ impl JSON {
 
 #[properties_new(raw)]
 impl JSON {
-    fn parse(str: &str, #[realm] realm: &Realm) -> Res<Value> {
-        let value: serde_json::Value = match serde_json::from_str(str) {
+    fn parse(str: &Value, #[realm] realm: &mut Realm) -> Res<Value> {
+        let str = str.to_primitive(Hint::String, realm)?;
+        let str = str.to_string(realm)?;
+        
+        
+        
+        let value: serde_json::Value = match serde_json::from_str(&str) {
             Ok(value) => value,
             Err(error) => return Err(Error::syn_error(error.to_string())),
         };
