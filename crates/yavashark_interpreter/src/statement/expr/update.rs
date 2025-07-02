@@ -1,20 +1,37 @@
 use crate::Interpreter;
+use std::rc::Rc;
 use swc_ecma_ast::{Expr, UpdateExpr, UpdateOp};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_update(realm: &mut Realm, stmt: &UpdateExpr, scope: &mut Scope) -> RuntimeResult {
-        fn update(value: &Value, op: UpdateOp, realm: &mut Realm) -> Res<(Value, Value)> {
+        fn update(value: Value, op: UpdateOp, realm: &mut Realm) -> Res<(Value, Value)> {
             Ok(match op {
-                UpdateOp::PlusPlus => (
-                    value.sub(&Value::Number(-1.0), realm)?,
-                    value.sub(&Value::Number(0.0), realm)?,
-                ),
-                UpdateOp::MinusMinus => (
-                    value.sub(&Value::Number(1.0), realm)?,
-                    value.sub(&Value::Number(0.0), realm)?,
-                ),
+                UpdateOp::PlusPlus => {
+                    if let Value::BigInt(orig) = value {
+                        let b = (*orig).clone() + 1;
+
+                        return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
+                    };
+
+                    (
+                        value.sub(&Value::Number(-1.0), realm)?,
+                        value.sub(&Value::Number(0.0), realm)?,
+                    )
+                }
+                UpdateOp::MinusMinus => {
+                    if let Value::BigInt(orig) = value {
+                        let b = (*orig).clone() - 1;
+
+                        return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
+                    };
+
+                    (
+                        value.sub(&Value::Number(1.0), realm)?,
+                        value.sub(&Value::Number(0.0), realm)?,
+                    )
+                }
             })
         }
 
@@ -24,7 +41,7 @@ impl Interpreter {
                 let value = scope
                     .resolve(&name)?
                     .ok_or(Error::reference_error(format!("{name} is not defined")))?;
-                let up = update(&value, stmt.op, realm)?;
+                let up = update(value, stmt.op, realm)?;
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
@@ -35,7 +52,7 @@ impl Interpreter {
             Expr::Member(m) => {
                 let value = Self::run_member(realm, m, scope)?;
 
-                let up = update(&value, stmt.op, realm)?;
+                let up = update(value, stmt.op, realm)?;
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
