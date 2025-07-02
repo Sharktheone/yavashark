@@ -50,11 +50,10 @@ impl Compiler {
                             params: Vec::new(),
                             is_async: false,
                             is_generator: false,
-                            code: Rc::new(
-                                g.body
-                                    .as_ref()
-                                    .map_or(Ok(BytecodeFunctionCode::default()), Self::create_bytecode_from_block)?,
-                            ),
+                            code: Rc::new(g.body.as_ref().map_or(
+                                Ok(BytecodeFunctionCode::default()),
+                                Self::create_bytecode_from_block,
+                            )?),
                         };
 
                         properties.push((prop, DataTypeValue::Get(bp)));
@@ -76,11 +75,10 @@ impl Compiler {
                             params: vec![param],
                             is_async: false,
                             is_generator: false,
-                            code: Rc::new(
-                                s.body
-                                    .as_ref()
-                                    .map_or(Ok(BytecodeFunctionCode::default()), Self::create_bytecode_from_block)?,
-                            ),
+                            code: Rc::new(s.body.as_ref().map_or(
+                                Ok(BytecodeFunctionCode::default()),
+                                Self::create_bytecode_from_block,
+                            )?),
                         };
 
                         properties.push((prop, DataTypeValue::Set(bp)));

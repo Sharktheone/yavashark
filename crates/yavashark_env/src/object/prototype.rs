@@ -352,12 +352,11 @@ impl Obj<Realm> for Prototype {
 
     fn contains_key(&self, name: &Value) -> Res<bool> {
         if let Value::String(name) = name {
-            
             if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
                 return Ok(true);
             }
         }
-        
+
         let this = self.inner.try_borrow()?;
 
         this.object.contains_key(name)
@@ -426,8 +425,7 @@ impl Obj<Realm> for Prototype {
         let this = self.inner.try_borrow()?;
 
         let mut keys = this.object.keys()?;
-        
-        
+
         for key in Self::DIRECT_PROPERTIES {
             keys.push(Value::string(key));
         }

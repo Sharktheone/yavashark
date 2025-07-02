@@ -15,8 +15,8 @@ use crate::{Res, Value};
 pub mod array;
 pub mod constructor;
 
-pub mod prototype;
 mod prealloc;
+pub mod prototype;
 
 #[derive(Debug)]
 pub struct Object {

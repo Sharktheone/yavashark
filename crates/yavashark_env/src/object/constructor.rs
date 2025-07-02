@@ -59,7 +59,6 @@ impl ObjectConstructor {
             return Err(Error::ty("Object prototype must be an object or null"));
         }
 
-
         let obj = Object::with_proto(proto);
 
         if let Some(props) = properties {
@@ -259,8 +258,7 @@ impl ObjectConstructor {
         let Value::Object(obj) = obj else {
             return Ok(Array::from_realm(realm).into_value());
         };
-        
-        
+
         let keys = obj
             .keys()?
             .iter()
@@ -304,8 +302,6 @@ impl ObjectConstructor {
         if obj.instance_of(&proto, realm)? {
             return Err(Error::ty("Cannot set prototype to itself"));
         }
-
-
 
         obj.as_object()?.set_prototype(proto.into())?;
 

@@ -1,4 +1,8 @@
 #![allow(unused)]
+use crate::array::Array;
+use crate::{
+    Error, NativeFunction, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, Variable,
+};
 use std::any::TypeId;
 use std::cell::Cell;
 use std::ops::Deref;
@@ -7,8 +11,6 @@ use yavashark_garbage::GcRef;
 use yavashark_macro::props;
 use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, Obj};
-use crate::{Error, NativeFunction, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, Variable};
-use crate::array::Array;
 
 #[derive(Debug)]
 pub struct Proxy {
@@ -17,14 +19,12 @@ pub struct Proxy {
     revoke: Cell<bool>,
 }
 
-
 impl Obj<Realm> for Proxy {
     fn define_property(&self, name: Value, value: Value) -> Res {
         if self.revoke.get() {
             return self.inner.define_property(name, value);
         }
-        
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -32,7 +32,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.define_variable(name, value);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -40,7 +40,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.deref().resolve_property(name);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -48,7 +48,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.deref().get_property(name);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -56,7 +56,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.define_getter(name, value);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -64,7 +64,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.define_setter(name, value);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -72,7 +72,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.delete_property(name);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -80,7 +80,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.contains_key(name);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -88,7 +88,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.has_key(name);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -108,7 +108,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.properties();
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -116,7 +116,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.keys();
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -124,7 +124,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.values();
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -132,7 +132,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.get_array_or_done(index);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -140,7 +140,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.clear_values();
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -148,19 +148,16 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.call(realm, args, this);
         }
-        
-        
+
         if let Some(apply) = self.handler.get_opt("apply", realm)? {
             let apply = apply.to_object()?;
-            
+
             let arguments = Array::with_elements(realm, args)?;
             apply.call(
                 realm,
                 vec![self.inner.clone().into(), this, arguments.into_value()],
                 self.handler.clone().into(),
             )
-            
-            
         } else {
             self.inner.call(realm, args, this)
         }
@@ -178,7 +175,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.prototype();
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -186,7 +183,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.set_prototype(proto);
         }
-        
+
         Err(Error::new("not yet implemented"))
     }
 
@@ -195,10 +192,7 @@ impl Obj<Realm> for Proxy {
     }
 
     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
-        vec![
-            self.inner.get_ref(),
-            self.handler.get_ref(),
-        ]
+        vec![self.inner.get_ref(), self.handler.get_ref()]
     }
 
     fn class_name(&self) -> &'static str {
@@ -209,8 +203,7 @@ impl Obj<Realm> for Proxy {
         if self.revoke.get() {
             return self.inner.construct(realm, args);
         }
-        
-        
+
         if let Some(construct) = self.handler.get_opt("construct", realm)? {
             let construct = construct.to_object()?;
             let arguments = Array::with_elements(realm, args)?;
@@ -236,49 +229,47 @@ impl Obj<Realm> for Proxy {
 #[props]
 impl Proxy {
     #[constructor]
-    #[must_use] 
+    #[must_use]
     pub fn construct(target: ObjectHandle, handler: ObjectHandle) -> ObjectHandle {
         Self {
             inner: target,
             handler,
             revoke: Cell::new(false),
         }
-            .into_object()
+        .into_object()
     }
-    
-    pub fn revocable(target: ObjectHandle, handler: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+
+    pub fn revocable(
+        target: ObjectHandle,
+        handler: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let proxy = Self {
             inner: target,
             handler,
             revoke: Cell::new(false),
         }
-            .into_object();
-
-
+        .into_object();
 
         let mut p = proxy.clone();
-        
+
         let revoke = NativeFunction::new(
             "revoke",
             move |_, _, _| {
                 if let Some(proxy) = p.downcast::<Self>() {
                     proxy.revoke.set(true);
                 }
-                
+
                 Ok(Value::Undefined)
             },
             realm,
         );
-        
+
         let ret = Object::new(realm);
-        
+
         ret.set("proxy", proxy, realm)?;
         ret.set("revoke", revoke, realm)?;
-        
-        
+
         Ok(ret)
     }
-    
-    
-    
 }

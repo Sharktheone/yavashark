@@ -8,13 +8,9 @@ pub enum PreallocPropertyKey {
     Symbol(&'static str),
 }
 
-
-
-
 pub trait PreallocProperties<const N: usize> {
     const PROPS: [(PreallocPropertyKey, Attributes); N];
 }
-
 
 pub struct PreallocObject<P: PreallocProperties<N>, const N: usize> {
     pub properties: [i32; N],
@@ -27,17 +23,19 @@ impl<P: PreallocProperties<N>, const N: usize> Default for PreallocObject<P, N> 
     }
 }
 
-
 impl<P: PreallocProperties<N>, const N: usize> PreallocObject<P, N> {
     pub const fn new() -> Self {
         let mut properties = [0; N];
-        Self { properties, _marker: PhantomData }
+        Self {
+            properties,
+            _marker: PhantomData,
+        }
     }
 
     pub fn get_property_name(&self, index: usize) -> Option<PreallocPropertyKey> {
         P::PROPS.get(index).map(|(key, _)| *key)
     }
-    
+
     pub fn get_property(&self, name: &PreallocPropertyKey) -> Option<i32> {
         for (i, (key, _)) in P::PROPS.iter().enumerate() {
             if key == name {
@@ -46,7 +44,7 @@ impl<P: PreallocProperties<N>, const N: usize> PreallocObject<P, N> {
         }
         None
     }
-    
+
     pub fn set_property(&mut self, name: PreallocPropertyKey, value: i32) -> Option<i32> {
         for (i, (key, _)) in P::PROPS.iter().enumerate() {
             if key == &name {
@@ -59,15 +57,25 @@ impl<P: PreallocProperties<N>, const N: usize> PreallocObject<P, N> {
     }
 }
 
-
 pub struct SomeObj;
 
 impl PreallocProperties<4> for SomeObj {
     const PROPS: [(PreallocPropertyKey, Attributes); 4] = [
-        (PreallocPropertyKey::String("someProperty"), Attributes::write_config()),
-        (PreallocPropertyKey::Symbol("someSymbol"), Attributes::config()),
-        (PreallocPropertyKey::String("anotherProperty"), Attributes::enumerable()),
-        (PreallocPropertyKey::Symbol("anotherSymbol"), Attributes::write()),
+        (
+            PreallocPropertyKey::String("someProperty"),
+            Attributes::write_config(),
+        ),
+        (
+            PreallocPropertyKey::Symbol("someSymbol"),
+            Attributes::config(),
+        ),
+        (
+            PreallocPropertyKey::String("anotherProperty"),
+            Attributes::enumerable(),
+        ),
+        (
+            PreallocPropertyKey::Symbol("anotherSymbol"),
+            Attributes::write(),
+        ),
     ];
 }
-

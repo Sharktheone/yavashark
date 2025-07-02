@@ -106,7 +106,8 @@ impl Duration {
         } else if let Value::String(s) = info {
             return Ok(RefOrOwned::Owned(
                 temporal_rs::Duration::from_str(s.as_str())
-                    .map_err(Error::from_temporal).map(|dur| Self::with_duration(realm, dur))?,
+                    .map_err(Error::from_temporal)
+                    .map(|dur| Self::with_duration(realm, dur))?,
             ));
         }
 

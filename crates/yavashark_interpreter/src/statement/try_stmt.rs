@@ -191,10 +191,7 @@ mod tests {
 
         let err = result.unwrap_err();
 
-        assert_eq!(
-            err.kind,
-            ErrorKind::Error(Some("error message".into()))
-        );
+        assert_eq!(err.kind, ErrorKind::Error(Some("error message".into())));
 
         let state = value.borrow();
 

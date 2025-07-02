@@ -17,7 +17,10 @@ pub struct RuntimeLifetimeGuard<'a, T> {
 
 impl<T> Drop for RuntimeLifetimeGuard<'_, T> {
     fn drop(&mut self) {
-        assert!(!self.ptr.1.get(), "Cannot remove reference that is still borrowed");
+        assert!(
+            !self.ptr.1.get(),
+            "Cannot remove reference that is still borrowed"
+        );
 
         self.ptr.0.set(self.old);
         self.ptr.1.set(self.borrowed);

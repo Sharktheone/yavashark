@@ -136,9 +136,7 @@ impl Map {
         }
 
         match inner.map.entry(key) {
-            Entry::Occupied(entry) => {
-                Ok(entry.get().clone())
-            }
+            Entry::Occupied(entry) => Ok(entry.get().clone()),
 
             Entry::Vacant(entry) => {
                 let value = callback.call(realm, vec![entry.key().copy()], Value::Undefined)?;

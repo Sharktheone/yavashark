@@ -103,7 +103,8 @@ impl Symbol {
         }
     }
 
-    #[must_use] pub fn as_ref(&self) -> &str {
+    #[must_use]
+    pub fn as_ref(&self) -> &str {
         AsRef::as_ref(self)
     }
 }

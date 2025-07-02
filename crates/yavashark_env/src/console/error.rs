@@ -48,7 +48,9 @@ fn error_message_pretty_circular(error: &Error, not: &mut Vec<usize>) -> String 
         | ErrorKind::URI(msg)
         | ErrorKind::Syntax(msg) => msg.to_string(),
         ErrorKind::Throw(val) => val.pretty_print_circular(not),
-        ErrorKind::Error(msg) => msg.as_ref().map_or(String::new(), std::string::ToString::to_string),
+        ErrorKind::Error(msg) => msg
+            .as_ref()
+            .map_or(String::new(), std::string::ToString::to_string),
     }
 }
 
@@ -63,6 +65,8 @@ fn error_message_pretty_circular_nl(error: &Error, not: &mut Vec<usize>) -> Stri
         | ErrorKind::URI(msg)
         | ErrorKind::Syntax(msg) => msg.to_string(),
         ErrorKind::Throw(val) => val.pretty_print_circular_nl(not),
-        ErrorKind::Error(msg) => msg.as_ref().map_or(String::new(), std::string::ToString::to_string),
+        ErrorKind::Error(msg) => msg
+            .as_ref()
+            .map_or(String::new(), std::string::ToString::to_string),
     }
 }
