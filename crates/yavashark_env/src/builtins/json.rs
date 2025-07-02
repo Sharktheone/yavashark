@@ -91,6 +91,10 @@ impl JSON {
 
                     return Ok(Some(serde_json::Value::Array(array)));
                 };
+                
+                if let Some(prim) = o.primitive() {
+                    return Self::value_to_serde(prim, realm);
+                }
 
                 let props = o.properties()?;
                 //TODO: handle getters
