@@ -55,7 +55,7 @@ impl ObjectConstructor {
 #[properties_new(raw)]
 impl ObjectConstructor {
     fn create(proto: Value, properties: Option<ObjectHandle>) -> Res<ObjectHandle> {
-        if !proto.is_object() || !proto.is_null() {
+        if !proto.is_object() && !proto.is_null() {
             return Err(Error::ty("Object prototype must be an object or null"));
         }
 
