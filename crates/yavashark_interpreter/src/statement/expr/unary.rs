@@ -1,7 +1,7 @@
 use crate::Interpreter;
 use swc_ecma_ast::{Expr, UnaryExpr, UnaryOp};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Realm, RuntimeResult, Value};
+use yavashark_env::{Error, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -33,6 +33,31 @@ impl Interpreter {
                     Self::run_call(realm, call, scope)?;
 
                     return Ok(true.into());
+                }
+                Expr::SuperProp(sp) => {
+                    let this = scope.this()?;
+                    let proto = this.prototype(realm)?;
+                    let sup = proto.prototype(realm)?;
+
+                    if sup.is_null() {
+                        return Err(Error::reference("Cannot delete property of null or undefined").into());
+                    }
+                    
+                    let sup = sup.as_object()?;
+                    
+                    
+
+                    return match &sp.prop {
+                        swc_ecma_ast::SuperProp::Ident(i) => {
+                            let name = i.sym.to_string();
+                            Ok(sup.delete_property(&name.into())?.is_some().into())
+                        }
+                        swc_ecma_ast::SuperProp::Computed(p) => {
+                            let name = Self::run_expr(realm, &p.expr, p.span, scope)?;
+                            Ok(sup.delete_property(&name)?.is_some().into())
+                        }
+                    }
+
                 }
                 _ => {}
             }
