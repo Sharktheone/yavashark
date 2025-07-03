@@ -467,7 +467,7 @@ impl Obj<Realm> for Prototype {
     }
 
     fn prototype(&self) -> Res<ObjectProperty> {
-        Ok(Value::Undefined.into())
+        Ok(Value::Null.into())
     }
 
     fn constructor(&self) -> Res<ObjectProperty> {
