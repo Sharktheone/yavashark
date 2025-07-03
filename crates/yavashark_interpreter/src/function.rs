@@ -92,9 +92,9 @@ impl JSFunction {
 
         let handle = ObjectHandle::new(this);
 
-        handle.define_property("name".into(), handle.clone().into())?;
-        handle.define_property("length".into(), len.into())?;
-        prototype.define_property("constructor".into(), handle.clone().into());
+        handle.define_variable("name".into(), Variable::config(handle.clone().into()))?;
+        handle.define_variable("length".into(), Variable::config(len.into()))?;
+        prototype.define_variable("constructor".into(), Variable::write_config(handle.clone().into()));
 
         Ok(handle)
     }
