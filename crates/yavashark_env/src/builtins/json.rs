@@ -51,7 +51,7 @@ impl JSON {
         })
     }
 
-    fn value_to_serde(value: Value, realm: &mut Realm) -> Res<Option<serde_json::Value>> {
+    fn value_to_serde(value: Value, realm: &mut Realm, visited: &mut Vec<usize>) -> Res<Option<serde_json::Value>> {
         //TODO: handle circular items
         Ok(Some(match value {
             Value::Null => serde_json::Value::Null,
@@ -63,6 +63,13 @@ impl JSON {
             Value::String(s) => serde_json::Value::String(s.to_string()),
             Value::BigInt(_) => return Err(Error::ty("Do not know how to serialize a BigInt")),
             Value::Object(ref o) => {
+                if visited.contains(&o.as_ptr().addr()) {
+                    return Err(Error::ty("Circular reference detected in JSON serialization"));
+                }
+                
+                visited.push(o.as_ptr().addr());
+                
+                
                 if value.instance_of(&realm.intrinsics.array_constructor().value, realm)? {
                     let mut index = 0;
 
@@ -78,7 +85,7 @@ impl JSON {
                         let val;
 
                         if let Some(value) = value {
-                            val = Self::value_to_serde(value, realm)?
+                            val = Self::value_to_serde(value, realm, visited)?
                                 .unwrap_or(serde_json::Value::Null);
                         } else {
                             val = serde_json::Value::Null;
@@ -93,7 +100,7 @@ impl JSON {
                 };
                 
                 if let Some(prim) = o.primitive() {
-                    return Self::value_to_serde(prim, realm);
+                    return Self::value_to_serde(prim, realm, visited);
                 }
 
                 let props = o.properties()?;
@@ -102,7 +109,7 @@ impl JSON {
                 let mut map = Map::with_capacity(props.len());
 
                 for (k, v) in props {
-                    let Some(val) = Self::value_to_serde(v, realm)? else {
+                    let Some(val) = Self::value_to_serde(v, realm, visited)? else {
                         continue;
                     };
 
@@ -134,7 +141,7 @@ impl JSON {
     }
 
     fn stringify(value: Value, #[realm] realm: &mut Realm) -> Res<Value> {
-        let value = Self::value_to_serde(value, realm)?;
+        let value = Self::value_to_serde(value, realm, &mut Vec::new())?;
 
         value.map_or_else(
             || Ok(Value::Undefined),
