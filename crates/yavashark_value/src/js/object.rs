@@ -593,8 +593,21 @@ impl<C: Realm> Object<C> {
                     .assert_no_object();
             }
         }
-
         Err(Error::ty("Cannot convert object to primitive"))
+    }
+    
+    pub fn enum_properties(&self) -> Result<Vec<(Value<C>, ObjectProperty<C>)>, Error<C>> {
+        let mut properties = Vec::new();
+
+        for name in self.0.keys()? {
+            if let Some(prop) = self.get_property_opt(&name)? {
+                if prop.attributes.is_enumerable() {
+                    properties.push((name, prop));
+                }
+            }
+        }
+
+        Ok(properties)
     }
 }
 

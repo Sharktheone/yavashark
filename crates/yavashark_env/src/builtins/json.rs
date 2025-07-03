@@ -103,13 +103,13 @@ impl JSON {
                     return Self::value_to_serde(prim, realm, visited);
                 }
 
-                let props = o.properties()?;
+                let props = o.enum_properties()?;
                 //TODO: handle getters
 
                 let mut map = Map::with_capacity(props.len());
 
                 for (k, v) in props {
-                    let Some(val) = Self::value_to_serde(v, realm, visited)? else {
+                    let Some(val) = Self::value_to_serde(v.value, realm, visited)? else {
                         continue;
                     };
 
