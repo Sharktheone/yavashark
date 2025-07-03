@@ -12,8 +12,9 @@ impl Interpreter {
         scope: &mut Scope,
     ) -> RuntimeResult {
         let this = scope.this()?;
-        let sup = this.prototype(realm)?;
-
+        let proto = this.prototype(realm)?;
+        let sup = proto.prototype(realm)?;
+        
         match &stmt.prop {
             SuperProp::Ident(i) => {
                 let name = i.sym.to_string();
