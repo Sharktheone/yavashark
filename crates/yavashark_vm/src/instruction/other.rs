@@ -134,6 +134,10 @@ pub fn yield_(data: impl Data, vm: &mut impl VM) -> ControlResult {
     Err(ControlFlow::Yield(result))
 }
 
+pub const fn yield_undefined(_: &impl VM) -> ControlResult {
+    Err(ControlFlow::Yield(Value::Undefined))
+}
+
 pub fn await_(data: impl Data, out: impl OutputData, vm: &mut impl VM) -> ControlResult {
     let result = data.get(vm)?;
 
