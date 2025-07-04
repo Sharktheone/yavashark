@@ -13,7 +13,7 @@ impl Interpreter {
         let name = stmt
             .ident
             .as_ref()
-            .map_or("anonymous".to_string(), |i| i.sym.to_string());
+            .map_or(String::new(), |i| i.sym.to_string());
 
         if stmt.function.is_async || stmt.function.is_generator {
             #[cfg(feature = "vm")]

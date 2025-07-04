@@ -34,7 +34,7 @@ impl ConstIntoValue for ConstValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.name.unwrap_or_default(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -53,7 +53,7 @@ impl ConstIntoValue for ConstValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    "anonymous".to_string(),
+                    String::new(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -97,7 +97,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                         }));
 
                     let optim = OptimFunction::new(
-                        bp.name.unwrap_or("anonymous".to_string()),
+                        bp.name.unwrap_or_default(),
                         bp.params,
                         Some(func),
                         vm.get_scope().clone(),
@@ -118,7 +118,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                         }));
 
                     let optim = OptimFunction::new(
-                        bp.name.unwrap_or("anonymous".to_string()),
+                        bp.name.unwrap_or_default(),
                         bp.params,
                         Some(func),
                         vm.get_scope().clone(),
@@ -159,7 +159,7 @@ impl ConstIntoValue for DataTypeValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.name.unwrap_or_default(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -177,7 +177,7 @@ impl ConstIntoValue for DataTypeValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.name.unwrap_or_default(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -195,7 +195,7 @@ impl ConstIntoValue for DataTypeValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    bp.name.unwrap_or("anonymous".to_string()),
+                    bp.name.unwrap_or_default(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
@@ -214,7 +214,7 @@ impl ConstIntoValue for DataTypeValue {
                     }));
 
                 let optim = OptimFunction::new(
-                    "anonymous".to_string(),
+                    String::new(),
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
