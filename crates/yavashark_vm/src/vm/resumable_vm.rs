@@ -12,22 +12,22 @@ use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value, ValueRe
 
 #[derive(Debug, Clone)]
 pub struct VmState {
-    regs: Registers,
-    stack: Stack,
-    call_args: Vec<Value>,
+    pub regs: Registers,
+    pub stack: Stack,
+    pub call_args: Vec<Value>,
 
-    pc: usize,
-    code: Rc<BytecodeFunctionCode>,
+    pub pc: usize,
+    pub code: Rc<BytecodeFunctionCode>,
 
-    current_scope: Scope,
+    pub current_scope: Scope,
 
     pub acc: Value,
 
-    continue_storage: Option<OutputDataType>,
+    pub continue_storage: Option<OutputDataType>,
 
-    try_stack: Vec<TryBlock>,
+    pub try_stack: Vec<TryBlock>,
 
-    throw: Option<Error>,
+    pub throw: Option<Error>,
 }
 
 pub struct ResumableVM<'a> {
