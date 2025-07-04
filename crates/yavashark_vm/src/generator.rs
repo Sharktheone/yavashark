@@ -6,7 +6,7 @@ use std::rc::Rc;
 use swc_ecma_ast::{Param, Pat};
 use yavashark_bytecode::BytecodeFunctionCode;
 use yavashark_env::scope::Scope;
-use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
 
@@ -182,6 +182,12 @@ impl Generator {
                 Ok(obj)
             }
         }
+    }
+    
+    #[prop(Symbol::ITERATOR)]
+    #[nonstatic]
+    pub const fn iterator(this: Value) -> Value {
+        this
     }
 }
 
