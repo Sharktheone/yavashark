@@ -9,6 +9,8 @@ impl Compiler {
             let arg = self.compile_expr_data_acc(arg)?;
 
             self.instructions.push(Instruction::yield_(arg));
+        } else {
+            self.instructions.push(Instruction::yield_undefined());
         }
 
         Ok(())
