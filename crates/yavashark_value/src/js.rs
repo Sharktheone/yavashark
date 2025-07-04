@@ -563,7 +563,15 @@ pub fn fmt_num(n: f64) -> YSString {
         if (1e-6..1e21).contains(&abs_n) {
             YSString::from_string(n.to_string())
         } else {
-            YSString::from_string(format!("{n:e}"))
+            let mut num = format!("{n:e}");
+
+            if let Some(e_idx) = num.find('e') {
+                num.insert(e_idx + 1, '+');
+            }
+
+
+
+            YSString::from_string(num)
         }
     }
 }
