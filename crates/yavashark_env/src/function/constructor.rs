@@ -3,6 +3,7 @@ use std::fmt;
 use std::fmt::{Debug, Formatter};
 
 use yavashark_macro::object;
+use yavashark_string::YSString;
 use yavashark_value::{Constructor, Func};
 
 use crate::realm::Realm;
@@ -10,7 +11,7 @@ use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Res, Value, ValueRes
 
 pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> ValueResult>;
 
-#[object(function, constructor, direct(constructor))]
+#[object(function, constructor, direct(constructor), to_string)]
 pub struct NativeConstructor {
     /// The name of the constructor
     pub name: String,
@@ -53,6 +54,15 @@ impl Func<Realm> for NativeConstructor {
 }
 
 impl NativeConstructor {
+
+    pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
+        Ok("function Function() { [native code] }".into())
+    }
+
+    pub fn override_to_string_internal(&self) -> Res<YSString> {
+        Ok("function Function() { [native code] }".into())
+    }
+
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         name: String,
