@@ -112,6 +112,7 @@ LoadSuper => Data
 LoadSuperConstructor => Data 
 
 Yield(Data)
+YieldUndefined 
 Await(Data) => Data
 AwaitNoOutput(Data) 
 
