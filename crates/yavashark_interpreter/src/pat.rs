@@ -198,7 +198,7 @@ pub fn set_value_name(
         }
 
         if let Some(arrow) = obj.downcast::<ArrowFunction>() {
-            //TODO: arrow functions currently don't have an
+            arrow.define_variable("name".into(), YSString::from_ref(name).into())?;
         }
 
         if let Some(class) = obj.downcast::<Class>() {
