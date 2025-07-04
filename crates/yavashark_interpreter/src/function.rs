@@ -15,6 +15,7 @@ use yavashark_env::{
 };
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
+use yavashark_string::YSString;
 use yavashark_value::{
     BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty,
 };
@@ -102,10 +103,29 @@ impl JSFunction {
         Ok(handle)
     }
 
-    pub fn set_name(&self, name: String) -> Res {
-        self.raw.name.replace(name.clone());
+    pub fn update_name(&self, n: &str) -> Res {
+        let mut name = self.raw.name.try_borrow_mut()?;
 
-        self.define_variable("name".into(), Variable::config(name.into()))
+        if name.is_empty() {
+            *name = n.to_owned();
+
+
+            self.inner.try_borrow_mut()?.object.force_update_property_cb(
+                "name".into(),
+                |v| {
+                    if let Some(v) = v {
+                        if !v.get().value.is_string() {
+                            return None;
+                        }
+
+                    }
+
+                    Some(YSString::from_ref(n).into())
+                }
+            )?;
+        }
+
+        Ok(())
     }
 
     pub fn new_instance(&self, realm: &mut Realm) -> ValueResult {

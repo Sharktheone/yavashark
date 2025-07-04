@@ -1,4 +1,4 @@
-use indexmap::map::Entry;
+use indexmap::map::{Entry, OccupiedEntry};
 use indexmap::IndexMap;
 pub use prototype::*;
 use rustc_hash::FxBuildHasher;
@@ -272,9 +272,9 @@ impl MutObject {
 
         if found
             && self
-                .array
-                .get(i)
-                .is_some_and(|v| v.1.attributes.is_configurable())
+            .array
+            .get(i)
+            .is_some_and(|v| v.1.attributes.is_configurable())
         {
             return Some(self.array.remove(i).1.value);
         }
@@ -325,6 +325,29 @@ impl MutObject {
 
         Ok(object)
     }
+
+    pub fn force_update_property_cb(&mut self, name: Value, cb: impl FnOnce(Option<&mut OccupiedEntry<Value, ObjectProperty>>) -> Option<Value>) -> Res {
+        match self.properties.entry(name) {
+            Entry::Occupied(mut entry) => {
+                let Some(val) = cb(Some(&mut entry)) else {
+                    return Ok(());
+                };
+
+                entry.insert(val.into());
+            }
+            Entry::Vacant(entry) => {
+                let Some(val) = cb(None) else {
+                    return Ok(());
+                };
+
+
+                entry.insert(val.into());
+            }
+        }
+
+        Ok(())
+    }
+
 }
 
 impl MutObj<Realm> for MutObject {

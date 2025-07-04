@@ -6,9 +6,11 @@ use crate::Interpreter;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{Error, Object, Realm, Res, Value, ValueResult};
+use yavashark_env::{Class, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_string::YSString;
 use yavashark_value::IntoValue;
+use crate::function::JSFunction;
+use crate::statement::expr::ArrowFunction;
 
 impl Interpreter {
     pub fn run_pat(
@@ -33,6 +35,12 @@ impl Interpreter {
         match stmt {
             Pat::Ident(id) => {
                 let value = value.next().unwrap_or(Value::Undefined);
+
+                set_value_name(
+                    id.id.sym.as_str(),
+                    &value,
+                )?;
+
                 cb(scope, id.id.sym.to_string(), value)?;
             }
             Pat::Array(arr) => {
@@ -108,6 +116,10 @@ impl Interpreter {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
                                 }
                             }
+                            set_value_name(
+                                &key,
+                                &value,
+                            )?;
 
                             cb(scope, key.clone(), value)?;
                             rest_not_props.push(key.into());
@@ -169,4 +181,32 @@ impl Interpreter {
             PropName::BigInt(_) => todo!(),
         })
     }
+}
+
+
+pub fn set_value_name(
+    name: &str,
+    value: &Value,
+) -> Res {
+    if name.is_empty() {
+        return Ok(());
+    }
+
+    if let Value::Object(obj) = value {
+        if let Some(f) = obj.downcast::<JSFunction>() {
+            f.update_name(name)?;
+        }
+
+        if let Some(arrow) = obj.downcast::<ArrowFunction>() {
+            //TODO: arrow functions currently don't have an
+        }
+
+        if let Some(class) = obj.downcast::<Class>() {
+            class.update_name(name)?;
+        }
+    };
+
+
+    Ok(())
+
 }
