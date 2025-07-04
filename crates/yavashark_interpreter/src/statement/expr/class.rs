@@ -7,7 +7,11 @@ use yavashark_value::Obj;
 
 impl Interpreter {
     pub fn run_class(realm: &mut Realm, stmt: &ClassExpr, scope: &mut Scope) -> RuntimeResult {
-        let (class, statics) = create_class(realm, &stmt.class, scope, String::new())?;
+
+        let name = stmt.ident.as_ref().map(|id| id.sym.to_string()).unwrap_or_default();
+
+
+        let (class, statics) = create_class(realm, &stmt.class, scope, name)?;
 
         let this = class.into_value();
 
