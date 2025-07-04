@@ -5,7 +5,7 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, Func, Obj};
+use yavashark_value::{fmt_num, Constructor, Func, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -191,7 +191,7 @@ impl NumberObj {
 #[properties_new(default_null(number), constructor(NumberConstructor::new))]
 impl NumberObj {
     #[prop("toString")]
-    fn to_string(&self, radix: Option<u32>) -> Res<String> {
+    fn to_string(&self, radix: Option<u32>) -> Res<YSString> {
         let inner = self.inner.try_borrow()?;
 
         let num = inner.number;
@@ -199,21 +199,21 @@ impl NumberObj {
         if num.is_nan() {
             check_radix_opt(radix)?;
 
-            return Ok("NaN".to_owned());
+            return Ok("NaN".into());
         }
 
         if num.is_infinite() {
             check_radix_opt(radix)?;
 
             return Ok(if num.is_sign_positive() {
-                "Infinity".to_owned()
+                "Infinity".into()
             } else {
-                "-Infinity".to_owned()
+                "-Infinity".into()
             });
         }
 
         radix.map_or_else(
-            || Ok(num.to_string()),
+            || Ok(fmt_num(num)),
             |radix| float_to_string_with_radix(num, radix),
         )
     }
@@ -335,7 +335,12 @@ pub fn check_radix(radix: u32) -> Res {
 }
 
 //TODO: find a better way to do this
-fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
+fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<YSString> {
+
+    if radix == 10 {
+        return Ok(fmt_num(value))
+    }
+
     const PRECISION: usize = 5;
 
     check_radix(radix)?;
@@ -376,7 +381,7 @@ fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<String> {
         }
     }
 
-    Ok(result)
+    Ok(result.into())
 }
 
 fn parse_float(string: &str) -> f64 {
