@@ -4,6 +4,7 @@ use yavashark_env::{Res, Value};
 
 pub const NUM_REGS: usize = 32;
 
+#[derive(Debug, Clone)]
 pub struct Registers {
     regs: [Value; NUM_REGS],
 }

@@ -1,5 +1,6 @@
 use yavashark_env::Value;
 
+#[derive(Debug, Clone)]
 pub struct Stack {
     stack: Vec<Value>,
 }

@@ -10,6 +10,7 @@ use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value, ValueResult};
 
+#[derive(Debug, Clone)]
 pub struct VmState {
     regs: Registers,
     stack: Stack,
