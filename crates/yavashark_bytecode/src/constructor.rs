@@ -59172,6 +59172,10 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn yield_undefined() -> Self {
+        Self::YieldUndefined
+    }
+    #[must_use]
     pub fn await_(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => {
@@ -62635,6 +62639,10 @@ impl Instruction {
     #[must_use]
     pub fn yield_(arg0: impl Data) -> Self {
         Self::Yield(arg0.data_type())
+    }
+    #[must_use]
+    pub fn yield_undefined() -> Self {
+        Self::YieldUndefined
     }
     #[must_use]
     pub fn await_(arg0: impl Data, output: impl OutputData) -> Self {

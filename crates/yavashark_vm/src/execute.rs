@@ -46599,6 +46599,7 @@ impl Execute for Instruction {
             Self::YieldBool(arg0) => instruction::yield_(arg0, vm)?,
             Self::YieldNull(arg0) => instruction::yield_(arg0, vm)?,
             Self::YieldUndefined(arg0) => instruction::yield_(arg0, vm)?,
+            Self::YieldUndefined => instruction::yield_undefined(vm)?,
             Self::AwaitVarToVar(arg0, output) => instruction::await_(arg0, output, vm)?,
             Self::AwaitRegToVar(arg0, output) => instruction::await_(arg0, output, vm)?,
             Self::AwaitAccToVar(arg0, output) => instruction::await_(arg0, output, vm)?,
@@ -50069,6 +50070,7 @@ impl Execute for Instruction {
                 instruction::load_super_constructor(output, vm)?
             }
             Self::Yield(arg0) => instruction::yield_(arg0, vm)?,
+            Self::YieldUndefined => instruction::yield_undefined(vm)?,
             Self::Await(arg0, output) => instruction::await_(arg0, output, vm)?,
             Self::AwaitNoOutput(arg0) => instruction::await_no_output(arg0, vm)?,
             Self::Debugger => instruction::debugger(vm)?,
