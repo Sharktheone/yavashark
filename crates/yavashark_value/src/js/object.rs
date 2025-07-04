@@ -595,7 +595,7 @@ impl<C: Realm> Object<C> {
         }
         Err(Error::ty("Cannot convert object to primitive"))
     }
-    
+
     pub fn enum_properties(&self) -> Result<Vec<(Value<C>, ObjectProperty<C>)>, Error<C>> {
         let mut properties = Vec::new();
 

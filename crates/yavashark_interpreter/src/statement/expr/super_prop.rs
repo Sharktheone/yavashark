@@ -14,7 +14,7 @@ impl Interpreter {
         let this = scope.this()?;
         let proto = this.prototype(realm)?;
         let sup = proto.prototype(realm)?;
-        
+
         match &stmt.prop {
             SuperProp::Ident(i) => {
                 let name = i.sym.to_string();

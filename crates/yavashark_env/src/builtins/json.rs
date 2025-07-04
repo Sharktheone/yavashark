@@ -51,7 +51,11 @@ impl JSON {
         })
     }
 
-    fn value_to_serde(value: Value, realm: &mut Realm, visited: &mut Vec<usize>) -> Res<Option<serde_json::Value>> {
+    fn value_to_serde(
+        value: Value,
+        realm: &mut Realm,
+        visited: &mut Vec<usize>,
+    ) -> Res<Option<serde_json::Value>> {
         //TODO: handle circular items
         Ok(Some(match value {
             Value::Null => serde_json::Value::Null,
@@ -64,12 +68,13 @@ impl JSON {
             Value::BigInt(_) => return Err(Error::ty("Do not know how to serialize a BigInt")),
             Value::Object(ref o) => {
                 if visited.contains(&o.as_ptr().addr()) {
-                    return Err(Error::ty("Circular reference detected in JSON serialization"));
+                    return Err(Error::ty(
+                        "Circular reference detected in JSON serialization",
+                    ));
                 }
-                
+
                 visited.push(o.as_ptr().addr());
-                
-                
+
                 if value.instance_of(&realm.intrinsics.array_constructor().value, realm)? {
                     let mut index = 0;
 
@@ -98,7 +103,7 @@ impl JSON {
 
                     return Ok(Some(serde_json::Value::Array(array)));
                 };
-                
+
                 if let Some(prim) = o.primitive() {
                     return Self::value_to_serde(prim, realm, visited);
                 }
@@ -129,9 +134,7 @@ impl JSON {
     fn parse(str: &Value, #[realm] realm: &mut Realm) -> Res<Value> {
         let str = str.to_primitive(Hint::String, realm)?;
         let str = str.to_string(realm)?;
-        
-        
-        
+
         let value: serde_json::Value = match serde_json::from_str(&str) {
             Ok(value) => value,
             Err(error) => return Err(Error::syn_error(error.to_string())),

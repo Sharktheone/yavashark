@@ -94,7 +94,10 @@ impl JSFunction {
 
         handle.define_variable("name".into(), Variable::config(handle.clone().into()))?;
         handle.define_variable("length".into(), Variable::config(len.into()))?;
-        prototype.define_variable("constructor".into(), Variable::write_config(handle.clone().into()));
+        prototype.define_variable(
+            "constructor".into(),
+            Variable::write_config(handle.clone().into()),
+        );
 
         Ok(handle)
     }
