@@ -21,12 +21,12 @@ pub fn create_class(
         let p = super_class.get_property(&"prototype".into(), realm)?;
 
         (
-            JSClass::with_super(super_class.to_object()?, name.clone()),
+            JSClass::with_super(super_class.to_object()?, name.clone())?,
             ClassInstance::new_with_proto(p, name),
         )
     } else {
         (
-            JSClass::new(realm, name.clone()),
+            JSClass::new(realm, name.clone())?,
             ClassInstance::new(realm, name),
         )
     };

@@ -16,7 +16,7 @@ pub struct Class {
     pub sup: Option<ObjectHandle>,
 
     pub private_props: FxHashMap<String, Value>,
-    pub name: String,
+    pub name: RefCell<String>,
     // #[gc(untyped)]
     pub prototype: RefCell<ObjectProperty>,
     // #[gc(untyped)]
@@ -102,7 +102,7 @@ impl Obj<Realm> for Class {
     }
 
     fn name(&self) -> String {
-        self.name.clone()
+        self.name.borrow().clone()
     }
 
     fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
@@ -182,7 +182,7 @@ impl Obj<Realm> for Class {
         Ok(if let Some(constructor) = &self.constructor {
             let this = ClassInstance::new_with_proto(
                 self.prototype.try_borrow()?.value.clone(),
-                self.name.clone(),
+                self.name.borrow().clone(),
             )
             .into_value();
 
@@ -197,13 +197,13 @@ impl Obj<Realm> for Class {
             ClassInstance {
                 inner: RefCell::new(c),
                 private_props: RefCell::new(HashMap::new()),
-                name: self.name.clone(),
+                name: self.name.borrow().clone(),
             }
             .into_value()
         } else {
             ClassInstance::new_with_proto(
                 self.prototype.try_borrow()?.value.clone(),
-                self.name.clone(),
+                self.name.borrow().clone(),
             )
             .into_value()
         })
@@ -223,32 +223,38 @@ impl Obj<Realm> for Class {
 }
 
 impl Class {
-    #[must_use]
-    pub fn new(realm: &Realm, name: String) -> Self {
+    pub fn new(realm: &Realm, name: String) -> Res<Self> {
         Self::new_with_proto(realm.intrinsics.func.clone().into(), name)
     }
 
-    #[must_use]
-    pub fn new_with_proto(proto: Value, name: String) -> Self {
-        Self {
-            inner: Object::with_proto(proto),
+    pub fn new_with_proto(proto: Value, name: String) -> Res<Self> {
+        let inner = Object::with_proto(proto);
+
+        inner.define_variable("name".into(), Variable::write_config(name.clone().into()))?;
+
+        Ok(Self {
+            inner,
             sup: None,
             private_props: FxHashMap::default(),
             constructor: None,
-            name,
+            name: RefCell::new(name),
             prototype: RefCell::new(ObjectProperty::new(Value::Undefined)),
-        }
+        })
     }
 
-    pub fn with_super(sup: ObjectHandle, name: String) -> Self {
-        Self {
-            inner: Object::with_proto(sup.clone().into()),
+    pub fn with_super(sup: ObjectHandle, name: String) -> Res<Self> {
+        let inner = Object::with_proto(sup.clone().into());
+
+        inner.define_variable("name".into(), Variable::write_config(name.clone().into()))?;
+
+        Ok(Self {
+            inner,
             sup: Some(sup),
             private_props: FxHashMap::default(),
             constructor: None,
-            name,
+            name: RefCell::new(name),
             prototype: RefCell::new(ObjectProperty::new(Value::Undefined)),
-        }
+        })
     }
 
     pub fn set_private_prop(&mut self, key: String, value: Value) {
@@ -269,13 +275,43 @@ impl Class {
     pub fn set_constructor(&mut self, constructor: impl ConstructorFn<Realm> + 'static) {
         self.constructor = Some(Box::new(constructor));
     }
+
+    pub fn update_name(&self, n: &str) -> Res {
+        let mut name = self.name.try_borrow_mut()?;
+
+        if name.is_empty() {
+            *name = n.to_owned();
+
+            if let Some(obj) = self.inner.downcast::<Object>() {
+                obj.inner_mut()?
+                    .force_update_property_cb("name".into(), |v| {
+                        if let Some(v) = v {
+                            if !v.get().value.is_string() {
+                                return None;
+                            }
+                        }
+
+                        Some(YSString::from_ref(n).into())
+                    })?;
+            } else {
+                let name_prop = self.inner.get_property_opt(&"name".into())?;
+
+                if name_prop.is_none_or(|p| p.value.is_string()) {
+                    self.inner
+                        .define_property("name".into(), YSString::from_ref(n).into())?;
+                }
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[properties]
 impl Class {
     #[constructor(raw)]
     pub fn construct(args: Vec<Value>, realm: &mut Realm) -> ValueResult {
-        let this = Self::new(realm, "Class".to_string()).into_value();
+        let this = Self::new(realm, "Class".to_string())?.into_value();
 
         if let Value::Object(o) = this.copy() {
             let deez = o.guard();
