@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use crate::function::{JSFunction, RawJSFunction};
 use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, Param, ParamOrTsParamProp, PropName};
@@ -52,7 +53,7 @@ pub fn create_class(
                 }
 
                 let raw_fn = RawJSFunction {
-                    name: "constructor".into(),
+                    name: RefCell::new("constructor".into()),
                     params,
                     block: constructor.body.clone(),
                     scope: scope.clone(),

@@ -29,7 +29,7 @@ pub struct JSFunction {
 
 #[derive(Debug)]
 pub struct RawJSFunction {
-    pub name: String,
+    pub name: RefCell<String>,
     pub params: Vec<Param>,
     pub block: Option<BlockStmt>,
     pub scope: Scope,
@@ -52,7 +52,7 @@ impl FunctionCode for OptimizedJSFunction {
 
 impl CustomName for JSFunction {
     fn custom_name(&self) -> String {
-        self.raw.name.clone()
+        self.raw.name.borrow().clone()
     }
 }
 
@@ -83,7 +83,7 @@ impl JSFunction {
                 prototype: prototype.clone().into(),
             }),
             raw: RawJSFunction {
-                name,
+                name: RefCell::new(name.clone()),
                 params,
                 block,
                 scope,
@@ -92,7 +92,7 @@ impl JSFunction {
 
         let handle = ObjectHandle::new(this);
 
-        handle.define_variable("name".into(), Variable::config(handle.clone().into()))?;
+        handle.define_variable("name".into(), Variable::config(name.into()))?;
         handle.define_variable("length".into(), Variable::config(len.into()))?;
         prototype.define_variable(
             "constructor".into(),
@@ -100,6 +100,12 @@ impl JSFunction {
         );
 
         Ok(handle)
+    }
+
+    pub fn set_name(&self, name: String) -> Res {
+        self.raw.name.replace(name.clone());
+
+        self.define_variable("name".into(), Variable::config(name.into()))
     }
 
     pub fn new_instance(&self, realm: &mut Realm) -> ValueResult {
