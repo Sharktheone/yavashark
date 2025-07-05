@@ -3,6 +3,7 @@
 pub use console::*;
 pub use function::*;
 pub use native_object::*;
+pub use native_proto::*;
 pub use object::*;
 use std::ops::Deref;
 use yavashark_garbage::OwningGcGuard;
@@ -22,6 +23,7 @@ mod function_conversion;
 mod global;
 mod native_obj;
 mod native_object;
+mod native_proto;
 pub mod optimizer;
 pub mod realm;
 pub mod task_queue;

@@ -9,6 +9,7 @@ edition = "2021"
 anyhow = { version = "1.0.40", optional = true }
 yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_string = { path = "../yavashark_string"}
+yavashark_realm = { path = "../yavashark_realm" }
 num-bigint = "0.4.6"
 num-traits = "0.2.19"
 half = "2.5.0"
