@@ -13,6 +13,7 @@ use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, ObjectHandle, Realm, Res, ValueResult};
+use yavashark_vm::async_generator::AsyncGeneratorFunction;
 use yavashark_vm::OldBorrowedVM;
 use yavashark_vm::function_code::BytecodeFunction;
 use yavashark_vm::generator::GeneratorFunction;
@@ -63,7 +64,15 @@ impl ByteCodeInterpreter {
         }
 
         if func.is_generator && func.is_async {
-            //async generator TODO
+            let g = AsyncGeneratorFunction::new(
+                compiled.unwrap_or_default(),
+                scope,
+                realm,
+                func.params.clone(),
+            );
+
+            return Ok(g.into_object());
+
         }
 
         let compiled = compiled.map(|code| {

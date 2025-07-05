@@ -488,8 +488,7 @@ impl<C: Realm> Object<C> {
         self.0.ptr_id()
     }
 
-    #[allow(clippy::needless_lifetimes)]
-    pub fn downcast<'a, T: 'static>(&'a self) -> Option<OwningGcGuard<'a, BoxedObj<C>, T>> {
+    pub fn downcast<T: 'static>(&self) -> Option<OwningGcGuard<'static, BoxedObj<C>, T>> {
         self.get_owning().maybe_map(BoxedObj::downcast::<T>).ok()
     }
 
