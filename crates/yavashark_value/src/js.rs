@@ -5,7 +5,7 @@ pub use conversion::*;
 pub use function::*;
 pub use name::*;
 use num_bigint::BigInt;
-use num_traits::Zero;
+use num_traits::{Zero};
 pub use object::*;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -566,10 +566,12 @@ pub fn fmt_num(n: f64) -> YSString {
             let mut num = format!("{n:e}");
 
             if let Some(e_idx) = num.find('e') {
-                num.insert(e_idx + 1, '+');
+                if num.as_bytes().get(e_idx + 1).copied() != Some(b'-') {
+                    if num.len() > e_idx + 1 {
+                        num.insert(e_idx + 1, '+');
+                    }
+                }
             }
-
-
 
             YSString::from_string(num)
         }
