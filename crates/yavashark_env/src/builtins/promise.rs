@@ -6,6 +6,7 @@ use crate::conversion::FromValueOutput;
 use crate::error::ErrorObj;
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
+use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
@@ -21,7 +22,7 @@ pub enum PromiseState {
 #[object]
 #[derive(Debug)]
 pub struct Promise {
-    pub notify: Notify,
+    pub notify: PromiseNotify,
     pub state: Cell<PromiseState>,
     #[mutable]
     pub value: Option<Value>,
@@ -31,6 +32,35 @@ pub struct Promise {
     pub on_rejected: Vec<RejectedHandler>,
     #[mutable]
     pub finally: Vec<ObjectHandle>,
+}
+
+#[derive(Debug)]
+pub struct PromiseNotify {
+    notify: Notify,
+    finished: Cell<bool>,
+}
+
+impl PromiseNotify {
+    pub fn new() -> Self {
+        Self {
+            notify: Notify::new(),
+            finished: Cell::new(false),
+        }
+    }
+
+    pub fn finished(&self) {
+        self.notify.notify_waiters();
+        self.finished.set(true);
+    }
+
+    pub fn notified(&self) -> Option<Notified<'_>> {
+        if self.finished.get() {
+            None
+        } else {
+            Some(self.notify.notified())
+        }
+    }
+
 }
 
 #[object]
@@ -51,7 +81,7 @@ impl Promise {
     #[must_use]
     pub fn new(realm: &Realm) -> Self {
         Self {
-            notify: Notify::new(),
+            notify: PromiseNotify::new(),
             state: Cell::new(PromiseState::Pending),
             inner: RefCell::new(MutablePromise {
                 object: MutObject::with_proto(realm.intrinsics.promise.clone().into()),
@@ -64,7 +94,9 @@ impl Promise {
     }
 
     pub async fn wait(&self) -> ValueResult {
-        self.notify.notified().await;
+        if let Some(notify) = self.notify.notified() {
+            notify.await
+        }
 
         Ok(self
             .inner
@@ -92,7 +124,7 @@ impl Promise {
             handler.call(realm, vec![], Value::Undefined)?;
         }
 
-        self.notify.notify_waiters();
+        self.notify.finished();
 
         Ok(())
     }
@@ -116,7 +148,7 @@ impl Promise {
             handler.call(realm, vec![], Value::Undefined)?;
         }
 
-        self.notify.notify_waiters();
+        self.notify.finished();
 
         Ok(())
     }

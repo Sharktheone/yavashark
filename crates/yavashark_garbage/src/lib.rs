@@ -409,6 +409,17 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
             _gc: self.gc,
         }
     }
+
+
+    pub fn try_map_refed<U: 'a, F: FnOnce(&'a V) -> Result<U, E>, E>(self, f: F) -> Result<OwningGcGuardRefed<T, U>, (Self, E)> {
+        match f(self.value_ptr) {
+            Ok(val) => Ok(OwningGcGuardRefed {
+                value_ptr: val,
+                _gc: self.gc,
+            }),
+            Err(e) => Err((self, e)),
+        }
+    }
 }
 
 impl<T: Collectable> Gc<T> {

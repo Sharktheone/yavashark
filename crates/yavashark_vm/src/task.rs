@@ -79,9 +79,39 @@ impl AsyncTask for BytecodeAsyncTask {
                         Err(e) => return Poll::Ready(Err(e)),
                     };
 
-                    let promise = promise.map_refed(|promise| (promise, promise.notify.notified()));
+                    let promise = promise.try_map_refed(|promise| {
+                        let Some(notify) = promise.notify.notified() else {
+                            return Err(())
+                        };
 
-                    inner.await_promise = Some(promise);
+
+
+                        Ok((promise, notify))
+                    });
+
+                    match promise {
+                        Ok(promise) => {
+                            inner.await_promise = Some(promise);
+
+                        }
+                        Err((promise, _)) => {
+                            let val = promise
+                                .inner
+                                .borrow()
+                                .value
+                                .clone()
+                                .unwrap_or(Value::Undefined);
+
+                            inner.state.as_mut().map(|state| state.continue_async(val));
+
+                            let this = unsafe {
+                                Pin::new_unchecked(inner)
+                            };
+
+                            return this.poll(cx, realm);
+                        }
+                    }
+
 
                     Poll::Pending
                 }
