@@ -5363,20 +5363,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "yavashark_realm"
-version = "0.1.0"
-dependencies = [
- "futures",
- "indexmap",
- "pin-project",
- "rustc-hash 2.1.1",
- "temporal_rs",
- "tokio",
- "yavashark_garbage",
- "yavashark_string",
-]
-
-[[package]]
 name = "yavashark_string"
 version = "0.1.0"
 
@@ -5418,7 +5404,6 @@ dependencies = [
  "rand 0.9.0",
  "temporal_rs",
  "yavashark_garbage",
- "yavashark_realm",
  "yavashark_string",
 ]
 

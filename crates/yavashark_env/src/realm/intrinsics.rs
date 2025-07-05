@@ -188,42 +188,70 @@ impl Intrinsics {
             proto.initialize(func_prototype.clone().into())?;
         }
 
+        // Phase 1: Create array prototype with Object::null() as requested
         let array_prototype = Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype  
+        array_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
+        // Phase 1: Create array iterator prototype with Object::null() as requested
         let array_iter_prototype = ArrayIterator::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype
+        array_iter_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
+        // Phase 1: Create error prototype with Object::null() as requested
         let error_prototype = ErrorObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype
+        error_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
         let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone())?;
 
+        // Phase 1: Create string prototype with Object::null() as requested
         let string_prototype = StringObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype
+        string_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
+        // Phase 1: Create number prototype with Object::null() as requested
         let number_prototype = NumberObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype
+        number_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
+        // Phase 1: Create boolean prototype with Object::null() as requested
         let boolean_prototype = BooleanObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype
+        boolean_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
+        // Phase 1: Create symbol prototype with Object::null() as requested
         let symbol_prototype = SymbolObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::null(),
             func_prototype.clone().into(),
         )?;
+        
+        // Phase 2: Set the prototype to obj_prototype
+        symbol_prototype.inner_mut()?.prototype = obj_prototype.clone().into();
 
         let bigint_prototype = BigIntObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
