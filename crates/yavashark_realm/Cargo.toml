@@ -9,6 +9,9 @@ yavashark_garbage = { path = "../yavashark_garbage" }
 temporal_rs = { version = "0.0.8", features = ["tzdb"] }
 tokio = { version = "1.44.1", features = ["sync"] }
 futures = "0.3.31"
+pin-project = "1.1.10"
+rustc-hash = "2.1.1"
+indexmap = "2.7.1"
 
 [lints]
 workspace = true

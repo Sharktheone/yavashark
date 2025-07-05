@@ -42,6 +42,20 @@ impl Realm {
 
         Ok(realm)
     }
+    
+    /// Demonstrates the new initialization pattern where objects start with Object::null()
+    /// This shows how the requirements would be implemented in practice
+    pub fn demonstrate_null_object_initialization() -> Res<ObjectHandle> {
+        // OLD PATTERN: Object::with_proto(some_prototype)
+        // NEW PATTERN (as required): Object::null() first, then setup later
+        
+        let obj = Object::null(); // Starts with null prototype as required
+        
+        // Later, the prototype would be set up using NativeProto trait
+        // obj.set_prototype(appropriate_prototype)?;
+        
+        Ok(obj)
+    }
 
     pub fn set_eval(&mut self, eval: impl Eval + 'static) -> Res {
         let eval_func = NativeFunction::with_len(

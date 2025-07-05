@@ -5367,6 +5367,9 @@ name = "yavashark_realm"
 version = "0.1.0"
 dependencies = [
  "futures",
+ "indexmap",
+ "pin-project",
+ "rustc-hash 2.1.1",
  "temporal_rs",
  "tokio",
  "yavashark_garbage",

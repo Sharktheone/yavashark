@@ -24,6 +24,7 @@ mod global;
 mod native_obj;
 mod native_object;
 mod native_proto;
+mod demo_new_pattern;
 pub mod optimizer;
 pub mod realm;
 pub mod task_queue;
