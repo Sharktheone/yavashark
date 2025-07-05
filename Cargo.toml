@@ -46,8 +46,8 @@ crate-type = ["cdylib"]
 
 [features]
 default = ["simple_bytecode"]
-vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler"]
-simple_bytecode = ["vm", "yavashark_vm/simple_bytecode"]
+vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler", "yavashark_interpreter/vm"]
+simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/simple_bytecode"]
 
 
 [profile.release]
