@@ -179,10 +179,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => *n == 0.0 || n.is_nan(),
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
-            Self::Object(o) => {
-                o.primitive()
-                    .is_some_and(|o| if o.is_object() { false } else { o.is_falsey() })
-            }
+            Self::Object(_) => false,
             Self::Symbol(_) => false,
             Self::BigInt(b) => b.is_zero(),
         }
