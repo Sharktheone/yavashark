@@ -7,6 +7,7 @@ use swc_ecma_ast::{Param, Pat};
 use yavashark_bytecode::BytecodeFunctionCode;
 use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use yavashark_env::builtins::Arguments;
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
 
@@ -87,7 +88,7 @@ impl GeneratorFunction {
 }
 
 impl Func<Realm> for GeneratorFunction {
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         scope.state_set_returnable()?;
 
@@ -104,6 +105,13 @@ impl Func<Realm> for GeneratorFunction {
 
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;
+
+        let args = Arguments::new(args, this.copy(), realm);
+
+        let args = ObjectHandle::new(args);
+
+        scope.declare_var("arguments".to_string(), args.into())?;
+
 
         let generator = Generator::new(realm, Rc::clone(&self.code), scope);
 
