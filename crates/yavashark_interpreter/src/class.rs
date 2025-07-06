@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use crate::function::{JSFunction, RawJSFunction};
 use swc_common::Span;
-use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, Param, ParamOrTsParamProp, PropName};
+use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName};
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
 };
@@ -39,7 +39,7 @@ pub fn create_class(
                 let (name, func) =
                     create_method(&method.key, &method.function, scope, realm, stmt.span)?;
 
-                define_on_class(name, func, &mut class, &mut proto, method.is_static, false);
+                define_method_on_class(name, func, &mut class, &mut proto, method.is_static, false, method.kind);
             }
             ClassMember::Constructor(constructor) => {
                 let mut params = Vec::new();
@@ -70,7 +70,7 @@ pub fn create_class(
                     stmt.span,
                 )?;
 
-                define_on_class(name, func, &mut class, &mut proto, method.is_static, true)?;
+                define_method_on_class(name, func, &mut class, &mut proto, method.is_static, true, method.kind)?;
             }
 
             ClassMember::StaticBlock(s) => {
@@ -240,6 +240,57 @@ fn define_on_class(
         class.define_property(name, value);
     } else {
         proto.define_property(name, value);
+    }
+
+    Ok(())
+}
+
+
+fn define_method_on_class(
+    name: Value,
+    value: Value,
+    class: &mut JSClass,
+    proto: &mut ClassInstance,
+    is_static: bool,
+    is_private: bool,
+    kind: MethodKind,
+) -> Res {
+    if is_private {
+        if is_static {
+            let Value::String(name) = name else {
+                return Err(Error::new(
+                    "Private static method name must be a string (how tf did you get here?)",
+                ));
+            };
+
+            class.set_private_prop(name.to_string(), value);
+        } else {
+            let Value::String(name) = name else {
+                return Err(Error::new(
+                    "Private method name must be a string (how tf did you get here?)",
+                ));
+            };
+
+            proto.set_private_prop(name.to_string(), value);
+        }
+    } else if is_static {
+        if name == Value::String("prototype".into()) {
+            return Err(Error::new(
+                "Classes may not have a static property named 'prototype'",
+            ));
+        }
+
+        match kind {
+            MethodKind::Getter => class.define_getter(name, value),
+            MethodKind::Setter => class.define_setter(name, value),
+            MethodKind::Method => class.define_property(name, value),
+        };
+    } else {
+        match kind {
+            MethodKind::Getter => proto.define_getter(name, value),
+            MethodKind::Setter => proto.define_setter(name, value),
+            MethodKind::Method => proto.define_property(name, value),
+        };
     }
 
     Ok(())
