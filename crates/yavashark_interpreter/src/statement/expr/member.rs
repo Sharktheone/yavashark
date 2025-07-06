@@ -3,7 +3,7 @@ use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
+use yavashark_env::{Class, ClassInstance, ControlFlow, Error, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 
@@ -34,10 +34,32 @@ impl Interpreter {
         let name = match &prop {
             MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
             MemberProp::Computed(e) => Self::run_expr(realm, &e.expr, span, scope)?,
-            MemberProp::PrivateName(_) => {
-                return Err(ControlFlow::error(
-                    "Unsupported member expression property".to_owned(),
-                ));
+            MemberProp::PrivateName(p) => {
+                let name = p.name.as_str();
+                let obj = value.as_object()?;
+
+                if let Some(class) = obj.downcast::<ClassInstance>() {
+                    let val =  class
+                        .get_private_prop(name)?
+                        .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+
+                    return Ok((val, None));
+                };
+
+                if let Some(class) = obj.downcast::<Class>() {
+                    let val = class
+                        .get_private_prop(name)
+                        .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+
+                    return Ok((val.copy(), None));
+                }
+
+
+                return Err(ControlFlow::error_type(format!(
+                    "Private name {name} can only be used in class"
+                )));
+
+
             }
         };
 
