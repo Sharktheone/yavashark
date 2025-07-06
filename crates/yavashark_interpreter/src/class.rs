@@ -263,6 +263,7 @@ fn define_method_on_class(
                 ));
             };
 
+            //TODO: handle getters and setters
             class.set_private_prop(name.to_string(), value);
         } else {
             let Value::String(name) = name else {
@@ -271,6 +272,7 @@ fn define_method_on_class(
                 ));
             };
 
+            //TODO: handle getters and setters
             proto.set_private_prop(name.to_string(), value);
         }
     } else if is_static {
