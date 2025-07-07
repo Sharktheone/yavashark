@@ -271,9 +271,19 @@ impl ObjectConstructor {
 
     #[prop("is")]
     fn is(val1: &Value, val2: &Value) -> ValueResult {
-        //TODO: handle things like NaN, -0, etc. BigInt & Numbers
+        let same = val1 == val2;
 
-        Ok((val1 == val2).into())
+        if same {
+            return Ok(Value::Boolean(true));
+        }
+
+        if val1.is_nan() && val2.is_nan() {
+            return Ok(Value::Boolean(true));
+        }
+
+        Ok(Value::Boolean(false))
+
+
     }
 
     #[prop("keys")]
