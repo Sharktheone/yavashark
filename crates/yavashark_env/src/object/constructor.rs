@@ -111,10 +111,33 @@ impl ObjectConstructor {
     }
 
     fn assign(
-        target: ObjectHandle,
+        target: Value,
         #[variadic] sources: &[Value],
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
+
+        let target = match target {
+            Value::Object(obj) => obj,
+            Value::Undefined | Value::Null => return Err(Error::ty("Cannot assign to undefined or null")),
+            Value::Boolean(b) => {
+                BooleanObj::new(realm, b)
+            }
+            Value::Number(n) => {
+                NumberObj::with_number(realm, n)?
+            }
+            Value::String(s) => {
+                StringObj::with_string(realm, s)
+                    .into_object()
+            }
+            Value::Symbol(s) => {
+                SymbolObj::new(realm, s)
+            }
+            Value::BigInt(b) => {
+                BigIntObj::new(realm, b)
+            }
+        };
+
+
         for source in sources {
             let source = source.as_object()?;
 
