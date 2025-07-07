@@ -108,7 +108,7 @@ impl RawOptimFunction {
 
         for (i, p) in self.params.iter().enumerate() {
             let Pat::Ident(name) = &p.pat else {
-                return Err(Error::syn("Invalid function parameter"));
+                return Err(Error::ty("Invalid function parameter"));
             };
 
             scope.declare_var(
