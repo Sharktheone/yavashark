@@ -3,9 +3,10 @@ use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, Obj};
+use yavashark_value::{Constructor, Func, IntoValue, Obj};
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -115,28 +116,17 @@ impl ObjectConstructor {
         #[variadic] sources: &[Value],
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-
         let target = match target {
             Value::Object(obj) => obj,
-            Value::Undefined | Value::Null => return Err(Error::ty("Cannot assign to undefined or null")),
-            Value::Boolean(b) => {
-                BooleanObj::new(realm, b)
+            Value::Undefined | Value::Null => {
+                return Err(Error::ty("Cannot assign to undefined or null"))
             }
-            Value::Number(n) => {
-                NumberObj::with_number(realm, n)?
-            }
-            Value::String(s) => {
-                StringObj::with_string(realm, s)
-                    .into_object()
-            }
-            Value::Symbol(s) => {
-                SymbolObj::new(realm, s)
-            }
-            Value::BigInt(b) => {
-                BigIntObj::new(realm, b)
-            }
+            Value::Boolean(b) => BooleanObj::new(realm, b),
+            Value::Number(n) => NumberObj::with_number(realm, n)?,
+            Value::String(s) => StringObj::with_string(realm, s).into_object(),
+            Value::Symbol(s) => SymbolObj::new(realm, s),
+            Value::BigInt(b) => BigIntObj::new(realm, b),
         };
-
 
         for source in sources {
             let source = source.as_object()?;
@@ -258,10 +248,27 @@ impl ObjectConstructor {
     }
 
     #[prop("groupBy")]
-    fn group_by(_items: ObjectHandle, _callback: Value, #[realm] realm: &Realm) -> ValueResult {
-        //TODO
+    fn group_by(items: Value, callback: Value, #[realm] realm: &mut Realm) -> ValueResult {
+        let iter = items.iter_no_realm(realm)?;
 
-        Ok(Object::new(realm).into())
+        let mut groups = HashMap::new();
+
+        while let Some(item) = iter.next(realm)? {
+            let key = callback.call(realm, vec![item.clone()], Value::Undefined)?;
+
+            let key = key.to_string(realm)?;
+
+            groups.entry(key).or_insert_with(Vec::new).push(item);
+        }
+
+        let mut result = Object::new(realm);
+
+        for (key, values) in groups {
+            let arr = Array::with_elements(realm, values)?;
+            result.define_property(key.into(), arr.into())?;
+        }
+
+        Ok(result.into_value())
     }
 
     #[prop("hasOwn")]
@@ -271,7 +278,6 @@ impl ObjectConstructor {
 
     #[prop("is")]
     fn is(val1: &Value, val2: &Value) -> ValueResult {
-
         match (val1, val2) {
             (Value::Number(n1), Value::Number(n2)) => {
                 if n1.is_nan() && n2.is_nan() {
@@ -288,12 +294,9 @@ impl ObjectConstructor {
             }
 
             _ => {}
-
         }
 
         Ok((val1 == val2).into())
-
-
     }
 
     #[prop("keys")]
