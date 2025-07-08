@@ -261,11 +261,11 @@ impl ObjectConstructor {
             groups.entry(key).or_insert_with(Vec::new).push(item);
         }
 
-        let mut result = Object::new(realm);
+        let result = Object::new(realm);
 
         for (key, values) in groups {
             let arr = Array::with_elements(realm, values)?;
-            result.define_property(key.into(), arr.into())?;
+            result.define_property(key.into(), arr.into_value())?;
         }
 
         Ok(result.into_value())
