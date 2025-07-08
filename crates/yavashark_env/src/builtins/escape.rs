@@ -175,7 +175,7 @@ fn decode_uri_impl(input: &str, decode_all: bool, realm: &Realm) -> ValueResult 
                     } else {
                         result.push('%');
                         for &byte in &bytes {
-                            write!(result, "{:02X}", byte).unwrap();
+                            write!(result, "{:02X}", byte)?;
                         }
                     }
                 }
