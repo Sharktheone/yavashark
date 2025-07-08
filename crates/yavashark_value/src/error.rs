@@ -71,7 +71,7 @@ impl<C: Realm> Error<C> {
     }
 
     #[must_use]
-    pub fn uri_error(error: String) -> Self {
+    pub fn uri_error(error: impl Into<YSString>) -> Self {
         Self {
             kind: ErrorKind::URI(error.into()),
             stacktrace: StackTrace { frames: vec![] },
