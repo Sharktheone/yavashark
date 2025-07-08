@@ -6,7 +6,7 @@ use yavashark_value::{IntoValue, Error};
 
 #[must_use]
 pub fn get_escape(realm: &Realm) -> Value {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "escape",
         |args, _, realm| {
             if args.len() != 1 {
@@ -35,13 +35,14 @@ pub fn get_escape(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
+        1
     )
     .into_value()
 }
 
 #[must_use]
 pub fn get_encode_uri(realm: &Realm) -> Value {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "encodeURI",
         |args, _, realm| {
             if args.len() != 1 {
@@ -64,13 +65,14 @@ pub fn get_encode_uri(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
+        1
     )
     .into_value()
 }
 
 #[must_use]
 pub fn get_encode_uri_component(realm: &Realm) -> Value {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "encodeURIComponent",
         |args, _, realm| {
             if args.len() != 1 {
@@ -93,13 +95,14 @@ pub fn get_encode_uri_component(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
+        1
     )
     .into_value()
 }
 
 #[must_use]
 pub fn get_unescape(realm: &Realm) -> Value {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "unescape",
         |args, _, realm| {
             if args.len() != 1 {
@@ -122,13 +125,14 @@ pub fn get_unescape(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
+        1
     )
     .into_value()
 }
 
 #[must_use]
 pub fn get_decode_uri(realm: &Realm) -> Value {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "decodeURI",
         |args, _, realm| {
             if args.len() != 1 {
@@ -139,13 +143,14 @@ pub fn get_decode_uri(realm: &Realm) -> Value {
             decode_uri_impl(&arg, false, realm)
         },
         realm,
+        1
     )
     .into_value()
 }
 
 #[must_use]
 pub fn get_decode_uri_component(realm: &Realm) -> Value {
-    NativeFunction::new(
+    NativeFunction::with_len(
         "decodeURIComponent",
         |args, _, realm| {
             if args.len() != 1 {
@@ -156,6 +161,7 @@ pub fn get_decode_uri_component(realm: &Realm) -> Value {
             decode_uri_impl(&arg, true, realm)
         },
         realm,
+        1
     )
     .into_value()
 }
