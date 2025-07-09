@@ -11,11 +11,20 @@ pub struct BoundFunction {
     #[gc]
     bound_this: Value,
     // #[gc]
-    // bound_args: Vec<Value>, TODO: we currently can't have a Vec<Value> in a #[object]
+    bound_args: Vec<Value>, //TODO: this is a memleak!
 }
 
 impl Func<Realm> for BoundFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
+
+        let args = if self.bound_args.is_empty() {
+            args
+        } else {
+            let mut bound_args = self.bound_args.clone();
+            bound_args.extend(args);
+            bound_args
+        };
+
         self.func.call(realm, args, self.bound_this.copy())
     }
 }
@@ -28,7 +37,7 @@ impl Constructor<Realm> for BoundFunction {
 
 impl BoundFunction {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(func: Value, this: Value, _: Vec<Value>, realm: &Realm) -> ValueResult {
+    pub fn new(func: Value, this: Value, args: Vec<Value>, realm: &Realm) -> ValueResult {
         let f = func.as_object()?;
 
         if !f.is_function() {
@@ -41,6 +50,7 @@ impl BoundFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
             }),
             bound_this: this,
+            bound_args: args,
         })
         .into())
     }
