@@ -1,4 +1,4 @@
-use crate::{Error, MutObject, ObjectHandle, Realm, Value, ValueResult};
+use crate::{Error, MutObject, ObjectHandle, Realm, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use yavashark_macro::object;
 use yavashark_value::{Constructor, Func};
@@ -44,14 +44,27 @@ impl BoundFunction {
             return Err(Error::ty("Function.bind must be called on a function"));
         }
 
-        Ok(ObjectHandle::new(Self {
+        let length =  f.get_property_opt(&"length".into())?
+            .unwrap_or(Value::Undefined.into());
+
+        let length = Variable::config(length.value);
+
+
+
+
+        let obj = ObjectHandle::new(Self {
             func,
             inner: RefCell::new(MutableBoundFunction {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
             }),
             bound_this: this,
             bound_args: args,
-        })
-        .into())
+        });
+
+
+        obj.define_variable("length".into(), length)?;
+
+
+        Ok(obj.into())
     }
 }
