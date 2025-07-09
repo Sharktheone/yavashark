@@ -1,5 +1,6 @@
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
+use std::collections::hash_map::Entry;
 use std::collections::HashSet;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -235,6 +236,29 @@ impl ObjectOrVariables {
         Ok(())
     }
 
+    fn insert_opt(&mut self, name: String, variable: Variable) -> Res {
+        match self {
+            Self::Object(o) => o.define_variable(name.into(), variable)?,
+            Self::Variables(v) => {
+                let entry = v.entry(name);
+
+                match entry {
+                    Entry::Occupied(mut occ) => {
+                        if !variable.value.is_undefined() {
+                            occ.insert(variable.into());
+                        }
+                    }
+                    Entry::Vacant(vac) => {
+                        vac.insert(variable.into());
+                    }
+                }
+
+            }
+        }
+
+        Ok(())
+    }
+
     fn get(&self, name: &str) -> Option<Variable> {
         match self {
             Self::Object(o) => o
@@ -411,7 +435,7 @@ impl ScopeInternal {
     }
 
     pub fn declare_var(&mut self, name: String, value: Value) -> Res {
-        self.variables.insert(name, Variable::new(value))
+        self.variables.insert_opt(name, Variable::new(value))
     }
 
     pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
@@ -430,14 +454,14 @@ impl ScopeInternal {
         if let ObjectOrVariables::Object(obj) = &mut self.variables {
             obj.define_property(name.into(), value)?;
         } else if self.state.is_function() {
-            self.variables.insert(name, Variable::new(value))?;
+            self.variables.insert_opt(name, Variable::new(value))?;
         } else {
             match &self.parent {
                 Some(p) => {
                     p.borrow_mut()?.declare_global_var(name, value.copy())?;
                 }
                 None => {
-                    self.variables.insert(name, Variable::new(value))?;
+                    self.variables.insert_opt(name, Variable::new(value))?;
                 }
             }
         }
