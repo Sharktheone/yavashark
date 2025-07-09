@@ -149,6 +149,10 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> ValueResult {
 }
 
 fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+    if !this.is_function() {
+        return Err(Error::ty("toString called on non-function"));
+    }
+
     Ok(this.to_string(realm)?.into())
 }
 
