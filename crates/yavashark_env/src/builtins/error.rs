@@ -30,7 +30,7 @@ macro_rules! error {
                 "prototype".into(),
                 Variable::new_read_only(proto.clone().into()),
             )?;
-            constr.define_property("name".into(), stringify!($name).into())?;
+            constr.define_variable("name".into(), Variable::config(stringify!($name).into()))?;
 
             proto.define_variable("constructor".into(), Variable::write_config(constr.into()))?;
 
