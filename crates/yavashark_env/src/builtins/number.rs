@@ -391,7 +391,6 @@ fn parse_float(string: &str) -> f64 {
         return f64::NAN;
     }
 
-    // Handle special cases first
     if string.starts_with("Infinity") {
         return f64::INFINITY;
     }
@@ -427,7 +426,6 @@ fn parse_float(string: &str) -> f64 {
                 idx += 1;
             }
         } else if (c == '+' || c == '-') && idx == 0 {
-            // Sign at the beginning is allowed
             idx += 1;
         } else {
             break;
