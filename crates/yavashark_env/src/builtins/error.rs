@@ -32,12 +32,13 @@ macro_rules! error {
             )?;
             constr.define_variable("name".into(), Variable::config(stringify!($name).into()))?;
 
-            proto.define_variable("constructor".into(), Variable::write_config(constr.into()))?;
-
             constr.define_variable(
                 "length".into(),
                 Variable::config(1.into()),
-            )
+            )?;
+
+            proto.define_variable("constructor".into(), Variable::write_config(constr.into()))?;
+
 
             Ok(proto.into())
         }
