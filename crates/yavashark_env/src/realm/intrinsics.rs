@@ -239,31 +239,36 @@ impl Intrinsics {
 
         let json = JSON::new(obj_prototype.clone(), func_prototype.clone())?;
 
+        let error_constructor = error_prototype
+            .get_property(&"constructor".into())
+            .unwrap_or(Value::Undefined.into())
+            .value;
+
         let type_error = get_type_error(
             error_prototype.clone().into(),
-            func_prototype.clone().into(),
+            error_constructor.clone().into(),
         )?;
         let range_error = get_range_error(
             error_prototype.clone().into(),
-            func_prototype.clone().into(),
+            error_constructor.clone().into(),
         )?;
         let reference_error = get_reference_error(
             error_prototype.clone().into(),
-            func_prototype.clone().into(),
+            error_constructor.clone().into(),
         )?;
         let syntax_error = get_syntax_error(
             error_prototype.clone().into(),
-            func_prototype.clone().into(),
+            error_constructor.clone().into(),
         )?;
 
         let eval_error = get_eval_error(
             error_prototype.clone().into(),
-            func_prototype.clone().into(),
+            error_constructor.clone().into(),
         )?;
 
         let uri_error = get_uri_error(
             error_prototype.clone().into(),
-            func_prototype.clone().into(),
+            error_constructor.clone().into(),
         )?;
 
         let arraybuffer = ArrayBuffer::initialize_proto(

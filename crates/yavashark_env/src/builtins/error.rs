@@ -4,7 +4,7 @@ use yavashark_value::Obj;
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-        pub fn $get(error: Value, func: Value) -> Res<ObjectHandle> {
+        pub fn $get(error: Value, error_proto: Value) -> Res<ObjectHandle> {
             let proto = Object::with_proto(error);
 
             proto.define_property("name".into(), stringify!($name).into())?;
@@ -22,8 +22,8 @@ macro_rules! error {
 
                     Ok(obj.into_value())
                 },
-                func.clone(),
-                func,
+                error_proto.clone(),
+                error_proto,
             );
 
             constr.define_variable(
