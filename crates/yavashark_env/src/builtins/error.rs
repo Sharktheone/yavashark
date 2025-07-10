@@ -34,6 +34,11 @@ macro_rules! error {
 
             proto.define_variable("constructor".into(), Variable::write_config(constr.into()))?;
 
+            constr.define_variable(
+                "length".into(),
+                Variable::config(1.into()),
+            )
+
             Ok(proto.into())
         }
     };
