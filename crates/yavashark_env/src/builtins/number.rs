@@ -391,39 +391,53 @@ fn parse_float(string: &str) -> f64 {
         return f64::NAN;
     }
 
-    let mut idx = 0;
-
-    let mut had_dot = false;
-
-    for c in string.chars() {
-        if c.is_numeric() || ['.', '-', '+'].contains(&c) {
-            if c == '.' {
-                if had_dot {
-                    break;
-                }
-
-                had_dot = true;
-            }
-            idx += c.len_utf8();
-        } else {
-            break;
-        }
-    }
-
-    if idx > 0 {
-        let Some(Ok(x)) = string.get(..idx).map(str::parse) else {
-            return f64::NAN;
-        };
-
-        return x;
-    }
-
+    // Handle special cases first
     if string.starts_with("Infinity") {
         return f64::INFINITY;
     }
 
     if string.starts_with("-Infinity") {
         return f64::NEG_INFINITY;
+    }
+
+    let mut idx = 0;
+    let mut had_dot = false;
+    let mut had_e = false;
+    let chars: Vec<char> = string.chars().collect();
+
+    while idx < chars.len() {
+        let c = chars[idx];
+
+        if c.is_ascii_digit() {
+            idx += 1;
+        } else if c == '.' {
+            if had_dot || had_e {
+                break;
+            }
+            had_dot = true;
+            idx += 1;
+        } else if c == 'e' || c == 'E' {
+            if had_e {
+                break;
+            }
+            had_e = true;
+            idx += 1;
+
+            if idx < chars.len() && (chars[idx] == '+' || chars[idx] == '-') {
+                idx += 1;
+            }
+        } else if (c == '+' || c == '-') && idx == 0 {
+            // Sign at the beginning is allowed
+            idx += 1;
+        } else {
+            break;
+        }
+    }
+
+    if idx > 0 {
+        if let Ok(x) = string[..idx].parse::<f64>() {
+            return x;
+        }
     }
 
     f64::NAN
