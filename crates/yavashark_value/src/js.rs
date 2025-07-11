@@ -26,6 +26,7 @@ mod object_impl;
 pub mod ops;
 mod symbol;
 pub mod variable;
+mod property_key;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {
