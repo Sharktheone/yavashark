@@ -15,7 +15,7 @@ pub struct Class {
     pub inner: ObjectHandle,
     pub sup: Option<ObjectHandle>,
 
-    pub private_props: FxHashMap<String, Value>,
+    pub private_props: RefCell<FxHashMap<String, Value>>,
     pub name: RefCell<String>,
     // #[gc(untyped)]
     pub prototype: RefCell<ObjectProperty>,
@@ -121,7 +121,7 @@ impl Obj<Realm> for Class {
             self.prototype.borrow().value.clone(),
         ));
 
-        for (key, value) in &self.private_props {
+        for (key, value) in &*self.private_props.try_borrow()? {
             props.push((Value::String(key.clone().into()), value.clone()));
         }
 
@@ -133,7 +133,7 @@ impl Obj<Realm> for Class {
 
         keys.push(Value::String("prototype".into()));
 
-        for key in self.private_props.keys() {
+        for key in self.private_props.try_borrow()?.keys() {
             keys.push(Value::String(key.clone().into()));
         }
 
@@ -145,7 +145,7 @@ impl Obj<Realm> for Class {
 
         values.push(self.prototype.borrow().value.clone());
 
-        for value in self.private_props.values() {
+        for value in self.private_props.try_borrow()?.values() {
             values.push(value.clone());
         }
 
@@ -235,7 +235,7 @@ impl Class {
         Ok(Self {
             inner,
             sup: None,
-            private_props: FxHashMap::default(),
+            private_props: RefCell::new(FxHashMap::default()),
             constructor: None,
             name: RefCell::new(name),
             prototype: RefCell::new(ObjectProperty::new(Value::Undefined)),
@@ -250,20 +250,28 @@ impl Class {
         Ok(Self {
             inner,
             sup: Some(sup),
-            private_props: FxHashMap::default(),
+            private_props: RefCell::new(FxHashMap::default()),
             constructor: None,
             name: RefCell::new(name),
             prototype: RefCell::new(ObjectProperty::new(Value::Undefined)),
         })
     }
 
+    pub fn set_private_prop_ref(&self, key: String, value: Value) {
+        self.private_props.borrow_mut().insert(key, value);
+    }
+
+
+
     pub fn set_private_prop(&mut self, key: String, value: Value) {
-        self.private_props.insert(key, value);
+        self.private_props.get_mut().insert(key, value);
     }
 
     #[must_use]
-    pub fn get_private_prop(&self, key: &str) -> Option<&Value> {
-        self.private_props.get(key)
+    pub fn get_private_prop(&self, key: &str) -> Option<Value> {
+        self.private_props.borrow()
+            .get(key)
+            .cloned()
     }
 
     pub fn set_proto(&mut self, proto: ObjectProperty) -> Res<(), Error> {
@@ -458,7 +466,7 @@ impl ClassInstance {
         }
     }
 
-    pub fn set_private_prop(&mut self, key: String, value: Value) {
+    pub fn set_private_prop(&self, key: String, value: Value) {
         self.private_props.borrow_mut().insert(key, value);
     }
 

@@ -8,7 +8,7 @@ use swc_ecma_ast::{
 
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, Res, RuntimeResult, Value};
+use yavashark_env::{Class, ClassInstance, Error, Realm, Res, RuntimeResult, Value};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 
@@ -72,7 +72,26 @@ impl Interpreter {
         if let Value::Object(obj) = obj {
             let name = match m {
                 MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
-                MemberProp::PrivateName(p) => Value::String(YSString::from_ref(&p.name)),
+                MemberProp::PrivateName(p) => {
+                    let name = p.name.as_str();
+
+                    if let Some(class) = obj.downcast::<ClassInstance>() {
+                        class.set_private_prop(name.to_owned(), value.copy());
+
+                        return Ok(());
+                    };
+
+                    if let Some(class) = obj.downcast::<Class>() {
+                        class.set_private_prop_ref(name.to_owned(), value.copy());
+
+                        return Ok(());
+                    }
+
+                    return Err(Error::ty_error(format!(
+                        "Private name {name} can only be used in class"
+                    )));
+                    
+                }
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
@@ -265,7 +284,42 @@ impl Interpreter {
         if let Value::Object(obj) = obj {
             let name = match m {
                 MemberProp::Ident(i) => Value::String(YSString::from_ref(&i.sym)),
-                MemberProp::PrivateName(p) => Value::String(YSString::from_ref(&p.name)),
+                MemberProp::PrivateName(p) => {
+                    let name = p.name.as_str();
+
+                    if let Some(class) = obj.downcast::<ClassInstance>() {
+                        let left =  class
+                            .get_private_prop(name)?
+                            .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+                        
+                        
+                        
+                        let value = Self::run_assign_op(op, left, right, realm)?;
+                        dbg!(&value);
+                        
+                        class.set_private_prop(name.to_owned(), value.copy());
+
+                        return Ok(value);
+                    };
+
+                    if let Some(class) = obj.downcast::<Class>() {
+                        let left = class
+                            .get_private_prop(name)
+                            .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+
+                        let value = Self::run_assign_op(op, left, right, realm)?;
+                        
+                        dbg!(&value);
+                        
+                        class.set_private_prop_ref(name.to_owned(), value.copy());
+
+                        return Ok(value);
+                    }
+                    
+                    return Err(Error::ty_error(format!(
+                        "Private name {name} can only be used in class"
+                    )).into());
+                }
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
