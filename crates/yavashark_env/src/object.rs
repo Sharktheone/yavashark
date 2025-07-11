@@ -1,13 +1,13 @@
-use indexmap::map::{Entry, OccupiedEntry};
-use indexmap::IndexMap;
+use std::collections::hash_map::Entry;
 pub use prototype::*;
-use rustc_hash::FxBuildHasher;
+use rustc_hash::FxHashMap;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
+use std::mem;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, MutObj, Obj};
-
+use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::realm::Realm;
 use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
@@ -25,8 +25,9 @@ pub struct Object {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MutObject {
-    pub properties: IndexMap<Value, ObjectProperty, FxBuildHasher>,
-    pub array: Vec<(usize, ObjectProperty)>,
+    pub properties: FxHashMap<PropertyKey, usize>,
+    pub array: Vec<(usize, usize)>,
+    pub values: Vec<ObjectProperty>,
     pub prototype: ObjectProperty,
 }
 
@@ -181,8 +182,9 @@ impl MutObject {
 
         Self {
             properties: Default::default(),
-            prototype,
             array: Vec::new(),
+            values: Vec::new(),
+            prototype,
         }
     }
 
@@ -191,6 +193,7 @@ impl MutObject {
         Self {
             properties: Default::default(),
             prototype: Value::Null.into(),
+            values: Vec::new(),
             array: Vec::new(),
         }
     }
@@ -200,6 +203,7 @@ impl MutObject {
         Self {
             properties: Default::default(),
             prototype: proto.into(),
+            values: Vec::new(),
             array: Vec::new(),
         }
     }
@@ -234,15 +238,41 @@ impl MutObject {
         let (i, found) = self.array_position(index);
 
         if found {
-            if let Some(v) = self.array.get_mut(i) {
-                if v.1.attributes.is_writable() {
-                    v.1 = value.into();
+            if let Some(vi) = self.array.get(i) {
+
+                let Some(v) = self.values.get_mut(vi.1) else {
+                    return;
+                };
+
+                if v.attributes.is_writable() {
+                    *v = value.into();
                 }
                 return;
             };
         }
 
-        self.array.insert(i, (index, value.into()));
+        let property_key = InternalPropertyKey::Index(index).into();
+
+        if let Some(prop) = self.properties.get(&property_key) {
+            let Some(v) = self.values.get_mut(*prop) else {
+                return;
+            };
+
+
+            if v.attributes.is_writable() {
+                *v = value.into();
+                return;
+            }
+        }
+
+        let len = self.values.len();
+        self.values.push(value.into());
+
+        self.array.insert(i, (index, len));
+        self.properties.insert(
+            property_key,
+            len,
+        );
     }
 
     #[must_use]
@@ -250,7 +280,9 @@ impl MutObject {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).map(|v| v.1.clone());
+            return self.array.get(i).and_then(|v| {
+                self.values.get(v.1).cloned()
+            });
         }
 
         None
@@ -261,7 +293,9 @@ impl MutObject {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).map(|v| &v.1);
+            return self.array.get(i).and_then(|v| {
+                self.values.get(v.1)
+            });
         }
 
         None
@@ -274,9 +308,22 @@ impl MutObject {
             && self
             .array
             .get(i)
-            .is_some_and(|v| v.1.attributes.is_configurable())
+            .is_some_and(|v| {
+                let Some(v) = self.values.get(v.1) else {
+                    return false;
+                };
+
+                v.attributes.is_configurable()
+            })
         {
-            return Some(self.array.remove(i).1.value);
+
+            let idx = self.array.remove(i);
+
+            return self.values
+                .get_mut(idx.1)
+                .map(|v| {
+                    mem::replace(&mut v.value, Value::Undefined)
+                });
         }
 
         None
@@ -284,8 +331,14 @@ impl MutObject {
 
     pub fn set_array(&mut self, elements: Vec<Value>) {
         self.array.clear();
-        for (i, v) in elements.into_iter().enumerate() {
-            self.array.push((i, ObjectProperty::new(v)));
+
+        let len = self.values.len();
+        let elements_len = elements.len();
+
+        self.values.extend(elements.into_iter().map(ObjectProperty::new));
+
+        for i in 0..elements_len {
+            self.array.push((i, len + i));
         }
     }
 
@@ -293,7 +346,11 @@ impl MutObject {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get_mut(i).map(|v| &mut v.1.value); //TODO: Check for perms
+            return self.array.get(i)
+                .and_then(|v| {
+                    self.values.get_mut(v.1)
+                        .map(|p| &mut p.value)
+                }); //TODO: Check for perms
         }
 
         None
@@ -326,14 +383,25 @@ impl MutObject {
         Ok(object)
     }
 
-    pub fn force_update_property_cb(&mut self, name: Value, cb: impl FnOnce(Option<&mut OccupiedEntry<Value, ObjectProperty>>) -> Option<Value>) -> Res {
-        match self.properties.entry(name) {
-            Entry::Occupied(mut entry) => {
-                let Some(val) = cb(Some(&mut entry)) else {
+    pub fn force_update_property_cb(&mut self, name: Value, cb: impl FnOnce(Option<&mut ObjectProperty>) -> Option<Value>) -> Res {
+        let key = name.into();
+
+
+        match self.properties.entry(key) {
+            Entry::Occupied(entry) => {
+                let idx = *entry.get();
+
+                let Some(val) = cb(self.values.get_mut(idx)) else {
                     return Ok(());
                 };
 
-                entry.insert(val.into());
+                if let Some(v) = self.values.get_mut(idx) {
+                    if v.attributes.is_writable() {
+                        v.value = val;
+                    }
+                } else {
+                    return Err(Error::new("Failed to get value for property"));
+                }
             }
             Entry::Vacant(entry) => {
                 let Some(val) = cb(None) else {
@@ -341,7 +409,9 @@ impl MutObject {
                 };
 
 
-                entry.insert(val.into());
+                let idx = self.values.len();
+                self.values.push(ObjectProperty::new(val));
+                entry.insert(idx);
             }
         }
 
@@ -352,21 +422,26 @@ impl MutObject {
 
 impl MutObj<Realm> for MutObject {
     fn define_property(&mut self, name: Value, value: Value) -> Result<(), Error> {
-        if let Value::Number(n) = &name {
-            self.insert_array(*n as usize, value.into());
+        let key = InternalPropertyKey::from(name);
+
+
+        if let InternalPropertyKey::Index(n) = key {
+            self.insert_array(n, value.into());
             return Ok(());
         }
 
-        if let Value::String(s) = &name {
+        if let InternalPropertyKey::String(s) = &key {
             if s == "__proto__" {
                 self.prototype = value.into();
                 return Ok(());
             }
         }
 
-        match self.properties.entry(name) {
-            Entry::Occupied(mut entry) => {
-                let e = entry.get_mut();
+        match self.properties.entry(key.into()) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
 
                 if e.attributes.is_writable() {
                     e.value = value;
@@ -374,36 +449,46 @@ impl MutObj<Realm> for MutObject {
                 }
             }
             Entry::Vacant(entry) => {
-                entry.insert(value.into());
+
+                let idx = self.values.len();
+                self.values.push(ObjectProperty::new(value));
+                entry.insert(idx);
             }
         }
         Ok(())
     }
 
     fn define_variable(&mut self, name: Value, value: Variable) -> Result<(), Error> {
-        if let Value::Number(n) = &name {
-            self.insert_array(*n as usize, value);
+        let key = InternalPropertyKey::from(name);
+
+        if let InternalPropertyKey::Index(n) = key {
+            self.insert_array(n, value);
             return Ok(());
         }
 
-        if let Value::String(s) = &name {
+        if let InternalPropertyKey::String(s) = &key {
             if s == "__proto__" {
                 self.prototype = value.into();
                 return Ok(());
             }
         }
 
-        match self.properties.entry(name) {
-            Entry::Occupied(mut entry) => {
-                let e = entry.get();
+        match self.properties.entry(key.into()) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
 
                 if e.attributes.is_writable() {
-                    entry.insert(value.into());
+                    *e = value.into();
+
                     return Ok(());
                 }
             }
             Entry::Vacant(entry) => {
-                entry.insert(value.into());
+                let idx = self.values.len();
+                self.values.push(value.into());
+                entry.insert(idx);
             }
         }
 
@@ -411,19 +496,25 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        if name == &Value::string("__proto__") {
+        let key = InternalPropertyKey::from(name.clone());
+
+
+        if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(Some(self.prototype.clone()));
         }
 
-        if let Value::Number(n) = name {
-            if let Some(value) = self.resolve_array(*n as usize) {
+        if let InternalPropertyKey::Index(n) = key {
+            if let Some(value) = self.resolve_array(n) {
                 return Ok(Some(value));
             }
+            //TODO: we should insert a new reference in the array to the value if we find it in the property map
         }
+
 
         Ok(self
             .properties
-            .get(name)
+            .get(&key.into())
+            .and_then(|idx| self.values.get(*idx))
             .cloned()
             .or_else(|| match &self.prototype.value {
                 Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a realm here!
@@ -432,57 +523,82 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        if name == &Value::string("__proto__") {
-            return Ok(Some(self.prototype.copy()));
+        let key = InternalPropertyKey::from(name.clone());
+
+
+        if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
+            return Ok(Some(self.prototype.clone()));
         }
 
         if let Value::Number(n) = name {
             return Ok(self.get_array(*n as usize).cloned());
         }
 
-        if let Some(prop) = self.properties.get(name) {
-            return Ok(Some(prop.copy()));
+        if let Some(prop) = self.properties.get(&key.into()) {
+            return Ok(self.values.get(*prop).cloned());
         }
 
         Ok(None)
     }
 
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
-        let val = self.properties.get_mut(&name);
+        let key = PropertyKey::from(name.clone());
+
+        let val = self.properties.get_mut(&key)
+            .and_then(|idx| self.values.get_mut(*idx));
+
         if let Some(prop) = val {
             prop.get = value;
             return Ok(());
         }
 
-        self.properties.insert(name, ObjectProperty::getter(value));
+        let len = self.values.len();
+        self.values.push(ObjectProperty::getter(value));
+        self.properties.insert(key, len);
 
         Ok(())
     }
 
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
-        let val = self.properties.get_mut(&name);
+        let key = PropertyKey::from(name.clone());
+
+        let val = self.properties.get_mut(&key)
+            .and_then(|idx| self.values.get_mut(*idx));
+
+
+
         if let Some(prop) = val {
             prop.set = value;
             return Ok(());
         }
 
-        self.properties.insert(name, ObjectProperty::setter(value));
+        let len = self.values.len();
+        self.values.push(ObjectProperty::setter(value));
+        self.properties.insert(key, len);
+
 
         Ok(())
     }
 
     fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {
-        if name == &Value::string("__proto__") {
+        let key = InternalPropertyKey::from(name.clone());
+
+
+        if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(None);
         }
 
-        if let Value::Number(n) = name {
-            return Ok(self.delete_array(*n as usize));
+        if let InternalPropertyKey::Index(n) = key {
+            return Ok(self.delete_array(n));
         }
 
-        if let Entry::Occupied(occ) = self.properties.entry(name.clone()) {
-            return if occ.get().attributes.is_configurable() {
-                Ok(Some(occ.shift_remove().value))
+        if let Entry::Occupied(occ) = self.properties.entry(key.into()) {
+            let prop = self.values.get_mut(*occ.get())
+                .ok_or_else(|| Error::new("Failed to get value for property"))?;
+
+
+            return if prop.attributes.is_configurable() {
+                Ok(Some(mem::replace(&mut prop.value, Value::Undefined)))
             } else {
                 // Err(Error::ty("Property is not configurable")) // this is only in strict mode
                 Ok(None)
@@ -493,15 +609,17 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
-        if name == &Value::string("__proto__") {
+        let name = InternalPropertyKey::from(name.clone());
+
+        if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(true);
         }
 
-        if let Value::Number(n) = name {
-            return Ok(self.contains_array_key(*n as usize));
+        if let InternalPropertyKey::Index(n) = name {
+            return Ok(self.contains_array_key(n));
         }
 
-        Ok(self.properties.contains_key(name))
+        Ok(self.properties.contains_key(&name.into()))
     }
 
     fn name(&self) -> String {
@@ -517,33 +635,29 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
-        Ok(self
-            .array
-            .iter()
-            .map(|(i, v)| (Value::Number(*i as f64), v.value.copy()))
-            .chain(
-                self.properties
+        Ok(self.
+                properties
                     .iter()
-                    .map(|(k, v)| (k.copy(), v.value.copy())),
-            )
-            .collect())
+                    .filter_map(|(k, v)| {
+                        let v = self.values.get(*v)?;
+
+                        Some((k.clone().into(), v.value.copy()))
+                    })
+            .collect()
+        )
     }
 
     fn keys(&self) -> Result<Vec<Value>, Error> {
-        Ok(self
-            .array
-            .iter()
-            .map(|(i, _)| Value::Number(*i as f64))
-            .chain(self.properties.keys().map(Value::copy))
-            .collect())
+        Ok(self.properties.keys()
+            .cloned()
+            .map(Into::into)
+            .collect()
+        )
     }
 
     fn values(&self) -> Result<Vec<Value>, Error> {
-        Ok(self
-            .array
-            .iter()
-            .map(|(_, v)| v.value.copy())
-            .chain(self.properties.values().map(|v| v.value.copy()))
+        Ok(self.values.iter()
+            .map(|v| v.value.copy())
             .collect())
         //TODO: getter (and setter) values
     }
@@ -578,8 +692,10 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn constructor(&self) -> Result<ObjectProperty, Error> {
-        if let Some(constructor) = self.properties.get(&Value::string("constructor")) {
-            return Ok(constructor.clone());
+        if let Some(constructor) = self.properties.get(&PropertyKey::String("constructor".into())) {
+            if let Some(value) = self.values.get(*constructor) {
+                return Ok(value.clone());
+            }
         }
 
         if let Value::Object(proto) = self.prototype()?.value {

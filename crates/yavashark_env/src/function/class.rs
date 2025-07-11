@@ -286,7 +286,7 @@ impl Class {
                 obj.inner_mut()?
                     .force_update_property_cb("name".into(), |v| {
                         if let Some(v) = v {
-                            if !v.get().value.is_string() {
+                            if !v.value.is_string() {
                                 return None;
                             }
                         }

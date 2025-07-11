@@ -114,7 +114,7 @@ impl JSFunction {
                 "name".into(),
                 |v| {
                     if let Some(v) = v {
-                        if !v.get().value.is_string() {
+                        if !v.value.is_string() {
                             return None;
                         }
 

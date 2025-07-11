@@ -91,6 +91,11 @@ impl ObjectImpl<Realm> for Array {
         let inner = self.inner.try_borrow()?;
 
         for (_, value) in &inner.array {
+            let Some(value) = inner.values.get(*value) else {
+                continue;
+            };
+            
+            
             buf.push_str(value.value.to_string(realm)?.as_str());
             buf.push_str(", ");
         }
@@ -109,6 +114,11 @@ impl ObjectImpl<Realm> for Array {
         let inner = self.inner.try_borrow()?;
 
         for (_, value) in &inner.array {
+            let Some(value) = inner.values.get(*value) else {
+                continue;
+            };
+            
+            
             let _ = write!(buf, "{}", value.value);
 
             buf.push_str(", ");
@@ -190,7 +200,13 @@ impl Array {
             let (_, val) = array_like.get_array_or_done(idx)?;
 
             if let Some(val) = val {
-                inner.array.push((idx, Variable::new(val).into()));
+                
+                let len = inner.values.len();
+                inner.values.push(Variable::new(val.clone()).into());
+                
+                
+                
+                inner.array.push((idx, len));
             }
         }
 
@@ -230,15 +246,18 @@ impl Array {
     pub fn as_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(inner.array.iter().map(|(_, v)| v.value.clone()).collect())
+        Ok(inner.array.iter().filter_map(|(_, v)| inner.values.get(*v).map(|p| p.value.clone())).collect())
     }
 
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
 
         let index = inner.array.last().map_or(0, |(i, _)| *i + 1);
+        
+        let len = inner.values.len();
+        inner.values.push(Variable::new(value.clone()).into());
 
-        inner.array.push((index, Variable::new(value).into()));
+        inner.array.push((index, len));
         self.length.set(index + 1);
 
         Ok(Value::Undefined)
@@ -252,6 +271,11 @@ impl Array {
         let mut vec = vec![Value::Undefined; len];
 
         for (idx, value) in &inner.array {
+            let Some(value) = inner.values.get(*value) else {
+                continue;
+            };
+            
+            
             vec[*idx] = value.value.clone();
         }
 
@@ -1321,16 +1345,11 @@ impl Constructor<Realm> for ArrayConstructor {
         }
 
         let this = Array::new(realm.intrinsics.array.clone().into());
-
-        let values = args
-            .into_iter()
-            .map(ObjectProperty::new)
-            .enumerate()
-            .collect::<Vec<_>>();
-
+        
+        
         let mut inner = this.inner.try_borrow_mut()?;
-
-        inner.array = values;
+        
+        inner.set_array(args);
         this.length.set(inner.array.len());
 
         drop(inner);
