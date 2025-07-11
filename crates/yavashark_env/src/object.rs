@@ -596,10 +596,10 @@ impl MutObj<Realm> for MutObject {
         if let Entry::Occupied(occ) = self.properties.entry(key.into()) {
             let prop = self.values.get_mut(*occ.get())
                 .ok_or_else(|| Error::new("Failed to get value for property"))?;
-            
-            occ.remove();
+
 
             return if prop.attributes.is_configurable() {
+                occ.remove();
                 Ok(Some(mem::replace(&mut prop.value, Value::Undefined)))
             } else {
                 // Err(Error::ty("Property is not configurable")) // this is only in strict mode
