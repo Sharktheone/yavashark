@@ -255,7 +255,7 @@ impl Array {
         let index = inner.array.last().map_or(0, |(i, _)| *i + 1);
         
         let len = inner.values.len();
-        inner.values.push(Variable::new(value.clone()).into());
+        inner.values.push(Variable::new(value).into());
 
         inner.array.push((index, len));
         self.length.set(index + 1);
