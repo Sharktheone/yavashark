@@ -88,7 +88,7 @@ pub fn create_class(
                     value,
                     &mut class,
                     &mut proto,
-                    false,
+                    o.is_static,
                     true,
                 );
             }
