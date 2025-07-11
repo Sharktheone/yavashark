@@ -294,6 +294,27 @@ impl Array {
 
     pub fn shallow_clone(&self, realm: &Realm) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
+        
+        
+        let other_array = &self.inner.try_borrow()?;
+        
+        let mut inner = array.inner.try_borrow_mut()?;
+        
+        for (idx, value) in &other_array.array {
+            let Some(value) = other_array.values.get(*value) else {
+                continue;
+            };
+            
+            let len = inner.values.len();
+            inner.values.push(value.clone());
+            
+            inner.array.push((*idx, len));
+            inner.properties.insert(InternalPropertyKey::Index(*idx).into(), len);
+        }
+        
+        drop(inner);
+        
+        
 
         array
             .inner
