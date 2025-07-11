@@ -2,9 +2,7 @@ use std::cell::RefCell;
 use crate::function::{JSFunction, RawJSFunction};
 use swc_common::Span;
 use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName};
-use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
-};
+use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult, Variable};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 
@@ -285,13 +283,13 @@ fn define_method_on_class(
         match kind {
             MethodKind::Getter => class.define_getter(name, value),
             MethodKind::Setter => class.define_setter(name, value),
-            MethodKind::Method => class.define_property(name, value),
+            MethodKind::Method => class.define_variable(name, Variable::write_config(value)),
         };
     } else {
         match kind {
             MethodKind::Getter => proto.define_getter(name, value),
             MethodKind::Setter => proto.define_setter(name, value),
-            MethodKind::Method => proto.define_property(name, value),
+            MethodKind::Method => proto.define_variable(name, Variable::write_config(value)),
         };
     }
 
