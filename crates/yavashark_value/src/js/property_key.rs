@@ -1,11 +1,13 @@
 use yavashark_string::{ToYSString, YSString};
 use crate::{Realm, Symbol, Value};
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {
     String(YSString),
     Symbol(Symbol),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum InternalPropertyKey {
     String(YSString),
     Symbol(Symbol),
