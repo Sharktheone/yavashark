@@ -5,7 +5,7 @@ use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
 use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
-
+use yavashark_value::property_key::InternalPropertyKey;
 use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{ArrayLike, ProtoDefault, ValueIterator};
@@ -207,6 +207,7 @@ impl Array {
                 
                 
                 inner.array.push((idx, len));
+                inner.properties.insert(InternalPropertyKey::Index(idx).into(), len);
             }
         }
 
@@ -258,6 +259,7 @@ impl Array {
         inner.values.push(Variable::new(value).into());
 
         inner.array.push((index, len));
+        inner.properties.insert(InternalPropertyKey::Index(index).into(), len);
         self.length.set(index + 1);
 
         Ok(Value::Undefined)
