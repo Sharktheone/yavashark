@@ -42,7 +42,10 @@ impl<R: Realm> From<PropertyKey> for Value<R> {
 impl<R: Realm> From<Value<R>> for InternalPropertyKey {
     fn from(value: Value<R>) -> Self {
         match value {
-            Value::String(s) => Self::String(s),
+            Value::String(s) => {
+                s.parse::<usize>().map_or_else(|_| Self::String(s), Self::Index)
+                //TODO: this is a hack, we should not parse strings to usize
+            },
             Value::Symbol(s) => Self::Symbol(s),
             Value::Null => Self::String("null".into()),
             Value::Undefined => Self::String("undefined".into()),
