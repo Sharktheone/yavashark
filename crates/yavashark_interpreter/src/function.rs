@@ -107,7 +107,7 @@ impl JSFunction {
         let mut name = self.raw.name.try_borrow_mut()?;
 
         if name.is_empty() {
-            *name = n.to_owned();
+            n.clone_into(&mut name);
 
 
             self.inner.try_borrow_mut()?.object.force_update_property_cb(
