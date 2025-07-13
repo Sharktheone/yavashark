@@ -973,7 +973,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let mut acc = initial_value.clone();
 
