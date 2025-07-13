@@ -64,9 +64,11 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 		for _, skip := range SKIP {
 			if strings.HasPrefix(p, skip) {
 				resultsChan <- results.Result{
-					Status: status.SKIP,
-					Msg:    "skip",
-					Path:   path,
+					Status:   status.SKIP,
+					Msg:      "skip",
+					Path:     path,
+					MemoryKB: 0,
+					Duration: 0,
 				}
 
 				return nil

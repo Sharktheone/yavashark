@@ -3,6 +3,8 @@ package results
 import (
 	"fmt"
 	"log"
+	"sort"
+	"time"
 	"yavashark_test262_runner/status"
 )
 
@@ -102,6 +104,76 @@ func (tr *TestResults) PrintResults() {
 
 	printRes("Passed (skip, no-parse)", tr.Passed, tr.Total-(tr.Skipped+tr.ParseError))
 	fmt.Printf("Total (skip, no-parse): %d\n", tr.Total-(tr.Skipped+tr.ParseError))
+
+	// Print memory usage statistics
+	tr.PrintMemoryStats()
+}
+
+func formatMemory(kb uint64) string {
+	if kb >= 1024*1024 {
+		gb := float64(kb) / (1024 * 1024)
+		return fmt.Sprintf("%.2f GB", gb)
+	} else if kb >= 1024 {
+		mb := float64(kb) / 1024
+		return fmt.Sprintf("%.2f MB", mb)
+	}
+	return fmt.Sprintf("%d KB", kb)
+}
+
+func (tr *TestResults) PrintMemoryStats() {
+	if len(tr.TestResults) == 0 {
+		return
+	}
+
+	results := make([]Result, len(tr.TestResults))
+	copy(results, tr.TestResults)
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].MemoryKB > results[j].MemoryKB
+	})
+
+	fmt.Printf("\n=== Top 10 Tests by Memory Usage ===\n")
+	limit := 10
+	if len(results) < limit {
+		limit = len(results)
+	}
+
+	for i := 0; i < limit; i++ {
+		result := results[i]
+		fmt.Printf("%2d. %s - %s - %v - %s\n",
+			i+1,
+			result.Path,
+			formatMemory(result.MemoryKB),
+			result.Duration.Round(time.Millisecond),
+			result.Status.String())
+	}
+
+	var totalMemory uint64
+	var totalDuration time.Duration
+	var maxMemory uint64
+	var maxDuration time.Duration
+
+	for _, result := range tr.TestResults {
+		totalMemory += result.MemoryKB
+		totalDuration += result.Duration
+		if result.MemoryKB > maxMemory {
+			maxMemory = result.MemoryKB
+		}
+		if result.Duration > maxDuration {
+			maxDuration = result.Duration
+		}
+	}
+
+	avgMemory := totalMemory / uint64(len(tr.TestResults))
+	avgDuration := totalDuration / time.Duration(len(tr.TestResults))
+
+	fmt.Printf("\n=== Memory and Timing Statistics ===\n")
+	fmt.Printf("Average memory usage: %s\n", formatMemory(avgMemory))
+	fmt.Printf("Maximum memory usage: %s\n", formatMemory(maxMemory))
+	fmt.Printf("Total memory used: %s\n", formatMemory(totalMemory))
+	fmt.Printf("Average test duration: %v\n", avgDuration.Round(time.Millisecond))
+	fmt.Printf("Maximum test duration: %v\n", maxDuration.Round(time.Millisecond))
+	fmt.Printf("Total test time: %v\n", totalDuration.Round(time.Millisecond))
 }
 
 func printRes(name string, n uint32, total uint32) {

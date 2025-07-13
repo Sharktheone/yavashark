@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 	"yavashark_test262_runner/status"
 )
 
@@ -13,9 +14,11 @@ const (
 )
 
 type Result struct {
-	Status status.Status `json:"status"`
-	Msg    string        `json:"msg"`
-	Path   string        `json:"path"`
+	Status   status.Status `json:"status"`
+	Msg      string        `json:"msg"`
+	Path     string        `json:"path"`
+	MemoryKB uint64        `json:"memory_kb"`
+	Duration time.Duration `json:"duration"`
 }
 
 type CIResult struct {
