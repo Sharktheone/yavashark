@@ -194,7 +194,7 @@ impl Array {
         let len = array_like
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined)
-            .as_number() as usize;
+            .to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = array_like.get_array_or_done(idx)?;
@@ -390,7 +390,7 @@ impl Array {
         let len = this
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined)
-            .as_number() as usize;
+            .to_number(realm)? as usize;
 
         let target = convert_index(target, len);
         let start = convert_index(start, len);
@@ -429,7 +429,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -462,7 +462,7 @@ impl Array {
         let len = this
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined)
-            .as_number() as usize;
+            .to_number(realm)? as usize;
 
         let start = start.map_or(0, |start| convert_index(start, len));
         let end = end.map_or(len, |end| convert_index(end, len));
@@ -486,7 +486,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let array = Self::from_realm(realm);
 
@@ -518,7 +518,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -550,7 +550,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -583,7 +583,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in (0..len).rev() {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -616,7 +616,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in (0..len).rev() {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -669,7 +669,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -696,7 +696,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -738,7 +738,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -767,7 +767,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let from_index = from_index.unwrap_or(0);
 
@@ -799,7 +799,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let from_index = from_index.unwrap_or(0);
 
@@ -826,7 +826,7 @@ impl Array {
         let len = this
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined)
-            .as_number() as usize;
+            .to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -871,7 +871,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let from_index = from_index.unwrap_or(len as isize - 1);
 
@@ -897,7 +897,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let array = Self::from_realm(realm);
 
@@ -921,7 +921,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         if len == 0 {
             this.define_property("length".into(), 0.into())?;
@@ -949,7 +949,7 @@ impl Array {
         let mut idx = this
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined)
-            .as_number() as usize;
+            .to_number(realm)? as usize;
 
         for arg in args {
             this.define_property(idx.into(), arg.clone())?;
@@ -1005,7 +1005,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let mut acc = initial_value.clone();
 
@@ -1031,7 +1031,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let mut idx = 0;
 
@@ -1060,7 +1060,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         if len == 0 {
             this.define_property("length".into(), 0.into())?;
@@ -1092,7 +1092,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let start = convert_index(start, len);
         let end = end.map_or(len, |end| convert_index(end, len));
@@ -1117,7 +1117,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -1153,7 +1153,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let start = convert_index(start, len);
 
@@ -1203,7 +1203,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         for idx in (0..len).rev() {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -1228,7 +1228,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let mut values = Vec::new();
 
@@ -1267,7 +1267,7 @@ impl Array {
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
 
-        let len = len.as_number() as usize;
+        let len = len.to_number(realm)? as usize;
 
         let mut idx = args.len() + len;
 
