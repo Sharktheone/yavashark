@@ -172,6 +172,10 @@ impl Math {
     }
 
     fn pow(base: f64, exponent: f64) -> f64 {
+        if base.is_nan() || exponent.is_nan() {
+            return f64::NAN;
+        }
+        
         base.powf(exponent)
     }
 
