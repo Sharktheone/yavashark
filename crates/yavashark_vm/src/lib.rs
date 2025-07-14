@@ -19,10 +19,10 @@ pub use stack::*;
 
 pub use yavashark_bytecode;
 
+use crate::async_generator::AsyncGenerator;
 use crate::generator::Generator;
 pub use vm::*;
 use yavashark_env::{Realm, Res};
-use crate::async_generator::AsyncGenerator;
 
 pub fn init(realm: &mut Realm) -> Res {
     Generator::init(realm)?;

@@ -252,7 +252,6 @@ impl ObjectOrVariables {
                         vac.insert(variable.into());
                     }
                 }
-
             }
         }
 

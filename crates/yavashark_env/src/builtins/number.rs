@@ -272,7 +272,7 @@ impl NumberObj {
     #[prop("toPrecision")]
     fn to_precision(&self, precision: Option<u32>) -> Res<String> {
         const MAX_PRECISION: u32 = 2000;
-        
+
         let inner = self.inner.try_borrow()?;
 
         let num = inner.number;
@@ -293,7 +293,6 @@ impl NumberObj {
             return Ok(num.to_string());
         };
 
-
         if num > 10f64.powi(precision as i32) {
             let result = format!("{:.1$e}", num, precision.saturating_sub(1) as usize);
 
@@ -303,28 +302,25 @@ impl NumberObj {
         }
 
         let num_digits = num.log10().ceil();
-        
+
         let num_digits = if num_digits.is_infinite() || num_digits.is_nan() {
             1
         } else {
             num_digits as i32
         };
-        
 
         let precision = if num_digits.is_negative() {
             precision + num_digits.unsigned_abs()
         } else {
             precision.saturating_sub(num_digits as u32)
         };
-        
 
         if precision > MAX_PRECISION {
             return Err(crate::Error::range(
                 "toPrecision() precision argument must be between 0 and 2000",
             ));
         }
-        
-        
+
         let result = format!("{:.1$}", num, precision as usize);
 
         Ok(result)
@@ -354,9 +350,8 @@ pub fn check_radix(radix: u32) -> Res {
 
 //TODO: find a better way to do this
 fn float_to_string_with_radix(value: f64, radix: u32) -> crate::Res<YSString> {
-
     if radix == 10 {
-        return Ok(fmt_num(value))
+        return Ok(fmt_num(value));
     }
 
     const PRECISION: usize = 5;

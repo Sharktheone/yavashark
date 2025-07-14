@@ -1,5 +1,5 @@
-use yavashark_string::{ToYSString, YSString};
 use crate::{Realm, Symbol, Value};
+use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {
@@ -13,7 +13,6 @@ pub enum InternalPropertyKey {
     Symbol(Symbol),
     Index(usize),
 }
-
 
 impl<R: Realm> From<Value<R>> for PropertyKey {
     fn from(value: Value<R>) -> Self {
@@ -43,9 +42,10 @@ impl<R: Realm> From<Value<R>> for InternalPropertyKey {
     fn from(value: Value<R>) -> Self {
         match value {
             Value::String(s) => {
-                s.parse::<usize>().map_or_else(|_| Self::String(s), Self::Index)
+                s.parse::<usize>()
+                    .map_or_else(|_| Self::String(s), Self::Index)
                 //TODO: this is a hack, we should not parse strings to usize
-            },
+            }
             Value::Symbol(s) => Self::Symbol(s),
             Value::Null => Self::String("null".into()),
             Value::Undefined => Self::String("undefined".into()),
@@ -62,7 +62,6 @@ impl<R: Realm> From<Value<R>> for InternalPropertyKey {
         }
     }
 }
-
 
 impl<R: Realm> From<InternalPropertyKey> for Value<R> {
     fn from(key: InternalPropertyKey) -> Self {

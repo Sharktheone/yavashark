@@ -261,17 +261,13 @@ impl Class {
         self.private_props.borrow_mut().insert(key, value);
     }
 
-
-
     pub fn set_private_prop(&mut self, key: String, value: Value) {
         self.private_props.get_mut().insert(key, value);
     }
 
     #[must_use]
     pub fn get_private_prop(&self, key: &str) -> Option<Value> {
-        self.private_props.borrow()
-            .get(key)
-            .cloned()
+        self.private_props.borrow().get(key).cloned()
     }
 
     pub fn set_proto(&mut self, proto: ObjectProperty) -> Res<(), Error> {

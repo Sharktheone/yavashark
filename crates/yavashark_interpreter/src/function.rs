@@ -109,20 +109,18 @@ impl JSFunction {
         if name.is_empty() {
             n.clone_into(&mut name);
 
-
-            self.inner.try_borrow_mut()?.object.force_update_property_cb(
-                "name".into(),
-                |v| {
+            self.inner
+                .try_borrow_mut()?
+                .object
+                .force_update_property_cb("name".into(), |v| {
                     if let Some(v) = v {
                         if !v.value.is_string() {
                             return None;
                         }
-
                     }
 
                     Some(YSString::from_ref(n).into())
-                }
-            )?;
+                })?;
         }
 
         Ok(())

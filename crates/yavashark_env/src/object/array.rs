@@ -1,16 +1,16 @@
+use crate::object::Object;
+use crate::realm::Realm;
+use crate::utils::{coerce_object, ArrayLike, ProtoDefault, ValueIterator};
+use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
+use crate::{MutObject, ObjectProperty};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
 use yavashark_value::property_key::InternalPropertyKey;
-use crate::object::Object;
-use crate::realm::Realm;
-use crate::utils::{coerce_object, ArrayLike, ProtoDefault, ValueIterator};
-use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
-use crate::{MutObject, ObjectProperty};
+use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
 
 #[derive(Debug)]
 pub struct Array {
@@ -94,8 +94,7 @@ impl ObjectImpl<Realm> for Array {
             let Some(value) = inner.values.get(*value) else {
                 continue;
             };
-            
-            
+
             buf.push_str(value.value.to_string(realm)?.as_str());
             buf.push_str(", ");
         }
@@ -117,8 +116,7 @@ impl ObjectImpl<Realm> for Array {
             let Some(value) = inner.values.get(*value) else {
                 continue;
             };
-            
-            
+
             let _ = write!(buf, "{}", value.value);
 
             buf.push_str(", ");
@@ -200,14 +198,13 @@ impl Array {
             let (_, val) = array_like.get_array_or_done(idx)?;
 
             if let Some(val) = val {
-                
                 let len = inner.values.len();
                 inner.values.push(Variable::new(val.clone()).into());
-                
-                
-                
+
                 inner.array.push((idx, len));
-                inner.properties.insert(InternalPropertyKey::Index(idx).into(), len);
+                inner
+                    .properties
+                    .insert(InternalPropertyKey::Index(idx).into(), len);
             }
         }
 
@@ -247,19 +244,25 @@ impl Array {
     pub fn as_vec(&self) -> Res<Vec<Value>> {
         let inner = self.inner.try_borrow()?;
 
-        Ok(inner.array.iter().filter_map(|(_, v)| inner.values.get(*v).map(|p| p.value.clone())).collect())
+        Ok(inner
+            .array
+            .iter()
+            .filter_map(|(_, v)| inner.values.get(*v).map(|p| p.value.clone()))
+            .collect())
     }
 
     pub fn push(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.try_borrow_mut()?;
 
         let index = inner.array.last().map_or(0, |(i, _)| *i + 1);
-        
+
         let len = inner.values.len();
         inner.values.push(Variable::new(value).into());
 
         inner.array.push((index, len));
-        inner.properties.insert(InternalPropertyKey::Index(index).into(), len);
+        inner
+            .properties
+            .insert(InternalPropertyKey::Index(index).into(), len);
         self.length.set(index + 1);
 
         Ok(Value::Undefined)
@@ -276,8 +279,7 @@ impl Array {
             let Some(value) = inner.values.get(*value) else {
                 continue;
             };
-            
-            
+
             vec[*idx] = value.value.clone();
         }
 
@@ -294,27 +296,26 @@ impl Array {
 
     pub fn shallow_clone(&self, realm: &Realm) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
-        
-        
+
         let other_array = &self.inner.try_borrow()?;
-        
+
         let mut inner = array.inner.try_borrow_mut()?;
-        
+
         for (idx, value) in &other_array.array {
             let Some(value) = other_array.values.get(*value) else {
                 continue;
             };
-            
+
             let len = inner.values.len();
             inner.values.push(value.clone());
-            
+
             inner.array.push((*idx, len));
-            inner.properties.insert(InternalPropertyKey::Index(*idx).into(), len);
+            inner
+                .properties
+                .insert(InternalPropertyKey::Index(*idx).into(), len);
         }
-        
+
         drop(inner);
-        
-        
 
         array
             .inner
@@ -1368,10 +1369,9 @@ impl Constructor<Realm> for ArrayConstructor {
         }
 
         let this = Array::new(realm.intrinsics.array.clone().into());
-        
-        
+
         let mut inner = this.inner.try_borrow_mut()?;
-        
+
         inner.set_array(args);
         this.length.set(inner.array.len());
 

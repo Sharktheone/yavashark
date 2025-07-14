@@ -2,6 +2,8 @@ use std::iter;
 use swc_common::{Span, DUMMY_SP};
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName};
 
+use crate::function::JSFunction;
+use crate::statement::expr::ArrowFunction;
 use crate::Interpreter;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
@@ -9,8 +11,6 @@ use yavashark_env::value::Obj;
 use yavashark_env::{Class, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_string::YSString;
 use yavashark_value::IntoValue;
-use crate::function::JSFunction;
-use crate::statement::expr::ArrowFunction;
 
 impl Interpreter {
     pub fn run_pat(
@@ -36,10 +36,7 @@ impl Interpreter {
             Pat::Ident(id) => {
                 let value = value.next().unwrap_or(Value::Undefined);
 
-                set_value_name(
-                    id.id.sym.as_str(),
-                    &value,
-                )?;
+                set_value_name(id.id.sym.as_str(), &value)?;
 
                 cb(scope, id.id.sym.to_string(), value)?;
             }
@@ -116,10 +113,7 @@ impl Interpreter {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
                                 }
                             }
-                            set_value_name(
-                                &key,
-                                &value,
-                            )?;
+                            set_value_name(&key, &value)?;
 
                             cb(scope, key.clone(), value)?;
                             rest_not_props.push(key.into());
@@ -183,11 +177,7 @@ impl Interpreter {
     }
 }
 
-
-pub fn set_value_name(
-    name: &str,
-    value: &Value,
-) -> Res {
+pub fn set_value_name(name: &str, value: &Value) -> Res {
     if name.is_empty() {
         return Ok(());
     }
@@ -206,7 +196,5 @@ pub fn set_value_name(
         }
     };
 
-
     Ok(())
-
 }

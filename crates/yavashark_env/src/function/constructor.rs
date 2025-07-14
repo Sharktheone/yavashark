@@ -54,7 +54,6 @@ impl Func<Realm> for NativeConstructor {
 }
 
 impl NativeConstructor {
-
     pub fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
         Ok("function Function() { [native code] }".into())
     }

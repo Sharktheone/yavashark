@@ -16,7 +16,6 @@ pub struct BoundFunction {
 
 impl Func<Realm> for BoundFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-
         let args = if self.bound_args.is_empty() {
             args
         } else {
@@ -44,13 +43,11 @@ impl BoundFunction {
             return Err(Error::ty("Function.bind must be called on a function"));
         }
 
-        let length =  f.get_property_opt(&"length".into())?
+        let length = f
+            .get_property_opt(&"length".into())?
             .unwrap_or(Value::Undefined.into());
 
         let length = Variable::config(length.value);
-
-
-
 
         let obj = ObjectHandle::new(Self {
             func,
@@ -61,9 +58,7 @@ impl BoundFunction {
             bound_args: args,
         });
 
-
         obj.define_variable("length".into(), length)?;
-
 
         Ok(obj.into())
     }

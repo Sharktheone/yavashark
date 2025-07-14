@@ -1,11 +1,11 @@
 mod iterator;
 mod protodefault;
 
+use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
+use crate::{Object, ObjectHandle, Realm, Res, Value};
 pub use iterator::*;
 pub use protodefault::*;
 use yavashark_value::ObjectImpl;
-use crate::{Object, ObjectHandle, Realm, Res, Value};
-use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 
 pub fn coerce_object(value: Value, realm: &mut Realm) -> Res<ObjectHandle> {
     Ok(match value {

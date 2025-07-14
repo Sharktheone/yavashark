@@ -90,7 +90,6 @@ impl Interpreter {
                     return Err(Error::ty_error(format!(
                         "Private name {name} can only be used in class"
                     )));
-                    
                 }
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
@@ -288,15 +287,13 @@ impl Interpreter {
                     let name = p.name.as_str();
 
                     if let Some(class) = obj.downcast::<ClassInstance>() {
-                        let left =  class
+                        let left = class
                             .get_private_prop(name)?
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
-                        
-                        
-                        
+
                         let value = Self::run_assign_op(op, left, right, realm)?;
                         dbg!(&value);
-                        
+
                         class.set_private_prop(name.to_owned(), value.copy());
 
                         return Ok(value);
@@ -308,17 +305,18 @@ impl Interpreter {
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
                         let value = Self::run_assign_op(op, left, right, realm)?;
-                        
+
                         dbg!(&value);
-                        
+
                         class.set_private_prop_ref(name.to_owned(), value.copy());
 
                         return Ok(value);
                     }
-                    
+
                     return Err(Error::ty_error(format!(
                         "Private name {name} can only be used in class"
-                    )).into());
+                    ))
+                    .into());
                 }
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };

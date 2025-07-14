@@ -39,7 +39,7 @@ impl Interpreter {
                 let obj = value.as_object()?;
 
                 if let Some(class) = obj.downcast::<ClassInstance>() {
-                    let val =  class
+                    let val = class
                         .get_private_prop(name)?
                         .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
@@ -54,12 +54,9 @@ impl Interpreter {
                     return Ok((val.copy(), None));
                 }
 
-
                 return Err(ControlFlow::error_type(format!(
                     "Private name {name} can only be used in class"
                 )));
-
-
             }
         };
 

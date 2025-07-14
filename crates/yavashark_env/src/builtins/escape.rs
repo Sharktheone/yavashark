@@ -2,7 +2,7 @@ use crate::{NativeFunction, Realm, Res, Value, ValueResult};
 use std::fmt::Write;
 use std::iter::Peekable;
 use std::str::Chars;
-use yavashark_value::{IntoValue, Error};
+use yavashark_value::{Error, IntoValue};
 
 #[must_use]
 pub fn get_escape(realm: &Realm) -> Value {
@@ -35,7 +35,7 @@ pub fn get_escape(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
-        1
+        1,
     )
     .into_value()
 }
@@ -65,7 +65,7 @@ pub fn get_encode_uri(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
-        1
+        1,
     )
     .into_value()
 }
@@ -95,7 +95,7 @@ pub fn get_encode_uri_component(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
-        1
+        1,
     )
     .into_value()
 }
@@ -125,7 +125,7 @@ pub fn get_unescape(realm: &Realm) -> Value {
             Ok(result.into())
         },
         realm,
-        1
+        1,
     )
     .into_value()
 }
@@ -143,7 +143,7 @@ pub fn get_decode_uri(realm: &Realm) -> Value {
             decode_uri_impl(&arg, false, realm)
         },
         realm,
-        1
+        1,
     )
     .into_value()
 }
@@ -161,7 +161,7 @@ pub fn get_decode_uri_component(realm: &Realm) -> Value {
             decode_uri_impl(&arg, true, realm)
         },
         realm,
-        1
+        1,
     )
     .into_value()
 }
@@ -201,11 +201,19 @@ fn parse_percent_sequence(chars: &mut Peekable<Chars>, _realm: &Realm) -> Res<Ve
     let mut bytes = Vec::new();
 
     loop {
-        let hex1 = chars.next().ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
-        let hex2 = chars.next().ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
+        let hex1 = chars
+            .next()
+            .ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
+        let hex2 = chars
+            .next()
+            .ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
 
-        let digit1 = hex1.to_digit(16).ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
-        let digit2 = hex2.to_digit(16).ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
+        let digit1 = hex1
+            .to_digit(16)
+            .ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
+        let digit2 = hex2
+            .to_digit(16)
+            .ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
 
         let byte = (digit1 * 16 + digit2) as u8;
         bytes.push(byte);
@@ -222,11 +230,19 @@ fn parse_percent_sequence(chars: &mut Peekable<Chars>, _realm: &Realm) -> Res<Ve
                 }
                 chars.next();
 
-                let hex1 = chars.next().ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
-                let hex2 = chars.next().ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
+                let hex1 = chars
+                    .next()
+                    .ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
+                let hex2 = chars
+                    .next()
+                    .ok_or_else(|| Error::uri_error("Incomplete percent sequence"))?;
 
-                let digit1 = hex1.to_digit(16).ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
-                let digit2 = hex2.to_digit(16).ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
+                let digit1 = hex1
+                    .to_digit(16)
+                    .ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
+                let digit2 = hex2
+                    .to_digit(16)
+                    .ok_or_else(|| Error::uri_error("Invalid hex digit"))?;
 
                 let continuation_byte = (digit1 * 16 + digit2) as u8;
 
@@ -266,7 +282,12 @@ fn utf8_sequence_length(first_byte: u8) -> Result<usize, Error<Realm>> {
 }
 
 fn is_reserved_unescaped(s: &str) -> bool {
-    s.chars().any(|c| matches!(c, ';' | '/' | '?' | ':' | '@' | '&' | '=' | '+' | '$' | ',' | '#'))
+    s.chars().any(|c| {
+        matches!(
+            c,
+            ';' | '/' | '?' | ':' | '@' | '&' | '=' | '+' | '$' | ',' | '#'
+        )
+    })
 }
 
 const fn is_ascii_world(c: char) -> bool {
@@ -342,4 +363,3 @@ fn unescape_char(c: char, chars: &mut Chars) -> Option<char> {
         _ => Some(c),
     }
 }
-

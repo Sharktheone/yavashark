@@ -1,8 +1,13 @@
-use std::cell::RefCell;
 use crate::function::{JSFunction, RawJSFunction};
+use std::cell::RefCell;
 use swc_common::Span;
-use swc_ecma_ast::{BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName};
-use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult, Variable};
+use swc_ecma_ast::{
+    BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
+};
+use yavashark_env::{
+    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
+    Variable,
+};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 
@@ -37,7 +42,15 @@ pub fn create_class(
                 let (name, func) =
                     create_method(&method.key, &method.function, scope, realm, stmt.span)?;
 
-                define_method_on_class(name, func, &mut class, &mut proto, method.is_static, false, method.kind);
+                define_method_on_class(
+                    name,
+                    func,
+                    &mut class,
+                    &mut proto,
+                    method.is_static,
+                    false,
+                    method.kind,
+                );
             }
             ClassMember::Constructor(constructor) => {
                 let mut params = Vec::new();
@@ -68,7 +81,15 @@ pub fn create_class(
                     stmt.span,
                 )?;
 
-                define_method_on_class(name, func, &mut class, &mut proto, method.is_static, true, method.kind)?;
+                define_method_on_class(
+                    name,
+                    func,
+                    &mut class,
+                    &mut proto,
+                    method.is_static,
+                    true,
+                    method.kind,
+                )?;
             }
 
             ClassMember::StaticBlock(s) => {
@@ -242,7 +263,6 @@ fn define_on_class(
 
     Ok(())
 }
-
 
 fn define_method_on_class(
     name: Value,

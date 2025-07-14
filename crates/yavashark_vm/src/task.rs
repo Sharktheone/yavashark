@@ -81,10 +81,8 @@ impl AsyncTask for BytecodeAsyncTask {
 
                     let promise = promise.try_map_refed(|promise| {
                         let Some(notify) = promise.notify.notified() else {
-                            return Err(())
+                            return Err(());
                         };
-
-
 
                         Ok((promise, notify))
                     });
@@ -92,7 +90,6 @@ impl AsyncTask for BytecodeAsyncTask {
                     match promise {
                         Ok(promise) => {
                             inner.await_promise = Some(promise);
-
                         }
                         Err((promise, _)) => {
                             let val = promise
@@ -104,14 +101,11 @@ impl AsyncTask for BytecodeAsyncTask {
 
                             inner.state.as_mut().map(|state| state.continue_async(val));
 
-                            let this = unsafe {
-                                Pin::new_unchecked(inner)
-                            };
+                            let this = unsafe { Pin::new_unchecked(inner) };
 
                             return this.poll(cx, realm);
                         }
                     }
-
 
                     Poll::Pending
                 }

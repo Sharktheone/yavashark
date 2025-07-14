@@ -1,3 +1,4 @@
+use crate::async_generator::AsyncGenerator;
 use crate::{AsyncGeneratorPoll, ResumableVM, VmState};
 use std::future::Future;
 use std::pin::Pin;
@@ -10,7 +11,6 @@ use yavashark_env::task_queue::AsyncTask;
 use yavashark_env::{Object, ObjectHandle, Realm, Res, Value};
 use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
 use yavashark_value::{BoxedObj, Obj};
-use crate::async_generator::AsyncGenerator;
 
 pub struct AsyncGeneratorTask {
     state: Option<VmState>,
@@ -34,9 +34,7 @@ impl AsyncGeneratorTask {
         let promise = <&Promise>::from_value_out(promise_obj.clone().into())?;
 
         let gen_notify = if state.is_none() {
-            Some(gen.clone().map_refed(|gen| {
-                gen.notify.notified()
-            }))
+            Some(gen.clone().map_refed(|gen| gen.notify.notified()))
         } else {
             None
         };
@@ -47,7 +45,6 @@ impl AsyncGeneratorTask {
             promise,
             gen,
             gen_notify,
-
         };
 
         realm.queue.queue_task(this);
@@ -89,7 +86,6 @@ impl AsyncTask for AsyncGeneratorTask {
                 } else {
                     state.continue_async(val)?;
                 }
-
             }
         }
 
@@ -107,10 +103,8 @@ impl AsyncTask for AsyncGeneratorTask {
 
                     let promise = promise.try_map_refed(|promise| {
                         let Some(notify) = promise.notify.notified() else {
-                            return Err(())
+                            return Err(());
                         };
-
-
 
                         Ok((promise, notify, false))
                     });
@@ -118,27 +112,22 @@ impl AsyncTask for AsyncGeneratorTask {
                     match promise {
                         Ok(promise) => {
                             inner.await_promise = Some(promise);
-
                         }
                         Err((promise, _)) => {
                             let val = promise
-                            .inner
-                            .borrow()
-                            .value
-                            .clone()
-                            .unwrap_or(Value::Undefined);
+                                .inner
+                                .borrow()
+                                .value
+                                .clone()
+                                .unwrap_or(Value::Undefined);
 
                             inner.state.as_mut().map(|state| state.continue_async(val));
 
-                            let this = unsafe {
-                                Pin::new_unchecked(inner)
-                            };
+                            let this = unsafe { Pin::new_unchecked(inner) };
 
                             return this.poll(cx, realm);
                         }
                     }
-
-
 
                     Poll::Pending
                 }
@@ -170,9 +159,8 @@ impl AsyncTask for AsyncGeneratorTask {
                         if let Some(promise) = obj.downcast::<Promise>() {
                             let promise = promise.try_map_refed(|promise| {
                                 let Some(notify) = promise.notify.notified() else {
-                                    return Err(())
+                                    return Err(());
                                 };
-
 
                                 Ok((promise, notify, true))
                             });
@@ -202,7 +190,6 @@ impl AsyncTask for AsyncGeneratorTask {
                     obj.define_property("value".into(), val)?;
 
                     inner.promise.resolve(&obj.into(), realm)?;
-
 
                     Poll::Ready(Ok(()))
                 }

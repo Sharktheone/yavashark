@@ -5,9 +5,9 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use swc_ecma_ast::{Param, Pat};
 use yavashark_bytecode::BytecodeFunctionCode;
+use yavashark_env::builtins::Arguments;
 use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
-use yavashark_env::builtins::Arguments;
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
 
@@ -111,7 +111,6 @@ impl Func<Realm> for GeneratorFunction {
         let args = ObjectHandle::new(args);
 
         scope.declare_var("arguments".to_string(), args.into())?;
-
 
         let generator = Generator::new(realm, Rc::clone(&self.code), scope);
 

@@ -9,10 +9,10 @@ use std::rc::Rc;
 use swc_ecma_ast::{Param, Pat};
 use tokio::sync::Notify;
 use yavashark_bytecode::BytecodeFunctionCode;
+use yavashark_env::builtins::Arguments;
 use yavashark_env::conversion::FromValueOutput;
 use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
-use yavashark_env::builtins::Arguments;
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
 

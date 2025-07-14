@@ -1,13 +1,15 @@
+#![allow(unused)]
+
+use crate::ObjectProperty;
+use indexmap::IndexMap;
 use rustc_hash::FxHashMap;
 use yavashark_value::property_key::PropertyKey;
-use crate::ObjectProperty;
 
 pub struct ObjectProperties {
     pub values: Vec<ObjectProperty>,
     pub properties: FxHashMap<PropertyKey, usize>,
     pub array: ArrayProperties,
 }
-
 
 impl ObjectProperties {
     pub fn new() -> Self {
@@ -29,13 +31,12 @@ impl ObjectProperties {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum ArrayProperties {
     #[default]
     Empty,
     Continuous(Vec<usize>),
-    Sparse(Vec<(usize, usize)>), 
+    Sparse(Vec<(usize, usize)>),
 }
 
 impl ArrayProperties {

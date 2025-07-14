@@ -5,7 +5,7 @@ pub use conversion::*;
 pub use function::*;
 pub use name::*;
 use num_bigint::BigInt;
-use num_traits::{Zero};
+use num_traits::Zero;
 pub use object::*;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -21,12 +21,13 @@ mod context;
 mod conversion;
 mod function;
 mod name;
+mod obj;
 mod object;
 mod object_impl;
 pub mod ops;
+pub mod property_key;
 mod symbol;
 pub mod variable;
-pub mod property_key;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {

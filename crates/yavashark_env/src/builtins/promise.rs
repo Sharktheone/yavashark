@@ -60,7 +60,6 @@ impl PromiseNotify {
             Some(self.notify.notified())
         }
     }
-
 }
 
 #[object]
