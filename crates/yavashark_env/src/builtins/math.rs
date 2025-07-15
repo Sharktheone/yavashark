@@ -1,6 +1,7 @@
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
+use num_traits::One;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
@@ -176,7 +177,7 @@ impl Math {
             return f64::NAN;
         }
         
-        if exponent.is_infinite() {
+        if base.abs().is_one() && exponent.is_infinite() {
             return f64::NAN;
         }
         
