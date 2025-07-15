@@ -176,6 +176,10 @@ impl Math {
             return f64::NAN;
         }
         
+        if exponent.is_infinite() {
+            return f64::NAN;
+        }
+        
         base.powf(exponent)
     }
 
