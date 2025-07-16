@@ -381,15 +381,18 @@ impl PlainDateTime {
     #[prop("toZonedDateTime")]
     pub fn to_zoned_date_time(
         &self,
+        tz: &str,
         options: Option<ObjectHandle>,
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let disambiguation = disambiguation_opt(options.as_ref(), realm)?;
+        let tz = TimeZone::try_from_str(tz)
+            .map_err(Error::from_temporal)?;
 
         let date = self
             .date
             .to_zoned_date_time_with_provider(
-                &TimeZone::default(),
+                &tz,
                 disambiguation.unwrap_or_default(),
                 &realm.env.tz_provider,
             )
