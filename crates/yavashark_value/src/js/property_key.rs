@@ -1,4 +1,4 @@
-use crate::{Realm, Symbol, Value};
+use crate::{fmt_num, Realm, Symbol, Value};
 use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -53,7 +53,7 @@ impl<R: Realm> From<Value<R>> for InternalPropertyKey {
                 if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 {
                     Self::Index(n as usize)
                 } else {
-                    Self::String(n.to_string().into())
+                    Self::String(fmt_num(n))
                 }
             }
             Value::Boolean(b) => Self::String(b.to_string().into()),
