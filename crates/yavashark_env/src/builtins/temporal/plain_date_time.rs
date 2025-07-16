@@ -1,6 +1,7 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
+use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
 use crate::builtins::temporal::utils::{
     difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options,
     string_rounding_mode_opts,
@@ -13,7 +14,6 @@ use temporal_rs::{Calendar, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
 
 #[object]
 #[derive(Debug)]
@@ -368,14 +368,21 @@ impl PlainDateTime {
     }
 
     #[prop("withPlainTime")]
-    pub fn with_plain_time(&self, plain_time: Option<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
-        let plain_time = plain_time.map(|p| value_to_plain_time(p, realm))
+    pub fn with_plain_time(
+        &self,
+        plain_time: Option<Value>,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let plain_time = plain_time
+            .map(|p| value_to_plain_time(p, realm))
             .transpose()?
             .unwrap_or_default();
-        
-        let dt = self.date.with_time(plain_time)
+
+        let dt = self
+            .date
+            .with_time(plain_time)
             .map_err(Error::from_temporal)?;
-        
+
         Ok(Self::new(dt, realm).into_object())
     }
 
@@ -387,8 +394,7 @@ impl PlainDateTime {
         realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let disambiguation = disambiguation_opt(options.as_ref(), realm)?;
-        let tz = TimeZone::try_from_str(tz)
-            .map_err(Error::from_temporal)?;
+        let tz = TimeZone::try_from_str(tz).map_err(Error::from_temporal)?;
 
         let date = self
             .date
@@ -401,11 +407,10 @@ impl PlainDateTime {
 
         Ok(ZonedDateTime::new(date, realm).into_object())
     }
-    
+
     #[prop("toPlainTime")]
     pub fn to_plain_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
-        let time = self.date.to_plain_time()
-            .map_err(Error::from_temporal)?;
+        let time = self.date.to_plain_time().map_err(Error::from_temporal)?;
 
         Ok(PlainTime::new(time, realm).into_object())
     }
