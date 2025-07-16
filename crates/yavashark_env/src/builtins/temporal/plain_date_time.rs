@@ -351,6 +351,19 @@ impl PlainDateTime {
 
         Ok(PlainDate::new(date, realm).into_object())
     }
+
+    #[prop("withCalendar")]
+    pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
+        let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
+
+        let date = self
+            .date
+            .with_calendar(calendar)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+
 }
 
 pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
