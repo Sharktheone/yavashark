@@ -1,10 +1,7 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{
-    difference_settings, display_calendar, overflow_options, rounding_options,
-    string_rounding_mode_opts,
-};
+use crate::builtins::temporal::utils::{difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options, string_rounding_mode_opts};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -12,6 +9,7 @@ use temporal_rs::{Calendar, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 
 #[object]
 #[derive(Debug)]
@@ -364,6 +362,20 @@ impl PlainDateTime {
         Ok(Self::new(date, realm).into_object())
     }
 
+    #[prop("toZonedDateTime")]
+    pub fn to_zoned_date_time(&self, options: Option<ObjectHandle>, realm: &mut Realm) -> Res<ObjectHandle> {
+        let disambiguation = disambiguation_opt(options.as_ref(), realm)?;
+
+
+        let date = self.date.to_zoned_date_time_with_provider(
+            &TimeZone::default(),
+            disambiguation.unwrap_or_default(),
+            &realm.env.tz_provider,
+        )
+        .map_err(Error::from_temporal)?;
+
+        Ok(ZonedDateTime::new(date, realm).into_object())
+    }
 }
 
 pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
