@@ -397,6 +397,14 @@ impl PlainDateTime {
 
         Ok(ZonedDateTime::new(date, realm).into_object())
     }
+    
+    #[prop("toPlainTime")]
+    pub fn to_plain_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
+        let time = self.date.to_plain_time()
+            .map_err(Error::from_temporal)?;
+
+        Ok(PlainTime::new(time, realm).into_object())
+    }
 }
 
 pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDateTime> {
