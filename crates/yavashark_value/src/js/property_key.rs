@@ -50,7 +50,7 @@ impl<R: Realm> From<Value<R>> for InternalPropertyKey {
             Value::Null => Self::String("null".into()),
             Value::Undefined => Self::String("undefined".into()),
             Value::Number(n) => {
-                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 {
+                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
                     Self::Index(n as usize)
                 } else {
                     Self::String(fmt_num(n))
