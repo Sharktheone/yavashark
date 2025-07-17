@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::property_key::{InternalPropertyKey, PropertyKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
