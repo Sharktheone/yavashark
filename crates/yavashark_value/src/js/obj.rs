@@ -1,9 +1,7 @@
 use crate::property_key::{InternalPropertyKey, PropertyKey};
-use crate::BoxedObj;
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
 use std::ptr::NonNull;
-use yavashark_garbage::GcRef;
 
 type Value = ();
 type ObjectProperty = ();
