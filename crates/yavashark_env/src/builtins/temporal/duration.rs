@@ -294,16 +294,15 @@ impl Duration {
 
     fn total(
         &self,
-        unit: Value,
-        obj: Option<ObjectHandle>,
+        obj: Value,
         #[realm] realm: &mut Realm,
     ) -> Res<f64> {
-        let unit = if let Value::String(unit) = unit {
-            unit
-        } else if let Value::Object(obj) = unit {
+        let (unit, obj) = if let Value::String(unit) = obj {
+            (unit, None)
+        } else if let Value::Object(obj) = obj {
             let unit = obj.get("unit", realm)?;
 
-            unit.to_string(realm)?
+            (unit.to_string(realm)?, Some(obj))
         } else {
             return Err(Error::ty("Invalid unit for Duration.total"));
         };
