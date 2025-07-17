@@ -30,18 +30,6 @@ impl Duration {
         }
     }
 
-    // pub fn from_duration(delta: TimeDelta, realm: &Realm) -> Res<Self> {
-    //     Ok(Self::with_sign(realm, delta.to_std()?, false))
-    // }
-    //
-    // fn from_secs(realm: &Realm, secs: i64) -> Self {
-    //     Self::with_sign(
-    //         realm,
-    //         std::time::Duration::from_secs(secs.unsigned_abs()),
-    //         secs.is_negative(),
-    //     )
-    // }
-
     pub fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<Self>> {
         if let Ok(this) = <&Self>::from_value_out(info.copy()) {
             return Ok(RefOrOwned::Ref(this));
