@@ -2,6 +2,7 @@ use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_traits::One;
 use std::cell::RefCell;
+use std::ops::Rem;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::Obj;
 
@@ -79,8 +80,8 @@ impl Math {
         if value.is_infinite() {
             return 32.0;
         }
-        
-        
+
+
         (value as i64 as u32).leading_zeros() as f64
     }
 
@@ -116,8 +117,14 @@ impl Math {
         left.hypot(right)
     }
 
-    const fn imul(left: f64, right: f64) -> f64 {
-        (left as i32 * right as i32) as f64
+    fn imul(left: i32, right: i32) -> i32 {
+        let res = left.wrapping_mul(right).rem(232);
+
+        if res >= 231 {
+            return res - 232;
+        }
+
+        res
     }
 
     fn log(value: f64) -> f64 {
@@ -201,7 +208,7 @@ impl Math {
         if value == -0.0 && value.is_sign_negative() {
             return -0.0;
         }
-        
+
         if value == 0.0 {
             return 0.0;
         }
