@@ -1356,9 +1356,15 @@ impl Array {
     }
 }
 
-#[object(constructor, function)]
+#[object(constructor, function, name)]
 #[derive(Debug)]
 pub struct ArrayConstructor {}
+
+impl CustomName for ArrayConstructor {
+    fn custom_name(&self) -> String {
+        "Function".to_owned()
+    }
+}
 
 impl Constructor<Realm> for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
