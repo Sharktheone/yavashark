@@ -76,6 +76,11 @@ impl Math {
     }
 
     const fn clz32(value: f64) -> f64 {
+        if value.is_infinite() {
+            return 32.0;
+        }
+        
+        
         (value as i64 as u32).leading_zeros() as f64
     }
 
