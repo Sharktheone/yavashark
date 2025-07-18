@@ -13,11 +13,7 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{
-    get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal,
-    get_type_error, get_uri_error, Arguments, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math,
-    NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, JSON,
-};
+use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal, get_type_error, get_uri_error, Arguments, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, JSON};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Value, Variable};
 use rustc_hash::FxHashMap;
@@ -44,6 +40,7 @@ pub struct Intrinsics {
     pub syntax_error: ObjectHandle,
     pub eval_error: ObjectHandle,
     pub uri_error: ObjectHandle,
+    pub aggregate_error: ObjectHandle,
     pub eval: Option<ObjectHandle>,
     pub arraybuffer: ObjectHandle,
     pub data_view: ObjectHandle,
@@ -130,6 +127,7 @@ impl Intrinsics {
     constructor!(syntax_error);
     constructor!(eval_error);
     constructor!(uri_error);
+    constructor!(aggregate_error);
     constructor!(arraybuffer);
     constructor!(data_view);
     constructor!(typed_array);
@@ -271,6 +269,12 @@ impl Intrinsics {
             error_constructor.clone().into(),
         )?;
 
+
+        let aggregate_error = get_aggregate_error(
+            error_prototype.clone().into(),
+            error_constructor.clone().into(),
+        )?;
+
         let arraybuffer = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
@@ -404,6 +408,7 @@ impl Intrinsics {
             syntax_error,
             eval_error,
             uri_error,
+            aggregate_error,
             eval: None,
             arraybuffer,
             data_view,

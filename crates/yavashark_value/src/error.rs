@@ -78,6 +78,15 @@ impl<C: Realm> Error<C> {
         }
     }
 
+
+    #[must_use]
+    pub fn aggregate_error(error: impl Into<YSString>) -> Self {
+        Self {
+            kind: ErrorKind::URI(error.into()),
+            stacktrace: StackTrace { frames: vec![] },
+        }
+    }
+
     #[must_use]
     pub const fn unknown(error: Option<YSString>) -> Self {
         Self {
@@ -147,6 +156,7 @@ impl<C: Realm> Error<C> {
             ErrorKind::Throw(_) => "Uncaught",
             ErrorKind::Eval(_) => "EvalError",
             ErrorKind::URI(_) => "URIError",
+            ErrorKind::Aggregate(_) => "AggregateError",
         }
     }
 
@@ -159,6 +169,7 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Runtime(msg)
             | ErrorKind::Eval(msg)
             | ErrorKind::URI(msg)
+            | ErrorKind::Aggregate(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_string(realm)?,
             ErrorKind::Error(msg) => msg.clone().unwrap_or(YSString::new()),
@@ -175,6 +186,7 @@ impl<C: Realm> Error<C> {
             | ErrorKind::Runtime(msg)
             | ErrorKind::Eval(msg)
             | ErrorKind::URI(msg)
+            | ErrorKind::Aggregate(msg)
             | ErrorKind::Syntax(msg) => msg.clone(),
             ErrorKind::Throw(val) => val.to_ys_string(),
             ErrorKind::Error(msg) => msg.clone().unwrap_or(YSString::new()),
@@ -245,6 +257,7 @@ pub enum ErrorKind<C: Realm> {
     Syntax(YSString),
     Eval(YSString),
     URI(YSString),
+    Aggregate(YSString),
     Throw(Value<C>),
     Error(Option<YSString>),
 }

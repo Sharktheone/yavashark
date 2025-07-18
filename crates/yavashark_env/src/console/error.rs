@@ -46,6 +46,7 @@ fn error_message_pretty_circular(error: &Error, not: &mut Vec<usize>) -> String 
         | ErrorKind::Runtime(msg)
         | ErrorKind::Eval(msg)
         | ErrorKind::URI(msg)
+        | ErrorKind::Aggregate(msg)
         | ErrorKind::Syntax(msg) => msg.to_string(),
         ErrorKind::Throw(val) => val.pretty_print_circular(not),
         ErrorKind::Error(msg) => msg
@@ -63,6 +64,7 @@ fn error_message_pretty_circular_nl(error: &Error, not: &mut Vec<usize>) -> Stri
         | ErrorKind::Runtime(msg)
         | ErrorKind::Eval(msg)
         | ErrorKind::URI(msg)
+        | ErrorKind::Aggregate(msg)
         | ErrorKind::Syntax(msg) => msg.to_string(),
         ErrorKind::Throw(val) => val.pretty_print_circular_nl(not),
         ErrorKind::Error(msg) => msg

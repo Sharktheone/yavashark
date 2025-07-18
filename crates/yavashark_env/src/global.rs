@@ -105,6 +105,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         "URIError".into(),
         Variable::write_config(realm.intrinsics.uri_error_constructor().value),
     )?;
+    obj.define_variable(
+        "AggregateError".into(),
+        Variable::write_config(realm.intrinsics.aggregate_error_constructor().value),
+    )?;
 
     obj.define_variable(
         "globalThis".into(),
