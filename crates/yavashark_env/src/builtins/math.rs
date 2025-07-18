@@ -196,6 +196,10 @@ impl Math {
         if value == -0.0 && value.is_sign_negative() {
             return -0.0;
         }
+        
+        if value == 0.0 {
+            return 0.0;
+        }
 
         value.signum()
     }
