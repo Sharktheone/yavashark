@@ -41,20 +41,39 @@ impl ToNumber for &str {
             0.0
         } else {
             if self.starts_with("0x") || self.starts_with("0X") {
+                if !only_numeric_digits(&self[2..], 16) {
+                    return f64::NAN;
+                }
+                
+                
                 return f64::from_str_radix(&self[2..], 16).unwrap_or(f64::NAN);
             }
 
             if self.starts_with("0b") || self.starts_with("0B") {
+                if !only_numeric_digits(&self[2..], 2) {
+                    
+                    return f64::NAN;
+                }
+                
                 return f64::from_str_radix(&self[2..], 2).unwrap_or(f64::NAN);
             }
 
             if self.starts_with("0o") || self.starts_with("0O") {
+                if !only_numeric_digits(&self[2..], 8) {
+
+                    return f64::NAN;
+                }
+                
                 return f64::from_str_radix(&self[2..], 8).unwrap_or(f64::NAN);
             }
 
             self.parse().unwrap_or(f64::NAN)
         }
     }
+}
+
+fn only_numeric_digits(s: &str, radix: u32) -> bool {
+    s.chars().all(|c| c.is_digit(radix))
 }
 
 pub enum BigIntOrNumber {
