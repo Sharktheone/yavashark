@@ -369,4 +369,7 @@ impl ObjectConstructor {
     const fn is_sealed(_: &ObjectHandle) -> bool {
         false
     }
+    
+    #[prop("freeze")]
+    const fn freeze(_: &ObjectHandle) {}
 }
