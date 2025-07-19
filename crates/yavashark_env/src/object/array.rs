@@ -1140,7 +1140,49 @@ impl Array {
         Ok(Value::Boolean(false))
     }
 
-    // fn sort(#[this] this_val: Value, #[realm] realm: &mut Realm, func: &Value) -> ValueResult {} // TODO
+    fn sort(#[this] this_val: Value, compare: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> ValueResult {
+        
+        let this = coerce_object(this_val, realm)?;
+
+        let len = this
+            .resolve_property(&"length".into(), realm)?
+            .unwrap_or(Value::Undefined);
+
+        let len = len.to_number(realm)? as usize;
+
+        let mut values = Vec::new();
+
+        for idx in 0..len {
+            let (_, val) = this.get_array_or_done(idx)?;
+
+            if let Some(val) = val {
+                values.push(val);
+            }
+        }
+
+        if let Some(compare) = compare {
+            values.sort_by(|a, b| {
+                let x = compare.call(
+                    realm,
+                    vec![a.clone(), b.clone()],
+                    realm.global.clone().into(),
+                ).unwrap_or(Value::Number(0.0));
+
+                x.as_number().partial_cmp(&0.0).unwrap_or(Ordering::Equal)
+            });
+        } else {
+            values.sort_by_key(|a| a.to_string(realm).unwrap_or_default());
+        }
+
+        for (idx, value) in values.into_iter().enumerate() {
+            this.define_property(idx.into(), value)?;
+        }
+
+        this.define_property("length".into(), len.into())?;
+
+        Ok(this.into())
+        
+    } 
 
     fn splice(
         #[this] this: Value,
