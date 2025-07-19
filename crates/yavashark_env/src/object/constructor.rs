@@ -364,4 +364,9 @@ impl ObjectConstructor {
     
     #[prop("seal")]
     const fn seal(_: &ObjectHandle) {}
+    
+    #[prop("isSealed")]
+    const fn is_sealed(_: &ObjectHandle) -> bool {
+        false
+    }
 }
