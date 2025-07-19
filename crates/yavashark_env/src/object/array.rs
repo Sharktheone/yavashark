@@ -540,6 +540,7 @@ impl Array {
         Ok(Value::Undefined)
     }
 
+    #[prop("findIndex")]
     fn find_index(
         #[this] this: Value,
         #[realm] realm: &mut Realm,
