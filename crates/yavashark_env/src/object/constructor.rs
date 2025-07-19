@@ -372,4 +372,9 @@ impl ObjectConstructor {
     
     #[prop("freeze")]
     const fn freeze(_: &ObjectHandle) {}
+    
+    #[prop("isFrozen")]
+    const fn is_frozen(_: &ObjectHandle) -> bool {
+        false
+    }
 }
