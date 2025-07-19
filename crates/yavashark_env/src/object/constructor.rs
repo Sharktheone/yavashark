@@ -354,6 +354,9 @@ impl ObjectConstructor {
         Ok(obj)
     }
 
+    #[prop("preventExtensions")]
+    const fn prevent_extensions(_: &ObjectHandle) {}
+
     #[prop("isExtensible")]
     const fn is_extensible(_: &ObjectHandle) -> bool {
         true
