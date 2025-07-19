@@ -361,4 +361,7 @@ impl ObjectConstructor {
     const fn is_extensible(_: &ObjectHandle) -> bool {
         true
     }
+    
+    #[prop("seal")]
+    const fn seal(_: &ObjectHandle) {}
 }
