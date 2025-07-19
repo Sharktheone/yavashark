@@ -344,7 +344,7 @@ impl<C: Realm> Display for Value<C> {
             Self::String(s) => write!(f, "{s}"),
             Self::Boolean(b) => write!(f, "{b}"),
             Self::Object(o) => write!(f, "{o}"),
-            Self::Symbol(s) => write!(f, "{s}"),
+            Self::Symbol(s) => write!(f, "Symbol({s})"),
             Self::BigInt(b) => write!(f, "{b}"),
         }
     }
@@ -359,7 +359,7 @@ impl<C: Realm> ToYSString for Value<C> {
             Self::String(s) => s.clone(),
             Self::Boolean(b) => b.to_ys_string(),
             Self::Object(b) => b.to_ys_string(),
-            Self::Symbol(s) => s.to_ys_string(),
+            Self::Symbol(s) => format!("Symbol({})", s.as_ref()).into(),
             Self::BigInt(n) => YSString::from(n.to_string()),
         }
     }
@@ -498,7 +498,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => fmt_num(*n),
             Self::String(s) => s.clone(),
             Self::Boolean(b) => b.to_ys_string(),
-            Self::Symbol(s) => s.to_ys_string(),
+            Self::Symbol(s) => format!("Symbol({})", s.as_ref()).into(),
             Self::BigInt(b) => b.to_string().into(),
         })
     }
@@ -536,7 +536,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => fmt_num(n),
             Self::String(s) => s,
             Self::Boolean(b) => b.to_ys_string(),
-            Self::Symbol(s) => s.to_ys_string(),
+            Self::Symbol(s) => format!("Symbol({})", s.as_ref()).into(),
             Self::BigInt(b) => b.to_string().into(),
         })
     }
