@@ -107,23 +107,30 @@ pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> Valu
     if args.is_empty() {
         return Ok(Value::Undefined);
     }
+    
+    let Value::Object(mut v) = args[0].copy() else {
+        return Ok(false.into());
+    };
+    
+    let o = this.to_object()?;
 
-    let mut search = args[0].copy();
 
     loop {
-        let mut obj = search.as_object()?;
-        let proto = obj.prototype()?;
-        let proto = proto.get(search.clone(), realm)?;
-
-        if proto.is_nullish() {
+        let proto = v.prototype()?;
+        let proto = proto.get(v.clone().into(), realm)?;
+        
+        let Value::Object(proto) = proto else {
             return Ok(false.into());
-        }
-
-        if proto == this {
+        };
+        
+        v = proto;
+        
+        
+        if v == o {
             return Ok(true.into());
         }
-
-        search = proto;
+        
+        
     }
 }
 
