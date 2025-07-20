@@ -105,13 +105,7 @@ fn call(mut args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     let new_this = if args.is_empty() {
         realm.global.clone().into()
     } else {
-        let val = args.remove(0);
-
-        if val.is_nullish() {
-            realm.global.clone().into()
-        } else {
-            val
-        }
+        args.remove(0)
     };
 
     this.call(realm, args, new_this)
