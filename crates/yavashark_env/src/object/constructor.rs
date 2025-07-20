@@ -7,6 +7,7 @@ use std::collections::HashMap;
 use std::mem;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
+use crate::utils::coerce_object;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -133,7 +134,7 @@ impl ObjectConstructor {
         };
 
         for source in sources {
-            let source = source.as_object()?;
+            let source = coerce_object(source.clone(), realm)?;
 
             for key in source.keys()? {
                 let value = source.get_property(&key)?;
