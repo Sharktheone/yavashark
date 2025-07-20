@@ -280,11 +280,7 @@ impl Duration {
         dur.as_temporal_string(opts).map_err(Error::from_temporal)
     }
 
-    fn total(
-        &self,
-        obj: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<f64> {
+    fn total(&self, obj: Value, #[realm] realm: &mut Realm) -> Res<f64> {
         let (unit, obj) = if let Value::String(unit) = obj {
             (unit, None)
         } else if let Value::Object(obj) = obj {

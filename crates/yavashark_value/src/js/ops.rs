@@ -44,26 +44,23 @@ impl ToNumber for &str {
                 if !only_numeric_digits(&self[2..], 16) {
                     return f64::NAN;
                 }
-                
-                
+
                 return f64::from_str_radix(&self[2..], 16).unwrap_or(f64::NAN);
             }
 
             if self.starts_with("0b") || self.starts_with("0B") {
                 if !only_numeric_digits(&self[2..], 2) {
-                    
                     return f64::NAN;
                 }
-                
+
                 return f64::from_str_radix(&self[2..], 2).unwrap_or(f64::NAN);
             }
 
             if self.starts_with("0o") || self.starts_with("0O") {
                 if !only_numeric_digits(&self[2..], 8) {
-
                     return f64::NAN;
                 }
-                
+
                 return f64::from_str_radix(&self[2..], 8).unwrap_or(f64::NAN);
             }
 

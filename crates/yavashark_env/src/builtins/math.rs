@@ -81,7 +81,6 @@ impl Math {
             return 32.0;
         }
 
-
         (value as i64 as u32).leading_zeros() as f64
     }
 

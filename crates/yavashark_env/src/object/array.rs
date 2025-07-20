@@ -1140,8 +1140,11 @@ impl Array {
         Ok(Value::Boolean(false))
     }
 
-    fn sort(#[this] this_val: Value, compare: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> ValueResult {
-        
+    fn sort(
+        #[this] this_val: Value,
+        compare: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         let this = coerce_object(this_val, realm)?;
 
         let len = this
@@ -1162,11 +1165,13 @@ impl Array {
 
         if let Some(compare) = compare {
             values.sort_by(|a, b| {
-                let x = compare.call(
-                    realm,
-                    vec![a.clone(), b.clone()],
-                    realm.global.clone().into(),
-                ).unwrap_or(Value::Number(0.0));
+                let x = compare
+                    .call(
+                        realm,
+                        vec![a.clone(), b.clone()],
+                        realm.global.clone().into(),
+                    )
+                    .unwrap_or(Value::Number(0.0));
 
                 x.as_number().partial_cmp(&0.0).unwrap_or(Ordering::Equal)
             });
@@ -1181,8 +1186,7 @@ impl Array {
         this.define_property("length".into(), len.into())?;
 
         Ok(this.into())
-        
-    } 
+    }
 
     fn splice(
         #[this] this: Value,

@@ -1,13 +1,13 @@
 use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
+use crate::utils::coerce_object;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::mem;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
-use crate::utils::coerce_object;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -67,9 +67,7 @@ impl ObjectConstructor {
             for (key, value) in props.properties()? {
                 if let Value::Object(value) = value {
                     Self::define_property(obj.clone(), &key, &value)?;
-
                 }
-
             }
         }
 
@@ -277,10 +275,7 @@ impl ObjectConstructor {
     }
 
     #[prop("fromEntries")]
-    fn from_entries(
-        entries: Value,
-        #[realm] realm: &mut Realm,
-    ) -> ValueResult {
+    fn from_entries(entries: Value, #[realm] realm: &mut Realm) -> ValueResult {
         let iter = entries.iter_no_realm(realm)?;
 
         let obj = Object::new(realm);

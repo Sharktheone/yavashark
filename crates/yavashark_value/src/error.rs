@@ -78,7 +78,6 @@ impl<C: Realm> Error<C> {
         }
     }
 
-
     #[must_use]
     pub fn aggregate_error(error: impl Into<YSString>) -> Self {
         Self {
