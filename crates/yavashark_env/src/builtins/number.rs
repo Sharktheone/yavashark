@@ -127,7 +127,7 @@ impl NumberConstructor {
     #[must_use]
     pub fn is_safe_integer(number: &Value) -> bool {
         if let Value::Number(number) = number {
-            number.is_finite() && number.abs() <= Self::MAX_SAFE_INTEGER
+            number.fract() == 0.0 && number.is_finite() && number.abs() <= Self::MAX_SAFE_INTEGER
         } else {
             false
         }
