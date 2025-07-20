@@ -64,7 +64,11 @@ impl ObjectConstructor {
 
         if let Some(props) = properties {
             for (key, value) in props.properties()? {
-                Self::define_property(obj.clone(), &key, value.as_object()?)?;
+                if let Value::Object(value) = value {
+                    Self::define_property(obj.clone(), &key, &value)?;
+                    
+                }
+                
             }
         }
 
@@ -361,18 +365,18 @@ impl ObjectConstructor {
     const fn is_extensible(_: &ObjectHandle) -> bool {
         true
     }
-    
+
     #[prop("seal")]
     const fn seal(_: &ObjectHandle) {}
-    
+
     #[prop("isSealed")]
     const fn is_sealed(_: &ObjectHandle) -> bool {
         false
     }
-    
+
     #[prop("freeze")]
     const fn freeze(_: &ObjectHandle) {}
-    
+
     #[prop("isFrozen")]
     const fn is_frozen(_: &ObjectHandle) -> bool {
         false
