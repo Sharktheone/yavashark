@@ -67,9 +67,9 @@ impl ObjectConstructor {
             for (key, value) in props.properties()? {
                 if let Value::Object(value) = value {
                     Self::define_property(obj.clone(), &key, &value)?;
-                    
+
                 }
-                
+
             }
         }
 
@@ -274,6 +274,27 @@ impl ObjectConstructor {
         }
 
         Ok(result.into_value())
+    }
+
+    #[prop("fromEntries")]
+    fn from_entries(
+        entries: Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
+        let iter = entries.iter_no_realm(realm)?;
+
+        let obj = Object::new(realm);
+
+        while let Some(entry) = iter.next(realm)? {
+            let entry = entry.as_object()?;
+
+            let key = entry.get(0, realm)?;
+            let value = entry.get(1, realm)?;
+
+            obj.define_property(key, value)?;
+        }
+
+        Ok(obj.into_value())
     }
 
     #[prop("hasOwn")]
