@@ -43,6 +43,7 @@ jobs:
         with:
           repository: Sharktheone/yavashark-data
           token: ${{ secrets.YAVASHARK_DATA_PAT }}
+          fetch-depth: '1'
           path: data
           persist-credentials: 'true'
       - name: Run Test262 Runner
