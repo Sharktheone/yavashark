@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"path/filepath"
 	"yavashark_test262_runner/ci"
@@ -11,32 +10,22 @@ import (
 
 const (
 	DEFAULT_TEST_ROOT = "test262/test"
-
-	DEFAULT_WORKERS = 256
+	DEFAULT_WORKERS   = 256
 )
 
 func main() {
-	ciEnabled := flag.Bool("ci", false, "Enable CI mode to commit results")
-	repoPath := flag.String("repo", "", "Path to external repository for CI results")
-	historyOnly := flag.Bool("history-only", false, "Only generate the history file (skip git commit)")
-	workers := *flag.Int("workers", DEFAULT_WORKERS, "Number of workers")
-	testRootDir := flag.String("test_root", DEFAULT_TEST_ROOT, "Path to test root directory")
-	diff := flag.Bool("diff", true, "Diff to use for CI results")
-	diffFilter := flag.String("dfilter", "", "Diff filter to use for CI results")
-	testdir := flag.String("testdir", "", "Path in the test directory")
+	config := LoadConfig()
 
-	flag.Parse()
+	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 
-	testRoot := filepath.Join(*testRootDir, *testdir)
+	testResults := run.TestsInDir(testRoot, config.Workers)
 
-	testResults := run.TestsInDir(testRoot, workers)
-
-	if *diff && !*ciEnabled {
-		printDiff(testResults, *diffFilter)
+	if config.Diff && !config.CI {
+		printDiff(testResults, config.DiffFilter)
 	}
 
-	if *ciEnabled {
-		ci.RunCi(testResults, *repoPath, *historyOnly, *diff, testRoot)
+	if config.CI {
+		ci.RunCi(testResults, config.RepoPath, config.HistoryOnly, config.Diff, testRoot)
 	} else {
 		testResults.PrintResults()
 
@@ -44,7 +33,7 @@ func main() {
 		_ = testResults.ComparePrev()
 	}
 
-	if *testdir == "" {
+	if config.TestDir == "" {
 		testResults.Write()
 	}
 }
