@@ -6,6 +6,7 @@ use crate::conversion::FromValueOutput;
 use crate::error::ErrorObj;
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
+use std::fmt::Debug;
 use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
@@ -62,18 +63,45 @@ impl PromiseNotify {
     }
 }
 
+pub enum Callable {
+    JsFunction(ObjectHandle),
+    NativeFunction(Box<dyn Fn(Value, Value, &mut Realm) -> Res>),
+}
+
+impl Debug for Callable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Callable::JsFunction(func) => write!(f, "JsFunction({:?})", func),
+            Callable::NativeFunction(_) => write!(f, "NativeFunction"),
+        }
+    }
+}
+
+impl Callable {
+    pub fn call(&self, realm: &mut Realm, arg: Value, this: Value) -> ValueResult {
+        match self {
+            Callable::JsFunction(func) => func.call(realm, vec![arg], this),
+            Callable::NativeFunction(func) => {
+                func(arg, this, realm)?;
+
+                Ok(Value::Undefined)
+            }
+        }
+    }
+}
+
 #[object]
 #[derive(Debug)]
 pub struct FullfilledHandler {
     pub promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
-    pub f: ObjectHandle,
+    pub f: Callable,
 }
 
 #[object]
 #[derive(Debug)]
 pub struct RejectedHandler {
     pub promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
-    pub f: ObjectHandle,
+    pub f: Callable,
 }
 
 impl Promise {
@@ -381,12 +409,26 @@ impl FullfilledHandler {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
             }),
             promise,
-            f,
+            f: Callable::JsFunction(f),
+        }
+    }
+
+    pub fn new_native(
+        promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
+        f: impl Fn(Value, Value, &mut Realm) -> Res + 'static,
+        realm: &Realm,
+    ) -> Self {
+        Self {
+            inner: RefCell::new(MutableFullfilledHandler {
+                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+            }),
+            promise,
+            f: Callable::NativeFunction(Box::new(f)),
         }
     }
 
     pub fn handle(&self, value: Value, realm: &mut Realm) -> Res {
-        match self.f.call(realm, vec![value], Value::Undefined) {
+        match self.f.call(realm, value, Value::Undefined) {
             Ok(ret) => self.promise.resolve(&ret, realm),
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
@@ -409,12 +451,12 @@ impl RejectedHandler {
                 object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
             }),
             promise,
-            f,
+            f: Callable::JsFunction(f),
         }
     }
 
     pub fn handle(&self, value: Value, realm: &mut Realm) -> Res {
-        match self.f.call(realm, vec![value], Value::Undefined) {
+        match self.f.call(realm, value, Value::Undefined) {
             Ok(ret) => self.promise.resolve(&ret, realm),
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
