@@ -348,6 +348,7 @@ impl Promise {
         Ok(promise.into_object())
     }
 
+    #[prop("withResolvers")]
     fn with_resolvers(#[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let ret = Object::new(realm);
 
@@ -364,6 +365,8 @@ impl Promise {
 
         Ok(ret)
     }
+
+
 }
 
 impl FullfilledHandler {
