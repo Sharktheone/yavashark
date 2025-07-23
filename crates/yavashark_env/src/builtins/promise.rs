@@ -4,9 +4,10 @@ pub use into_promise::*;
 
 use crate::conversion::FromValueOutput;
 use crate::error::ErrorObj;
-use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
+use futures::future::join_all;
 use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
@@ -18,6 +19,12 @@ pub enum PromiseState {
     Pending,
     Fulfilled,
     Rejected,
+}
+
+
+pub enum PromiseResult {
+    Fulfilled(Value),
+    Rejected(Value),
 }
 
 #[object]
@@ -131,6 +138,21 @@ impl Promise {
             .value
             .clone()
             .unwrap_or(Value::Undefined))
+    }
+
+    pub async fn wait_to_res(&self) -> Res<PromiseResult> {
+        if let Some(notify) = self.notify.notified() {
+            notify.await;
+        }
+
+        let inner = self.inner.try_borrow_mut()?;
+        let value = inner.value.clone().unwrap_or(Value::Undefined);
+
+        match self.state.get() {
+            PromiseState::Fulfilled => Ok(PromiseResult::Fulfilled(value)),
+            PromiseState::Rejected => Ok(PromiseResult::Rejected(value)),
+            PromiseState::Pending => Err(Error::new("Promise is still pending")),
+        }
     }
 
     pub fn resolve(&self, value: &Value, realm: &mut Realm) -> Res {
