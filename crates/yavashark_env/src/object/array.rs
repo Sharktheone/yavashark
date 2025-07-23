@@ -153,6 +153,20 @@ impl Array {
         Ok(array)
     }
 
+
+    pub fn with_elements_and_proto(proto: Value, elements: Vec<Value>) -> Res<Self> {
+        let array = Self::new(proto);
+
+        let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
+
+        inner.set_array(elements);
+
+        drop(inner);
+
+        Ok(array)
+    }
+
     pub fn with_len(realm: &Realm, len: usize) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone().into());
 
