@@ -13,6 +13,8 @@ use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
+use crate::array::Array;
+use crate::utils::ValueIterator;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PromiseState {
@@ -416,6 +418,59 @@ impl Promise {
         Ok(ret)
     }
 
+
+    pub fn all(
+        promises: &Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let iter = ValueIterator::new(promises, realm)?;
+
+        let mut promises = Vec::new();
+
+        while let Some(p) =  iter.next(realm)? {
+            if let Ok(prom) = <&Self>::from_value_out(p) {
+                promises.push(prom);
+            }
+        }
+
+        let futures = promises.into_iter().map(|p| {
+            p.map_refed(|p| {
+                let x = p.wait_to_res();
+
+                x
+            })
+        });
+
+        let fut = join_all(
+            futures
+        );
+
+        let array_proto = realm.intrinsics.array.clone().into();
+
+        let fut = async move {
+            let results = fut.await;
+
+            let mut values = Vec::new();
+            for res in results {
+                match res? {
+                    PromiseResult::Fulfilled(val) => values.push(val),
+                    PromiseResult::Rejected(val) => {
+                        return Err(Error::throw(val))
+                    }
+                }
+            }
+
+            let array = Array::with_elements_and_proto(array_proto, values)?;
+
+            Ok(array.into_object())
+        };
+
+
+
+
+
+        Ok(fut.into_promise(realm))
+    }
 
 }
 
