@@ -434,11 +434,7 @@ impl Promise {
         }
 
         let futures = promises.into_iter().map(|p| {
-            p.map_refed(|p| {
-                let x = p.wait_to_res();
-
-                x
-            })
+            p.map_refed(Self::wait_to_res)
         });
 
         let fut = join_all(
@@ -488,11 +484,7 @@ impl Promise {
         }
 
         let futures = promises.into_iter().map(|p| {
-            p.map_refed(|p| {
-                let x = p.wait_to_res();
-
-                x
-            })
+            p.map_refed(Self::wait_to_res)
         });
 
         let fut = join_all(
