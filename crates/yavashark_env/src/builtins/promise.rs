@@ -486,11 +486,25 @@ impl Promise {
         promises: &Value,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let iter = ValueIterator::new(promises, realm)?;
+        let iter = match ValueIterator::new(promises, realm) {
+            Ok(iter) => iter,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                return Promise::reject_(&err, realm);
+            }
+        };
 
         let mut promises = Vec::new();
 
-        while let Some(p) = iter.next(realm)? {
+        while let Some(p) = match iter.next(realm) {
+            Ok(p) => p,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                return Promise::reject_(&err, realm);
+            }
+        } {
             if let Ok(prom) = <&Self>::from_value_out(p) {
                 promises.push(prom);
             }
