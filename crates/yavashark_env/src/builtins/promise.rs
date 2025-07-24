@@ -423,11 +423,25 @@ impl Promise {
         promises: &Value,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let iter = ValueIterator::new(promises, realm)?;
+        let iter = match ValueIterator::new(promises, realm) {
+            Ok(iter) => iter,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                return Promise::reject_(&err, realm);
+            }
+        };
 
         let mut promises = Vec::new();
 
-        while let Some(p) =  iter.next(realm)? {
+        while let Some(p) = match iter.next(realm) {
+            Ok(p) => p,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                return Promise::reject_(&err, realm);
+            }
+        } {
             if let Ok(prom) = <&Self>::from_value_out(p) {
                 promises.push(prom);
             }
@@ -467,7 +481,6 @@ impl Promise {
 
         Ok(fut.into_promise(realm))
     }
-    
     #[prop("allSettled")]
     pub fn all_settled(
         promises: &Value,
@@ -502,18 +515,18 @@ impl Promise {
                 match res? {
                     PromiseResult::Fulfilled(val) => {
                         let obj = Object::with_proto(obj_proto.clone());
-                        
+
                         obj.define_property("status".into(), "fulfilled".into())?;
                         obj.define_property("value".into(), val)?;
-                        
+
                         values.push(obj.into())
                     },
                     PromiseResult::Rejected(val) => {
                         let obj = Object::with_proto(obj_proto.clone());
-                        
+
                         obj.define_property("status".into(), "rejected".into())?;
                         obj.define_property("reason".into(), val)?;
-                        
+
                         values.push(obj.into())
                     },
                 }
