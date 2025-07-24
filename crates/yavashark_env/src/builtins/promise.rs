@@ -472,6 +472,7 @@ impl Promise {
         Ok(fut.into_promise(realm))
     }
     
+    #[prop("allSettled")]
     pub fn all_settled(
         promises: &Value,
         #[realm] realm: &mut Realm,
