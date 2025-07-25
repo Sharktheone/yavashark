@@ -171,6 +171,14 @@ impl PlainYearMonth {
         Ok(self.year_month.to_ixdtf_string(calendar))
     }
 
+
+
+    #[prop("toLocaleString")]
+    pub fn to_locale_string(&self) -> String {
+        self.year_month.to_string()
+    }
+
+
     pub fn until(
         &self,
         other: Value,
