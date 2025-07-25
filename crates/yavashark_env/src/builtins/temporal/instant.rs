@@ -180,6 +180,18 @@ impl Instant {
             .map_err(Error::from_temporal)
     }
 
+    #[prop("toLocaleString")]
+    fn to_locale_string(&self, #[realm] realm: &Realm) -> Res<String> {
+        self.stamp
+            .to_ixdtf_string_with_provider(
+                None,
+                ToStringRoundingOptions::default(),
+                &realm.env.tz_provider,
+            )
+            .map_err(Error::from_temporal)
+    }
+
+
     pub fn until(
         &self,
         other: Value,
