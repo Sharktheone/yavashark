@@ -9,6 +9,7 @@ use temporal_rs::{Calendar, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
 
 #[object]
@@ -285,6 +286,19 @@ impl PlainDate {
             .map_err(Error::from_temporal)?;
 
         Ok(PlainDateTime::new(date_time, realm).into_object())
+    }
+
+    #[prop("toPlainMonthDay")]
+    pub fn to_plain_month_day(
+        &self,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let month_day = self
+            .date
+            .to_plain_month_day()
+            .map_err(Error::from_temporal)?;
+
+        Ok(PlainMonthDay::new(month_day, realm).into_object())
     }
 
     #[prop("toString")]
