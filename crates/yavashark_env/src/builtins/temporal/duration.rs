@@ -280,6 +280,13 @@ impl Duration {
         dur.as_temporal_string(opts).map_err(Error::from_temporal)
     }
 
+    #[prop("toLocaleString")]
+    fn to_locale_string(&self) -> String {
+        let dur = self.dur;
+
+        dur.to_string()
+    }
+
     fn total(&self, obj: Value, #[realm] realm: &mut Realm) -> Res<f64> {
         let (unit, obj) = if let Value::String(unit) = obj {
             (unit, None)
