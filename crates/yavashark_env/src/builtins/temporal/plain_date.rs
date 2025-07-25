@@ -11,6 +11,7 @@ use yavashark_string::YSString;
 use yavashark_value::Obj;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
+use crate::builtins::temporal::plain_year_month::PlainYearMonth;
 
 #[object]
 #[derive(Debug)]
@@ -279,7 +280,7 @@ impl PlainDate {
             value_to_plain_time(t, realm)
         })
         .transpose()?;
-        
+
         let date_time = self
             .date
             .to_plain_date_time(time)
@@ -299,6 +300,19 @@ impl PlainDate {
             .map_err(Error::from_temporal)?;
 
         Ok(PlainMonthDay::new(month_day, realm).into_object())
+    }
+
+    #[prop("toPlainYearMonth")]
+    pub fn to_plain_year_month(
+        &self,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let year_month = self
+            .date
+            .to_plain_year_month()
+            .map_err(Error::from_temporal)?;
+
+        Ok(PlainYearMonth::new(year_month, realm).into_object())
     }
 
     #[prop("toString")]
