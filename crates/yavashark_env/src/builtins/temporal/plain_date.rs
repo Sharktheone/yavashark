@@ -287,6 +287,13 @@ impl PlainDate {
 
         Ok(self.date.to_ixdtf_string(calendar))
     }
+
+
+    #[prop("toLocaleString")]
+    pub fn to_locale_string(&self) -> String {
+        self.date.to_string()
+    }
+
 }
 
 pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDate> {
