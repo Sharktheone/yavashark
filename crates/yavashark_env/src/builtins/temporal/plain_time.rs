@@ -9,6 +9,7 @@ use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::TimeZone;
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
+use crate::builtins::temporal::plain_date::value_to_plain_date;
 
 #[object]
 #[derive(Debug)]
@@ -144,7 +145,25 @@ impl PlainTime {
             .to_ixdtf_string(ToStringRoundingOptions::default())
             .map_err(Error::from_temporal)
     }
-    
+
+
+    #[prop("toPlainDateTime")]
+    pub fn to_plain_date_time(
+        &self,
+        date: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let date = value_to_plain_date(date, realm)?;
+
+        let plain_date_time = temporal_rs::PlainDateTime::from_date_and_time(
+            date,
+            self.time,
+        )
+        .map_err(Error::from_temporal)?;
+
+        Ok(PlainDateTime::new(plain_date_time, realm).into_object())
+    }
+
     pub fn until(
         &self,
         other: Value,
@@ -201,6 +220,7 @@ impl PlainTime {
     pub const fn nanosecond(&self) -> u16 {
         self.time.nanosecond()
     }
+
 }
 
 pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainTime> {
