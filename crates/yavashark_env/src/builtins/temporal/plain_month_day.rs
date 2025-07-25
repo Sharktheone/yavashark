@@ -106,6 +106,12 @@ impl PlainMonthDay {
         Ok(self.month_day.to_ixdtf_string(calendar))
     }
 
+
+    #[prop("toLocaleString")]
+    pub fn to_locale_string(&self) -> String {
+        self.month_day.to_string()
+    }
+
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
