@@ -256,6 +256,14 @@ impl ZonedDateTime {
             .map_err(Error::from_temporal)
     }
 
+
+    #[prop("toLocaleString")]
+    pub fn to_locale_string(&self, realm: &Realm) -> Res<String> {
+        self.date
+            .to_string_with_provider(&realm.env.tz_provider)
+            .map_err(Error::from_temporal)
+    }
+
     pub fn until(
         &self,
         other: &Value,
