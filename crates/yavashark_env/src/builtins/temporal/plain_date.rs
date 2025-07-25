@@ -9,6 +9,7 @@ use temporal_rs::{Calendar, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
+use crate::builtins::temporal::plain_time::value_to_plain_time;
 
 #[object]
 #[derive(Debug)]
@@ -270,12 +271,17 @@ impl PlainDate {
     #[prop("toPlainDateTime")]
     pub fn to_plain_date_time(
         &self,
-        _time: Option<Value>,
-        #[realm] realm: &Realm,
+        time: Option<Value>,
+        #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
+        let time = time.map(|t| {
+            value_to_plain_time(t, realm)
+        })
+        .transpose()?;
+        
         let date_time = self
             .date
-            .to_plain_date_time(None)
+            .to_plain_date_time(time)
             .map_err(Error::from_temporal)?;
 
         Ok(PlainDateTime::new(date_time, realm).into_object())
