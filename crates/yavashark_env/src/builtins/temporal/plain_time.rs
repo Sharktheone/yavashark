@@ -137,6 +137,14 @@ impl PlainTime {
             .map_err(Error::from_temporal)
     }
 
+
+    #[prop("toLocaleString")]
+    pub fn to_locale_string(&self) -> Res<String> {
+        self.time
+            .to_ixdtf_string(ToStringRoundingOptions::default())
+            .map_err(Error::from_temporal)
+    }
+    
     pub fn until(
         &self,
         other: Value,
