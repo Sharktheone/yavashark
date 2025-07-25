@@ -224,6 +224,13 @@ impl PlainDateTime {
             .map_err(Error::from_temporal)
     }
 
+
+    #[prop("toLocaleString")]
+    pub fn to_locale_string(&self) -> String {
+        self.date.to_string()
+    }
+
+
     #[prop("valueOf")]
     #[nonstatic]
     pub const fn value_of() -> Res {
