@@ -12,6 +12,7 @@ use yavashark_value::Obj;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
 use crate::builtins::temporal::plain_year_month::PlainYearMonth;
+use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 
 #[object]
 #[derive(Debug)]
@@ -313,6 +314,50 @@ impl PlainDate {
             .map_err(Error::from_temporal)?;
 
         Ok(PlainYearMonth::new(year_month, realm).into_object())
+    }
+
+    #[prop("toZonedDateTime")]
+    pub fn to_zoned_date_time(
+        &self,
+        opts: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let (tz, time) = if let Value::String(tz) = opts {
+            let tz = TimeZone::try_from_str(tz.as_str())
+                .map_err(Error::from_temporal)?;
+            (tz, None)
+        } else if let Value::Object(obj) = opts {
+            let Some(tz) = obj
+                .resolve_property(&"timeZone".into(), realm)? else {
+                return Err(Error::ty("Missing timeZone property for toZonedDateTime"));
+            };
+            
+            let tz = tz.to_string(realm)?;
+            
+            let tz = TimeZone::try_from_str(tz.as_str())
+                .map_err(Error::from_temporal)?;
+            
+
+            let time = obj
+                .resolve_property(&"plainTime".into(), realm)?;
+            
+            let time = time.map(|time| {
+                value_to_plain_time(time, realm)
+            })
+                .transpose()?;
+
+            (tz, time)
+        } else {
+            return Err(Error::ty("Invalid options for toZonedDateTime"));
+        };
+
+
+        let zoned_date_time = self
+            .date
+            .to_zoned_date_time_with_provider(tz, time, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)?;
+
+        Ok(ZonedDateTime::new(zoned_date_time, realm).into_object())
     }
 
     #[prop("toString")]
