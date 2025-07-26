@@ -19,6 +19,12 @@ pub struct Computed {
 
 #[props]
 impl Computed {
+    
+    #[constructor]
+    pub fn construct() -> ObjectHandle {
+        todo!()
+    }
+    
     pub fn get(&self, realm: &mut Realm) -> ValueResult {
         if self.dirty.get() {
             self.dirty.set(false);
