@@ -157,6 +157,7 @@ impl Intrinsics {
     obj!(math);
     obj!(reflect);
     obj!(temporal);
+    obj!(signal);
 }
 
 #[allow(clippy::similar_names)]

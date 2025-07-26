@@ -19,12 +19,12 @@ pub fn get_signal(
     func_proto: ObjectHandle,
 ) -> Res<(ObjectHandle, Protos)> {
     let obj = Object::with_proto(obj_proto.clone().into());
-    
+
     let state = State::initialize_proto(
         Object::raw_with_proto(obj_proto.clone().into()),
         func_proto.clone().into(),
     )?;
-    
+
     let computed = Computed::initialize_proto(
         Object::raw_with_proto(obj_proto.into()),
         func_proto.into(),
@@ -33,12 +33,12 @@ pub fn get_signal(
 
     let state_constructor = state.get_property(&"constructor".into())?.value;
     let computed_constructor = computed.get_property(&"constructor".into())?.value;
-    
+
     obj.define_property(
         "State".into(),
         state_constructor,
     );
-    
+
     obj.define_property(
         "Computed".into(),
         computed_constructor,
@@ -56,8 +56,8 @@ pub fn notify_dependent(dep: &ObjectHandle, realm: &mut Realm) -> Res<()> {
     let Some(computed) = dep.downcast::<Computed>() else {
         return Ok(())
     };
-    
+
     computed.dirty.set(true);
-    
+
     Ok(())
 }
