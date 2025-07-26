@@ -55,7 +55,7 @@ impl State {
             }
 
             dep.upgrade().is_some_and(|dep| {
-                if let Err(error) = notify_dependent(dep, realm) {
+                if let Err(error) = notify_dependent(&dep.into(), realm) {
                     err = Some(error);
                 }
 

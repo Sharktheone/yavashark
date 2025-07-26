@@ -5,7 +5,8 @@ mod state;
 
 use crate::{Object, ObjectHandle, Realm, Res};
 use yavashark_garbage::Gc;
-use yavashark_value::BoxedObj;
+use yavashark_value::{BoxedObj};
+use crate::builtins::signal::computed::Computed;
 
 pub struct Protos {
     pub state: ObjectHandle,
@@ -26,6 +27,12 @@ pub fn get_signal(
     Ok((obj, protos))
 }
 
-pub fn notify_dependent(dep: Gc<BoxedObj<Realm>>, realm: &mut Realm) -> Res<()> {
+pub fn notify_dependent(dep: &ObjectHandle, realm: &mut Realm) -> Res<()> {
+    let Some(computed) = dep.downcast::<Computed>() else {
+        return Ok(())
+    };
+    
+    computed.dirty.set(true);
+    
     Ok(())
 }
