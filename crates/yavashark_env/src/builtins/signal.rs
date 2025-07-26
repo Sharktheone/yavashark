@@ -7,6 +7,7 @@ use crate::{Object, ObjectHandle, Realm, Res};
 use yavashark_garbage::Gc;
 use yavashark_value::{BoxedObj};
 use crate::builtins::signal::computed::Computed;
+use crate::builtins::signal::state::State;
 
 pub struct Protos {
     pub state: ObjectHandle,
@@ -17,11 +18,35 @@ pub fn get_signal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
 ) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.into());
+    let obj = Object::with_proto(obj_proto.clone().into());
+    
+    let state = State::initialize_proto(
+        Object::raw_with_proto(obj_proto.clone().into()),
+        func_proto.clone().into(),
+    )?;
+    
+    let computed = Computed::initialize_proto(
+        Object::raw_with_proto(obj_proto.into()),
+        func_proto.into(),
+    )?;
+
+
+    let state_constructor = state.get_property(&"constructor".into())?.value;
+    let computed_constructor = computed.get_property(&"constructor".into())?.value;
+    
+    obj.define_property(
+        "State".into(),
+        state_constructor,
+    );
+    
+    obj.define_property(
+        "Computed".into(),
+        computed_constructor,
+    );
 
     let protos = Protos {
-        state: Object::null(),
-        computed: Object::null(),
+        state,
+        computed,
     };
 
     Ok((obj, protos))
