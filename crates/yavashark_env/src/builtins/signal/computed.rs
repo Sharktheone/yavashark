@@ -43,8 +43,10 @@ impl Computed {
 impl Computed {
     
     #[constructor]
-    pub fn construct() -> ObjectHandle {
-        todo!()
+    pub fn construct(cb: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+        let obj = Self::new(cb, realm)?;
+        
+        Ok(obj.into_object())
     }
     
     pub fn get(&self, realm: &mut Realm) -> ValueResult {
