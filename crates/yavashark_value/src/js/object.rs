@@ -616,6 +616,12 @@ impl<C: Realm> From<Box<dyn Obj<C>>> for Object<C> {
     }
 }
 
+impl<C: Realm> From<Gc<BoxedObj<C>>> for Object<C> {
+    fn from(obj: Gc<BoxedObj<C>>) -> Self {
+        Self(obj)
+    }
+}
+
 impl<C: Realm> Object<C> {
     #[must_use]
     pub fn from_boxed(obj: Box<dyn Obj<C>>) -> Self {
