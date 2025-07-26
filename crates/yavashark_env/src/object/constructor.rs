@@ -299,22 +299,18 @@ impl ObjectConstructor {
 
     #[prop("is")]
     fn is(val1: &Value, val2: &Value) -> ValueResult {
-        match (val1, val2) {
-            (Value::Number(n1), Value::Number(n2)) => {
-                if n1.is_nan() && n2.is_nan() {
-                    return Ok(Value::Boolean(true));
-                }
-
-                if n1.is_sign_positive() && n2.is_sign_negative() {
-                    return Ok(Value::Boolean(false));
-                }
-
-                if n1.is_sign_negative() && n2.is_sign_positive() {
-                    return Ok(Value::Boolean(false));
-                }
+        if let (Value::Number(n1), Value::Number(n2)) = (val1, val2) {
+            if n1.is_nan() && n2.is_nan() {
+                return Ok(Value::Boolean(true));
             }
 
-            _ => {}
+            if n1.is_sign_positive() && n2.is_sign_negative() {
+                return Ok(Value::Boolean(false));
+            }
+
+            if n1.is_sign_negative() && n2.is_sign_positive() {
+                return Ok(Value::Boolean(false));
+            }
         }
 
         Ok((val1 == val2).into())
