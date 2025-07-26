@@ -1,8 +1,8 @@
-use crate::{ObjectHandle, Realm, Value, ValueResult};
-use std::cell::Cell;
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
+use std::cell::{Cell, RefCell};
 use yavashark_garbage::Weak;
 use yavashark_macro::{object, props};
-use yavashark_value::BoxedObj;
+use yavashark_value::{BoxedObj, Obj};
 use crate::builtins::signal::notify_dependent;
 
 #[object]
@@ -15,6 +15,28 @@ pub struct Computed {
 
     pub dirty: Cell<bool>,
     pub dependents: Vec<Weak<BoxedObj<Realm>>>, //TODO: this should be Vec<Weak<Computed>> or maybe even Vec<Weak<dyn Signal>> in the future
+}
+
+
+impl Computed {
+    pub fn new(compute_fn: ObjectHandle, realm: &Realm) -> Res<Self> {
+        if !compute_fn.is_function() {
+            return Err(Error::ty(
+                "Computed constructor expects a function as the first argument"
+            ));
+        }
+        
+        Ok(Self {
+            inner: RefCell::new(MutableComputed {
+                object: MutObject::with_proto(realm.intrinsics.signal_computed.clone().into()),
+                value: Value::Undefined,
+            }),
+            
+            compute_fn,
+            dirty: Cell::new(true),
+            dependents: Vec::new(),
+        })
+    }
 }
 
 #[props]
