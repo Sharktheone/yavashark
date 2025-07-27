@@ -529,21 +529,11 @@ impl MutObj<Realm> for MutObject {
         let key = InternalPropertyKey::from(name);
 
 
-        if let InternalPropertyKey::Index(n) = key {
-            let pos = self.array_position(n);
-            
-            if pos.1 {
-                if let Some(prop) = self.values.get_mut(n) {
-                    prop.get = value;
-                    return Ok(());
-                }
-            } else {
-                self.insert_array(n, ObjectProperty::getter(value));
-                return Ok(());
-            }
-            
+        if let InternalPropertyKey::Index(n) = key { 
+            self.insert_array(n, ObjectProperty::getter(value));
+            return Ok(());
         }
-        
+
         let key = key.into();
 
 
@@ -569,18 +559,8 @@ impl MutObj<Realm> for MutObject {
 
 
         if let InternalPropertyKey::Index(n) = key {
-            let pos = self.array_position(n);
-
-            if pos.1 {
-                if let Some(prop) = self.values.get_mut(n) {
-                    prop.set = value;
-                    return Ok(());
-                }
-            } else {
-                self.insert_array(n, ObjectProperty::setter(value));
-                return Ok(());
-            }
-
+            self.insert_array(n, ObjectProperty::setter(value));
+            return Ok(());
         }
 
         let key = key.into();
