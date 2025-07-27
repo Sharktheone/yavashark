@@ -235,7 +235,7 @@ impl MutObject {
         (self.array.len(), false)
     }
 
-    pub fn insert_array(&mut self, index: usize, value: Variable) {
+    pub fn insert_array(&mut self, index: usize, value: impl Into<ObjectProperty>) {
         let (i, found) = self.array_position(index);
 
         if found {
@@ -414,7 +414,7 @@ impl MutObj<Realm> for MutObject {
         let key = InternalPropertyKey::from(name);
 
         if let InternalPropertyKey::Index(n) = key {
-            self.insert_array(n, value.into());
+            self.insert_array(n, value);
             return Ok(());
         }
 
@@ -526,7 +526,26 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
-        let key = PropertyKey::from(name.clone());
+        let key = InternalPropertyKey::from(name);
+
+
+        if let InternalPropertyKey::Index(n) = key {
+            let pos = self.array_position(n);
+            
+            if pos.1 {
+                if let Some(prop) = self.values.get_mut(n) {
+                    prop.get = value;
+                    return Ok(());
+                }
+            } else {
+                self.insert_array(n, ObjectProperty::getter(value));
+                return Ok(());
+            }
+            
+        }
+        
+        let key = key.into();
+
 
         let val = self
             .properties
@@ -546,7 +565,25 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
-        let key = PropertyKey::from(name.clone());
+        let key = InternalPropertyKey::from(name.clone());
+
+
+        if let InternalPropertyKey::Index(n) = key {
+            let pos = self.array_position(n);
+
+            if pos.1 {
+                if let Some(prop) = self.values.get_mut(n) {
+                    prop.set = value;
+                    return Ok(());
+                }
+            } else {
+                self.insert_array(n, ObjectProperty::setter(value));
+                return Ok(());
+            }
+
+        }
+
+        let key = key.into();
 
         let val = self
             .properties
@@ -733,7 +770,7 @@ mod tests {
         object
             .inner_mut()
             .unwrap()
-            .insert_array(0, Value::Number(42.0).into());
+            .insert_array(0, Value::Number(42.0));
 
         let (index, found) = object.inner().unwrap().array_position(0);
 
@@ -763,7 +800,7 @@ mod tests {
         object
             .inner_mut()
             .unwrap()
-            .insert_array(0, Value::Number(42.0).into());
+            .insert_array(0, Value::Number(42.0));
 
         let value = object.inner().unwrap().resolve_array(0);
 
@@ -777,7 +814,7 @@ mod tests {
         object
             .inner_mut()
             .unwrap()
-            .insert_array(0, Value::Number(42.0).into());
+            .insert_array(0, Value::Number(42.0));
 
         let inner = object.inner().unwrap();
 
@@ -793,7 +830,7 @@ mod tests {
         object
             .inner_mut()
             .unwrap()
-            .insert_array(0, Value::Number(42.0).into());
+            .insert_array(0, Value::Number(42.0));
 
         let mut inner = object.inner_mut().unwrap();
 
@@ -809,7 +846,7 @@ mod tests {
         object
             .inner_mut()
             .unwrap()
-            .insert_array(0, Value::Number(42.0).into());
+            .insert_array(0, Value::Number(42.0));
 
         let contains = object.inner().unwrap().contains_array_key(0);
 
