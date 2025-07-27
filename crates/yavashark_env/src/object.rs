@@ -514,8 +514,8 @@ impl MutObj<Realm> for MutObject {
             return Ok(Some(self.prototype.clone()));
         }
 
-        if let Value::Number(n) = name {
-            return Ok(self.get_array(*n as usize).cloned());
+        if let InternalPropertyKey::Index(n) = key {
+            return Ok(self.get_array(n).cloned());
         }
 
         if let Some(prop) = self.properties.get(&key.into()) {
