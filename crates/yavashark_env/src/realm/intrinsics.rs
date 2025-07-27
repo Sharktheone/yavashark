@@ -249,34 +249,34 @@ impl Intrinsics {
 
         let type_error = get_type_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor.clone(),
         )?;
         let range_error = get_range_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor.clone(),
         )?;
         let reference_error = get_reference_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor.clone(),
         )?;
         let syntax_error = get_syntax_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor.clone(),
         )?;
 
         let eval_error = get_eval_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor.clone(),
         )?;
 
         let uri_error = get_uri_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor.clone(),
         )?;
 
         let aggregate_error = get_aggregate_error(
             error_prototype.clone().into(),
-            error_constructor.clone().into(),
+            error_constructor,
         )?;
 
         let arraybuffer = ArrayBuffer::initialize_proto(
