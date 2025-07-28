@@ -6,6 +6,8 @@ use egui::{Context, ViewportCommand};
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::error;
+use std::fmt::Display;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
@@ -86,9 +88,16 @@ impl Gui {
         eframe::run_native(
             &self.name,
             opts,
-            Box::new(|_| Ok(Box::new(GuiApp::new(realm, error, f).unwrap()))),
-        )
-        .unwrap();
+            Box::new(|_| 
+                Ok(
+                    Box::new(GuiApp::new(realm, error, f)
+                        .map_err(|e| {
+                            *error2.borrow_mut() = Some(e);
+                            GuiCreationError
+                        })?
+            
+            ))),
+        )?;
 
         // eframe::run_simple_native(&self.name, opts, func).unwrap();
 
@@ -99,6 +108,7 @@ impl Gui {
         Ok(())
     }
 }
+
 
 pub struct GuiApp<'a> {
     realm: &'a mut Realm,
@@ -148,5 +158,18 @@ impl App for GuiApp<'_> {
 
             drop(x);
         });
+    }
+}
+
+
+
+#[derive(Debug)]
+pub struct GuiCreationError;
+
+impl error::Error for GuiCreationError {}
+
+impl Display for GuiCreationError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Failed to create GUI")
     }
 }
