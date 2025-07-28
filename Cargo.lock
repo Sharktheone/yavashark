@@ -2197,9 +2197,9 @@ checksum = "d75a2a4b1b190afb6f5425f10f6a8f959d2ea0b9c2b1d79553551850539e4674"
 
 [[package]]
 name = "ixdtf"
-version = "0.5.0"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8289f7f711a1a51f80e2e368355d023042ca55d8d554fd5e953f01464c15842d"
+checksum = "ba9132ab5fad81d12d374347859866cdf8e21fe44c3bbb76aab3eccae2f7cd72"
 dependencies = [
  "displaydoc",
 ]
@@ -3934,9 +3934,9 @@ dependencies = [
 
 [[package]]
 name = "temporal_rs"
-version = "0.0.8"
+version = "0.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c80f310fada8d4273eec0ec47ef48f3e1e4ee837e490a39241f579f965f8a3a7"
+checksum = "7807e330b12e288b847a3e2a2b0dcd41ca764d0f90f9e8940f02c6ddd68cd2d7"
 dependencies = [
  "combine",
  "core_maths",
@@ -4015,10 +4015,11 @@ dependencies = [
 
 [[package]]
 name = "timezone_provider"
-version = "0.0.8"
+version = "0.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b1f13b254ee27a0053f442ea0a7f29677e26ba0bc9b3b8640c1848598f8a386"
+checksum = "1d1fc912f1a2ced7bc0cfed255b2ab58cdcf8df442f11bc02c8f3b9245588d4c"
 dependencies = [
+ "tinystr 0.8.1",
  "zerotrie",
  "zerovec 0.11.2",
 ]
@@ -4200,9 +4201,9 @@ checksum = "1dccffe3ce07af9386bfd29e80c0ab1a8205a2fc34e4bcd40364df902cfa8f3f"
 
 [[package]]
 name = "tzif"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cecffbab91858408738280e7bb6aac788f59a522dda961cd6b15542f0c08559"
+checksum = "e5e762ac355f0c204d09ae644b3d59423d5ddfc5603997d60c8c56f24e429a9d"
 dependencies = [
  "combine",
 ]

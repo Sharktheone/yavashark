@@ -309,7 +309,7 @@ impl ZonedDateTime {
 
         let date = self
             .date
-            .with_plain_time_and_provider(time, &realm.env.tz_provider)
+            .with_plain_time_and_provider(Some(time), &realm.env.tz_provider)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::new(date, realm).into_object())
@@ -496,11 +496,10 @@ impl ZonedDateTime {
     }
 
     #[get("timeZoneId")]
-    pub fn time_zone_id(&self) -> Res<String> {
+    pub fn time_zone_id(&self) -> String {
         self.date
             .timezone()
             .identifier()
-            .map_err(Error::from_temporal)
     }
 
     #[get("weekOfYear")]
@@ -561,8 +560,9 @@ pub fn value_to_zoned_date_time(
             let offset_disambiguation =
                 offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
 
-            temporal_rs::ZonedDateTime::from_str_with_provider(
-                str,
+
+            temporal_rs::ZonedDateTime::from_utf8_with_provider(
+                str.as_str().as_bytes(),
                 disambiguation,
                 offset_disambiguation,
                 &realm.env.tz_provider,

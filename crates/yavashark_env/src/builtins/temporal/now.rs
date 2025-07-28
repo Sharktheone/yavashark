@@ -79,7 +79,7 @@ impl Now {
     fn time_zone_id() -> Res<String> {
         let now = Self::get_now()?;
 
-        now.time_zone().identifier().map_err(Error::from_temporal)
+        Ok(now.time_zone().identifier())
     }
 
     #[prop("zonedDateTimeISO")]

@@ -382,8 +382,7 @@ impl PlainDateTime {
     ) -> Res<ObjectHandle> {
         let plain_time = plain_time
             .map(|p| value_to_plain_time(p, realm))
-            .transpose()?
-            .unwrap_or_default();
+            .transpose()?;
 
         let dt = self
             .date
