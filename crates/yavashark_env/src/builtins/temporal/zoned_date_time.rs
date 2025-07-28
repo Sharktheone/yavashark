@@ -316,17 +316,13 @@ impl ZonedDateTime {
     }
 
     #[prop("withTimeZone")]
-    pub fn with_time_zone(&self, time_zone: &Value, realm: &mut Realm) -> Res<Value> {
-        let dir = transition_direction(time_zone, realm)?;
-
-        let Some(date) = self
-            .date
-            .get_time_zone_transition_with_provider(dir, &realm.env.tz_provider)
-            .map_err(Error::from_temporal)?
-        else {
-            return Ok(Value::Null);
-        };
-
+    pub fn with_time_zone(&self, time_zone: &str, realm: &Realm) -> Res<Value> {
+        let tz = TimeZone::try_from_str(time_zone)
+            .map_err(Error::from_temporal)?;
+        
+        let date = self.date.with_timezone(tz)
+            .map_err(Error::from_temporal)?;
+        
         Ok(Self::new(date, realm).into_value())
     }
 
