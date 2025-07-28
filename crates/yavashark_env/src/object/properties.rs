@@ -2,32 +2,29 @@
 
 use crate::ObjectProperty;
 use indexmap::IndexMap;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxBuildHasher, FxHashMap};
 use yavashark_value::property_key::PropertyKey;
 
 pub struct ObjectProperties {
-    pub values: Vec<ObjectProperty>,
-    pub properties: FxHashMap<PropertyKey, usize>,
+    pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,
     pub array: ArrayProperties,
 }
 
 impl ObjectProperties {
     pub fn new() -> Self {
         Self {
-            values: Vec::new(),
-            properties: FxHashMap::default(),
+            properties: IndexMap::default(),
             array: ArrayProperties::Empty,
         }
     }
 
     pub fn clear(&mut self) {
-        self.values.clear();
         self.properties.clear();
         self.array.clear();
     }
 
     pub fn is_empty(&self) -> bool {
-        self.values.is_empty()
+        self.properties.is_empty() && self.array.is_empty()
     }
 }
 
@@ -35,8 +32,8 @@ impl ObjectProperties {
 pub enum ArrayProperties {
     #[default]
     Empty,
-    Continuous(Vec<usize>),
-    Sparse(Vec<(usize, usize)>),
+    Continuous(Vec<ObjectProperty>),
+    Sparse(Vec<(usize, ObjectProperty)>),
 }
 
 impl ArrayProperties {
@@ -48,7 +45,7 @@ impl ArrayProperties {
         }
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         match self {
             Self::Empty => true,
             Self::Continuous(arr) => arr.is_empty(),
