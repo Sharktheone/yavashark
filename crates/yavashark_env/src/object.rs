@@ -765,10 +765,12 @@ mod tests {
         object
             .inner_mut()
             .unwrap()
-            .insert_array(0, Value::Number(42.0).into());
+            .insert_array(0, Value::Number(42.0));
 
+        let inner = object.inner().unwrap();
+        let array_index = inner.array[0].1;
         assert_eq!(
-            object.inner().unwrap().array[0].1.value,
+            inner.values[array_index].value,
             Value::Number(42.0)
         );
     }
@@ -841,14 +843,11 @@ mod tests {
             .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
+        let inner = object.inner().unwrap();
+        let key: PropertyKey = Value::string("key").into();
+        let property_index = inner.properties.get(&key).unwrap();
         assert_eq!(
-            object
-                .inner()
-                .unwrap()
-                .properties
-                .get(&Value::string("key"))
-                .unwrap()
-                .value,
+            inner.values[*property_index].value,
             Value::Number(42.0)
         );
     }
@@ -861,22 +860,12 @@ mod tests {
             .define_property(Value::string("key"), Value::Number(42.0))
             .unwrap();
 
-        let value = object.resolve_property(&Value::string("key")).unwrap();
-
-        assert_eq!(value, Some(Value::Number(42.0).into()));
-    }
-
-    #[test]
-    fn get_property() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .define_property(Value::string("key"), Value::Number(42.0))
+        let property = object
+            .resolve_property(&Value::string("key"))
+            .unwrap()
             .unwrap();
 
-        let value = object.get_property(&Value::string("key")).unwrap();
-
-        assert_eq!(value.unwrap().value, Value::Number(42.0));
+        assert_eq!(property.value, Value::Number(42.0));
     }
 
     #[test]
