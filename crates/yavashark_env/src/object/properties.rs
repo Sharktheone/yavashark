@@ -1,6 +1,8 @@
 #![allow(unused)]
 
-use crate::ObjectProperty;
+use std::{iter, mem};
+use std::process::Output;
+use crate::{ObjectProperty, Res};
 use indexmap::IndexMap;
 use rustc_hash::{FxBuildHasher, FxHashMap};
 use yavashark_value::property_key::PropertyKey;
@@ -61,6 +63,29 @@ impl ArrayProperties {
             Self::Empty => true,
             Self::Continuous(arr) => arr.is_empty(),
             Self::Sparse(arr) => arr.is_empty(),
+        }
+    }
+    
+    
+    pub fn insert(&mut self, idx: usize, value: ObjectProperty) {
+        match self {
+            Self::Empty => {
+                if idx == 0 {
+                    *self = Self::Continuous(value.into());
+                } else {
+                    *self = Self::Sparse((idx, value).into());
+                }
+            }
+            Self::Continuous(arr) => {
+                if let Some(arr) = arr.insert(idx, value) {
+                    *self = Self::Sparse(arr);
+                }
+            }
+            Self::Sparse(arr) => {
+                if let Some(arr) = arr.insert(idx, value) {
+                    *self = Self::Continuous(arr);
+                }
+            }
         }
     }
 }
@@ -153,5 +178,34 @@ impl SparseArrayProperties {
         //TODO
         
         None
+    }
+}
+
+
+impl From<ObjectProperty> for ContinuousArrayProperties {
+    fn from(value: ObjectProperty) -> Self {
+        Self {
+            properties: vec![value],
+        }
+    }
+}
+
+impl From<Vec<ObjectProperty>> for ContinuousArrayProperties {
+    fn from(properties: Vec<ObjectProperty>) -> Self {
+        Self { properties }
+    }
+}
+
+impl From<(usize, ObjectProperty)> for SparseArrayProperties {
+    fn from(value: (usize, ObjectProperty)) -> Self {
+        Self {
+            properties: vec![value],
+        }
+    }
+}
+
+impl From<Vec<(usize, ObjectProperty)>> for SparseArrayProperties {
+    fn from(properties: Vec<(usize, ObjectProperty)>) -> Self {
+        Self { properties }
     }
 }
