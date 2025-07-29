@@ -64,6 +64,7 @@ impl ArrayProperties {
         }
     }
 }
+
 impl ContinuousArrayProperties {
     pub fn clear(&mut self) {
         self.properties.clear();
@@ -73,7 +74,56 @@ impl ContinuousArrayProperties {
         self.properties.is_empty()
     }
     
+    pub fn insert(&mut self, idx: usize, value: ObjectProperty) -> Option<SparseArrayProperties> {
+        if idx < self.properties.len() {
+            self.properties[idx] = value;
+        } else {
+            if idx == self.properties.len() {
+                self.properties.push(value)
+            } else {
+                return Some(
+                    self.sparse_with(
+                        iter::once(
+                            (idx, value)
+                        )
+                    )
+                );
+            }
+        }
+        
+        None
+    }
+    
+    pub fn sparse(&mut self) -> SparseArrayProperties {
+        let properties = mem::take(&mut self.properties);
+        
+        let properties = properties
+            .into_iter()
+            .enumerate()
+            .collect::<Vec<_>>();
+        
+        
+        SparseArrayProperties {
+            properties,
+        }
+    }
+    
+    pub fn sparse_with(&mut self, additional: impl Iterator<Item=(usize, ObjectProperty)>) -> SparseArrayProperties {
+        let properties = mem::take(&mut self.properties);
+
+        let properties = properties
+            .into_iter()
+            .enumerate()
+            .chain(additional)
+            .collect();
+        
+        
+        SparseArrayProperties {
+            properties,
+        }
+    }
 }
+
 impl SparseArrayProperties {
     pub fn clear(&mut self) {
         self.properties.clear();
