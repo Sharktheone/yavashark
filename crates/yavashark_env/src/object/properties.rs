@@ -64,3 +64,23 @@ impl ArrayProperties {
         }
     }
 }
+impl ContinuousArrayProperties {
+    pub fn clear(&mut self) {
+        self.properties.clear();
+    }
+
+    pub const fn is_empty(&self) -> bool {
+        self.properties.is_empty()
+    }
+    
+}
+impl SparseArrayProperties {
+    pub fn clear(&mut self) {
+        self.properties.clear();
+    }
+
+    pub const fn is_empty(&self) -> bool {
+        self.properties.is_empty()
+    }
+    
+}
