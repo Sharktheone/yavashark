@@ -148,4 +148,10 @@ impl SparseArrayProperties {
         
         true
     }
+    
+    pub fn insert(&mut self, idx: usize, value: ObjectProperty) -> Option<ContinuousArrayProperties> {
+        //TODO
+        
+        None
+    }
 }
