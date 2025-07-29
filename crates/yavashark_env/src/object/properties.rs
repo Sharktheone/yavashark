@@ -133,4 +133,19 @@ impl SparseArrayProperties {
         self.properties.is_empty()
     }
     
+    pub fn is_continuous(&self) -> bool {
+        if self.properties.is_empty() {
+            return true;
+        }
+        
+        let mut last_idx = 0;
+        for (idx, _) in &self.properties {
+            if *idx != last_idx {
+                return false;
+            }
+            last_idx += 1;
+        }
+        
+        true
+    }
 }
