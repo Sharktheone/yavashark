@@ -32,8 +32,19 @@ impl ObjectProperties {
 pub enum ArrayProperties {
     #[default]
     Empty,
-    Continuous(Vec<ObjectProperty>),
-    Sparse(Vec<(usize, ObjectProperty)>),
+    Continuous(ContinuousArrayProperties),
+    Sparse(SparseArrayProperties),
+}
+
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct ContinuousArrayProperties {
+    pub properties: Vec<ObjectProperty>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
+pub struct SparseArrayProperties {
+    pub properties: Vec<(usize, ObjectProperty)>,
 }
 
 impl ArrayProperties {
