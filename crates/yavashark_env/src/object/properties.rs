@@ -67,7 +67,6 @@ pub enum ArrayProperties {
     Sparse(SparseArrayProperties),
 }
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct ContinuousArrayProperties {
     pub properties: Vec<ObjectProperty>,
@@ -94,8 +93,7 @@ impl ArrayProperties {
             Self::Sparse(arr) => arr.is_empty(),
         }
     }
-    
-    
+
     pub fn insert(&mut self, idx: usize, value: ObjectProperty) {
         match self {
             Self::Empty => {
@@ -127,7 +125,7 @@ impl ContinuousArrayProperties {
     pub const fn is_empty(&self) -> bool {
         self.properties.is_empty()
     }
-    
+
     pub fn insert(&mut self, idx: usize, value: ObjectProperty) -> Option<SparseArrayProperties> {
         if idx < self.properties.len() {
             self.properties[idx] = value;
@@ -135,34 +133,25 @@ impl ContinuousArrayProperties {
             if idx == self.properties.len() {
                 self.properties.push(value)
             } else {
-                return Some(
-                    self.sparse_with(
-                        iter::once(
-                            (idx, value)
-                        )
-                    )
-                );
+                return Some(self.sparse_with(iter::once((idx, value))));
             }
         }
-        
+
         None
     }
-    
+
     pub fn sparse(&mut self) -> SparseArrayProperties {
         let properties = mem::take(&mut self.properties);
-        
-        let properties = properties
-            .into_iter()
-            .enumerate()
-            .collect::<Vec<_>>();
-        
-        
-        SparseArrayProperties {
-            properties,
-        }
+
+        let properties = properties.into_iter().enumerate().collect::<Vec<_>>();
+
+        SparseArrayProperties { properties }
     }
-    
-    pub fn sparse_with(&mut self, additional: impl Iterator<Item=(usize, ObjectProperty)>) -> SparseArrayProperties {
+
+    pub fn sparse_with(
+        &mut self,
+        additional: impl Iterator<Item = (usize, ObjectProperty)>,
+    ) -> SparseArrayProperties {
         let properties = mem::take(&mut self.properties);
 
         let properties = properties
@@ -170,11 +159,8 @@ impl ContinuousArrayProperties {
             .enumerate()
             .chain(additional)
             .collect();
-        
-        
-        SparseArrayProperties {
-            properties,
-        }
+
+        SparseArrayProperties { properties }
     }
 }
 
@@ -186,12 +172,12 @@ impl SparseArrayProperties {
     pub const fn is_empty(&self) -> bool {
         self.properties.is_empty()
     }
-    
+
     pub fn is_continuous(&self) -> bool {
         if self.properties.is_empty() {
             return true;
         }
-        
+
         let mut last_idx = 0;
         for (idx, _) in &self.properties {
             if *idx != last_idx {
@@ -199,17 +185,20 @@ impl SparseArrayProperties {
             }
             last_idx += 1;
         }
-        
+
         true
     }
-    
-    pub fn insert(&mut self, idx: usize, value: ObjectProperty) -> Option<ContinuousArrayProperties> {
+
+    pub fn insert(
+        &mut self,
+        idx: usize,
+        value: ObjectProperty,
+    ) -> Option<ContinuousArrayProperties> {
         //TODO
-        
+
         None
     }
 }
-
 
 impl From<ObjectProperty> for ContinuousArrayProperties {
     fn from(value: ObjectProperty) -> Self {
