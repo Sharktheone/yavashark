@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use crate::{fmt_num, Realm, Symbol, Value};
 use yavashark_string::{ToYSString, YSString};
 
@@ -7,11 +8,30 @@ pub enum PropertyKey {
     Symbol(Symbol),
 }
 
+impl Display for PropertyKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::String(s) => write!(f, "{s}"),
+            Self::Symbol(s) => write!(f, "Symbol{s})"),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum InternalPropertyKey {
     String(YSString),
     Symbol(Symbol),
     Index(usize),
+}
+
+impl Display for InternalPropertyKey {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::String(s) => write!(f, "{s}"),
+            Self::Symbol(s) => write!(f, "Symbol{s})"),
+            Self::Index(i) => write!(f, "[{i}]"),
+        }
+    }
 }
 
 impl<R: Realm> From<Value<R>> for PropertyKey {
