@@ -1,11 +1,11 @@
 #![allow(unused)]
 
-use std::{iter, mem};
-use std::process::Output;
-use crate::{ObjectProperty, Res};
+use crate::{Error, ObjectProperty, Res};
+use indexmap::map::Entry;
 use indexmap::IndexMap;
-use rustc_hash::{FxBuildHasher, FxHashMap};
-use yavashark_value::property_key::PropertyKey;
+use rustc_hash::FxBuildHasher;
+use std::{iter, mem};
+use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
 
 pub struct ObjectProperties {
     pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,
@@ -27,6 +27,35 @@ impl ObjectProperties {
 
     pub fn is_empty(&self) -> bool {
         self.properties.is_empty() && self.array.is_empty()
+    }
+
+    pub fn insert(&mut self, key: InternalPropertyKey, value: ObjectProperty) -> Res {
+        if let InternalPropertyKey::Index(idx) = key {
+            self.array.insert(idx, value);
+            return Ok(());
+        }
+
+        let key = PropertyKey::from(key);
+
+        let entry = self.properties.entry(key);
+
+        match entry {
+            Entry::Occupied(mut e) => {
+                if !e.get().attributes.is_writable() {
+                    return Err(Error::ty_error(format!(
+                        "Cannot write to property `{}`: property is not writable",
+                        e.key()
+                    )));
+                }
+
+                e.insert(value);
+            }
+            Entry::Vacant(e) => {
+                e.insert(value);
+            }
+        }
+
+        Ok(())
     }
 }
 
