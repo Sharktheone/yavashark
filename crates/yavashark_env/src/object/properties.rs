@@ -5,6 +5,7 @@ use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::{iter, mem};
+use std::cmp::Ordering;
 use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
 
 pub struct ObjectProperties {
@@ -187,14 +188,47 @@ impl SparseArrayProperties {
         true
     }
 
+    fn find_position(&self, target_idx: usize) -> (usize, bool) {
+        let mut left = 0;
+        let mut right = self.properties.len();
+
+        while left < right {
+            let mid = left + (right - left) / 2;
+            let mid_idx = self.properties[mid].0;
+
+            match mid_idx.cmp(&target_idx) {
+                Ordering::Equal => return (mid, true),
+                Ordering::Less => left = mid + 1,
+                Ordering::Greater => right = mid,
+            }
+        }
+
+        (left, false)
+    }
+
     pub fn insert(
         &mut self,
         idx: usize,
         value: ObjectProperty,
     ) -> Option<ContinuousArrayProperties> {
-        //TODO
+        let (pos, found) = self.find_position(idx);
 
-        None
+        if found {
+            self.properties[pos].1 = value;
+        } else {
+            self.properties.insert(pos, (idx, value));
+        }
+
+        if self.is_continuous() {
+            let properties = self
+                .properties
+                .iter()
+                .map(|(_, prop)| prop.clone())
+                .collect();
+            Some(ContinuousArrayProperties { properties })
+        } else {
+            None
+        }
     }
 }
 
