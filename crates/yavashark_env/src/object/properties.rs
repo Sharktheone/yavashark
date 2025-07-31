@@ -178,12 +178,10 @@ impl SparseArrayProperties {
             return true;
         }
 
-        let mut last_idx = 0;
-        for (idx, _) in &self.properties {
+        for (last_idx, (idx, _)) in self.properties.iter().enumerate() {
             if *idx != last_idx {
                 return false;
             }
-            last_idx += 1;
         }
 
         true
