@@ -4,8 +4,8 @@ use crate::{Error, ObjectProperty, Res};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
-use std::{iter, mem};
 use std::cmp::Ordering;
+use std::{iter, mem};
 use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
 
 pub struct ObjectProperties {
@@ -129,14 +129,10 @@ impl ContinuousArrayProperties {
     }
 
     pub fn insert(&mut self, idx: usize, value: ObjectProperty) -> Option<SparseArrayProperties> {
-        if idx < self.properties.len() {
-            self.properties[idx] = value;
-        } else {
-            if idx == self.properties.len() {
-                self.properties.push(value)
-            } else {
-                return Some(self.sparse_with(iter::once((idx, value))));
-            }
+        match idx.cmp(&self.properties.len()) {
+            Ordering::Less => self.properties[idx] = value,
+            Ordering::Equal => self.properties.push(value),
+            Ordering::Greater => return Some(self.sparse_with(iter::once((idx, value)))),
         }
 
         None
@@ -145,12 +141,11 @@ impl ContinuousArrayProperties {
     pub fn sparse(&mut self) -> SparseArrayProperties {
         let properties = mem::take(&mut self.properties);
 
-        let indices = (0..properties.len())
-            .collect::<Vec<_>>();
+        let indices = (0..properties.len()).collect::<Vec<_>>();
 
-        SparseArrayProperties { 
+        SparseArrayProperties {
             indices,
-            properties
+            properties,
         }
     }
 
@@ -160,14 +155,14 @@ impl ContinuousArrayProperties {
     ) -> SparseArrayProperties {
         let mut properties = mem::take(&mut self.properties);
         let mut indices = (0..properties.len()).collect::<Vec<_>>();
-        
+
         let (min, max) = additional.size_hint();
-        
+
         let reserve = max.unwrap_or(min);
-        
+
         properties.reserve(reserve);
         indices.reserve(reserve);
-        
+
         for (idx, value) in additional {
             if idx < properties.len() {
                 properties[idx] = value;
@@ -175,13 +170,13 @@ impl ContinuousArrayProperties {
                 properties.push(value);
                 indices.push(idx);
             }
-            
+
             //TODO: currently this is JS-level UB when additional is not sorted
         }
 
-        SparseArrayProperties { 
+        SparseArrayProperties {
             indices,
-            properties
+            properties,
         }
     }
 }
@@ -242,8 +237,7 @@ impl SparseArrayProperties {
 
         if self.is_continuous() {
             let properties = mem::take(&mut self.properties);
-            
-            
+
             Some(ContinuousArrayProperties { properties })
         } else {
             None
