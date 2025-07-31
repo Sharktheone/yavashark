@@ -75,7 +75,8 @@ pub struct ContinuousArrayProperties {
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct SparseArrayProperties {
-    pub properties: Vec<(usize, ObjectProperty)>,
+    pub indices: Vec<usize>,
+    pub properties: Vec<ObjectProperty>,
 }
 
 impl ArrayProperties {
@@ -144,24 +145,44 @@ impl ContinuousArrayProperties {
     pub fn sparse(&mut self) -> SparseArrayProperties {
         let properties = mem::take(&mut self.properties);
 
-        let properties = properties.into_iter().enumerate().collect::<Vec<_>>();
+        let indices = (0..properties.len())
+            .collect::<Vec<_>>();
 
-        SparseArrayProperties { properties }
+        SparseArrayProperties { 
+            indices,
+            properties
+        }
     }
 
     pub fn sparse_with(
         &mut self,
         additional: impl Iterator<Item = (usize, ObjectProperty)>,
     ) -> SparseArrayProperties {
-        let properties = mem::take(&mut self.properties);
+        let mut properties = mem::take(&mut self.properties);
+        let mut indices = (0..properties.len()).collect::<Vec<_>>();
+        
+        let (min, max) = additional.size_hint();
+        
+        let reserve = max.unwrap_or(min);
+        
+        properties.reserve(reserve);
+        indices.reserve(reserve);
+        
+        for (idx, value) in additional {
+            if idx < properties.len() {
+                properties[idx] = value;
+            } else {
+                properties.push(value);
+                indices.push(idx);
+            }
+            
+            //TODO: currently this is JS-level UB when additional is not sorted
+        }
 
-        let properties = properties
-            .into_iter()
-            .enumerate()
-            .chain(additional)
-            .collect();
-
-        SparseArrayProperties { properties }
+        SparseArrayProperties { 
+            indices,
+            properties
+        }
     }
 }
 
@@ -179,8 +200,8 @@ impl SparseArrayProperties {
             return true;
         }
 
-        for (last_idx, (idx, _)) in self.properties.iter().enumerate() {
-            if *idx != last_idx {
+        for (pos, idx) in self.indices.iter().enumerate() {
+            if *idx != pos {
                 return false;
             }
         }
@@ -190,11 +211,11 @@ impl SparseArrayProperties {
 
     fn find_position(&self, target_idx: usize) -> (usize, bool) {
         let mut left = 0;
-        let mut right = self.properties.len();
+        let mut right = self.indices.len();
 
         while left < right {
             let mid = left + (right - left) / 2;
-            let mid_idx = self.properties[mid].0;
+            let mid_idx = self.indices[mid];
 
             match mid_idx.cmp(&target_idx) {
                 Ordering::Equal => return (mid, true),
@@ -214,17 +235,15 @@ impl SparseArrayProperties {
         let (pos, found) = self.find_position(idx);
 
         if found {
-            self.properties[pos].1 = value;
+            self.properties[pos] = value;
         } else {
-            self.properties.insert(pos, (idx, value));
+            self.properties.insert(pos, value);
         }
 
         if self.is_continuous() {
-            let properties = self
-                .properties
-                .iter()
-                .map(|(_, prop)| prop.clone())
-                .collect();
+            let properties = mem::take(&mut self.properties);
+            
+            
             Some(ContinuousArrayProperties { properties })
         } else {
             None
@@ -249,13 +268,8 @@ impl From<Vec<ObjectProperty>> for ContinuousArrayProperties {
 impl From<(usize, ObjectProperty)> for SparseArrayProperties {
     fn from(value: (usize, ObjectProperty)) -> Self {
         Self {
-            properties: vec![value],
+            indices: vec![value.0],
+            properties: vec![value.1],
         }
-    }
-}
-
-impl From<Vec<(usize, ObjectProperty)>> for SparseArrayProperties {
-    fn from(properties: Vec<(usize, ObjectProperty)>) -> Self {
-        Self { properties }
     }
 }
