@@ -12,7 +12,7 @@ pub enum PropertyKey {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum BorrowedPropertyKey<'a> {
     String(&'a str),
-    Symbol(&'a str),
+    Symbol(&'a Symbol),
 }
 
 
@@ -20,7 +20,7 @@ impl Equivalent<PropertyKey> for BorrowedPropertyKey<'_> {
     fn equivalent(&self, other: &PropertyKey) -> bool {
         match (self, other) {
             (Self::String(s), PropertyKey::String(o)) => *s == o.as_str(),
-            (Self::Symbol(s), PropertyKey::Symbol(o)) => *s == o.as_str(),
+            (Self::Symbol(s), PropertyKey::Symbol(o)) => *s == o,
             _ => false,
         }
     }
