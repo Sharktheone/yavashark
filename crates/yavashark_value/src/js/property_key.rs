@@ -1,4 +1,5 @@
 use std::fmt::Display;
+use equivalent::Equivalent;
 use crate::{fmt_num, Realm, Symbol, Value};
 use yavashark_string::{ToYSString, YSString};
 
@@ -8,6 +9,22 @@ pub enum PropertyKey {
     Symbol(Symbol),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum BorrowedPropertyKey<'a> {
+    String(&'a str),
+    Symbol(&'a str),
+}
+
+
+impl Equivalent<PropertyKey> for BorrowedPropertyKey<'_> {
+    fn equivalent(&self, other: &PropertyKey) -> bool {
+        match (self, other) {
+            (Self::String(s), PropertyKey::String(o)) => *s == o.as_str(),
+            (Self::Symbol(s), PropertyKey::Symbol(o)) => *s == o.as_str(),
+            _ => false,
+        }
+    }
+}
 impl Display for PropertyKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
