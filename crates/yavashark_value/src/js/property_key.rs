@@ -119,3 +119,63 @@ impl From<InternalPropertyKey> for PropertyKey {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+
+    fn calculate_hash<T: Hash>(t: &T) -> u64 {
+        let mut s = DefaultHasher::new();
+        t.hash(&mut s);
+        s.finish()
+    }
+
+    #[test]
+    fn test_equivalent_string_keys_have_same_hash() {
+        let property_key = PropertyKey::String("test".into());
+        let borrowed_key = BorrowedPropertyKey::String("test");
+
+        assert!(borrowed_key.equivalent(&property_key));
+
+        let property_hash = calculate_hash(&property_key);
+        let borrowed_hash = calculate_hash(&borrowed_key);
+        assert_eq!(property_hash, borrowed_hash);
+    }
+
+    #[test]
+    fn test_equivalent_symbol_keys_have_same_hash() {
+        let symbol = Symbol::from("test_symbol");
+        let property_key = PropertyKey::Symbol(symbol.clone());
+        let borrowed_key = BorrowedPropertyKey::Symbol(&symbol);
+
+        assert!(borrowed_key.equivalent(&property_key));
+
+        let property_hash = calculate_hash(&property_key);
+        let borrowed_hash = calculate_hash(&borrowed_key);
+        assert_eq!(property_hash, borrowed_hash);
+    }
+
+    #[test]
+    fn test_non_equivalent_keys_may_have_different_hashes() {
+        let property_key = PropertyKey::String("test".into());
+        let borrowed_key = BorrowedPropertyKey::String("different");
+
+        assert!(!borrowed_key.equivalent(&property_key));
+
+        let property_hash = calculate_hash(&property_key);
+        let borrowed_hash = calculate_hash(&borrowed_key);
+        
+        let _ = (property_hash, borrowed_hash);
+    }
+
+    #[test]
+    fn test_string_and_symbol_keys_are_not_equivalent() {
+        let property_key = PropertyKey::String("test".into());
+        let symbol = Symbol::from("test_symbol");
+        let borrowed_key = BorrowedPropertyKey::Symbol(&symbol);
+
+        assert!(!borrowed_key.equivalent(&property_key));
+    }
+}
