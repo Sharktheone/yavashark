@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::{iter, mem};
-use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
+use yavashark_value::property_key::{BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
 
 pub struct ObjectProperties {
     pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,
@@ -57,6 +57,20 @@ impl ObjectProperties {
         }
 
         Ok(())
+    }
+    
+    pub fn get(&self, key: &InternalPropertyKey) -> Option<&ObjectProperty> {
+        match key {
+            InternalPropertyKey::String(s) => {
+                self.properties.get(&BorrowedPropertyKey::String(s.as_str()))
+            }
+            InternalPropertyKey::Symbol(s) => {
+                self.properties.get(&BorrowedPropertyKey::Symbol(s))
+            }
+            InternalPropertyKey::Index(idx) => {
+                self.array.get(*idx)
+            }
+        }
     }
 }
 
@@ -117,6 +131,14 @@ impl ArrayProperties {
             }
         }
     }
+    
+    pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
+        match self {
+            Self::Empty => None,
+            Self::Continuous(arr) => arr.get(idx),
+            Self::Sparse(arr) => arr.get(idx),
+        }
+    }
 }
 
 impl ContinuousArrayProperties {
@@ -136,6 +158,10 @@ impl ContinuousArrayProperties {
         }
 
         None
+    }
+    
+    pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
+        self.properties.get(idx)
     }
 
     pub fn sparse(&mut self) -> SparseArrayProperties {
@@ -239,6 +265,15 @@ impl SparseArrayProperties {
             let properties = mem::take(&mut self.properties);
 
             Some(ContinuousArrayProperties { properties })
+        } else {
+            None
+        }
+    }
+    
+    pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
+        let (pos, found) = self.find_position(idx);
+        if found {
+            Some(&self.properties[pos])
         } else {
             None
         }
