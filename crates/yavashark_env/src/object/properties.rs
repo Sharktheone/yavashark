@@ -74,6 +74,23 @@ impl ObjectProperties {
             }
         }
     }
+    
+    pub fn remove(&mut self, key: &InternalPropertyKey) -> Res {
+        match key {
+            InternalPropertyKey::Index(idx) => {
+                self.array.remove(*idx);
+                Ok(())
+            }
+            InternalPropertyKey::String(s) => {
+                self.properties.shift_remove(&BorrowedPropertyKey::String(s.as_str()));
+                Ok(())
+            }
+            InternalPropertyKey::Symbol(s) => {
+                self.properties.shift_remove(&BorrowedPropertyKey::Symbol(s));
+                Ok(())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -141,6 +158,21 @@ impl ArrayProperties {
             Self::Sparse(arr) => arr.get(idx),
         }
     }
+    
+    pub fn remove(&mut self, idx: usize) -> Option<ObjectProperty> {
+        match self {
+            Self::Empty => None,
+            Self::Continuous(arr) => match arr.remove(idx) {
+                Ok(Some(value)) => Some(value),
+                Ok(None) => None,
+                Err(sparse) => {
+                    *self = Self::Sparse(sparse);
+                    None
+                }
+            },
+            Self::Sparse(arr) => arr.remove(idx),
+        }
+    }
 }
 
 impl ContinuousArrayProperties {
@@ -164,6 +196,22 @@ impl ContinuousArrayProperties {
     
     pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
         self.properties.get(idx)
+    }
+    
+    pub fn remove(&mut self, idx: usize) -> Result<Option<ObjectProperty>, SparseArrayProperties> {
+        if idx >= self.properties.len() {
+            return Ok(None);
+        }
+
+        if idx == self.properties.len() - 1 {
+            return Ok(self.properties.pop());
+        }
+        
+        let mut sparse = self.sparse();
+        
+        sparse.remove(idx);
+        
+        Err(sparse)
     }
 
     pub fn sparse(&mut self) -> SparseArrayProperties {
@@ -276,6 +324,15 @@ impl SparseArrayProperties {
         let (pos, found) = self.find_position(idx);
         if found {
             Some(&self.properties[pos])
+        } else {
+            None
+        }
+    }
+    
+    pub fn remove(&mut self, idx: usize) -> Option<ObjectProperty> {
+        let (pos, found) = self.find_position(idx);
+        if found {
+            Some(self.properties.remove(pos))
         } else {
             None
         }
