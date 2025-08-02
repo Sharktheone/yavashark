@@ -31,13 +31,15 @@ impl ObjectProperties {
     }
 
     pub fn insert(&mut self, key: InternalPropertyKey, value: ObjectProperty) -> Res {
-        if let InternalPropertyKey::Index(idx) = key {
-            self.array.insert(idx, value);
-            return Ok(());
-        }
-
-        let key = PropertyKey::from(key);
-
+        let key = match key {
+            InternalPropertyKey::Index(idx) => {
+                self.array.insert(idx, value);
+                return Ok(());
+            }
+            InternalPropertyKey::String(s) => PropertyKey::String(s),
+            InternalPropertyKey::Symbol(s) => PropertyKey::Symbol(s),
+        };
+        
         let entry = self.properties.entry(key);
 
         match entry {
