@@ -27,14 +27,7 @@ impl Display for YSString {
 
 impl Debug for YSString {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self.inner() {
-            InnerString::Inline(inline) => write!(f, "{}", inline.as_str()),
-            InnerString::Static(static_str) => write!(f, "{static_str}"),
-            InnerString::Owned(owned) => write!(f, "{owned}"),
-            InnerString::BoxedOwned(boxed) => write!(f, "{boxed}"),
-            InnerString::Rc(rc) => write!(f, "{rc}"),
-            InnerString::Rope(rope) => write!(f, "{}", rope.as_string()),
-        }
+        write!(f, "{}", self.as_str())
     }
 }
 
