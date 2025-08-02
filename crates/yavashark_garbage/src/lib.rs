@@ -1,6 +1,8 @@
 #![deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
+use log::warn;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::fmt::{Debug, Formatter};
 use std::future::Future;
 use std::ops::{Deref, DerefMut};
@@ -8,8 +10,6 @@ use std::pin::Pin;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::task::{Context, Poll};
-use log::warn;
-use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 
 use spin_lock::SpinLock;
 
@@ -298,7 +298,6 @@ pub struct OwningGcGuardRefed<T: Collectable, V = T> {
     _gc: Gc<T>,
 }
 
-
 impl<T: Collectable, V> Clone for OwningGcGuard<'_, T, V> {
     fn clone(&self) -> Self {
         Self {
@@ -377,10 +376,9 @@ impl<T: Collectable, V: Future> Future for OwningGcGuardRefed<T, V> {
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         unsafe {
             let this = Pin::into_inner_unchecked(self);
-            
+
             Pin::new_unchecked(&mut this.value_ptr).poll(cx)
         }
-        
     }
 }
 

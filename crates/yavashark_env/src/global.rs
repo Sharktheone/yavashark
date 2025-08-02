@@ -230,12 +230,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         Variable::write_config(realm.intrinsics.temporal_obj().value),
     )?;
 
-
     obj.define_variable(
         "Signal".into(),
         Variable::write_config(realm.intrinsics.signal_obj().value),
     )?;
-
 
     obj.define_variable(
         "Promise".into(),

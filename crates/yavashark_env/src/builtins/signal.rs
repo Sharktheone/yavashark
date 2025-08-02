@@ -3,11 +3,11 @@
 mod computed;
 mod state;
 
-use crate::{Object, ObjectHandle, Realm, Res};
-use yavashark_garbage::Gc;
-use yavashark_value::{BoxedObj};
 use crate::builtins::signal::computed::Computed;
 use crate::builtins::signal::state::State;
+use crate::{Object, ObjectHandle, Realm, Res};
+use yavashark_garbage::Gc;
+use yavashark_value::BoxedObj;
 
 pub struct Protos {
     pub state: ObjectHandle,
@@ -25,36 +25,24 @@ pub fn get_signal(
         func_proto.clone().into(),
     )?;
 
-    let computed = Computed::initialize_proto(
-        Object::raw_with_proto(obj_proto.into()),
-        func_proto.into(),
-    )?;
-
+    let computed =
+        Computed::initialize_proto(Object::raw_with_proto(obj_proto.into()), func_proto.into())?;
 
     let state_constructor = state.get_property(&"constructor".into())?.value;
     let computed_constructor = computed.get_property(&"constructor".into())?.value;
 
-    obj.define_property(
-        "State".into(),
-        state_constructor,
-    );
+    obj.define_property("State".into(), state_constructor);
 
-    obj.define_property(
-        "Computed".into(),
-        computed_constructor,
-    );
+    obj.define_property("Computed".into(), computed_constructor);
 
-    let protos = Protos {
-        state,
-        computed,
-    };
+    let protos = Protos { state, computed };
 
     Ok((obj, protos))
 }
 
 pub fn notify_dependent(dep: &ObjectHandle, realm: &mut Realm) -> Res<()> {
     let Some(computed) = dep.downcast::<Computed>() else {
-        return Ok(())
+        return Ok(());
     };
 
     computed.dirty.set(true);

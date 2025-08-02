@@ -50,7 +50,6 @@ pub struct Symbol {
     inner: SymbolInner,
 }
 
-
 impl AsRef<str> for Symbol {
     fn as_ref(&self) -> &str {
         self.inner.as_ref()

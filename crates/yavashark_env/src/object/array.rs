@@ -153,7 +153,6 @@ impl Array {
         Ok(array)
     }
 
-
     pub fn with_elements_and_proto(proto: Value, elements: Vec<Value>) -> Res<Self> {
         let array = Self::new(proto);
 

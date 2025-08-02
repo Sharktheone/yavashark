@@ -528,14 +528,12 @@ impl MutObj<Realm> for MutObject {
     fn define_getter(&mut self, name: Value, value: Value) -> Res {
         let key = InternalPropertyKey::from(name);
 
-
-        if let InternalPropertyKey::Index(n) = key { 
+        if let InternalPropertyKey::Index(n) = key {
             self.insert_array(n, ObjectProperty::getter(value));
             return Ok(());
         }
 
         let key = key.into();
-
 
         let val = self
             .properties
@@ -556,7 +554,6 @@ impl MutObj<Realm> for MutObject {
 
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
         let key = InternalPropertyKey::from(name.clone());
-
 
         if let InternalPropertyKey::Index(n) = key {
             self.insert_array(n, ObjectProperty::setter(value));
@@ -769,10 +766,7 @@ mod tests {
 
         let inner = object.inner().unwrap();
         let array_index = inner.array[0].1;
-        assert_eq!(
-            inner.values[array_index].value,
-            Value::Number(42.0)
-        );
+        assert_eq!(inner.values[array_index].value, Value::Number(42.0));
     }
 
     #[test]
@@ -846,10 +840,7 @@ mod tests {
         let inner = object.inner().unwrap();
         let key: PropertyKey = Value::string("key").into();
         let property_index = inner.properties.get(&key).unwrap();
-        assert_eq!(
-            inner.values[*property_index].value,
-            Value::Number(42.0)
-        );
+        assert_eq!(inner.values[*property_index].value, Value::Number(42.0));
     }
 
     #[test]

@@ -2,19 +2,21 @@ mod into_promise;
 
 pub use into_promise::*;
 
+use crate::array::Array;
 use crate::conversion::FromValueOutput;
 use crate::error::ErrorObj;
-use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::utils::ValueIterator;
+use crate::{
+    Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
+};
+use futures::future::join_all;
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
-use futures::future::join_all;
 use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
-use crate::array::Array;
-use crate::utils::ValueIterator;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PromiseState {
@@ -22,7 +24,6 @@ pub enum PromiseState {
     Fulfilled,
     Rejected,
 }
-
 
 pub enum PromiseResult {
     Fulfilled(Value),
@@ -418,11 +419,7 @@ impl Promise {
         Ok(ret)
     }
 
-
-    pub fn all(
-        promises: &Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn all(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
@@ -447,13 +444,9 @@ impl Promise {
             }
         }
 
-        let futures = promises.into_iter().map(|p| {
-            p.map_refed(Self::wait_to_res)
-        });
+        let futures = promises.into_iter().map(|p| p.map_refed(Self::wait_to_res));
 
-        let fut = join_all(
-            futures
-        );
+        let fut = join_all(futures);
 
         let array_proto = realm.intrinsics.array.clone().into();
 
@@ -464,9 +457,7 @@ impl Promise {
             for res in results {
                 match res? {
                     PromiseResult::Fulfilled(val) => values.push(val),
-                    PromiseResult::Rejected(val) => {
-                        return Err(Error::throw(val))
-                    }
+                    PromiseResult::Rejected(val) => return Err(Error::throw(val)),
                 }
             }
 
@@ -475,17 +466,10 @@ impl Promise {
             Ok(array.into_object())
         };
 
-
-
-
-
         Ok(fut.into_promise(realm))
     }
     #[prop("allSettled")]
-    pub fn all_settled(
-        promises: &Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn all_settled(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
@@ -510,13 +494,9 @@ impl Promise {
             }
         }
 
-        let futures = promises.into_iter().map(|p| {
-            p.map_refed(Self::wait_to_res)
-        });
+        let futures = promises.into_iter().map(|p| p.map_refed(Self::wait_to_res));
 
-        let fut = join_all(
-            futures
-        );
+        let fut = join_all(futures);
 
         let array_proto = realm.intrinsics.array.clone().into();
         let obj_proto: Value = realm.intrinsics.obj.clone().into();
@@ -534,7 +514,7 @@ impl Promise {
                         obj.define_property("value".into(), val)?;
 
                         values.push(obj.into())
-                    },
+                    }
                     PromiseResult::Rejected(val) => {
                         let obj = Object::with_proto(obj_proto.clone());
 
@@ -542,7 +522,7 @@ impl Promise {
                         obj.define_property("reason".into(), val)?;
 
                         values.push(obj.into())
-                    },
+                    }
                 }
             }
 

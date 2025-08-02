@@ -39,7 +39,7 @@ impl ObjectProperties {
             InternalPropertyKey::String(s) => PropertyKey::String(s),
             InternalPropertyKey::Symbol(s) => PropertyKey::Symbol(s),
         };
-        
+
         let entry = self.properties.entry(key);
 
         match entry {
@@ -60,21 +60,17 @@ impl ObjectProperties {
 
         Ok(())
     }
-    
+
     pub fn get(&self, key: &InternalPropertyKey) -> Option<&ObjectProperty> {
         match key {
-            InternalPropertyKey::String(s) => {
-                self.properties.get(&BorrowedPropertyKey::String(s.as_str()))
-            }
-            InternalPropertyKey::Symbol(s) => {
-                self.properties.get(&BorrowedPropertyKey::Symbol(s))
-            }
-            InternalPropertyKey::Index(idx) => {
-                self.array.get(*idx)
-            }
+            InternalPropertyKey::String(s) => self
+                .properties
+                .get(&BorrowedPropertyKey::String(s.as_str())),
+            InternalPropertyKey::Symbol(s) => self.properties.get(&BorrowedPropertyKey::Symbol(s)),
+            InternalPropertyKey::Index(idx) => self.array.get(*idx),
         }
     }
-    
+
     pub fn remove(&mut self, key: &InternalPropertyKey) -> Res {
         match key {
             InternalPropertyKey::Index(idx) => {
@@ -82,11 +78,13 @@ impl ObjectProperties {
                 Ok(())
             }
             InternalPropertyKey::String(s) => {
-                self.properties.shift_remove(&BorrowedPropertyKey::String(s.as_str()));
+                self.properties
+                    .shift_remove(&BorrowedPropertyKey::String(s.as_str()));
                 Ok(())
             }
             InternalPropertyKey::Symbol(s) => {
-                self.properties.shift_remove(&BorrowedPropertyKey::Symbol(s));
+                self.properties
+                    .shift_remove(&BorrowedPropertyKey::Symbol(s));
                 Ok(())
             }
         }
@@ -150,7 +148,7 @@ impl ArrayProperties {
             }
         }
     }
-    
+
     pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
         match self {
             Self::Empty => None,
@@ -158,7 +156,7 @@ impl ArrayProperties {
             Self::Sparse(arr) => arr.get(idx),
         }
     }
-    
+
     pub fn remove(&mut self, idx: usize) -> Option<ObjectProperty> {
         match self {
             Self::Empty => None,
@@ -193,11 +191,11 @@ impl ContinuousArrayProperties {
 
         None
     }
-    
+
     pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
         self.properties.get(idx)
     }
-    
+
     pub fn remove(&mut self, idx: usize) -> Result<Option<ObjectProperty>, SparseArrayProperties> {
         if idx >= self.properties.len() {
             return Ok(None);
@@ -206,11 +204,11 @@ impl ContinuousArrayProperties {
         if idx == self.properties.len() - 1 {
             return Ok(self.properties.pop());
         }
-        
+
         let mut sparse = self.sparse();
-        
+
         sparse.remove(idx);
-        
+
         Err(sparse)
     }
 
@@ -319,7 +317,7 @@ impl SparseArrayProperties {
             None
         }
     }
-    
+
     pub fn get(&self, idx: usize) -> Option<&ObjectProperty> {
         let (pos, found) = self.find_position(idx);
         if found {
@@ -328,7 +326,7 @@ impl SparseArrayProperties {
             None
         }
     }
-    
+
     pub fn remove(&mut self, idx: usize) -> Option<ObjectProperty> {
         let (pos, found) = self.find_position(idx);
         if found {

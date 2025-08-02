@@ -1,7 +1,11 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
+use crate::builtins::temporal::plain_month_day::PlainMonthDay;
+use crate::builtins::temporal::plain_time::value_to_plain_time;
+use crate::builtins::temporal::plain_year_month::PlainYearMonth;
 use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options};
+use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -9,10 +13,6 @@ use temporal_rs::{Calendar, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
-use crate::builtins::temporal::plain_month_day::PlainMonthDay;
-use crate::builtins::temporal::plain_time::value_to_plain_time;
-use crate::builtins::temporal::plain_year_month::PlainYearMonth;
-use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 
 #[object]
 #[derive(Debug)]
@@ -277,10 +277,7 @@ impl PlainDate {
         time: Option<Value>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let time = time.map(|t| {
-            value_to_plain_time(t, realm)
-        })
-        .transpose()?;
+        let time = time.map(|t| value_to_plain_time(t, realm)).transpose()?;
 
         let date_time = self
             .date
@@ -291,10 +288,7 @@ impl PlainDate {
     }
 
     #[prop("toPlainMonthDay")]
-    pub fn to_plain_month_day(
-        &self,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn to_plain_month_day(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let month_day = self
             .date
             .to_plain_month_day()
@@ -304,10 +298,7 @@ impl PlainDate {
     }
 
     #[prop("toPlainYearMonth")]
-    pub fn to_plain_year_month(
-        &self,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn to_plain_year_month(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let year_month = self
             .date
             .to_plain_year_month()
@@ -317,40 +308,29 @@ impl PlainDate {
     }
 
     #[prop("toZonedDateTime")]
-    pub fn to_zoned_date_time(
-        &self,
-        opts: Value,
-        #[realm] realm: &mut Realm,
-    ) -> Res<ObjectHandle> {
+    pub fn to_zoned_date_time(&self, opts: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let (tz, time) = if let Value::String(tz) = opts {
-            let tz = TimeZone::try_from_str(tz.as_str())
-                .map_err(Error::from_temporal)?;
+            let tz = TimeZone::try_from_str(tz.as_str()).map_err(Error::from_temporal)?;
             (tz, None)
         } else if let Value::Object(obj) = opts {
-            let Some(tz) = obj
-                .resolve_property(&"timeZone".into(), realm)? else {
+            let Some(tz) = obj.resolve_property(&"timeZone".into(), realm)? else {
                 return Err(Error::ty("Missing timeZone property for toZonedDateTime"));
             };
-            
-            let tz = tz.to_string(realm)?;
-            
-            let tz = TimeZone::try_from_str(tz.as_str())
-                .map_err(Error::from_temporal)?;
-            
 
-            let time = obj
-                .resolve_property(&"plainTime".into(), realm)?;
-            
-            let time = time.map(|time| {
-                value_to_plain_time(time, realm)
-            })
+            let tz = tz.to_string(realm)?;
+
+            let tz = TimeZone::try_from_str(tz.as_str()).map_err(Error::from_temporal)?;
+
+            let time = obj.resolve_property(&"plainTime".into(), realm)?;
+
+            let time = time
+                .map(|time| value_to_plain_time(time, realm))
                 .transpose()?;
 
             (tz, time)
         } else {
             return Err(Error::ty("Invalid options for toZonedDateTime"));
         };
-
 
         let zoned_date_time = self
             .date
@@ -367,12 +347,10 @@ impl PlainDate {
         Ok(self.date.to_ixdtf_string(calendar))
     }
 
-
     #[prop("toLocaleString")]
     pub fn to_locale_string(&self) -> String {
         self.date.to_string()
     }
-
 }
 
 pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::PlainDate> {

@@ -191,7 +191,6 @@ impl Instant {
             .map_err(Error::from_temporal)
     }
 
-
     pub fn until(
         &self,
         other: Value,

@@ -1,6 +1,6 @@
-use std::fmt::Display;
-use equivalent::Equivalent;
 use crate::{fmt_num, Realm, Symbol, Value};
+use equivalent::Equivalent;
+use std::fmt::Display;
 use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -14,7 +14,6 @@ pub enum BorrowedPropertyKey<'a> {
     String(&'a str),
     Symbol(&'a Symbol),
 }
-
 
 impl Equivalent<PropertyKey> for BorrowedPropertyKey<'_> {
     fn equivalent(&self, other: &PropertyKey) -> bool {
@@ -166,7 +165,7 @@ mod tests {
 
         let property_hash = calculate_hash(&property_key);
         let borrowed_hash = calculate_hash(&borrowed_key);
-        
+
         let _ = (property_hash, borrowed_hash);
     }
 

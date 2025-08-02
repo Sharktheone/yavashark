@@ -256,7 +256,6 @@ impl ZonedDateTime {
             .map_err(Error::from_temporal)
     }
 
-
     #[prop("toLocaleString")]
     pub fn to_locale_string(&self, realm: &Realm) -> Res<String> {
         self.date
@@ -317,12 +316,10 @@ impl ZonedDateTime {
 
     #[prop("withTimeZone")]
     pub fn with_time_zone(&self, time_zone: &str, realm: &Realm) -> Res<Value> {
-        let tz = TimeZone::try_from_str(time_zone)
-            .map_err(Error::from_temporal)?;
-        
-        let date = self.date.with_timezone(tz)
-            .map_err(Error::from_temporal)?;
-        
+        let tz = TimeZone::try_from_str(time_zone).map_err(Error::from_temporal)?;
+
+        let date = self.date.with_timezone(tz).map_err(Error::from_temporal)?;
+
         Ok(Self::new(date, realm).into_value())
     }
 
@@ -497,9 +494,7 @@ impl ZonedDateTime {
 
     #[get("timeZoneId")]
     pub fn time_zone_id(&self) -> String {
-        self.date
-            .timezone()
-            .identifier()
+        self.date.timezone().identifier()
     }
 
     #[get("weekOfYear")]
@@ -559,7 +554,6 @@ pub fn value_to_zoned_date_time(
             let disambiguation = disambiguation.unwrap_or_default();
             let offset_disambiguation =
                 offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
-
 
             temporal_rs::ZonedDateTime::from_utf8_with_provider(
                 str.as_str().as_bytes(),
