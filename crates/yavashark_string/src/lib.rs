@@ -33,14 +33,7 @@ impl Debug for YSString {
 
 impl Hash for YSString {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        match self.inner() {
-            InnerString::Inline(inline) => inline.as_str().hash(state),
-            InnerString::Static(static_str) => static_str.hash(state),
-            InnerString::Owned(owned) => owned.hash(state),
-            InnerString::BoxedOwned(boxed) => boxed.hash(state),
-            InnerString::Rc(rc) => rc.hash(state),
-            InnerString::Rope(rope) => rope.as_string().hash(state),
-        }
+        self.as_str().hash(state);
     }
 }
 
