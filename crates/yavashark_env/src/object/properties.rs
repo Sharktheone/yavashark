@@ -89,6 +89,21 @@ impl ObjectProperties {
             }
         }
     }
+    
+    pub fn contains_key(&self, key: &InternalPropertyKey) -> bool {
+        match key {
+            InternalPropertyKey::Index(idx) => self.array.contains_key(*idx),
+            InternalPropertyKey::String(s) => {
+                self.properties.contains_key(&BorrowedPropertyKey::String(s.as_str()))
+            }
+            InternalPropertyKey::Symbol(s) => {
+                self.properties.contains_key(&BorrowedPropertyKey::Symbol(s))
+            }
+            
+        }
+        
+    }
+    
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -169,6 +184,14 @@ impl ArrayProperties {
                 }
             },
             Self::Sparse(arr) => arr.remove(idx),
+        }
+    }
+
+    pub fn contains_key(&self, idx: usize) -> bool {
+        match self {
+            Self::Empty => false,
+            Self::Continuous(arr) => idx < arr.properties.len(),
+            Self::Sparse(arr) => arr.indices.binary_search(&idx).is_ok(),
         }
     }
 }
