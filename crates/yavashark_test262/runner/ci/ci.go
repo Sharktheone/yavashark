@@ -14,6 +14,8 @@ import (
 	"yavashark_test262_runner/status"
 )
 
+const MAX_NEW_TEST_FAILURES = 1000
+
 func RunCi(tr *results.TestResults, repoPath string, historyOnly bool, diff bool, testRoot string) {
 	if repoPath == "" {
 		fmt.Println("CI mode enabled but no repository path specified via --repo")
@@ -68,8 +70,10 @@ func runCI(testResults *results.TestResults, overall Summary, repo string, histo
 		return nil
 	}
 
+	tooManyFailures := false
+
 	if diff {
-		printCiDiff(filepath.Join(repo, "results.json"), testResults, root)
+		tooManyFailures = printCiDiff(filepath.Join(repo, "results.json"), testResults, root)
 	} else {
 		testResults.PrintResults()
 	}
@@ -184,6 +188,10 @@ func runCI(testResults *results.TestResults, overall Summary, repo string, histo
 	//	return fmt.Errorf("git commit failed: %v, output: %s", err, out)
 	//}
 
+	if tooManyFailures {
+		return fmt.Errorf("too many new test failures detected, please review the changes before committing")
+	}
+
 	return nil
 }
 
@@ -249,7 +257,7 @@ func computeAggregate(dir string, summaries map[string]*DirectorySummary) Direct
 	return agg
 }
 
-func printCiDiff(path string, testResults *results.TestResults, root string) {
+func printCiDiff(path string, testResults *results.TestResults, root string) bool {
 	prev, _ := LoadPrevCi(path)
 	if prev != nil {
 		d := testResults.ComputeDiffRoot(prev, root)
@@ -267,5 +275,9 @@ func printCiDiff(path string, testResults *results.TestResults, root string) {
 		fmt.Println("<=== Comparison ===>")
 
 		testResults.Compare(prev)
+
+		return d.NewTestFailures() > MAX_NEW_TEST_FAILURES
 	}
+
+	return false
 }

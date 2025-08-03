@@ -140,6 +140,16 @@ func (d *Diff) PrintGrouped() {
 	print("\n\n\n")
 }
 
+func (d *Diff) NewTestFailures() int {
+	for k, v := range *d {
+		if k.From == status.PASS && k.To == status.FAIL {
+			return len(v)
+		}
+	}
+
+	return 0
+}
+
 func (d *Diff) PrintDiffFilter(filter []TestDiff) {
 	for _, f := range filter {
 		if v, ok := (*d)[f]; ok {
