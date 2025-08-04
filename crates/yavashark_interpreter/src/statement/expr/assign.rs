@@ -292,7 +292,6 @@ impl Interpreter {
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
                         let value = Self::run_assign_op(op, left, right, realm)?;
-                        dbg!(&value);
 
                         class.set_private_prop(name.to_owned(), value.copy());
 
@@ -305,8 +304,6 @@ impl Interpreter {
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
                         let value = Self::run_assign_op(op, left, right, realm)?;
-
-                        dbg!(&value);
 
                         class.set_private_prop_ref(name.to_owned(), value.copy());
 
