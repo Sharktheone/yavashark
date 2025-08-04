@@ -331,7 +331,7 @@ mod temp_test {
                 .filter_level(log::LevelFilter::Warn)
                 .init();
 
-            let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+            let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
             let c = EsSyntax::default();
 

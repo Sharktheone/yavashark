@@ -12,7 +12,7 @@ macro_rules! test_eval {
         use swc_common::BytePos;
         let src = $code;
         let input =
-            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
         let c = Default::default();
 
@@ -33,7 +33,7 @@ macro_rules! test_eval {
         use swc_common::BytePos;
         let src = $code;
         let input =
-            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
         let c = Default::default();
 
@@ -54,7 +54,7 @@ macro_rules! test_eval {
         use swc_common::BytePos;
         let src = $code;
         let input =
-            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+            swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
         let c = Default::default();
 

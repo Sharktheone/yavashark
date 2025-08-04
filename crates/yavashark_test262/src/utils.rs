@@ -23,7 +23,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let metadata = parse_metadata(&input);
 
-    let end = BytePos(input.len() as u32 - 1);
+    let end = BytePos(input.len() as u32);
 
     let input = StringInput::new(&input, BytePos(0), end);
 

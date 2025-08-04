@@ -108,7 +108,7 @@ impl Test262 {
             return Ok(Value::Undefined);
         }
 
-        let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32 - 1));
+        let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
 
         let c = EsSyntax::default();
 

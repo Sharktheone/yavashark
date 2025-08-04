@@ -14,7 +14,7 @@ impl Eval for InterpreterEval {
             return Ok(Value::Undefined);
         }
 
-        let input = StringInput::new(code, BytePos(0), BytePos(code.len() as u32 - 1));
+        let input = StringInput::new(code, BytePos(0), BytePos(code.len() as u32));
         let syn = Syntax::Es(EsSyntax::default());
 
         let mut p = Parser::new(syn, input, None);

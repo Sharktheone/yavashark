@@ -117,7 +117,7 @@ fn main() {
             return;
         }
 
-        let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32 - 1));
+        let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32));
 
         let c = EsSyntax::default();
 

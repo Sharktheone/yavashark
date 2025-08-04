@@ -120,7 +120,7 @@ fn run_input(
         return;
     }
 
-    let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32 - 1));
+    let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
     let syn = Syntax::Es(EsSyntax::default());
 
     let mut p = Parser::new(syn, input, None);

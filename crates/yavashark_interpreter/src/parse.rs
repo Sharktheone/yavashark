@@ -9,7 +9,7 @@ pub fn parse_module(input: &str) -> PResult<Module> {
         return Ok(Module::dummy());
     }
 
-    let end = BytePos(input.len() as u32 - 1);
+    let end = BytePos(input.len() as u32);
 
     let input = StringInput::new(input, BytePos(0), end);
 

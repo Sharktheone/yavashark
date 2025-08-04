@@ -10,7 +10,7 @@
 //         ..Default::default()
 //     };
 //
-//     let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32 - 1));
+//     let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 //
 //     let mut p = Parser::new(Syntax::Typescript(c), input, None);
 //     let prog = p.parse_program().unwrap();
