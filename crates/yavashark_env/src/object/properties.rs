@@ -7,9 +7,8 @@ use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
-use std::{iter, mem};
-use yavashark_value::property_key::{BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
 use std::mem;
+use yavashark_value::property_key::{BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
 use crate::array::ArrayIterator;
 use crate::object::properties::iter::ArrayPropertiesIter;
 
@@ -106,6 +105,10 @@ impl ObjectProperties {
             }
             
         }
+        
+    }
+    
+    pub fn properties(&self) -> impl Iterator<Item = (BorrowedInternalPropertyKey, &ObjectProperty)> {
         
     }
     

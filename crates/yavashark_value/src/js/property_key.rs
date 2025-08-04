@@ -40,6 +40,24 @@ pub enum InternalPropertyKey {
     Index(usize),
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum BorrowedInternalPropertyKey<'a> {
+    String(&'a str),
+    Symbol(&'a Symbol),
+    Index(usize),
+}
+
+impl Equivalent<InternalPropertyKey> for BorrowedInternalPropertyKey<'_> {
+    fn equivalent(&self, other: &InternalPropertyKey) -> bool {
+        match (self, other) {
+            (Self::String(s), InternalPropertyKey::String(o)) => *s == o.as_str(),
+            (Self::Symbol(s), InternalPropertyKey::Symbol(o)) => *s == o,
+            (Self::Index(i), InternalPropertyKey::Index(o)) => *i == *o,
+            _ => false,
+        }
+    }
+}
+
 impl Display for InternalPropertyKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
