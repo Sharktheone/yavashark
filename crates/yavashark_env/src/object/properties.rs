@@ -107,11 +107,10 @@ impl ObjectProperties {
         }
         
     }
-    
+
     pub fn properties(&self) -> ObjectPropertiesIter {
         ObjectPropertiesIter::new(self)
     }
-    
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -202,7 +201,7 @@ impl ArrayProperties {
             Self::Sparse(arr) => arr.indices.binary_search(&idx).is_ok(),
         }
     }
-    
+
     pub fn iter(&self) -> ArrayPropertiesIter {
         ArrayPropertiesIter::new(self)
     }
@@ -330,11 +329,11 @@ impl SparseArrayProperties {
 
         (left, false)
     }
-    
+
     fn get_internal(&self, offset: usize) -> Option<(usize, &ObjectProperty)> {
         let idx = *self.indices.get(offset)?;
         let value = self.properties.get(offset)?;
-        
+
         Some((idx, value))
     }
 
