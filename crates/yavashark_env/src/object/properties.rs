@@ -10,7 +10,7 @@ use std::cmp::Ordering;
 use std::mem;
 use yavashark_value::property_key::{BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
 use crate::array::ArrayIterator;
-use crate::object::properties::iter::ArrayPropertiesIter;
+use crate::object::properties::iter::{ArrayPropertiesIter, ObjectPropertiesIter};
 
 pub struct ObjectProperties {
     pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,
@@ -108,8 +108,8 @@ impl ObjectProperties {
         
     }
     
-    pub fn properties(&self) -> impl Iterator<Item = (BorrowedInternalPropertyKey, &ObjectProperty)> {
-        
+    pub fn properties(&self) -> ObjectPropertiesIter {
+        ObjectPropertiesIter::new(self)
     }
     
 }
