@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+pub mod iter;
+
 use crate::{Error, ObjectProperty, Res};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
@@ -7,6 +9,9 @@ use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::{iter, mem};
 use yavashark_value::property_key::{BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
+use std::mem;
+use crate::array::ArrayIterator;
+use crate::object::properties::iter::ArrayPropertiesIter;
 
 pub struct ObjectProperties {
     pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,
@@ -194,6 +199,10 @@ impl ArrayProperties {
             Self::Sparse(arr) => arr.indices.binary_search(&idx).is_ok(),
         }
     }
+    
+    pub fn iter(&self) -> ArrayPropertiesIter {
+        ArrayPropertiesIter::new(self)
+    }
 }
 
 impl ContinuousArrayProperties {
@@ -209,7 +218,7 @@ impl ContinuousArrayProperties {
         match idx.cmp(&self.properties.len()) {
             Ordering::Less => self.properties[idx] = value,
             Ordering::Equal => self.properties.push(value),
-            Ordering::Greater => return Some(self.sparse_with(iter::once((idx, value)))),
+            Ordering::Greater => return Some(self.sparse_with(std::iter::once((idx, value)))),
         }
 
         None
@@ -317,6 +326,13 @@ impl SparseArrayProperties {
         }
 
         (left, false)
+    }
+    
+    fn get_internal(&self, offset: usize) -> Option<(usize, &ObjectProperty)> {
+        let idx = *self.indices.get(offset)?;
+        let value = self.properties.get(offset)?;
+        
+        Some((idx, value))
     }
 
     pub fn insert(
