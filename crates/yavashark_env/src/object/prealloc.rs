@@ -7,26 +7,37 @@ use crate::Symbol;
 type PreallocPropertyKey = BorrowedPropertyKey<'static>;
 
 
-pub trait PreallocProperties<const N: usize> {
+pub trait PreallocProperties<const N: usize, const S: usize, const G: usize> {
     const PROPS: [(PreallocPropertyKey, Attributes); N];
+    const SETTERS: [PreallocPropertyKey; S];
+    const GETTERS: [PreallocPropertyKey; G];
+
 }
 
-pub struct PreallocObject<P: PreallocProperties<N>, const N: usize> {
+pub struct PreallocObject<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> {
     pub properties: [i32; N],
+    pub get: [i32; S],
+    pub set: [i32; G],
     _marker: PhantomData<P>,
 }
 
-impl<P: PreallocProperties<N>, const N: usize> Default for PreallocObject<P, N> {
+
+
+impl<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> Default for PreallocObject<P, N, S, G> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<P: PreallocProperties<N>, const N: usize> PreallocObject<P, N> {
+impl<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> PreallocObject<P, N, S, G> {
     pub const fn new() -> Self {
         let mut properties = [0; N];
+        let mut get = [0; S];
+        let mut set = [0; G];
         Self {
             properties,
+            get,
+            set,
             _marker: PhantomData,
         }
     }
@@ -58,7 +69,7 @@ impl<P: PreallocProperties<N>, const N: usize> PreallocObject<P, N> {
 
 pub struct SomeObj;
 
-impl PreallocProperties<4> for SomeObj {
+impl PreallocProperties<4, 0, 0> for SomeObj {
     const PROPS: [(PreallocPropertyKey, Attributes); 4] = [
         (
             PreallocPropertyKey::String("someProperty"),
@@ -77,4 +88,7 @@ impl PreallocProperties<4> for SomeObj {
             Attributes::write(),
         ),
     ];
+
+    const SETTERS: [PreallocPropertyKey; 0] = [];
+    const GETTERS: [PreallocPropertyKey; 0] = [];
 }
