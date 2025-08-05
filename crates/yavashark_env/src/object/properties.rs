@@ -108,7 +108,7 @@ impl ObjectProperties {
         
     }
 
-    pub fn properties(&self) -> ObjectPropertiesIter {
+    pub const fn properties(&self) -> ObjectPropertiesIter {
         ObjectPropertiesIter::new(self)
     }
 }
@@ -202,7 +202,7 @@ impl ArrayProperties {
         }
     }
 
-    pub fn iter(&self) -> ArrayPropertiesIter {
+    pub const fn iter(&self) -> ArrayPropertiesIter {
         ArrayPropertiesIter::new(self)
     }
 }

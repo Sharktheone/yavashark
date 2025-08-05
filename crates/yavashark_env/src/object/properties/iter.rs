@@ -47,7 +47,7 @@ impl<'a> Iterator for ObjectPropertiesIter<'a> {
 }
 
 impl <'a> ObjectPropertiesIter<'a> {
-    pub fn new(props: &'a ObjectProperties) -> Self {
+    pub const fn new(props: &'a ObjectProperties) -> Self {
         Self {
             props,
             inner: InnerObjectPropertiesIter::Array(props.array.iter()),
@@ -87,7 +87,7 @@ impl<'a> Iterator for ArrayPropertiesIter<'a> {
 
 
 impl<'a> ArrayPropertiesIter<'a> {
-    pub fn new(array: &'a ArrayProperties) -> Self {
+    pub const fn new(array: &'a ArrayProperties) -> Self {
         Self { array, index: 0 }
     }
 }
@@ -142,7 +142,7 @@ pub enum ArrayPropertiesKeysIter<'a> {
     Sparse(slice::Iter<'a, usize>)
 }
 
-impl<'a> Iterator for ArrayPropertiesKeysIter<'a> {
+impl Iterator for ArrayPropertiesKeysIter<'_> {
     type Item = usize;
 
     fn next(&mut self) -> Option<Self::Item> {
