@@ -1,12 +1,11 @@
 #![allow(unused)]
 use std::marker::PhantomData;
 use yavashark_value::Attributes;
+use yavashark_value::property_key::BorrowedPropertyKey;
+use crate::Symbol;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PreallocPropertyKey {
-    String(&'static str),
-    Symbol(&'static str),
-}
+type PreallocPropertyKey = BorrowedPropertyKey<'static>;
+
 
 pub trait PreallocProperties<const N: usize> {
     const PROPS: [(PreallocPropertyKey, Attributes); N];
@@ -66,7 +65,7 @@ impl PreallocProperties<4> for SomeObj {
             Attributes::write_config(),
         ),
         (
-            PreallocPropertyKey::Symbol("someSymbol"),
+            PreallocPropertyKey::Symbol(Symbol::ITERATOR),
             Attributes::config(),
         ),
         (
@@ -74,7 +73,7 @@ impl PreallocProperties<4> for SomeObj {
             Attributes::enumerable(),
         ),
         (
-            PreallocPropertyKey::Symbol("anotherSymbol"),
+            PreallocPropertyKey::Symbol(Symbol::ASYNC_ITERATOR),
             Attributes::write(),
         ),
     ];
