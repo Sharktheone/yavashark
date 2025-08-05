@@ -1,6 +1,6 @@
 use std::ops::Range;
 use std::slice;
-use indexmap::map::{Iter, Keys};
+use indexmap::map::{Iter, Keys, Values};
 use yavashark_value::property_key::{BorrowedInternalPropertyKey, PropertyKey};
 use crate::object::properties::{ArrayProperties, ObjectProperties};
 use crate::ObjectProperty;
@@ -168,6 +168,78 @@ impl<'a> ArrayPropertiesKeysIter<'a> {
             }
             ArrayProperties::Sparse(sparse) => {
                 Self::Sparse(sparse.indices.iter())
+            }
+        }
+    }
+}
+
+pub struct ObjectPropertiesValuesIter<'a> {
+    props: &'a ObjectProperties,
+    inner: InnerObjectPropertiesValuesIter<'a>,
+}
+
+enum InnerObjectPropertiesValuesIter<'a> {
+    Array(ArrayPropertiesValuesIter<'a>),
+    Object(Values<'a, PropertyKey, ObjectProperty>),
+}
+
+impl<'a> Iterator for ObjectPropertiesValuesIter<'a> {
+    type Item = &'a ObjectProperty;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match &mut self.inner {
+            InnerObjectPropertiesValuesIter::Array(iter) => {
+                if let Some(index) = iter.next() {
+                    Some(index)
+                } else {
+                    let mut iter = self.props.properties.values();
+                    self.inner = InnerObjectPropertiesValuesIter::Object(iter);
+                    self.next()
+                }
+            }
+            InnerObjectPropertiesValuesIter::Object(iter) => {
+                iter.next()
+            }
+        }
+    }
+}
+
+impl<'a> ObjectPropertiesValuesIter<'a> {
+    pub fn new(props: &'a ObjectProperties) -> Self {
+        Self {
+            props,
+            inner: InnerObjectPropertiesValuesIter::Array(ArrayPropertiesValuesIter::new(&props.array)),
+        }
+    }
+}
+
+pub struct ArrayPropertiesValuesIter<'a> {
+    iter: slice::Iter<'a, ObjectProperty>,
+}
+
+impl<'a> Iterator for ArrayPropertiesValuesIter<'a> {
+    type Item = &'a ObjectProperty;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
+impl<'a> ArrayPropertiesValuesIter<'a> {
+    pub fn new(array: &'a ArrayProperties) -> Self {
+        match array {
+            ArrayProperties::Empty => Self {
+                iter: [].iter(),
+            },
+            ArrayProperties::Continuous(continuous) => {
+                Self {
+                    iter: continuous.properties.iter(),
+                }
+            }
+            ArrayProperties::Sparse(sparse) => {
+                Self {
+                    iter: sparse.properties.iter(),
+                }
             }
         }
     }
