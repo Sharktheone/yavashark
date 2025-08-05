@@ -9,7 +9,7 @@ pub enum PropertyKey {
     Symbol(Symbol),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BorrowedPropertyKey<'a> {
     String(&'a str),
     Symbol(&'a Symbol),
@@ -40,7 +40,7 @@ pub enum InternalPropertyKey {
     Index(usize),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BorrowedInternalPropertyKey<'a> {
     String(&'a str),
     Symbol(&'a Symbol),
