@@ -323,7 +323,7 @@ impl ObjectConstructor {
             Value::Undefined | Value::Null => return Err(Error::ty("Object.keys() expects an object")),
             _ => return Ok(Array::from_realm(realm).into_value())
         };
-        
+
         let keys = obj
             .keys()?
             .iter()
@@ -342,7 +342,13 @@ impl ObjectConstructor {
     }
 
     #[prop("values")]
-    fn values(obj: &ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+    fn values(obj: &Value, #[realm] realm: &mut Realm) -> ValueResult {
+        let obj = match obj {
+            Value::Object(obj) => obj,
+            Value::Undefined | Value::Null => return Err(Error::ty("Object.values() expects an object")),
+            _ => return Ok(Array::from_realm(realm).into_value())
+        };
+
         let keys = obj.keys()?;
 
         let mut props = Vec::with_capacity(keys.len());
