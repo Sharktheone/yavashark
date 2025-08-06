@@ -7,10 +7,14 @@ pub struct NativeObject<N: DynNativeObj + ?Sized> {
     pub native_inner: N,
 }
 
-pub trait NativeObj {
-    fn prototype(realm: &Realm) -> ObjectHandle;
-    fn setup_realm(realm: &mut Realm);
+pub trait SetupNativeObj {
+    fn get_prototype(realm: &Realm) -> &ObjectHandle;
+    fn get_prototype_mut(realm: &mut Realm) -> &mut ObjectHandle;
+    
+    fn setup_callback(&self, realm: &mut Realm) {}
+}
 
+pub trait NativeObj: SetupNativeObj {
     fn set_property(&self, name: Value, value: Value) -> Res<bool> {
         Ok(false)
     }
@@ -37,15 +41,5 @@ impl<N: DynNativeObj> NativeObject<N> {
             native_inner,
         }
     }
-
-    pub fn as_dyn(self) -> Box<DynNativeObject> {
-        Box::new(self)
-    }
 }
 
-pub type DynNativeObject = NativeObject<dyn DynNativeObj>;
-
-// pub struct NativeObject2 {
-//     inner: MutObject,
-//     native_inner: dyn DynNativeObj,
-// }
