@@ -318,10 +318,12 @@ impl ObjectConstructor {
 
     #[prop("keys")]
     pub fn keys_js(obj: &Value, #[realm] realm: &Realm) -> ValueResult {
-        let Value::Object(obj) = obj else {
-            return Ok(Array::from_realm(realm).into_value());
+        let obj = match obj {
+            Value::Object(obj) => obj,
+            Value::Undefined | Value::Null => return Err(Error::ty("Object.keys() expects an object")),
+            _ => return Ok(Array::from_realm(realm).into_value())
         };
-
+        
         let keys = obj
             .keys()?
             .iter()
