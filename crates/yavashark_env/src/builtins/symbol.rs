@@ -112,6 +112,11 @@ impl SymbolConstructor {
 impl Func<Realm> for SymbolConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let sym = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
+            if v.is_undefined() {
+                return Ok(String::new());
+            }
+            
+            
             Ok(v.to_string(realm)?.to_string())
         })?;
 
