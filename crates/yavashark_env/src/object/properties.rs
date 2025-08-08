@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 pub mod iter;
+mod hooked;
 
 use crate::array::ArrayIterator;
 use crate::object::properties::iter::{
