@@ -1,10 +1,9 @@
-use std::ops::Range;
-use std::slice;
-use indexmap::map::{Iter, Keys, Values};
-use yavashark_value::property_key::{BorrowedInternalPropertyKey, PropertyKey};
 use crate::object::properties::{ArrayProperties, ObjectProperties};
 use crate::ObjectProperty;
-
+use indexmap::map::{Iter, Keys, Values};
+use std::ops::Range;
+use std::slice;
+use yavashark_value::property_key::{BorrowedInternalPropertyKey, PropertyKey};
 
 pub struct ObjectPropertiesIter<'a> {
     props: &'a ObjectProperties,
@@ -14,7 +13,6 @@ pub struct ObjectPropertiesIter<'a> {
 enum InnerObjectPropertiesIter<'a> {
     Array(ArrayPropertiesIter<'a>),
     Object(Iter<'a, PropertyKey, ObjectProperty>),
-    
 }
 
 impl<'a> Iterator for ObjectPropertiesIter<'a> {
@@ -22,31 +20,33 @@ impl<'a> Iterator for ObjectPropertiesIter<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         match &mut self.inner {
-            InnerObjectPropertiesIter::Array(iter) => if let Some((index, prop)) = iter.next() {
-                let key = BorrowedInternalPropertyKey::Index(index);
-                Some((key, prop))
-            } else {
-                let mut iter = self.props.properties.iter();
-                
-                self.inner = InnerObjectPropertiesIter::Object(iter);
-                
-                self.next()
-            },
+            InnerObjectPropertiesIter::Array(iter) => {
+                if let Some((index, prop)) = iter.next() {
+                    let key = BorrowedInternalPropertyKey::Index(index);
+                    Some((key, prop))
+                } else {
+                    let mut iter = self.props.properties.iter();
+
+                    self.inner = InnerObjectPropertiesIter::Object(iter);
+
+                    self.next()
+                }
+            }
             InnerObjectPropertiesIter::Object(iter) => {
                 let (key, prop) = iter.next()?;
-                
+
                 let key = match key {
                     PropertyKey::String(s) => BorrowedInternalPropertyKey::String(s.as_str()),
                     PropertyKey::Symbol(s) => BorrowedInternalPropertyKey::Symbol(s),
                 };
-                
+
                 Some((key, prop))
             }
         }
     }
 }
 
-impl <'a> ObjectPropertiesIter<'a> {
+impl<'a> ObjectPropertiesIter<'a> {
     pub const fn new(props: &'a ObjectProperties) -> Self {
         Self {
             props,
@@ -54,10 +54,6 @@ impl <'a> ObjectPropertiesIter<'a> {
         }
     }
 }
-
-
-
-
 
 pub struct ArrayPropertiesIter<'a> {
     array: &'a ArrayProperties,
@@ -72,19 +68,16 @@ impl<'a> Iterator for ArrayPropertiesIter<'a> {
             ArrayProperties::Empty => None,
             ArrayProperties::Continuous(continuous) => {
                 let prop = continuous.get(self.index)?;
-                
+
                 let item = (self.index, prop);
                 self.index += 1;
-                
+
                 Some(item)
             }
-            ArrayProperties::Sparse(sparse) => {
-                sparse.get_internal(self.index)
-            }
+            ArrayProperties::Sparse(sparse) => sparse.get_internal(self.index),
         }
     }
 }
-
 
 impl<'a> ArrayPropertiesIter<'a> {
     pub const fn new(array: &'a ArrayProperties) -> Self {
@@ -139,7 +132,7 @@ impl<'a> ObjectPropertiesKeysIter<'a> {
 pub enum ArrayPropertiesKeysIter<'a> {
     Empty,
     Continuous(Range<usize>),
-    Sparse(slice::Iter<'a, usize>)
+    Sparse(slice::Iter<'a, usize>),
 }
 
 impl Iterator for ArrayPropertiesKeysIter<'_> {
@@ -148,13 +141,8 @@ impl Iterator for ArrayPropertiesKeysIter<'_> {
     fn next(&mut self) -> Option<Self::Item> {
         match self {
             ArrayPropertiesKeysIter::Empty => None,
-            ArrayPropertiesKeysIter::Continuous(range) => {
-                range.next()
-                
-            }
-            ArrayPropertiesKeysIter::Sparse(iter) => {
-                Some(*iter.next()?)
-            }
+            ArrayPropertiesKeysIter::Continuous(range) => range.next(),
+            ArrayPropertiesKeysIter::Sparse(iter) => Some(*iter.next()?),
         }
     }
 }
@@ -166,9 +154,7 @@ impl<'a> ArrayPropertiesKeysIter<'a> {
             ArrayProperties::Continuous(continuous) => {
                 Self::Continuous(0..continuous.properties.len())
             }
-            ArrayProperties::Sparse(sparse) => {
-                Self::Sparse(sparse.indices.iter())
-            }
+            ArrayProperties::Sparse(sparse) => Self::Sparse(sparse.indices.iter()),
         }
     }
 }
@@ -197,9 +183,7 @@ impl<'a> Iterator for ObjectPropertiesValuesIter<'a> {
                     self.next()
                 }
             }
-            InnerObjectPropertiesValuesIter::Object(iter) => {
-                iter.next()
-            }
+            InnerObjectPropertiesValuesIter::Object(iter) => iter.next(),
         }
     }
 }
@@ -208,7 +192,9 @@ impl<'a> ObjectPropertiesValuesIter<'a> {
     pub fn new(props: &'a ObjectProperties) -> Self {
         Self {
             props,
-            inner: InnerObjectPropertiesValuesIter::Array(ArrayPropertiesValuesIter::new(&props.array)),
+            inner: InnerObjectPropertiesValuesIter::Array(ArrayPropertiesValuesIter::new(
+                &props.array,
+            )),
         }
     }
 }
@@ -228,19 +214,13 @@ impl<'a> Iterator for ArrayPropertiesValuesIter<'a> {
 impl<'a> ArrayPropertiesValuesIter<'a> {
     pub fn new(array: &'a ArrayProperties) -> Self {
         match array {
-            ArrayProperties::Empty => Self {
-                iter: [].iter(),
+            ArrayProperties::Empty => Self { iter: [].iter() },
+            ArrayProperties::Continuous(continuous) => Self {
+                iter: continuous.properties.iter(),
             },
-            ArrayProperties::Continuous(continuous) => {
-                Self {
-                    iter: continuous.properties.iter(),
-                }
-            }
-            ArrayProperties::Sparse(sparse) => {
-                Self {
-                    iter: sparse.properties.iter(),
-                }
-            }
+            ArrayProperties::Sparse(sparse) => Self {
+                iter: sparse.properties.iter(),
+            },
         }
     }
 }

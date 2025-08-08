@@ -320,8 +320,10 @@ impl ObjectConstructor {
     pub fn keys_js(obj: &Value, #[realm] realm: &Realm) -> ValueResult {
         let obj = match obj {
             Value::Object(obj) => obj,
-            Value::Undefined | Value::Null => return Err(Error::ty("Object.keys() expects an object")),
-            _ => return Ok(Array::from_realm(realm).into_value())
+            Value::Undefined | Value::Null => {
+                return Err(Error::ty("Object.keys() expects an object"))
+            }
+            _ => return Ok(Array::from_realm(realm).into_value()),
         };
 
         let keys = obj
@@ -345,8 +347,10 @@ impl ObjectConstructor {
     fn values(obj: &Value, #[realm] realm: &mut Realm) -> ValueResult {
         let obj = match obj {
             Value::Object(obj) => obj,
-            Value::Undefined | Value::Null => return Err(Error::ty("Object.values() expects an object")),
-            _ => return Ok(Array::from_realm(realm).into_value())
+            Value::Undefined | Value::Null => {
+                return Err(Error::ty("Object.values() expects an object"))
+            }
+            _ => return Ok(Array::from_realm(realm).into_value()),
         };
 
         let keys = obj.keys()?;

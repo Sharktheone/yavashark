@@ -1,35 +1,40 @@
 #![allow(unused)]
-use std::marker::PhantomData;
-use yavashark_value::Attributes;
-use yavashark_value::property_key::BorrowedPropertyKey;
 use crate::Symbol;
+use std::marker::PhantomData;
+use yavashark_value::property_key::BorrowedPropertyKey;
+use yavashark_value::Attributes;
 
 type PreallocPropertyKey = BorrowedPropertyKey<'static>;
-
 
 pub trait PreallocProperties<const N: usize, const S: usize, const G: usize> {
     const PROPS: [(PreallocPropertyKey, Attributes); N];
     const SETTERS: [PreallocPropertyKey; S];
     const GETTERS: [PreallocPropertyKey; G];
-
 }
 
-pub struct PreallocObject<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> {
+pub struct PreallocObject<
+    P: PreallocProperties<N, S, G>,
+    const N: usize,
+    const S: usize,
+    const G: usize,
+> {
     pub properties: [i32; N],
     pub get: [i32; S],
     pub set: [i32; G],
     _marker: PhantomData<P>,
 }
 
-
-
-impl<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> Default for PreallocObject<P, N, S, G> {
+impl<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> Default
+    for PreallocObject<P, N, S, G>
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize> PreallocObject<P, N, S, G> {
+impl<P: PreallocProperties<N, S, G>, const N: usize, const S: usize, const G: usize>
+    PreallocObject<P, N, S, G>
+{
     pub const fn new() -> Self {
         let mut properties = [0; N];
         let mut get = [0; S];

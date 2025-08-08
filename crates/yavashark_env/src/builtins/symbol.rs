@@ -115,8 +115,7 @@ impl Func<Realm> for SymbolConstructor {
             if v.is_undefined() {
                 return Ok(String::new());
             }
-            
-            
+
             Ok(v.to_string(realm)?.to_string())
         })?;
 

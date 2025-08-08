@@ -2,15 +2,19 @@
 
 pub mod iter;
 
+use crate::array::ArrayIterator;
+use crate::object::properties::iter::{
+    ArrayPropertiesIter, ObjectPropertiesIter, ObjectPropertiesKeysIter, ObjectPropertiesValuesIter,
+};
 use crate::{Error, ObjectProperty, Res};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::mem;
-use yavashark_value::property_key::{BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey};
-use crate::array::ArrayIterator;
-use crate::object::properties::iter::{ArrayPropertiesIter, ObjectPropertiesIter, ObjectPropertiesKeysIter, ObjectPropertiesValuesIter};
+use yavashark_value::property_key::{
+    BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey,
+};
 
 pub struct ObjectProperties {
     pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,
@@ -93,29 +97,27 @@ impl ObjectProperties {
             }
         }
     }
-    
+
     pub fn contains_key(&self, key: &InternalPropertyKey) -> bool {
         match key {
             InternalPropertyKey::Index(idx) => self.array.contains_key(*idx),
-            InternalPropertyKey::String(s) => {
-                self.properties.contains_key(&BorrowedPropertyKey::String(s.as_str()))
-            }
-            InternalPropertyKey::Symbol(s) => {
-                self.properties.contains_key(&BorrowedPropertyKey::Symbol(s))
-            }
-            
+            InternalPropertyKey::String(s) => self
+                .properties
+                .contains_key(&BorrowedPropertyKey::String(s.as_str())),
+            InternalPropertyKey::Symbol(s) => self
+                .properties
+                .contains_key(&BorrowedPropertyKey::Symbol(s)),
         }
-        
     }
 
     pub const fn properties(&self) -> ObjectPropertiesIter {
         ObjectPropertiesIter::new(self)
     }
-    
+
     pub fn keys(&self) -> ObjectPropertiesKeysIter {
         ObjectPropertiesKeysIter::new(self)
     }
-    
+
     pub fn values(&self) -> ObjectPropertiesValuesIter {
         ObjectPropertiesValuesIter::new(self)
     }

@@ -10,7 +10,7 @@ pub struct NativeObject<N: DynNativeObj + ?Sized> {
 pub trait SetupNativeObj {
     fn get_prototype(realm: &Realm) -> &ObjectHandle;
     fn get_prototype_mut(realm: &mut Realm) -> &mut ObjectHandle;
-    
+
     fn setup_callback(&self, realm: &mut Realm) {}
 }
 
@@ -42,4 +42,3 @@ impl<N: DynNativeObj> NativeObject<N> {
         }
     }
 }
-
