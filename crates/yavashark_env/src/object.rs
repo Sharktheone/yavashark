@@ -647,7 +647,13 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn keys(&self) -> Result<Vec<Value>, Error> {
-        Ok(self.properties.keys().cloned().map(Into::into).collect())
+        Ok(
+            self.array
+            .iter()
+            .map(|(i, _)| Value::from(InternalPropertyKey::Index(*i)))
+            .chain(self.properties.keys().cloned().map(Into::into))
+            .collect::<Vec<_>>()
+        )
     }
 
     fn values(&self) -> Result<Vec<Value>, Error> {
