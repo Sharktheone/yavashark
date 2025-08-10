@@ -1,0 +1,96 @@
+name: Build Binaries
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-all:
+    name: Build all targets on Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-gnu,wasm32-unknown-unknown,x86_64-apple-darwin,aarch64-apple-darwin
+
+      - name: Install dependencies (zig, mingw, tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config curl unzip \
+            mingw-w64 zig
+          cargo install cargo-zigbuild --locked
+
+      - name: Build (Linux x86_64)
+        run: cargo build --release
+
+      - name: Build (Windows x86_64 gnu)
+        env:
+          CC_x86_64_pc_windows_gnu: x86_64-w64-mingw32-gcc
+          CXX_x86_64_pc_windows_gnu: x86_64-w64-mingw32-g++
+          AR_x86_64_pc_windows_gnu: x86_64-w64-mingw32-gcc-ar
+        run: cargo build --release --target x86_64-pc-windows-gnu
+
+      - name: Build (macOS x86_64)
+        env:
+          ZIGBUILD_DOWNLOAD_MACOS_SDK: '1'
+        run: cargo zigbuild --release --target x86_64-apple-darwin
+
+      - name: Build (macOS aarch64)
+        env:
+          ZIGBUILD_DOWNLOAD_MACOS_SDK: '1'
+        run: cargo zigbuild --release --target aarch64-apple-darwin
+
+      - name: Install wasm-pack
+        run: curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
+
+      - name: Build (wasm with wasm-pack for web)
+        run: wasm-pack build --target web --release
+
+      - name: Upload artifact (Linux x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yavashark-linux-x86_64-${{ github.sha }}
+          if-no-files-found: error
+          path: target/release/yavashark
+
+      - name: Upload artifact (Windows x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yavashark-windows-x86_64-gnu-${{ github.sha }}
+          if-no-files-found: error
+          path: target/x86_64-pc-windows-gnu/release/yavashark.exe
+
+      - name: Upload artifact (macOS x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yavashark-macos-x86_64-${{ github.sha }}
+          if-no-files-found: error
+          path: target/x86_64-apple-darwin/release/yavashark
+
+      - name: Upload artifact (macOS aarch64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yavashark-macos-aarch64-${{ github.sha }}
+          if-no-files-found: error
+          path: target/aarch64-apple-darwin/release/yavashark
+
+      - name: Upload artifact (wasm pkg)
+        uses: actions/upload-artifact@v4
+        with:
+          name: yavashark-wasm-web-pkg-${{ github.sha }}
+          if-no-files-found: error
+          path: |
+            pkg/yavashark_bg.wasm
+            pkg/yavashark_bg.wasm.d.ts
+            pkg/yavashark.js
+            pkg/yavashark.d.ts
+            pkg/package.json
