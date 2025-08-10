@@ -49,3 +49,14 @@ pub fn notify_dependent(dep: &ObjectHandle, realm: &mut Realm) -> Res<()> {
 
     Ok(())
 }
+
+
+pub fn make_dependent(
+    dep: &ObjectHandle,
+    realm: &mut Realm,
+) -> Res<()> {
+    //TODO
+
+
+    Ok(())
+}
