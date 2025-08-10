@@ -6,6 +6,7 @@ use crate::Value;
 
 mod error;
 pub mod print;
+pub mod sink;
 
 #[must_use]
 pub fn get_console(realm: &Realm) -> Value {
@@ -25,10 +26,12 @@ pub fn get_console(realm: &Realm) -> Value {
 
                 str.pop();
 
-                #[cfg(not(target_arch = "wasm32"))]
-                println!("{str}");
-                #[cfg(target_arch = "wasm32")]
-                log::info!("YAVASHARK_LOG: {str}");
+                if !sink::call_log_sink(&str) {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    println!("{str}");
+                    #[cfg(target_arch = "wasm32")]
+                    log::info!("YAVASHARK_LOG: {str}");
+                } 
 
                 Ok(Value::Undefined)
             },
