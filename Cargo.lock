@@ -1635,10 +1635,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c4567c8db10ae91089c99af84c68c38da3ec2f087c3f82960bcdbf3656b6f4d7"
 dependencies = [
  "cfg-if",
- "js-sys",
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "wasm-bindgen",
 ]
 
 [[package]]
@@ -2471,13 +2469,13 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "1.0.3"
+version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2886843bf800fba2e3377cff24abf6379b4c4d5c6681eaf9ea5b0d15090450bd"
+checksum = "78bed444cc8a2160f01cbcf811ef18cac863ad68ae8ca62092e8db51d51c761c"
 dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -5327,7 +5325,7 @@ dependencies = [
  "clap",
  "console_error_panic_hook",
  "console_log",
- "getrandom 0.2.15",
+ "getrandom 0.3.1",
  "js-sys",
  "rustyline",
  "rustyline-derive",
@@ -5336,6 +5334,7 @@ dependencies = [
  "swc_ecma_parser 22.0.3",
  "tokio",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "yavashark_codegen",
  "yavashark_compiler",
  "yavashark_env",

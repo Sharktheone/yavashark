@@ -25,7 +25,7 @@ half = { version = "2.4.1", features = ["bytemuck", "num-traits"]}
 bytemuck = "1.21.0"
 hex = "0.4.3"
 log = "0.4.25"
-tokio = { version = "1.44.1", features = ["sync"] } # tokio is just needed for `Notify` probably we should use another dependency for that
+tokio = { version = "1.44.1", default-features = false, features = ["sync"] }
 futures = "0.3.31"
 pin-project = "1.1.10"
 rustc-hash = "2.1.1"
