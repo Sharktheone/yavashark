@@ -39,15 +39,15 @@ jobs:
           AR_x86_64_pc_windows_gnu: x86_64-w64-mingw32-gcc-ar
         run: cargo build --release --target x86_64-pc-windows-gnu
 
-      - name: Build (macOS x86_64)
-        env:
-          ZIGBUILD_DOWNLOAD_MACOS_SDK: '1'
-        run: cargo zigbuild --release --target x86_64-apple-darwin
+#      - name: Build (macOS x86_64)
+#        env:
+#          ZIGBUILD_DOWNLOAD_MACOS_SDK: '1'
+#        run: cargo zigbuild --release --target x86_64-apple-darwin
 
-      - name: Build (macOS aarch64)
-        env:
-          ZIGBUILD_DOWNLOAD_MACOS_SDK: '1'
-        run: cargo zigbuild --release --target aarch64-apple-darwin
+#      - name: Build (macOS aarch64)
+#        env:
+#          ZIGBUILD_DOWNLOAD_MACOS_SDK: '1'
+#        run: cargo zigbuild --release --target aarch64-apple-darwin
 
       - name: Install wasm-pack
         run: curl -sSf https://rustwasm.github.io/wasm-pack/installer/init.sh | sh
@@ -69,19 +69,19 @@ jobs:
           if-no-files-found: error
           path: target/x86_64-pc-windows-gnu/release/yavashark.exe
 
-      - name: Upload artifact (macOS x86_64)
-        uses: actions/upload-artifact@v4
-        with:
-          name: yavashark-macos-x86_64-${{ github.sha }}
-          if-no-files-found: error
-          path: target/x86_64-apple-darwin/release/yavashark
-
-      - name: Upload artifact (macOS aarch64)
-        uses: actions/upload-artifact@v4
-        with:
-          name: yavashark-macos-aarch64-${{ github.sha }}
-          if-no-files-found: error
-          path: target/aarch64-apple-darwin/release/yavashark
+#      - name: Upload artifact (macOS x86_64)
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: yavashark-macos-x86_64-${{ github.sha }}
+#          if-no-files-found: error
+#          path: target/x86_64-apple-darwin/release/yavashark
+#
+#      - name: Upload artifact (macOS aarch64)
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: yavashark-macos-aarch64-${{ github.sha }}
+#          if-no-files-found: error
+#          path: target/aarch64-apple-darwin/release/yavashark
 
       - name: Upload artifact (wasm pkg)
         uses: actions/upload-artifact@v4
