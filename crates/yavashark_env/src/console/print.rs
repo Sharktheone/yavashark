@@ -1,8 +1,19 @@
 use colored::Colorize;
 
 use yavashark_value::{Object, Value};
-
+use crate::array::Array;
+use crate::builtins::RegExp;
 use crate::realm::Realm;
+
+pub trait PrettyObjectOverride {
+    fn pretty_inline(&self, _obj: &Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
+        None
+    }
+
+    fn pretty_multiline(&self, _obj: &Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
+        None
+    }
+}
 
 pub trait PrettyPrint {
     fn pretty_print(&self) -> String {
@@ -26,6 +37,17 @@ impl PrettyPrint for Object<Realm> {
     }
 
     fn pretty_print_circular(&self, not: &mut Vec<usize>) -> String {
+        if let Some(array) = self.downcast::<Array>() {
+            if let Some(s) = PrettyObjectOverride::pretty_inline(&*array, self, not) {
+                return s;
+            }
+        }
+        if let Some(re) = self.downcast::<RegExp>() {
+            if let Some(s) = PrettyObjectOverride::pretty_inline(&*re, self, not) {
+                return s;
+            }
+        }
+
         let id = self.id();
 
         if not.contains(&id) {
@@ -82,6 +104,18 @@ impl PrettyPrint for Object<Realm> {
     }
 
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String {
+        // Try type-specific overrides first
+        if let Some(array) = self.downcast::<crate::object::array::Array>() {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(&*array, self, not) {
+                return s;
+            }
+        }
+        if let Some(re) = self.downcast::<crate::builtins::RegExp>() {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(&*re, self, not) {
+                return s;
+            }
+        }
+
         let id = self.id();
 
         if not.contains(&id) {
