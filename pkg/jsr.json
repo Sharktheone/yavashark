@@ -2,7 +2,7 @@
   "name": "@yavashark/engine-git",
   "version": "0.1.0",
   "exports": {
-    ".": "./pkg/yavashark.js"
+    ".": "./yavashark.js"
   },
   "description": "A new, experimental JavaScript/TypeScript engine written in Rust, compiled to WebAssembly",
   "license": "MIT",
