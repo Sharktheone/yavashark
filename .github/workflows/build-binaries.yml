@@ -97,9 +97,9 @@ jobs:
             pkg/yavashark.js
             pkg/yavashark.d.ts
             pkg/package.json
-      - name: Publish wasm on jsr 
+      - name: Publish wasm on jsr
         if: github.repository == 'Sharktheone/yavashark'
         run: |
           cd pkg
-          npx jsr publish
+          npx jsr publish --allow-dirty
 
