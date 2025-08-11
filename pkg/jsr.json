@@ -1,0 +1,27 @@
+{
+  "name": "@yavashark/engine-git",
+  "version": "0.1.0",
+  "exports": {
+    ".": "./pkg/yavashark.js"
+  },
+  "description": "A new, experimental JavaScript/TypeScript engine written in Rust, compiled to WebAssembly",
+  "license": "MIT",
+  "keywords": ["javascript", "typescript", "rust", "interpreter", "engine", "wasm"],
+  "homepage": "https://github.com/Sharktheone/yavashark",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sharktheone/yavashark.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sharktheone /yavashark/issues"
+  },
+  "include": [
+    "yavashark.js",
+    "yavashark.d.ts",
+    "yavashark_bg.wasm",
+    "yavashark_bg.wasm.d.ts",
+    "README.md",
+    "LICENSE"
+  ]
+}
+
