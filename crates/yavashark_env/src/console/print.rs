@@ -1,9 +1,9 @@
 use colored::Colorize;
 
-use yavashark_value::{Object, Value};
 use crate::array::Array;
 use crate::builtins::RegExp;
 use crate::realm::Realm;
+use yavashark_value::{Object, Value};
 
 pub trait PrettyObjectOverride {
     fn pretty_inline(&self, _obj: &Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
@@ -106,12 +106,16 @@ impl PrettyPrint for Object<Realm> {
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String {
         // Try type-specific overrides first
         if let Some(array) = self.downcast::<crate::object::array::Array>() {
-            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(&*array, self, not) {
+            if let Some(s) =
+                crate::console::print::PrettyObjectOverride::pretty_multiline(&*array, self, not)
+            {
                 return s;
             }
         }
         if let Some(re) = self.downcast::<crate::builtins::RegExp>() {
-            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(&*re, self, not) {
+            if let Some(s) =
+                crate::console::print::PrettyObjectOverride::pretty_multiline(&*re, self, not)
+            {
                 return s;
             }
         }

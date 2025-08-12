@@ -31,7 +31,7 @@ pub fn get_console(realm: &Realm) -> Value {
                     println!("{str}");
                     #[cfg(target_arch = "wasm32")]
                     log::info!("YAVASHARK_LOG: {str}");
-                } 
+                }
 
                 Ok(Value::Undefined)
             },

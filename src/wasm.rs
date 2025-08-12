@@ -1,7 +1,7 @@
-use crate::{execute_fmt};
+use crate::execute_fmt;
+use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::cell::RefCell;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_ast::Stmt;
@@ -96,7 +96,9 @@ impl Engine {
         let realm = Realm::new().map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
         let scope = Scope::global(&realm, PathBuf::new());
         let inner = EngineInner { realm, scope };
-        Ok(Engine { inner: Rc::new(RefCell::new(inner)) })
+        Ok(Engine {
+            inner: Rc::new(RefCell::new(inner)),
+        })
     }
 
     pub fn eval(&self, code: &str) -> Result<String, JsValue> {
@@ -104,7 +106,6 @@ impl Engine {
         let mut inner = self.inner.borrow_mut();
 
         let exec_res = {
-
             // let inner = &mut *inner;
             // let realm = &mut inner.realm;
             // let scope = &mut inner.scope;

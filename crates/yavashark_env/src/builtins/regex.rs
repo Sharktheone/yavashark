@@ -1,6 +1,6 @@
 use crate::array::Array;
-use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use crate::console::print::PrettyObjectOverride;
+use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use regress::{Range, Regex};
 use std::cell::{Cell, RefCell};
 use yavashark_macro::{object, properties_new};
@@ -306,7 +306,11 @@ impl RegExp {
 }
 
 impl PrettyObjectOverride for RegExp {
-    fn pretty_inline(&self, _obj: &yavashark_value::Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        _obj: &yavashark_value::Object<Realm>,
+        _not: &mut Vec<usize>,
+    ) -> Option<String> {
         let mut s = String::new();
         s.push('/');
         s.push_str(self.source.as_str());
@@ -315,7 +319,11 @@ impl PrettyObjectOverride for RegExp {
         Some(s)
     }
 
-    fn pretty_multiline(&self, _obj: &yavashark_value::Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_multiline(
+        &self,
+        _obj: &yavashark_value::Object<Realm>,
+        _not: &mut Vec<usize>,
+    ) -> Option<String> {
         self.pretty_inline(_obj, _not)
     }
 }

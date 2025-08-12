@@ -1,9 +1,9 @@
-use yavashark_value::property_key::InternalPropertyKey;
 use crate::{ObjectProperty, Res};
+use yavashark_value::property_key::InternalPropertyKey;
 
 pub struct ObjectProperties<H: Hooks> {
     pub(crate) hooks: H,
-    props: super::ObjectProperties
+    props: super::ObjectProperties,
 }
 
 pub trait Hooks {

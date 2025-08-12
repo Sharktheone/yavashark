@@ -46,11 +46,7 @@ pub fn set_log_sink<F>(f: Option<F>)
 where
     F: Fn(&str) + Send + Sync + 'static,
 {
-    let mut w = LOG_SINK
-        .write()
-        .unwrap_or_else(|e| {
-            e.into_inner()
-        });
+    let mut w = LOG_SINK.write().unwrap_or_else(|e| e.into_inner());
 
     *w = f.map(|f| Box::new(f) as Box<SinkFn>);
 }
@@ -62,9 +58,7 @@ pub fn clear_log_sink() {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn call_log_sink(msg: &str) -> bool {
-    let r = LOG_SINK.read().unwrap_or_else(|e| {
-        e.into_inner()
-    });
+    let r = LOG_SINK.read().unwrap_or_else(|e| e.into_inner());
 
     (*r).as_ref().is_some_and(|f| {
         f(msg);

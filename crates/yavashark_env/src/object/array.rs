@@ -1418,13 +1418,21 @@ impl Array {
 }
 
 impl PrettyObjectOverride for Array {
-    fn pretty_inline(&self, _obj: &yavashark_value::Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
-        let Ok(inner) = self.inner.try_borrow() else { return None; };
+    fn pretty_inline(
+        &self,
+        _obj: &yavashark_value::Object<Realm>,
+        not: &mut Vec<usize>,
+    ) -> Option<String> {
+        let Ok(inner) = self.inner.try_borrow() else {
+            return None;
+        };
         let mut s = String::new();
         s.push('[');
         for (i, (_, idx)) in inner.array.iter().enumerate() {
             if let Some(v) = inner.values.get(*idx) {
-                if i > 0 { s.push_str(", "); }
+                if i > 0 {
+                    s.push_str(", ");
+                }
                 s.push_str(&v.value.pretty_print_circular(not));
             }
         }
@@ -1432,15 +1440,23 @@ impl PrettyObjectOverride for Array {
         Some(s)
     }
 
-    fn pretty_multiline(&self, _obj: &yavashark_value::Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
-        let Ok(inner) = self.inner.try_borrow() else { return None; };
+    fn pretty_multiline(
+        &self,
+        _obj: &yavashark_value::Object<Realm>,
+        not: &mut Vec<usize>,
+    ) -> Option<String> {
+        let Ok(inner) = self.inner.try_borrow() else {
+            return None;
+        };
         let mut s = String::new();
         s.push_str("[\n");
         for (i, (_, idx)) in inner.array.iter().enumerate() {
             if let Some(v) = inner.values.get(*idx) {
                 s.push_str("  ");
                 s.push_str(&v.value.pretty_print_circular_nl(not));
-                if i + 1 < inner.array.len() { s.push_str(",\n"); }
+                if i + 1 < inner.array.len() {
+                    s.push_str(",\n");
+                }
             }
         }
         s.push_str("\n]");
