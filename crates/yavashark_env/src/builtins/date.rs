@@ -6,6 +6,7 @@ use std::ops::Rem;
 use std::str::FromStr;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
+use crate::print::PrettyObjectOverride;
 
 #[object]
 #[derive(Debug)]
@@ -636,4 +637,11 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
     let val = val.rem(max);
 
     (val as u32, larger - larger_diff)
+}
+
+
+impl PrettyObjectOverride for Date {
+    fn pretty_inline(&self, _obj: &yavashark_value::Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
+        Some(self.date().format("%Y-%m-%d %H:%M:%S").to_string())
+    }
 }
