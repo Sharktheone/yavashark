@@ -4,6 +4,9 @@
   "exports": {
     ".": "./yavashark.js"
   },
+  "exclude": [
+    "!*"
+  ],
   "description": "A new, experimental JavaScript/TypeScript engine written in Rust, compiled to WebAssembly",
   "license": "MIT",
   "keywords": ["javascript", "typescript", "rust", "interpreter", "engine", "wasm"],
