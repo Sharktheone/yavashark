@@ -1,4 +1,5 @@
 use crate::conversion::FromValueOutput;
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike};
 use std::cell::RefCell;
@@ -6,7 +7,6 @@ use std::ops::Rem;
 use std::str::FromStr;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, Obj};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -638,7 +638,6 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
 
     (val as u32, larger - larger_diff)
 }
-
 
 impl PrettyObjectOverride for Date {
     fn pretty_inline(

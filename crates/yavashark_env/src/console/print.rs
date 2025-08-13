@@ -125,7 +125,9 @@ impl PrettyPrint for Object<Realm> {
         }
 
         if let Some(date) = self.downcast::<crate::builtins::Date>() {
-            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not) {
+            if let Some(s) =
+                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not)
+            {
                 return s;
             }
         }
