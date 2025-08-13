@@ -239,3 +239,26 @@ impl PrettyPrint for Value<Realm> {
         }
     }
 }
+
+pub fn fmt_properties_to(obj: &Object<Realm>, str: &mut String, not: &mut Vec<usize>) {
+    let Ok(properties) = obj.properties() else {
+        return;
+    };
+
+    if properties.is_empty() {
+        return;
+    }
+
+    str.push_str(" { ");
+
+    for (key, value) in properties {
+        str.push_str(&key.pretty_print_key());
+        str.push_str(": ");
+        str.push_str(&value.pretty_print_circular(not));
+        str.push_str(", ");
+    }
+    str.pop();
+    str.pop();
+
+    str.push_str(" }");
+}
