@@ -6,12 +6,10 @@ use crate::realm::Realm;
 use yavashark_value::{Object, Value};
 
 pub trait PrettyObjectOverride {
-    fn pretty_inline(&self, _obj: &Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
-        None
-    }
+    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String>;
 
-    fn pretty_multiline(&self, _obj: &Object<Realm>, _not: &mut Vec<usize>) -> Option<String> {
-        None
+    fn pretty_multiline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+        self.pretty_inline(obj, not)
     }
 }
 
