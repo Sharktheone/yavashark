@@ -13,7 +13,8 @@ use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
 use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
-use yavashark_value::Obj;
+use yavashark_value::{Obj, Object};
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -249,5 +250,17 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
             temporal_rs::Instant::from_str(s.as_str()).map_err(Error::from_temporal)
         }
         _ => Err(Error::ty("Expected a Temporal.Instant object")),
+    }
+}
+
+
+impl PrettyObjectOverride for Instant {
+    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+        let mut s = self.stamp
+            .to_ixdtf_string(None, ToStringRoundingOptions::default()).ok()?;
+
+        fmt_properties_to(obj, &mut s, not);
+
+        Some(s)
     }
 }
