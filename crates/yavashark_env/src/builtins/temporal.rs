@@ -9,15 +9,16 @@ mod plain_year_month;
 mod utils;
 mod zoned_date_time;
 
-use crate::builtins::temporal::duration::Duration;
-use crate::builtins::temporal::instant::Instant;
-use crate::builtins::temporal::now::Now;
-use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::plain_month_day::PlainMonthDay;
-use crate::builtins::temporal::plain_time::PlainTime;
-use crate::builtins::temporal::plain_year_month::PlainYearMonth;
-use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
+pub use crate::builtins::temporal::duration::*;
+pub use crate::builtins::temporal::instant::*;
+pub use crate::builtins::temporal::now::*;
+pub use crate::builtins::temporal::plain_date::*;
+pub use crate::builtins::temporal::plain_date_time::*;
+pub use crate::builtins::temporal::plain_month_day::*;
+pub use crate::builtins::temporal::plain_time::*;
+pub use crate::builtins::temporal::plain_year_month::*;
+pub use crate::builtins::temporal::zoned_date_time::*;
+
 use crate::{Object, ObjectHandle, Res, Value, Variable};
 
 pub struct Protos {
