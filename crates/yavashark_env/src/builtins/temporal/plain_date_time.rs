@@ -9,11 +9,14 @@ use crate::builtins::temporal::utils::{
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
+use std::env::temp_dir;
 use std::str::FromStr;
 use temporal_rs::{Calendar, TimeZone};
+use temporal_rs::options::DisplayCalendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use yavashark_value::Obj;
+use yavashark_value::{Obj, Object};
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -518,4 +521,15 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
     }
 
     Err(Error::range("Invalid date")) //TODO
+}
+
+
+impl PrettyObjectOverride for PlainDateTime {
+    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+        let mut s = self.date.to_string();
+
+        fmt_properties_to(obj, &mut s, not);
+
+        Some(s)
+    }
 }
