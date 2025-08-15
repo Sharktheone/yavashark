@@ -10,8 +10,8 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
 use yavashark_value::property_key::InternalPropertyKey;
+use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -79,12 +79,13 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
 
             return Ok(Some(chr.into()));
         }
-        
+
         let key = InternalPropertyKey::from(name.copy());
-        
-        if let InternalPropertyKey::Index(index) = key { let inner = self.inner.borrow();
-            let chr =
-                Self::get_single_str(&inner.string, index as isize).map_or(Value::Undefined, Into::into);
+
+        if let InternalPropertyKey::Index(index) = key {
+            let inner = self.inner.borrow();
+            let chr = Self::get_single_str(&inner.string, index as isize)
+                .map_or(Value::Undefined, Into::into);
 
             return Ok(Some(chr.into()));
         }

@@ -4,6 +4,7 @@ use crate::builtins::temporal::utils::{
     difference_settings, rounding_options, string_rounding_mode_opts,
 };
 use crate::conversion::FromValueOutput;
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
@@ -14,7 +15,6 @@ use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::{Obj, Object};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -253,11 +253,12 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
     }
 }
 
-
 impl PrettyObjectOverride for Instant {
     fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
-        let mut s = self.stamp
-            .to_ixdtf_string(None, ToStringRoundingOptions::default()).ok()?;
+        let mut s = self
+            .stamp
+            .to_ixdtf_string(None, ToStringRoundingOptions::default())
+            .ok()?;
 
         fmt_properties_to(obj, &mut s, not);
 

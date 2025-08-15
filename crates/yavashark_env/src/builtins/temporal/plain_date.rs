@@ -6,15 +6,15 @@ use crate::builtins::temporal::plain_time::value_to_plain_time;
 use crate::builtins::temporal::plain_year_month::PlainYearMonth;
 use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options};
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
+use temporal_rs::options::DisplayCalendar;
 use temporal_rs::{Calendar, TimeZone};
-use temporal_rs::options::{DisplayCalendar};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -416,12 +416,9 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
     Err(Error::ty("Invalid date")) //TODO
 }
 
-
-
 impl PrettyObjectOverride for PlainDate {
     fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
-        let mut s = self.date
-            .to_ixdtf_string(DisplayCalendar::Auto);
+        let mut s = self.date.to_ixdtf_string(DisplayCalendar::Auto);
 
         fmt_properties_to(obj, &mut s, not);
 

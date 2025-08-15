@@ -2,13 +2,13 @@ use crate::builtins::temporal::utils::{
     opt_relative_to_wrap, rounding_options, string_rounding_mode_opts,
 };
 use crate::conversion::{FromValueOutput, NonFract};
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::{ToStringRoundingOptions, Unit};
 use yavashark_macro::{object, props};
 use yavashark_value::{Obj, Object};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -385,8 +385,10 @@ pub fn value_to_duration(value: Value, realm: &mut Realm) -> Res<temporal_rs::Du
 
 impl PrettyObjectOverride for Duration {
     fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
-        let mut s = self.dur
-            .as_temporal_string(ToStringRoundingOptions::default()).ok()?;
+        let mut s = self
+            .dur
+            .as_temporal_string(ToStringRoundingOptions::default())
+            .ok()?;
 
         fmt_properties_to(obj, &mut s, not);
 
