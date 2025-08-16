@@ -82,6 +82,12 @@ impl PrettyPrint for Object<Realm> {
             }
         }
 
+        if let Some(date) = self.downcast::<crate::builtins::temporal::PlainTime>() {
+            if let Some(s) = PrettyObjectOverride::pretty_inline(&*date, self, not) {
+                return s;
+            }
+        }
+
         let id = self.id();
 
         if not.contains(&id) {
@@ -195,6 +201,14 @@ impl PrettyPrint for Object<Realm> {
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::PlainMonthDay>() {
+            if let Some(s) =
+                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not)
+            {
+                return s;
+            }
+        }
+
+        if let Some(date) = self.downcast::<crate::builtins::temporal::PlainTime>() {
             if let Some(s) =
                 crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not)
             {

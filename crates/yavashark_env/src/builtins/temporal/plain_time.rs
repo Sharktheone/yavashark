@@ -9,7 +9,8 @@ use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::TimeZone;
 use yavashark_macro::{object, props};
-use yavashark_value::Obj;
+use yavashark_value::{Obj, Object};
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -259,3 +260,17 @@ pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
         )),
     }
 }
+
+
+impl PrettyObjectOverride for PlainTime {
+    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+        let mut s = self.time
+            .to_ixdtf_string(ToStringRoundingOptions::default()).ok()?;
+            
+
+        fmt_properties_to(obj, &mut s, not);
+
+        Some(s)
+    }
+}
+
