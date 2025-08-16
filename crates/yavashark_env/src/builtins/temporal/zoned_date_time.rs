@@ -20,7 +20,9 @@ use temporal_rs::{Calendar, MonthCode, TimeZone, TinyAsciiStr, UtcOffset};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
-use yavashark_value::Obj;
+use yavashark_value::{Obj, Object};
+use crate::builtins::PlainMonthDay;
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -680,3 +682,15 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     Ok(partial)
 }
+
+
+impl PrettyObjectOverride for ZonedDateTime {
+    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+        let mut s = self.date.to_string();
+
+        fmt_properties_to(obj, &mut s, not);
+
+        Some(s)
+    }
+}
+
