@@ -9,7 +9,8 @@ use std::cell::RefCell;
 use std::str::FromStr;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use yavashark_value::Obj;
+use yavashark_value::{Obj, Object};
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -331,3 +332,14 @@ pub fn value_to_plain_year_month(
         _ => Err(Error::ty("Expected object or string")),
     }
 }
+
+impl PrettyObjectOverride for PlainYearMonth {
+    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+        let mut s = self.year_month.to_string();
+
+        fmt_properties_to(obj, &mut s, not);
+
+        Some(s)
+    }
+}
+
