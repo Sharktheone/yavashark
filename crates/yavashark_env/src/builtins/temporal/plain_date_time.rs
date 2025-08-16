@@ -9,10 +9,8 @@ use crate::builtins::temporal::utils::{
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
-use std::env::temp_dir;
 use std::str::FromStr;
 use temporal_rs::{Calendar, TimeZone};
-use temporal_rs::options::DisplayCalendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};

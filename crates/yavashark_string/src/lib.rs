@@ -437,7 +437,7 @@ impl YSString {
         }
     }
 
-    fn as_str_no_rope_fix(&self) -> Cow<str> {
+    fn as_str_no_rope_fix(&self) -> Cow<'_, str> {
         Cow::Borrowed(match self.inner() {
             InnerString::Inline(inline) => inline.as_str(),
             InnerString::Static(static_str) => static_str,

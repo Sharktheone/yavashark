@@ -54,7 +54,7 @@ impl DataView {
         })
     }
 
-    pub fn get_buffer(&self) -> Res<OwningGcGuard<BoxedObj<Realm>, ArrayBuffer>> {
+    pub fn get_buffer(&self) -> Res<OwningGcGuard<'_, BoxedObj<Realm>, ArrayBuffer>> {
         let inner = self.inner.borrow();
 
         let buf = inner.buffer.value.clone();

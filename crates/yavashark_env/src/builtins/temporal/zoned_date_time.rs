@@ -21,7 +21,6 @@ use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::{Obj, Object};
-use crate::builtins::PlainMonthDay;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]

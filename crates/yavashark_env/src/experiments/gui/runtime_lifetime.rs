@@ -28,7 +28,7 @@ impl<T> Drop for RuntimeLifetimeGuard<'_, T> {
 }
 
 impl<T> RuntimeLifetime<T> {
-    #[allow(elided_named_lifetimes, dead_code)]
+    #[allow(mismatched_lifetime_syntaxes, dead_code)]
     pub fn new(r: &mut T) -> (Self, RuntimeLifetimeGuard<'_, T>) {
         let rc = Rc::new((Cell::new(Some(NonNull::from(r))), Cell::new(false)));
 

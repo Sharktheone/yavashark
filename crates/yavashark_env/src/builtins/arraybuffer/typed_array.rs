@@ -137,7 +137,7 @@ impl TypedArray {
         })
     }
 
-    pub fn get_buffer(&self) -> Res<OwningGcGuard<BoxedObj<Realm>, ArrayBuffer>> {
+    pub fn get_buffer(&self) -> Res<OwningGcGuard<'_, BoxedObj<Realm>, ArrayBuffer>> {
         let buf = self.buffer.clone();
 
         <&ArrayBuffer>::from_value_out(buf)

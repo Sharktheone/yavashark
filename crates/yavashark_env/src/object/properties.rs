@@ -111,15 +111,15 @@ impl ObjectProperties {
         }
     }
 
-    pub const fn properties(&self) -> ObjectPropertiesIter {
+    pub const fn properties(&self) -> ObjectPropertiesIter<'_> {
         ObjectPropertiesIter::new(self)
     }
 
-    pub fn keys(&self) -> ObjectPropertiesKeysIter {
+    pub fn keys(&self) -> ObjectPropertiesKeysIter<'_> {
         ObjectPropertiesKeysIter::new(self)
     }
 
-    pub fn values(&self) -> ObjectPropertiesValuesIter {
+    pub fn values(&self) -> ObjectPropertiesValuesIter<'_> {
         ObjectPropertiesValuesIter::new(self)
     }
 }
@@ -213,7 +213,7 @@ impl ArrayProperties {
         }
     }
 
-    pub const fn iter(&self) -> ArrayPropertiesIter {
+    pub const fn iter(&self) -> ArrayPropertiesIter<'_> {
         ArrayPropertiesIter::new(self)
     }
 }

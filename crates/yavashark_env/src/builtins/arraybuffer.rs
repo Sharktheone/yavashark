@@ -62,13 +62,13 @@ impl ArrayBuffer {
         }
     }
 
-    pub fn get_slice(&self) -> Ref<[u8]> {
+    pub fn get_slice(&self) -> Ref<'_, [u8]> {
         let inner = self.inner.borrow();
 
         Ref::map(inner, |x| x.buffer.as_slice())
     }
 
-    pub fn get_slice_mut(&self) -> RefMut<[u8]> {
+    pub fn get_slice_mut(&self) -> RefMut<'_, [u8]> {
         let inner = self.inner.borrow_mut();
 
         RefMut::map(inner, |x| x.buffer.as_mut())

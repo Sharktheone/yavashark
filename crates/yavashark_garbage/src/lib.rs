@@ -441,7 +441,7 @@ impl<'a, T: Collectable, V> OwningGcGuard<'a, T, V> {
 impl<T: Collectable> Gc<T> {
     #[must_use]
     #[allow(clippy::missing_const_for_fn)] //Bug in clippy... we can't dereference a mut ptr in a const fn
-    pub fn guard(&self) -> GcGuard<T> {
+    pub fn guard(&self) -> GcGuard<'_, T> {
         let value_ptr = unsafe { (*self.inner.as_ptr()).value.as_ref() };
         GcGuard {
             value_ptr,
@@ -686,15 +686,15 @@ impl<T: Collectable> Refs<T> {
         self.strong.load(Ordering::Relaxed)
     }
 
-    fn read_refs(&self) -> Option<RwLockReadGuard<Vec<GcRef<T>>>> {
+    fn read_refs(&self) -> Option<RwLockReadGuard<'_, Vec<GcRef<T>>>> {
         self.ref_to.spin_read()
     }
 
-    fn read_ref_by(&self) -> Option<RwLockReadGuard<Vec<GcRef<T>>>> {
+    fn read_ref_by(&self) -> Option<RwLockReadGuard<'_, Vec<GcRef<T>>>> {
         self.ref_by.spin_read()
     }
 
-    fn write_refs(&self) -> Option<RwLockWriteGuard<Vec<GcRef<T>>>> {
+    fn write_refs(&self) -> Option<RwLockWriteGuard<'_, Vec<GcRef<T>>>> {
         self.ref_to.spin_write()
     }
 }

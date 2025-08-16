@@ -104,7 +104,7 @@ impl<T> SmallVec<T> {
         }
     }
 
-    fn vec_wrapper(&mut self) -> VecWrapper<T> {
+    fn vec_wrapper(&mut self) -> VecWrapper<'_, T> {
         unsafe { VecWrapper(self.to_vec_ref(), self) }
     }
 

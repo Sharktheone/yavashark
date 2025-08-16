@@ -73,13 +73,13 @@ impl Object {
         })
     }
 
-    pub fn inner_mut(&self) -> Result<RefMut<MutObject>, Error> {
+    pub fn inner_mut(&self) -> Result<RefMut<'_, MutObject>, Error> {
         self.inner
             .try_borrow_mut()
             .map_err(|_| Error::new("Failed to borrow object mutably"))
     }
 
-    pub fn inner(&self) -> Result<Ref<MutObject>, Error> {
+    pub fn inner(&self) -> Result<Ref<'_, MutObject>, Error> {
         self.inner
             .try_borrow()
             .map_err(|_| Error::new("Failed to borrow object"))
