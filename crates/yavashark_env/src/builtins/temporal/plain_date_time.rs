@@ -244,8 +244,8 @@ impl PlainDateTime {
     }
 
     #[get("dayOfWeek")]
-    pub fn day_of_week(&self) -> Res<u16> {
-        self.date.day_of_week().map_err(Error::from_temporal)
+    pub fn day_of_week(&self) -> u16 {
+        self.date.day_of_week()
     }
 
     #[get("dayOfYear")]
@@ -259,8 +259,8 @@ impl PlainDateTime {
     }
 
     #[get("daysInWeek")]
-    pub fn days_in_week(&self) -> Res<u16> {
-        self.date.days_in_week().map_err(Error::from_temporal)
+    pub fn days_in_week(&self) -> u16 {
+        self.date.days_in_week()
     }
 
     #[get("daysInYear")]

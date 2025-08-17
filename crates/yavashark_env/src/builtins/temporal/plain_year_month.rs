@@ -151,7 +151,8 @@ impl PlainYearMonth {
     ) -> Res<ObjectHandle> {
         let day_info = day_info
             .map(|info| value_to_partial_date(info, realm))
-            .transpose()?;
+            .transpose()?
+            .map(|date| date.calendar_fields);
 
         let plain_date = self
             .year_month

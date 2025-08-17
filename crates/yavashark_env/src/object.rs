@@ -553,7 +553,7 @@ impl MutObj<Realm> for MutObject {
     }
 
     fn define_setter(&mut self, name: Value, value: Value) -> Res {
-        let key = InternalPropertyKey::from(name.clone());
+        let key = InternalPropertyKey::from(name);
 
         if let InternalPropertyKey::Index(n) = key {
             self.insert_array(n, ObjectProperty::setter(value));

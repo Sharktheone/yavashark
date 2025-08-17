@@ -100,7 +100,7 @@ impl Instant {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
         let i = temporal_rs::Instant::from(
-            EpochNanoseconds::try_from(ns).map_err(Error::from_temporal)?,
+            EpochNanoseconds::from(ns)
         );
 
         Ok(Self::from_stamp(i, realm).into_object())

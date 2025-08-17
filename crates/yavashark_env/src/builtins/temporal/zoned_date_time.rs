@@ -116,7 +116,8 @@ impl ZonedDateTime {
     fn equals(&self, other: Value, realm: &mut Realm) -> Res<bool> {
         let other = value_to_zoned_date_time(&other, None, realm)?;
 
-        Ok(self.date == other)
+        self.date.equals_with_provider(&other, &realm.env.tz_provider)
+            .map_err(Error::from_temporal)
     }
 
     #[prop("getTimeZoneTransition")]
@@ -575,7 +576,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         let calendar = calendar.to_string(realm)?;
         let calendar = Calendar::from_str(&calendar).map_err(Error::from_temporal)?;
 
-        partial.date = partial.date.with_calendar(calendar);
+        partial.calendar = calendar;
     }
 
     let mut has_year = false;
@@ -584,19 +585,19 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         let era = ns.to_string(realm)?;
         let era = TinyAsciiStr::try_from_str(&era).map_err(|_| Error::ty("Invalid era string"))?;
 
-        partial.date = partial.date.with_era(Some(era));
+        partial.fields.calendar_fields.era = Some(era);
         has_year = true;
     }
 
     if let Some(era_year) = obj.get_opt("eraYear", realm)? {
         let era_year = era_year.to_number(realm)?;
-        partial.date = partial.date.with_era_year(Some(era_year as i32));
+        partial.fields.calendar_fields.era_year = Some(era_year as i32);
         has_year = true;
     }
 
     if let Some(year) = obj.get_opt("year", realm)? {
         let year = year.to_number(realm)?;
-        partial.date = partial.date.with_year(Some(year as i32));
+        partial.fields.calendar_fields.year = Some(year as i32);
         has_year = true;
     }
 
@@ -608,7 +609,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(month) = obj.get_opt("month", realm)? {
         let month = month.to_number(realm)?;
-        partial.date = partial.date.with_month(Some(month as u8));
+        partial.fields.calendar_fields.month = Some(month as u8);
         has_month = true;
     }
 
@@ -618,7 +619,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         let month_code =
             MonthCode::from_str(&month_code).map_err(|_| Error::ty("Invalid month code"))?;
 
-        partial.date = partial.date.with_month_code(Some(month_code));
+        partial.fields.calendar_fields.month_code = Some(month_code);
         has_month = true;
     }
 
@@ -628,39 +629,39 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(day) = obj.get_opt("day", realm)? {
         let day = day.to_number(realm)?;
-        partial.date = partial.date.with_day(Some(day as u8));
+        partial.fields.calendar_fields.day = Some(day as u8);
     } else {
         return Err(Error::ty("Expected day to be defined"));
     }
 
     if let Some(hour) = obj.get_opt("hour", realm)? {
         let hour = hour.to_number(realm)?;
-        partial.time = partial.time.with_hour(Some(hour as u8));
+        partial.fields.time = partial.fields.time.with_hour(Some(hour as u8));
     }
 
     if let Some(minute) = obj.get_opt("minute", realm)? {
         let minute = minute.to_number(realm)?;
-        partial.time = partial.time.with_minute(Some(minute as u8));
+        partial.fields.time = partial.fields.time.with_minute(Some(minute as u8));
     }
 
     if let Some(second) = obj.get_opt("second", realm)? {
         let second = second.to_number(realm)?;
-        partial.time = partial.time.with_second(Some(second as u8));
+        partial.fields.time = partial.fields.time.with_second(Some(second as u8));
     }
 
     if let Some(millisecond) = obj.get_opt("millisecond", realm)? {
         let millisecond = millisecond.to_number(realm)?;
-        partial.time = partial.time.with_millisecond(Some(millisecond as u16));
+        partial.fields.time = partial.fields.time.with_millisecond(Some(millisecond as u16));
     }
 
     if let Some(microsecond) = obj.get_opt("microsecond", realm)? {
         let microsecond = microsecond.to_number(realm)?;
-        partial.time = partial.time.with_microsecond(Some(microsecond as u16));
+        partial.fields.time = partial.fields.time.with_microsecond(Some(microsecond as u16));
     }
 
     if let Some(nanosecond) = obj.get_opt("nanosecond", realm)? {
         let nanosecond = nanosecond.to_number(realm)?;
-        partial.time = partial.time.with_nanosecond(Some(nanosecond as u16));
+        partial.fields.time = partial.fields.time.with_nanosecond(Some(nanosecond as u16));
     }
 
     if let Some(time_zone) = obj.get_opt("timeZone", realm)? {
@@ -676,7 +677,7 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
         let offset = offset.to_string(realm)?;
         let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
 
-        partial.offset = Some(offset);
+        partial.fields.offset = Some(offset);
     }
 
     Ok(partial)

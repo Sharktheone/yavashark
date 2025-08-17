@@ -90,7 +90,7 @@ impl PlainMonthDay {
 
         let plain_date = self
             .month_day
-            .to_plain_date(Some(date))
+            .to_plain_date(Some(date.calendar_fields))
             .map_err(Error::from_temporal)?;
 
         Ok(PlainDate::new(plain_date, realm).into_object())
