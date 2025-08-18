@@ -1,4 +1,4 @@
-use crate::metadata::{Metadata, NegativePhase};
+use crate::metadata::{Flags, Metadata, NegativePhase};
 use std::path::Path;
 use swc_common::comments::{CommentKind, SingleThreadedComments, SingleThreadedCommentsMap};
 use swc_common::input::StringInput;
@@ -22,6 +22,11 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
     let c = EsSyntax::default();
 
     let metadata = parse_metadata(&input);
+
+    if metadata.flags.contains(Flags::ONLY_STRICT) {
+        println!("SKIP");
+        return (Program::Script(Script::dummy()), Metadata::default());
+    }
 
     let end = BytePos(input.len() as u32);
 
