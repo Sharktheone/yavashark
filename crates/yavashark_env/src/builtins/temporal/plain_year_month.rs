@@ -4,13 +4,13 @@ use crate::builtins::temporal::plain_month_day::value_to_partial_date;
 use crate::builtins::temporal::utils::{
     calendar_opt, difference_settings, display_calendar, overflow_options,
 };
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -343,4 +343,3 @@ impl PrettyObjectOverride for PlainYearMonth {
         Some(s)
     }
 }
-

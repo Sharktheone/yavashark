@@ -1,5 +1,6 @@
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::utils::{calendar_opt, display_calendar, overflow_options};
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -9,7 +10,6 @@ use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -236,7 +236,6 @@ pub fn value_to_partial_date(value: ObjectHandle, realm: &mut Realm) -> Res<Part
     Ok(partial_date)
 }
 
-
 impl PrettyObjectOverride for PlainMonthDay {
     fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.month_day.to_string();
@@ -246,4 +245,3 @@ impl PrettyObjectOverride for PlainMonthDay {
         Some(s)
     }
 }
-

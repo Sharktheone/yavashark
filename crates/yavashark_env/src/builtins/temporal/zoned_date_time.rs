@@ -9,6 +9,7 @@ use crate::builtins::temporal::utils::{
     offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts,
     transition_direction,
 };
+use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
@@ -21,7 +22,6 @@ use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::{Obj, Object};
-use crate::print::{fmt_properties_to, PrettyObjectOverride};
 
 #[object]
 #[derive(Debug)]
@@ -116,7 +116,8 @@ impl ZonedDateTime {
     fn equals(&self, other: Value, realm: &mut Realm) -> Res<bool> {
         let other = value_to_zoned_date_time(&other, None, realm)?;
 
-        self.date.equals_with_provider(&other, &realm.env.tz_provider)
+        self.date
+            .equals_with_provider(&other, &realm.env.tz_provider)
             .map_err(Error::from_temporal)
     }
 
@@ -651,12 +652,18 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     if let Some(millisecond) = obj.get_opt("millisecond", realm)? {
         let millisecond = millisecond.to_number(realm)?;
-        partial.fields.time = partial.fields.time.with_millisecond(Some(millisecond as u16));
+        partial.fields.time = partial
+            .fields
+            .time
+            .with_millisecond(Some(millisecond as u16));
     }
 
     if let Some(microsecond) = obj.get_opt("microsecond", realm)? {
         let microsecond = microsecond.to_number(realm)?;
-        partial.fields.time = partial.fields.time.with_microsecond(Some(microsecond as u16));
+        partial.fields.time = partial
+            .fields
+            .time
+            .with_microsecond(Some(microsecond as u16));
     }
 
     if let Some(nanosecond) = obj.get_opt("nanosecond", realm)? {
@@ -683,7 +690,6 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
     Ok(partial)
 }
 
-
 impl PrettyObjectOverride for ZonedDateTime {
     fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.date.to_string();
@@ -693,4 +699,3 @@ impl PrettyObjectOverride for ZonedDateTime {
         Some(s)
     }
 }
-

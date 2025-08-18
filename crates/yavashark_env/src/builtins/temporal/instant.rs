@@ -99,9 +99,7 @@ impl Instant {
     fn from_epoch_nanoseconds(epoch: &BigInt, #[realm] realm: &Realm) -> Res<ObjectHandle> {
         let ns = epoch.to_i128().ok_or(Error::range("epoch out of range"))?;
 
-        let i = temporal_rs::Instant::from(
-            EpochNanoseconds::from(ns)
-        );
+        let i = temporal_rs::Instant::from(EpochNanoseconds::from(ns));
 
         Ok(Self::from_stamp(i, realm).into_object())
     }
