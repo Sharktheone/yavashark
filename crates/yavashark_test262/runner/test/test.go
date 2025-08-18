@@ -152,6 +152,16 @@ func RunTest(path string) results.Result {
 		}
 	}
 
+	if strings.HasPrefix(out, "SKIP") {
+		return results.Result{
+			Status:   status.SKIP,
+			Msg:      out,
+			Path:     path,
+			MemoryKB: peakMemoryKB,
+			Duration: duration,
+		}
+	}
+
 	return results.Result{
 		Status:   status.CRASH,
 		Msg:      out,
