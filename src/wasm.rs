@@ -34,6 +34,8 @@ fn parse(input: &str) -> Res<Vec<Stmt>> {
     Ok(script.body)
 }
 
+
+/// runs the provided code in a new YavaShark engine and returns a formatted version of the return value
 #[wasm_bindgen]
 pub fn run_standalone(code: &str) -> String {
     match execute_fmt(code) {
@@ -48,6 +50,7 @@ thread_local! {
     static LOG_CALLBACK: RefCell<Option<js_sys::Function>> = RefCell::new(None);
 }
 
+/// Sets a JavaScript callback function to be called whenever the `console.log` function is invoked within the YavaShark engine.
 #[wasm_bindgen]
 pub fn set_console_log(callback: js_sys::Function) {
     LOG_CALLBACK.with(|cell| {
@@ -64,6 +67,7 @@ pub fn set_console_log(callback: js_sys::Function) {
     }));
 }
 
+/// Clears the JavaScript callback function set by `set_console_log`, stopping any further calls to it when `console.log` is invoked within the YavaShark engine.
 #[wasm_bindgen]
 pub fn clear_console_log() {
     LOG_CALLBACK.with(|cell| {
@@ -72,6 +76,7 @@ pub fn clear_console_log() {
     yavashark_env::console::sink::clear_log_sink();
 }
 
+/// Represents the YavaShark engine, which provides an interface to evaluate JavaScript code and manage the execution context.
 #[wasm_bindgen]
 pub struct Engine {
     inner: Rc<RefCell<EngineInner>>,
@@ -91,6 +96,7 @@ impl EngineInner {
 
 #[wasm_bindgen]
 impl Engine {
+    /// Creates a new instance of the YavaShark engine, initializing the execution context with a fresh realm and global scope.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<Engine, JsValue> {
         let realm = Realm::new().map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
@@ -101,6 +107,7 @@ impl Engine {
         })
     }
 
+    /// Evaluates the provided JavaScript code within the YavaShark engine's execution context and returns the result as a string.
     pub fn eval(&self, code: &str) -> Result<String, JsValue> {
         let stmts = parse(code).map_err(|e| JsValue::from_str(&format!("{e:?}")))?;
         let mut inner = self.inner.borrow_mut();
@@ -120,6 +127,7 @@ impl Engine {
             .map_err(|e| JsValue::from_str(&format!("{e:?}")))
     }
 
+    /// Evaluates the provided JavaScript code within the YavaShark engine's execution context and returns a boolean indicating whether the evaluation was successful.
     pub fn eval_ok(&self, code: &str) -> bool {
         let res: ValueResult = (|| {
             let stmts = parse(code)?;
@@ -130,6 +138,7 @@ impl Engine {
         res.is_ok()
     }
 
+    /// Runs the event loop of the YavaShark engine, allowing it to process asynchronous events and promises.
     pub fn run_event_loop(&self) -> js_sys::Promise {
         let inner = Rc::clone(&self.inner);
         wasm_bindgen_futures::future_to_promise(async move {
