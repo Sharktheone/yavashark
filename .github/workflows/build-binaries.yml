@@ -101,5 +101,6 @@ jobs:
         if: github.repository == 'Sharktheone/yavashark'
         run: |
           cd pkg
-          npx jsr publish --allow-dirty
-
+          VERSION="0.1.0-$(date +%Y%m%d).${GITHUB_RUN_NUMBER}.${GITHUB_RUN_ATTEMPT:-1}.${GITHUB_SHA::7}"
+          echo "Publishing version: $VERSION"
+          npx jsr publish --allow-dirty --set-version "$VERSION"
