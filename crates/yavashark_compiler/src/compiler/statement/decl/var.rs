@@ -8,7 +8,7 @@ impl Compiler {
         match var.kind {
             VarDeclKind::Var => {
                 for decl in &var.decls {
-                    let name = decl.name.as_ident().ok_or(anyhow!("Expected identifier"))?;
+                    let name = decl.name.as_ident().ok_or_else(|| todo!())?;
                     let name = self.alloc_var(name.id.as_ref());
 
                     if let Some(init) = &decl.init {
@@ -22,7 +22,7 @@ impl Compiler {
 
             VarDeclKind::Let => {
                 for decl in &var.decls {
-                    let name = decl.name.as_ident().ok_or(anyhow!("Expected identifier"))?;
+                    let name = decl.name.as_ident().ok_or_else(|| todo!())?;
                     let name = self.alloc_var(name.id.as_ref());
 
                     if let Some(init) = &decl.init {
@@ -36,7 +36,7 @@ impl Compiler {
 
             VarDeclKind::Const => {
                 for decl in &var.decls {
-                    let name = decl.name.as_ident().ok_or(anyhow!("Expected identifier"))?;
+                    let name = decl.name.as_ident().ok_or_else(|| todo!())?;
                     let name = self.alloc_var(name.id.as_ref());
 
                     if let Some(init) = &decl.init {
