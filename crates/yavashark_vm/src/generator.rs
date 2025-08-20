@@ -94,7 +94,7 @@ impl Func<Realm> for GeneratorFunction {
 
         for (i, p) in self.params.iter().enumerate() {
             let Pat::Ident(name) = &p.pat else {
-                return Err(Error::ty("Invalid function parameter"));
+                todo!()
             };
 
             scope.declare_var(
