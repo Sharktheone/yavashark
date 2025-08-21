@@ -49893,6 +49893,73 @@ impl Execute for Instruction {
             Self::PatArrayMoveVarUndefined(arg0) => {
                 instruction::pat_array_move_var(arg0, vm)?
             }
+            Self::PatArrayRestLetVar(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetReg(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetAcc(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetStack(arg0) => {
+                instruction::pat_array_rest_let(arg0, vm)?
+            }
+            Self::PatArrayRestLetConst(arg0) => {
+                instruction::pat_array_rest_let(arg0, vm)?
+            }
+            Self::PatArrayRestLetF32(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetI32(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetU32(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetBool(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetNull(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestLetUndefined(arg0) => {
+                instruction::pat_array_rest_let(arg0, vm)?
+            }
+            Self::PatArrayRestConstVar(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstReg(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstAcc(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstStack(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstConst(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstF32(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstI32(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstU32(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstBool(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstNull(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestConstUndefined(arg0) => {
+                instruction::pat_array_rest_const(arg0, vm)?
+            }
+            Self::PatArrayRestVarVar(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarReg(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarAcc(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarStack(arg0) => {
+                instruction::pat_array_rest_var(arg0, vm)?
+            }
+            Self::PatArrayRestVarConst(arg0) => {
+                instruction::pat_array_rest_var(arg0, vm)?
+            }
+            Self::PatArrayRestVarF32(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarI32(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarU32(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarBool(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarNull(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PatArrayRestVarUndefined(arg0) => {
+                instruction::pat_array_rest_var(arg0, vm)?
+            }
         }
         Ok(())
     }
@@ -50122,6 +50189,9 @@ impl Execute for Instruction {
             Self::PatArrayMoveLet(arg0) => instruction::pat_array_move_let(arg0, vm)?,
             Self::PatArrayMoveConst(arg0) => instruction::pat_array_move_const(arg0, vm)?,
             Self::PatArrayMoveVar(arg0) => instruction::pat_array_move_var(arg0, vm)?,
+            Self::PatArrayRestLet(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
+            Self::PatArrayRestConst(arg0) => instruction::pat_array_rest_const(arg0, vm)?,
+            Self::PatArrayRestVar(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
         }
         Ok(())
     }

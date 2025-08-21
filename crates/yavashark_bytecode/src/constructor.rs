@@ -62237,6 +62237,54 @@ impl Instruction {
             DataType::Undefined(arg0) => Self::PatArrayMoveVarUndefined(arg0),
         }
     }
+    #[must_use]
+    pub fn pat_array_rest_let(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatArrayRestLetAcc(arg0),
+            DataType::Const(arg0) => Self::PatArrayRestLetConst(arg0),
+            DataType::Reg(arg0) => Self::PatArrayRestLetReg(arg0),
+            DataType::Stack(arg0) => Self::PatArrayRestLetStack(arg0),
+            DataType::Var(arg0) => Self::PatArrayRestLetVar(arg0),
+            DataType::F32(arg0) => Self::PatArrayRestLetF32(arg0),
+            DataType::I32(arg0) => Self::PatArrayRestLetI32(arg0),
+            DataType::U32(arg0) => Self::PatArrayRestLetU32(arg0),
+            DataType::Boolean(arg0) => Self::PatArrayRestLetBool(arg0),
+            DataType::Null(arg0) => Self::PatArrayRestLetNull(arg0),
+            DataType::Undefined(arg0) => Self::PatArrayRestLetUndefined(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_array_rest_const(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatArrayRestConstAcc(arg0),
+            DataType::Const(arg0) => Self::PatArrayRestConstConst(arg0),
+            DataType::Reg(arg0) => Self::PatArrayRestConstReg(arg0),
+            DataType::Stack(arg0) => Self::PatArrayRestConstStack(arg0),
+            DataType::Var(arg0) => Self::PatArrayRestConstVar(arg0),
+            DataType::F32(arg0) => Self::PatArrayRestConstF32(arg0),
+            DataType::I32(arg0) => Self::PatArrayRestConstI32(arg0),
+            DataType::U32(arg0) => Self::PatArrayRestConstU32(arg0),
+            DataType::Boolean(arg0) => Self::PatArrayRestConstBool(arg0),
+            DataType::Null(arg0) => Self::PatArrayRestConstNull(arg0),
+            DataType::Undefined(arg0) => Self::PatArrayRestConstUndefined(arg0),
+        }
+    }
+    #[must_use]
+    pub fn pat_array_rest_var(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PatArrayRestVarAcc(arg0),
+            DataType::Const(arg0) => Self::PatArrayRestVarConst(arg0),
+            DataType::Reg(arg0) => Self::PatArrayRestVarReg(arg0),
+            DataType::Stack(arg0) => Self::PatArrayRestVarStack(arg0),
+            DataType::Var(arg0) => Self::PatArrayRestVarVar(arg0),
+            DataType::F32(arg0) => Self::PatArrayRestVarF32(arg0),
+            DataType::I32(arg0) => Self::PatArrayRestVarI32(arg0),
+            DataType::U32(arg0) => Self::PatArrayRestVarU32(arg0),
+            DataType::Boolean(arg0) => Self::PatArrayRestVarBool(arg0),
+            DataType::Null(arg0) => Self::PatArrayRestVarNull(arg0),
+            DataType::Undefined(arg0) => Self::PatArrayRestVarUndefined(arg0),
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -62791,5 +62839,17 @@ impl Instruction {
     #[must_use]
     pub fn pat_array_move_var(arg0: impl Data) -> Self {
         Self::PatArrayMoveVar(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_array_rest_let(arg0: impl Data) -> Self {
+        Self::PatArrayRestLet(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_array_rest_const(arg0: impl Data) -> Self {
+        Self::PatArrayRestConst(arg0.data_type())
+    }
+    #[must_use]
+    pub fn pat_array_rest_var(arg0: impl Data) -> Self {
+        Self::PatArrayRestVar(arg0.data_type())
     }
 }

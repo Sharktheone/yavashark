@@ -272,3 +272,15 @@ pub fn pat_array_move_const(_: impl Data, _vm: &mut impl VM) -> Res {
 pub fn pat_array_move_var(_: impl Data, _vm: &mut impl VM) -> Res {
     todo!()
 }
+
+pub fn pat_array_rest_let(_: impl Data, _vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn pat_array_rest_const(_: impl Data, _vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn pat_array_rest_var(_: impl Data, _vm: &mut impl VM) -> Res {
+    todo!()
+}

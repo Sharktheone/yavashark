@@ -159,3 +159,7 @@ PatRestVar(Data)
 PatArrayMoveLet(Data)
 PatArrayMoveConst(Data)
 PatArrayMoveVar(Data)
+
+PatArrayRestLet(Data)
+PatArrayRestConst(Data)
+PatArrayRestVar(Data)  
