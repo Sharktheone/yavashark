@@ -41,7 +41,7 @@ yavashark_env = { path = "crates/yavashark_env", default-features = false }
 clap = "4.5.18"
 rustyline = { version = "15.0.0", features = ["derive"] }
 rustyline-derive = "0.11.0"
-tokio = { version = "1.10.0", features = ["full"] }
+tokio = { version = "1.47.1", features = ["full"] }
 yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments", "gui"] }
 
 [lib]
