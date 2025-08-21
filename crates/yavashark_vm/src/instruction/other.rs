@@ -284,3 +284,19 @@ pub fn pat_array_rest_const(_: impl Data, _vm: &mut impl VM) -> Res {
 pub fn pat_array_rest_var(_: impl Data, _vm: &mut impl VM) -> Res {
     todo!()
 }
+
+pub fn push_iter(_: impl Data, _vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn iter_next(_output: impl OutputData, _vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn iter_next_no_output(_vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn pop_iter(_vm: &mut impl VM) -> Res {
+    todo!()
+}

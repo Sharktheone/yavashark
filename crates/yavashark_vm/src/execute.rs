@@ -49960,6 +49960,23 @@ impl Execute for Instruction {
             Self::PatArrayRestVarUndefined(arg0) => {
                 instruction::pat_array_rest_var(arg0, vm)?
             }
+            Self::PushIterVar(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterReg(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterAcc(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterStack(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterConst(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterF32(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterI32(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterU32(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterBool(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterNull(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::PushIterUndefined(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::IterNextToVar(output) => instruction::iter_next(output, vm)?,
+            Self::IterNextToReg(output) => instruction::iter_next(output, vm)?,
+            Self::IterNextToAcc(output) => instruction::iter_next(output, vm)?,
+            Self::IterNextToStack(output) => instruction::iter_next(output, vm)?,
+            Self::IterNextNoOutput => instruction::iter_next_no_output(vm)?,
+            Self::PopIter => instruction::pop_iter(vm)?,
         }
         Ok(())
     }
@@ -50192,6 +50209,10 @@ impl Execute for Instruction {
             Self::PatArrayRestLet(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
             Self::PatArrayRestConst(arg0) => instruction::pat_array_rest_const(arg0, vm)?,
             Self::PatArrayRestVar(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
+            Self::PushIter(arg0) => instruction::push_iter(arg0, vm)?,
+            Self::IterNext(output) => instruction::iter_next(output, vm)?,
+            Self::IterNextNoOutput => instruction::iter_next_no_output(vm)?,
+            Self::PopIter => instruction::pop_iter(vm)?,
         }
         Ok(())
     }

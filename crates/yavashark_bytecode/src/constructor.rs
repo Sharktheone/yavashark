@@ -62285,6 +62285,39 @@ impl Instruction {
             DataType::Undefined(arg0) => Self::PatArrayRestVarUndefined(arg0),
         }
     }
+    #[must_use]
+    pub fn push_iter(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PushIterAcc(arg0),
+            DataType::Const(arg0) => Self::PushIterConst(arg0),
+            DataType::Reg(arg0) => Self::PushIterReg(arg0),
+            DataType::Stack(arg0) => Self::PushIterStack(arg0),
+            DataType::Var(arg0) => Self::PushIterVar(arg0),
+            DataType::F32(arg0) => Self::PushIterF32(arg0),
+            DataType::I32(arg0) => Self::PushIterI32(arg0),
+            DataType::U32(arg0) => Self::PushIterU32(arg0),
+            DataType::Boolean(arg0) => Self::PushIterBool(arg0),
+            DataType::Null(arg0) => Self::PushIterNull(arg0),
+            DataType::Undefined(arg0) => Self::PushIterUndefined(arg0),
+        }
+    }
+    #[must_use]
+    pub fn iter_next(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::IterNextToAcc(output),
+            OutputDataType::Reg(output) => Self::IterNextToReg(output),
+            OutputDataType::Stack(output) => Self::IterNextToStack(output),
+            OutputDataType::Var(output) => Self::IterNextToVar(output),
+        }
+    }
+    #[must_use]
+    pub fn iter_next_no_output() -> Self {
+        Self::IterNextNoOutput
+    }
+    #[must_use]
+    pub fn pop_iter() -> Self {
+        Self::PopIter
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -62851,5 +62884,21 @@ impl Instruction {
     #[must_use]
     pub fn pat_array_rest_var(arg0: impl Data) -> Self {
         Self::PatArrayRestVar(arg0.data_type())
+    }
+    #[must_use]
+    pub fn push_iter(arg0: impl Data) -> Self {
+        Self::PushIter(arg0.data_type())
+    }
+    #[must_use]
+    pub fn iter_next(output: impl OutputData) -> Self {
+        Self::IterNext(output.data_type())
+    }
+    #[must_use]
+    pub fn iter_next_no_output() -> Self {
+        Self::IterNextNoOutput
+    }
+    #[must_use]
+    pub fn pop_iter() -> Self {
+        Self::PopIter
     }
 }

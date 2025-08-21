@@ -17014,6 +17014,23 @@ pub enum Instruction {
     PatArrayRestVarBool(Boolean),
     PatArrayRestVarNull(Null),
     PatArrayRestVarUndefined(Undefined),
+    PushIterVar(VarName),
+    PushIterReg(Reg),
+    PushIterAcc(Acc),
+    PushIterStack(Stack),
+    PushIterConst(ConstIdx),
+    PushIterF32(F32),
+    PushIterI32(I32),
+    PushIterU32(U32),
+    PushIterBool(Boolean),
+    PushIterNull(Null),
+    PushIterUndefined(Undefined),
+    IterNextToVar(VarName),
+    IterNextToReg(Reg),
+    IterNextToAcc(Acc),
+    IterNextToStack(Stack),
+    IterNextNoOutput,
+    PopIter,
 }
 #[cfg(feature = "simple_bytecode")]
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17152,4 +17169,8 @@ pub enum Instruction {
     PatArrayRestLet(DataType),
     PatArrayRestConst(DataType),
     PatArrayRestVar(DataType),
+    PushIter(DataType),
+    IterNext(OutputDataType),
+    IterNextNoOutput,
+    PopIter,
 }

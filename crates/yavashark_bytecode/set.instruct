@@ -162,4 +162,9 @@ PatArrayMoveVar(Data)
 
 PatArrayRestLet(Data)
 PatArrayRestConst(Data)
-PatArrayRestVar(Data)  
+PatArrayRestVar(Data)
+
+PushIter(Data)
+IterNext => Data
+IterNextNoOutput
+PopIter
