@@ -50257,6 +50257,171 @@ impl Execute for Instruction {
             Self::IterNextNoOutputUndefined(arg0) => {
                 instruction::iter_next_no_output(arg0, vm)?
             }
+            Self::IterNextJmpVarToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpRegToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpAccToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpStackToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpConstToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpF32ToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpI32ToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpU32ToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpBoolToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpNullToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpUndefinedToVar(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpVarToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpRegToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpAccToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpStackToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpConstToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpF32ToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpI32ToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpU32ToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpBoolToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpNullToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpUndefinedToReg(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpVarToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpRegToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpAccToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpStackToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpConstToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpF32ToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpI32ToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpU32ToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpBoolToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpNullToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpUndefinedToAcc(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpVarToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpRegToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpAccToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpStackToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpConstToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpF32ToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpI32ToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpU32ToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpBoolToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpNullToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextJmpUndefinedToStack(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextNoOutputJmpVar(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpReg(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpAcc(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpStack(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpConst(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpF32(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpI32(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpU32(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpBool(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpNull(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterNextNoOutputJmpUndefined(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
         }
         Ok(())
     }
@@ -50492,6 +50657,12 @@ impl Execute for Instruction {
             Self::PushIter(arg0, output) => instruction::push_iter(arg0, output, vm)?,
             Self::IterNext(arg0, output) => instruction::iter_next(arg0, output, vm)?,
             Self::IterNextNoOutput(arg0) => instruction::iter_next_no_output(arg0, vm)?,
+            Self::IterNextJmp(arg0, arg1, output) => {
+                instruction::iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::IterNextNoOutputJmp(arg0, arg1) => {
+                instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
         }
         Ok(())
     }

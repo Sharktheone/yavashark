@@ -62543,6 +62543,207 @@ impl Instruction {
             DataType::Undefined(arg0) => Self::IterNextNoOutputUndefined(arg0),
         }
     }
+    #[must_use]
+    pub fn iter_next_jmp(
+        arg0: impl Data,
+        arg1: JmpAddr,
+        output: impl OutputData,
+    ) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpAccToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpAccToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpAccToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpAccToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpConstToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpConstToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpConstToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpConstToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpRegToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpRegToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpRegToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpRegToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpStackToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpStackToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpStackToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpStackToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpVarToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpVarToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpVarToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpVarToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpF32ToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpF32ToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpF32ToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpF32ToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpI32ToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpI32ToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpI32ToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpI32ToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpU32ToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpU32ToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpU32ToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpU32ToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpBoolToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpBoolToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpBoolToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpBoolToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpNullToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpNullToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpNullToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpNullToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterNextJmpUndefinedToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterNextJmpUndefinedToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterNextJmpUndefinedToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterNextJmpUndefinedToVar(arg0, arg1, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::IterNextNoOutputJmpAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::IterNextNoOutputJmpConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::IterNextNoOutputJmpReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::IterNextNoOutputJmpStack(arg0, arg1),
+            DataType::Var(arg0) => Self::IterNextNoOutputJmpVar(arg0, arg1),
+            DataType::F32(arg0) => Self::IterNextNoOutputJmpF32(arg0, arg1),
+            DataType::I32(arg0) => Self::IterNextNoOutputJmpI32(arg0, arg1),
+            DataType::U32(arg0) => Self::IterNextNoOutputJmpU32(arg0, arg1),
+            DataType::Boolean(arg0) => Self::IterNextNoOutputJmpBool(arg0, arg1),
+            DataType::Null(arg0) => Self::IterNextNoOutputJmpNull(arg0, arg1),
+            DataType::Undefined(arg0) => Self::IterNextNoOutputJmpUndefined(arg0, arg1),
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -63121,5 +63322,17 @@ impl Instruction {
     #[must_use]
     pub fn iter_next_no_output(arg0: impl Data) -> Self {
         Self::IterNextNoOutput(arg0.data_type())
+    }
+    #[must_use]
+    pub fn iter_next_jmp(
+        arg0: impl Data,
+        arg1: JmpAddr,
+        output: impl OutputData,
+    ) -> Self {
+        Self::IterNextJmp(arg0.data_type(), arg1, output.data_type())
+    }
+    #[must_use]
+    pub fn iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::IterNextNoOutputJmp(arg0.data_type(), arg1)
     }
 }

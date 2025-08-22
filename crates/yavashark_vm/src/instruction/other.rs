@@ -1,6 +1,7 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_bytecode::data::{ControlIdx, Label};
+use yavashark_bytecode::JmpAddr;
 use yavashark_env::builtins::Promise;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
 
@@ -294,5 +295,13 @@ pub fn iter_next(_: impl Data, _output: impl OutputData, _vm: &mut impl VM) -> R
 }
 
 pub fn iter_next_no_output(_: impl Data, _vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn iter_next_rel(_: impl Data, addr: JmpAddr, _output: impl OutputData, _vm: &mut impl VM) -> Res {
+    todo!()
+}
+
+pub fn iter_next_no_output_rel(_: impl Data, addr: JmpAddr, _vm: &mut impl VM) -> Res {
     todo!()
 }

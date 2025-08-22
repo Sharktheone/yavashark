@@ -167,3 +167,5 @@ PatArrayRestVar(Data)
 PushIter(Data) => Data
 IterNext(Data) => Data
 IterNextNoOutput(Data)
+IterNextJmp(Data, JmpAddr) => Data
+IterNextNoOutputJmp(Data, JmpAddr)
