@@ -302,10 +302,10 @@ pub fn iter_next_no_output(_: impl Data, _vm: &mut impl VM) -> Res {
     todo!()
 }
 
-pub fn iter_next_rel(_: impl Data, addr: JmpAddr, _output: impl OutputData, _vm: &mut impl VM) -> Res {
+pub fn iter_next_jmp(_: impl Data, addr: JmpAddr, _output: impl OutputData, _vm: &mut impl VM) -> Res {
     todo!()
 }
 
-pub fn iter_next_no_output_rel(_: impl Data, addr: JmpAddr, _vm: &mut impl VM) -> Res {
+pub fn iter_next_no_output_jmp(_: impl Data, addr: JmpAddr, _vm: &mut impl VM) -> Res {
     todo!()
 }
