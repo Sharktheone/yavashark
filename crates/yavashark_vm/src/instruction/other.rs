@@ -286,8 +286,12 @@ pub fn pat_array_rest_var(_: impl Data, _vm: &mut impl VM) -> Res {
     todo!()
 }
 
-pub fn push_iter(_: impl Data, _output: impl OutputData, _vm: &mut impl VM) -> Res {
-    todo!()
+pub fn push_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let iter = iter.get(vm)?;
+
+    output.set(iter, vm)?;
+
+    Ok(())
 }
 
 pub fn iter_next(_: impl Data, _output: impl OutputData, _vm: &mut impl VM) -> Res {

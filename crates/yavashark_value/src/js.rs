@@ -629,15 +629,20 @@ impl<C: Realm> Iterator for CtxIter<'_, C> {
 
 impl<C: Realm> Iter<C> {
     pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+        self.next_obj.iter_next(realm)
+    }
+}
+
+impl<C: Realm> Value<C> {
+    pub fn iter_next(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
         let next = self
-            .next_obj
             .call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property(&Value::string("done"), realm)?;
 
         if done.is_truthy() {
             return Ok(None);
         }
-        next.get_property(&Value::string("value"), realm).map(Some)
+        next.get_property(&Self::string("value"), realm).map(Some)
     }
 }
 
