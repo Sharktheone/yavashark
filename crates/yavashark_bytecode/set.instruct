@@ -164,7 +164,6 @@ PatArrayRestLet(Data)
 PatArrayRestConst(Data)
 PatArrayRestVar(Data)
 
-PushIter(Data)
-IterNext => Data
-IterNextNoOutput
-PopIter
+PushIter(Data) => Data
+IterNext(Data) => Data
+IterNextNoOutput(Data)

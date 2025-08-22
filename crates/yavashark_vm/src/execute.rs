@@ -49960,23 +49960,303 @@ impl Execute for Instruction {
             Self::PatArrayRestVarUndefined(arg0) => {
                 instruction::pat_array_rest_var(arg0, vm)?
             }
-            Self::PushIterVar(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterReg(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterAcc(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterStack(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterConst(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterF32(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterI32(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterU32(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterBool(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterNull(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::PushIterUndefined(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::IterNextToVar(output) => instruction::iter_next(output, vm)?,
-            Self::IterNextToReg(output) => instruction::iter_next(output, vm)?,
-            Self::IterNextToAcc(output) => instruction::iter_next(output, vm)?,
-            Self::IterNextToStack(output) => instruction::iter_next(output, vm)?,
-            Self::IterNextNoOutput => instruction::iter_next_no_output(vm)?,
-            Self::PopIter => instruction::pop_iter(vm)?,
+            Self::PushIterVarToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterRegToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterAccToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterStackToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterConstToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterF32ToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterI32ToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterU32ToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterBoolToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterNullToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterUndefinedToVar(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterVarToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterRegToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterAccToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterStackToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterConstToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterF32ToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterI32ToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterU32ToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterBoolToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterNullToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterUndefinedToReg(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterVarToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterRegToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterAccToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterStackToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterConstToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterF32ToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterI32ToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterU32ToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterBoolToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterNullToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterUndefinedToAcc(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterVarToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterRegToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterAccToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterStackToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterConstToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterF32ToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterI32ToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterU32ToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterBoolToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterNullToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::PushIterUndefinedToStack(arg0, output) => {
+                instruction::push_iter(arg0, output, vm)?
+            }
+            Self::IterNextVarToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextRegToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextAccToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextStackToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextConstToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextF32ToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextI32ToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextU32ToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextBoolToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextNullToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextUndefinedToVar(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextVarToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextRegToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextAccToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextStackToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextConstToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextF32ToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextI32ToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextU32ToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextBoolToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextNullToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextUndefinedToReg(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextVarToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextRegToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextAccToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextStackToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextConstToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextF32ToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextI32ToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextU32ToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextBoolToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextNullToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextUndefinedToAcc(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextVarToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextRegToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextAccToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextStackToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextConstToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextF32ToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextI32ToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextU32ToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextBoolToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextNullToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextUndefinedToStack(arg0, output) => {
+                instruction::iter_next(arg0, output, vm)?
+            }
+            Self::IterNextNoOutputVar(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputReg(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputAcc(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputStack(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputConst(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputF32(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputI32(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputU32(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputBool(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputNull(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
+            Self::IterNextNoOutputUndefined(arg0) => {
+                instruction::iter_next_no_output(arg0, vm)?
+            }
         }
         Ok(())
     }
@@ -50209,10 +50489,9 @@ impl Execute for Instruction {
             Self::PatArrayRestLet(arg0) => instruction::pat_array_rest_let(arg0, vm)?,
             Self::PatArrayRestConst(arg0) => instruction::pat_array_rest_const(arg0, vm)?,
             Self::PatArrayRestVar(arg0) => instruction::pat_array_rest_var(arg0, vm)?,
-            Self::PushIter(arg0) => instruction::push_iter(arg0, vm)?,
-            Self::IterNext(output) => instruction::iter_next(output, vm)?,
-            Self::IterNextNoOutput => instruction::iter_next_no_output(vm)?,
-            Self::PopIter => instruction::pop_iter(vm)?,
+            Self::PushIter(arg0, output) => instruction::push_iter(arg0, output, vm)?,
+            Self::IterNext(arg0, output) => instruction::iter_next(arg0, output, vm)?,
+            Self::IterNextNoOutput(arg0) => instruction::iter_next_no_output(arg0, vm)?,
         }
         Ok(())
     }
