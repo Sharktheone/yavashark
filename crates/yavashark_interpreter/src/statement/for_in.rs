@@ -35,7 +35,7 @@ impl Interpreter {
                 continue;
             }
 
-            Self::run_for_head(realm, stmt.left.clone(), scope, &key)?;
+            Self::run_for_head(realm, &stmt.left, scope, &key)?;
 
             let result = Self::run_statement(realm, &stmt.body, scope);
             match result {
@@ -53,12 +53,12 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 
-    pub fn run_for_head(realm: &mut Realm, decl: ForHead, scope: &mut Scope, value: &Value) -> Res {
+    pub fn run_for_head(realm: &mut Realm, decl: &ForHead, scope: &mut Scope, value: &Value) -> Res {
         match decl {
             ForHead::VarDecl(decl) => {
                 let kind = decl.kind;
                 //TODO: respect var decl kind
-                for d in decl.decls {
+                for d in &decl.decls {
                     let value = if value.is_truthy() {
                         value.clone()
                     } else if let Some(init) = &d.init {
@@ -81,7 +81,7 @@ impl Interpreter {
                 }
             }
             ForHead::UsingDecl(decl) => {
-                for decl in decl.decls {
+                for decl in &decl.decls {
                     let value = if value.is_truthy() {
                         value.clone()
                     } else if let Some(init) = &decl.init {
