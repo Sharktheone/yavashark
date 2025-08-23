@@ -644,6 +644,14 @@ impl<C: Realm> Value<C> {
         }
         next.get_property(&Self::string("value"), realm).map(Some)
     }
+
+
+    pub fn iter_next_no_out(&self, realm: &mut C) -> Result<(), Error<C>> {
+        let _ = self
+            .call_method(&"next".into(), realm, Vec::new())?;
+
+        Ok(())
+    }
 }
 
 pub trait CustomGcRef: Collectable + CustomGcRefUntyped {
