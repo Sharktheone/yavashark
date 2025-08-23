@@ -652,6 +652,14 @@ impl<C: Realm> Value<C> {
 
         Ok(())
     }
+
+    pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
+        let next = self
+            .call_method(&"next".into(), realm, Vec::new())?;
+        let done = next.get_property(&Self::string("done"), realm)?;
+
+        Ok(done.is_truthy())
+    }
 }
 
 pub trait CustomGcRef: Collectable + CustomGcRefUntyped {
