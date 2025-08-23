@@ -302,8 +302,10 @@ pub fn iter_next(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> 
     output.set(next.unwrap_or(Value::Undefined), vm)
 }
 
-pub fn iter_next_no_output(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
+pub fn iter_next_no_output(iter: impl Data, vm: &mut impl VM) -> Res {
+    let iter = iter.get(vm)?;
+
+    iter.iter_next_no_out(vm.get_realm())
 }
 
 pub fn iter_next_jmp(_: impl Data, addr: JmpAddr, _output: impl OutputData, _vm: &mut impl VM) -> Res {
