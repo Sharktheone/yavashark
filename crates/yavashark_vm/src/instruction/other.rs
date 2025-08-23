@@ -294,8 +294,12 @@ pub fn push_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> 
     Ok(())
 }
 
-pub fn iter_next(_: impl Data, _output: impl OutputData, _vm: &mut impl VM) -> Res {
-    todo!()
+pub fn iter_next(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let iter = iter.get(vm)?;
+    
+    let next = iter.iter_next(vm.get_realm())?;
+    
+    output.set(next.unwrap_or(Value::Undefined), vm)
 }
 
 pub fn iter_next_no_output(_: impl Data, _vm: &mut impl VM) -> Res {
