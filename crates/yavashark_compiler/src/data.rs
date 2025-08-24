@@ -111,6 +111,15 @@ impl Compiler {
             .map(OutputDataType::Reg)
             .unwrap_or_else(|| OutputDataType::Stack(self.alloc_stack()))
     }
+    
+    pub fn data_to_out_or_alloc(&mut self, data: impl Into<DataType>) -> OutputDataType {
+        match data.into() {
+            DataType::Acc(acc) => OutputDataType::Acc(acc),
+            DataType::Reg(reg) => OutputDataType::Reg(reg),
+            DataType::Stack(stack) => OutputDataType::Stack(stack),
+            _ => self.alloc_reg_or_stack(),
+        }
+    }
 
     pub fn dealloc(&mut self, data: impl Into<DataType>) {
         match data.into() {
