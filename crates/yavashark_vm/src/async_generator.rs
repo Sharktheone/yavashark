@@ -182,6 +182,13 @@ impl AsyncGenerator {
     pub const fn iterator(this: Value) -> Value {
         this
     }
+
+
+    #[prop(Symbol::ASYNC_ITERATOR)]
+    #[nonstatic]
+    pub const fn async_iterator(this: Value) -> Value {
+        this
+    }
 }
 
 impl Debug for AsyncGenerator {
