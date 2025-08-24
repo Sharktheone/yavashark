@@ -88,6 +88,12 @@ impl TaskQueueRunner {
             self.queue
                 .retain_mut(|task| task.as_mut().poll(cx, realm).is_pending());
 
+            while self.flush_queue(realm, cx) {
+                Self::flush_microtasks(realm);
+                self.queue
+                    .retain_mut(|task| task.as_mut().poll(cx, realm).is_pending());
+            }
+
             if self.queue.is_empty() {
                 Poll::Ready(())
             } else {
@@ -107,5 +113,28 @@ impl TaskQueueRunner {
         if !realm.queue.microtasks.is_empty() {
             Self::flush_microtasks(realm);
         }
+    }
+
+    fn flush_queue(&mut self, realm: &mut Realm, cx: &mut Context) -> bool {
+        let mut buf = Vec::new();
+
+        let mut ran_tasks = false;
+
+        while !realm.queue.queue.is_empty() {
+            Self::flush_microtasks(realm);
+
+            let mut queue = realm.queue.queue.drain(..).collect::<Vec<_>>();
+
+            ran_tasks |= !queue.is_empty();
+
+            queue
+                .retain_mut(|task| task.as_mut().poll(cx, realm).is_pending());
+
+            buf.append(&mut queue);
+        }
+
+        self.queue.append(&mut buf);
+
+        ran_tasks
     }
 }
