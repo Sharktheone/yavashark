@@ -1,7 +1,6 @@
 use crate::ConstString;
 use std::fmt::Display;
 use std::hash::Hash;
-use std::ptr;
 use std::rc::Rc;
 use yavashark_string::{ToYSString, YSString};
 
@@ -20,7 +19,10 @@ pub enum SymbolInner {
 impl PartialEq for SymbolInner {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
-            (Self::Static(s1), Self::Static(s2)) => ptr::eq(*s1, *s2),
+            (Self::Static(s1), Self::Static(s2)) => {
+                s1 == s2
+                // ptr::eq(*s1, *s2)
+            },
             (Self::Str(s1), Self::Str(s2)) => Rc::ptr_eq(s1, s2),
             _ => false,
         }
@@ -30,7 +32,8 @@ impl PartialEq for SymbolInner {
 impl Hash for SymbolInner {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         match self {
-            Self::Static(s) => state.write_usize(s.as_ptr() as usize),
+            // Self::Static(s) => state.write_usize(s.as_ptr() as usize),
+            Self::Static(s) => s.hash(state),
             Self::Str(s) => state.write_usize(s.as_ptr() as usize),
         }
     }
