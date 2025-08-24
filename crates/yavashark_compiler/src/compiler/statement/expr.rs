@@ -111,6 +111,24 @@ impl Compiler {
         }
     }
 
+
+    pub fn compile_expr_data_out(
+        &mut self,
+        expr: &Expr,
+    ) -> Res<DataType> {
+        let out = self.alloc_reg_or_stack();
+
+        match self.compile_expr(expr, Some(out))? {
+            Some(optim) => {
+                self.dealloc(out);
+                Ok(optim.output)
+            },
+            None => {
+                Ok(out.data_type().into())
+            },
+        }
+    }
+
     pub fn compile_expr_data_acc(&mut self, expr: &Expr) -> Res<DataType> {
         self.compile_expr_data(expr, Some(Acc))
     }
