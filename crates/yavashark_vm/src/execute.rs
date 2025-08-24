@@ -36465,6 +36465,7 @@ impl Execute for Instruction {
                 instruction::inc(arg0, output, vm)?
             }
             Self::PushScope => instruction::push_scope(vm)?,
+            Self::PushLoopScope => instruction::push_loop_scope(vm)?,
             Self::PopScope => instruction::pop_scope(vm)?,
             Self::CallVarToVar(arg0, output) => instruction::call(arg0, output, vm)?,
             Self::CallRegToVar(arg0, output) => instruction::call(arg0, output, vm)?,
@@ -50473,6 +50474,7 @@ impl Execute for Instruction {
             Self::Dec(arg0, output) => instruction::dec(arg0, output, vm)?,
             Self::Inc(arg0, output) => instruction::inc(arg0, output, vm)?,
             Self::PushScope => instruction::push_scope(vm)?,
+            Self::PushLoopScope => instruction::push_loop_scope(vm)?,
             Self::PopScope => instruction::pop_scope(vm)?,
             Self::Call(arg0, output) => instruction::call(arg0, output, vm)?,
             Self::CallNoOutput(arg0) => instruction::call_no_output(arg0, vm)?,

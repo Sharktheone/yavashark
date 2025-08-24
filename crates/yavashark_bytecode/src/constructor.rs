@@ -50168,6 +50168,10 @@ impl Instruction {
         Self::PushScope
     }
     #[must_use]
+    pub fn push_loop_scope() -> Self {
+        Self::PushLoopScope
+    }
+    #[must_use]
     pub fn pop_scope() -> Self {
         Self::PopScope
     }
@@ -62874,6 +62878,10 @@ impl Instruction {
     #[must_use]
     pub fn push_scope() -> Self {
         Self::PushScope
+    }
+    #[must_use]
+    pub fn push_loop_scope() -> Self {
+        Self::PushLoopScope
     }
     #[must_use]
     pub fn pop_scope() -> Self {
