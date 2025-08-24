@@ -62748,6 +62748,752 @@ impl Instruction {
             DataType::Undefined(arg0) => Self::IterNextNoOutputJmpUndefined(arg0, arg1),
         }
     }
+    #[must_use]
+    pub fn push_async_iter(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterVarToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterF32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterF32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterF32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterI32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterI32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterI32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterU32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterU32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterU32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterBoolToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterBoolToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterBoolToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterNullToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterNullToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterNullToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::PushAsyncIterUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::PushAsyncIterUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::PushAsyncIterUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::PushAsyncIterUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn async_iter_poll_next(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextVarToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextF32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextF32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextF32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextI32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextI32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextI32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextU32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextU32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextU32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextBoolToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextBoolToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextBoolToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextNullToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextNullToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextNullToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterPollNextUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterPollNextUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterPollNextUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterPollNextUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn async_iter_next(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextVarToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextF32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextF32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextF32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextI32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextI32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextI32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextU32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextU32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextU32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextBoolToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextBoolToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextBoolToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextNullToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextNullToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextNullToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn async_iter_next_jmp(
+        arg0: impl Data,
+        arg1: JmpAddr,
+        output: impl OutputData,
+    ) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpAccToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpAccToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpAccToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpAccToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpConstToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpConstToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpConstToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpConstToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpRegToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpRegToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpRegToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpRegToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpStackToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpStackToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpStackToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpStackToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpVarToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpVarToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpVarToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpVarToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpF32ToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpF32ToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpF32ToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpF32ToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpI32ToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpI32ToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpI32ToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpI32ToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpU32ToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpU32ToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpU32ToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpU32ToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpBoolToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpBoolToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpBoolToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpBoolToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpNullToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpNullToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpNullToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpNullToVar(arg0, arg1, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::AsyncIterNextJmpUndefinedToAcc(arg0, arg1, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::AsyncIterNextJmpUndefinedToReg(arg0, arg1, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::AsyncIterNextJmpUndefinedToStack(arg0, arg1, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::AsyncIterNextJmpUndefinedToVar(arg0, arg1, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn async_iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::AsyncIterNextNoOutputJmpAcc(arg0, arg1),
+            DataType::Const(arg0) => Self::AsyncIterNextNoOutputJmpConst(arg0, arg1),
+            DataType::Reg(arg0) => Self::AsyncIterNextNoOutputJmpReg(arg0, arg1),
+            DataType::Stack(arg0) => Self::AsyncIterNextNoOutputJmpStack(arg0, arg1),
+            DataType::Var(arg0) => Self::AsyncIterNextNoOutputJmpVar(arg0, arg1),
+            DataType::F32(arg0) => Self::AsyncIterNextNoOutputJmpF32(arg0, arg1),
+            DataType::I32(arg0) => Self::AsyncIterNextNoOutputJmpI32(arg0, arg1),
+            DataType::U32(arg0) => Self::AsyncIterNextNoOutputJmpU32(arg0, arg1),
+            DataType::Boolean(arg0) => Self::AsyncIterNextNoOutputJmpBool(arg0, arg1),
+            DataType::Null(arg0) => Self::AsyncIterNextNoOutputJmpNull(arg0, arg1),
+            DataType::Undefined(arg0) => {
+                Self::AsyncIterNextNoOutputJmpUndefined(arg0, arg1)
+            }
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -63342,5 +64088,29 @@ impl Instruction {
     #[must_use]
     pub fn iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
         Self::IterNextNoOutputJmp(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn push_async_iter(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::PushAsyncIter(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn async_iter_poll_next(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::AsyncIterPollNext(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn async_iter_next(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::AsyncIterNext(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn async_iter_next_jmp(
+        arg0: impl Data,
+        arg1: JmpAddr,
+        output: impl OutputData,
+    ) -> Self {
+        Self::AsyncIterNextJmp(arg0.data_type(), arg1, output.data_type())
+    }
+    #[must_use]
+    pub fn async_iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
+        Self::AsyncIterNextNoOutputJmp(arg0.data_type(), arg1)
     }
 }

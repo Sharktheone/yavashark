@@ -35,6 +35,7 @@ Dec(Data) => Data
 Inc(Data) => Data
 
 PushScope
+PushLoopScope
 PopScope
 
 Call(Data) => Data
@@ -169,3 +170,9 @@ IterNext(Data) => Data
 IterNextNoOutput(Data)
 IterNextJmp(Data, JmpAddr) => Data
 IterNextNoOutputJmp(Data, JmpAddr)
+
+PushAsyncIter(Data) => Data
+AsyncIterPollNext(Data) => Data
+AsyncIterNext(Data) => Data
+AsyncIterNextJmp(Data, JmpAddr) => Data
+AsyncIterNextNoOutputJmp(Data, JmpAddr)

@@ -288,7 +288,7 @@ pub fn pat_array_rest_var(_: impl Data, _vm: &mut impl VM) -> Res {
 
 pub fn push_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let iter = iter.get(vm)?;
-    
+
     let iter = iter.get_iter(vm.get_realm())?;
 
     output.set(iter, vm)?;
@@ -336,7 +336,7 @@ pub fn iter_next_no_output_jmp(iter: impl Data, addr: JmpAddr, vm: &mut impl VM)
     Ok(())
 }
 
-pub fn push_async_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> ControlResult {
+pub fn push_async_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let iter = iter.get(vm)?;
 
     let iter = iter.get_async_iter(vm.get_realm())?;
@@ -346,24 +346,38 @@ pub fn push_async_iter(iter: impl Data, output: impl OutputData, vm: &mut impl V
     Ok(())
 }
 
-pub fn async_iter_next(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> ControlResult {
+pub fn async_iter_poll_next(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> ControlResult {
     let iter = iter.get(vm)?;
 
-    let next = iter.iter_next(vm.get_realm())?;
+    let next = iter.async_iter_next(vm.get_realm())?;
+
+
+    match next {
+        Value::Object(obj) if obj.downcast::<Promise>().is_some() => {
+            vm.set_continue_storage(output);
+            return Err(ControlFlow::Await(obj));
+        }
+
+        _ => output.set(next, vm)?,
+    }
+
+    Ok(())
+}
+
+
+
+pub fn async_iter_next(next: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let next = next.get(vm)?;
+
+    let next = next.iter_res(vm.get_realm())?;
 
     output.set(next.unwrap_or(Value::Undefined), vm)
 }
 
-pub fn async_iter_next_no_output(iter: impl Data, vm: &mut impl VM) -> ControlResult {
-    let iter = iter.get(vm)?;
+pub fn async_iter_next_jmp(next: impl Data, addr: JmpAddr, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let next = next.get(vm)?;
 
-    iter.iter_next_no_out(vm.get_realm())
-}
-
-pub fn async_iter_next_jmp(iter: impl Data, addr: JmpAddr, output: impl OutputData, vm: &mut impl VM) -> ControlResult {
-    let iter = iter.get(vm)?;
-
-    let next = iter.iter_next(vm.get_realm())?;
+    let next = next.iter_res(vm.get_realm())?;
 
     if let Some(next) = next {
         output.set(next, vm)?;
@@ -374,10 +388,10 @@ pub fn async_iter_next_jmp(iter: impl Data, addr: JmpAddr, output: impl OutputDa
     Ok(())
 }
 
-pub fn async_iter_next_no_output_jmp(iter: impl Data, addr: JmpAddr, vm: &mut impl VM) -> ControlResult {
-    let iter = iter.get(vm)?;
+pub fn async_iter_next_no_output_jmp(next: impl Data, addr: JmpAddr, vm: &mut impl VM) -> Res {
+    let next = next.get(vm)?;
 
-    let finished = iter.iter_next_is_finished(vm.get_realm())?;
+    let finished = next.iter_done(vm.get_realm())?;
 
     if finished {
         vm.set_pc(addr);

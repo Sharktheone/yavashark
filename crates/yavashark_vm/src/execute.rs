@@ -50423,6 +50423,567 @@ impl Execute for Instruction {
             Self::IterNextNoOutputJmpUndefined(arg0, arg1) => {
                 instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
             }
+            Self::PushAsyncIterVarToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterRegToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterAccToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterStackToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterConstToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterF32ToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterI32ToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterU32ToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterBoolToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterNullToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterUndefinedToVar(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterVarToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterRegToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterAccToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterStackToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterConstToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterF32ToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterI32ToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterU32ToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterBoolToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterNullToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterUndefinedToReg(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterVarToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterRegToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterAccToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterStackToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterConstToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterF32ToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterI32ToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterU32ToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterBoolToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterNullToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterUndefinedToAcc(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterVarToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterRegToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterAccToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterStackToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterConstToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterF32ToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterI32ToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterU32ToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterBoolToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterNullToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::PushAsyncIterUndefinedToStack(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextVarToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextRegToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextAccToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextStackToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextConstToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextF32ToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextI32ToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextU32ToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextBoolToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextNullToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextUndefinedToVar(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextVarToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextRegToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextAccToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextStackToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextConstToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextF32ToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextI32ToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextU32ToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextBoolToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextNullToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextUndefinedToReg(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextVarToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextRegToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextAccToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextStackToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextConstToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextF32ToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextI32ToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextU32ToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextBoolToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextNullToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextUndefinedToAcc(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextVarToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextRegToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextAccToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextStackToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextConstToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextF32ToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextI32ToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextU32ToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextBoolToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextNullToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNextUndefinedToStack(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextVarToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextRegToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextAccToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextStackToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextConstToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextF32ToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextI32ToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextU32ToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextBoolToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextNullToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextUndefinedToVar(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextVarToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextRegToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextAccToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextStackToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextConstToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextF32ToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextI32ToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextU32ToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextBoolToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextNullToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextUndefinedToReg(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextVarToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextRegToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextAccToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextStackToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextConstToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextF32ToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextI32ToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextU32ToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextBoolToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextNullToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextUndefinedToAcc(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextVarToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextRegToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextAccToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextStackToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextConstToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextF32ToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextI32ToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextU32ToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextBoolToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextNullToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextUndefinedToStack(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextJmpVarToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpRegToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpAccToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpStackToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpConstToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpF32ToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpI32ToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpU32ToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpBoolToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpNullToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpUndefinedToVar(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpVarToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpRegToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpAccToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpStackToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpConstToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpF32ToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpI32ToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpU32ToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpBoolToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpNullToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpUndefinedToReg(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpVarToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpRegToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpAccToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpStackToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpConstToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpF32ToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpI32ToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpU32ToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpBoolToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpNullToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpUndefinedToAcc(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpVarToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpRegToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpAccToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpStackToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpConstToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpF32ToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpI32ToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpU32ToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpBoolToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpNullToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextJmpUndefinedToStack(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpVar(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpReg(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpAcc(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpStack(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpConst(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpF32(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpI32(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpU32(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpBool(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpNull(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmpUndefined(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
         }
         Ok(())
     }
@@ -50664,6 +51225,21 @@ impl Execute for Instruction {
             }
             Self::IterNextNoOutputJmp(arg0, arg1) => {
                 instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::PushAsyncIter(arg0, output) => {
+                instruction::push_async_iter(arg0, output, vm)?
+            }
+            Self::AsyncIterPollNext(arg0, output) => {
+                instruction::async_iter_poll_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNext(arg0, output) => {
+                instruction::async_iter_next(arg0, output, vm)?
+            }
+            Self::AsyncIterNextJmp(arg0, arg1, output) => {
+                instruction::async_iter_next_jmp(arg0, arg1, output, vm)?
+            }
+            Self::AsyncIterNextNoOutputJmp(arg0, arg1) => {
+                instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
             }
         }
         Ok(())

@@ -397,6 +397,12 @@ impl<C: Realm> Value<C> {
         iter.call(realm, Vec::new(), self.copy())
     }
 
+    pub fn get_async_iter(&self, realm: &mut C) -> Result<Self, Error<C>> {
+        let iter = self.get_property(&Symbol::ASYNC_ITERATOR.into(), realm)?;
+
+        iter.call(realm, Vec::new(), self.copy())
+    }
+
     pub fn get_property(&self, name: &Self, realm: &mut C) -> Result<Self, Error<C>> {
         match self {
             Self::Object(o) => o
@@ -643,6 +649,28 @@ impl<C: Realm> Value<C> {
             return Ok(None);
         }
         next.get_property(&Self::string("value"), realm).map(Some)
+    }
+
+    pub fn async_iter_next(&self, realm: &mut C) -> Result<Self, Error<C>> {
+        let promise = self
+            .call_method(&"next".into(), realm, Vec::new())?;
+
+        Ok(promise)
+    }
+
+    pub fn iter_res(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
+        let done = self.get_property(&Self::string("done"), realm)?;
+
+        if done.is_truthy() {
+            return Ok(None);
+        }
+        self.get_property(&Self::string("value"), realm).map(Some)
+    }
+
+    pub fn iter_done(&self, realm: &mut C) -> Result<bool, Error<C>> {
+        let done = self.get_property(&Self::string("done"), realm)?;
+
+        Ok(done.is_truthy())
     }
 
 
