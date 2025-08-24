@@ -124,7 +124,7 @@ impl Compiler {
                 Ok(optim.output)
             },
             None => {
-                Ok(out.data_type().into())
+                Ok(out.into())
             },
         }
     }
