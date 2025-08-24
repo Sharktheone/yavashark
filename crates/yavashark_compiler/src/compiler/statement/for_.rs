@@ -4,6 +4,8 @@ use yavashark_bytecode::{JmpAddr, instructions::Instruction, jmp::Test};
 
 impl Compiler {
     pub fn compile_for(&mut self, f: &ForStmt) -> Res {
+        self.instructions.push(Instruction::push_loop_scope()); //TODO: we need some kind of handler for continue/break
+
         if let Some(init) = &f.init {
             match init {
                 VarDeclOrExpr::VarDecl(vd) => self.decl_var(vd)?,
@@ -41,6 +43,8 @@ impl Compiler {
                 self.instructions[jmp_pos] = inst;
             }
         }
+
+        self.instructions.push(Instruction::pop_scope());
 
         Ok(())
     }
