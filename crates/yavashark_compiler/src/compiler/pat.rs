@@ -10,7 +10,6 @@ impl Compiler {
         match pat {
             Pat::Array(array) => self.compile_array_pat(array, source)?,
             Pat::Ident(ident) => {
-
                 let name = self.alloc_var(ident.as_ref());
 
                 self.instructions.push(Instruction::decl_let(source, name));

@@ -1,6 +1,7 @@
 use crate::Compiler;
 use anyhow::anyhow;
 use swc_ecma_ast::{VarDecl, VarDeclKind};
+use yavashark_bytecode::data::{DataType, Undefined};
 use yavashark_bytecode::instructions::Instruction;
 
 impl Compiler {
@@ -22,14 +23,11 @@ impl Compiler {
 
             VarDeclKind::Let => {
                 for decl in &var.decls {
-                    let name = decl.name.as_ident().ok_or_else(|| todo!())?;
-                    let name = self.alloc_var(name.id.as_ref());
-
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.instructions.push(Instruction::decl_let(out, name));
+                        self.compile_pat(&decl.name, out)?
                     } else {
-                        self.instructions.push(Instruction::decl_empty_let(name));
+                        self.compile_pat(&decl.name, DataType::Undefined(Undefined))?
                     }
                 }
             }
