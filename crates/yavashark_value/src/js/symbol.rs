@@ -22,7 +22,7 @@ impl PartialEq for SymbolInner {
             (Self::Static(s1), Self::Static(s2)) => {
                 s1 == s2
                 // ptr::eq(*s1, *s2)
-            },
+            }
             (Self::Str(s1), Self::Str(s2)) => Rc::ptr_eq(s1, s2),
             _ => false,
         }

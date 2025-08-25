@@ -34,7 +34,6 @@ fn parse(input: &str) -> Res<Vec<Stmt>> {
     Ok(script.body)
 }
 
-
 /// runs the provided code in a new YavaShark engine and returns a formatted version of the return value
 #[wasm_bindgen]
 pub fn run_standalone(code: &str) -> String {

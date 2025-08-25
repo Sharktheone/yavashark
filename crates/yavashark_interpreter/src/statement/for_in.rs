@@ -53,7 +53,12 @@ impl Interpreter {
         Ok(Value::Undefined)
     }
 
-    pub fn run_for_head(realm: &mut Realm, decl: &ForHead, scope: &mut Scope, value: &Value) -> Res {
+    pub fn run_for_head(
+        realm: &mut Realm,
+        decl: &ForHead,
+        scope: &mut Scope,
+        value: &Value,
+    ) -> Res {
         match decl {
             ForHead::VarDecl(decl) => {
                 let kind = decl.kind;

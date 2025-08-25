@@ -107,9 +107,7 @@ impl RawOptimFunction {
         scope.state_set_returnable()?;
 
         for (i, p) in self.params.iter().enumerate() {
-            let Pat::Ident(name) = &p.pat else {
-                todo!()
-            };
+            let Pat::Ident(name) = &p.pat else { todo!() };
 
             scope.declare_var(
                 name.sym.to_string(),

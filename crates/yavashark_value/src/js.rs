@@ -641,8 +641,7 @@ impl<C: Realm> Iter<C> {
 
 impl<C: Realm> Value<C> {
     pub fn iter_next(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
-        let next = self
-            .call_method(&"next".into(), realm, Vec::new())?;
+        let next = self.call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property(&Value::string("done"), realm)?;
 
         if done.is_truthy() {
@@ -652,8 +651,7 @@ impl<C: Realm> Value<C> {
     }
 
     pub fn async_iter_next(&self, realm: &mut C) -> Result<Self, Error<C>> {
-        let promise = self
-            .call_method(&"next".into(), realm, Vec::new())?;
+        let promise = self.call_method(&"next".into(), realm, Vec::new())?;
 
         Ok(promise)
     }
@@ -673,17 +671,14 @@ impl<C: Realm> Value<C> {
         Ok(done.is_truthy())
     }
 
-
     pub fn iter_next_no_out(&self, realm: &mut C) -> Result<(), Error<C>> {
-        let _ = self
-            .call_method(&"next".into(), realm, Vec::new())?;
+        let _ = self.call_method(&"next".into(), realm, Vec::new())?;
 
         Ok(())
     }
 
     pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
-        let next = self
-            .call_method(&"next".into(), realm, Vec::new())?;
+        let next = self.call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property(&Self::string("done"), realm)?;
 
         Ok(done.is_truthy())

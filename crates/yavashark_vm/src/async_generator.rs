@@ -102,9 +102,7 @@ impl Func<Realm> for AsyncGeneratorFunction {
         scope.state_set_returnable()?;
 
         for (i, p) in self.params.iter().enumerate() {
-            let Pat::Ident(name) = &p.pat else {
-                todo!()
-            };
+            let Pat::Ident(name) = &p.pat else { todo!() };
 
             scope.declare_var(
                 name.sym.to_string(),
@@ -182,7 +180,6 @@ impl AsyncGenerator {
     pub const fn iterator(this: Value) -> Value {
         this
     }
-
 
     #[prop(Symbol::ASYNC_ITERATOR)]
     #[nonstatic]

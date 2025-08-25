@@ -127,8 +127,7 @@ impl TaskQueueRunner {
 
             ran_tasks |= !queue.is_empty();
 
-            queue
-                .retain_mut(|task| task.as_mut().poll(cx, realm).is_pending());
+            queue.retain_mut(|task| task.as_mut().poll(cx, realm).is_pending());
 
             buf.append(&mut queue);
         }
