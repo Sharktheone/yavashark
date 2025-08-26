@@ -3,20 +3,20 @@ use std::cell::RefCell;
 use std::fmt::Debug;
 use std::path::PathBuf;
 use std::rc::Rc;
-use swc_ecma_ast::{Param, Pat};
-use yavashark_bytecode::BytecodeFunctionCode;
+use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 use yavashark_env::builtins::Arguments;
 use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
+use crate::params::VMParams;
 
 #[object(function)]
 #[derive(Debug)]
 pub struct GeneratorFunction {
     code: Rc<BytecodeFunctionCode>,
     scope: Scope,
-    params: Vec<Param>,
+    params: VMParams,
 }
 
 impl GeneratorFunction {
@@ -25,7 +25,7 @@ impl GeneratorFunction {
         code: Rc<BytecodeFunctionCode>,
         scope: Scope,
         realm: &Realm,
-        params: Vec<Param>,
+        params: BytecodeFunctionParams,
     ) -> Self {
         Self {
             inner: RefCell::new(MutableGeneratorFunction {
@@ -33,7 +33,7 @@ impl GeneratorFunction {
             }),
             code,
             scope,
-            params,
+            params: VMParams::from(params),
         }
     }
 
@@ -45,7 +45,7 @@ impl GeneratorFunction {
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),
-            params: Vec::new(),
+            params: VMParams::default(),
         }
     }
 }
@@ -92,14 +92,8 @@ impl Func<Realm> for GeneratorFunction {
         let scope = &mut Scope::with_parent(&self.scope)?;
         scope.state_set_returnable()?;
 
-        for (i, p) in self.params.iter().enumerate() {
-            let Pat::Ident(name) = &p.pat else { todo!() };
 
-            scope.declare_var(
-                name.sym.to_string(),
-                args.get(i).unwrap_or(&Value::Undefined).copy(),
-            )?;
-        }
+        self.params.execute(&args, scope.clone(), realm)?;
 
         let mut scope = Scope::with_parent(scope)?;
         scope.state_set_function()?;

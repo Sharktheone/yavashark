@@ -3,7 +3,7 @@ use std::rc::Rc;
 use swc_ecma_ast::{Function, Stmt};
 
 pub use yavashark_bytecode as bytecode;
-use yavashark_bytecode::BytecodeFunctionCode;
+use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 pub use yavashark_codegen as codegen;
 pub use yavashark_vm as vm;
 
@@ -52,12 +52,31 @@ impl ByteCodeInterpreter {
             }));
         }
 
+        let params = {
+            let (params_code, params_defs) =
+                Compiler::compile_params(func.params.iter().map(|p| &p.pat))
+                    .map_err(|e| Error::syn_error(format!("Failed to compile: {e:?}")))?;
+
+            let ds = DataSection::new(
+                params_code.variables,
+                Vec::new(),
+                params_code.literals,
+                params_code.control,
+            );
+
+            BytecodeFunctionParams {
+                instructions: params_code.instructions,
+                ds,
+                defs: params_defs,
+            }
+        };
+
         if func.is_generator && !func.is_async {
             let g = GeneratorFunction::new(
                 compiled.unwrap_or_default(),
                 scope,
                 realm,
-                func.params.clone(),
+                params,
             );
 
             return Ok(g.into_object());
