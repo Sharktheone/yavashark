@@ -87,7 +87,7 @@ impl ByteCodeInterpreter {
                 compiled.unwrap_or_default(),
                 scope,
                 realm,
-                func.params.clone(),
+                params,
             );
 
             return Ok(g.into_object());
