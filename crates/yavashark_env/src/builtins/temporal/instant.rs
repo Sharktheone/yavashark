@@ -107,7 +107,7 @@ impl Instant {
     fn add(&self, other: Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let other = Duration::from_value_ref(other, realm)?;
 
-        let i = self.stamp.add(other.dur).map_err(Error::from_temporal)?;
+        let i = self.stamp.add(&other.dur).map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
     }
@@ -153,7 +153,7 @@ impl Instant {
 
         let i = self
             .stamp
-            .subtract(other.dur)
+            .subtract(&other.dur)
             .map_err(Error::from_temporal)?;
 
         Ok(Self::from_stamp(i, realm).into_object())
