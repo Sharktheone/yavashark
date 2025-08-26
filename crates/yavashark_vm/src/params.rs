@@ -1,8 +1,8 @@
+use crate::{BorrowedVM, VM};
 use std::ops::Deref;
 use yavashark_bytecode::BytecodeFunctionParams;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Res, Value};
-use crate::{BorrowedVM, VM};
 
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct VMParams(BytecodeFunctionParams);
@@ -26,7 +26,6 @@ impl VMParams {
         let mut prev_i = 0;
 
         for (i, param) in self.0.defs.iter().enumerate() {
-
             let Some(instructions) = self.instructions.get(prev_i..*param as usize) else {
                 return Err(Error::new("Invalid parameter instructions"));
             };

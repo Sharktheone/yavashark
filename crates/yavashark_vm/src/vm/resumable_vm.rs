@@ -121,7 +121,6 @@ impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
         Self { state, realm }
     }
 
-
     pub fn handle_error(&mut self, err: Error) -> Res {
         if let Some(tb) = self.state.try_stack.last_mut() {
             if let Some(catch) = tb.catch.take() {
@@ -255,7 +254,6 @@ impl ResumableVM<'_> {
 
         AsyncPoll::Ret(self.state, Ok(()))
     }
-
 }
 
 impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {

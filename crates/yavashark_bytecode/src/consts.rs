@@ -60,7 +60,6 @@ pub struct BytecodeFunctionCode {
     pub ds: DataSection,
 }
 
-
 #[derive(Debug, PartialEq, Clone, Default)]
 pub struct BytecodeFunctionParams {
     pub instructions: Vec<instructions::Instruction>,

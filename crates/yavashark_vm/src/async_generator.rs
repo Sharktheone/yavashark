@@ -1,6 +1,7 @@
 mod task;
 
 use crate::async_generator::task::AsyncGeneratorTask;
+use crate::params::VMParams;
 use crate::VmState;
 use std::cell::RefCell;
 use std::fmt::Debug;
@@ -14,7 +15,6 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_value::{Error, Func, Obj};
-use crate::params::VMParams;
 
 #[object(function)]
 #[derive(Debug)]
@@ -30,7 +30,7 @@ impl AsyncGeneratorFunction {
         code: Rc<BytecodeFunctionCode>,
         scope: Scope,
         realm: &Realm,
-        params: BytecodeFunctionParams
+        params: BytecodeFunctionParams,
     ) -> Self {
         Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
@@ -100,7 +100,6 @@ impl Func<Realm> for AsyncGeneratorFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
         scope.state_set_returnable()?;
-
 
         self.params.execute(&args, scope.clone(), realm)?;
 

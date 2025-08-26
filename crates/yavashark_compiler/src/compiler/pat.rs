@@ -1,6 +1,6 @@
 use crate::{Compiler, Res};
-use std::path::Component;
 use anyhow::anyhow;
+use std::path::Component;
 use swc_ecma_ast::{ArrayPat, Pat};
 use yavashark_bytecode::data::Data;
 use yavashark_bytecode::instructions::Instruction;
@@ -13,11 +13,9 @@ impl Compiler {
                 let name = self.alloc_var(ident.as_ref());
 
                 self.instructions.push(Instruction::decl_let(source, name));
-            },
-            Pat::Invalid(invalid) => {
-                Err(anyhow!("Invalid pattern: {:?}", invalid))?
-            },
-            _ => todo!()
+            }
+            Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
+            _ => todo!(),
         }
 
         Ok(())
@@ -35,16 +33,14 @@ impl Compiler {
             if let Some(elem) = elem {
                 self.compile_pat(elem, out)?;
             } else {
-                self.instructions.push(Instruction::iter_next_no_output(iter))
+                self.instructions
+                    .push(Instruction::iter_next_no_output(iter))
             }
         }
 
         self.dealloc(iter);
         self.dealloc(out);
 
-
-
         Ok(())
-
     }
 }
