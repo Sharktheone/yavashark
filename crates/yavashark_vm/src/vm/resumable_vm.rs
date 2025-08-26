@@ -4,20 +4,20 @@ use crate::{Registers, Stack, VM};
 use std::mem;
 use std::rc::Rc;
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
-use yavashark_bytecode::data::{ControlIdx, Label, OutputData, OutputDataType};
-use yavashark_bytecode::{BytecodeFunctionCode, ConstIdx, Reg, VarName};
+use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
+use yavashark_bytecode::{instructions, BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value, ValueResult};
 
 #[derive(Debug, Clone)]
-pub struct VmState {
+pub struct VmState<T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
     pub regs: Registers,
     pub stack: Stack,
     pub call_args: Vec<Value>,
 
     pub pc: usize,
-    pub code: Rc<BytecodeFunctionCode>,
+    pub code: T,
 
     pub current_scope: Scope,
 
@@ -27,11 +27,27 @@ pub struct VmState {
 
     pub try_stack: Vec<TryBlock>,
 
+    // pub rest_stack: Vec<()>,
     pub throw: Option<Error>,
 }
 
-pub struct ResumableVM<'a> {
-    state: VmState,
+pub trait VMStateFunctionCode: Clone {
+    fn instructions(&self) -> &[instructions::Instruction];
+    fn data_section(&self) -> &DataSection;
+}
+
+impl VMStateFunctionCode for Rc<BytecodeFunctionCode> {
+    fn instructions(&self) -> &[instructions::Instruction] {
+        &self.instructions
+    }
+
+    fn data_section(&self) -> &DataSection {
+        &self.ds
+    }
+}
+
+pub struct ResumableVM<'a, T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
+    state: VmState<T>,
     realm: &'a mut Realm,
 }
 
@@ -40,6 +56,7 @@ pub enum AsyncPoll {
     Ret(VmState, Res),
 }
 
+#[allow(clippy::large_enum_variant)]
 pub enum GeneratorPoll {
     Ret(ValueResult),
     Yield(VmState, Value),
@@ -51,9 +68,9 @@ pub enum AsyncGeneratorPoll {
     Yield(VmState, Value),
 }
 
-impl VmState {
+impl<T: VMStateFunctionCode> VmState<T> {
     #[must_use]
-    pub const fn new(code: Rc<BytecodeFunctionCode>, scope: Scope) -> Self {
+    pub const fn new(code: T, scope: Scope) -> Self {
         Self {
             regs: Registers::new(),
             stack: Stack::new(),
@@ -67,7 +84,6 @@ impl VmState {
             throw: None,
         }
     }
-
     pub fn continue_async(&mut self, val: Value) -> Res {
         if let Some(storage) = self.continue_storage.take() {
             match storage {
@@ -77,7 +93,7 @@ impl VmState {
                 OutputDataType::Var(name) => {
                     let name = self
                         .code
-                        .ds
+                        .data_section()
                         .var_names
                         .get(name.0 as usize)
                         .map(String::as_str)
@@ -92,19 +108,41 @@ impl VmState {
     }
 }
 
-impl<'a> ResumableVM<'a> {
+impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
     #[must_use]
-    pub const fn new(code: Rc<BytecodeFunctionCode>, scope: Scope, realm: &'a mut Realm) -> Self {
+    pub const fn new(code: T, scope: Scope, realm: &'a mut Realm) -> Self {
         let state = VmState::new(code, scope);
 
         Self { state, realm }
     }
 
     #[must_use]
-    pub const fn from_state(state: VmState, realm: &'a mut Realm) -> Self {
+    pub const fn from_state(state: VmState<T>, realm: &'a mut Realm) -> Self {
         Self { state, realm }
     }
 
+
+    pub fn handle_error(&mut self, err: Error) -> Res {
+        if let Some(tb) = self.state.try_stack.last_mut() {
+            if let Some(catch) = tb.catch.take() {
+                if tb.finally.is_none() {
+                    self.state.try_stack.pop();
+                }
+                self.offset_pc(catch);
+                self.set_acc(ErrorObj::error_to_value(err, self.realm));
+            } else if let Some(finally) = tb.finally.take() {
+                self.state.throw = Some(err);
+                self.offset_pc(finally);
+
+                self.state.try_stack.pop();
+            }
+        }
+
+        Ok(())
+    }
+}
+
+impl ResumableVM<'_> {
     #[must_use]
     pub fn next(mut self) -> GeneratorPoll {
         while self.state.pc < self.state.code.instructions.len() {
@@ -218,27 +256,9 @@ impl<'a> ResumableVM<'a> {
         AsyncPoll::Ret(self.state, Ok(()))
     }
 
-    pub fn handle_error(&mut self, err: Error) -> Res {
-        if let Some(tb) = self.state.try_stack.last_mut() {
-            if let Some(catch) = tb.catch.take() {
-                if tb.finally.is_none() {
-                    self.state.try_stack.pop();
-                }
-                self.offset_pc(catch);
-                self.set_acc(ErrorObj::error_to_value(err, self.realm));
-            } else if let Some(finally) = tb.finally.take() {
-                self.state.throw = Some(err);
-                self.offset_pc(finally);
-
-                self.state.try_stack.pop();
-            }
-        }
-
-        Ok(())
-    }
 }
 
-impl VM for ResumableVM<'_> {
+impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
     fn acc(&self) -> Value {
         self.state.acc.clone()
     }
@@ -248,7 +268,7 @@ impl VM for ResumableVM<'_> {
     }
 
     fn get_variable(&self, name: VarName) -> Res<Value> {
-        let Some(name) = self.state.code.ds.var_names.get(name as usize) else {
+        let Some(name) = self.state.code.data_section().var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
 
@@ -261,7 +281,7 @@ impl VM for ResumableVM<'_> {
     fn var_name(&self, name: VarName) -> Option<&str> {
         self.state
             .code
-            .ds
+            .data_section()
             .var_names
             .get(name as usize)
             .map(String::as_str)
@@ -277,7 +297,7 @@ impl VM for ResumableVM<'_> {
     fn get_label(&self, label: Label) -> Res<&str> {
         self.state
             .code
-            .ds
+            .data_section()
             .labels
             .get(label.0 as usize)
             .map(String::as_str)
@@ -317,7 +337,7 @@ impl VM for ResumableVM<'_> {
         let val = self
             .state
             .code
-            .ds
+            .data_section()
             .constants
             .get(const_idx as usize)
             .ok_or(Error::reference("Invalid constant index"))?;
@@ -399,7 +419,7 @@ impl VM for ResumableVM<'_> {
     }
 
     fn enter_try(&mut self, id: ControlIdx) -> Res {
-        let Some(c) = self.state.code.ds.control.get(id.0 as usize) else {
+        let Some(c) = self.state.code.data_section().control.get(id.0 as usize) else {
             return Err(Error::new("Invalid control index"));
         };
 
