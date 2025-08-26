@@ -3,10 +3,10 @@ mod pat;
 mod statement;
 
 use crate::Res;
-use swc_ecma_ast::Stmt;
+use swc_ecma_ast::{Pat, Stmt};
 use yavashark_bytecode::ConstValue;
 use yavashark_bytecode::control::ControlBlock;
-use yavashark_bytecode::data::{Label, Stack};
+use yavashark_bytecode::data::{Acc, Label, Stack};
 use yavashark_bytecode::instructions::Instruction;
 
 #[derive(Debug, Clone, Default)]
@@ -38,6 +38,34 @@ impl Compiler {
         this.compile_stmts(stmt)?;
 
         Ok(this)
+    }
+
+    pub fn compile_params<'a>(params: impl Iterator<Item = &'a Pat>) -> Res<(Self, Vec<u32>)> {
+        let mut this = Self::new();
+
+        let (low, high) = params.size_hint();
+        let num_params = high.unwrap_or(low);
+        let mut param_defs = Vec::with_capacity(num_params);
+
+        for pat in params {
+            this.compile_pat(pat, Acc)?;
+            param_defs.push(this.instructions.len() as u32);
+            this.reset_allocs();
+        }
+
+        Ok((this, param_defs))
+    }
+
+    pub fn reset_allocs(&mut self) {
+        self.labeled.clear();
+        self.active_labeled.clear();
+        self.labels.clear();
+        self.loop_label = None;
+        self.label_backpatch.clear();
+        self.used_registers.clear();
+        self.stack_ptr = 0;
+        self.max_stack_size = 0;
+        self.stack_to_deallloc.clear();
     }
 }
 
