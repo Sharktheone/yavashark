@@ -20,7 +20,7 @@ pub struct BorrowedVM<'a> {
     code: &'a [Instruction],
     data: &'a DataSection,
 
-    current_scope: Scope,
+    pub current_scope: Scope,
 
     acc: Value,
 
