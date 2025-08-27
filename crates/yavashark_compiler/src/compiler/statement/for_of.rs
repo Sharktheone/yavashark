@@ -143,7 +143,7 @@ impl Compiler {
                             self.instructions
                                 .push(Instruction::async_iter_poll_next(iter, res));
 
-                            let inst = (Acc.data_type(), self.instructions.len());
+                            let inst = (OutputData::data_type(Acc), self.instructions.len());
 
                             self.instructions.push(Instruction::jmp_rel(0));
                             self.instructions

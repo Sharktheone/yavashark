@@ -7,34 +7,32 @@ use yavashark_bytecode::instructions::Instruction;
 
 
 
-type DeclCB<'a> = &'a mut impl FnMut(DataType, VarName);
-
 impl Compiler {
     pub fn compile_pat_var(&mut self, pat: &Pat, source: impl Data) -> Res {
-        self.compile_pat(pat, source, &mut |dtype, name| {
-            self.instructions.push(Instruction::decl_var(dtype, name));
+        self.compile_pat(pat, source, &mut |compiler, dtype, name| {
+            compiler.instructions.push(Instruction::decl_var(dtype, name));
         })
     }
 
     pub fn compile_pat_let(&mut self, pat: &Pat, source: impl Data) -> Res {
-        self.compile_pat(pat, source, &mut |dtype, name| {
-            self.instructions.push(Instruction::decl_let(dtype, name));
+        self.compile_pat(pat, source, &mut |compiler, dtype, name| {
+            compiler.instructions.push(Instruction::decl_let(dtype, name));
         })
     }
 
     pub fn compile_pat_const(&mut self, pat: &Pat, source: impl Data) -> Res {
-        self.compile_pat(pat, source, &mut |dtype, name| {
-            self.instructions.push(Instruction::decl_const(dtype, name));
+        self.compile_pat(pat, source, &mut |compiler, dtype, name| {
+            compiler.instructions.push(Instruction::decl_const(dtype, name));
         })
     }
 
-    pub fn compile_pat(&mut self, pat: &Pat, source: impl Data, cb: DeclCB) -> Res {
+    pub fn compile_pat(&mut self, pat: &Pat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
         match pat {
             Pat::Array(array) => self.compile_array_pat(array, source, cb)?,
             Pat::Ident(ident) => {
                 let name = self.alloc_var(ident.as_ref());
 
-                cb(source.data_type(), name);
+                cb(self, source.data_type(), name);
             }
             Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
             _ => todo!(),
@@ -43,7 +41,7 @@ impl Compiler {
         Ok(())
     }
 
-    pub fn compile_array_pat(&mut self, array: &ArrayPat, source: impl Data, cb: DeclCB) -> Res {
+    pub fn compile_array_pat(&mut self, array: &ArrayPat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
         let iter = self.alloc_reg_or_stack();
 
         self.instructions.push(Instruction::push_iter(source, iter));
