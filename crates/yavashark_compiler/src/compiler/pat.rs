@@ -117,15 +117,17 @@ impl Compiler {
     }
 
     pub fn compile_assign_pat(&mut self, assign: &AssignPat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
-        self.instructions.push(Instruction::move_(source, Acc));
+        let out = self.alloc_reg_or_stack();
+        self.instructions.push(Instruction::move_(source, out));
 
         let idx = self.instructions.len();
         self.instructions.push(Instruction::jmp(0));
 
-        self.compile_expr_data_certain(&assign.right, Acc)?;
-        self.instructions[idx] = Instruction::jmp_if_not_undefined(Acc, self.instructions.len());
+        self.compile_expr_data_certain(&assign.right, out)?;
+        self.instructions[idx] = Instruction::jmp_if_not_undefined(out, self.instructions.len());
 
-        self.compile_pat(&assign.left, Acc, cb)?;
+        self.compile_pat(&assign.left, out, cb)?;
+        self.dealloc(out);
 
         Ok(())
     }
