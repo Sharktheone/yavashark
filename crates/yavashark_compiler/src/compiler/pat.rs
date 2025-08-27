@@ -1,7 +1,7 @@
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::path::Component;
-use swc_ecma_ast::{ArrayPat, Pat};
+use swc_ecma_ast::{ArrayPat, ObjectPat, ObjectPatProp, Pat};
 use yavashark_bytecode::data::{Data, DataType, VarName};
 use yavashark_bytecode::instructions::Instruction;
 
@@ -33,7 +33,8 @@ impl Compiler {
                 let name = self.alloc_var(ident.as_ref());
 
                 cb(self, source.data_type(), name);
-            }
+            },
+            Pat::Object(obj) => self.compile_object_pat(obj, source, cb)?,
             Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
             _ => todo!(),
         }
@@ -63,4 +64,20 @@ impl Compiler {
 
         Ok(())
     }
+
+    pub fn compile_object_pat(&mut self, obj: &ObjectPat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
+        for prop in &obj.props {
+            match prop {
+                ObjectPatProp::KeyValue(prop) => {}
+                ObjectPatProp::Assign(prop) => {
+
+                }
+                ObjectPatProp::Rest(prop) => todo!()
+            }
+
+        }
+
+        Ok(())
+    }
 }
+
