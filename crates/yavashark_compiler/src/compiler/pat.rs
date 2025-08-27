@@ -82,8 +82,9 @@ impl Compiler {
                 ObjectPatProp::Assign(prop) => {
                     if let Some(value) = &prop.value {
                         let name = self.alloc_var(prop.key.id.as_ref());
+                        let key = self.alloc_const(prop.key.sym.as_str());
 
-                        self.instructions.push(Instruction::load_member(source, name, Acc));
+                        self.instructions.push(Instruction::load_member(source, key, Acc));
 
                         let idx = self.instructions.len();
                         self.instructions.push(Instruction::jmp(0));
@@ -95,16 +96,17 @@ impl Compiler {
                         cb(self, Acc.into(), name);
                     } else {
                         let name = self.alloc_var(prop.key.id.as_ref());
+                        let key = self.alloc_const(prop.key.sym.as_str());
 
-                        self.instructions.push(Instruction::load_member(source, name, Acc));
+                        self.instructions.push(Instruction::load_member(source, key, Acc));
 
                         cb(self, Acc.into(), name);
                     }
                 }
                 ObjectPatProp::Rest(prop) => todo!()
             }
-
         }
+
 
         Ok(())
     }
