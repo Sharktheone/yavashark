@@ -77,7 +77,7 @@ impl Compiler {
 
                     self.instructions.push(Instruction::load_member(source, key, Acc));
 
-                    self.compile_pat(&prop.value, source, cb)?;
+                    self.compile_pat(&prop.value, Acc, cb)?;
                 }
                 ObjectPatProp::Assign(prop) => {
                     if let Some(value) = &prop.value {
