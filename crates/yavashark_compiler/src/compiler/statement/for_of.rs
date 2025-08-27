@@ -2,7 +2,7 @@ use crate::{Compiler, Res};
 use anyhow::anyhow;
 use swc_ecma_ast::{ForHead, ForOfStmt, VarDeclKind};
 use yavashark_bytecode::ConstValue;
-use yavashark_bytecode::data::{Data, DataType, OutputData, OutputDataType};
+use yavashark_bytecode::data::{Acc, Data, DataType, OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{JmpAddr, jmp::Test};
 
@@ -111,54 +111,82 @@ impl Compiler {
 
                 let decl = &dec.decls[0];
 
-                let var_name = if let Some(ident) = &decl.name.as_ident() {
-                    self.alloc_var(&*ident.sym)
+                if let Some(ident) = &decl.name.as_ident() {
+                    let var_name = self.alloc_var(&*ident.sym);
+
+                    match dec.kind {
+                        VarDeclKind::Var => {
+                            self.instructions
+                                .push(Instruction::decl_empty_var(var_name));
+
+                            self.instructions
+                                .push(Instruction::async_iter_poll_next(iter, res));
+
+                            let inst = (OutputData::data_type(var_name), self.instructions.len());
+                            self.instructions.push(Instruction::jmp_rel(0));
+
+                            inst
+                        }
+                        VarDeclKind::Let => {
+                            self.instructions
+                                .push(Instruction::decl_empty_var(var_name));
+
+                            self.instructions
+                                .push(Instruction::async_iter_poll_next(iter, res));
+
+                            let inst = (OutputData::data_type(var_name), self.instructions.len());
+                            self.instructions.push(Instruction::jmp_rel(0));
+
+                            inst
+                        }
+                        VarDeclKind::Const => {
+                            self.instructions
+                                .push(Instruction::async_iter_poll_next(iter, res));
+
+                            let inst = (Acc.data_type(), self.instructions.len());
+
+                            self.instructions.push(Instruction::jmp_rel(0));
+                            self.instructions
+                                .push(Instruction::decl_const(Acc, var_name));
+
+                            inst
+                        }
+                    }
                 } else {
-                    todo!()
-                };
+                    self.instructions
+                        .push(Instruction::async_iter_poll_next(iter, res));
 
-                match dec.kind {
-                    VarDeclKind::Var => {
-                        self.instructions
-                            .push(Instruction::decl_empty_var(var_name));
+                    let inst = (OutputData::data_type(Acc), self.instructions.len());
+                    self.instructions.push(Instruction::jmp_rel(0));
 
-                        self.instructions
-                            .push(Instruction::async_iter_poll_next(iter, res));
-
-                        let inst = (OutputData::data_type(var_name), self.instructions.len());
-                        self.instructions.push(Instruction::jmp_rel(0));
-
-                        inst
+                    match dec.kind {
+                        VarDeclKind::Var => {
+                            self.compile_pat_var(&decl.name, Acc)?;
+                        }
+                        VarDeclKind::Let => {
+                            self.compile_pat_let(&decl.name, Acc)?;
+                        }
+                        VarDeclKind::Const => {
+                            self.compile_pat_const(&decl.name, Acc)?;
+                        }
                     }
-                    VarDeclKind::Let => {
-                        self.instructions
-                            .push(Instruction::decl_empty_var(var_name));
 
-                        self.instructions
-                            .push(Instruction::async_iter_poll_next(iter, res));
-
-                        let inst = (OutputData::data_type(var_name), self.instructions.len());
-                        self.instructions.push(Instruction::jmp_rel(0));
-
-                        inst
-                    }
-                    VarDeclKind::Const => {
-                        self.instructions
-                            .push(Instruction::async_iter_poll_next(iter, res));
-
-                        let out = self.alloc_reg_or_stack();
-
-                        let inst = (out, self.instructions.len());
-
-                        self.instructions.push(Instruction::jmp_rel(0));
-                        self.instructions
-                            .push(Instruction::decl_const(out, var_name));
-
-                        inst
-                    }
+                    inst
                 }
             }
-            _ => todo!(),
+            ForHead::Pat(pat) => {
+                self.instructions
+                    .push(Instruction::async_iter_poll_next(iter, res));
+
+                let inst = (OutputData::data_type(Acc), self.instructions.len());
+                self.instructions.push(Instruction::jmp_rel(0));
+
+                self.compile_pat_let(&pat, Acc)?;
+
+                inst
+
+            }
+            ForHead::UsingDecl(_) => todo!(),
         };
 
         self.compile_stmt(&f.body);
