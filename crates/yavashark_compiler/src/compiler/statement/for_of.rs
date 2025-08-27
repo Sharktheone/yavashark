@@ -156,20 +156,25 @@ impl Compiler {
                     self.instructions
                         .push(Instruction::async_iter_poll_next(iter, res));
 
-                    let inst = (OutputData::data_type(Acc), self.instructions.len());
+                    let out = self.alloc_reg_or_stack();
+                    self.instructions.push(Instruction::move_(Acc, out));
+
+                    let inst = (out, self.instructions.len());
                     self.instructions.push(Instruction::jmp_rel(0));
 
                     match dec.kind {
                         VarDeclKind::Var => {
-                            self.compile_pat_var(&decl.name, Acc)?;
+                            self.compile_pat_var(&decl.name, out)?;
                         }
                         VarDeclKind::Let => {
-                            self.compile_pat_let(&decl.name, Acc)?;
+                            self.compile_pat_let(&decl.name, out)?;
                         }
                         VarDeclKind::Const => {
-                            self.compile_pat_const(&decl.name, Acc)?;
+                            self.compile_pat_const(&decl.name, out)?;
                         }
                     }
+
+                    self.dealloc(out);
 
                     inst
                 }
@@ -178,10 +183,15 @@ impl Compiler {
                 self.instructions
                     .push(Instruction::async_iter_poll_next(iter, res));
 
-                let inst = (OutputData::data_type(Acc), self.instructions.len());
+                let out = self.alloc_reg_or_stack();
+                self.instructions.push(Instruction::move_(Acc, out));
+
+                let inst = (out, self.instructions.len());
                 self.instructions.push(Instruction::jmp_rel(0));
 
-                self.compile_pat_let(&pat, Acc)?;
+                self.compile_pat_let(&pat, out)?;
+
+                self.dealloc(out);
 
                 inst
 

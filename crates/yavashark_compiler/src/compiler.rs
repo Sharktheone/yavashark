@@ -48,7 +48,11 @@ impl Compiler {
         let mut param_defs = Vec::with_capacity(num_params);
 
         for pat in params {
-            this.compile_pat_let(pat, Acc)?;
+            let out = this.alloc_reg_or_stack();
+            this.instructions.push(Instruction::move_(Acc, out));
+            this.compile_pat_let(pat, out)?;
+            this.dealloc(out);
+
             param_defs.push(this.instructions.len() as u32);
             this.reset_allocs();
         }
