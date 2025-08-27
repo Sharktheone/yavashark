@@ -108,6 +108,10 @@ impl Compiler {
             }
         }
 
+        if obj.props.is_empty() {
+            //TODO: throw if not an object
+        }
+
 
         Ok(())
     }
@@ -119,7 +123,7 @@ impl Compiler {
         self.instructions.push(Instruction::jmp(0));
 
         self.compile_expr_data_certain(&assign.right, Acc)?;
-        self.instructions[idx] = Instruction::jmp_if_undefined(Acc, self.instructions.len());
+        self.instructions[idx] = Instruction::jmp_if_not_undefined(Acc, self.instructions.len());
 
         self.compile_pat(&assign.left, Acc, cb)?;
 
