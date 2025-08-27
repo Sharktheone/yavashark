@@ -55,9 +55,9 @@ pub fn load_member(
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
-    let result = left.get_property(&right, vm.get_realm())?;
+    let result = left.get_property_opt(&right, vm.get_realm())?;
 
-    output.set(result, vm)
+    output.set(result.unwrap_or(Value::Undefined), vm)
 }
 
 pub fn load_var(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
