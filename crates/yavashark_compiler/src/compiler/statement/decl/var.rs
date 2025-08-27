@@ -9,14 +9,11 @@ impl Compiler {
         match var.kind {
             VarDeclKind::Var => {
                 for decl in &var.decls {
-                    let name = decl.name.as_ident().ok_or_else(|| todo!())?;
-                    let name = self.alloc_var(name.id.as_ref());
-
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.instructions.push(Instruction::decl_var(out, name));
+                        self.compile_pat_var(&decl.name, out)?
                     } else {
-                        self.instructions.push(Instruction::decl_empty_var(name));
+                        self.compile_pat_var(&decl.name, DataType::Undefined(Undefined))?
                     }
                 }
             }
@@ -34,12 +31,10 @@ impl Compiler {
 
             VarDeclKind::Const => {
                 for decl in &var.decls {
-                    let name = decl.name.as_ident().ok_or_else(|| todo!())?;
-                    let name = self.alloc_var(name.id.as_ref());
 
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.instructions.push(Instruction::decl_const(out, name));
+                        self.compile_pat_const(&decl.name, out)?
                     } else {
                         return Err(anyhow!("Const declaration without initializer"));
                     }
