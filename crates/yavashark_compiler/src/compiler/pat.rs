@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use std::path::Component;
 use std::rc::Rc;
 use swc_ecma_ast::{ArrayPat, ObjectPat, ObjectPatProp, Pat, PropName};
-use yavashark_bytecode::data::{Data, DataType, OutputDataType, VarName, F32};
+use yavashark_bytecode::data::{Acc, Data, DataType, OutputDataType, VarName, F32};
 use yavashark_bytecode::{ConstValue, DataTypeValue};
 use yavashark_bytecode::instructions::Instruction;
 
@@ -73,11 +73,33 @@ impl Compiler {
         for prop in &obj.props {
             match prop {
                 ObjectPatProp::KeyValue(prop) => {
-                    self.instructions.push(Instruction::load_member(source, ))
-                    let key = self.convert_prop_name(&prop.key, &mut dealloc);
+                    let key = self.convert_pat_prop_name(&prop.key, &mut dealloc);
+
+                    self.instructions.push(Instruction::load_member(source, key, Acc));
+
+                    self.compile_pat(&prop.value, source, cb)?;
                 }
                 ObjectPatProp::Assign(prop) => {
+                    if let Some(value) = &prop.value {
+                        let name = self.alloc_var(prop.key.id.as_ref());
 
+                        self.instructions.push(Instruction::load_member(source, name, Acc));
+
+                        let idx = self.instructions.len();
+                        self.instructions.push(Instruction::jmp(0));
+
+                        self.compile_expr_data_certain(value, Acc);
+
+                        self.instructions[idx] = Instruction::jmp_if_undefined(Acc, self.instructions.len());
+
+                        cb(self, Acc.into(), name);
+                    } else {
+                        let name = self.alloc_var(prop.key.id.as_ref());
+
+                        self.instructions.push(Instruction::load_member(source, name, Acc));
+
+                        cb(self, Acc.into(), name);
+                    }
                 }
                 ObjectPatProp::Rest(prop) => todo!()
             }
