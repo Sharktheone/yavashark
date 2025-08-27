@@ -1,8 +1,10 @@
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::path::Component;
-use swc_ecma_ast::{ArrayPat, ObjectPat, ObjectPatProp, Pat};
-use yavashark_bytecode::data::{Data, DataType, VarName};
+use std::rc::Rc;
+use swc_ecma_ast::{ArrayPat, ObjectPat, ObjectPatProp, Pat, PropName};
+use yavashark_bytecode::data::{Data, DataType, OutputDataType, VarName, F32};
+use yavashark_bytecode::{ConstValue, DataTypeValue};
 use yavashark_bytecode::instructions::Instruction;
 
 
@@ -66,9 +68,14 @@ impl Compiler {
     }
 
     pub fn compile_object_pat(&mut self, obj: &ObjectPat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
+        let mut dealloc = Vec::new();
+
         for prop in &obj.props {
             match prop {
-                ObjectPatProp::KeyValue(prop) => {}
+                ObjectPatProp::KeyValue(prop) => {
+                    self.instructions.push(Instruction::load_member(source, ))
+                    let key = self.convert_prop_name(&prop.key, &mut dealloc);
+                }
                 ObjectPatProp::Assign(prop) => {
 
                 }
@@ -78,6 +85,48 @@ impl Compiler {
         }
 
         Ok(())
+    }
+
+
+    pub fn convert_pat_prop_name(
+        &mut self,
+        key: &PropName,
+        dealloc: &mut Vec<OutputDataType>,
+    ) -> DataType {
+        match key {
+            PropName::Ident(id) => {
+                let id = id.sym.to_string();
+
+                let c = self.alloc_const(id);
+
+                DataType::Const(c)
+            },
+            PropName::Str(s) => {
+                let s = s.value.to_string();
+
+                let c = self.alloc_const(s);
+
+                DataType::Const(c)
+            }
+            PropName::Num(n) => {
+
+                DataType::F32(F32(n.value as f32))
+            }
+            PropName::Computed(c) => {
+                let reg = self.alloc_reg_or_stack();
+                self.compile_expr_data_certain(&c.expr, reg);
+                dealloc.push(reg);
+
+                reg.into()
+            }
+            PropName::BigInt(b) => {
+                let b = Rc::new((*b.value).clone());
+
+                let c = self.alloc_const(ConstValue::BigInt(b));
+
+                DataType::Const(c)
+            }
+        }
     }
 }
 
