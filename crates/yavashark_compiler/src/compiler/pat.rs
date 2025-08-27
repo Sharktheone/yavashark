@@ -90,7 +90,7 @@ impl Compiler {
 
                         self.compile_expr_data_certain(value, Acc);
 
-                        self.instructions[idx] = Instruction::jmp_if_undefined(Acc, self.instructions.len());
+                        self.instructions[idx] = Instruction::jmp_if_not_undefined(Acc, self.instructions.len());
 
                         cb(self, Acc.into(), name);
                     } else {
