@@ -2,7 +2,7 @@ use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::path::Component;
 use std::rc::Rc;
-use swc_ecma_ast::{ArrayPat, ObjectPat, ObjectPatProp, Pat, PropName};
+use swc_ecma_ast::{ArrayPat, AssignPat, ObjectPat, ObjectPatProp, Pat, PropName};
 use yavashark_bytecode::data::{Acc, Data, DataType, OutputDataType, VarName, F32};
 use yavashark_bytecode::{ConstValue, DataTypeValue};
 use yavashark_bytecode::instructions::Instruction;
@@ -36,6 +36,7 @@ impl Compiler {
 
                 cb(self, source.data_type(), name);
             },
+            Pat::Assign(assign) => self.compile_assign_pat(assign, source, cb)?,
             Pat::Object(obj) => self.compile_object_pat(obj, source, cb)?,
             Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
             _ => todo!(),
@@ -107,6 +108,20 @@ impl Compiler {
             }
         }
 
+
+        Ok(())
+    }
+
+    pub fn compile_assign_pat(&mut self, assign: &AssignPat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
+        self.instructions.push(Instruction::move_(source, Acc));
+
+        let idx = self.instructions.len();
+        self.instructions.push(Instruction::jmp(0));
+
+        self.compile_expr_data_certain(&assign.right, Acc)?;
+        self.instructions[idx] = Instruction::jmp_if_undefined(Acc, self.instructions.len());
+
+        self.compile_pat(&assign.left, Acc, cb)?;
 
         Ok(())
     }
