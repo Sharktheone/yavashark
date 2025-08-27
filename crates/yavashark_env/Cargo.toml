@@ -29,7 +29,7 @@ tokio = { version = "1.47.1", default-features = false, features = ["sync"] }
 futures = "0.3.31"
 pin-project = "1.1.10"
 rustc-hash = "2.1.1"
-temporal_rs = { version = "0.0.13", features = ["tzdb"] }
+temporal_rs = { version = "0.0.14", features = ["tzdb"] }
 egui = { version = "0.31.1", optional = true}
 eframe = { version = "0.31.1", optional = true}
 egui_extras = { version = "0.31.1", optional = true}
