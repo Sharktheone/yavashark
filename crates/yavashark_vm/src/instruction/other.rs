@@ -4,6 +4,8 @@ use yavashark_bytecode::data::{ControlIdx, Label};
 use yavashark_bytecode::JmpAddr;
 use yavashark_env::builtins::Promise;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
+use yavashark_env::array::Array;
+use yavashark_value::ObjectImpl;
 
 pub fn nullish_coalescing(
     left: impl Data,
@@ -337,6 +339,22 @@ pub fn iter_next_no_output_jmp(iter: impl Data, addr: JmpAddr, vm: &mut impl VM)
     if finished {
         vm.set_pc(addr);
     }
+
+    Ok(())
+}
+
+pub fn iter_collect(iter: impl Data, out: impl OutputData, vm: &mut impl VM) -> Res {
+    let iter = iter.get(vm)?;
+
+    let mut elems = Vec::new();
+
+    while let Some(next) = iter.iter_next(vm.get_realm())? {
+        elems.push(next);
+    }
+
+    let array = Array::with_elements(vm.get_realm(), elems)?;
+
+    out.set(array.into_value(), vm)?;
 
     Ok(())
 }

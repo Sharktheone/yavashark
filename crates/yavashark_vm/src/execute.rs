@@ -50423,6 +50423,138 @@ impl Execute for Instruction {
             Self::IterNextNoOutputJmpUndefined(arg0, arg1) => {
                 instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
             }
+            Self::IterCollectVarToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectRegToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectAccToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectStackToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectConstToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectF32ToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectI32ToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectU32ToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectBoolToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectNullToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectUndefinedToVar(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectVarToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectRegToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectAccToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectStackToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectConstToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectF32ToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectI32ToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectU32ToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectBoolToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectNullToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectUndefinedToReg(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectVarToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectRegToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectAccToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectStackToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectConstToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectF32ToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectI32ToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectU32ToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectBoolToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectNullToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectUndefinedToAcc(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectVarToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectRegToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectAccToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectStackToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectConstToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectF32ToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectI32ToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectU32ToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectBoolToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectNullToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
+            Self::IterCollectUndefinedToStack(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
+            }
             Self::PushAsyncIterVarToVar(arg0, output) => {
                 instruction::push_async_iter(arg0, output, vm)?
             }
@@ -51225,6 +51357,9 @@ impl Execute for Instruction {
             }
             Self::IterNextNoOutputJmp(arg0, arg1) => {
                 instruction::iter_next_no_output_jmp(arg0, arg1, vm)?
+            }
+            Self::IterCollect(arg0, output) => {
+                instruction::iter_collect(arg0, output, vm)?
             }
             Self::PushAsyncIter(arg0, output) => {
                 instruction::push_async_iter(arg0, output, vm)?

@@ -53,10 +53,17 @@ impl Compiler {
 
         let out = self.alloc_reg_or_stack();
         for (i, elem) in array.elems.iter().enumerate() {
-            self.instructions.push(Instruction::iter_next(iter, out));
 
             if let Some(elem) = elem {
-                self.compile_pat(elem, out, cb)?;
+                if let Pat::Rest(rest) = elem {
+                    let rest_out = self.alloc_reg_or_stack();
+                    self.instructions.push(Instruction::iter_collect(iter, rest_out));
+
+                    self.compile_pat(&rest.arg, rest_out, cb)?;
+                } else {
+                    self.instructions.push(Instruction::iter_next(iter, out));
+                    self.compile_pat(elem, out, cb)?;
+                }
             } else {
                 self.instructions
                     .push(Instruction::iter_next_no_output(iter))

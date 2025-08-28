@@ -170,6 +170,7 @@ IterNext(Data) => Data
 IterNextNoOutput(Data)
 IterNextJmp(Data, JmpAddr) => Data
 IterNextNoOutputJmp(Data, JmpAddr)
+IterCollect(Data) => Data
 
 PushAsyncIter(Data) => Data
 AsyncIterPollNext(Data) => Data

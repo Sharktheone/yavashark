@@ -62749,6 +62749,187 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn iter_collect(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectAccToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectAccToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectAccToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectRegToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectRegToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectRegToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectVarToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectVarToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectVarToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectF32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectF32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectF32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectI32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectI32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectI32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectU32ToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectU32ToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectU32ToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectBoolToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectBoolToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectBoolToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectNullToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectNullToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectNullToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::IterCollectUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::IterCollectUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::IterCollectUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::IterCollectUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
     pub fn push_async_iter(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => {
@@ -64088,6 +64269,10 @@ impl Instruction {
     #[must_use]
     pub fn iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
         Self::IterNextNoOutputJmp(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn iter_collect(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::IterCollect(arg0.data_type(), output.data_type())
     }
     #[must_use]
     pub fn push_async_iter(arg0: impl Data, output: impl OutputData) -> Self {
