@@ -1411,6 +1411,28 @@ impl Array {
         Ok(iter.into())
     }
 
+
+    #[prop(crate::Symbol::ASYNC_ITERATOR)]
+    #[allow(clippy::unused_self)]
+    fn iterator_async(&self, #[realm] realm: &Realm, #[this] this: Value) -> ValueResult {
+        let Value::Object(obj) = this else {
+            return Err(Error::ty_error(format!("Expected object, found {this:?}")));
+        };
+
+        let iter = ArrayIterator {
+            inner: RefCell::new(MutableArrayIterator {
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+            }),
+            array: obj,
+            next: Cell::new(0),
+            done: Cell::new(false),
+        };
+
+        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
+
+        Ok(iter.into())
+    }
+
     #[prop("toString")]
     fn to_string_js(&self, #[realm] realm: &mut Realm) -> Res<YSString> {
         Obj::to_string(self, realm)
