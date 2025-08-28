@@ -35,45 +35,77 @@ impl Compiler {
 
                 let decl = &dec.decls[0];
 
-                let var_name = if let Some(ident) = &decl.name.as_ident() {
-                    self.alloc_var(&*ident.sym)
+                if let Some(ident) = &decl.name.as_ident() {
+                    let var_name = self.alloc_var(&*ident.sym);
+
+                    match dec.kind {
+                        VarDeclKind::Var => {
+                            self.instructions
+                                .push(Instruction::decl_empty_var(var_name));
+
+                            let inst = (OutputData::data_type(var_name), self.instructions.len());
+                            self.instructions.push(Instruction::jmp_rel(0));
+
+                            inst
+                        }
+                        VarDeclKind::Let => {
+                            self.instructions
+                                .push(Instruction::decl_empty_var(var_name));
+
+                            let inst = (OutputData::data_type(var_name), self.instructions.len());
+                            self.instructions.push(Instruction::jmp_rel(0));
+
+                            inst
+                        }
+                        VarDeclKind::Const => {
+                            let out = self.alloc_reg_or_stack();
+
+                            let inst = (out, self.instructions.len());
+
+                            self.instructions.push(Instruction::jmp_rel(0));
+                            self.instructions
+                                .push(Instruction::decl_const(out, var_name));
+
+                            inst
+                        }
+                    }
                 } else {
-                    todo!()
-                };
+                    let out = self.alloc_reg_or_stack();
 
-                match dec.kind {
-                    VarDeclKind::Var => {
-                        self.instructions
-                            .push(Instruction::decl_empty_var(var_name));
+                    let inst = (out, self.instructions.len());
+                    self.instructions.push(Instruction::jmp_rel(0));
 
-                        let inst = (OutputData::data_type(var_name), self.instructions.len());
-                        self.instructions.push(Instruction::jmp_rel(0));
-
-                        inst
+                    match dec.kind {
+                        VarDeclKind::Var => {
+                            self.compile_pat_var(&decl.name, out)?;
+                        }
+                        VarDeclKind::Let => {
+                            self.compile_pat_let(&decl.name, out)?;
+                        }
+                        VarDeclKind::Const => {
+                            self.compile_pat_const(&decl.name, out)?;
+                        }
                     }
-                    VarDeclKind::Let => {
-                        self.instructions
-                            .push(Instruction::decl_empty_var(var_name));
 
-                        let inst = (OutputData::data_type(var_name), self.instructions.len());
-                        self.instructions.push(Instruction::jmp_rel(0));
+                    self.dealloc(out);
 
-                        inst
-                    }
-                    VarDeclKind::Const => {
-                        let out = self.alloc_reg_or_stack();
-
-                        let inst = (out, self.instructions.len());
-
-                        self.instructions.push(Instruction::jmp_rel(0));
-                        self.instructions
-                            .push(Instruction::decl_const(out, var_name));
-
-                        inst
-                    }
+                    inst
                 }
             }
-            _ => todo!(),
+            ForHead::Pat(pat) => {
+                let out = self.alloc_reg_or_stack();
+
+                let inst = (out, self.instructions.len());
+                self.instructions.push(Instruction::jmp_rel(0));
+
+                self.compile_pat_let(&pat, out)?;
+
+                self.dealloc(out);
+
+                inst
+
+            }
+            ForHead::UsingDecl(_) => todo!(),
         };
 
         self.compile_stmt(&f.body);
@@ -184,7 +216,6 @@ impl Compiler {
                     .push(Instruction::async_iter_poll_next(iter, res));
 
                 let out = self.alloc_reg_or_stack();
-                self.instructions.push(Instruction::move_(Acc, out));
 
                 let inst = (out, self.instructions.len());
                 self.instructions.push(Instruction::jmp_rel(0));
