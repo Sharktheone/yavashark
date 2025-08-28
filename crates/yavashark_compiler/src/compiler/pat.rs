@@ -2,7 +2,7 @@ use crate::{Compiler, Res};
 use anyhow::anyhow;
 use std::path::Component;
 use std::rc::Rc;
-use swc_ecma_ast::{ArrayPat, AssignPat, ObjectPat, ObjectPatProp, Pat, PropName};
+use swc_ecma_ast::{ArrayPat, AssignPat, Expr, ObjectPat, ObjectPatProp, Pat, PropName};
 use yavashark_bytecode::data::{Acc, Data, DataType, OutputDataType, VarName, F32};
 use yavashark_bytecode::{ConstValue, DataTypeValue};
 use yavashark_bytecode::instructions::Instruction;
@@ -39,6 +39,7 @@ impl Compiler {
             Pat::Assign(assign) => self.compile_assign_pat(assign, source, cb)?,
             Pat::Object(obj) => self.compile_object_pat(obj, source, cb)?,
             Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
+            Pat::Expr(expr) => self.compile_expr_pat(expr, source)?,
             _ => todo!(),
         }
 
@@ -128,6 +129,12 @@ impl Compiler {
 
         self.compile_pat(&assign.left, out, cb)?;
         self.dealloc(out);
+
+        Ok(())
+    }
+
+    pub fn compile_expr_pat(&mut self, expr: &Expr, source: impl Data) -> Res {
+        self.compile_assign_expr(expr, source)?;
 
         Ok(())
     }

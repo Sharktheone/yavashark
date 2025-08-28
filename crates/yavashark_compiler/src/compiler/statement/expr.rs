@@ -139,4 +139,25 @@ impl Compiler {
         self.compile_expr(expr, None::<Acc>)?;
         Ok(())
     }
+
+    pub fn compile_assign_expr(&mut self , expr: &Expr, value: impl Data) -> Res {
+        match expr {
+            Expr::Member(m) => {
+                todo!()
+            }
+            Expr::SuperProp(super_prop) => {
+                todo!()
+            }
+            Expr::OptChain(opt) => {
+                todo!()
+            }
+            Expr::Paren(paren) => {
+                self.compile_assign_expr(&paren.expr, value)?
+            }
+            _ => self.compile_expr_no_out(expr)?,
+
+        }
+
+        Ok(())
+    }
 }
