@@ -40,7 +40,7 @@ impl Compiler {
             Pat::Object(obj) => self.compile_object_pat(obj, source, cb)?,
             Pat::Invalid(invalid) => Err(anyhow!("Invalid pattern: {:?}", invalid))?,
             Pat::Expr(expr) => self.compile_expr_pat(expr, source)?,
-            _ => todo!(),
+            Pat::Rest(_) => todo!(),
         }
 
         Ok(())

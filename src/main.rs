@@ -12,7 +12,7 @@ use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use tokio::runtime::Builder;
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
-use yavashark_env::Realm;
+use yavashark_env::{ControlFlow, Realm};
 use yavashark_interpreter::eval::InterpreterEval;
 
 #[allow(clippy::unwrap_used)]
@@ -167,7 +167,37 @@ fn main() {
                 let data = DataSection::new(bc.variables, Vec::new(), bc.literals, bc.control);
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
-                vm.run().unwrap();
+                match vm.run() {
+                    Ok(_) => {}
+                    Err(ControlFlow::Continue(_)) => {
+                        println!("Error: Unexpected continue");
+                        return;
+                    }
+                    Err(ControlFlow::Break(_)) => {
+                        println!("Error: Unexpected break");
+                        return;
+                    }
+                    Err(ControlFlow::Return(_)) => {
+                        println!("Error: Unexpected return");
+                        return;
+                    }
+                    Err(ControlFlow::Error(err)) => {
+                        println!("Error: {}", err.pretty_print());
+                        return;
+                    }
+                    Err(ControlFlow::Yield(_)) => {
+                        println!("Error: Unexpected yield");
+                        return;
+                    }
+                    Err(ControlFlow::Await(_)) => {
+                        println!("Error: Unexpected await");
+                        return;
+                    }
+                    Err(ControlFlow::OptChainShortCircuit) => {
+                        println!("Error: Unexpected optional chaining short-circuit");
+                        return;
+                    }
+                }
 
                 rt.block_on(vm.get_realm().run_event_loop());
 

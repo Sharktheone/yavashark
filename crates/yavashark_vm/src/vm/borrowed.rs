@@ -9,7 +9,7 @@ use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Realm, Res, Value};
+use yavashark_env::{ControlResult, Error, Realm, Res, Value};
 
 pub struct BorrowedVM<'a> {
     regs: Registers,
@@ -79,7 +79,7 @@ impl<'a> BorrowedVM<'a> {
         }
     }
 
-    pub fn run(&mut self) -> Res {
+    pub fn run(&mut self) -> ControlResult {
         while self.pc < self.code.len() {
             let instr = self.code[self.pc];
             self.pc += 1;
