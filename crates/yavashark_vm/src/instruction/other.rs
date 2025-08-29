@@ -239,9 +239,7 @@ pub fn leave_try(vm: &mut impl VM) -> Res {
     vm.leave_try()
 }
 
-pub fn pat_begin_rest(_len: usize, _vm: &mut impl VM) -> Res {
-    todo!()
-}
+
 pub fn pat_void_next(_vm: &mut impl VM) -> Res {
     todo!()
 }
@@ -438,4 +436,26 @@ pub fn throw_if_not_object(data: impl Data, vm: &mut impl VM) -> Res {
     }
 
     Ok(())
+}
+
+pub fn begin_spread(cap: usize, vm: &mut impl VM) -> Res {
+    vm.begin_spread(cap)
+}
+
+pub fn push_spread(elem: impl Data, vm: &mut impl VM) -> Res {
+    let elem = elem.get(vm)?;
+
+    vm.push_spread(elem)
+}
+
+pub fn end_spread(obj: impl Data, out: impl OutputData, vm: &mut impl VM) -> Res {
+    let obj = obj.get(vm)?;
+
+    let rest_obj = vm.end_spread(obj.to_object()?)?;
+
+    out.set(rest_obj.into(), vm)
+}
+
+pub fn end_spread_no_output(vm: &mut impl VM) -> Res {
+    vm.end_spread_no_output()
 }

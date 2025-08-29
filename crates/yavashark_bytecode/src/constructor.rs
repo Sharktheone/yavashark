@@ -61584,12 +61584,161 @@ impl Instruction {
         Self::DeclEmptyLet(arg0)
     }
     #[must_use]
-    pub fn pat_begin_rest(arg0: usize) -> Self {
-        Self::PatBeginRest(arg0)
+    pub fn begin_spread(arg0: usize) -> Self {
+        Self::BeginSpread(arg0)
     }
     #[must_use]
-    pub fn pat_void_next() -> Self {
-        Self::PatVoidNext
+    pub fn push_spread(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::PushSpreadAcc(arg0),
+            DataType::Const(arg0) => Self::PushSpreadConst(arg0),
+            DataType::Reg(arg0) => Self::PushSpreadReg(arg0),
+            DataType::Stack(arg0) => Self::PushSpreadStack(arg0),
+            DataType::Var(arg0) => Self::PushSpreadVar(arg0),
+            DataType::F32(arg0) => Self::PushSpreadF32(arg0),
+            DataType::I32(arg0) => Self::PushSpreadI32(arg0),
+            DataType::U32(arg0) => Self::PushSpreadU32(arg0),
+            DataType::Boolean(arg0) => Self::PushSpreadBool(arg0),
+            DataType::Null(arg0) => Self::PushSpreadNull(arg0),
+            DataType::Undefined(arg0) => Self::PushSpreadUndefined(arg0),
+        }
+    }
+    #[must_use]
+    pub fn end_spread(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::EndSpreadConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::EndSpreadConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::EndSpreadConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::EndSpreadStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::EndSpreadStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::EndSpreadStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadBoolToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadBoolToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadBoolToVar(arg0, output),
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::EndSpreadNullToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::EndSpreadNullToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::EndSpreadNullToVar(arg0, output),
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::EndSpreadUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::EndSpreadUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::EndSpreadUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::EndSpreadUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn end_spread_no_output() -> Self {
+        Self::EndSpreadNoOutput
     }
     #[must_use]
     pub fn pat_move_let(arg0: impl Data, arg1: impl Data) -> Self {
@@ -64207,12 +64356,20 @@ impl Instruction {
         Self::DeclEmptyLet(arg0)
     }
     #[must_use]
-    pub fn pat_begin_rest(arg0: usize) -> Self {
-        Self::PatBeginRest(arg0)
+    pub fn begin_spread(arg0: usize) -> Self {
+        Self::BeginSpread(arg0)
     }
     #[must_use]
-    pub fn pat_void_next() -> Self {
-        Self::PatVoidNext
+    pub fn push_spread(arg0: impl Data) -> Self {
+        Self::PushSpread(arg0.data_type())
+    }
+    #[must_use]
+    pub fn end_spread(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::EndSpread(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn end_spread_no_output() -> Self {
+        Self::EndSpreadNoOutput
     }
     #[must_use]
     pub fn pat_move_let(arg0: impl Data, arg1: impl Data) -> Self {

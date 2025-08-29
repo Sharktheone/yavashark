@@ -146,8 +146,11 @@ DeclEmptyVar(VarName)
 DeclLet(Data, VarName)
 DeclEmptyLet(VarName)
 
-PatBeginRest(usize)
-PatVoidNext
+BeginSpread(usize)
+PushSpread(Data)
+EndSpread(Data) => Data
+EndSpreadNoOutput
+
 
 PatMoveLet(Data, Data)
 PatMoveConst(Data, Data)

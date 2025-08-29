@@ -48703,8 +48703,151 @@ impl Execute for Instruction {
             Self::DeclLetNull(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
             Self::DeclLetUndefined(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
             Self::DeclEmptyLet(arg0) => instruction::decl_empty_let(arg0, vm)?,
-            Self::PatBeginRest(arg0) => instruction::pat_begin_rest(arg0, vm)?,
-            Self::PatVoidNext => instruction::pat_void_next(vm)?,
+            Self::BeginSpread(arg0) => instruction::begin_spread(arg0, vm)?,
+            Self::PushSpreadVar(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadReg(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadAcc(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadStack(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadConst(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadF32(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadI32(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadU32(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadBool(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadNull(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::PushSpreadUndefined(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::EndSpreadVarToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadRegToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadAccToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadStackToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadConstToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadF32ToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadI32ToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadU32ToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadBoolToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadNullToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadUndefinedToVar(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadVarToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadRegToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadAccToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadStackToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadConstToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadF32ToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadI32ToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadU32ToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadBoolToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadNullToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadUndefinedToReg(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadVarToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadRegToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadAccToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadStackToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadConstToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadF32ToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadI32ToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadU32ToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadBoolToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadNullToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadUndefinedToAcc(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadVarToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadRegToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadAccToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadStackToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadConstToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadF32ToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadI32ToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadU32ToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadBoolToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadNullToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadUndefinedToStack(arg0, output) => {
+                instruction::end_spread(arg0, output, vm)?
+            }
+            Self::EndSpreadNoOutput => instruction::end_spread_no_output(vm)?,
             Self::PatMoveLetVarVar(arg0, arg1) => {
                 instruction::pat_move_let(arg0, arg1, vm)?
             }
@@ -51366,8 +51509,10 @@ impl Execute for Instruction {
             Self::DeclEmptyVar(arg0) => instruction::decl_empty_var(arg0, vm)?,
             Self::DeclLet(arg0, arg1) => instruction::decl_let(arg0, arg1, vm)?,
             Self::DeclEmptyLet(arg0) => instruction::decl_empty_let(arg0, vm)?,
-            Self::PatBeginRest(arg0) => instruction::pat_begin_rest(arg0, vm)?,
-            Self::PatVoidNext => instruction::pat_void_next(vm)?,
+            Self::BeginSpread(arg0) => instruction::begin_spread(arg0, vm)?,
+            Self::PushSpread(arg0) => instruction::push_spread(arg0, vm)?,
+            Self::EndSpread(arg0, output) => instruction::end_spread(arg0, output, vm)?,
+            Self::EndSpreadNoOutput => instruction::end_spread_no_output(vm)?,
             Self::PatMoveLet(arg0, arg1) => instruction::pat_move_let(arg0, arg1, vm)?,
             Self::PatMoveConst(arg0, arg1) => {
                 instruction::pat_move_const(arg0, arg1, vm)?
