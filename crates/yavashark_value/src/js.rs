@@ -633,6 +633,7 @@ impl<C: Realm> Iterator for CtxIter<'_, C> {
     }
 }
 
+
 impl<C: Realm> Iter<C> {
     pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         self.next_obj.iter_next(realm)
@@ -641,34 +642,62 @@ impl<C: Realm> Iter<C> {
 
 impl<C: Realm> Value<C> {
     pub fn iter_next(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
+        self.as_object()?.iter_next(realm)
+    }
+
+    pub fn async_iter_next(&self, realm: &mut C) -> Result<Self, Error<C>> {
+        self.as_object()?.async_iter_next(realm)
+    }
+
+    pub fn iter_res(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
+        self.as_object()?.iter_res(realm)
+    }
+
+    pub fn iter_done(&self, realm: &mut C) -> Result<bool, Error<C>> {
+        self.as_object()?.iter_done(realm)
+    }
+
+    pub fn iter_next_no_out(&self, realm: &mut C) -> Result<(), Error<C>> {
+        self.as_object()?.iter_next_no_out(realm)
+    }
+
+    pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
+        self.as_object()?.iter_next_is_finished(realm)
+    }
+}
+
+
+impl<C: Realm> Object<C> {
+    pub fn iter_next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         let next = self.call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property(&Value::string("done"), realm)?;
 
         if done.is_truthy() {
             return Ok(None);
         }
-        next.get_property(&Self::string("value"), realm).map(Some)
+        next.get_property(&Value::string("value"), realm).map(Some)
     }
 
-    pub fn async_iter_next(&self, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn async_iter_next(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
         let promise = self.call_method(&"next".into(), realm, Vec::new())?;
 
         Ok(promise)
     }
 
-    pub fn iter_res(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
-        let done = self.get_property(&Self::string("done"), realm)?;
+    pub fn iter_res(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+        let done = self.resolve_property(&Value::string("done"), realm)?;
 
-        if done.is_truthy() {
+        if done.is_some_and(|x| x.is_truthy()) {
             return Ok(None);
         }
-        self.get_property(&Self::string("value"), realm).map(Some)
+        self.resolve_property(&Value::string("value"), realm)
+            .map(|x| Some(x.unwrap_or(Value::Undefined)))
     }
 
     pub fn iter_done(&self, realm: &mut C) -> Result<bool, Error<C>> {
-        let done = self.get_property(&Self::string("done"), realm)?;
+        let done = self.resolve_property(&Value::string("done"), realm)?;
 
-        Ok(done.is_truthy())
+        Ok(done.is_some_and(|x| x.is_truthy()))
     }
 
     pub fn iter_next_no_out(&self, realm: &mut C) -> Result<(), Error<C>> {
@@ -679,7 +708,7 @@ impl<C: Realm> Value<C> {
 
     pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
         let next = self.call_method(&"next".into(), realm, Vec::new())?;
-        let done = next.get_property(&Self::string("done"), realm)?;
+        let done = next.get_property(&Value::string("done"), realm)?;
 
         Ok(done.is_truthy())
     }
