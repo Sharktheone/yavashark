@@ -117,7 +117,7 @@ impl Compiler {
         }
 
         if obj.props.is_empty() {
-            //TODO: throw if not an object
+            self.instructions.push(Instruction::throw_if_not_object(source))
         }
 
 
