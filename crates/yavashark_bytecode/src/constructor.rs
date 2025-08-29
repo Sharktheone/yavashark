@@ -63675,6 +63675,22 @@ impl Instruction {
             }
         }
     }
+    #[must_use]
+    pub fn throw_if_not_object(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::ThrowIfNotObjectAcc(arg0),
+            DataType::Const(arg0) => Self::ThrowIfNotObjectConst(arg0),
+            DataType::Reg(arg0) => Self::ThrowIfNotObjectReg(arg0),
+            DataType::Stack(arg0) => Self::ThrowIfNotObjectStack(arg0),
+            DataType::Var(arg0) => Self::ThrowIfNotObjectVar(arg0),
+            DataType::F32(arg0) => Self::ThrowIfNotObjectF32(arg0),
+            DataType::I32(arg0) => Self::ThrowIfNotObjectI32(arg0),
+            DataType::U32(arg0) => Self::ThrowIfNotObjectU32(arg0),
+            DataType::Boolean(arg0) => Self::ThrowIfNotObjectBool(arg0),
+            DataType::Null(arg0) => Self::ThrowIfNotObjectNull(arg0),
+            DataType::Undefined(arg0) => Self::ThrowIfNotObjectUndefined(arg0),
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -64297,5 +64313,9 @@ impl Instruction {
     #[must_use]
     pub fn async_iter_next_no_output_jmp(arg0: impl Data, arg1: JmpAddr) -> Self {
         Self::AsyncIterNextNoOutputJmp(arg0.data_type(), arg1)
+    }
+    #[must_use]
+    pub fn throw_if_not_object(arg0: impl Data) -> Self {
+        Self::ThrowIfNotObject(arg0.data_type())
     }
 }

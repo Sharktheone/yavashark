@@ -428,3 +428,14 @@ pub fn async_iter_next_no_output_jmp(next: impl Data, addr: JmpAddr, vm: &mut im
 
     Ok(())
 }
+
+
+pub fn throw_if_not_object(data: impl Data, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    if !data.is_object() {
+        return Err(Error::ty("Expected object"));
+    }
+
+    Ok(())
+}

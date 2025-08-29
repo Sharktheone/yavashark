@@ -17400,6 +17400,17 @@ pub enum Instruction {
     AsyncIterNextNoOutputJmpBool(Boolean, JmpAddr),
     AsyncIterNextNoOutputJmpNull(Null, JmpAddr),
     AsyncIterNextNoOutputJmpUndefined(Undefined, JmpAddr),
+    ThrowIfNotObjectVar(VarName),
+    ThrowIfNotObjectReg(Reg),
+    ThrowIfNotObjectAcc(Acc),
+    ThrowIfNotObjectStack(Stack),
+    ThrowIfNotObjectConst(ConstIdx),
+    ThrowIfNotObjectF32(F32),
+    ThrowIfNotObjectI32(I32),
+    ThrowIfNotObjectU32(U32),
+    ThrowIfNotObjectBool(Boolean),
+    ThrowIfNotObjectNull(Null),
+    ThrowIfNotObjectUndefined(Undefined),
 }
 #[cfg(feature = "simple_bytecode")]
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17550,4 +17561,5 @@ pub enum Instruction {
     AsyncIterNext(DataType, OutputDataType),
     AsyncIterNextJmp(DataType, JmpAddr, OutputDataType),
     AsyncIterNextNoOutputJmp(DataType, JmpAddr),
+    ThrowIfNotObject(DataType),
 }

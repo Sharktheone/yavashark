@@ -51116,6 +51116,39 @@ impl Execute for Instruction {
             Self::AsyncIterNextNoOutputJmpUndefined(arg0, arg1) => {
                 instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
             }
+            Self::ThrowIfNotObjectVar(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectReg(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectAcc(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectStack(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectConst(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectF32(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectI32(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectU32(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectBool(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectNull(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
+            Self::ThrowIfNotObjectUndefined(arg0) => {
+                instruction::throw_if_not_object(arg0, vm)?
+            }
         }
         Ok(())
     }
@@ -51376,6 +51409,7 @@ impl Execute for Instruction {
             Self::AsyncIterNextNoOutputJmp(arg0, arg1) => {
                 instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
             }
+            Self::ThrowIfNotObject(arg0) => instruction::throw_if_not_object(arg0, vm)?,
         }
         Ok(())
     }

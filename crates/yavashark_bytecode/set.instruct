@@ -177,3 +177,5 @@ AsyncIterPollNext(Data) => Data
 AsyncIterNext(Data) => Data
 AsyncIterNextJmp(Data, JmpAddr) => Data
 AsyncIterNextNoOutputJmp(Data, JmpAddr)
+
+ThrowIfNotObject(Data)
