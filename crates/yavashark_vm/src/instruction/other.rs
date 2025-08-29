@@ -240,51 +240,6 @@ pub fn leave_try(vm: &mut impl VM) -> Res {
 }
 
 
-pub fn pat_void_next(_vm: &mut impl VM) -> Res {
-    todo!()
-}
-
-pub fn pat_move_let(_: impl Data, _: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-pub fn pat_move_const(_: impl Data, _: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-pub fn pat_move_var(_: impl Data, _: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-
-pub fn pat_rest_let(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-pub fn pat_rest_const(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-pub fn pat_rest_var(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-
-pub fn pat_array_move_let(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-pub fn pat_array_move_const(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-pub fn pat_array_move_var(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-
-pub fn pat_array_rest_let(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-
-pub fn pat_array_rest_const(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
-
-pub fn pat_array_rest_var(_: impl Data, _vm: &mut impl VM) -> Res {
-    todo!()
-}
 
 pub fn push_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let iter = iter.get(vm)?;

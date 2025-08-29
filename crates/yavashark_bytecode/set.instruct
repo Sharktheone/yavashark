@@ -151,23 +151,6 @@ PushSpread(Data)
 EndSpread(Data) => Data
 EndSpreadNoOutput
 
-
-PatMoveLet(Data, Data)
-PatMoveConst(Data, Data)
-PatMoveVar(Data, Data)
-
-PatRestLet(Data)
-PatRestConst(Data)
-PatRestVar(Data)
-
-PatArrayMoveLet(Data)
-PatArrayMoveConst(Data)
-PatArrayMoveVar(Data)
-
-PatArrayRestLet(Data)
-PatArrayRestConst(Data)
-PatArrayRestVar(Data)
-
 PushIter(Data) => Data
 IterNext(Data) => Data
 IterNextNoOutput(Data)
