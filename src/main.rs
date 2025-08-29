@@ -185,7 +185,7 @@ fn main() {
                         println!("Error: {}", err.pretty_print());
                         return;
                     }
-                    Err(ControlFlow::Yield(_)) => {
+                    Err(ControlFlow::Yield(_)) | Err(ControlFlow::YieldStar(_)) => {
                         println!("Error: Unexpected yield");
                         return;
                     }

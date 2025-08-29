@@ -49,6 +49,7 @@ pub enum ControlFlow {
     Return(Value),
     Error(Error),
     Yield(Value),
+    YieldStar(ObjectHandle),
     Await(ObjectHandle),
     OptChainShortCircuit,
 }

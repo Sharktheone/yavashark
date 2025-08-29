@@ -26,6 +26,7 @@ pub struct VmState<T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
     pub continue_storage: Option<OutputDataType>,
 
     pub try_stack: Vec<TryBlock>,
+    pub yield_star_val: Option<ObjectHandle>,
 
     pub spread_stack: Vec<Vec<Value>>,
     pub throw: Option<Error>,
@@ -82,6 +83,7 @@ impl<T: VMStateFunctionCode> VmState<T> {
             continue_storage: None,
             spread_stack: Vec::new(),
             try_stack: Vec::new(),
+            yield_star_val: None,
             throw: None,
         }
     }
@@ -145,6 +147,17 @@ impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
 impl ResumableVM<'_> {
     #[must_use]
     pub fn next(mut self) -> GeneratorPoll {
+        match self.yield_star_checkpoint() {
+            Some(Ok(next)) => {
+                return GeneratorPoll::Yield(self.state, next);
+            }
+            Some(Err(e)) => {
+                return GeneratorPoll::Ret(Err(e));
+            }
+            None => {}
+        }
+
+
         while self.state.pc < self.state.code.instructions.len() {
             let instr = &self.state.code.instructions[self.state.pc];
             self.state.pc += 1;
@@ -166,6 +179,19 @@ impl ResumableVM<'_> {
                     ControlFlow::Yield(v) => {
                         return GeneratorPoll::Yield(self.state, v);
                     }
+                    ControlFlow::YieldStar(ys) => {
+                        return match ys.iter_next(self.realm) {
+                            Ok(Some(next)) => {
+                                self.state.yield_star_val = Some(ys);
+                                GeneratorPoll::Yield(self.state, next)
+                            }
+                            Ok(None) => {
+                                self.next()
+
+                            }
+                            Err(e) => GeneratorPoll::Ret(Err(e)),
+                        }
+                    }
                     ControlFlow::OptChainShortCircuit => {}
                 },
             }
@@ -176,6 +202,16 @@ impl ResumableVM<'_> {
 
     #[must_use]
     pub fn poll_next(mut self) -> AsyncGeneratorPoll {
+        match self.yield_star_checkpoint() {
+            Some(Ok(next)) => {
+                return AsyncGeneratorPoll::Yield(self.state, next);
+            }
+            Some(Err(e)) => {
+                return AsyncGeneratorPoll::Ret(self.state, Err(e));
+            }
+            None => {}
+        }
+
         while self.state.pc < self.state.code.instructions.len() {
             let instr = &self.state.code.instructions[self.state.pc];
             self.state.pc += 1;
@@ -204,6 +240,20 @@ impl ResumableVM<'_> {
                     }
                     ControlFlow::Yield(v) => {
                         return AsyncGeneratorPoll::Yield(self.state, v);
+                    }
+                    ControlFlow::YieldStar(ys) => {
+                        return match ys.iter_next(self.realm) {
+                            Ok(Some(next)) => {
+                                dbg!(&next);
+                                self.state.yield_star_val = Some(ys);
+                                AsyncGeneratorPoll::Yield(self.state, next)
+                            }
+                            Ok(None) => {
+                                self.poll_next()
+
+                            }
+                            Err(e) => AsyncGeneratorPoll::Ret(self.state, Err(e)),
+                        }
                     }
                     ControlFlow::OptChainShortCircuit => {}
                 },
@@ -242,18 +292,32 @@ impl ResumableVM<'_> {
                     ControlFlow::Await(out) => {
                         return AsyncPoll::Await(self.state, out);
                     }
-                    ControlFlow::Yield(_) => {
+                    ControlFlow::Yield(_) | ControlFlow::YieldStar(_) => {
                         return AsyncPoll::Ret(
                             self.state,
                             Err(Error::new("Yield outside of generator")),
                         );
                     }
+
                     ControlFlow::OptChainShortCircuit => {}
                 },
             }
         }
 
         AsyncPoll::Ret(self.state, Ok(()))
+    }
+
+    pub fn yield_star_checkpoint(&mut self) -> Option<Res<Value>> {
+        let ys = self.state.yield_star_val.as_ref()?;
+
+        match ys.iter_next(self.realm) {
+            Ok(Some(next)) => Some(Ok(next)),
+            Ok(None) => {
+                self.state.yield_star_val = None;
+                None
+            }
+            Err(e) => Some(Err(e)),
+        }
     }
 }
 

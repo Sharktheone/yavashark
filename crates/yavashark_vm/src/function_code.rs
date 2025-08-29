@@ -58,7 +58,7 @@ impl FunctionCode for BytecodeFunction {
                         Err(Error::syn("Illegal continue statement").into())
                     }
                     ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement").into()),
-                    ControlFlow::Await(_) => Err(Error::syn("Illegal await statement").into()),
+                    ControlFlow::Await(_) | ControlFlow::YieldStar(_) => Err(Error::syn("Illegal await statement").into()),
                     ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
                 }
             }
@@ -101,7 +101,7 @@ impl FunctionCode for BytecodeArrowFunction {
                         Err(Error::syn("Illegal continue statement").into())
                     }
                     ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement").into()),
-                    ControlFlow::Await(_) => Err(Error::syn("Illegal await statement").into()),
+                    ControlFlow::Await(_) | ControlFlow::YieldStar(_) => Err(Error::syn("Illegal await statement").into()),
                     ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
                 }
             }

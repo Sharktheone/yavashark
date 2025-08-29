@@ -136,7 +136,7 @@ impl RawOptimFunction {
                     ControlFlow::Return(v) => Ok(v),
                     ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
                     ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
-                    ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement")),
+                    ControlFlow::Yield(_) | ControlFlow::YieldStar(_) => Err(Error::syn("Illegal yield statement")),
                     ControlFlow::Await(_) => Err(Error::syn("Illegal await statement")),
                     ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
                 },
