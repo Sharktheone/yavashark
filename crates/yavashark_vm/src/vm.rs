@@ -12,7 +12,7 @@ pub use resumable_vm::*;
 use yavashark_bytecode::data::{ControlIdx, Label, OutputData};
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Res, Value};
+use yavashark_env::{ObjectHandle, Res, Value};
 
 pub trait VM {
     fn acc(&self) -> Value;
@@ -61,4 +61,9 @@ pub trait VM {
 
     fn enter_try(&mut self, id: ControlIdx) -> Res;
     fn leave_try(&mut self) -> Res;
+
+    fn begin_spread(&mut self, cap: usize) -> Res;
+    fn push_spread(&mut self, elem: Value) -> Res;
+    fn end_spread(&mut self, obj: ObjectHandle) -> Res<ObjectHandle>;
+    fn end_spread_no_output(&mut self) -> Res;
 }

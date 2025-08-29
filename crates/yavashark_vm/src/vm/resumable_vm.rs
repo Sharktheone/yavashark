@@ -8,7 +8,7 @@ use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, Outpu
 use yavashark_bytecode::{instructions, BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, ObjectHandle, Realm, Res, Value, ValueResult};
+use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 
 #[derive(Debug, Clone)]
 pub struct VmState<T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
@@ -27,7 +27,7 @@ pub struct VmState<T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
 
     pub try_stack: Vec<TryBlock>,
 
-    // pub rest_stack: Vec<()>,
+    pub spread_stack: Vec<Vec<Value>>,
     pub throw: Option<Error>,
 }
 
@@ -80,6 +80,7 @@ impl<T: VMStateFunctionCode> VmState<T> {
             current_scope: scope,
             acc: Value::Undefined,
             continue_storage: None,
+            spread_stack: Vec::new(),
             try_stack: Vec::new(),
             throw: None,
         }
@@ -451,4 +452,53 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
 
         Ok(())
     }
+
+    fn begin_spread(&mut self, cap: usize) -> Res {
+        self.state.spread_stack.push(Vec::with_capacity(cap));
+
+        Ok(())
+    }
+
+    fn push_spread(&mut self, elem: Value) -> Res {
+        let Some(last) = self.state.spread_stack.last_mut() else {
+            return Err(Error::new("No spread in progress"));
+        };
+
+        last.push(elem);
+
+        Ok(())
+    }
+
+    fn end_spread(&mut self, obj: ObjectHandle) -> Res<ObjectHandle> {
+        let not= self
+            .state
+            .spread_stack
+            .pop()
+            .ok_or(Error::new("No spread in progress"))?;
+
+        let mut props = Vec::new();
+
+        for (name, value) in obj.properties()? {
+            if !not.contains(&name) {
+                props.push((name, value));
+            }
+        }
+
+
+        let rest_obj = Object::from_values(props, self.get_realm())?;
+
+        Ok(rest_obj)
+    }
+
+    fn end_spread_no_output(&mut self) -> Res {
+        let _ = self
+            .state
+            .spread_stack
+            .pop()
+            .ok_or(Error::new("No spread in progress"))?;
+
+        Ok(())
+    }
 }
+
+

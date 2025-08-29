@@ -9,7 +9,7 @@ use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlResult, Error, Realm, Res, Value};
+use yavashark_env::{ControlResult, Error, Object, ObjectHandle, Realm, Res, Value};
 
 pub struct OwnedVM {
     regs: Registers,
@@ -27,6 +27,7 @@ pub struct OwnedVM {
     realm: Realm,
     continue_storage: Option<OutputDataType>,
 
+    spread_stack: Vec<Vec<Value>>,
     try_stack: Vec<TryBlock>,
 
     throw: Option<Error>,
@@ -51,6 +52,7 @@ impl OwnedVM {
             acc: Value::Undefined,
             realm,
             continue_storage: None,
+            spread_stack: Vec::new(),
             try_stack: Vec::new(),
             throw: None,
         })
@@ -74,6 +76,7 @@ impl OwnedVM {
             acc: Value::Undefined,
             realm,
             continue_storage: None,
+            spread_stack: Vec::new(),
             try_stack: Vec::new(),
             throw: None,
         }
@@ -97,6 +100,7 @@ impl OwnedVM {
             acc: Value::Undefined,
             realm,
             continue_storage: None,
+            spread_stack: Vec::new(),
             try_stack: Vec::new(),
             throw: None,
         }
@@ -312,6 +316,53 @@ impl VM for OwnedVM {
             self.offset_pc(exit);
             self.try_stack.pop();
         }
+
+        Ok(())
+    }
+
+
+
+    fn begin_spread(&mut self, cap: usize) -> Res {
+        self.spread_stack.push(Vec::with_capacity(cap));
+
+        Ok(())
+    }
+
+    fn push_spread(&mut self, elem: Value) -> Res {
+        let Some(last) = self.spread_stack.last_mut() else {
+            return Err(Error::new("No spread in progress"));
+        };
+
+        last.push(elem);
+
+        Ok(())
+    }
+
+    fn end_spread(&mut self, obj: ObjectHandle) -> Res<ObjectHandle> {
+        let not= self
+            .spread_stack
+            .pop()
+            .ok_or(Error::new("No spread in progress"))?;
+
+        let mut props = Vec::new();
+
+        for (name, value) in obj.properties()? {
+            if !not.contains(&name) {
+                props.push((name, value));
+            }
+        }
+
+
+        let rest_obj = Object::from_values(props, self.get_realm())?;
+
+        Ok(rest_obj)
+    }
+
+    fn end_spread_no_output(&mut self) -> Res {
+        let _ = self
+            .spread_stack
+            .pop()
+            .ok_or(Error::new("No spread in progress"))?;
 
         Ok(())
     }
