@@ -77,21 +77,38 @@ impl Compiler {
     }
 
     pub fn compile_object_pat(&mut self, obj: &ObjectPat, source: impl Data, cb: &mut impl FnMut(&mut Compiler, DataType, VarName)) -> Res {
-        let mut dealloc = Vec::new();
 
-        for prop in &obj.props {
+        let has_rest = obj.props.last().map_or(false, |p| matches!(p, ObjectPatProp::Rest(_)));
+
+        if has_rest {
+            self.instructions.push(Instruction::begin_spread(obj.props.len()))
+        }
+
+        for (i, prop) in obj.props.iter().enumerate() {
             match prop {
                 ObjectPatProp::KeyValue(prop) => {
+                    let mut dealloc = Vec::new();
                     let key = self.convert_pat_prop_name(&prop.key, &mut dealloc);
 
+                    if has_rest {
+                        self.instructions.push(Instruction::push_spread(key))
+                    }
                     self.instructions.push(Instruction::load_member(source, key, Acc));
 
                     self.compile_pat(&prop.value, Acc, cb)?;
+
+                    for d in dealloc {
+                        self.dealloc(d);
+                    }
                 }
                 ObjectPatProp::Assign(prop) => {
                     if let Some(value) = &prop.value {
                         let name = self.alloc_var(prop.key.id.as_ref());
                         let key = self.alloc_const(prop.key.sym.as_str());
+
+                        if has_rest {
+                            self.instructions.push(Instruction::push_spread(key))
+                        }
 
                         self.instructions.push(Instruction::load_member(source, key, Acc));
 
@@ -107,12 +124,26 @@ impl Compiler {
                         let name = self.alloc_var(prop.key.id.as_ref());
                         let key = self.alloc_const(prop.key.sym.as_str());
 
+                        if has_rest {
+                            self.instructions.push(Instruction::push_spread(key))
+                        }
+
                         self.instructions.push(Instruction::load_member(source, key, Acc));
 
                         cb(self, Acc.into(), name);
                     }
                 }
-                ObjectPatProp::Rest(prop) => todo!()
+                ObjectPatProp::Rest(prop) => {
+                    if i != obj.props.len() - 1 {
+                        return Err(anyhow!("Rest element must be the last element in an object pattern"));
+                    }
+
+                    let rest_out = self.alloc_reg_or_stack();
+
+                    self.instructions.push(Instruction::end_spread(source, rest_out));
+
+                    self.compile_pat(&prop.arg, rest_out, cb)?;
+                }
             }
         }
 
