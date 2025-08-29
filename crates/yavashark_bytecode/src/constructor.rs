@@ -59176,6 +59176,22 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn yield_star(arg0: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => Self::YieldStarAcc(arg0),
+            DataType::Const(arg0) => Self::YieldStarConst(arg0),
+            DataType::Reg(arg0) => Self::YieldStarReg(arg0),
+            DataType::Stack(arg0) => Self::YieldStarStack(arg0),
+            DataType::Var(arg0) => Self::YieldStarVar(arg0),
+            DataType::F32(arg0) => Self::YieldStarF32(arg0),
+            DataType::I32(arg0) => Self::YieldStarI32(arg0),
+            DataType::U32(arg0) => Self::YieldStarU32(arg0),
+            DataType::Boolean(arg0) => Self::YieldStarBool(arg0),
+            DataType::Null(arg0) => Self::YieldStarNull(arg0),
+            DataType::Undefined(arg0) => Self::YieldStarUndefined(arg0),
+        }
+    }
+    #[must_use]
     pub fn yield_undefined() -> Self {
         Self::YieldUndefined
     }
@@ -63548,6 +63564,10 @@ impl Instruction {
     #[must_use]
     pub fn yield_(arg0: impl Data) -> Self {
         Self::Yield(arg0.data_type())
+    }
+    #[must_use]
+    pub fn yield_star(arg0: impl Data) -> Self {
+        Self::YieldStar(arg0.data_type())
     }
     #[must_use]
     pub fn yield_undefined() -> Self {
