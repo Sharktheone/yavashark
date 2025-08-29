@@ -114,7 +114,7 @@ pub struct InstructionLine<'a> {
     output: Option<&'a str>,
 }
 
-fn split_in_parts(line: &str) -> InstructionLine {
+fn split_in_parts(line: &str) -> InstructionLine<'_> {
     let parts = line.split_once(['(', ' ']);
     let name = parts.map(|x| x.0).unwrap_or(line);
 
