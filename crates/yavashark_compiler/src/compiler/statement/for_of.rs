@@ -103,7 +103,6 @@ impl Compiler {
                 self.dealloc(out);
 
                 inst
-
             }
             ForHead::UsingDecl(_) => todo!(),
         };
@@ -225,7 +224,6 @@ impl Compiler {
                 self.dealloc(out);
 
                 inst
-
             }
             ForHead::UsingDecl(_) => todo!(),
         };

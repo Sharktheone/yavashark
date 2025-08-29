@@ -212,10 +212,7 @@ impl ZonedDateTime {
 
     #[prop("toPlainDate")]
     pub fn to_plain_date(&self, realm: &mut Realm) -> Res<ObjectHandle> {
-        let date = self
-            .date
-            .to_plain_date()
-            .map_err(Error::from_temporal)?;
+        let date = self.date.to_plain_date().map_err(Error::from_temporal)?;
 
         Ok(PlainDate::new(date, realm).into_object())
     }
@@ -232,10 +229,7 @@ impl ZonedDateTime {
 
     #[prop("toPlainTime")]
     pub fn to_plain_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
-        let date = self
-            .date
-            .to_plain_time()
-            .map_err(Error::from_temporal)?;
+        let date = self.date.to_plain_time().map_err(Error::from_temporal)?;
 
         Ok(PlainTime::new(date, realm).into_object())
     }
@@ -333,44 +327,32 @@ impl ZonedDateTime {
 
     #[get("day")]
     pub fn day(&self) -> Res<u8> {
-        self.date
-            .day()
-            .map_err(Error::from_temporal)
+        self.date.day().map_err(Error::from_temporal)
     }
 
     #[get("dayOfWeek")]
     pub fn day_of_week(&self) -> Res<u16> {
-        self.date
-            .day_of_week()
-            .map_err(Error::from_temporal)
+        self.date.day_of_week().map_err(Error::from_temporal)
     }
 
     #[get("dayOfYear")]
     pub fn day_of_year(&self) -> Res<u16> {
-        self.date
-            .day_of_year()
-            .map_err(Error::from_temporal)
+        self.date.day_of_year().map_err(Error::from_temporal)
     }
 
     #[get("daysInMonth")]
     pub fn days_in_month(&self) -> Res<u16> {
-        self.date
-            .days_in_month()
-            .map_err(Error::from_temporal)
+        self.date.days_in_month().map_err(Error::from_temporal)
     }
 
     #[get("daysInWeek")]
     pub fn days_in_week(&self) -> Res<u16> {
-        self.date
-            .days_in_week()
-            .map_err(Error::from_temporal)
+        self.date.days_in_week().map_err(Error::from_temporal)
     }
 
     #[get("daysInYear")]
     pub fn days_in_year(&self) -> Res<u16> {
-        self.date
-            .days_in_year()
-            .map_err(Error::from_temporal)
+        self.date.days_in_year().map_err(Error::from_temporal)
     }
 
     #[get("epochMilliseconds")]
@@ -399,59 +381,44 @@ impl ZonedDateTime {
             .date
             .era()
             .map_err(Error::from_temporal)?
-            .map_or(Value::Undefined, |era|
-                YSString::from_ref(era.as_str())
-                    .into()
-            ))
+            .map_or(Value::Undefined, |era| {
+                YSString::from_ref(era.as_str()).into()
+            }))
     }
 
     #[get("hour")]
     pub fn hour(&self) -> Res<u8> {
-        self.date
-            .hour()
-            .map_err(Error::from_temporal)
+        self.date.hour().map_err(Error::from_temporal)
     }
 
     #[get("hoursInDay")]
     pub fn hours_in_day(&self) -> Res<f64> {
-        self.date
-            .hours_in_day()
-            .map_err(Error::from_temporal)
+        self.date.hours_in_day().map_err(Error::from_temporal)
     }
 
     #[get("inLeapYear")]
     pub fn in_leap_year(&self) -> Res<bool> {
-        self.date
-            .in_leap_year()
-            .map_err(Error::from_temporal)
+        self.date.in_leap_year().map_err(Error::from_temporal)
     }
 
     #[get("microsecond")]
     pub fn microsecond(&self) -> Res<u16> {
-        self.date
-            .microsecond()
-            .map_err(Error::from_temporal)
+        self.date.microsecond().map_err(Error::from_temporal)
     }
 
     #[get("millisecond")]
     pub fn millisecond(&self) -> Res<u16> {
-        self.date
-            .millisecond()
-            .map_err(Error::from_temporal)
+        self.date.millisecond().map_err(Error::from_temporal)
     }
 
     #[get("minute")]
     pub fn minute(&self) -> Res<u8> {
-        self.date
-            .minute()
-            .map_err(Error::from_temporal)
+        self.date.minute().map_err(Error::from_temporal)
     }
 
     #[get("month")]
     pub fn month(&self) -> Res<u8> {
-        self.date
-            .month()
-            .map_err(Error::from_temporal)
+        self.date.month().map_err(Error::from_temporal)
     }
 
     #[get("monthCode")]
@@ -464,35 +431,27 @@ impl ZonedDateTime {
 
     #[get("monthsInYear")]
     pub fn months_in_year(&self) -> Res<u16> {
-        self.date
-            .months_in_year()
-            .map_err(Error::from_temporal)
+        self.date.months_in_year().map_err(Error::from_temporal)
     }
 
     #[get("nanosecond")]
     pub fn nanosecond(&self) -> Res<u16> {
-        self.date
-            .nanosecond()
-            .map_err(Error::from_temporal)
+        self.date.nanosecond().map_err(Error::from_temporal)
     }
 
     #[get("offset")]
     pub fn offset(&self) -> String {
-        self.date
-            .offset()
+        self.date.offset()
     }
 
     #[get("offsetNanoseconds")]
     pub fn offset_nanoseconds(&self) -> i64 {
-        self.date
-            .offset_nanoseconds()
+        self.date.offset_nanoseconds()
     }
 
     #[get("second")]
     pub fn second(&self) -> Res<u8> {
-        self.date
-            .second()
-            .map_err(Error::from_temporal)
+        self.date.second().map_err(Error::from_temporal)
     }
 
     #[get("timeZoneId")]
@@ -511,9 +470,7 @@ impl ZonedDateTime {
 
     #[get("year")]
     pub fn year(&self) -> Res<i32> {
-        self.date
-            .year()
-            .map_err(Error::from_temporal)
+        self.date.year().map_err(Error::from_temporal)
     }
 
     #[get("yearOfWeek")]

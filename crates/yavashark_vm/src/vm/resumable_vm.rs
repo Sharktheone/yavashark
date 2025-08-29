@@ -470,7 +470,7 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
     }
 
     fn end_spread(&mut self, obj: ObjectHandle) -> Res<ObjectHandle> {
-        let not= self
+        let not = self
             .state
             .spread_stack
             .pop()
@@ -483,7 +483,6 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
                 props.push((name, value));
             }
         }
-
 
         let rest_obj = Object::from_values(props, self.get_realm())?;
 
@@ -500,5 +499,3 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
         Ok(())
     }
 }
-
-

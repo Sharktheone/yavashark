@@ -2,9 +2,9 @@ use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_bytecode::data::{ControlIdx, Label};
 use yavashark_bytecode::JmpAddr;
+use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
-use yavashark_env::array::Array;
 use yavashark_value::ObjectImpl;
 
 pub fn nullish_coalescing(
@@ -239,8 +239,6 @@ pub fn leave_try(vm: &mut impl VM) -> Res {
     vm.leave_try()
 }
 
-
-
 pub fn push_iter(iter: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let iter = iter.get(vm)?;
 
@@ -381,7 +379,6 @@ pub fn async_iter_next_no_output_jmp(next: impl Data, addr: JmpAddr, vm: &mut im
 
     Ok(())
 }
-
 
 pub fn throw_if_not_object(data: impl Data, vm: &mut impl VM) -> Res {
     let data = data.get(vm)?;

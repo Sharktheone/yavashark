@@ -140,7 +140,7 @@ impl Compiler {
         Ok(())
     }
 
-    pub fn compile_assign_expr(&mut self , expr: &Expr, value: impl Data) -> Res {
+    pub fn compile_assign_expr(&mut self, expr: &Expr, value: impl Data) -> Res {
         match expr {
             Expr::Member(m) => {
                 todo!()
@@ -151,11 +151,8 @@ impl Compiler {
             Expr::OptChain(opt) => {
                 todo!()
             }
-            Expr::Paren(paren) => {
-                self.compile_assign_expr(&paren.expr, value)?
-            }
+            Expr::Paren(paren) => self.compile_assign_expr(&paren.expr, value)?,
             _ => self.compile_expr_no_out(expr)?,
-
         }
 
         Ok(())

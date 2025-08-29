@@ -31,7 +31,6 @@ impl Compiler {
 
             VarDeclKind::Const => {
                 for decl in &var.decls {
-
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
                         self.compile_pat_const(&decl.name, out)?

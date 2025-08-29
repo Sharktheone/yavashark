@@ -48,16 +48,20 @@ impl FunctionCode for BytecodeFunction {
         let mut vm = BorrowedVM::with_scope(&self.code.instructions, &self.code.ds, realm, scope);
 
         match vm.run() {
-            Ok(()) => {},
-            Err(e) => return match e {
-                ControlFlow::Error(e) => Err(e.into()),
-                ControlFlow::Return(v) => Ok(v),
-                ControlFlow::Break(_) => Err(Error::syn("Illegal break statement").into()),
-                ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement").into()),
-                ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement").into()),
-                ControlFlow::Await(_) => Err(Error::syn("Illegal await statement").into()),
-                ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
-            },
+            Ok(()) => {}
+            Err(e) => {
+                return match e {
+                    ControlFlow::Error(e) => Err(e.into()),
+                    ControlFlow::Return(v) => Ok(v),
+                    ControlFlow::Break(_) => Err(Error::syn("Illegal break statement").into()),
+                    ControlFlow::Continue(_) => {
+                        Err(Error::syn("Illegal continue statement").into())
+                    }
+                    ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement").into()),
+                    ControlFlow::Await(_) => Err(Error::syn("Illegal await statement").into()),
+                    ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
+                }
+            }
         }
 
         Ok(vm.acc())
@@ -87,16 +91,20 @@ impl FunctionCode for BytecodeArrowFunction {
         let mut vm = BorrowedVM::with_scope(&self.code.instructions, &self.code.ds, realm, scope);
 
         match vm.run() {
-            Ok(()) => {},
-            Err(e) => return match e {
-                ControlFlow::Error(e) => Err(e.into()),
-                ControlFlow::Return(v) => Ok(v),
-                ControlFlow::Break(_) => Err(Error::syn("Illegal break statement").into()),
-                ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement").into()),
-                ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement").into()),
-                ControlFlow::Await(_) => Err(Error::syn("Illegal await statement").into()),
-                ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
-            },
+            Ok(()) => {}
+            Err(e) => {
+                return match e {
+                    ControlFlow::Error(e) => Err(e.into()),
+                    ControlFlow::Return(v) => Ok(v),
+                    ControlFlow::Break(_) => Err(Error::syn("Illegal break statement").into()),
+                    ControlFlow::Continue(_) => {
+                        Err(Error::syn("Illegal continue statement").into())
+                    }
+                    ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement").into()),
+                    ControlFlow::Await(_) => Err(Error::syn("Illegal await statement").into()),
+                    ControlFlow::OptChainShortCircuit => Ok(Value::Undefined),
+                }
+            }
         }
 
         Ok(vm.acc())

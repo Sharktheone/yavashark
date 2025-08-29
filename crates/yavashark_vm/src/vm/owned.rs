@@ -320,8 +320,6 @@ impl VM for OwnedVM {
         Ok(())
     }
 
-
-
     fn begin_spread(&mut self, cap: usize) -> Res {
         self.spread_stack.push(Vec::with_capacity(cap));
 
@@ -339,7 +337,7 @@ impl VM for OwnedVM {
     }
 
     fn end_spread(&mut self, obj: ObjectHandle) -> Res<ObjectHandle> {
-        let not= self
+        let not = self
             .spread_stack
             .pop()
             .ok_or(Error::new("No spread in progress"))?;
@@ -351,7 +349,6 @@ impl VM for OwnedVM {
                 props.push((name, value));
             }
         }
-
 
         let rest_obj = Object::from_values(props, self.get_realm())?;
 

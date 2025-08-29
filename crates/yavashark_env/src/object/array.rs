@@ -1411,7 +1411,6 @@ impl Array {
         Ok(iter.into())
     }
 
-
     #[prop(crate::Symbol::ASYNC_ITERATOR)]
     #[allow(clippy::unused_self)]
     fn iterator_async(&self, #[realm] realm: &Realm, #[this] this: Value) -> ValueResult {
