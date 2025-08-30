@@ -8,7 +8,7 @@ use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData, OutputDataTy
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Error, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 
 pub struct OldBorrowedVM<'a> {
     regs: Registers,
@@ -116,7 +116,15 @@ impl<'a> OldBorrowedVM<'a> {
             let instr = self.code[self.pc];
             self.pc += 1;
 
-            instr.execute(self)?;
+            match instr.execute(self) {
+                Ok(()) => {}
+                Err(ControlFlow::Error(e)) => {
+                    self.handle_root_error(e)?;
+
+                    return self.run();
+                }
+                other => other?,
+            }
         }
 
         Ok(())
@@ -128,12 +136,17 @@ impl<'a> OldBorrowedVM<'a> {
         Ok(self.acc())
     }
 
+    pub fn handle_root_error(&mut self, err: Error) -> Res {
+        if self.try_stack.is_empty() {
+            return Err(err);
+        }
+
+        self.handle_error(err)
+    }
+
     pub fn handle_error(&mut self, err: Error) -> Res {
         if let Some(tb) = self.try_stack.last_mut() {
             if let Some(catch) = tb.catch.take() {
-                if tb.finally.is_none() {
-                    self.try_stack.pop();
-                }
                 self.set_pc(catch);
                 self.set_acc(ErrorObj::error_to_value(err, self.realm));
             } else if let Some(finally) = tb.finally.take() {
