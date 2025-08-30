@@ -179,7 +179,13 @@ impl ResumableVM<'_> {
                     ControlFlow::Yield(v) => {
                         return GeneratorPoll::Yield(self.state, v);
                     }
-                    ControlFlow::YieldStar(ys) => {
+                    ControlFlow::YieldStar(i) => {
+                        let ys = match i.get_iter(self.realm)
+                            .and_then(Value::to_object) {
+                            Ok(o) => o,
+                            Err(e) => return GeneratorPoll::Ret(Err(e)),
+                        };
+
                         return match ys.iter_next(self.realm) {
                             Ok(Some(next)) => {
                                 self.state.yield_star_val = Some(ys);
@@ -241,10 +247,15 @@ impl ResumableVM<'_> {
                     ControlFlow::Yield(v) => {
                         return AsyncGeneratorPoll::Yield(self.state, v);
                     }
-                    ControlFlow::YieldStar(ys) => {
+                    ControlFlow::YieldStar(i) => {
+                        let ys = match i.get_iter(self.realm)
+                            .and_then(Value::to_object) {
+                                Ok(o) => o,
+                                Err(e) => return AsyncGeneratorPoll::Ret(self.state, Err(e)),
+                        };
+
                         return match ys.iter_next(self.realm) {
                             Ok(Some(next)) => {
-                                dbg!(&next);
                                 self.state.yield_star_val = Some(ys);
                                 AsyncGeneratorPoll::Yield(self.state, next)
                             }
