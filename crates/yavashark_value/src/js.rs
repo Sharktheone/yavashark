@@ -692,12 +692,14 @@ impl<C: Realm> Value<C> {
 impl<C: Realm> Object<C> {
     pub fn iter_next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         let next = self.call_method(&"next".into(), realm, Vec::new())?;
-        let done = next.get_property(&Value::string("done"), realm)?;
+        let done = next.get_property_opt(&Value::string("done"), realm)?;
 
-        if done.is_truthy() {
+        if done.is_some_and(|x| x.is_truthy()) {
             return Ok(None);
         }
-        next.get_property(&Value::string("value"), realm).map(Some)
+
+        next.get_property_opt(&Value::string("value"), realm)
+            .map(|opt| Some(opt.unwrap_or(Value::Undefined)))
     }
 
     pub fn async_iter_next(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
@@ -730,9 +732,9 @@ impl<C: Realm> Object<C> {
 
     pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
         let next = self.call_method(&"next".into(), realm, Vec::new())?;
-        let done = next.get_property(&Value::string("done"), realm)?;
+        let done = next.get_property_opt(&Value::string("done"), realm)?;
 
-        Ok(done.is_truthy())
+        Ok(done.is_some_and(|done| done.is_truthy()))
     }
 }
 
