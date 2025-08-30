@@ -124,17 +124,24 @@ impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
         Self { state, realm }
     }
 
+
+    pub fn handle_root_error(&mut self, err: Error) -> Res {
+        if self.state.try_stack.is_empty() {
+            return Err(err);
+        }
+
+        self.handle_error(err)
+    }
+
+
     pub fn handle_error(&mut self, err: Error) -> Res {
         if let Some(tb) = self.state.try_stack.last_mut() {
             if let Some(catch) = tb.catch.take() {
-                if tb.finally.is_none() {
-                    self.state.try_stack.pop();
-                }
-                self.offset_pc(catch);
+                self.set_pc(catch);
                 self.set_acc(ErrorObj::error_to_value(err, self.realm));
             } else if let Some(finally) = tb.finally.take() {
                 self.state.throw = Some(err);
-                self.offset_pc(finally);
+                self.set_pc(finally);
 
                 self.state.try_stack.pop();
             }
@@ -165,7 +172,13 @@ impl ResumableVM<'_> {
             match instr.execute(&mut self) {
                 Ok(()) => {}
                 Err(e) => match e {
-                    ControlFlow::Error(e) => return GeneratorPoll::Ret(Err(e)),
+                    ControlFlow::Error(e) => {
+                        if let Err(e) = self.handle_root_error(e) {
+                            return GeneratorPoll::Ret(Err(e));
+                        }
+
+                        return self.next();
+                    }
                     ControlFlow::Return(value) => return GeneratorPoll::Ret(Ok(value)),
                     ControlFlow::Break(_) => {
                         return GeneratorPoll::Ret(Err(Error::new("Break outside of loop")));
@@ -183,7 +196,13 @@ impl ResumableVM<'_> {
                         let ys = match i.get_iter(self.realm)
                             .and_then(Value::to_object) {
                             Ok(o) => o,
-                            Err(e) => return GeneratorPoll::Ret(Err(e)),
+                            Err(e) => {
+                                if let Err(e) = self.handle_root_error(e) {
+                                    return GeneratorPoll::Ret(Err(e));
+                                }
+
+                                return self.next();
+                            }
                         };
 
                         return match ys.iter_next(self.realm) {
@@ -195,7 +214,13 @@ impl ResumableVM<'_> {
                                 self.next()
 
                             }
-                            Err(e) => GeneratorPoll::Ret(Err(e)),
+                            Err(e) =>  {
+                                if let Err(e) = self.handle_root_error(e) {
+                                    return GeneratorPoll::Ret(Err(e));
+                                }
+
+                                self.next()
+                            }
                         }
                     }
                     ControlFlow::OptChainShortCircuit => {}
@@ -225,7 +250,13 @@ impl ResumableVM<'_> {
             match instr.execute(&mut self) {
                 Ok(()) => {}
                 Err(e) => match e {
-                    ControlFlow::Error(e) => return AsyncGeneratorPoll::Ret(self.state, Err(e)),
+                    ControlFlow::Error(e) => {
+                        if let Err(e) = self.handle_root_error(e) {
+                            return AsyncGeneratorPoll::Ret(self.state, Err(e));
+                        }
+
+                        return self.poll_next();
+                    }
                     ControlFlow::Return(value) => {
                         return AsyncGeneratorPoll::Ret(self.state, Ok(value))
                     }
@@ -251,7 +282,13 @@ impl ResumableVM<'_> {
                         let ys = match i.get_iter(self.realm)
                             .and_then(Value::to_object) {
                                 Ok(o) => o,
-                                Err(e) => return AsyncGeneratorPoll::Ret(self.state, Err(e)),
+                                Err(e) => {
+                                    if let Err(e) = self.handle_root_error(e) {
+                                        return AsyncGeneratorPoll::Ret(self.state, Err(e));
+                                    }
+
+                                    return self.poll_next();
+                                }
                         };
 
                         return match ys.iter_next(self.realm) {
@@ -263,7 +300,13 @@ impl ResumableVM<'_> {
                                 self.poll_next()
 
                             }
-                            Err(e) => AsyncGeneratorPoll::Ret(self.state, Err(e)),
+                            Err(e) => {
+                                if let Err(e) = self.handle_root_error(e) {
+                                    return AsyncGeneratorPoll::Ret(self.state, Err(e));
+                                }
+
+                                self.poll_next()
+                            }
                         }
                     }
                     ControlFlow::OptChainShortCircuit => {}
@@ -283,7 +326,13 @@ impl ResumableVM<'_> {
             match instr.execute(&mut self) {
                 Ok(()) => {}
                 Err(e) => match e {
-                    ControlFlow::Error(e) => return AsyncPoll::Ret(self.state, Err(e)),
+                    ControlFlow::Error(e) => {
+                        if let Err(e) = self.handle_root_error(e) {
+                            return AsyncPoll::Ret(self.state, Err(e));
+                        }
+
+                        return self.poll();
+                    }
                     ControlFlow::Return(value) => {
                         self.state.acc = value;
                         break;
@@ -514,14 +563,14 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
             .ok_or(Error::new("No try block"))?;
 
         if let Some(f) = tb.finally.take() {
-            self.offset_pc(f);
+            self.set_pc(f);
         } else {
             let exit = tb.exit;
             if let Some(err) = self.state.throw.take() {
                 return self.handle_error(err);
             }
 
-            self.offset_pc(exit);
+            self.set_pc(exit);
             self.state.try_stack.pop();
         }
 

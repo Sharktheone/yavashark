@@ -123,11 +123,11 @@ impl OwnedVM {
                 if tb.finally.is_none() {
                     self.try_stack.pop();
                 }
-                self.offset_pc(catch);
+                self.set_pc(catch);
                 self.set_acc(ErrorObj::error_to_value(err, &self.realm));
             } else if let Some(finally) = tb.finally.take() {
                 self.throw = Some(err);
-                self.offset_pc(finally);
+                self.set_pc(finally);
 
                 self.try_stack.pop();
             }
@@ -305,7 +305,7 @@ impl VM for OwnedVM {
             .ok_or(Error::new("No try block"))?;
 
         if let Some(f) = tb.finally.take() {
-            self.offset_pc(f);
+            self.set_pc(f);
         } else {
             let exit = tb.exit;
 
@@ -313,7 +313,7 @@ impl VM for OwnedVM {
                 return self.handle_error(err);
             }
 
-            self.offset_pc(exit);
+            self.set_pc(exit);
             self.try_stack.pop();
         }
 

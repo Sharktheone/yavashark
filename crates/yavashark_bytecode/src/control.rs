@@ -1,5 +1,5 @@
 use crate::data::VarName;
-use crate::JmpOffset;
+use crate::JmpAddr;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ControlBlock {
@@ -11,10 +11,10 @@ pub enum ControlBlock {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
 pub struct TryBlock {
-    pub exit: JmpOffset,
-    pub catch: Option<JmpOffset>,
+    pub exit: JmpAddr,
+    pub catch: Option<JmpAddr>,
     pub catch_pat: Option<PatBlock>,
-    pub finally: Option<JmpOffset>,
+    pub finally: Option<JmpAddr>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
