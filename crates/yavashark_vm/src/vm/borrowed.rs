@@ -101,7 +101,6 @@ impl<'a> BorrowedVM<'a> {
         Ok(())
     }
 
-
     pub fn handle_root_error(&mut self, err: Error) -> Res {
         if self.try_stack.is_empty() {
             return Err(err);

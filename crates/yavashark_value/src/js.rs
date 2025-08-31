@@ -374,7 +374,7 @@ impl<C: Realm> CustomGcRefUntyped for Value<C> {
     }
 }
 
-impl<C: Realm>  Object<C> {
+impl<C: Realm> Object<C> {
     #[allow(clippy::iter_not_returning_iterator)]
     pub fn iter<'a>(&self, realm: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
         let iter = self.get_iter(realm)?;
@@ -392,19 +392,20 @@ impl<C: Realm>  Object<C> {
     }
 
     pub fn get_iter(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
-        let iter = self.resolve_property(&Symbol::ITERATOR.into(), realm)?
+        let iter = self
+            .resolve_property(&Symbol::ITERATOR.into(), realm)?
             .ok_or(Error::reference("Object is not iterable"))?;
 
         iter.call(realm, Vec::new(), self.clone().into())
     }
 
     pub fn get_async_iter(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
-        let iter = self.resolve_property(&Symbol::ASYNC_ITERATOR.into(), realm)?
+        let iter = self
+            .resolve_property(&Symbol::ASYNC_ITERATOR.into(), realm)?
             .ok_or(Error::reference("Object is not async iterable"))?;
 
         iter.call(realm, Vec::new(), self.clone().into())
     }
-
 }
 
 impl<C: Realm> Value<C> {
@@ -655,7 +656,6 @@ impl<C: Realm> Iterator for CtxIter<'_, C> {
     }
 }
 
-
 impl<C: Realm> Iter<C> {
     pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         self.next_obj.iter_next(realm)
@@ -687,7 +687,6 @@ impl<C: Realm> Value<C> {
         self.as_object()?.iter_next_is_finished(realm)
     }
 }
-
 
 impl<C: Realm> Object<C> {
     pub fn iter_next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {

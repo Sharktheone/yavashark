@@ -124,7 +124,6 @@ impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
         Self { state, realm }
     }
 
-
     pub fn handle_root_error(&mut self, err: Error) -> Res {
         if self.state.try_stack.is_empty() {
             return Err(err);
@@ -132,7 +131,6 @@ impl<'a, T: VMStateFunctionCode> ResumableVM<'a, T> {
 
         self.handle_error(err)
     }
-
 
     pub fn handle_error(&mut self, err: Error) -> Res {
         if let Some(tb) = self.state.try_stack.last_mut() {
@@ -164,7 +162,6 @@ impl ResumableVM<'_> {
             None => {}
         }
 
-
         while self.state.pc < self.state.code.instructions.len() {
             let instr = &self.state.code.instructions[self.state.pc];
             self.state.pc += 1;
@@ -193,8 +190,7 @@ impl ResumableVM<'_> {
                         return GeneratorPoll::Yield(self.state, v);
                     }
                     ControlFlow::YieldStar(i) => {
-                        let ys = match i.get_iter(self.realm)
-                            .and_then(Value::to_object) {
+                        let ys = match i.get_iter(self.realm).and_then(Value::to_object) {
                             Ok(o) => o,
                             Err(e) => {
                                 if let Err(e) = self.handle_root_error(e) {
@@ -210,18 +206,15 @@ impl ResumableVM<'_> {
                                 self.state.yield_star_val = Some(ys);
                                 GeneratorPoll::Yield(self.state, next)
                             }
-                            Ok(None) => {
-                                self.next()
-
-                            }
-                            Err(e) =>  {
+                            Ok(None) => self.next(),
+                            Err(e) => {
                                 if let Err(e) = self.handle_root_error(e) {
                                     return GeneratorPoll::Ret(Err(e));
                                 }
 
                                 self.next()
                             }
-                        }
+                        };
                     }
                     ControlFlow::OptChainShortCircuit => {}
                 },
@@ -279,16 +272,15 @@ impl ResumableVM<'_> {
                         return AsyncGeneratorPoll::Yield(self.state, v);
                     }
                     ControlFlow::YieldStar(i) => {
-                        let ys = match i.get_iter(self.realm)
-                            .and_then(Value::to_object) {
-                                Ok(o) => o,
-                                Err(e) => {
-                                    if let Err(e) = self.handle_root_error(e) {
-                                        return AsyncGeneratorPoll::Ret(self.state, Err(e));
-                                    }
-
-                                    return self.poll_next();
+                        let ys = match i.get_iter(self.realm).and_then(Value::to_object) {
+                            Ok(o) => o,
+                            Err(e) => {
+                                if let Err(e) = self.handle_root_error(e) {
+                                    return AsyncGeneratorPoll::Ret(self.state, Err(e));
                                 }
+
+                                return self.poll_next();
+                            }
                         };
 
                         return match ys.iter_next(self.realm) {
@@ -296,10 +288,7 @@ impl ResumableVM<'_> {
                                 self.state.yield_star_val = Some(ys);
                                 AsyncGeneratorPoll::Yield(self.state, next)
                             }
-                            Ok(None) => {
-                                self.poll_next()
-
-                            }
+                            Ok(None) => self.poll_next(),
                             Err(e) => {
                                 if let Err(e) = self.handle_root_error(e) {
                                     return AsyncGeneratorPoll::Ret(self.state, Err(e));
@@ -307,7 +296,7 @@ impl ResumableVM<'_> {
 
                                 self.poll_next()
                             }
-                        }
+                        };
                     }
                     ControlFlow::OptChainShortCircuit => {}
                 },

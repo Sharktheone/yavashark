@@ -1,8 +1,8 @@
 use crate::{Compiler, Res};
 use swc_ecma_ast::TryStmt;
-use yavashark_bytecode::{JmpAddr, JmpOffset};
 use yavashark_bytecode::control::TryBlock;
 use yavashark_bytecode::instructions::Instruction;
+use yavashark_bytecode::{JmpAddr, JmpOffset};
 
 impl Compiler {
     pub fn compile_try(&mut self, s: &TryStmt) -> Res {
