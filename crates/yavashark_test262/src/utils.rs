@@ -21,7 +21,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let c = EsSyntax::default();
 
-    let metadata = parse_metadata(&input);
+    let metadata = parse_metadata(input);
 
     if metadata.flags.contains(Flags::ONLY_STRICT) {
         println!("SKIP");
@@ -30,7 +30,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let end = BytePos(input.len() as u32);
 
-    let input = StringInput::new(&input, BytePos(0), end);
+    let input = StringInput::new(input, BytePos(0), end);
 
     let mut p = Parser::new(Syntax::Es(c), input, None);
 

@@ -27,19 +27,17 @@ impl Compiler {
             _ => bail!("Invalid left-hand side expression in update expression"),
         };
 
-        if let Some(out) = out {
-            if !expr.prefix {
+        if let Some(out) = out
+            && !expr.prefix {
                 self.instructions.push(Instruction::move_(source, out)); //TODO: this is incorrect, since we need to also convert the value to a number
             }
-        }
 
         self.instructions.push(op(source, source));
 
-        if let Some(out) = out {
-            if expr.prefix {
+        if let Some(out) = out
+            && expr.prefix {
                 self.instructions.push(Instruction::move_(source, out));
             }
-        }
 
         if let Some((m, prop)) = member {
             //TODO: store member

@@ -34,7 +34,7 @@ fn a() {
     }
 
     impl Test {
-        fn borrow(&self) -> Option<BorrowedTest> {
+        fn borrow(&self) -> Option<BorrowedTest<'_>> {
             let rand: bool = random();
 
             if rand {

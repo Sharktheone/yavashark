@@ -13,12 +13,10 @@ impl Compiler {
             } else {
                 self.instructions.push(Instruction::yield_(arg));
             }
+        } else if expr.delegate {
+            self.instructions.push(Instruction::yield_star(Undefined));
         } else {
-            if expr.delegate {
-                self.instructions.push(Instruction::yield_star(Undefined));
-            } else {
-                self.instructions.push(Instruction::yield_undefined());
-            }
+            self.instructions.push(Instruction::yield_undefined());
         }
 
         Ok(())

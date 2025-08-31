@@ -99,7 +99,7 @@ impl Compiler {
 
                         properties.push((prop, DataTypeValue::Function(bp)));
                     }
-                    _ => todo!(),
+                    Prop::Assign(_) => todo!(),
                 },
                 PropOrSpread::Spread(_) => {
                     todo!()

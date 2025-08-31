@@ -36,7 +36,7 @@ impl Compiler {
         &mut self,
         pat: &Pat,
         source: impl Data,
-        cb: &mut impl FnMut(&mut Compiler, DataType, VarName),
+        cb: &mut impl FnMut(&mut Self, DataType, VarName),
     ) -> Res {
         match pat {
             Pat::Array(array) => self.compile_array_pat(array, source, cb)?,
@@ -59,7 +59,7 @@ impl Compiler {
         &mut self,
         array: &ArrayPat,
         source: impl Data,
-        cb: &mut impl FnMut(&mut Compiler, DataType, VarName),
+        cb: &mut impl FnMut(&mut Self, DataType, VarName),
     ) -> Res {
         let iter = self.alloc_reg_or_stack();
 
@@ -80,7 +80,7 @@ impl Compiler {
                 }
             } else {
                 self.instructions
-                    .push(Instruction::iter_next_no_output(iter))
+                    .push(Instruction::iter_next_no_output(iter));
             }
         }
 
@@ -94,16 +94,16 @@ impl Compiler {
         &mut self,
         obj: &ObjectPat,
         source: impl Data,
-        cb: &mut impl FnMut(&mut Compiler, DataType, VarName),
+        cb: &mut impl FnMut(&mut Self, DataType, VarName),
     ) -> Res {
         let has_rest = obj
             .props
             .last()
-            .map_or(false, |p| matches!(p, ObjectPatProp::Rest(_)));
+            .is_some_and(|p| matches!(p, ObjectPatProp::Rest(_)));
 
         if has_rest {
             self.instructions
-                .push(Instruction::begin_spread(obj.props.len()))
+                .push(Instruction::begin_spread(obj.props.len()));
         }
 
         for (i, prop) in obj.props.iter().enumerate() {
@@ -113,7 +113,7 @@ impl Compiler {
                     let key = self.convert_pat_prop_name(&prop.key, &mut dealloc);
 
                     if has_rest {
-                        self.instructions.push(Instruction::push_spread(key))
+                        self.instructions.push(Instruction::push_spread(key));
                     }
                     self.instructions
                         .push(Instruction::load_member(source, key, Acc));
@@ -130,7 +130,7 @@ impl Compiler {
                         let key = self.alloc_const(prop.key.sym.as_str());
 
                         if has_rest {
-                            self.instructions.push(Instruction::push_spread(key))
+                            self.instructions.push(Instruction::push_spread(key));
                         }
 
                         self.instructions
@@ -150,7 +150,7 @@ impl Compiler {
                         let key = self.alloc_const(prop.key.sym.as_str());
 
                         if has_rest {
-                            self.instructions.push(Instruction::push_spread(key))
+                            self.instructions.push(Instruction::push_spread(key));
                         }
 
                         self.instructions
@@ -178,7 +178,7 @@ impl Compiler {
 
         if obj.props.is_empty() {
             self.instructions
-                .push(Instruction::throw_if_not_object(source))
+                .push(Instruction::throw_if_not_object(source));
         }
 
         Ok(())
@@ -188,7 +188,7 @@ impl Compiler {
         &mut self,
         assign: &AssignPat,
         source: impl Data,
-        cb: &mut impl FnMut(&mut Compiler, DataType, VarName),
+        cb: &mut impl FnMut(&mut Self, DataType, VarName),
     ) -> Res {
         let out = self.alloc_reg_or_stack();
         self.instructions.push(Instruction::move_(source, out));

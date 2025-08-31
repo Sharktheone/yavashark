@@ -400,7 +400,7 @@ impl Array {
         end: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this_val.clone(), realm)?;
+        let this = coerce_object(this_val, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -423,7 +423,7 @@ impl Array {
     }
 
     fn entries(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this.clone(), realm)?;
+        let this = coerce_object(this, realm)?;
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
@@ -472,7 +472,7 @@ impl Array {
         end: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this_val.clone(), realm)?;
+        let this = coerce_object(this_val, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?

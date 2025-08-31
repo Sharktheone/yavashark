@@ -109,7 +109,7 @@ pub fn move_(from: impl Data, data: impl OutputData, vm: &mut impl VM) -> Res {
     data.set(result, vm)
 }
 
-pub fn return_(_vm: &mut impl VM) -> ControlResult {
+pub const fn return_(_vm: &mut impl VM) -> ControlResult {
     Err(ControlFlow::Return(Value::Undefined))
 }
 
@@ -179,7 +179,7 @@ pub fn debugger(_vm: &mut impl VM) -> Res {
     Ok(())
 }
 
-pub fn break_(_vm: &mut impl VM) -> ControlResult {
+pub const fn break_(_vm: &mut impl VM) -> ControlResult {
     Err(ControlFlow::Break(None))
 }
 
@@ -189,7 +189,7 @@ pub fn break_label(label: Label, vm: &impl VM) -> ControlResult {
     Err(ControlFlow::Break(Some(label.to_owned())))
 }
 
-pub fn continue_(_vm: &mut impl VM) -> ControlResult {
+pub const fn continue_(_vm: &mut impl VM) -> ControlResult {
     Err(ControlFlow::Continue(None))
 }
 

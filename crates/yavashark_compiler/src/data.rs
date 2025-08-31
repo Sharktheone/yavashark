@@ -91,7 +91,7 @@ impl Compiler {
         }
     }
 
-    pub fn alloc_stack(&mut self) -> Stack {
+    pub const fn alloc_stack(&mut self) -> Stack {
         let stack = Stack(self.stack_ptr);
         self.stack_ptr += 1;
         stack

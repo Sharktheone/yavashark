@@ -91,7 +91,7 @@ impl AsyncTask for BytecodeAsyncTask {
                         Ok(promise) => {
                             inner.await_promise = Some(promise);
                         }
-                        Err((promise, _)) => {
+                        Err((promise, ())) => {
                             let val = promise
                                 .inner
                                 .borrow()

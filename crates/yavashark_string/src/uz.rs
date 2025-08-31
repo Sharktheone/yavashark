@@ -21,7 +21,7 @@ impl UsizeSmall {
         Some(Self { bytes: res })
     }
 
-    pub fn from_le_slice(slice: &[u8]) -> Option<Self> {
+    pub const fn from_le_slice(slice: &[u8]) -> Option<Self> {
         if slice.len() != UZ_BYTES {
             return None;
         }

@@ -13,7 +13,7 @@ impl Interpreter {
                         let b = (*orig).clone() + 1;
 
                         return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
-                    };
+                    }
 
                     (
                         value.sub(&Value::Number(-1.0), realm)?,
@@ -25,7 +25,7 @@ impl Interpreter {
                         let b = (*orig).clone() - 1;
 
                         return Ok((Value::BigInt(Rc::new(b)), Value::BigInt(orig)));
-                    };
+                    }
 
                     (
                         value.sub(&Value::Number(1.0), realm)?,

@@ -137,7 +137,7 @@ impl<C: Realm> Value<C> {
             Self::Boolean(b) => Self::Boolean(*b),
             Self::Object(o) => Self::Object(Object::clone(o)),
             Self::Symbol(s) => Self::Symbol(s.clone()),
-            Self::BigInt(b) => Self::BigInt(b.clone()),
+            Self::BigInt(b) => Self::BigInt(Rc::clone(b)),
         }
     }
 
@@ -181,8 +181,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => *n == 0.0 || n.is_nan(),
             Self::String(s) => s.is_empty(),
             Self::Boolean(b) => !b,
-            Self::Object(_) => false,
-            Self::Symbol(_) => false,
+            Self::Object(_) | Self::Symbol(_) => false,
             Self::BigInt(b) => b.is_zero(),
         }
     }
@@ -194,8 +193,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => !(*n == 0.0 || n.is_nan()),
             Self::String(s) => !s.is_empty(),
             Self::Boolean(b) => *b,
-            Self::Object(_) => true,
-            Self::Symbol(_) => true,
+            Self::Object(_) | Self::Symbol(_) => true,
             Self::BigInt(b) => !b.is_zero(),
         }
     }
@@ -595,11 +593,10 @@ pub fn fmt_num(n: f64) -> YSString {
             let mut num = format!("{n:e}");
 
             if let Some(e_idx) = num.find('e') {
-                if num.as_bytes().get(e_idx + 1).copied() != Some(b'-') {
-                    if num.len() > e_idx + 1 {
+                if num.as_bytes().get(e_idx + 1).copied() != Some(b'-')
+                    && num.len() > e_idx + 1 {
                         num.insert(e_idx + 1, '+');
                     }
-                }
             }
 
             YSString::from_string(num)

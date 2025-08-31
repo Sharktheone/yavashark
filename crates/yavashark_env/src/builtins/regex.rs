@@ -300,7 +300,7 @@ impl RegExp {
     }
 
     #[get("lastIndex")]
-    pub fn last_index(&self) -> usize {
+    pub const fn last_index(&self) -> usize {
         self.last_index.get()
     }
 }

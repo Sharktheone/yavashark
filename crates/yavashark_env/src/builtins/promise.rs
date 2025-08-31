@@ -51,8 +51,14 @@ pub struct PromiseNotify {
     finished: Cell<bool>,
 }
 
+impl Default for PromiseNotify {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PromiseNotify {
-    pub fn new() -> Self {
+    #[must_use] pub fn new() -> Self {
         Self {
             notify: Notify::new(),
             finished: Cell::new(false),
@@ -81,8 +87,8 @@ pub enum Callable {
 impl Debug for Callable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Callable::JsFunction(func) => write!(f, "JsFunction({:?})", func),
-            Callable::NativeFunction(_) => write!(f, "NativeFunction"),
+            Self::JsFunction(func) => write!(f, "JsFunction({func:?})"),
+            Self::NativeFunction(_) => write!(f, "NativeFunction"),
         }
     }
 }
@@ -90,8 +96,8 @@ impl Debug for Callable {
 impl Callable {
     pub fn call(&self, realm: &mut Realm, arg: Value, this: Value) -> ValueResult {
         match self {
-            Callable::JsFunction(func) => func.call(realm, vec![arg], this),
-            Callable::NativeFunction(func) => {
+            Self::JsFunction(func) => func.call(realm, vec![arg], this),
+            Self::NativeFunction(func) => {
                 func(arg, this, realm)?;
 
                 Ok(Value::Undefined)
@@ -132,7 +138,7 @@ impl Promise {
 
     pub async fn wait(&self) -> ValueResult {
         if let Some(notify) = self.notify.notified() {
-            notify.await
+            notify.await;
         }
 
         Ok(self
@@ -299,7 +305,7 @@ impl Promise {
                 }
                 PromiseState::Rejected => {}
             }
-        };
+        }
 
         if let Some(on_rejected) = on_rejected {
             match state {
@@ -314,7 +320,7 @@ impl Promise {
                 }
                 PromiseState::Fulfilled => {}
             }
-        };
+        }
 
         if promise_obj.state.get() != state {
             promise_obj.state.set(state);
@@ -425,7 +431,7 @@ impl Promise {
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Promise::reject_(&err, realm);
+                return Self::reject_(&err, realm);
             }
         };
 
@@ -436,7 +442,7 @@ impl Promise {
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Promise::reject_(&err, realm);
+                return Self::reject_(&err, realm);
             }
         } {
             if let Ok(prom) = <&Self>::from_value_out(p) {
@@ -475,7 +481,7 @@ impl Promise {
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Promise::reject_(&err, realm);
+                return Self::reject_(&err, realm);
             }
         };
 
@@ -486,7 +492,7 @@ impl Promise {
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Promise::reject_(&err, realm);
+                return Self::reject_(&err, realm);
             }
         } {
             if let Ok(prom) = <&Self>::from_value_out(p) {
@@ -513,7 +519,7 @@ impl Promise {
                         obj.define_property("status".into(), "fulfilled".into())?;
                         obj.define_property("value".into(), val)?;
 
-                        values.push(obj.into())
+                        values.push(obj.into());
                     }
                     PromiseResult::Rejected(val) => {
                         let obj = Object::with_proto(obj_proto.clone());
@@ -521,7 +527,7 @@ impl Promise {
                         obj.define_property("status".into(), "rejected".into())?;
                         obj.define_property("reason".into(), val)?;
 
-                        values.push(obj.into())
+                        values.push(obj.into());
                     }
                 }
             }

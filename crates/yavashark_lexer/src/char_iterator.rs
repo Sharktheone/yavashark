@@ -263,7 +263,7 @@ impl CharIteratorReceiver {
 
     /// # Safety
     /// The caller is responsible for ensuring that N is less than or equal to the buffer size, otherwise the caller will pay a performance penalty
-    pub fn next_n<const N: usize>(&mut self) -> Option<NextN<N>> {
+    pub fn next_n<const N: usize>(&mut self) -> Option<NextN<'_, N>> {
         let buffer = unsafe { &*self.buffer };
         let read_pos = buffer.read_pos.load(Ordering::Relaxed);
 

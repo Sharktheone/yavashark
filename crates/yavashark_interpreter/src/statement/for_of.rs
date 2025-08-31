@@ -25,9 +25,7 @@ impl Interpreter {
                 Err(ControlFlow::Break(l)) if label.as_ref() == l.as_ref() => {
                     break;
                 }
-                Err(ControlFlow::Continue(l)) if label.as_ref() == l.as_ref() => {
-                    continue;
-                }
+                Err(ControlFlow::Continue(l)) if label.as_ref() == l.as_ref() => {}
                 Err(e) => return Err(e),
             }
         }

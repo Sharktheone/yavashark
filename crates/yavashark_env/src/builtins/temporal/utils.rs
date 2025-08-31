@@ -185,7 +185,7 @@ pub fn rounding_options(
         };
     } else {
         return Err(Error::ty("Invalid unit"));
-    };
+    }
 
     Ok((opts, rel))
 }

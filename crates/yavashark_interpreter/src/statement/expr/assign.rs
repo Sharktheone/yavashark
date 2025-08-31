@@ -79,7 +79,7 @@ impl Interpreter {
                         class.set_private_prop(name.to_owned(), value.copy());
 
                         return Ok(());
-                    };
+                    }
 
                     if let Some(class) = obj.downcast::<Class>() {
                         class.set_private_prop_ref(name.to_owned(), value.copy());
@@ -296,7 +296,7 @@ impl Interpreter {
                         class.set_private_prop(name.to_owned(), value.copy());
 
                         return Ok(value);
-                    };
+                    }
 
                     if let Some(class) = obj.downcast::<Class>() {
                         let left = class

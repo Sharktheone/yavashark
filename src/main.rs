@@ -168,7 +168,7 @@ fn main() {
                 let mut vm = OwnedVM::new(bc.instructions, data, path.clone()).unwrap();
 
                 match vm.run() {
-                    Ok(_) => {}
+                    Ok(()) => {}
                     Err(ControlFlow::Continue(_)) => {
                         println!("Error: Unexpected continue");
                         return;
@@ -185,7 +185,7 @@ fn main() {
                         println!("Error: {}", err.pretty_print());
                         return;
                     }
-                    Err(ControlFlow::Yield(_)) | Err(ControlFlow::YieldStar(_)) => {
+                    Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {
                         println!("Error: Unexpected yield");
                         return;
                     }

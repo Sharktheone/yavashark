@@ -80,7 +80,7 @@ impl<'a> OldBorrowedVM<'a> {
             throw: None,
         }
     }
-    pub fn get_realm(&mut self) -> &mut Realm {
+    pub const fn get_realm(&mut self) -> &mut Realm {
         self.realm
     }
 
@@ -102,11 +102,11 @@ impl<'a> OldBorrowedVM<'a> {
         Ok(())
     }
 
-    pub fn set_pc(&mut self, pc: usize) {
+    pub const fn set_pc(&mut self, pc: usize) {
         self.pc = pc;
     }
 
-    pub fn offset_pc(&mut self, offset: isize) {
+    pub const fn offset_pc(&mut self, offset: isize) {
         // pc won't be above isize::MAX, since this is `Vec`'s length limit
         self.pc = (self.pc as isize + offset) as usize;
     }

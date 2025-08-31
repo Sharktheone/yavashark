@@ -745,34 +745,34 @@ impl Flags {
         Self(Self::IS_ROOT)
     }
 
-    fn set_marked(&mut self) {
+    const fn set_marked(&mut self) {
         self.0 |= Self::MARKED;
     }
-    fn set_has_root(&mut self) {
+    const fn set_has_root(&mut self) {
         self.0 |= Self::HAS_ROOT;
     }
 
-    fn set_has_no_root(&mut self) {
+    const fn set_has_no_root(&mut self) {
         self.0 |= Self::HAS_NO_ROOT;
     }
 
-    fn set_root_pending(&mut self) {
+    const fn set_root_pending(&mut self) {
         self.0 |= Self::ROOT_PENDING;
     }
 
-    fn set_root(&mut self) {
+    const fn set_root(&mut self) {
         self.0 |= Self::IS_ROOT;
     }
 
-    fn unset_root(&mut self) {
+    const fn unset_root(&mut self) {
         self.0 &= !Self::IS_ROOT;
     }
 
-    fn set_externally_dropped(&mut self) {
+    const fn set_externally_dropped(&mut self) {
         self.0 |= Self::EXTERNALLY_DROPPED;
     }
 
-    fn set_value_dropped(&mut self) {
+    const fn set_value_dropped(&mut self) {
         self.0 |= Self::VALUE_DROPPED;
     }
 
@@ -804,12 +804,12 @@ impl Flags {
         self.0 & Self::VALUE_DROPPED != 0
     }
 
-    fn reset(&mut self) {
+    const fn reset(&mut self) {
         self.0 = 0;
     }
 
     /// Unsets any root flags and marked flags, but not `IS_ROOT` or `VALUE_DROPPED`
-    fn unmark(&mut self) {
+    const fn unmark(&mut self) {
         self.0 &= !(Self::MARKED | Self::HAS_ROOT | Self::HAS_NO_ROOT | Self::ROOT_PENDING);
     }
 }
@@ -949,7 +949,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
-    fn unmark(&mut self) {
+    const fn unmark(&mut self) {
         self.flags.unmark();
     }
 
@@ -1294,7 +1294,7 @@ impl<T: Collectable> Drop for Gc<T> {
                     return;
                 };
 
-                if (*self.inner.as_ptr()).refs.weak() == 0 && refs.len() == 0 {
+                if (*self.inner.as_ptr()).refs.weak() == 0 && refs.is_empty() {
                     drop(refs);
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());

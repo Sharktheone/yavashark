@@ -43,14 +43,14 @@ impl Compiler {
                             self.instructions
                                 .push(Instruction::decl_empty_var(var_name));
 
-                            let inst = (OutputData::data_type(var_name), self.instructions.len());
+                            let instr = (OutputData::data_type(var_name), self.instructions.len());
                             self.instructions.push(Instruction::jmp_rel(0));
 
-                            inst
+                            instr
                         }
                         VarDeclKind::Let => {
                             self.instructions
-                                .push(Instruction::decl_empty_var(var_name));
+                                .push(Instruction::decl_empty_let(var_name));
 
                             let inst = (OutputData::data_type(var_name), self.instructions.len());
                             self.instructions.push(Instruction::jmp_rel(0));
@@ -60,19 +60,19 @@ impl Compiler {
                         VarDeclKind::Const => {
                             let out = self.alloc_reg_or_stack();
 
-                            let inst = (out, self.instructions.len());
+                            let instr = (out, self.instructions.len());
 
                             self.instructions.push(Instruction::jmp_rel(0));
                             self.instructions
                                 .push(Instruction::decl_const(out, var_name));
 
-                            inst
+                            instr
                         }
                     }
                 } else {
                     let out = self.alloc_reg_or_stack();
 
-                    let inst = (out, self.instructions.len());
+                    let instr = (out, self.instructions.len());
                     self.instructions.push(Instruction::jmp_rel(0));
 
                     match dec.kind {
@@ -89,20 +89,20 @@ impl Compiler {
 
                     self.dealloc(out);
 
-                    inst
+                    instr
                 }
             }
             ForHead::Pat(pat) => {
                 let out = self.alloc_reg_or_stack();
 
-                let inst = (out, self.instructions.len());
+                let instr = (out, self.instructions.len());
                 self.instructions.push(Instruction::jmp_rel(0));
 
-                self.compile_pat_let(&pat, out)?;
+                self.compile_pat_let(pat, out)?;
 
                 self.dealloc(out);
 
-                inst
+                instr
             }
             ForHead::UsingDecl(_) => todo!(),
         };
@@ -160,7 +160,7 @@ impl Compiler {
                         }
                         VarDeclKind::Let => {
                             self.instructions
-                                .push(Instruction::decl_empty_var(var_name));
+                                .push(Instruction::decl_empty_let(var_name));
 
                             self.instructions
                                 .push(Instruction::async_iter_poll_next(iter, res));
@@ -219,7 +219,7 @@ impl Compiler {
                 let inst = (out, self.instructions.len());
                 self.instructions.push(Instruction::jmp_rel(0));
 
-                self.compile_pat_let(&pat, out)?;
+                self.compile_pat_let(pat, out)?;
 
                 self.dealloc(out);
 

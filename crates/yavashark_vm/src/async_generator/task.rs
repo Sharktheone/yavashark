@@ -61,10 +61,9 @@ impl AsyncTask for AsyncGeneratorTask {
             let pinned = unsafe { Pin::new_unchecked(&mut **gen_notify) };
             if pinned.poll(cx).is_pending() {
                 return Poll::Pending;
-            } else {
-                inner.state = inner.gen.state.take();
-                inner.gen_notify = None;
             }
+            inner.state = inner.gen.state.take();
+            inner.gen_notify = None;
         }
 
         if let Some(promise) = &mut inner.await_promise {
@@ -83,9 +82,8 @@ impl AsyncTask for AsyncGeneratorTask {
                 if promise.2 {
                     inner.promise.resolve(&val, realm)?;
                     return Poll::Ready(Ok(()));
-                } else {
-                    state.continue_async(val)?;
                 }
+                state.continue_async(val)?;
             }
         }
 
@@ -113,7 +111,7 @@ impl AsyncTask for AsyncGeneratorTask {
                         Ok(promise) => {
                             inner.await_promise = Some(promise);
                         }
-                        Err((promise, _)) => {
+                        Err((promise, ())) => {
                             let val = promise
                                 .inner
                                 .borrow()
@@ -170,7 +168,7 @@ impl AsyncTask for AsyncGeneratorTask {
                                     inner.await_promise = Some(promise);
                                     return Poll::Pending;
                                 }
-                                Err((promise, _)) => {
+                                Err((promise, ())) => {
                                     let value = promise
                                         .inner
                                         .borrow()

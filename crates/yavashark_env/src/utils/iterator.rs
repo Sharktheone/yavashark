@@ -43,7 +43,7 @@ impl ArrayLike {
     pub fn is_array_like(val: &Value) -> Res<bool> {
         if let Ok(Some(_)) = val.downcast::<Array>() {
             return Ok(true);
-        };
+        }
 
         let Value::Object(o) = val else {
             return Ok(false);
@@ -150,15 +150,15 @@ impl ArrayLike {
         Ok(Some(val))
     }
 
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.len.get()
     }
 
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
-    pub fn idx(&self) -> usize {
+    pub const fn idx(&self) -> usize {
         self.idx.get()
     }
 

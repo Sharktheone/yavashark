@@ -86,8 +86,8 @@ impl<R: Realm> From<Value<R>> for PropertyKey {
 impl<R: Realm> From<PropertyKey> for Value<R> {
     fn from(key: PropertyKey) -> Self {
         match key {
-            PropertyKey::String(s) => Value::String(s),
-            PropertyKey::Symbol(s) => Value::Symbol(s),
+            PropertyKey::String(s) => Self::String(s),
+            PropertyKey::Symbol(s) => Self::Symbol(s),
         }
     }
 }
@@ -120,9 +120,9 @@ impl<R: Realm> From<Value<R>> for InternalPropertyKey {
 impl<R: Realm> From<InternalPropertyKey> for Value<R> {
     fn from(key: InternalPropertyKey) -> Self {
         match key {
-            InternalPropertyKey::String(s) => Value::String(s),
-            InternalPropertyKey::Symbol(s) => Value::Symbol(s),
-            InternalPropertyKey::Index(i) => Value::Number(i as f64),
+            InternalPropertyKey::String(s) => Self::String(s),
+            InternalPropertyKey::Symbol(s) => Self::Symbol(s),
+            InternalPropertyKey::Index(i) => Self::Number(i as f64),
         }
     }
 }
@@ -130,9 +130,9 @@ impl<R: Realm> From<InternalPropertyKey> for Value<R> {
 impl From<InternalPropertyKey> for PropertyKey {
     fn from(key: InternalPropertyKey) -> Self {
         match key {
-            InternalPropertyKey::String(s) => PropertyKey::String(s),
-            InternalPropertyKey::Symbol(s) => PropertyKey::Symbol(s),
-            InternalPropertyKey::Index(i) => PropertyKey::String(i.to_string().into()),
+            InternalPropertyKey::String(s) => Self::String(s),
+            InternalPropertyKey::Symbol(s) => Self::Symbol(s),
+            InternalPropertyKey::Index(i) => Self::String(i.to_string().into()),
         }
     }
 }

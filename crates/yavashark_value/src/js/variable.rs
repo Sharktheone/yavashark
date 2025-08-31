@@ -67,7 +67,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub fn new_with_attributes(
+    pub const fn new_with_attributes(
         value: Value<C>,
         writable: bool,
         enumerable: bool,
@@ -113,15 +113,15 @@ impl<C: Realm> Variable<C> {
         self.properties.is_configurable()
     }
 
-    pub fn make_writable(&mut self) {
+    pub const fn make_writable(&mut self) {
         self.properties.make_writable();
     }
 
-    pub fn make_enumerable(&mut self) {
+    pub const fn make_enumerable(&mut self) {
         self.properties.make_enumerable();
     }
 
-    pub fn make_configurable(&mut self) {
+    pub const fn make_configurable(&mut self) {
         self.properties.make_configurable();
     }
 }
@@ -199,20 +199,20 @@ impl Attributes {
         self.0 & Self::CONFIGURABLE != 0
     }
 
-    pub fn make_writable(&mut self) {
+    pub const fn make_writable(&mut self) {
         self.0 |= Self::WRITABLE;
     }
 
-    pub fn make_enumerable(&mut self) {
+    pub const fn make_enumerable(&mut self) {
         self.0 |= Self::ENUMERABLE;
     }
 
-    pub fn make_configurable(&mut self) {
+    pub const fn make_configurable(&mut self) {
         self.0 |= Self::CONFIGURABLE;
     }
 
     #[must_use]
-    pub fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
+    pub const fn from_values(writable: bool, enumerable: bool, configurable: bool) -> Self {
         let mut attributes = Self::new_read_only();
         if writable {
             attributes.make_writable();

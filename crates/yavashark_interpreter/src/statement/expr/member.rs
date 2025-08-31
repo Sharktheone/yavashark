@@ -44,7 +44,7 @@ impl Interpreter {
                         .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
                     return Ok((val, None));
-                };
+                }
 
                 if let Some(class) = obj.downcast::<Class>() {
                     let val = class

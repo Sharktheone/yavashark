@@ -68,30 +68,30 @@ impl ScopeState {
         Self { state }
     }
 
-    pub fn set_function(&mut self) {
+    pub const fn set_function(&mut self) {
         self.state |= Self::FUNCTION;
         self.state |= Self::RETURNABLE;
     }
 
-    pub fn set_iteration(&mut self) {
+    pub const fn set_iteration(&mut self) {
         self.state |= Self::ITERATION;
         self.state |= Self::BREAKABLE;
     }
 
-    pub fn set_breakable(&mut self) {
+    pub const fn set_breakable(&mut self) {
         self.state |= Self::BREAKABLE;
     }
 
-    pub fn set_returnable(&mut self) {
+    pub const fn set_returnable(&mut self) {
         self.state |= Self::RETURNABLE;
     }
 
-    pub fn set_loop(&mut self) {
+    pub const fn set_loop(&mut self) {
         self.state |= Self::CONTINUABLE;
         self.state |= Self::BREAKABLE;
     }
 
-    pub fn set_opt_chain(&mut self) {
+    pub const fn set_opt_chain(&mut self) {
         self.state |= Self::OPT_CHAIN;
     }
 
@@ -513,31 +513,31 @@ impl ScopeInternal {
         self.available_labels.last()
     }
 
-    pub fn set_no_label(&mut self) {
+    pub const fn set_no_label(&mut self) {
         self.last_label_is_current = false;
     }
 
-    pub fn state_set_function(&mut self) {
+    pub const fn state_set_function(&mut self) {
         self.state.set_function();
     }
 
-    pub fn state_set_iteration(&mut self) {
+    pub const fn state_set_iteration(&mut self) {
         self.state.set_iteration();
     }
 
-    pub fn state_set_breakable(&mut self) {
+    pub const fn state_set_breakable(&mut self) {
         self.state.set_breakable();
     }
 
-    pub fn state_set_returnable(&mut self) {
+    pub const fn state_set_returnable(&mut self) {
         self.state.set_returnable();
     }
 
-    pub fn state_set_loop(&mut self) {
+    pub const fn state_set_loop(&mut self) {
         self.state.set_loop();
     }
 
-    pub fn state_set_opt_chain(&mut self) {
+    pub const fn state_set_opt_chain(&mut self) {
         self.state.set_opt_chain();
     }
 

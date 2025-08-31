@@ -168,7 +168,7 @@ impl AsyncGenerator {
 impl AsyncGenerator {
     #[nonstatic]
     pub fn next(this: Value, realm: &mut Realm) -> ValueResult {
-        let this = <&AsyncGenerator>::from_value_out(this)?;
+        let this = <&Self>::from_value_out(this)?;
 
         let mut state_ref = this.state.try_borrow_mut()?;
         let state = state_ref.take();

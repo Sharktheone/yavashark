@@ -11,9 +11,9 @@ impl Compiler {
                 for decl in &var.decls {
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.compile_pat_var(&decl.name, out)?
+                        self.compile_pat_var(&decl.name, out)?;
                     } else {
-                        self.compile_pat_var(&decl.name, DataType::Undefined(Undefined))?
+                        self.compile_pat_var(&decl.name, DataType::Undefined(Undefined))?;
                     }
                 }
             }
@@ -22,9 +22,9 @@ impl Compiler {
                 for decl in &var.decls {
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.compile_pat_let(&decl.name, out)?
+                        self.compile_pat_let(&decl.name, out)?;
                     } else {
-                        self.compile_pat_let(&decl.name, DataType::Undefined(Undefined))?
+                        self.compile_pat_let(&decl.name, DataType::Undefined(Undefined))?;
                     }
                 }
             }
@@ -33,7 +33,7 @@ impl Compiler {
                 for decl in &var.decls {
                     if let Some(init) = &decl.init {
                         let out = self.compile_expr_data_acc(init)?;
-                        self.compile_pat_const(&decl.name, out)?
+                        self.compile_pat_const(&decl.name, out)?;
                     } else {
                         return Err(anyhow!("Const declaration without initializer"));
                     }

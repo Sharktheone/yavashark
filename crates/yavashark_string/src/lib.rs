@@ -172,7 +172,8 @@ impl InlineString {
         None
     }
 
-    fn pop(&mut self) {
+    #[allow(clippy::expect_used)]
+    const fn pop(&mut self) {
         self.len = InlineLen::from_usize(self.len().saturating_sub(1)).expect("unreachable");
     }
 }

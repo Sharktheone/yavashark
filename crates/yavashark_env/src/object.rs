@@ -248,7 +248,7 @@ impl MutObject {
                     *v = value.into();
                 }
                 return;
-            };
+            }
         }
 
         let property_key = InternalPropertyKey::Index(index).into();

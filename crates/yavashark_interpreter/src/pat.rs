@@ -194,7 +194,7 @@ pub fn set_value_name(name: &str, value: &Value) -> Res {
         if let Some(class) = obj.downcast::<Class>() {
             class.update_name(name)?;
         }
-    };
+    }
 
     Ok(())
 }
