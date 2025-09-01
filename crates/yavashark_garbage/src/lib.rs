@@ -515,6 +515,7 @@ impl<T: Collectable> Weak<T> {
 
         // Check if the strong reference count is greater than 0
         if unsafe { (*inner.as_ptr()).refs.strong() } > 0 {
+            unsafe { (*inner.as_ptr()).refs.inc_strong() };
             Some(Gc { inner })
         } else {
             None
