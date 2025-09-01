@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use yavashark_garbage::Weak;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
+use crate::builtins::signal::computed::Computed;
 
 #[object]
 #[derive(Debug)]
@@ -36,8 +37,25 @@ impl State {
         state.into_object()
     }
 
-    pub fn get(&self) -> Res<Value> {
+    pub fn get(&self, realm: &Realm, this: Value) -> Res<Value> {
+        let computed_proto = Computed::get_proto(realm)?;
+
+        if let Some(current_dep) = &*computed_proto.current_dep.borrow() {
+            let weak = current_dep.gc().downgrade();
+
+            let mut inner = self.inner.try_borrow_mut()?;
+
+            if !inner.dependents.iter().any(|d| d.ptr_eq(&weak)) {
+                inner.dependents.push(weak);
+            }
+
+            return Ok(inner.value.clone());
+        }
+
+
         let inner = self.inner.try_borrow()?;
+
+
 
         Ok(inner.value.clone())
     }
