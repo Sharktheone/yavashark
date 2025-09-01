@@ -6,7 +6,7 @@ use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, ToTokens};
-use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl};
+use syn::{spanned::Spanned, Expr, ImplItem, ItemImpl, Path};
 
 use crate::config::Config;
 use crate::properties_new::constant::{parse_constant, Constant};
@@ -43,6 +43,7 @@ pub struct PropertiesArgs {
     extends: Option<Ident>,
     #[allow(unused)]
     or: Option<Expr>,
+    override_object: Option<Path>,
 }
 
 #[allow(unused)]
@@ -124,13 +125,13 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     )?;
 
     let try_into_value = &config.try_into_value;
-    let object = &config.object;
+    let proto_object = args.override_object.as_ref().unwrap_or(&config.object);
     let object_handle = &config.object_handle;
     let value = &config.value;
     let error = &config.error;
 
     let init_fn = quote! {
-        pub fn initialize_proto(mut obj: #object, func_proto: #value) -> ::core::result::Result<#object_handle, #error> {
+        pub fn initialize_proto(mut obj: #proto_object, func_proto: #value) -> ::core::result::Result<#object_handle, #error> {
             use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
             use #try_into_value;
 
