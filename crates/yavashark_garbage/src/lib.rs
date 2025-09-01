@@ -91,6 +91,13 @@ pub struct Weak<T: Collectable> {
     inner: NonNull<GcBox<T>>,
 }
 
+impl<T: Collectable> Weak<T> {
+    #[must_use]
+    pub fn ptr_eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
 impl<T: Collectable> Debug for Weak<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "(Weak)")
