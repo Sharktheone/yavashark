@@ -1,5 +1,5 @@
 use crate::builtins::temporal::plain_date::PlainDate;
-use crate::builtins::temporal::utils::{calendar_opt, display_calendar, overflow_options};
+use crate::builtins::temporal::utils::{calendar_opt, display_calendar, overflow_options, overflow_options_opt, value_to_calendar_fields};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
@@ -118,6 +118,19 @@ impl PlainMonthDay {
         Err(Error::ty(
             "Called valueOf on a Temporal.PlainMonthDay object",
         ))
+    }
+
+    fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow  = overflow_options_opt(Some(&other), realm)?;
+        let fields = value_to_calendar_fields(&other, realm)?;
+
+
+        let month_day = self
+            .month_day
+            .with(fields, overflow)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(month_day, realm).into_object())
     }
 
     #[get("calendarId")]
