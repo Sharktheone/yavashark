@@ -1,6 +1,7 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
+use temporal_rs::fields::CalendarFields;
 use temporal_rs::options::{
     ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset,
     DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions,
@@ -390,4 +391,74 @@ pub fn transition_direction(obj: &Value, realm: &mut Realm) -> Res<TransitionDir
             "Expected an object or string for transition direction",
         )),
     }
+}
+
+pub fn value_to_calendar_fields(value: &ObjectHandle, realm: &mut Realm) -> Res<CalendarFields> {
+    const INVALID_KEYS: [&str; 3] = ["calendar", "timeZone", "months"];
+
+    for key in INVALID_KEYS {
+        if let Some(v) = value.get_opt(key, realm)? {
+            if !v.is_undefined() {
+                return Err(Error::ty_error(format!(
+                    "Invalid key '{key}' in calendar fields"
+                )));
+            }
+        }
+    }
+
+    let mut fields = CalendarFields::new();
+    let mut had_fields = false;
+
+    if let Some(era) = value.get_opt("era", realm)? {
+        let era = era.to_string(realm)?;
+
+        let str = FromStr::from_str(&era)?;
+
+        fields = fields.with_era(Some(str));
+        had_fields = true;
+    }
+
+    if let Some(era_year) = value.get_opt("eraYear", realm)? {
+        let era_year = era_year.to_number(realm)?;
+
+        fields = fields.with_era_year(Some(era_year as i32));
+        had_fields = true;
+    }
+
+    if let Some(year) = value.get_opt("year", realm)? {
+        let year = year.to_number(realm)?;
+
+        fields = fields.with_year(year as i32);
+        had_fields = true;
+    }
+
+    if let Some(month) = value.get_opt("month", realm)? {
+        let month = month.to_number(realm)?;
+
+        fields = fields.with_month(month as u8);
+        had_fields = true;
+    }
+
+    if let Some(month_code) = value.get_opt("monthCode", realm)? {
+        let month_code = month_code.to_string(realm)?;
+
+        let month_code = temporal_rs::MonthCode::from_str(&month_code)
+            .map_err(|_| Error::range("Invalid month code"))?;
+
+        fields = fields.with_month_code(month_code);
+        had_fields = true;
+    }
+
+    if let Some(day) = value.get_opt("day", realm)? {
+        let day = day.to_number(realm)?;
+
+        fields = fields.with_day(day as u8);
+        had_fields = true;
+    }
+
+    if !had_fields {
+        return Err(Error::ty("At least one field must be provided"));
+    }
+
+    Ok(fields)
 }
