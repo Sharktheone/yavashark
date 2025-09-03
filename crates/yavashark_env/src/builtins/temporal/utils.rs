@@ -1,7 +1,7 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::fields::CalendarFields;
+use temporal_rs::fields::{CalendarFields, DateTimeFields};
 use temporal_rs::options::{
     ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset,
     DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions,
@@ -10,6 +10,7 @@ use temporal_rs::options::{
 use temporal_rs::parsers::Precision;
 use temporal_rs::provider::TransitionDirection;
 use temporal_rs::Calendar;
+use temporal_rs::partial::PartialTime;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -461,4 +462,69 @@ pub fn value_to_calendar_fields(value: &ObjectHandle, realm: &mut Realm) -> Res<
     }
 
     Ok(fields)
+}
+
+
+pub fn value_to_partial_time(value: &ObjectHandle, realm: &mut Realm) -> Res<PartialTime> {
+    let mut partial_time = PartialTime::new();
+    let mut had_time = false;
+
+    if let Some(hour) = value.get_opt("hour", realm)? {
+        let hour = hour.to_number(realm)?;
+
+        partial_time = partial_time.with_hour(Some(hour as u8));
+        had_time = true;
+    }
+
+    if let Some(minute) = value.get_opt("minute", realm)? {
+        let minute = minute.to_number(realm)?;
+
+        partial_time = partial_time.with_minute(Some(minute as u8));
+        had_time = true;
+    }
+
+    if let Some(second) = value.get_opt("second", realm)? {
+        let second = second.to_number(realm)?;
+
+        partial_time = partial_time.with_second(Some(second as u8));
+        had_time = true;
+    }
+
+    if let Some(millisecond) = value.get_opt("millisecond", realm)? {
+        let millisecond = millisecond.to_number(realm)?;
+
+        partial_time = partial_time.with_millisecond(Some(millisecond as u16));
+        had_time = true;
+    }
+
+    if let Some(microsecond) = value.get_opt("microsecond", realm)? {
+        let microsecond = microsecond.to_number(realm)?;
+
+        partial_time = partial_time.with_microsecond(Some(microsecond as u16));
+        had_time = true;
+    }
+
+    if let Some(nanosecond) = value.get_opt("nanosecond", realm)? {
+        let nanosecond = nanosecond.to_number(realm)?;
+
+        partial_time = partial_time.with_nanosecond(Some(nanosecond as u16));
+        had_time = true;
+    }
+
+    if !had_time {
+        return Err(Error::ty("At least one time field must be provided"));
+    }
+
+    Ok(partial_time)
+}
+
+
+pub fn value_to_date_time_fields(other: &ObjectHandle, realm: &mut Realm) -> Res<DateTimeFields> {
+    let calendar_fields = value_to_calendar_fields(other, realm)?;
+    let time = value_to_partial_time(other, realm)?;
+
+    Ok(DateTimeFields {
+        calendar_fields,
+        time,
+    })
 }
