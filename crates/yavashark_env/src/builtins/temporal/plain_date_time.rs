@@ -2,10 +2,7 @@ use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
-use crate::builtins::temporal::utils::{
-    difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options,
-    string_rounding_mode_opts,
-};
+use crate::builtins::temporal::utils::{difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options, string_rounding_mode_opts, value_to_date_time_fields};
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -359,6 +356,19 @@ impl PlainDateTime {
         let date = self.date.to_plain_date().map_err(Error::from_temporal)?;
 
         Ok(PlainDate::new(date, realm).into_object())
+    }
+
+    pub fn with(&self, other: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow = overflow_options(other, realm)?;
+
+        let fields = value_to_date_time_fields(other, realm)?;
+
+        let date = self
+            .date
+            .with(fields, overflow)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
     }
 
     #[prop("withCalendar")]

@@ -86,7 +86,7 @@ impl PlainMonthDay {
         info: ObjectHandle,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-        let date = value_to_partial_date(info, realm)?;
+        let date = value_to_partial_date(&info, realm)?;
 
         let plain_date = self
             .month_day
@@ -121,8 +121,8 @@ impl PlainMonthDay {
     }
 
     fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let overflow  = overflow_options_opt(Some(&other), realm)?;
-        let fields = value_to_calendar_fields(&other, realm)?;
+        let overflow  = overflow_options_opt(Some(other), realm)?;
+        let fields = value_to_calendar_fields(other, realm)?;
 
 
         let month_day = self
@@ -223,7 +223,7 @@ pub fn value_to_plain_month_day(
     }
 }
 
-pub fn value_to_partial_date(value: ObjectHandle, realm: &mut Realm) -> Res<PartialDate> {
+pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<PartialDate> {
     let mut partial_date = PartialDate::new();
 
     if let Some(era) = value.get_opt("era", realm)? {
