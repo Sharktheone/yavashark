@@ -11,7 +11,6 @@ use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::TimeZone;
 use yavashark_macro::{object, props};
 use yavashark_value::{Obj, Object};
-use crate::builtins::value_to_partial_date;
 
 #[object]
 #[derive(Debug)]
