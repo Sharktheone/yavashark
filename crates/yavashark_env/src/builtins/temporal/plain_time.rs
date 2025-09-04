@@ -2,7 +2,7 @@ use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::utils::{difference_settings, string_rounding_mode_opts};
+use crate::builtins::temporal::utils::{difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
@@ -11,6 +11,7 @@ use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::TimeZone;
 use yavashark_macro::{object, props};
 use yavashark_value::{Obj, Object};
+use crate::builtins::value_to_partial_date;
 
 #[object]
 #[derive(Debug)]
@@ -181,6 +182,18 @@ impl PlainTime {
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
         Err(Error::ty("Called valueOf on a Temporal.PlainTime object"))
+    }
+
+    fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow  = overflow_options(other, realm)?;
+        let partial_time = value_to_partial_time(other, realm)?;
+
+        let date = self
+            .time
+            .with(partial_time, overflow)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
     }
 
     #[get("hour")]
