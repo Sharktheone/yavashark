@@ -1,7 +1,7 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::fields::{CalendarFields, DateTimeFields, YearMonthCalendarFields};
+use temporal_rs::fields::{CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields};
 use temporal_rs::options::{
     ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset,
     DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions,
@@ -9,7 +9,7 @@ use temporal_rs::options::{
 };
 use temporal_rs::parsers::Precision;
 use temporal_rs::provider::TransitionDirection;
-use temporal_rs::Calendar;
+use temporal_rs::{Calendar, UtcOffset};
 use temporal_rs::partial::PartialTime;
 
 pub fn opt_relative_to_wrap(
@@ -581,4 +581,27 @@ pub fn value_to_year_month_fields(
     }
 
     Ok(fields)
+}
+
+pub fn value_to_zoned_date_time_fields(
+    value: &ObjectHandle,
+    realm: &mut Realm,
+) -> Res<ZonedDateTimeFields> {
+    let calendar_fields = value_to_calendar_fields(value, realm)?;
+    let time = value_to_partial_time(value, realm)?;
+
+    let offset = if let Some(offset) = value.get_opt("offset", realm)? {
+        let offset = offset.to_string(realm)?;
+        let offset = UtcOffset::from_str(&offset).map_err(Error::from_temporal)?;
+
+        Some(offset)
+    } else {
+        None
+    };
+
+    Ok(ZonedDateTimeFields {
+        calendar_fields,
+        time,
+        offset,
+    })
 }

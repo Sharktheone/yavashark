@@ -4,11 +4,7 @@ use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
-use crate::builtins::temporal::utils::{
-    difference_settings, disambiguation_opt, display_calendar, display_offset, display_timezone,
-    offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts,
-    transition_direction,
-};
+use crate::builtins::temporal::utils::{difference_settings, disambiguation_opt, display_calendar, display_offset, display_timezone, offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts, transition_direction, value_to_zoned_date_time_fields};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -287,6 +283,22 @@ impl ZonedDateTime {
         Err(Error::ty("ZonedDateTime does not support valueOf"))
     }
 
+    pub fn with(&self, other: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow = overflow_options_opt(Some(other), realm)?;
+        let disambiguation = disambiguation_opt(Some(other), realm)?;
+        let offset_disambiguation = offset_disambiguation_opt(Some(other), realm)?;
+
+        let fields = value_to_zoned_date_time_fields(other, realm)?;
+
+        let date = self
+            .date
+            .with(fields, disambiguation, offset_disambiguation, overflow)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(date, realm).into_object())
+    }
+    
+    
     #[prop("withCalendar")]
     pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
         let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
