@@ -1,9 +1,7 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_month_day::value_to_partial_date;
-use crate::builtins::temporal::utils::{
-    calendar_opt, difference_settings, display_calendar, overflow_options,
-};
+use crate::builtins::temporal::utils::{calendar_opt, difference_settings, display_calendar, overflow_options, value_to_year_month_fields};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
@@ -203,6 +201,22 @@ impl PlainYearMonth {
     #[nonstatic]
     pub const fn value_of() -> Res<()> {
         Err(Error::ty("`valueOf` is not supported for PlainYearMonth"))
+    }
+
+    pub fn with(
+        &self,
+        other: &ObjectHandle,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
+        let overflow = overflow_options(other, realm)?;
+        let year_month = value_to_year_month_fields(other, realm)?;
+
+        let year_month = self
+            .year_month
+            .with(year_month, overflow)
+            .map_err(Error::from_temporal)?;
+
+        Ok(Self::new(year_month, realm).into_object())
     }
 
     #[get("calendarId")]
