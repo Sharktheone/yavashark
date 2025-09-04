@@ -1,16 +1,18 @@
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::str::FromStr;
-use temporal_rs::fields::{CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields};
+use temporal_rs::fields::{
+    CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields,
+};
 use temporal_rs::options::{
     ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset,
     DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions,
     ToStringRoundingOptions, Unit,
 };
 use temporal_rs::parsers::Precision;
+use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::TransitionDirection;
 use temporal_rs::{Calendar, UtcOffset};
-use temporal_rs::partial::PartialTime;
 
 pub fn opt_relative_to_wrap(
     obj: Option<ObjectHandle>,
@@ -464,7 +466,6 @@ pub fn value_to_calendar_fields(value: &ObjectHandle, realm: &mut Realm) -> Res<
     Ok(fields)
 }
 
-
 pub fn value_to_partial_time(value: &ObjectHandle, realm: &mut Realm) -> Res<PartialTime> {
     let mut partial_time = PartialTime::new();
     let mut had_time = false;
@@ -517,7 +518,6 @@ pub fn value_to_partial_time(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
 
     Ok(partial_time)
 }
-
 
 pub fn value_to_date_time_fields(other: &ObjectHandle, realm: &mut Realm) -> Res<DateTimeFields> {
     let calendar_fields = value_to_calendar_fields(other, realm)?;

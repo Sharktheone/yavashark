@@ -2,7 +2,9 @@ use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
-use crate::builtins::temporal::utils::{difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time};
+use crate::builtins::temporal::utils::{
+    difference_settings, overflow_options, string_rounding_mode_opts, value_to_partial_time,
+};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
@@ -184,7 +186,7 @@ impl PlainTime {
     }
 
     fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let overflow  = overflow_options(other, realm)?;
+        let overflow = overflow_options(other, realm)?;
         let partial_time = value_to_partial_time(other, realm)?;
 
         let date = self

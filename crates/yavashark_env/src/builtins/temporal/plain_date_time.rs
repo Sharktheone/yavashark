@@ -2,7 +2,10 @@ use crate::builtins::temporal::duration::{value_to_duration, Duration};
 use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
-use crate::builtins::temporal::utils::{difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options, string_rounding_mode_opts, value_to_date_time_fields};
+use crate::builtins::temporal::utils::{
+    difference_settings, disambiguation_opt, display_calendar, overflow_options, rounding_options,
+    string_rounding_mode_opts, value_to_date_time_fields,
+};
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};

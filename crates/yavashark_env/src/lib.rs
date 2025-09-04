@@ -42,7 +42,6 @@ pub type Symbol = yavashark_value::Symbol;
 
 pub type ObjectProperty = yavashark_value::ObjectProperty<Realm>;
 
-
 pub type GCd<T> = OwningGcGuard<'static, BoxedObj<Realm>, T>;
 
 #[derive(Debug, PartialEq, Eq)]

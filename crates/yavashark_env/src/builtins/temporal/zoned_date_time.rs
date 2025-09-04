@@ -4,7 +4,11 @@ use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
-use crate::builtins::temporal::utils::{difference_settings, disambiguation_opt, display_calendar, display_offset, display_timezone, offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts, transition_direction, value_to_zoned_date_time_fields};
+use crate::builtins::temporal::utils::{
+    difference_settings, disambiguation_opt, display_calendar, display_offset, display_timezone,
+    offset_disambiguation_opt, overflow_options_opt, rounding_options, string_rounding_mode_opts,
+    transition_direction, value_to_zoned_date_time_fields,
+};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -297,8 +301,7 @@ impl ZonedDateTime {
 
         Ok(Self::new(date, realm).into_object())
     }
-    
-    
+
     #[prop("withCalendar")]
     pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
         let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;

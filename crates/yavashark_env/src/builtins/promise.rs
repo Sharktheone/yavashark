@@ -58,7 +58,8 @@ impl Default for PromiseNotify {
 }
 
 impl PromiseNotify {
-    #[must_use] pub fn new() -> Self {
+    #[must_use]
+    pub fn new() -> Self {
         Self {
             notify: Notify::new(),
             finished: Cell::new(false),

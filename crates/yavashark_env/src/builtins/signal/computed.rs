@@ -1,5 +1,5 @@
-use crate::{ControlFlow, GCd, Object};
 use crate::builtins::signal::notify_dependent;
+use crate::{ControlFlow, GCd, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
@@ -44,36 +44,30 @@ impl Computed {
     pub fn get_proto(realm: &Realm) -> Res<GCd<ComputedProtoObj>> {
         let proto = &realm.intrinsics.signal_computed;
 
-        proto.downcast::<ComputedProtoObj>()
+        proto
+            .downcast::<ComputedProtoObj>()
             .ok_or_else(|| Error::ty("Computed prototype is not a ComputedProtoObj"))
     }
 
-    fn setup_dependency_tracking(
-        realm: &mut Realm,
-        this: &ObjectHandle,
-    ) -> Res<Option<GCd<Self>>> {
+    fn setup_dependency_tracking(realm: &mut Realm, this: &ObjectHandle) -> Res<Option<GCd<Self>>> {
         let p = Self::get_proto(realm)?;
 
         let mut dep = p.current_dep.borrow_mut();
 
         let old = dep.take();
 
-        let new = this.downcast::<Self>()
+        let new = this
+            .downcast::<Self>()
             .ok_or_else(|| Error::ty("Computed.get called on non-Computed object"))?;
 
         //TODO: we somehow also need to remove this from all dependencies of the old computed
 
-
         *dep = Some(new);
-
 
         Ok(old)
     }
 
-    fn restore_dependency_tracking(
-        realm: &mut Realm,
-        old: Option<GCd<Self>>,
-    ) -> Res<()> {
+    fn restore_dependency_tracking(realm: &mut Realm, old: Option<GCd<Self>>) -> Res<()> {
         let p = Self::get_proto(realm)?;
 
         let mut dep = p.current_dep.borrow_mut();
@@ -90,9 +84,7 @@ impl Computed {
 
         inner.dependents.push(weak);
 
-
         drop(inner);
-
     }
 }
 
@@ -113,15 +105,15 @@ impl Deref for ComputedProtoObj {
 impl yavashark_value::ObjectImpl<Realm> for ComputedProtoObj {
     type Inner = Option<GCd<Computed>>;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
         self.obj.inner_mut().unwrap()
     }
 
-    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
         self.current_dep.borrow()
     }
 
-    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.current_dep.borrow_mut()
     }
 }
@@ -153,7 +145,6 @@ impl Computed {
             inner.value = new;
 
             // TODO: what to do if the value is the same?
-
 
             for dep in &inner.dependents {
                 if let Some(dep) = dep.upgrade() {

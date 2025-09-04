@@ -48,9 +48,10 @@ impl Compiler {
         self.instructions.push(x(val, out));
 
         if let Some(output) = output
-            && out != OutputDataType::Acc(Acc) {
-                self.instructions.push(Instruction::move_(out, output));
-            }
+            && out != OutputDataType::Acc(Acc)
+        {
+            self.instructions.push(Instruction::move_(out, output));
+        }
 
         self.dealloc(val);
         self.dealloc(val_);

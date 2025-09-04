@@ -3,10 +3,10 @@
 mod computed;
 mod state;
 
-use std::cell::RefCell;
 use crate::builtins::signal::computed::{Computed, ComputedProtoObj};
 use crate::builtins::signal::state::State;
 use crate::{Object, ObjectHandle, Realm, Res};
+use std::cell::RefCell;
 use yavashark_garbage::Gc;
 use yavashark_value::BoxedObj;
 
@@ -31,8 +31,7 @@ pub fn get_signal(
         current_dep: RefCell::default(),
     };
 
-    let computed =
-        Computed::initialize_proto(proto, func_proto.into())?;
+    let computed = Computed::initialize_proto(proto, func_proto.into())?;
 
     let state_constructor = state.get_property(&"constructor".into())?.value;
     let computed_constructor = computed.get_property(&"constructor".into())?.value;

@@ -4,7 +4,9 @@ use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
 use crate::builtins::temporal::plain_year_month::PlainYearMonth;
-use crate::builtins::temporal::utils::{difference_settings, display_calendar, overflow_options, value_to_calendar_fields};
+use crate::builtins::temporal::utils::{
+    difference_settings, display_calendar, overflow_options, value_to_calendar_fields,
+};
 use crate::builtins::temporal::zoned_date_time::ZonedDateTime;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
@@ -355,7 +357,7 @@ impl PlainDate {
     }
 
     pub fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let overflow  = overflow_options(other, realm)?;
+        let overflow = overflow_options(other, realm)?;
         let fields = value_to_calendar_fields(other, realm)?;
 
         let date = self

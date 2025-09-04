@@ -385,8 +385,9 @@ impl<C: Realm> Display for Object<C> {
 #[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Realm> ToYSString for Object<C> {
     fn to_ys_string(&self) -> YSString {
-        self.to_string_internal()
-            .unwrap_or_else(|_| YSString::new_static("Error: error while converting object to string"))
+        self.to_string_internal().unwrap_or_else(|_| {
+            YSString::new_static("Error: error while converting object to string")
+        })
     }
 }
 

@@ -106,7 +106,12 @@ impl<T: Collectable> Debug for Weak<T> {
 
 impl<T: Collectable> Clone for Weak<T> {
     fn clone(&self) -> Self {
-        unsafe { (*self.inner.as_ptr()).refs.weak.fetch_add(1, Ordering::Relaxed) };
+        unsafe {
+            (*self.inner.as_ptr())
+                .refs
+                .weak
+                .fetch_add(1, Ordering::Relaxed)
+        };
 
         Self { inner: self.inner }
     }

@@ -1,10 +1,10 @@
+use crate::builtins::signal::computed::Computed;
 use crate::builtins::signal::notify_dependent;
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Weak;
 use yavashark_macro::{object, props};
 use yavashark_value::{BoxedObj, Obj};
-use crate::builtins::signal::computed::Computed;
 
 #[object]
 #[derive(Debug)]
@@ -52,10 +52,7 @@ impl State {
             return Ok(inner.value.clone());
         }
 
-
         let inner = self.inner.try_borrow()?;
-
-
 
         Ok(inner.value.clone())
     }
