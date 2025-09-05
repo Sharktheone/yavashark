@@ -356,8 +356,8 @@ impl PlainDate {
         self.date.to_string()
     }
 
-    pub fn with(&self, other: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let overflow = overflow_options(other, realm)?;
+    pub fn with(&self, other: &ObjectHandle, overflow: &ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let overflow = overflow_options(overflow, realm)?;
         let fields = value_to_calendar_fields(other, realm)?;
 
         let date = self
