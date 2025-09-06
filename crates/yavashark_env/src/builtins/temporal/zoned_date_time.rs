@@ -508,11 +508,12 @@ pub fn value_to_zoned_date_time(
 
     Ok(match value {
         Value::Object(obj) => {
+            let overflow = overflow_options_opt(options.as_ref(), realm)?;
+
             if let Some(zdt) = obj.downcast::<ZonedDateTime>() {
                 return Ok(zdt.date.clone());
             }
 
-            let overflow = overflow_options_opt(options.as_ref(), realm)?;
 
             let partial = partial_zoned_date_time(obj, realm)?;
 
@@ -529,6 +530,7 @@ pub fn value_to_zoned_date_time(
             let disambiguation = disambiguation.unwrap_or_default();
             let offset_disambiguation =
                 offset_disambiguation.unwrap_or(OffsetDisambiguation::Reject);
+            _ = overflow_options_opt(options.as_ref(), realm)?;
 
             temporal_rs::ZonedDateTime::from_utf8_with_provider(
                 str.as_str().as_bytes(),
