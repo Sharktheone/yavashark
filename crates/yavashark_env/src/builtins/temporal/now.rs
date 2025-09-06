@@ -21,8 +21,7 @@ impl Now {
             .duration_since(UNIX_EPOCH)
             .map_err(|_| Error::new("System time before UNIX epoch"))?;
 
-        let nanos = EpochNanoseconds::try_from(now.as_nanos() as i128)
-            .map_err(|_| Error::new("Failed to convert system time to nanoseconds"))?;
+        let nanos = EpochNanoseconds::from(now.as_nanos() as i128);
 
         let tz = iana_time_zone::get_timezone().map_err(|e| Error::new_error(e.to_string()))?;
 
