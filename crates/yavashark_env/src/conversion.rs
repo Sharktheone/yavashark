@@ -8,7 +8,7 @@ use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
-use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
+use yavashark_value::{fmt_num, BoxedObj, FromValue, Hint, IntoValue, Obj, ops::ToNumber};
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult;
@@ -379,13 +379,18 @@ macro_rules! impl_from_value_output {
             impl FromValueOutput for $t {
                 type Output = $t;
 
-                fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
+                fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
-                        Value::String(ref s) => s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}"))),
+                        Value::String(ref s) => Ok(s.as_str().num() as $t),
                         Value::Boolean(b) => Ok(b.into()),
                         #[allow(clippy::cast_lossless)]
                         Value::Undefined => Ok(0 as $t),
+                        Value::Object(_) => {
+                            let v = value.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+                            return Self::from_value_out(v, realm);
+                        }
                         #[allow(clippy::cast_lossless)]
                         Value::Null => Ok(0 as $t),
                         _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
@@ -402,7 +407,7 @@ macro_rules! impl_from_value_output_nonfract {
             impl FromValueOutput for NonFract<$t> {
                 type Output = NonFract<$t>;
 
-                fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
+                fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => {
                             if n.fract() != 0.0 {
@@ -410,12 +415,24 @@ macro_rules! impl_from_value_output_nonfract {
                             }
                             Ok(NonFract(n as $t))
                         },
-                        Value::String(ref s) => Ok(NonFract(s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}")))?)),
+                        Value::String(ref s) => {
+                            let n = s.as_str().num();
+                            if n.fract() != 0.0 {
+                                return Err(Error::range("Expected integer, found a float"));
+                            }
+
+                            Ok(NonFract(n as $t))
+                        }
                         Value::Boolean(b) => Ok(NonFract(b.into())),
                         #[allow(clippy::cast_lossless)]
                         Value::Undefined => Ok(NonFract(0 as $t)),
                         #[allow(clippy::cast_lossless)]
                         Value::Null => Ok(NonFract(0 as $t)),
+                        Value::Object(_) => {
+                            let v = value.to_primitive(Hint::Number, realm)?.assert_no_object()?;
+
+                            return Self::from_value_out(v, realm);
+                        }
                         _ => Err(Error::ty_error(format!("Expected a number, found {value:?}"))),
                     }
                 }

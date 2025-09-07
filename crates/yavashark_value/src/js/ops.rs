@@ -21,7 +21,7 @@ use std::cmp::Ordering;
 use std::rc::Rc;
 use std::str::FromStr;
 
-trait ToNumber {
+pub trait ToNumber {
     fn num(&self) -> f64;
 }
 
