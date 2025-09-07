@@ -68,7 +68,10 @@ impl PlainMonthDay {
             .transpose()?
             .flatten();
 
-        let month_day = value_to_plain_month_day(info, realm, overflow)?;
+        let mut month_day = value_to_plain_month_day(info, realm, overflow)?;
+
+        month_day.iso.year = 1972;
+
         Ok(Self::new(month_day, realm).into_object())
     }
 
