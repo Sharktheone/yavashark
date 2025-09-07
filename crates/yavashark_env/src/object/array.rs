@@ -1,7 +1,7 @@
 use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::object::Object;
 use crate::realm::Realm;
-use crate::utils::{coerce_object, ArrayLike, ProtoDefault, ValueIterator};
+use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 use std::cell::{Cell, RefCell};
@@ -357,7 +357,7 @@ impl Array {
     pub const LENGTH: usize = 0;
 
     fn at(#[this] this: Value, idx: isize, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let length = this.get("length", realm)?.to_int_or_null(realm)? as usize;
 
@@ -400,7 +400,7 @@ impl Array {
         end: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this_val, realm)?;
+        let this = coerce_object_strict(this_val, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -423,7 +423,7 @@ impl Array {
     }
 
     fn entries(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
@@ -438,7 +438,7 @@ impl Array {
     }
 
     fn every(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -472,7 +472,7 @@ impl Array {
         end: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this_val, realm)?;
+        let this = coerce_object_strict(this_val, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -495,7 +495,7 @@ impl Array {
         func: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -527,7 +527,7 @@ impl Array {
     }
 
     fn find(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -560,7 +560,7 @@ impl Array {
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -593,7 +593,7 @@ impl Array {
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -626,7 +626,7 @@ impl Array {
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -675,7 +675,7 @@ impl Array {
 
             Ok(())
         }
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let array = Self::from_realm(realm);
 
@@ -704,7 +704,7 @@ impl Array {
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let array = Self::from_realm(realm);
 
@@ -748,7 +748,7 @@ impl Array {
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -777,7 +777,7 @@ impl Array {
         from_index: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -809,7 +809,7 @@ impl Array {
         from_index: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -835,7 +835,7 @@ impl Array {
     }
 
     fn join(#[this] this: Value, #[realm] realm: &mut Realm, separator: &Value) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let mut buf = String::new();
 
@@ -860,7 +860,7 @@ impl Array {
     }
 
     fn keys(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
@@ -881,7 +881,7 @@ impl Array {
         from_index: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -907,7 +907,7 @@ impl Array {
     }
 
     fn map(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -931,7 +931,7 @@ impl Array {
     }
 
     fn pop(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -960,7 +960,7 @@ impl Array {
         #[variadic] args: &[Value],
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let mut idx = this
             .resolve_property(&"length".into(), realm)?
@@ -983,7 +983,7 @@ impl Array {
         func: &ObjectHandle,
         initial_value: &Value,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1015,7 +1015,7 @@ impl Array {
         func: &ObjectHandle,
         initial_value: &Value,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1041,7 +1041,7 @@ impl Array {
     }
 
     fn reverse(#[this] this_val: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this_val, realm)?;
+        let this = coerce_object_strict(this_val, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1070,7 +1070,7 @@ impl Array {
     }
 
     fn shift(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1102,7 +1102,7 @@ impl Array {
         end: Option<isize>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1127,7 +1127,7 @@ impl Array {
     }
 
     fn some(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1159,7 +1159,7 @@ impl Array {
         compare: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this_val, realm)?;
+        let this = coerce_object_strict(this_val, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1209,7 +1209,7 @@ impl Array {
         items: Vec<Value>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1257,7 +1257,7 @@ impl Array {
 
     #[prop("toReversed")]
     fn js_to_reversed(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let array = Self::from_realm(realm);
 
@@ -1284,7 +1284,7 @@ impl Array {
         func: Option<Value>,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1323,7 +1323,7 @@ impl Array {
     }
 
     fn unshift(#[this] this: Value, args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
@@ -1351,7 +1351,7 @@ impl Array {
     }
 
     fn values(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
-        let this = coerce_object(this, realm)?;
+        let this = coerce_object_strict(this, realm)?;
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
