@@ -1,5 +1,5 @@
 use crate::conversion::FromValueOutput;
-use crate::{Res, Value};
+use crate::{Realm, Res, Value};
 use std::mem;
 use std::slice::IterMut;
 
@@ -17,31 +17,31 @@ impl<'a> Extractor<'a> {
 
 pub trait ExtractValue<T>: Sized {
     type Output;
-    fn extract(&mut self) -> Res<Self::Output>;
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output>;
 }
 
 impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
     type Output = T::Output;
-    fn extract(&mut self) -> Res<Self::Output> {
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
         let val = self
             .args
             .next()
             .map_or(Value::Undefined, |val| mem::replace(val, Value::Undefined));
 
-        T::from_value_out(val)
+        T::from_value_out(val, realm)
     }
 }
 
 impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
     type Output = Option<T::Output>;
 
-    fn extract(&mut self) -> Res<Self::Output> {
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
         let Some(val) = self.args.next() else {
             return Ok(None);
         };
 
         let val = mem::replace(val, Value::Undefined);
 
-        Ok(Some(T::from_value_out(val)?))
+        Ok(Some(T::from_value_out(val, realm)?))
     }
 }

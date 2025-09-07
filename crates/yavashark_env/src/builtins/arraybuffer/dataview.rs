@@ -2,7 +2,7 @@ mod from_bytes;
 
 use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::builtins::ArrayBuffer;
-use crate::conversion::FromValueOutput;
+use crate::conversion::downcast_obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
@@ -24,7 +24,7 @@ impl DataView {
         byte_offset: Option<usize>,
         byte_length: Option<usize>,
     ) -> Res<Self> {
-        let buf = <&ArrayBuffer>::from_value_out(buffer.copy())?;
+        let buf = downcast_obj::<ArrayBuffer>(buffer.copy())?;
         let buf_len = buf.inner.borrow().buffer.len();
         let byte_offset = byte_offset.unwrap_or(0);
 
@@ -59,7 +59,7 @@ impl DataView {
 
         let buf = inner.buffer.value.clone();
 
-        <&ArrayBuffer>::from_value_out(buf)
+        downcast_obj::<ArrayBuffer>(buf)
     }
 
     pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Res<T> {

@@ -1,7 +1,7 @@
 use crate::builtins::temporal::utils::{
     opt_relative_to_wrap, rounding_options, string_rounding_mode_opts,
 };
-use crate::conversion::{FromValueOutput, NonFract};
+use crate::conversion::{downcast_obj, NonFract};
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, RefOrOwned, Res, Value};
 use std::cell::RefCell;
@@ -32,7 +32,7 @@ impl Duration {
     }
 
     pub fn from_value_ref(info: Value, realm: &mut Realm) -> Res<RefOrOwned<Self>> {
-        if let Ok(this) = <&Self>::from_value_out(info.copy()) {
+        if let Ok(this) = downcast_obj::<Self>(info.copy()) {
             return Ok(RefOrOwned::Ref(this));
         }
 

@@ -1,5 +1,5 @@
 use crate::builtins::Promise;
-use crate::conversion::{FromValueOutput, TryIntoValue};
+use crate::conversion::{downcast_obj, TryIntoValue};
 use crate::task_queue::AsyncTask;
 use crate::{ObjectHandle, Realm, Res};
 use pin_project::pin_project;
@@ -34,7 +34,7 @@ impl<F: Future<Output = O>, O: TryIntoValue> AsyncTask for FutureTask<F, O> {
 
         match projected.future.poll(cx) {
             Poll::Ready(value) => {
-                let value = value.try_into_value();
+                let value = value.try_into_value(realm);
                 projected.promise.set_res(value, realm)?;
                 Poll::Ready(Ok(()))
             }
@@ -48,7 +48,7 @@ impl<F: Future<Output = O> + 'static, O: TryIntoValue + 'static> IntoPromise for
         let promise_obj = Promise::new(realm).into_object();
 
         #[allow(clippy::expect_used)]
-        let promise = <&Promise>::from_value_out(promise_obj.clone().into()).expect("unreachable");
+        let promise = downcast_obj::<Promise>(promise_obj.clone().into()).expect("unreachable");
 
         let task = FutureTask {
             future: self,

@@ -3,7 +3,7 @@ use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::utils::{
     difference_settings, rounding_options, string_rounding_mode_opts,
 };
-use crate::conversion::FromValueOutput;
+use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
@@ -35,7 +35,7 @@ impl Instant {
     #[allow(unused)]
     pub fn from(value: Value, realm: &mut Realm) -> Res<Self> {
         if let Value::Object(obj) = &value {
-            let instant = <&Self>::from_value_out(value)?;
+            let instant = downcast_obj::<Self>(value)?;
 
             return Ok(Self::from_stamp(instant.stamp, realm));
         }

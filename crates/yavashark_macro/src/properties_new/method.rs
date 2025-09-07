@@ -34,18 +34,16 @@ impl Method {
         let mut call_args = TokenStream::new();
 
         for (i, ty) in self.args.iter().enumerate() {
-            let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
+            let mut argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
             if Some(i) == self.this {
                 arg_prepare.extend(quote! {
                     let #argname = this.copy();
                 });
             } else if Some(i) == self.realm {
-                arg_prepare.extend(quote! {
-                    let #argname = realm;
-                });
+                argname = syn::Ident::new("realm", Span::call_site());
             } else {
                 arg_prepare.extend(quote! {
-                    let #argname = #extract_value::<#ty>::extract(&mut extractor)?;
+                    let #argname = #extract_value::<#ty>::extract(&mut extractor, realm)?;
                 });
             }
             let refs = if matches!(ty, syn::Type::Reference(_)) && Some(i) != self.realm {
@@ -117,7 +115,7 @@ impl Method {
             #native_function::with_proto_and_len(#js_name.as_ref(), |mut args, mut this, realm| {
                 #arg_prepare
                 #prepare_receiver
-                #call.try_into_value()
+                #call.try_into_value(realm)
             }, func_proto.copy(), #length)
         }
     }
@@ -137,18 +135,16 @@ impl Method {
         let mut call_args = TokenStream::new();
 
         for (i, ty) in self.args.iter().enumerate() {
-            let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
+            let mut argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
             if Some(i) == self.this {
                 arg_prepare.extend(quote! {
                     let #argname = this.copy();
                 });
             } else if Some(i) == self.realm {
-                arg_prepare.extend(quote! {
-                    let #argname = realm;
-                });
+                argname = syn::Ident::new("realm", Span::call_site());
             } else {
                 arg_prepare.extend(quote! {
-                    let #argname = #extract_value::<#ty>::extract(&mut extractor)?;
+                    let #argname = #extract_value::<#ty>::extract(&mut extractor, realm)?;
                 });
             }
             let refs = if matches!(ty, syn::Type::Reference(_)) && Some(i) != self.realm {
@@ -182,7 +178,7 @@ impl Method {
         quote! {
                 #arg_prepare
                 #prepare_receiver
-                #call.try_into_value()
+                #call.try_into_value(realm)
         }
     }
 }

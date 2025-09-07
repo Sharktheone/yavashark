@@ -10,7 +10,7 @@ use std::rc::Rc;
 use tokio::sync::Notify;
 use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 use yavashark_env::builtins::Arguments;
-use yavashark_env::conversion::FromValueOutput;
+use yavashark_env::conversion::downcast_obj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
@@ -168,7 +168,7 @@ impl AsyncGenerator {
 impl AsyncGenerator {
     #[nonstatic]
     pub fn next(this: Value, realm: &mut Realm) -> ValueResult {
-        let this = <&Self>::from_value_out(this)?;
+        let this = downcast_obj::<Self>(this)?;
 
         let mut state_ref = this.state.try_borrow_mut()?;
         let state = state_ref.take();

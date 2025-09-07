@@ -1,4 +1,4 @@
-use crate::conversion::FromValueOutput;
+use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike};
@@ -488,7 +488,7 @@ impl Date {
                     }
 
                     Value::Object(obj) => {
-                        if let Ok(date) = <&Self>::from_value_out(obj.clone().into()) {
+                        if let Ok(date) = downcast_obj::<Self>(obj.clone().into()) {
                             date.inner.borrow().date
                         } else {
                             let str = obj.to_string(realm)?;

@@ -5,7 +5,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use tokio::sync::futures::Notified;
 use yavashark_env::builtins::Promise;
-use yavashark_env::conversion::FromValueOutput;
+use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error::ErrorObj;
 use yavashark_env::task_queue::AsyncTask;
 use yavashark_env::{Object, ObjectHandle, Realm, Res, Value};
@@ -31,7 +31,7 @@ impl AsyncGeneratorTask {
         gen: OwningGcGuard<'static, BoxedObj<Realm>, AsyncGenerator>,
     ) -> Res<ObjectHandle> {
         let promise_obj = Promise::new(realm).into_object();
-        let promise = <&Promise>::from_value_out(promise_obj.clone().into())?;
+        let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let gen_notify = if state.is_none() {
             Some(gen.clone().map_refed(|gen| gen.notify.notified()))
@@ -94,7 +94,7 @@ impl AsyncTask for AsyncGeneratorTask {
             match vm.poll_next() {
                 AsyncGeneratorPoll::Await(state, promise) => {
                     inner.state = Some(state);
-                    let promise = match <&Promise>::from_value_out(promise.into()) {
+                    let promise = match downcast_obj::<Promise>(promise.into()) {
                         Ok(promise) => promise,
                         Err(e) => return Poll::Ready(Err(e)),
                     };

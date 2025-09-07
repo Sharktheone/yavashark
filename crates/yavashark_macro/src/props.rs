@@ -404,22 +404,21 @@ impl Method {
         };
         let mut call_args = TokenStream::new();
 
+
         for (i, ty) in self.args.iter().enumerate() {
-            let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
+            let mut argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
 
             if Some(i) == self.this {
                 let from_value_out = &config.from_value_output;
 
                 arg_prepare.extend(quote! {
-                    let #argname = <#ty as #from_value_out>::from_value_out(this.copy())?;
+                    let #argname = <#ty as #from_value_out>::from_value_out(this.copy(), realm)?;
                 });
             } else if Some(i) == self.realm {
-                arg_prepare.extend(quote! {
-                    let #argname = realm;
-                });
+                argname = syn::Ident::new("realm", Span::call_site());
             } else {
                 arg_prepare.extend(quote! {
-                    let #argname = #extract_value::<#ty>::extract(&mut extractor)?;
+                    let #argname = #extract_value::<#ty>::extract(&mut extractor, realm)?;
                 });
             }
 
@@ -445,27 +444,20 @@ impl Method {
         };
 
         let prepare_receiver = if self.has_receiver {
-            let realm_arg = if let Some(i) = self.realm {
-                let argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
-                quote! {#argname}
-            } else {
-                quote! {realm}
-            };
-
             if let Some((def, null)) = proto_default {
                 let env = &config.env_path;
 
                 let f = if *null {
                     quote! {null_proto_default()}
                 } else {
-                    quote! {proto_default(#realm_arg)}
+                    quote! {proto_default(realm)}
                 };
 
                 quote! {
                     let mut guard = None;
                     let mut def = None::<Self>;
 
-                    let this = if this.as_object() == Ok(&#realm_arg.intrinsics.#def) {
+                    let this = if this.as_object() == Ok(&realm.intrinsics.#def) {
                         &*def.insert(#env::utils::ProtoDefault::#f)
                     } else {
                         let this: yavashark_garbage::OwningGcGuard<_, Self> = FromValue::from_value(this)?;
@@ -519,7 +511,7 @@ impl Method {
             #native_function::with_proto_and_len(#name.as_ref(), |mut args, mut this, realm| {
                 #arg_prepare
                 #prepare_receiver
-                #call.try_into_value()
+                #call.try_into_value(realm)
             }, func_proto.copy(), #length)
         }
     }

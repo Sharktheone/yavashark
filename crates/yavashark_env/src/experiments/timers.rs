@@ -1,5 +1,5 @@
 use crate::builtins::{GcPromise, Promise};
-use crate::conversion::FromValueOutput;
+use crate::conversion::{downcast_obj, FromValueOutput};
 use crate::task_queue::AsyncTask;
 use crate::{Error, NativeFunction, ObjectHandle, Realm, Res, Value};
 use pin_project::pin_project;
@@ -41,7 +41,7 @@ impl TimeoutTask {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(timer: SleepDuration, cb: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let promise_obj = Promise::new(realm).into_object();
-        let promise = <&Promise>::from_value_out(promise_obj.clone().into())?;
+        let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let this = Self { timer, promise, cb };
 

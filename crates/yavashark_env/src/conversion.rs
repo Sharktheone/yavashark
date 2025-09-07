@@ -1,4 +1,4 @@
-use crate::{Error, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use crate::{Error, GCd, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use std::fmt::Display;
 use std::mem;
@@ -11,24 +11,24 @@ use yavashark_value::ops::BigIntOrNumber;
 use yavashark_value::{fmt_num, BoxedObj, FromValue, IntoValue, Obj};
 
 pub trait TryIntoValue: Sized {
-    fn try_into_value(self) -> ValueResult;
+    fn try_into_value(self, realm: &mut Realm) -> ValueResult;
 }
 
 impl<T: IntoValue<Realm>> TryIntoValue for T {
-    fn try_into_value(self) -> ValueResult {
+    fn try_into_value(self, _: &mut Realm) -> ValueResult {
         Ok(self.into_value())
     }
 }
 
 impl<T: TryIntoValue> TryIntoValue for Res<T, Error> {
-    fn try_into_value(self) -> ValueResult {
-        self?.try_into_value()
+    fn try_into_value(self, realm: &mut Realm) -> ValueResult {
+        self?.try_into_value(realm)
     }
 }
 
 pub trait FromValueOutput {
     type Output;
-    fn from_value_out(value: Value) -> Res<Self::Output>;
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output>;
 }
 
 // TODO: this might work in future rust versions with specialization, but unfortunately not at this time...
@@ -43,15 +43,19 @@ pub trait FromValueOutput {
 impl<O: Obj<Realm>> FromValueOutput for &O {
     type Output = OwningGcGuard<'static, BoxedObj<Realm>, O>;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         FromValue::from_value(value)
     }
+}
+
+pub fn downcast_obj<O: Obj<Realm>>(value: Value) -> Res<GCd<O>> {
+    FromValue::from_value(value)
 }
 
 impl FromValueOutput for ObjectHandle {
     type Output = Self;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(obj) => Ok(obj),
             _ => Err(Error::ty_error(format!("Expected object, found {value:?}"))),
@@ -62,7 +66,7 @@ impl FromValueOutput for ObjectHandle {
 impl FromValueOutput for &ObjectHandle {
     type Output = ObjectHandle;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(obj) => Ok(obj),
             _ => Err(Error::ty_error(format!("Expected object, found {value:?}"))),
@@ -72,56 +76,56 @@ impl FromValueOutput for &ObjectHandle {
 
 impl FromValueOutput for Value {
     type Output = Self;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         Ok(value)
     }
 }
 
 impl FromValueOutput for &Value {
     type Output = Value;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         Ok(value)
     }
 }
 
 impl FromValueOutput for () {
     type Output = ();
-    fn from_value_out(_value: Value) -> Res<Self::Output> {
+    fn from_value_out(_value: Value, _: &mut Realm) -> Res<Self::Output> {
         Ok(())
     }
 }
 
 impl FromValueOutput for bool {
     type Output = Self;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         Ok(value.is_truthy())
     }
 }
 
 impl FromValueOutput for String {
     type Output = Self;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
-        Ok(value.to_string_no_realm()?.to_string()) //TODO: this should be removed!
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        Ok(value.to_string(realm)?.to_string())
     }
 }
 
 impl FromValueOutput for YSString {
     type Output = Self;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
-        value.to_string_no_realm()
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        value.to_string(realm)
     }
 }
 
 impl FromValueOutput for &str {
     type Output = YSString;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
-        YSString::from_value_out(value)
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        YSString::from_value_out(value, realm)
     }
 }
 
 impl FromValueOutput for Symbol {
     type Output = Self;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Symbol(s) => Ok(s),
             _ => Err(Error::ty_error(format!("Expected symbol, found {value:?}"))),
@@ -131,7 +135,7 @@ impl FromValueOutput for Symbol {
 
 impl FromValueOutput for BigInt {
     type Output = Self;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::BigInt(n) => Ok((*n).clone()),
             Value::Number(n) => {
@@ -152,7 +156,7 @@ impl FromValueOutput for BigInt {
 
 impl FromValueOutput for &BigInt {
     type Output = Rc<BigInt>;
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::BigInt(n) => Ok(n),
             Value::Number(n) => {
@@ -175,7 +179,7 @@ impl FromValueOutput for &BigInt {
 impl FromValueOutput for BigIntOrNumber {
     type Output = Self;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::BigInt(n) => Ok(Self::BigInt(n)),
             Value::Number(n) => {
@@ -205,8 +209,8 @@ impl FromValueOutput for BigIntOrNumber {
 impl FromValueOutput for &BigIntOrNumber {
     type Output = BigIntOrNumber;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
-        BigIntOrNumber::from_value_out(value)
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        BigIntOrNumber::from_value_out(value, realm)
     }
 }
 
@@ -247,11 +251,11 @@ impl From<Stringable> for Value {
 impl FromValueOutput for Stringable {
     type Output = Self;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(ref o) => {
                 if let Some(p) = o.primitive() {
-                    return Self::from_value_out(p);
+                    return Self::from_value_out(p, realm);
                 }
             }
             Value::String(s) => return Ok(Self(s.to_string())),
@@ -267,8 +271,8 @@ impl FromValueOutput for Stringable {
 impl FromValueOutput for &Stringable {
     type Output = Stringable;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
-        Stringable::from_value_out(value)
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        Stringable::from_value_out(value, realm)
     }
 }
 
@@ -309,11 +313,11 @@ impl From<ActualString> for Value {
 impl FromValueOutput for ActualString {
     type Output = Self;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(ref o) => {
                 if let Some(p) = o.primitive() {
-                    return Self::from_value_out(p);
+                    return Self::from_value_out(p, realm);
                 }
             }
             Value::String(s) => return Ok(Self(s.to_string())),
@@ -329,8 +333,8 @@ impl FromValueOutput for ActualString {
 impl FromValueOutput for &ActualString {
     type Output = ActualString;
 
-    fn from_value_out(value: Value) -> Res<Self::Output> {
-        ActualString::from_value_out(value)
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        ActualString::from_value_out(value, realm)
     }
 }
 
@@ -375,7 +379,7 @@ macro_rules! impl_from_value_output {
             impl FromValueOutput for $t {
                 type Output = $t;
 
-                fn from_value_out(value: Value) -> Res<Self::Output> {
+                fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
                         Value::String(ref s) => s.parse().map_err(|_| Error::ty_error(format!("Expected a number, found {value:?}"))),
@@ -398,7 +402,7 @@ macro_rules! impl_from_value_output_nonfract {
             impl FromValueOutput for NonFract<$t> {
                 type Output = NonFract<$t>;
 
-                fn from_value_out(value: Value) -> Res<Self::Output> {
+                fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
                     match value {
                         Value::Number(n) => {
                             if n.fract() != 0.0 {
@@ -440,25 +444,25 @@ impl<'a> Extractor<'a> {
 
 pub trait ExtractValue<T>: Sized {
     type Output;
-    fn extract(&mut self) -> Res<Self::Output>;
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output>;
 }
 
 impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
     type Output = T::Output;
-    fn extract(&mut self) -> Res<Self::Output> {
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
         let val = self
             .values
             .next()
             .map_or(Value::Undefined, |val| mem::replace(val, Value::Undefined));
 
-        T::from_value_out(val)
+        T::from_value_out(val, realm)
     }
 }
 
 impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
     type Output = Option<T::Output>;
 
-    fn extract(&mut self) -> Res<Self::Output> {
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
         let Some(val) = self.values.next() else {
             return Ok(None);
         };
@@ -469,26 +473,26 @@ impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
 
         let val = mem::replace(val, Value::Undefined);
 
-        Ok(Some(T::from_value_out(val)?))
+        Ok(Some(T::from_value_out(val, realm)?))
     }
 }
 
 impl<T: FromValueOutput> ExtractValue<&Option<T>> for Extractor<'_> {
     type Output = Option<T::Output>;
 
-    fn extract(&mut self) -> Res<Self::Output> {
-        ExtractValue::<Option<T>>::extract(self)
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
+        ExtractValue::<Option<T>>::extract(self, realm)
     }
 }
 
 impl<T: FromValueOutput> ExtractValue<Vec<T>> for Extractor<'_> {
     type Output = Vec<T::Output>;
 
-    fn extract(&mut self) -> Res<Self::Output> {
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
         let mut vec = Vec::new();
         for val in &mut self.values {
             let val = mem::replace(val, Value::Undefined);
-            vec.push(T::from_value_out(val)?);
+            vec.push(T::from_value_out(val, realm)?);
         }
 
         Ok(vec)
@@ -497,11 +501,11 @@ impl<T: FromValueOutput> ExtractValue<Vec<T>> for Extractor<'_> {
 impl<T: FromValueOutput> ExtractValue<&'_ [T]> for Extractor<'_> {
     type Output = Vec<T::Output>;
 
-    fn extract(&mut self) -> Res<Self::Output> {
+    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
         let mut vec = Vec::new();
         for val in &mut self.values {
             let val = mem::replace(val, Value::Undefined);
-            vec.push(T::from_value_out(val)?);
+            vec.push(T::from_value_out(val, realm)?);
         }
 
         Ok(vec)

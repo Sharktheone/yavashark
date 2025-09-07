@@ -1,6 +1,6 @@
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::ArrayBuffer;
-use crate::conversion::FromValueOutput;
+use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
@@ -86,7 +86,7 @@ impl TypedArray {
         byte_length: Option<usize>,
         ty: Type,
     ) -> Res<Self> {
-        let buf = if let Ok(buf) = <&ArrayBuffer>::from_value_out(buffer.copy()) {
+        let buf = if let Ok(buf) = downcast_obj::<ArrayBuffer>(buffer.copy()) {
             buf
         } else if buffer.has_key(&"length".into()).ok().unwrap_or(false) {
             let iter = ValueIterator::new(&buffer, realm)?;
@@ -99,12 +99,12 @@ impl TypedArray {
 
             buffer = convert_buffer(items, ty, realm)?.into_value();
 
-            <&ArrayBuffer>::from_value_out(buffer.copy())?
+            downcast_obj::<ArrayBuffer>(buffer.copy())?
         } else {
             let len = buffer.to_int_or_null(realm)? as usize;
             buffer = ArrayBuffer::new(realm, len).into_value();
 
-            <&ArrayBuffer>::from_value_out(buffer.copy())?
+            downcast_obj::<ArrayBuffer>(buffer.copy())?
         };
 
         let buf_len = buf.inner.borrow().buffer.len();
@@ -140,7 +140,7 @@ impl TypedArray {
     pub fn get_buffer(&self) -> Res<OwningGcGuard<'_, BoxedObj<Realm>, ArrayBuffer>> {
         let buf = self.buffer.clone();
 
-        <&ArrayBuffer>::from_value_out(buf)
+        downcast_obj::<ArrayBuffer>(buf)
     }
 
     pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> Res<&'a [u8]> {

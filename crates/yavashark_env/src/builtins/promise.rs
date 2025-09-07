@@ -3,7 +3,7 @@ mod into_promise;
 pub use into_promise::*;
 
 use crate::array::Array;
-use crate::conversion::FromValueOutput;
+use crate::conversion::downcast_obj;
 use crate::error::ErrorObj;
 use crate::utils::ValueIterator;
 use crate::{
@@ -249,7 +249,7 @@ impl Promise {
     }
 
     pub fn get_gc(this: ObjectHandle) -> Res<GcPromise> {
-        <&Self>::from_value_out(this.into())
+        downcast_obj::<Self>(this.into())
     }
 
     pub fn with_callback(callback: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
@@ -291,7 +291,7 @@ impl Promise {
 
         let promise = Self::new(realm).into_object();
 
-        let promise_obj = <&Self>::from_value_out(promise.clone().into())?;
+        let promise_obj = downcast_obj::<Self>(promise.clone().into())?;
 
         if let Some(on_fulfilled) = on_fulfilled {
             match state {
@@ -354,7 +354,7 @@ impl Promise {
                     promise.reject(&val, realm)?;
                 }
                 Ok(val) => {
-                    if let Ok(prom) = <&Self>::from_value_out(val) {
+                    if let Ok(prom) = downcast_obj::<Self>(val) {
                         if prom.state.get() == PromiseState::Rejected {
                             promise.reject(
                                 &prom
@@ -446,7 +446,7 @@ impl Promise {
                 return Self::reject_(&err, realm);
             }
         } {
-            if let Ok(prom) = <&Self>::from_value_out(p) {
+            if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
             }
         }
@@ -496,7 +496,7 @@ impl Promise {
                 return Self::reject_(&err, realm);
             }
         } {
-            if let Ok(prom) = <&Self>::from_value_out(p) {
+            if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
             }
         }

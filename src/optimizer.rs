@@ -3,6 +3,7 @@ use yavashark_env::optimizer::OptimFunction;
 use yavashark_env::{
     conversion::FromValueOutput, Error, NativeFunction, ObjectHandle, Realm, Res, Value,
 };
+use yavashark_env::conversion::downcast_obj;
 use yavashark_interpreter::function::OptimizedJSFunction;
 use yavashark_vm::function_code::OldBytecodeFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
@@ -27,7 +28,7 @@ fn get_optimizer(realm: &Realm) -> ObjectHandle {
                 ));
             };
 
-            let func = <&OptimFunction>::from_value_out(func.copy())?;
+            let func = downcast_obj::<OptimFunction>(func.copy())?;
             println!("Optimizing function: {}", func.raw.name);
 
             let Some(code) = &func.raw.block else {

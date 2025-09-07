@@ -1,4 +1,4 @@
-use crate::conversion::FromValueOutput;
+use crate::conversion::{downcast_obj, FromValueOutput};
 use crate::experiments::gui::ui::Ui;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};
 use eframe::{App, Frame, NativeOptions};
@@ -117,7 +117,7 @@ pub struct GuiApp<'a> {
 impl<'a> GuiApp<'a> {
     fn new(realm: &'a mut Realm, error: Rc<RefCell<Option<Error>>>, f: ObjectHandle) -> Res<Self> {
         let ui = Ui::new(realm)?;
-        let ui_ref = <&Ui as FromValueOutput>::from_value_out(ui.clone().into())?;
+        let ui_ref = downcast_obj::<Ui>(ui.clone().into())?;
 
         Ok(Self {
             realm,

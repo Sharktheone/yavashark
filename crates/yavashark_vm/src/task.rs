@@ -6,7 +6,7 @@ use std::task::{Context, Poll};
 use tokio::sync::futures::Notified;
 use yavashark_bytecode::BytecodeFunctionCode;
 use yavashark_env::builtins::Promise;
-use yavashark_env::conversion::FromValueOutput;
+use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::task_queue::AsyncTask;
@@ -32,7 +32,7 @@ impl BytecodeAsyncTask {
     ) -> Res<ObjectHandle> {
         let state = VmState::new(code, scope);
         let promise_obj = Promise::new(realm).into_object();
-        let promise = <&Promise>::from_value_out(promise_obj.clone().into())?;
+        let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;
 
         let this = Self {
             state: Some(state),
@@ -74,7 +74,7 @@ impl AsyncTask for BytecodeAsyncTask {
             match vm.poll() {
                 AsyncPoll::Await(state, promise) => {
                     inner.state = Some(state);
-                    let promise = match <&Promise>::from_value_out(promise.into()) {
+                    let promise = match downcast_obj::<Promise>(promise.into()) {
                         Ok(promise) => promise,
                         Err(e) => return Poll::Ready(Err(e)),
                     };

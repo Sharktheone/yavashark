@@ -1,5 +1,5 @@
 use crate::builtins::check_radix;
-use crate::conversion::FromValueOutput;
+use crate::conversion::downcast_obj;
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use num_bigint::BigInt;
 use std::cell::RefCell;
@@ -87,7 +87,7 @@ impl BigIntObj {
             return Ok(bi.into());
         }
 
-        let this = <&Self as FromValueOutput>::from_value_out(this)?;
+        let this = downcast_obj::<Self>(this)?;
 
         let inner = this.inner.try_borrow()?;
 
