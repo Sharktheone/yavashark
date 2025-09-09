@@ -133,7 +133,7 @@ impl Interpreter {
 
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                right.contains_key(&left)?.into()
+                right.has_key(&left)?.into()
             }
             BinaryOp::InstanceOf => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
