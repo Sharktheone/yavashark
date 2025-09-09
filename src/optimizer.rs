@@ -1,7 +1,7 @@
 use yavashark_codegen::ByteCodegen;
 use yavashark_env::optimizer::OptimFunction;
 use yavashark_env::{
-    conversion::FromValueOutput, Error, NativeFunction, ObjectHandle, Realm, Res, Value,
+    Error, NativeFunction, ObjectHandle, Realm, Res, Value,
 };
 use yavashark_env::conversion::downcast_obj;
 use yavashark_interpreter::function::OptimizedJSFunction;
