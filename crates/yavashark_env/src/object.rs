@@ -619,16 +619,7 @@ impl MutObj<Realm> for MutObject {
             return Ok(self.contains_array_key(n));
         }
 
-        let mut contains = self.properties.contains_key(&name.into());
-
-        if !contains {
-            if let Value::Object(o) = &self.prototype.value {
-                contains = o.contains_key(name_val)?;
-            }
-        }
-
-
-        Ok(contains)
+        Ok(self.properties.contains_key(&name.into()))
     }
 
     fn name(&self) -> String {
