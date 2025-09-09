@@ -133,6 +133,12 @@ impl JSFunction {
 
         let obj = Object::with_proto(proto);
 
+        obj.set(
+            "name",
+            Value::String(self.raw.name.borrow().clone().into()),
+            realm
+        )?;
+
         Ok(obj.into())
     }
 }
