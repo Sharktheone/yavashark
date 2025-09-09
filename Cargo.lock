@@ -5521,6 +5521,7 @@ dependencies = [
  "swc_common 14.0.2",
  "swc_ecma_ast 14.0.0",
  "swc_ecma_parser 22.0.3",
+ "tokio",
  "yaml-rust2",
  "yavashark_env",
  "yavashark_garbage",

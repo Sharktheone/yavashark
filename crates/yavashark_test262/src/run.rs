@@ -69,5 +69,11 @@ pub fn run_file_in(
         }
     }
 
+    if res.is_ok() {
+        tokio::runtime::Builder::new_current_thread()
+            .build()?
+            .block_on(realm.run_event_loop())
+    }
+
     res
 }

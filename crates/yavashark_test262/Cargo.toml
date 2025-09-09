@@ -11,6 +11,7 @@ yavashark_garbage = { path = "../yavashark_garbage" }
 yavashark_interpreter = { path = "../yavashark_interpreter", features = ["vm", "simple_bytecode"] }
 yavashark_string = { path = "../yavashark_string" }
 yavashark_vm = { path = "../yavashark_vm" }
+tokio = { version = "1.47.1", features = ["rt"]}
 
 
 
