@@ -608,8 +608,8 @@ impl MutObj<Realm> for MutObject {
         Ok(None)
     }
 
-    fn contains_key(&self, name: &Value) -> Result<bool, Error> {
-        let name = InternalPropertyKey::from(name.clone());
+    fn contains_key(&self, name_val: &Value) -> Result<bool, Error> {
+        let name = InternalPropertyKey::from(name_val.clone());
 
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(true);
@@ -619,7 +619,16 @@ impl MutObj<Realm> for MutObject {
             return Ok(self.contains_array_key(n));
         }
 
-        Ok(self.properties.contains_key(&name.into()))
+        let mut contains = self.properties.contains_key(&name.into());
+
+        if !contains {
+            if let Value::Object(o) = &self.prototype.value {
+                contains = o.contains_key(name_val)?;
+            }
+        }
+
+
+        Ok(contains)
     }
 
     fn name(&self) -> String {
