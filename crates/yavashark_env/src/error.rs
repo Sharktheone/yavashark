@@ -107,6 +107,7 @@ impl CustomName for ErrorObj {
 #[props]
 impl ErrorObj {
     #[prop("name")]
+    #[both]
     const NAME: &'static str = "Error";
 
     #[constructor]
