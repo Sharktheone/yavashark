@@ -136,7 +136,7 @@ impl JSFunction {
         obj.set(
             "name",
             Value::String(self.raw.name.borrow().clone().into()),
-            realm
+            realm,
         )?;
 
         Ok(obj.into())

@@ -1,5 +1,5 @@
 use crate::builtins::{GcPromise, Promise};
-use crate::conversion::{downcast_obj};
+use crate::conversion::downcast_obj;
 use crate::task_queue::AsyncTask;
 use crate::{Error, NativeFunction, ObjectHandle, Realm, Res, Value};
 use pin_project::pin_project;

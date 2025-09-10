@@ -106,7 +106,9 @@ impl yavashark_value::ObjectImpl<Realm> for ComputedProtoObj {
     type Inner = Option<GCd<Computed>>;
 
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
-        self.obj.inner_mut().expect("TODO: handle this case properly")
+        self.obj
+            .inner_mut()
+            .expect("TODO: handle this case properly")
     }
 
     fn get_inner(&self) -> impl Deref<Target = Self::Inner> {

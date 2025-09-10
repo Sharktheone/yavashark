@@ -404,7 +404,6 @@ impl Method {
         };
         let mut call_args = TokenStream::new();
 
-
         for (i, ty) in self.args.iter().enumerate() {
             let mut argname = syn::Ident::new(&format!("arg{}", i), Span::call_site());
 

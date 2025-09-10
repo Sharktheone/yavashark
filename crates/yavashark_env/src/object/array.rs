@@ -447,7 +447,12 @@ impl Array {
         Ok(iter.into_value())
     }
 
-    fn every(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, deez: Option<Value>) -> ValueResult {
+    fn every(
+        #[this] this: Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+        deez: Option<Value>,
+    ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this
@@ -856,7 +861,11 @@ impl Array {
             .unwrap_or(Value::Undefined)
             .to_number(realm)? as usize;
 
-        let sep = if separator.is_undefined() { YSString::new_static(",") } else { separator.to_string(realm)? };
+        let sep = if separator.is_undefined() {
+            YSString::new_static(",")
+        } else {
+            separator.to_string(realm)?
+        };
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -1575,14 +1584,11 @@ impl ArrayConstructor {
     }
 
     fn of(#[realm] realm: &mut Realm, args: Vec<Value>, #[this] this: Value) -> ValueResult {
-
         if let Ok(this) = this.as_object() {
             if this.is_constructor() {
                 return this.construct(realm, vec![Value::Number(args.len() as f64)]);
             }
-
         }
-
 
         let array = Array::with_elements(realm, args)?;
 

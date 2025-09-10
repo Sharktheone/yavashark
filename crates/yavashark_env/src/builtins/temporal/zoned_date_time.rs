@@ -514,7 +514,6 @@ pub fn value_to_zoned_date_time(
                 return Ok(zdt.date.clone());
             }
 
-
             let partial = partial_zoned_date_time(obj, realm)?;
 
             temporal_rs::ZonedDateTime::from_partial_with_provider(
