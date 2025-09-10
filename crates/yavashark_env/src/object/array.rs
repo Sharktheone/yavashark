@@ -846,6 +846,8 @@ impl Array {
             .unwrap_or(Value::Undefined)
             .to_number(realm)? as usize;
 
+        let sep = if separator.is_undefined() { YSString::new_static(",") } else { separator.to_string(realm)? };
+
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
 
@@ -854,7 +856,7 @@ impl Array {
             }
 
             if idx < len - 1 {
-                buf.push_str(&separator.to_string(realm)?);
+                buf.push_str(&sep);
             }
         }
 
