@@ -437,7 +437,7 @@ impl Array {
         Ok(iter.into_value())
     }
 
-    fn every(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+    fn every(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, deez: Option<Value>) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this
@@ -446,6 +446,8 @@ impl Array {
 
         let len = len.to_number(realm)? as usize;
 
+        let deez = deez.unwrap_or(realm.global.clone().into());
+
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
 
@@ -453,7 +455,7 @@ impl Array {
                 let x = func.call(
                     realm,
                     vec![val, idx.into(), this.clone().into()],
-                    realm.global.clone().into(),
+                    deez.clone(),
                 )?;
 
                 if x.is_falsey() {
