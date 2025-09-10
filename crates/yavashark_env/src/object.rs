@@ -670,6 +670,11 @@ impl MutObj<Realm> for MutObject {
             return Ok((done, Some(value.value)));
         }
 
+
+        if let Ok(obj) = self.prototype.value.as_object() {
+            return obj.get_array_or_done(index);
+        }
+
         Ok((true, None))
     }
 
