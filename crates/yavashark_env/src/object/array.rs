@@ -1574,7 +1574,16 @@ impl ArrayConstructor {
         this.is_ok()
     }
 
-    fn of(#[realm] realm: &Realm, args: Vec<Value>) -> ValueResult {
+    fn of(#[realm] realm: &mut Realm, args: Vec<Value>, #[this] this: Value) -> ValueResult {
+
+        if let Ok(this) = this.as_object() {
+            if this.is_constructor() {
+                return this.construct(realm, vec![Value::Number(args.len() as f64)]);
+            }
+
+        }
+
+
         let array = Array::with_elements(realm, args)?;
 
         Ok(Obj::into_value(array))
