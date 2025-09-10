@@ -34,7 +34,7 @@ impl ObjectImpl<Realm> for Array {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: Value, value: Value) -> Res<()> {
+    fn define_property(&self, name: Value, value: Value) -> Res {
         if matches!(&name, Value::String(s) if s == "length") {
             let length = value.as_number() as usize;
 
@@ -43,7 +43,12 @@ impl ObjectImpl<Realm> for Array {
             return Ok(());
         }
 
-        self.get_wrapped_object().define_property(name, value)
+        self.get_wrapped_object().define_property(name, value)?;
+
+        let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        self.length.set(len);
+
+        Ok(())
     }
 
     fn define_variable(&self, name: Value, value: Variable) -> Res {
@@ -55,7 +60,12 @@ impl ObjectImpl<Realm> for Array {
             return Ok(());
         }
 
-        self.get_wrapped_object().define_variable(name, value)
+        self.get_wrapped_object().define_variable(name, value)?;
+
+        let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        self.length.set(len);
+
+        Ok(())
     }
 
     fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
