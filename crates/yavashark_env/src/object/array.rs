@@ -1512,9 +1512,13 @@ impl CustomName for ArrayConstructor {
 impl Constructor<Realm> for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         if args.len() == 1 {
-            if let Value::Number(num) = &args[0] {
-                return Ok(Obj::into_value(Array::with_len(realm, *num as usize)?));
+            let len = args[0].to_number(realm)?;
+
+            if !len.is_finite() || len.fract() != 0.0 || len < 0.0 {
+                return Err(Error::range("Invalid array length"));
             }
+
+            return Ok(Obj::into_value(Array::with_len(realm, len as usize)?));
         }
 
         let this = Array::new(realm.intrinsics.array.clone().into());
