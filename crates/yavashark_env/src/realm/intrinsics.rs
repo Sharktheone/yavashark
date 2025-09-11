@@ -13,7 +13,12 @@ use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal, get_type_error, get_uri_error, Arguments, ArrayBuffer, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, WeakSet, StringObj, SymbolObj, WeakMap, JSON, Set};
+use crate::builtins::{
+    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
+    get_temporal, get_type_error, get_uri_error, Arguments, ArrayBuffer, BigIntObj, BooleanObj,
+    Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj,
+    WeakMap, WeakSet, JSON,
+};
 use crate::error::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Value, Variable};
 use rustc_hash::FxHashMap;
@@ -351,7 +356,6 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-
 
         let weak_set = WeakSet::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
