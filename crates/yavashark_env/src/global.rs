@@ -218,6 +218,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         Variable::write_config(realm.intrinsics.set_constructor().value),
     )?;
     obj.define_variable(
+        "WeakSet".into(),
+        Variable::write_config(realm.intrinsics.weak_set_constructor().value),
+    )?;
+    obj.define_variable(
         "Date".into(),
         Variable::write_config(realm.intrinsics.date_constructor().value),
     )?;
