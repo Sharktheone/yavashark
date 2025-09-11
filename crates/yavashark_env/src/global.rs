@@ -210,6 +210,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         Variable::write_config(realm.intrinsics.map_constructor().value),
     )?;
     obj.define_variable(
+        "WeakMap".into(),
+        Variable::write_config(realm.intrinsics.weak_map_constructor().value),
+    )?;
+    obj.define_variable(
         "Set".into(),
         Variable::write_config(realm.intrinsics.set_constructor().value),
     )?;

@@ -145,6 +145,7 @@ impl Intrinsics {
     constructor!(bigint64array);
     constructor!(biguint64array);
     constructor!(map);
+    constructor!(weak_map);
     constructor!(set);
     constructor!(date);
     constructor!(promise);
