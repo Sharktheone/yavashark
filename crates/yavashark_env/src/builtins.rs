@@ -19,6 +19,7 @@ mod string;
 mod symbol;
 pub mod temporal;
 mod weakmap;
+mod weakset;
 
 pub use arguments::*;
 pub use arraybuffer::*;
@@ -40,3 +41,4 @@ pub use string::*;
 pub use symbol::*;
 pub use temporal::*;
 pub use weakmap::*;
+pub use weakset::*;
