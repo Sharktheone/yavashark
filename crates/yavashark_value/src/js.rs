@@ -69,7 +69,7 @@ pub enum Value<C: Realm> {
 }
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum WeakValue<C: Realm> {
     Null,
     Undefined,
@@ -126,7 +126,7 @@ impl<R: Realm> Hash for WeakValue<R> {
             Self::BigInt(b) => (Type::BigInt, b).hash(state),
         }
     }
-    
+
 }
 
 impl<C: Realm> AsRef<Self> for Value<C> {
