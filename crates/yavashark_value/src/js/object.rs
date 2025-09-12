@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
-
+use equivalent::Equivalent;
 use super::Value;
 use crate::js::context::Realm;
 use crate::variable::Variable;
@@ -671,6 +671,27 @@ impl<C: Realm> PartialEq for WeakObject<C> {
         self.0 == other.0
     }
 }
+
+
+impl<R: Realm> Equivalent<Object<R>> for WeakObject<R> {
+    fn equivalent(&self, key: &Object<R>) -> bool {
+        self.0 == key.0
+    }
+}
+
+impl<R: Realm> Equivalent<WeakObject<R>> for Object<R> {
+    fn equivalent(&self, key: &WeakObject<R>) -> bool {
+        self.0 == key.0
+    }
+}
+
+
+impl<R: Realm> Hash for WeakObject<R> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.0.as_ptr().hash(state);
+    }
+}
+
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Hint {

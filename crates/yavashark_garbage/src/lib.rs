@@ -98,6 +98,7 @@ impl<T: Collectable> Weak<T> {
     }
 }
 
+
 impl<T: Collectable> Debug for Weak<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "(Weak)")
@@ -119,6 +120,19 @@ impl<T: Collectable> Clone for Weak<T> {
 
 impl<T: Collectable> PartialEq for Weak<T> {
     fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
+
+impl<T: Collectable> PartialEq<Gc<T> > for Weak<T> {
+    fn eq(&self, other: &Gc<T>) -> bool {
+        self.inner == other.inner
+    }
+}
+
+impl<T: Collectable> PartialEq<Weak<T>> for Gc<T> {
+    fn eq(&self, other: &Weak<T>) -> bool {
         self.inner == other.inner
     }
 }
@@ -538,6 +552,10 @@ impl<T: Collectable> Weak<T> {
         } else {
             None
         }
+    }
+    
+    pub fn as_ptr(&self) -> *mut T {
+        unsafe { (*self.inner.as_ptr()).value.as_ptr() }
     }
 }
 

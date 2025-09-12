@@ -9,8 +9,9 @@ use num_traits::Zero;
 pub use object::*;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
-use std::hash::Hash;
+use std::hash::{Hash, Hasher};
 use std::rc::Rc;
+use equivalent::Equivalent;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
@@ -87,6 +88,46 @@ impl<C: Realm> Clone for Value<C> {
 }
 
 impl<C: Realm> Eq for Value<C> {}
+impl<C: Realm> Eq for WeakValue<C> {}
+
+
+impl<R: Realm> Equivalent<Value<R>> for WeakValue<R> {
+    fn equivalent(&self, other: &Value<R>) -> bool {
+        match (self, other) {
+            (Self::Null, Value::Null) => true,
+            (Self::Undefined, Value::Undefined) => true,
+            (Self::Number(a), Value::Number(b)) => a.to_bits() == b.to_bits(),
+            (Self::String(a), Value::String(b)) => a == b,
+            (Self::Boolean(a), Value::Boolean(b)) => a == b,
+            (Self::Object(a), Value::Object(b)) => a.equivalent(b),
+            (Self::Symbol(a), Value::Symbol(b)) => a == b,
+            (Self::BigInt(a), Value::BigInt(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+impl<R: Realm> Equivalent<WeakValue<R>> for Value<R> {
+    fn equivalent(&self, other: &WeakValue<R>) -> bool {
+        other.equivalent(self)
+    }
+}
+
+impl<R: Realm> Hash for WeakValue<R> {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        match self {
+            Self::Null => Type::Null.hash(state),
+            Self::Undefined => Type::Undefined.hash(state),
+            Self::Number(n) => (Type::Number, n.to_bits()).hash(state),
+            Self::String(s) => (Type::String, s).hash(state),
+            Self::Boolean(b) => (Type::Boolean, b).hash(state),
+            Self::Object(o) => (Type::Object, o).hash(state),
+            Self::Symbol(s) => (Type::Symbol, s).hash(state),
+            Self::BigInt(b) => (Type::BigInt, b).hash(state),
+        }
+    }
+    
+}
 
 impl<C: Realm> AsRef<Self> for Value<C> {
     fn as_ref(&self) -> &Self {
@@ -342,7 +383,7 @@ impl<C: Realm> Value<C> {
             _ => Ok(self.copy()),
         }
     }
-    
+
     pub fn downgrade(&self) -> WeakValue<C> {
         match self {
             Self::Null => WeakValue::Null,
