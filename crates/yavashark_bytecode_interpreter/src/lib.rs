@@ -52,6 +52,16 @@ impl ByteCodeInterpreter {
             }));
         }
 
+
+        let len = func.params.last().map_or(0, |last| {
+            if last.pat.is_rest() {
+                func.params.len() - 1
+            } else {
+                func.params.len()
+            }
+        });
+
+
         let params = {
             let (params_code, params_defs) =
                 Compiler::compile_params(func.params.iter().map(|p| &p.pat))
@@ -74,11 +84,15 @@ impl ByteCodeInterpreter {
         if func.is_generator && !func.is_async {
             let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
+            g.define_variable("length".into(), len.into())?;
+
             return Ok(g.into_object());
         }
 
         if func.is_generator && func.is_async {
             let g = AsyncGeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params);
+
+            g.define_variable("length".into(), len.into())?;
 
             return Ok(g.into_object());
         }
@@ -94,6 +108,12 @@ impl ByteCodeInterpreter {
             x
         });
 
-        OptimFunction::new(name, func.params.clone(), compiled, scope, realm)
+        let f = OptimFunction::new(name, func.params.clone(), compiled, scope, realm)?;
+
+        f.define_variable("length".into(), len.into())?;
+
+        Ok(f)
+
+
     }
 }
