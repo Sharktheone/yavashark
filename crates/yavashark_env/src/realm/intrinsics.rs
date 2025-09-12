@@ -150,6 +150,7 @@ impl Intrinsics {
     constructor!(weak_map);
     constructor!(set);
     constructor!(weak_set);
+    constructor!(weak_ref);
     constructor!(date);
     constructor!(promise);
     constructor!(proxy);
@@ -357,7 +358,7 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
-        
+
         let weak_ref = WeakRef::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
