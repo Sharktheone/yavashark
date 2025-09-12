@@ -929,12 +929,14 @@ impl Array {
         Ok(Value::Number(-1.0))
     }
 
-    fn map(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
+    fn map(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, this_arg: Option<Value>) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this
             .resolve_property(&"length".into(), realm)?
             .unwrap_or(Value::Undefined);
+
+        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
 
         let len = len.to_number(realm)? as usize;
 
@@ -944,7 +946,7 @@ impl Array {
             let (_, val) = this.get_array_or_done(idx)?;
 
             if let Some(val) = val {
-                let x = func.call(realm, vec![val], realm.global.clone().into())?;
+                let x = func.call(realm, vec![val], this_arg.copy())?;
 
                 array.insert_array(x, idx)?;
             }
