@@ -73,6 +73,8 @@ impl Interpreter {
                         }
                     }
                 }
+
+                iter.close(realm)?;
             }
             Pat::Rest(rest) => {
                 let collect = value.collect::<Vec<_>>();
