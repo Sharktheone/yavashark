@@ -10,7 +10,6 @@ use yavashark_value::{Constructor, MutObj, Obj};
 #[object]
 #[derive(Debug)]
 pub struct WeakMap {
-    // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
     map: IndexMap<WeakValue, WeakValue, FxBuildHasher>,
 }

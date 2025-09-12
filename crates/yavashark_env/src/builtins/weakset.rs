@@ -8,7 +8,6 @@ use yavashark_value::{Constructor, MutObj, Obj};
 #[object]
 #[derive(Debug)]
 pub struct WeakSet {
-    // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
     set: IndexSet<WeakValue>,
 }
