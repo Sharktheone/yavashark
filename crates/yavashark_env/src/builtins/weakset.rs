@@ -1,5 +1,5 @@
 use crate::utils::ValueIterator;
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult, WeakValue};
 use indexmap::IndexSet;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
@@ -10,7 +10,7 @@ use yavashark_value::{Constructor, MutObj, Obj};
 pub struct WeakSet {
     // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
-    set: IndexSet<Value>,
+    set: IndexSet<WeakValue>,
 }
 
 impl WeakSet {
@@ -19,7 +19,7 @@ impl WeakSet {
         Self::with_set(realm, IndexSet::new())
     }
 
-    fn with_set(realm: &Realm, set: IndexSet<Value>) -> Self {
+    fn with_set(realm: &Realm, set: IndexSet<WeakValue>) -> Self {
         Self {
             inner: RefCell::new(MutableWeakSet {
                 object: MutObject::with_proto(realm.intrinsics.weak_set.clone().into()),
@@ -41,7 +41,7 @@ impl Constructor<Realm> for WeakSetConstructor {
             let iter = ValueIterator::new(iter, realm)?;
 
             while let Some(val) = iter.next(realm)? {
-                set.insert(val);
+                set.insert(val.downgrade());
             }
         }
 
@@ -72,7 +72,7 @@ impl WeakSet {
     fn add(&self, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        inner.set.insert(value.copy());
+        inner.set.insert(value.downgrade());
 
         Ok(value)
     }
@@ -119,9 +119,15 @@ impl WeakSet {
         let inner = self.inner.borrow();
 
         for key in &inner.set {
+            let Some(key) = key.upgrade() else {
+                continue;
+            };
+            
+            
+            
             func.call(
                 realm,
-                vec![key.copy(), this.copy()],
+                vec![key, this.copy()],
                 realm.global.clone().into(),
             )?;
         }
