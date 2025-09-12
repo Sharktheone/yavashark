@@ -47,6 +47,7 @@ impl Interpreter {
                     .iter_no_realm(realm)?;
 
                 let mut assert_last = false;
+                let mut is_finished = false;
 
                 for elem in &arr.elems {
                     if assert_last {
@@ -66,7 +67,10 @@ impl Interpreter {
                         Self::run_pat(realm, rest, scope, &mut elems.into_iter(), cb)?;
                         let assert_last = true;
                     } else {
-                        let next = iter.next(realm)?.unwrap_or(Value::Undefined);
+                        let next = iter.next(realm)?.unwrap_or_else(|| {
+                            is_finished = true;
+                            Value::Undefined
+                        });
 
                         if let Some(elem) = elem {
                             Self::run_pat(realm, elem, scope, &mut iter::once(next), cb)?;
@@ -74,7 +78,9 @@ impl Interpreter {
                     }
                 }
 
-                iter.close(realm)?;
+                if !is_finished {
+                    iter.close(realm)?;
+                }
             }
             Pat::Rest(rest) => {
                 let collect = value.collect::<Vec<_>>();
