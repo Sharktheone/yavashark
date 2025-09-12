@@ -117,6 +117,12 @@ impl<T: Collectable> Clone for Weak<T> {
     }
 }
 
+impl<T: Collectable> PartialEq for Weak<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner == other.inner
+    }
+}
+
 ///Function to completely deallocate the value, including freeing the memory!
 type DeallocFn = unsafe fn(NonNull<[(); 0]>);
 

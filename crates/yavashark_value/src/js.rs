@@ -67,6 +67,19 @@ pub enum Value<C: Realm> {
     BigInt(Rc<BigInt>),
 }
 
+
+#[derive(Debug, PartialEq)]
+pub enum WeakValue<C: Realm> {
+    Null,
+    Undefined,
+    Number(f64),
+    String(YSString),
+    Boolean(bool),
+    Object(WeakObject<C>),
+    Symbol(Symbol),
+    BigInt(Rc<BigInt>),
+}
+
 impl<C: Realm> Clone for Value<C> {
     fn clone(&self) -> Self {
         self.copy()

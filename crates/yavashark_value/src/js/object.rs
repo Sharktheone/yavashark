@@ -10,7 +10,7 @@ use super::Value;
 use crate::js::context::Realm;
 use crate::variable::Variable;
 use crate::{Attributes, Error, IntoValue, IntoValueRef, Symbol};
-use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard};
+use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard, Weak};
 use yavashark_string::{ToYSString, YSString};
 
 pub use super::object_impl::*;
@@ -633,6 +633,37 @@ impl<C: Realm> Object<C> {
 
     pub fn to_string(&self, realm: &mut C) -> Result<YSString, Error<C>> {
         self.0.to_string(realm)
+    }
+}
+
+
+#[derive(Clone)]
+pub struct WeakObject<C: Realm>(Weak<BoxedObj<C>>);
+
+impl<C: Realm> WeakObject<C> {
+    #[must_use]
+    pub fn new(obj: &Object<C>) -> Self {
+        Self(Gc::downgrade(&obj.0))
+    }
+
+    pub fn upgrade(&self) -> Option<Object<C>> {
+        self.0.upgrade().map(Object::from)
+    }
+}
+
+impl<R: Realm> Debug for WeakObject<R> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.upgrade() {
+            Some(obj) => write!(f, "WeakObject({obj})"),
+            None => write!(f, "WeakObject(<dead>)"),
+        }
+    }
+}
+
+
+impl<C: Realm> PartialEq for WeakObject<C> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
     }
 }
 
