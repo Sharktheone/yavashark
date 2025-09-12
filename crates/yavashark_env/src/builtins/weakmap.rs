@@ -12,7 +12,7 @@ use yavashark_value::{Constructor, MutObj, Obj};
 pub struct WeakMap {
     // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
-    map: IndexMap<Value, WeakValue, FxBuildHasher>,
+    map: IndexMap<WeakValue, WeakValue, FxBuildHasher>,
 }
 
 #[object(constructor)]
@@ -30,7 +30,7 @@ impl Constructor<Realm> for WeakMapConstructor {
                 let key = val.get_property(&0.into(), realm)?;
                 let value = val.get_property(&1.into(), realm)?;
 
-                map.insert(key, value.downgrade());
+                map.insert(key.downgrade(), value.downgrade());
             }
         }
 
@@ -92,10 +92,10 @@ impl WeakMap {
         inner.map.contains_key(key)
     }
 
-    fn set(&self, key: Value, value: Value) -> ValueResult {
+    fn set(&self, key: &Value, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        inner.map.insert(key, value.downgrade());
+        inner.map.insert(key.downgrade(), value.downgrade());
 
         Ok(value)
     }
@@ -105,9 +105,18 @@ impl WeakMap {
         let inner = self.inner.borrow();
 
         for (key, value) in &inner.map {
+            let Some(key) = key.upgrade() else {
+                continue;
+            };
+
+            let Some(value) = value.upgrade() else {
+                continue;
+            };
+
+
             func.call(
                 realm,
-                vec![key.copy(), value.upgrade().unwrap_or(Value::Undefined), this.copy()],
+                vec![key, value, this.copy()],
                 realm.global.clone().into(),
             )?;
         }
@@ -116,11 +125,11 @@ impl WeakMap {
     }
 
     #[prop("getOrInsert")]
-    fn get_or_insert(&self, key: Value, value: Value) -> ValueResult {
+    fn get_or_insert(&self, key: &Value, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        inner.map.entry(key).or_insert(value.downgrade());
-        
+        inner.map.entry(key.downgrade()).or_insert(value.downgrade());
+
         Ok(value)
     }
 
@@ -137,11 +146,25 @@ impl WeakMap {
             return Err(Error::ty("Callback must be a function"));
         }
 
-        match inner.map.entry(key) {
-            Entry::Occupied(entry) => Ok(entry.get().upgrade().unwrap_or(Value::Undefined)),
+        match inner.map.entry(key.downgrade()) {
+            Entry::Occupied(mut entry) => {
+                if let Some(value) = entry.get().upgrade() {
+                    Ok(value)
+                } else {
+                    let value = callback.call(realm, vec![key], Value::Undefined)?;
+
+                    if value.is_undefined() {
+                        entry.shift_remove();
+                    } else {
+                        entry.insert(value.downgrade());
+                    }
+
+                    Ok(value)
+                }
+            }
 
             Entry::Vacant(entry) => {
-                let value = callback.call(realm, vec![entry.key().copy()], Value::Undefined)?;
+                let value = callback.call(realm, vec![key], Value::Undefined)?;
 
                 if !value.is_undefined() {
                     entry.insert(value.downgrade());
