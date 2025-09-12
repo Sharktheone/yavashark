@@ -342,6 +342,36 @@ impl<C: Realm> Value<C> {
             _ => Ok(self.copy()),
         }
     }
+    
+    pub fn downgrade(&self) -> WeakValue<C> {
+        match self {
+            Self::Null => WeakValue::Null,
+            Self::Undefined => WeakValue::Undefined,
+            Self::Number(n) => WeakValue::Number(*n),
+            Self::String(s) => WeakValue::String(s.clone()),
+            Self::Boolean(b) => WeakValue::Boolean(*b),
+            Self::Object(o) => WeakValue::Object(o.downgrade()),
+            Self::Symbol(s) => WeakValue::Symbol(s.clone()),
+            Self::BigInt(b) => WeakValue::BigInt(Rc::clone(b)),
+        }
+    }
+}
+
+
+
+impl<R: Realm> WeakValue<R> {
+    pub fn upgrade(&self) -> Option<Value<R>> {
+        Some(match self {
+            Self::Null => Value::Null,
+            Self::Undefined => Value::Undefined,
+            Self::Number(n) => Value::Number(*n),
+            Self::String(s) => Value::String(s.clone()),
+            Self::Boolean(b) => Value::Boolean(*b),
+            Self::Object(o) => Value::Object(o.upgrade()?),
+            Self::Symbol(s) => Value::Symbol(s.clone()),
+            Self::BigInt(b) => Value::BigInt(Rc::clone(b)),
+        })
+    }
 }
 
 #[cfg(any(test, debug_assertions, feature = "display_object"))]

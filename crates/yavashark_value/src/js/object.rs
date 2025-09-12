@@ -607,6 +607,11 @@ impl<C: Realm> Object<C> {
 
         Ok(properties)
     }
+
+    #[must_use]
+    pub fn downgrade(&self) -> WeakObject<C> {
+        WeakObject::new(self)
+    }
 }
 
 impl<C: Realm> From<Box<dyn Obj<C>>> for Object<C> {

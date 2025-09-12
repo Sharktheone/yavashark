@@ -1,5 +1,5 @@
 use crate::utils::ValueIterator;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, WeakValue};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
@@ -12,7 +12,7 @@ use yavashark_value::{Constructor, MutObj, Obj};
 pub struct WeakMap {
     // #[gc(untyped)] //TODO: this is a memleak!
     #[mutable]
-    map: IndexMap<Value, Value, FxBuildHasher>,
+    map: IndexMap<Value, WeakValue, FxBuildHasher>,
 }
 
 #[object(constructor)]
@@ -30,7 +30,7 @@ impl Constructor<Realm> for WeakMapConstructor {
                 let key = val.get_property(&0.into(), realm)?;
                 let value = val.get_property(&1.into(), realm)?;
 
-                map.insert(key, value);
+                map.insert(key, value.downgrade());
             }
         }
 
@@ -83,7 +83,7 @@ impl WeakMap {
         inner
             .map
             .get(key)
-            .map_or_else(|| Ok(Value::Undefined), |value| Ok(value.clone()))
+            .map_or_else(|| Ok(Value::Undefined), |value| Ok(value.upgrade().unwrap_or(Value::Undefined)))
     }
 
     fn has(&self, key: &Value) -> bool {
@@ -95,7 +95,7 @@ impl WeakMap {
     fn set(&self, key: Value, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        inner.map.insert(key, value.copy());
+        inner.map.insert(key, value.downgrade());
 
         Ok(value)
     }
@@ -107,7 +107,7 @@ impl WeakMap {
         for (key, value) in &inner.map {
             func.call(
                 realm,
-                vec![key.copy(), value.copy(), this.copy()],
+                vec![key.copy(), value.upgrade().unwrap_or(Value::Undefined), this.copy()],
                 realm.global.clone().into(),
             )?;
         }
@@ -119,7 +119,9 @@ impl WeakMap {
     fn get_or_insert(&self, key: Value, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        Ok(inner.map.entry(key).or_insert(value).clone())
+        inner.map.entry(key).or_insert(value.downgrade());
+        
+        Ok(value)
     }
 
     #[prop("getOrInsertComputed")]
@@ -136,13 +138,13 @@ impl WeakMap {
         }
 
         match inner.map.entry(key) {
-            Entry::Occupied(entry) => Ok(entry.get().clone()),
+            Entry::Occupied(entry) => Ok(entry.get().upgrade().unwrap_or(Value::Undefined)),
 
             Entry::Vacant(entry) => {
                 let value = callback.call(realm, vec![entry.key().copy()], Value::Undefined)?;
 
                 if !value.is_undefined() {
-                    entry.insert(value.copy());
+                    entry.insert(value.downgrade());
                 }
 
                 Ok(value)

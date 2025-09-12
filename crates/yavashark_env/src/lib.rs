@@ -35,6 +35,7 @@ pub use yavashark_value as value;
 use yavashark_value::{BoxedObj, Location};
 
 pub type Value = yavashark_value::Value<Realm>;
+pub type WeakValue = yavashark_value::WeakValue<Realm>;
 pub type Error = yavashark_value::Error<Realm>;
 pub type ObjectHandle = yavashark_value::Object<Realm>;
 pub type WeakObjectHandle = yavashark_value::WeakObject<Realm>;
