@@ -4,8 +4,8 @@ use crate::object::common;
 use crate::utils::coerce_object;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::mem;
+use indexmap::IndexMap;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
 
@@ -254,7 +254,7 @@ impl ObjectConstructor {
     fn group_by(items: Value, callback: Value, #[realm] realm: &mut Realm) -> ValueResult {
         let iter = items.iter_no_realm(realm)?;
 
-        let mut groups = HashMap::new();
+        let mut groups = IndexMap::new();
 
         while let Some(item) = iter.next(realm)? {
             let key = callback.call(realm, vec![item.clone()], Value::Undefined)?;
