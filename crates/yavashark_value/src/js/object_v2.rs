@@ -1,3 +1,6 @@
+#![allow(warnings)]
+
+
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ptr::NonNull;
