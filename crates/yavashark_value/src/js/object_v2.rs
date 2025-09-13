@@ -20,13 +20,18 @@ pub trait ObjV2: Collectable + Debug + 'static {
     fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res;
     fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res;
 
-    fn resolve_property(&self, name: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
-    fn get_own_property(&self, name: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
 
     fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res;
     fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res;
 
-    fn delete_property(&self, name: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
+    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
+
 
     fn contains_own_key(&self, name: &InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
 
