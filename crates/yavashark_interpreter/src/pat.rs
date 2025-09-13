@@ -117,7 +117,7 @@ impl Interpreter {
                                 .unwrap_or(Value::Undefined);
 
                             if let Some(val_expr) = &assign.value {
-                                if value.is_nullish() {
+                                if value.is_undefined() {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
                                 }
                             }
