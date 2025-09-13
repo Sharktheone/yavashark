@@ -2,11 +2,12 @@ use crate::realm::Realm;
 use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
 pub use prototype::*;
-use rustc_hash::FxHashMap;
+use rustc_hash::{FxBuildHasher};
 use std::cell::{Ref, RefCell, RefMut};
-use std::collections::hash_map::Entry;
 use std::fmt::Debug;
 use std::mem;
+use indexmap::IndexMap;
+use indexmap::map::Entry;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
 use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
@@ -26,7 +27,7 @@ pub struct Object {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct MutObject {
-    pub properties: FxHashMap<PropertyKey, usize>,
+    pub properties: IndexMap<PropertyKey, usize, FxBuildHasher>,
     pub array: Vec<(usize, usize)>,
     pub values: Vec<ObjectProperty>,
     pub prototype: ObjectProperty,
@@ -498,7 +499,7 @@ impl MutObj<Realm> for MutObject {
 
         Ok(self
             .properties
-            .get(&key.into())
+            .get::<PropertyKey>(&key.into())
             .and_then(|idx| self.values.get(*idx))
             .cloned()
             .or_else(|| match &self.prototype.value {
@@ -518,7 +519,7 @@ impl MutObj<Realm> for MutObject {
             return Ok(self.get_array(n).cloned());
         }
 
-        if let Some(prop) = self.properties.get(&key.into()) {
+        if let Some(prop) = self.properties.get::<PropertyKey>(&key.into()) {
             return Ok(self.values.get(*prop).cloned());
         }
 
@@ -619,7 +620,7 @@ impl MutObj<Realm> for MutObject {
             return Ok(self.contains_array_key(n));
         }
 
-        Ok(self.properties.contains_key(&name.into()))
+        Ok(self.properties.contains_key::<PropertyKey>(&name.into()))
     }
 
     fn name(&self) -> String {
