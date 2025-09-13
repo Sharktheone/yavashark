@@ -29,6 +29,7 @@ pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
+mod object_v2;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {
@@ -740,7 +741,7 @@ impl<C: Realm> Iter<C> {
     pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
         self.next_obj.iter_next(realm)
     }
-    
+
     pub fn close(self, realm: &mut C) -> Result<(), Error<C>> {
         self.next_obj.iter_close(realm)
     }
@@ -770,7 +771,7 @@ impl<C: Realm> Value<C> {
     pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
         self.as_object()?.iter_next_is_finished(realm)
     }
-    
+
     pub fn iter_close(&self, realm: &mut C) -> Result<(), Error<C>> {
         let obj = self.as_object()?;
         let return_method = obj.resolve_property(&"return".into(), realm)?;
