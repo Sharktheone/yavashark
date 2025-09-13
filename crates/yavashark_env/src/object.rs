@@ -598,7 +598,7 @@ impl MutObj<Realm> for MutObject {
                 .ok_or_else(|| Error::new("Failed to get value for property"))?;
 
             return if prop.attributes.is_configurable() {
-                occ.remove();
+                occ.shift_remove();
                 Ok(Some(mem::replace(&mut prop.value, Value::Undefined)))
             } else {
                 // Err(Error::ty("Property is not configurable")) // this is only in strict mode
