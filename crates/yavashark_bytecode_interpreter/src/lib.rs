@@ -85,6 +85,7 @@ impl ByteCodeInterpreter {
             let g = GeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
             g.define_variable("length".into(), len.into())?;
+            g.define_variable("name".into(), name.into())?;
 
             return Ok(g.into_object());
         }
@@ -93,6 +94,7 @@ impl ByteCodeInterpreter {
             let g = AsyncGeneratorFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
             g.define_variable("length".into(), len.into())?;
+            g.define_variable("name".into(), name.into())?;
 
             return Ok(g.into_object());
         }
