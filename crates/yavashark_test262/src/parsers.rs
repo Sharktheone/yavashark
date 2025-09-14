@@ -2,8 +2,23 @@ use std::path::PathBuf;
 use swc_common::BytePos;
 use swc_common::input::StringInput;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+use yavashark_env::Error;
 use crate::metadata::NegativePhase;
 use crate::utils::parse_metadata;
+
+
+
+pub fn test_file(file: PathBuf) -> Result<String, Error> {
+    #[cfg(not(feature = "oxc"))]
+    test_parse_swc(file.clone());
+
+    #[cfg(feature = "oxc")]
+    test_parse_oxc(file);
+
+
+    Ok(String::new())
+}
+
 
 pub fn test_parse_swc(file: PathBuf) {
     let input = std::fs::read_to_string(&file).unwrap();

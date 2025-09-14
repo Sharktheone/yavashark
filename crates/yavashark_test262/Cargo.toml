@@ -33,3 +33,4 @@ bitflags = "2.6.0"
 [features]
 default = []
 oxc = ["dep:oxc"]
+parser_test = []

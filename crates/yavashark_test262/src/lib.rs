@@ -3,7 +3,7 @@ mod metadata;
 pub mod run;
 mod test262;
 mod utils;
-mod parsers;
+pub mod parsers;
 
 pub type Value = yavashark_value::Value<Realm>;
 pub type Error = yavashark_value::Error<Realm>;
