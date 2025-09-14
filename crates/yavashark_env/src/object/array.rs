@@ -929,7 +929,12 @@ impl Array {
         Ok(Value::Number(-1.0))
     }
 
-    fn map(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, this_arg: Option<Value>) -> ValueResult {
+    fn map(
+        #[this] this: Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+        this_arg: Option<Value>,
+    ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this

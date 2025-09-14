@@ -121,14 +121,8 @@ impl WeakSet {
             let Some(key) = key.upgrade() else {
                 continue;
             };
-            
-            
-            
-            func.call(
-                realm,
-                vec![key, this.copy()],
-                realm.global.clone().into(),
-            )?;
+
+            func.call(realm, vec![key, this.copy()], realm.global.clone().into())?;
         }
 
         Ok(Value::Undefined)

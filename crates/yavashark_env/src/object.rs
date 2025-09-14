@@ -1,13 +1,13 @@
 use crate::realm::Realm;
 use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
+use indexmap::map::Entry;
+use indexmap::IndexMap;
 pub use prototype::*;
-use rustc_hash::{FxBuildHasher};
+use rustc_hash::FxBuildHasher;
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 use std::mem;
-use indexmap::IndexMap;
-use indexmap::map::Entry;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
 use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};

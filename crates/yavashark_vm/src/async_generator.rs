@@ -59,9 +59,9 @@ impl AsyncGeneratorFunction {
         }
     }
 
-
     pub fn update_name(&self, n: &str) -> Res {
-        let name = self.get_property(&"name".into())
+        let name = self
+            .get_property(&"name".into())
             .ok()
             .flatten()
             .and_then(|v| v.value.to_string_no_realm().ok())

@@ -211,7 +211,6 @@ pub fn set_value_name(name: &str, value: &Value) -> Res {
 
         if let Some(gen) = obj.downcast::<AsyncGeneratorFunction>() {
             gen.update_name(name)?;
-
         }
     }
 

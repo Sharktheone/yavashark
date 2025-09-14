@@ -52,7 +52,6 @@ impl ByteCodeInterpreter {
             }));
         }
 
-
         let len = func.params.last().map_or(0, |last| {
             if last.pat.is_rest() {
                 func.params.len() - 1
@@ -60,7 +59,6 @@ impl ByteCodeInterpreter {
                 func.params.len()
             }
         });
-
 
         let params = {
             let (params_code, params_defs) =
@@ -115,7 +113,5 @@ impl ByteCodeInterpreter {
         f.define_variable("length".into(), len.into())?;
 
         Ok(f)
-
-
     }
 }

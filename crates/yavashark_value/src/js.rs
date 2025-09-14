@@ -2,6 +2,7 @@ use crate::Error;
 pub use constructor::*;
 pub use context::*;
 pub use conversion::*;
+use equivalent::Equivalent;
 pub use function::*;
 pub use name::*;
 use num_bigint::BigInt;
@@ -11,7 +12,6 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
-use equivalent::Equivalent;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
@@ -25,11 +25,11 @@ mod name;
 mod obj;
 mod object;
 mod object_impl;
+mod object_v2;
 pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
-mod object_v2;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub enum ConstString {
@@ -69,7 +69,6 @@ pub enum Value<C: Realm> {
     BigInt(Rc<BigInt>),
 }
 
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum WeakValue<C: Realm> {
     Null,
@@ -90,7 +89,6 @@ impl<C: Realm> Clone for Value<C> {
 
 impl<C: Realm> Eq for Value<C> {}
 impl<C: Realm> Eq for WeakValue<C> {}
-
 
 impl<R: Realm> Equivalent<Value<R>> for WeakValue<R> {
     fn equivalent(&self, other: &Value<R>) -> bool {
@@ -127,7 +125,6 @@ impl<R: Realm> Hash for WeakValue<R> {
             Self::BigInt(b) => (Type::BigInt, b).hash(state),
         }
     }
-
 }
 
 impl<C: Realm> AsRef<Self> for Value<C> {
@@ -398,8 +395,6 @@ impl<C: Realm> Value<C> {
         }
     }
 }
-
-
 
 impl<R: Realm> WeakValue<R> {
     pub fn upgrade(&self) -> Option<Value<R>> {

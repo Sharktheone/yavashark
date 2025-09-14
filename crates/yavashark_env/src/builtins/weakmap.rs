@@ -79,10 +79,10 @@ impl WeakMap {
     fn get(&self, key: &Value) -> ValueResult {
         let inner = self.inner.borrow();
 
-        inner
-            .map
-            .get(key)
-            .map_or_else(|| Ok(Value::Undefined), |value| Ok(value.upgrade().unwrap_or(Value::Undefined)))
+        inner.map.get(key).map_or_else(
+            || Ok(Value::Undefined),
+            |value| Ok(value.upgrade().unwrap_or(Value::Undefined)),
+        )
     }
 
     fn has(&self, key: &Value) -> bool {
@@ -112,7 +112,6 @@ impl WeakMap {
                 continue;
             };
 
-
             func.call(
                 realm,
                 vec![key, value, this.copy()],
@@ -127,7 +126,10 @@ impl WeakMap {
     fn get_or_insert(&self, key: &Value, value: Value) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        inner.map.entry(key.downgrade()).or_insert(value.downgrade());
+        inner
+            .map
+            .entry(key.downgrade())
+            .or_insert(value.downgrade());
 
         Ok(value)
     }

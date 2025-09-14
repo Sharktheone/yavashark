@@ -3,9 +3,9 @@ use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
 use crate::utils::coerce_object;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
+use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
-use indexmap::IndexMap;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Func, IntoValue, Obj};
 

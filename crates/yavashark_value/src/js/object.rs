@@ -1,3 +1,8 @@
+use super::Value;
+use crate::js::context::Realm;
+use crate::variable::Variable;
+use crate::{Attributes, Error, IntoValue, IntoValueRef, Symbol};
+use equivalent::Equivalent;
 use std::any::{Any, TypeId};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
@@ -5,11 +10,6 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
-use equivalent::Equivalent;
-use super::Value;
-use crate::js::context::Realm;
-use crate::variable::Variable;
-use crate::{Attributes, Error, IntoValue, IntoValueRef, Symbol};
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard, Weak};
 use yavashark_string::{ToYSString, YSString};
 
@@ -641,7 +641,6 @@ impl<C: Realm> Object<C> {
     }
 }
 
-
 #[derive(Clone)]
 pub struct WeakObject<C: Realm>(Weak<BoxedObj<C>>);
 
@@ -665,13 +664,11 @@ impl<R: Realm> Debug for WeakObject<R> {
     }
 }
 
-
 impl<C: Realm> PartialEq for WeakObject<C> {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
-
 
 impl<R: Realm> Equivalent<Object<R>> for WeakObject<R> {
     fn equivalent(&self, key: &Object<R>) -> bool {
@@ -685,13 +682,11 @@ impl<R: Realm> Equivalent<WeakObject<R>> for Object<R> {
     }
 }
 
-
 impl<R: Realm> Hash for WeakObject<R> {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.0.as_ptr().hash(state);
     }
 }
-
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Hint {

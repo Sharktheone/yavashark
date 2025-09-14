@@ -1,11 +1,10 @@
 #![allow(warnings)]
 
-
+use crate::property_key::InternalPropertyKey;
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ptr::NonNull;
 use yavashark_garbage::Collectable;
-use crate::property_key::InternalPropertyKey;
 
 pub struct Realm;
 
@@ -17,54 +16,113 @@ type ObjectHandle = ();
 
 type NullableObjectHandle = Option<ObjectHandle>;
 
-
 type PreHashedPropertyKey = (InternalPropertyKey, u64);
-
-
 
 pub trait ObjV2: Collectable + Debug + 'static {
     fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res;
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res;
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res;
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Variable>>;
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Variable>>;
 
-    fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res;
-    fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res;
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res;
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res;
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Variable>>;
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Variable>>;
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
 
-
-    fn define_property_pre_hash(&self, name: PreHashedPropertyKey, value: Value, realm: &mut Realm) -> Res {
+    fn define_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res {
         self.define_property(name.0, value, realm)
     }
-    fn define_property_attributes_pre_hash(&self, name: PreHashedPropertyKey, value: Variable, realm: &mut Realm) -> Res {
+    fn define_property_attributes_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res {
         self.define_property_attributes(name.0, value, realm)
     }
 
-    fn resolve_property_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<Option<Variable>> {
+    fn resolve_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Variable>> {
         self.resolve_property(name.0, realm)
     }
-    fn get_own_property_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<Option<Variable>> {
+    fn get_own_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Variable>> {
         self.get_own_property(name.0, realm)
     }
 
-    fn define_getter_pre_hash(&self, name: PreHashedPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         self.define_getter(name.0, callback, realm)
     }
-    fn define_setter_pre_hash(&self, name: PreHashedPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         self.define_setter(name.0, callback, realm)
     }
 
-    fn delete_property_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<Option<Variable>> {
+    fn delete_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Variable>> {
         self.delete_property(name.0, realm)
     }
 
-    fn contains_own_key_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<bool> {
+    fn contains_own_key_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<bool> {
         self.contains_own_key(name.0, realm)
     }
 
@@ -93,7 +151,6 @@ pub trait ObjV2: Collectable + Debug + 'static {
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle>; //TODO: i think this somehow needs to work differently
     fn is_constructable(&self) -> bool;
-
 
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()

@@ -1,12 +1,10 @@
-use std::path::PathBuf;
-use swc_common::BytePos;
-use swc_common::input::StringInput;
-use swc_ecma_parser::{EsSyntax, Parser, Syntax};
-use yavashark_env::Error;
 use crate::metadata::NegativePhase;
 use crate::utils::parse_metadata;
-
-
+use std::path::PathBuf;
+use swc_common::input::StringInput;
+use swc_common::BytePos;
+use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+use yavashark_env::Error;
 
 pub fn test_file(file: PathBuf) -> Result<String, Error> {
     #[cfg(not(feature = "oxc"))]
@@ -15,10 +13,8 @@ pub fn test_file(file: PathBuf) -> Result<String, Error> {
     #[cfg(feature = "oxc")]
     test_parse_oxc(file);
 
-
     Ok(String::new())
 }
-
 
 pub fn test_parse_swc(file: PathBuf) {
     let input = std::fs::read_to_string(&file).unwrap();
@@ -47,7 +43,7 @@ pub fn test_parse_swc(file: PathBuf) {
         Err(e) => {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    return
+                    return;
                 }
             }
 
@@ -57,32 +53,27 @@ pub fn test_parse_swc(file: PathBuf) {
     };
 }
 
-
-
 #[cfg(feature = "oxc")]
 pub fn test_parse_oxc(file: PathBuf) {
     oxc_parser::test_parse_oxc(file)
-
 }
-
 
 #[cfg(feature = "oxc")]
 mod oxc_parser {
-    use std::path::PathBuf;
-    use oxc::allocator::Allocator;
-    use oxc::span::SourceType;
     use crate::metadata::NegativePhase;
     use crate::utils::parse_metadata;
+    use oxc::allocator::Allocator;
+    use oxc::span::SourceType;
+    use std::path::PathBuf;
 
     pub fn test_parse_oxc(file: PathBuf) {
         let input = std::fs::read_to_string(&file).unwrap();
 
         let metadata = parse_metadata(&input);
 
-
         let alloc = Allocator::default();
 
-        let parser =  oxc::parser::Parser::new(&alloc, &input, SourceType::default());
+        let parser = oxc::parser::Parser::new(&alloc, &input, SourceType::default());
 
         let res = parser.parse();
 
@@ -96,7 +87,7 @@ mod oxc_parser {
         } else {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    return
+                    return;
                 }
             }
 
