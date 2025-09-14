@@ -11,6 +11,7 @@ use yavashark_env::value::Obj;
 use yavashark_env::{Class, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_string::YSString;
 use yavashark_value::IntoValue;
+use yavashark_vm::generator::GeneratorFunction;
 
 impl Interpreter {
     pub fn run_pat(
@@ -201,6 +202,10 @@ pub fn set_value_name(name: &str, value: &Value) -> Res {
 
         if let Some(class) = obj.downcast::<Class>() {
             class.update_name(name)?;
+        }
+
+        if let Some(gen) = obj.downcast::<GeneratorFunction>() {
+            gen.update_name(name)?;
         }
     }
 
