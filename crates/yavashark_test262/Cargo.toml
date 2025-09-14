@@ -12,6 +12,9 @@ yavashark_interpreter = { path = "../yavashark_interpreter", features = ["vm", "
 yavashark_string = { path = "../yavashark_string" }
 yavashark_vm = { path = "../yavashark_vm" }
 tokio = { version = "1.47.1", features = ["rt"]}
+oxc = { version = "0.87.0", optional = true}
+
+
 
 
 
@@ -26,3 +29,7 @@ bitflags = "2.6.0"
 
 [lints]
 #workspace = true # this is test code, so we are fine, not having all clippy lints
+
+[features]
+default = []
+oxc = ["dep:oxc"]
