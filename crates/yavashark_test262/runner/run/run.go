@@ -17,7 +17,7 @@ var SKIP = []string{
 	"staging",
 }
 
-func TestsInDir(testRoot string, workers int) *results.TestResults {
+func TestsInDir(testRoot string, workers int, skips bool) *results.TestResults {
 	jobs := make(chan string, workers*8)
 
 	resultsChan := make(chan results.Result, workers*8)
@@ -61,17 +61,19 @@ func TestsInDir(testRoot string, workers int) *results.TestResults {
 			return nil
 		}
 
-		for _, skip := range SKIP {
-			if strings.HasPrefix(p, skip) {
-				resultsChan <- results.Result{
-					Status:   status.SKIP,
-					Msg:      "skip",
-					Path:     path,
-					MemoryKB: 0,
-					Duration: 0,
-				}
+		if skips {
+			for _, skip := range SKIP {
+				if strings.HasPrefix(p, skip) {
+					resultsChan <- results.Result{
+						Status:   status.SKIP,
+						Msg:      "skip",
+						Path:     path,
+						MemoryKB: 0,
+						Duration: 0,
+					}
 
-				return nil
+					return nil
+				}
 			}
 		}
 

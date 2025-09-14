@@ -1,7 +1,6 @@
 package router
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -9,6 +8,8 @@ import (
 	"viewer/conf"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/run"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 var (
@@ -36,7 +37,7 @@ func rerunAll(c *fiber.Ctx) error {
 
 	defer testRun.Unlock()
 
-	res := run.TestsInDir(conf.TestRoot, conf.Workers)
+	res := run.TestsInDir(conf.TestRoot, conf.Workers, true)
 	res.Write()
 
 	resCi := results.ConvertResultsToCI(res.TestResults, conf.TestRoot)
@@ -62,7 +63,7 @@ func rerun(c *fiber.Ctx) error {
 
 	fullPath := filepath.Join(conf.TestRoot, path)
 
-	run.TestsInDir(fullPath, conf.Workers)
+	run.TestsInDir(fullPath, conf.Workers, true)
 
 	return current(c)
 }

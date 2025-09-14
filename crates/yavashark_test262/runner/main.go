@@ -18,7 +18,7 @@ func main() {
 
 	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 
-	testResults := run.TestsInDir(testRoot, config.Workers)
+	testResults := run.TestsInDir(testRoot, config.Workers, config.Skips)
 
 	if config.Diff && !config.CI {
 		printDiff(testResults, config.DiffFilter)
