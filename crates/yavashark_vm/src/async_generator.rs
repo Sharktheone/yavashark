@@ -14,6 +14,7 @@ use yavashark_env::conversion::downcast_obj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
+use yavashark_string::YSString;
 use yavashark_value::{Error, Func, Obj};
 
 #[object(function)]
@@ -56,6 +57,32 @@ impl AsyncGeneratorFunction {
             scope: Scope::new(realm, PathBuf::new()),
             params: VMParams::default(),
         }
+    }
+
+
+    pub fn update_name(&self, n: &str) -> Res {
+        let name = self.get_property(&"name".into())
+            .ok()
+            .flatten()
+            .and_then(|v| v.value.to_string_no_realm().ok())
+            .unwrap_or_default();
+
+        if name.is_empty() {
+            self.inner
+                .try_borrow_mut()?
+                .object
+                .force_update_property_cb("name".into(), |v| {
+                    if let Some(v) = v {
+                        if !v.value.is_string() {
+                            return None;
+                        }
+                    }
+
+                    Some(YSString::from_ref(n).into())
+                })?;
+        }
+
+        Ok(())
     }
 }
 
