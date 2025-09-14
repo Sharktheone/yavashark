@@ -65,7 +65,8 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
     (s, metadata)
 }
 
-fn parse_metadata(input: &str) -> Metadata {
+
+pub fn parse_metadata(input: &str) -> Metadata {
     let Some(start) = input.find("\n/*---\n").map(|x| x + 7) else {
         return parse_metadata_comments(input);
     };
