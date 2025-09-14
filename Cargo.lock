@@ -3842,9 +3842,9 @@ dependencies = [
 
 [[package]]
 name = "swc_common"
-version = "14.0.2"
+version = "14.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7e510ae120281a9daee0b9246b6740b509b99bd78f88b2a7210c87ec78572a7"
+checksum = "63fdb58d278e7cd625f671e5371b3e6c0eab56c6e2a995a6f70dd0f7725255d4"
 dependencies = [
  "anyhow",
  "ast_node",
@@ -3888,9 +3888,9 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_ast"
-version = "14.0.0"
+version = "15.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5d8d26e697ce58654f0816890af7a28efd8660c154b613acefa2d3727e8ec93"
+checksum = "65c25af97d53cf8aab66a6c68f3418663313fc969ad267fc2a4d19402c329be1"
 dependencies = [
  "bitflags 2.8.0",
  "is-macro",
@@ -3900,7 +3900,7 @@ dependencies = [
  "rustc-hash 2.1.1",
  "string_enum",
  "swc_atoms 7.0.0",
- "swc_common 14.0.2",
+ "swc_common 14.0.3",
  "swc_visit",
  "unicode-id-start",
 ]
@@ -3932,9 +3932,9 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_lexer"
-version = "22.0.2"
+version = "23.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "69ec39d3c46e3a76129ad5b7032d509240fb150cf1a2e8a57b368bfd5ec3f9cd"
+checksum = "67c3bd958a5a67e2cc3f74abdd41fda688e54e7a25b866569260ef7018b67972"
 dependencies = [
  "arrayvec",
  "bitflags 2.8.0",
@@ -3948,8 +3948,8 @@ dependencies = [
  "smartstring",
  "stacker",
  "swc_atoms 7.0.0",
- "swc_common 14.0.2",
- "swc_ecma_ast 14.0.0",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
  "tracing",
 ]
 
@@ -3981,17 +3981,17 @@ dependencies = [
 
 [[package]]
 name = "swc_ecma_parser"
-version = "22.0.3"
+version = "24.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a43a77589c03110cb7f749b0e3feb8a75c5a81e9e539bde2873ddd5072fcb13"
+checksum = "e8079e65c43d8f3e64e791321355f5864322425fce3a3ab7fc959bbddb531933"
 dependencies = [
  "either",
  "num-bigint",
  "serde",
  "swc_atoms 7.0.0",
- "swc_common 14.0.2",
- "swc_ecma_ast 14.0.0",
- "swc_ecma_lexer 22.0.2",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
+ "swc_ecma_lexer 23.0.1",
  "tracing",
 ]
 
@@ -5342,9 +5342,9 @@ dependencies = [
  "js-sys",
  "rustyline",
  "rustyline-derive",
- "swc_common 14.0.2",
- "swc_ecma_ast 14.0.0",
- "swc_ecma_parser 22.0.3",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
+ "swc_ecma_parser 24.0.1",
  "tokio",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -5361,7 +5361,7 @@ version = "0.1.0"
 dependencies = [
  "bincode",
  "num-bigint",
- "swc_ecma_ast 14.0.0",
+ "swc_ecma_ast 15.0.0",
  "yavashark_value",
 ]
 
@@ -5369,7 +5369,7 @@ dependencies = [
 name = "yavashark_bytecode_interpreter"
 version = "0.1.0"
 dependencies = [
- "swc_ecma_ast 14.0.0",
+ "swc_ecma_ast 15.0.0",
  "yavashark_bytecode",
  "yavashark_codegen",
  "yavashark_compiler",
@@ -5383,9 +5383,9 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "log",
- "swc_common 14.0.2",
- "swc_ecma_ast 14.0.0",
- "swc_ecma_parser 22.0.3",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
+ "swc_ecma_parser 24.0.1",
  "yavashark_bytecode",
 ]
 
@@ -5396,7 +5396,7 @@ dependencies = [
  "anyhow",
  "log",
  "num-traits",
- "swc_ecma_ast 14.0.0",
+ "swc_ecma_ast 15.0.0",
  "yavashark_bytecode",
 ]
 
@@ -5427,7 +5427,7 @@ dependencies = [
  "rustc-hash 2.1.1",
  "serde",
  "serde_json",
- "swc_ecma_ast 14.0.0",
+ "swc_ecma_ast 15.0.0",
  "temporal_rs",
  "tokio",
  "unicode-normalization",
@@ -5459,9 +5459,9 @@ version = "0.1.0"
 dependencies = [
  "env_logger",
  "log",
- "swc_common 14.0.2",
- "swc_ecma_ast 14.0.0",
- "swc_ecma_parser 22.0.3",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
+ "swc_ecma_parser 24.0.1",
  "yavashark_bytecode_interpreter",
  "yavashark_env",
  "yavashark_garbage",
@@ -5518,9 +5518,9 @@ name = "yavashark_test262"
 version = "0.1.0"
 dependencies = [
  "bitflags 2.8.0",
- "swc_common 14.0.2",
- "swc_ecma_ast 14.0.0",
- "swc_ecma_parser 22.0.3",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
+ "swc_ecma_parser 24.0.1",
  "tokio",
  "yaml-rust2",
  "yavashark_env",
@@ -5552,7 +5552,7 @@ name = "yavashark_vm"
 version = "0.1.0"
 dependencies = [
  "log",
- "swc_ecma_ast 14.0.0",
+ "swc_ecma_ast 15.0.0",
  "tokio",
  "yavashark_bytecode",
  "yavashark_env",

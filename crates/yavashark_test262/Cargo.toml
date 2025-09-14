@@ -16,9 +16,9 @@ tokio = { version = "1.47.1", features = ["rt"]}
 
 
 
-swc_common = "14.0.2"
-swc_ecma_parser = "22.0.3"
-swc_ecma_ast = "14.0.0"
+swc_common = "14.0.3"
+swc_ecma_parser = "24.0.1"
+swc_ecma_ast = "15.0.0"
 yaml-rust2 = "0.10.0"
 bitflags = "2.6.0"
 
