@@ -5788,6 +5788,7 @@ dependencies = [
  "yavashark_garbage",
  "yavashark_macro",
  "yavashark_string",
+ "yavashark_swc_validator",
  "yavashark_value",
  "yavashark_vm",
 ]
