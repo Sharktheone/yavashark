@@ -13,7 +13,7 @@ yavashark_string = { path = "../yavashark_string" }
 yavashark_vm = { path = "../yavashark_vm" }
 yavashark_swc_validator = { path = "../yavashark_swc_validator" }
 tokio = { version = "1.47.1", features = ["rt"]}
-oxc = { version = "0.87.0", optional = true}
+oxc = { version = "0.89.0", optional = true}
 
 
 
