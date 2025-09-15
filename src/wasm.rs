@@ -10,6 +10,7 @@ use wasm_bindgen::prelude::*;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res, ValueResult};
 use yavashark_interpreter::Interpreter;
+use yavashark_swc_validator::validate_statements;
 
 #[wasm_bindgen(start)]
 fn init() {
@@ -30,6 +31,11 @@ fn parse(input: &str) -> Res<Vec<Stmt>> {
     let script = p
         .parse_script()
         .map_err(|e| yavashark_env::Error::syn_error(format!("{e:?}")))?;
+
+
+    if let Err(e) = validate_statements(&script.body) {
+        return Err(yavashark_env::Error::syn_error(e));
+    }
 
     Ok(script.body)
 }
