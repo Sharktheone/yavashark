@@ -142,6 +142,11 @@ fn run_input(
         }
     };
 
+    if let Err(e) = yavashark_swc_validator::validate_statements(&script.body) {
+        eprintln!("SyntaxError: {e}");
+        return;
+    }
+
     if conf.ast {
         println!("AST:\n{script:#?}");
     }
