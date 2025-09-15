@@ -1,0 +1,11 @@
+[package]
+name = "yavashark_swc_validator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+swc_common = "14.0.3"
+swc_ecma_ast = "15.0.0"
+
+[lints]
+workspace = true
