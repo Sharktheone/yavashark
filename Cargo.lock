@@ -5673,6 +5673,7 @@ dependencies = [
  "yavashark_compiler",
  "yavashark_env",
  "yavashark_interpreter",
+ "yavashark_swc_validator",
  "yavashark_vm",
 ]
 
