@@ -764,6 +764,7 @@ impl Array {
         #[this] this: Value,
         #[realm] realm: &mut Realm,
         func: &ObjectHandle,
+        this_arg: Option<Value>,
     ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
@@ -772,6 +773,8 @@ impl Array {
             .unwrap_or(Value::Undefined);
 
         let len = len.to_number(realm)? as usize;
+        
+        let this_arg = this_arg.unwrap_or(realm.global.clone().into());
 
         for idx in 0..len {
             let (_, val) = this.get_array_or_done(idx)?;
@@ -780,7 +783,7 @@ impl Array {
                 func.call(
                     realm,
                     vec![val.clone(), idx.into(), this.clone().into()],
-                    realm.global.clone().into(),
+                    this_arg.clone(),
                 )?;
             }
         }
