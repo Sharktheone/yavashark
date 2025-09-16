@@ -68,7 +68,7 @@ impl Validator {
 
             Stmt::Decl(decl) => Self::validate_decl(decl),
 
-            Stmt::Expr(expr) => Self::validate_expr(expr),
+            Stmt::Expr(expr) => Self::validate_expr_stmt(expr),
         }
     }
 
