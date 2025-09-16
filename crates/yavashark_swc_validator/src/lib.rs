@@ -19,7 +19,7 @@ mod try_;
 mod with;
 mod whle;
 
-use swc_ecma_ast::{ModuleItem, Stmt};
+use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
 
 pub struct Validator;
 
@@ -82,7 +82,7 @@ impl Validator {
         Ok(())
     }
 
-    pub fn validate_module_decl(decl: &swc_ecma_ast::ModuleDecl) -> Result<(), String> {
+    pub fn validate_module_decl(_decl: &ModuleDecl) -> Result<(), String> {
         Ok(())
     }
 }
