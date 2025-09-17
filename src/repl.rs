@@ -15,6 +15,7 @@ use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
 use yavashark_interpreter::eval::InterpreterEval;
+use yavashark_swc_validator::Validator;
 
 pub fn repl(conf: Conf) -> Res {
     let path = Path::new("repl.js");
@@ -142,7 +143,7 @@ fn run_input(
         }
     };
 
-    if let Err(e) = yavashark_swc_validator::validate_statements(&script.body) {
+    if let Err(e) = Validator::validate_statements(&script.body) {
         eprintln!("SyntaxError: {e}");
         return;
     }
