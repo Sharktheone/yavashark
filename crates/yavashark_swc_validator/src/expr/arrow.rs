@@ -1,8 +1,19 @@
-use swc_ecma_ast::ArrowExpr;
+use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 use crate::Validator;
 
 impl Validator {
     pub fn validate_arrow_expr(arrow: &ArrowExpr) -> Result<(), String> {
-        Ok(())
+        for param in &arrow.params {
+            Self::validate_pat(param)?;
+        }
+
+        match &*arrow.body {
+            BlockStmtOrExpr::BlockStmt(block) => {
+                Self::validate_block(block)
+            },
+            BlockStmtOrExpr::Expr(expr) => {
+                Self::validate_expr(expr)
+            },
+        }
     }
 }
