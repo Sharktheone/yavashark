@@ -3,6 +3,6 @@ use crate::Validator;
 
 impl Validator {
     pub fn validate_update_expr(update: &UpdateExpr) -> Result<(), String> {
-        Ok(())
+        Self::validate_expr(&update.arg)
     }
 }
