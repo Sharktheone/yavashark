@@ -14,7 +14,7 @@ use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Realm};
 use yavashark_interpreter::eval::InterpreterEval;
-use yavashark_swc_validator::validate_statements;
+use yavashark_swc_validator::Validator;
 
 #[allow(clippy::unwrap_used)]
 fn main() {
@@ -130,7 +130,7 @@ fn main() {
             println!("AST:\n{script:#?}");
         }
         
-        if let Err(e) = validate_statements(&script.body) {
+        if let Err(e) = Validator::validate_statements(&script.body) {
             println!("SyntaxError: {e}");
             return;
         }
