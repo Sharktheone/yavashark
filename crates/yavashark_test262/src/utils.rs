@@ -37,6 +37,36 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let s = match p.parse_program() {
         Ok(s) => {
+            match &s {
+                Program::Script(script) => {
+                    if let Err(e) = Validator::validate_statements(&script.body) {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("VALIDATION_ERROR:\n{e:?}");
+                        panic!()
+
+                    }
+                }
+                Program::Module(module) => {
+                    if let Err(e) = Validator::validate_module_items(&module.body) {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("VALIDATION_ERROR:\n{e:?}");
+                        panic!()
+
+                    }
+                }
+            }
+
+
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
                     println!("PARSE_ERROR: Expected error but parsed successfully");
@@ -64,34 +94,6 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
     };
 
 
-    match &s {
-        Program::Script(script) => {
-            if let Err(e) = Validator::validate_statements(&script.body) {
-                if let Some(neg) = &metadata.negative {
-                    if neg.phase == NegativePhase::Parse {
-                        return (Program::Script(Script::dummy()), Metadata::default());
-                    }
-                }
-
-                println!("VALIDATION_ERROR:\n{e:?}");
-                panic!()
-
-            }
-        }
-        Program::Module(module) => {
-            if let Err(e) = Validator::validate_module_items(&module.body) {
-                if let Some(neg) = &metadata.negative {
-                    if neg.phase == NegativePhase::Parse {
-                        return (Program::Script(Script::dummy()), Metadata::default());
-                    }
-                }
-
-                println!("VALIDATION_ERROR:\n{e:?}");
-                panic!()
-
-            }
-        }
-    }
 
     (s, metadata)
 }
