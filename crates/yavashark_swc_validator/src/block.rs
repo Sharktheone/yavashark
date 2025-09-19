@@ -1,5 +1,5 @@
-use swc_ecma_ast::BlockStmt;
 use crate::Validator;
+use swc_ecma_ast::BlockStmt;
 
 impl Validator {
     pub fn validate_block(block: &BlockStmt) -> Result<(), String> {

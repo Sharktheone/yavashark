@@ -1,5 +1,5 @@
-use swc_ecma_ast::{ObjectPatProp, Pat};
 use crate::Validator;
+use swc_ecma_ast::{ObjectPatProp, Pat};
 
 impl Validator {
     pub fn validate_pat(pat: &Pat) -> Result<(), String> {

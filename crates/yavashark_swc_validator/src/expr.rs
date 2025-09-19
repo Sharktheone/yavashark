@@ -1,30 +1,30 @@
 mod array;
-mod object;
-mod function;
-mod unary;
-mod update;
-mod binary;
+mod arrow;
 mod assign;
-mod member;
-mod super_prop;
-mod cond;
+mod await_;
+mod binary;
 mod call;
-mod new;
-mod seq;
+mod class;
+mod cond;
+mod function;
 mod ident;
 mod lit;
-mod tpl;
-mod taged_tpl;
-mod arrow;
-mod class;
-mod yield_;
+mod member;
 mod meta_prop;
-mod await_;
-mod private_name;
+mod new;
+mod object;
 mod opt_chain;
+mod private_name;
+mod seq;
+mod super_prop;
+mod taged_tpl;
+mod tpl;
+mod unary;
+mod update;
+mod yield_;
 
-use swc_ecma_ast::{Expr, ExprStmt};
 use crate::Validator;
+use swc_ecma_ast::{Expr, ExprStmt};
 
 impl Validator {
     pub fn validate_expr_stmt(expr: &ExprStmt) -> Result<(), String> {

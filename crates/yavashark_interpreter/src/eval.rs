@@ -30,7 +30,6 @@ impl Eval for InterpreterEval {
         // let scope = &mut scope.child()?;
         // scope.state_set_function();
 
-
         if let Err(e) = Validator::validate_statements(&script.body) {
             return Err(Error::syn_error(e));
         }

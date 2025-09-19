@@ -1,5 +1,5 @@
-use swc_ecma_ast::BinExpr;
 use crate::Validator;
+use swc_ecma_ast::BinExpr;
 
 impl Validator {
     pub fn validate_binary_expr(bin: &BinExpr) -> Result<(), String> {

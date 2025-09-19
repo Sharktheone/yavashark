@@ -1,5 +1,5 @@
-use swc_ecma_ast::DoWhileStmt;
 use crate::Validator;
+use swc_ecma_ast::DoWhileStmt;
 
 impl Validator {
     pub fn validate_do_while(do_while: &DoWhileStmt) -> Result<(), String> {

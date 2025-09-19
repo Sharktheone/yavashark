@@ -1,5 +1,5 @@
-use swc_ecma_ast::IfStmt;
 use crate::Validator;
+use swc_ecma_ast::IfStmt;
 
 impl Validator {
     pub fn validate_if(if_: &IfStmt) -> Result<(), String> {
@@ -8,7 +8,7 @@ impl Validator {
         if let Some(alt) = &if_.alt {
             Self::validate_statement(alt)?;
         }
-        
+
         Ok(())
     }
 }

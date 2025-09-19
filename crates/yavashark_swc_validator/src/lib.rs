@@ -12,13 +12,13 @@ mod for_of;
 mod if_;
 mod labeled;
 mod pat;
+mod prop;
 mod ret;
 mod switch;
 mod throw;
 mod try_;
-mod with;
 mod whle;
-mod prop;
+mod with;
 
 use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
 

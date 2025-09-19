@@ -1,5 +1,5 @@
-use swc_ecma_ast::YieldExpr;
 use crate::Validator;
+use swc_ecma_ast::YieldExpr;
 
 impl Validator {
     pub fn validate_yield_expr(yield_: &YieldExpr) -> Result<(), String> {

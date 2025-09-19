@@ -1,5 +1,5 @@
-use swc_ecma_ast::{ObjectLit, Prop, PropOrSpread};
 use crate::Validator;
+use swc_ecma_ast::{ObjectLit, Prop, PropOrSpread};
 
 impl Validator {
     pub fn validate_object_expr(object: &ObjectLit) -> Result<(), String> {

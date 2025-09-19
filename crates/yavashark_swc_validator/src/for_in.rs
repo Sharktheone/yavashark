@@ -1,5 +1,5 @@
-use swc_ecma_ast::{ForHead, ForInStmt, Pat};
 use crate::Validator;
+use swc_ecma_ast::{ForHead, ForInStmt, Pat};
 
 impl Validator {
     pub fn validate_for_in(for_in: &ForInStmt) -> Result<(), String> {
@@ -26,13 +26,11 @@ impl Validator {
                 }
 
                 Self::validate_pat(pat)?;
-            },
+            }
         }
-        
-        
+
         Self::validate_expr(&for_in.right)?;
-        
+
         Self::validate_statement(&for_in.body)
-        
     }
 }

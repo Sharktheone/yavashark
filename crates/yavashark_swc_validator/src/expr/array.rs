@@ -1,5 +1,5 @@
-use swc_ecma_ast::ArrayLit;
 use crate::Validator;
+use swc_ecma_ast::ArrayLit;
 
 impl Validator {
     pub fn validate_array_expr(array: &ArrayLit) -> Result<(), String> {

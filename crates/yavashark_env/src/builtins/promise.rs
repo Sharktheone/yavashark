@@ -576,7 +576,6 @@ impl FullfilledHandler {
         match self.f.call(realm, value, Value::Undefined) {
             Ok(ret) => {
                 if let Ok(prom) = downcast_obj::<Promise>(ret.clone()) {
-
                     match prom.state.get() {
                         PromiseState::Fulfilled => {
                             let val = prom
@@ -606,11 +605,10 @@ impl FullfilledHandler {
                             return Ok(());
                         }
                     }
-
                 }
 
                 self.promise.resolve(&ret, realm)
-            },
+            }
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
 

@@ -48,7 +48,6 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
                         println!("PARSE_ERROR:\n{e:?}");
                         panic!()
-
                     }
                 }
                 Program::Module(module) => {
@@ -61,11 +60,9 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
                         println!("PARSE_ERROR:\n{e:?}");
                         panic!()
-
                     }
                 }
             }
-
 
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
@@ -92,8 +89,6 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
             panic!()
         }
     };
-
-
 
     (s, metadata)
 }

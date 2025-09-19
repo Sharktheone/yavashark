@@ -1,7 +1,7 @@
 mod var;
 
-use swc_ecma_ast::Decl;
 use crate::Validator;
+use swc_ecma_ast::Decl;
 
 impl Validator {
     pub fn validate_decl(decl: &Decl) -> Result<(), String> {

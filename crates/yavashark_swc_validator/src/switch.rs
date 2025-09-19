@@ -1,5 +1,5 @@
-use swc_ecma_ast::SwitchStmt;
 use crate::Validator;
+use swc_ecma_ast::SwitchStmt;
 
 impl Validator {
     pub fn validate_switch(brk: &SwitchStmt) -> Result<(), String> {

@@ -1,5 +1,5 @@
-use swc_ecma_ast::TryStmt;
 use crate::Validator;
+use swc_ecma_ast::TryStmt;
 
 impl Validator {
     pub fn validate_try(try_: &TryStmt) -> Result<(), String> {

@@ -773,7 +773,7 @@ impl Array {
             .unwrap_or(Value::Undefined);
 
         let len = len.to_number(realm)? as usize;
-        
+
         let this_arg = this_arg.unwrap_or(realm.global.clone().into());
 
         for idx in 0..len {

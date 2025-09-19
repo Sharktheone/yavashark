@@ -1,5 +1,5 @@
-use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 use crate::Validator;
+use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
 
 impl Validator {
     pub fn validate_for(for_: &ForStmt) -> Result<(), String> {

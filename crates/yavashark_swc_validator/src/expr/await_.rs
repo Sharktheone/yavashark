@@ -1,5 +1,5 @@
-use swc_ecma_ast::AwaitExpr;
 use crate::Validator;
+use swc_ecma_ast::AwaitExpr;
 
 impl Validator {
     pub fn validate_await_expr(await_: &AwaitExpr) -> Result<(), String> {

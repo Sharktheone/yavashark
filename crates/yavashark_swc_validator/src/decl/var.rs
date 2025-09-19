@@ -1,5 +1,5 @@
-use swc_ecma_ast::VarDecl;
 use crate::Validator;
+use swc_ecma_ast::VarDecl;
 
 impl Validator {
     pub fn validate_var_decl(decl: &VarDecl) -> Result<(), String> {
@@ -11,8 +11,6 @@ impl Validator {
             }
         }
 
-
         Ok(())
-
     }
 }

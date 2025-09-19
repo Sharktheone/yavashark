@@ -1,5 +1,5 @@
-use swc_ecma_ast::{SuperProp, SuperPropExpr};
 use crate::Validator;
+use swc_ecma_ast::{SuperProp, SuperPropExpr};
 
 impl Validator {
     pub fn validate_super_prop_expr(super_prop: &SuperPropExpr) -> Result<(), String> {
