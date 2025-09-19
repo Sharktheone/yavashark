@@ -1,4 +1,4 @@
-use swc_ecma_ast::{ForHead, ForInStmt};
+use swc_ecma_ast::{ForHead, ForInStmt, Pat};
 use crate::Validator;
 
 impl Validator {
@@ -20,7 +20,13 @@ impl Validator {
                     Self::validate_pat(&decl.name)?;
                 }
             }
-            ForHead::Pat(pat) => Self::validate_pat(pat)?,
+            ForHead::Pat(pat) => {
+                if matches!(&**pat, Pat::Expr(expr) if expr.is_assign() ) {
+                    return Err("ForInStmt left side cannot be an expression".to_string());
+                }
+
+                Self::validate_pat(pat)?;
+            },
         }
         
         
