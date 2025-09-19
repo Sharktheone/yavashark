@@ -46,7 +46,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
                             }
                         }
 
-                        println!("VALIDATION_ERROR:\n{e:?}");
+                        println!("PARSE_ERROR:\n{e:?}");
                         panic!()
 
                     }
@@ -59,7 +59,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
                             }
                         }
 
-                        println!("VALIDATION_ERROR:\n{e:?}");
+                        println!("PARSE_ERROR:\n{e:?}");
                         panic!()
 
                     }
