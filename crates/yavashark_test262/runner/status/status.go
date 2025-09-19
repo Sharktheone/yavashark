@@ -14,6 +14,7 @@ const (
 	TIMEOUT
 	CRASH
 	PARSE_ERROR
+	PARSE_SUCCESS_ERROR
 	NOT_IMPLEMENTED
 	RUNNER_ERROR
 )
@@ -32,6 +33,8 @@ func (s Status) String() string {
 		return "CRASH"
 	case PARSE_ERROR:
 		return "PARSE_ERROR"
+	case PARSE_SUCCESS_ERROR:
+		return "PARSE_SUCCESS_ERROR"
 	case NOT_IMPLEMENTED:
 		return "NOT_IMPLEMENTED"
 	case RUNNER_ERROR:
@@ -74,6 +77,8 @@ func ParseStatus(s string) (Status, error) {
 		return CRASH, nil
 	case "PARSE_ERROR":
 		return PARSE_ERROR, nil
+	case "PARSE_SUCCESS_ERROR":
+		return PARSE_SUCCESS_ERROR, nil
 	case "NOT_IMPLEMENTED":
 		return NOT_IMPLEMENTED, nil
 	case "RUNNER_ERROR":
@@ -140,6 +145,8 @@ func (s Status) ToCIStatus() CIStatus {
 		return CI_CRASH
 	case PARSE_ERROR:
 		return CI_OK
+	case PARSE_SUCCESS_ERROR:
+		return CI_ERROR
 	case NOT_IMPLEMENTED:
 		return CI_PRECONDITION_FAILED
 	case RUNNER_ERROR:

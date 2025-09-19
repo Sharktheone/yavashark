@@ -19,14 +19,15 @@ type History struct {
 }
 
 type DirectorySummary struct {
-	Directory      string `json:"directory"`
-	Passed         int    `json:"passed"`
-	Failed         int    `json:"failed"`
-	Skipped        int    `json:"skipped"`
-	NotImplemented int    `json:"not_implemented"`
-	RunnerError    int    `json:"runner_error"`
-	Crashed        int    `json:"crashed"`
-	Timeout        int    `json:"timeout"`
-	ParseError     int    `json:"parse_error"`
-	Total          int    `json:"total"`
+	Directory         string `json:"directory"`
+	Passed            int    `json:"passed"`
+	Failed            int    `json:"failed"`
+	Skipped           int    `json:"skipped"`
+	NotImplemented    int    `json:"not_implemented"`
+	RunnerError       int    `json:"runner_error"`
+	Crashed           int    `json:"crashed"`
+	Timeout           int    `json:"timeout"`
+	ParseError        int    `json:"parse_error"`
+	ParseSuccessError int    `json:"parse_success_error"`
+	Total             int    `json:"total"`
 }

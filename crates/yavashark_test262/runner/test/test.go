@@ -83,10 +83,21 @@ func RunTest(path string) results.Result {
 		}
 	}
 
+	// what the f... is this code btw?
 	if waitErr != nil {
 		if strings.HasPrefix(out, "PARSE_ERROR") {
 			return results.Result{
 				Status:   status.PARSE_ERROR,
+				Msg:      out,
+				Path:     path,
+				MemoryKB: peakMemoryKB,
+				Duration: duration,
+			}
+		}
+
+		if strings.HasPrefix(out, "PARSE_SUCCESS_ERROR") {
+			return results.Result{
+				Status:   status.PARSE_SUCCESS_ERROR,
 				Msg:      out,
 				Path:     path,
 				MemoryKB: peakMemoryKB,
