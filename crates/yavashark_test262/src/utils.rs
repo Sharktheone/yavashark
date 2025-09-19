@@ -69,7 +69,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    println!("PARSE_ERROR: Expected error but parsed successfully");
+                    println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
                     panic!()
                 }
             }
