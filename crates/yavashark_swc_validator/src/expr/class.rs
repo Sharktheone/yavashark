@@ -39,6 +39,7 @@ impl Validator {
                 Self::validate_function(&method.function)?;
             },
             ClassMember::PrivateMethod(private_method) => {
+                Self::validate_private_name_expr(&private_method.key)?;
                 Self::validate_function(&private_method.function)?;
             },
             ClassMember::ClassProp(prop) => {
@@ -48,6 +49,7 @@ impl Validator {
                 }
             },
             ClassMember::PrivateProp(private_prop) => {
+                Self::validate_private_name_expr(&private_prop.key)?;
                 if let Some(value) = &private_prop.value {
                     Self::validate_expr(value)?;
                 }
