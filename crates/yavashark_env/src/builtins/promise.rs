@@ -574,7 +574,43 @@ impl FullfilledHandler {
 
     pub fn handle(&self, value: Value, realm: &mut Realm) -> Res {
         match self.f.call(realm, value, Value::Undefined) {
-            Ok(ret) => self.promise.resolve(&ret, realm),
+            Ok(ret) => {
+                if let Ok(prom) = downcast_obj::<Promise>(ret.clone()) {
+
+                    match prom.state.get() {
+                        PromiseState::Fulfilled => {
+                            let val = prom
+                                .inner
+                                .try_borrow()?
+                                .value
+                                .clone()
+                                .unwrap_or(Value::Undefined);
+                            return self.promise.resolve(&val, realm);
+                        }
+                        PromiseState::Rejected => {
+                            let val = prom
+                                .inner
+                                .try_borrow()?
+                                .value
+                                .clone()
+                                .unwrap_or(Value::Undefined);
+                            return self.promise.reject(&val, realm);
+                        }
+                        PromiseState::Pending => {
+                            let mut inner = self.promise.inner.try_borrow_mut()?;
+
+                            let mut other = prom.inner.try_borrow_mut()?;
+
+                            other.on_fulfilled.append(&mut inner.on_fulfilled);
+                            other.on_rejected.append(&mut inner.on_rejected);
+                            return Ok(());
+                        }
+                    }
+
+                }
+
+                self.promise.resolve(&ret, realm)
+            },
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
 
