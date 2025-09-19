@@ -6,8 +6,20 @@ impl Validator {
         match pat {
             Pat::Ident(ident) => Self::validate_ident(&ident.id)?,
             Pat::Array(array) => {
-                for elem in array.elems.iter().flatten() {
-                    Self::validate_pat(elem)?;
+                let mut assert_last = false;
+
+                for elem in &array.elems {
+                    if assert_last {
+                        return Err("Elements after a rest pattern are not allowed".to_string());
+                    }
+
+                    if let Some(elem) = elem {
+                        if elem.is_rest() {
+                            assert_last = true;
+                        }
+
+                        Self::validate_pat(elem)?;
+                    }
                 }
             }
             Pat::Rest(rest) => Self::validate_pat(&rest.arg)?,
