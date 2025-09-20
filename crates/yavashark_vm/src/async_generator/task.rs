@@ -47,7 +47,8 @@ impl AsyncGeneratorTask {
             gen_notify,
         };
 
-        realm.queue.queue_task(this);
+
+        AsyncTaskQueue::queue_task(this, realm);
 
         Ok(promise_obj)
     }

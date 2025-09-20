@@ -9,7 +9,7 @@ use yavashark_env::builtins::Promise;
 use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::task_queue::AsyncTask;
+use yavashark_env::task_queue::{AsyncTask, AsyncTaskQueue};
 use yavashark_env::value::{BoxedObj, Obj};
 use yavashark_env::{ObjectHandle, Realm, Res, Value};
 use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
@@ -40,7 +40,7 @@ impl BytecodeAsyncTask {
             promise,
         };
 
-        realm.queue.queue_task(this);
+        AsyncTaskQueue::queue_task(this, realm);
 
         Ok(promise_obj)
     }

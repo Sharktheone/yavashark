@@ -49,10 +49,11 @@ impl AsyncTaskQueue {
         self.microtasks.push(Box::new(task));
     }
 
-    pub fn queue_task(&mut self, task: impl AsyncTask + 'static) {
-        let boxed: Box<dyn AsyncTask> = Box::new(task);
+    pub fn queue_task(task: impl AsyncTask + 'static, realm: &mut Realm) {
+        let pinned: Pin<Box<dyn AsyncTask>> = Box::pin(task);
 
-        self.queue.push(Box::into_pin(boxed));
+
+        realm.queue.queue.push(pinned);
     }
 
     pub fn flush_microtasks(&mut self) -> Microtasks {
