@@ -7,6 +7,10 @@ use std::{fmt, mem};
 
 pub trait AsyncTask {
     fn poll(self: Pin<&mut Self>, cx: &mut Context, realm: &mut Realm) -> Poll<Res>;
+
+    fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res> {
+        Poll::Pending
+    }
 }
 
 #[derive(Default)]

@@ -7,7 +7,7 @@ use tokio::sync::futures::Notified;
 use yavashark_env::builtins::Promise;
 use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error::ErrorObj;
-use yavashark_env::task_queue::AsyncTask;
+use yavashark_env::task_queue::{AsyncTask, AsyncTaskQueue};
 use yavashark_env::{Object, ObjectHandle, Realm, Res, Value};
 use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
 use yavashark_value::{BoxedObj, Obj};
@@ -89,12 +89,24 @@ impl AsyncTask for AsyncGeneratorTask {
         }
 
         _ = inner.await_promise.take();
+        
+        inner.poll_next(realm)
 
-        if let Some(state) = inner.state.take() {
+        
+    }
+    fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res> {
+        self.poll_next(realm)
+    }
+}
+
+
+impl AsyncGeneratorTask {
+    fn poll_next(&mut self, realm: &mut Realm) -> Poll<Res> {
+        if let Some(state) = self.state.take() {
             let vm = ResumableVM::from_state(state, realm);
             match vm.poll_next() {
                 AsyncGeneratorPoll::Await(state, promise) => {
-                    inner.state = Some(state);
+                    self.state = Some(state);
                     let promise = match downcast_obj::<Promise>(promise.into()) {
                         Ok(promise) => promise,
                         Err(e) => return Poll::Ready(Err(e)),
@@ -110,7 +122,7 @@ impl AsyncTask for AsyncGeneratorTask {
 
                     match promise {
                         Ok(promise) => {
-                            inner.await_promise = Some(promise);
+                            self.await_promise = Some(promise);
                         }
                         Err((promise, ())) => {
                             let val = promise
@@ -120,11 +132,9 @@ impl AsyncTask for AsyncGeneratorTask {
                                 .clone()
                                 .unwrap_or(Value::Undefined);
 
-                            inner.state.as_mut().map(|state| state.continue_async(val));
+                            self.state.as_mut().map(|state| state.continue_async(val));
 
-                            let this = unsafe { Pin::new_unchecked(inner) };
-
-                            return this.poll(cx, realm);
+                            return self.poll_next(realm);
                         }
                     }
 
@@ -133,26 +143,26 @@ impl AsyncTask for AsyncGeneratorTask {
                 AsyncGeneratorPoll::Ret(_, ret) => {
                     match ret {
                         Ok(val) => {
-                            inner.gen.notify.notify_waiters();
+                            self.gen.notify.notify_waiters();
                             let obj = Object::new(realm);
 
                             obj.define_property("done".into(), true.into())?;
                             obj.define_property("value".into(), val)?;
 
-                            inner.promise.resolve(&obj.into(), realm)?;
+                            self.promise.resolve(&obj.into(), realm)?;
                         }
                         Err(e) => {
-                            inner.gen.notify.notify_waiters();
+                            self.gen.notify.notify_waiters();
                             let e = ErrorObj::error_to_value(e, realm);
-                            inner.promise.reject(&e, realm)?;
+                            self.promise.reject(&e, realm)?;
                         }
                     }
 
                     Poll::Ready(Ok(()))
                 }
                 AsyncGeneratorPoll::Yield(state, mut val) => {
-                    inner.gen.state.replace(Some(state));
-                    inner.gen.notify.notify_one();
+                    self.gen.state.replace(Some(state));
+                    self.gen.notify.notify_one();
 
                     if let Value::Object(obj) = &val {
                         if let Some(promise) = obj.downcast::<Promise>() {
@@ -166,7 +176,7 @@ impl AsyncTask for AsyncGeneratorTask {
 
                             match promise {
                                 Ok(promise) => {
-                                    inner.await_promise = Some(promise);
+                                    self.await_promise = Some(promise);
                                     return Poll::Pending;
                                 }
                                 Err((promise, ())) => {
@@ -188,7 +198,7 @@ impl AsyncTask for AsyncGeneratorTask {
                     obj.define_property("done".into(), false.into())?;
                     obj.define_property("value".into(), val)?;
 
-                    inner.promise.resolve(&obj.into(), realm)?;
+                    self.promise.resolve(&obj.into(), realm)?;
 
                     Poll::Ready(Ok(()))
                 }
