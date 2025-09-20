@@ -69,11 +69,22 @@ impl AsyncTask for BytecodeAsyncTask {
 
         _ = inner.await_promise.take();
 
-        if let Some(state) = inner.state.take() {
+        inner.poll_next(realm)
+    }
+
+    fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res> {
+        self.poll_next(realm)
+    }
+}
+
+
+impl BytecodeAsyncTask {
+    fn poll_next(&mut self, realm: &mut Realm) -> Poll<Res> {
+        if let Some(state) = self.state.take() {
             let vm = ResumableVM::from_state(state, realm);
             match vm.poll() {
                 AsyncPoll::Await(state, promise) => {
-                    inner.state = Some(state);
+                    self.state = Some(state);
                     let promise = match downcast_obj::<Promise>(promise.into()) {
                         Ok(promise) => promise,
                         Err(e) => return Poll::Ready(Err(e)),
@@ -89,7 +100,7 @@ impl AsyncTask for BytecodeAsyncTask {
 
                     match promise {
                         Ok(promise) => {
-                            inner.await_promise = Some(promise);
+                            self.await_promise = Some(promise);
                         }
                         Err((promise, ())) => {
                             let val = promise
@@ -99,11 +110,9 @@ impl AsyncTask for BytecodeAsyncTask {
                                 .clone()
                                 .unwrap_or(Value::Undefined);
 
-                            inner.state.as_mut().map(|state| state.continue_async(val));
+                            self.state.as_mut().map(|state| state.continue_async(val));
 
-                            let this = unsafe { Pin::new_unchecked(inner) };
-
-                            return this.poll(cx, realm);
+                            return self.poll_next(realm);
                         }
                     }
 
@@ -111,10 +120,10 @@ impl AsyncTask for BytecodeAsyncTask {
                 }
                 AsyncPoll::Ret(state, ret) => {
                     match ret {
-                        Ok(()) => inner.promise.resolve(&state.acc, realm)?,
+                        Ok(()) => self.promise.resolve(&state.acc, realm)?,
                         Err(e) => {
                             let e = ErrorObj::error_to_value(e, realm);
-                            inner.promise.reject(&e, realm)?;
+                            self.promise.reject(&e, realm)?;
                         }
                     }
 
@@ -125,4 +134,5 @@ impl AsyncTask for BytecodeAsyncTask {
             Poll::Ready(Ok(()))
         }
     }
+
 }
