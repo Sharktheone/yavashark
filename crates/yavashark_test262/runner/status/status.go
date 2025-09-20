@@ -174,6 +174,8 @@ func (s CIStatus) ToStatus() Status {
 		return NOT_IMPLEMENTED
 	case CI_NOT_RUN:
 		return RUNNER_ERROR
+	case CI_ERROR:
+	     return PARSE_SUCCESS_ERROR
 	default:
 		return CRASH
 	}
