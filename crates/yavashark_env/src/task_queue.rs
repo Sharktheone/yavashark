@@ -52,9 +52,9 @@ impl AsyncTaskQueue {
     }
 
     pub fn queue_task(mut task: impl AsyncTask + 'static, realm: &mut Realm) {
-        // if task.run_first_sync(realm).is_ready() {
-        //     return;
-        // }
+        if task.run_first_sync(realm).is_ready() {
+            return;
+        }
 
         let pinned: Pin<Box<dyn AsyncTask>> = Box::pin(task);
 
