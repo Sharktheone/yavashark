@@ -11,6 +11,11 @@ impl Validator {
                     Self::validate_super_prop_expr(prop)?;
                 }
                 SimpleAssignTarget::Paren(paren) => {
+                    if paren.expr.is_await_expr() {
+                        return Err("Invalid assignment target: await expression".to_string());
+                    }
+
+
                     Self::validate_expr(&paren.expr)?;
                 }
                 SimpleAssignTarget::OptChain(optchain) => {
