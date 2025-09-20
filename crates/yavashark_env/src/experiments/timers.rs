@@ -68,6 +68,10 @@ impl AsyncTask for TimeoutTask {
             Poll::Pending => Poll::Pending,
         }
     }
+
+    fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res> {
+        Poll::Pending
+    }
 }
 
 pub fn get_set_timeout(realm: &Realm) -> ObjectHandle {

@@ -41,6 +41,10 @@ impl<F: Future<Output = O>, O: TryIntoValue> AsyncTask for FutureTask<F, O> {
             Poll::Pending => Poll::Pending,
         }
     }
+    
+    fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res> {
+        Poll::Pending
+    }
 }
 
 impl<F: Future<Output = O> + 'static, O: TryIntoValue + 'static> IntoPromise for F {
