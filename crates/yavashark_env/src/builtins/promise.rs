@@ -327,15 +327,6 @@ impl Promise {
             }
         }
 
-        if promise_obj.state.get() != state {
-            promise_obj.state.set(state);
-            promise_obj
-                .inner
-                .try_borrow_mut()?
-                .value
-                .clone_from(&inner.value);
-        }
-
         Ok(promise)
     }
 
