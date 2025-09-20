@@ -604,7 +604,7 @@ impl FullfilledHandler {
                             other.on_rejected.append(&mut inner.on_rejected);
                             Ok(())
                         }
-                    }
+                    };
                 }
 
                 self.promise.resolve(&ret, realm)

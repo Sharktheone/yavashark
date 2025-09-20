@@ -47,7 +47,6 @@ impl AsyncGeneratorTask {
             gen_notify,
         };
 
-
         AsyncTaskQueue::queue_task(this, realm);
 
         Ok(promise_obj)
@@ -89,16 +88,13 @@ impl AsyncTask for AsyncGeneratorTask {
         }
 
         _ = inner.await_promise.take();
-        
-        inner.poll_next(realm)
 
-        
+        inner.poll_next(realm)
     }
     fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res> {
         self.poll_next(realm)
     }
 }
-
 
 impl AsyncGeneratorTask {
     fn poll_next(&mut self, realm: &mut Realm) -> Poll<Res> {

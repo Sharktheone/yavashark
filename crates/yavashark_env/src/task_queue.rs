@@ -58,7 +58,6 @@ impl AsyncTaskQueue {
 
         let pinned: Pin<Box<dyn AsyncTask>> = Box::pin(task);
 
-
         realm.queue.queue.push(pinned);
     }
 

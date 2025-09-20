@@ -77,7 +77,6 @@ impl AsyncTask for BytecodeAsyncTask {
     }
 }
 
-
 impl BytecodeAsyncTask {
     fn poll_next(&mut self, realm: &mut Realm) -> Poll<Res> {
         if let Some(state) = self.state.take() {
@@ -134,5 +133,4 @@ impl BytecodeAsyncTask {
             Poll::Ready(Ok(()))
         }
     }
-
 }
