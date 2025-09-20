@@ -286,7 +286,6 @@ impl Promise {
         on_fulfilled: Option<ObjectHandle>,
         on_rejected: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-        #[this] this: Value,
     ) -> Res<ObjectHandle> {
         let mut inner = self.inner.try_borrow_mut()?;
         // let this_prom = <&Promise>::from_value_out(this.clone())?;
@@ -301,8 +300,9 @@ impl Promise {
             match state {
                 PromiseState::Fulfilled => {
                     let val = inner.value.clone().unwrap_or(Value::Undefined);
-                    let ret = on_fulfilled.call(realm, vec![val], this.clone())?;
-                    promise_obj.resolve(&ret, realm)?;
+                    let handler = FullfilledHandler::new(promise_obj.clone(), on_fulfilled);
+
+                    handler.handle(val, realm)?;
                 }
                 PromiseState::Pending => {
                     let handler = FullfilledHandler::new(promise_obj.clone(), on_fulfilled);
@@ -316,8 +316,8 @@ impl Promise {
             match state {
                 PromiseState::Rejected => {
                     let val = inner.value.clone().unwrap_or(Value::Undefined);
-                    let ret = on_rejected.call(realm, vec![val], this)?;
-                    promise_obj.reject(&ret, realm)?;
+                    let handler = RejectedHandler::new(promise_obj.clone(), on_rejected);
+                    handler.handle(val, realm)?;
                 }
                 PromiseState::Pending => {
                     let handler = RejectedHandler::new(promise_obj.clone(), on_rejected);
@@ -340,7 +340,7 @@ impl Promise {
     }
 
     pub fn catch(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        self.then(None, Some(f), realm, Value::Undefined)
+        self.then(None, Some(f), realm)
     }
 
     pub fn finally(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
