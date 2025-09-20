@@ -260,11 +260,17 @@ impl Promise {
         let on_fullfilled = Self::get_fullfilled(gc.clone(), realm);
         let on_rejected = Self::get_rejected(gc, realm);
 
-        callback.call(
+        if let Err(e) = callback.call(
             realm,
             vec![on_fullfilled.into(), on_rejected.into()],
             Value::Undefined,
-        )?;
+        ) {
+            let val = ErrorObj::error_to_value(e, realm);
+            let gc = Self::get_gc(promise.clone())?;
+            gc.reject(&val, realm)?;
+        }
+
+
 
         Ok(promise)
     }
