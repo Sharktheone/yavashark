@@ -34,6 +34,7 @@ default = []
 oxc = ["dep:oxc"]
 parser_test = []
 pprof = ["dep:pprof", "dep:flate2"]
+timings = []
 
 
 [profile.release]

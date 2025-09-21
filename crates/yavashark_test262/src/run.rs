@@ -1,7 +1,7 @@
 use crate::harness::setup_global;
 use crate::metadata::{Flags, Metadata, NegativePhase};
 use crate::utils::parse_file;
-use crate::TEST262_DIR;
+use crate::{PARSE_DURATION, TEST262_DIR};
 use std::path::{Path, PathBuf};
 use swc_ecma_ast::Program;
 use yavashark_env::error::ErrorObj;
@@ -10,10 +10,24 @@ use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
 
 pub fn run_file(file: PathBuf) -> Result<String, Error> {
+    #[cfg(feature = "timings")]
+    let parse = std::time::Instant::now();
     let (stmt, metadata) = parse_file(&file);
+    #[cfg(feature = "timings")]
+    unsafe {
+        crate::PARSE_DURATION = parse.elapsed();
+        
+    }
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
+    #[cfg(feature = "timings")]
+    let setup = std::time::Instant::now();
     let (mut realm, mut scope) = setup_global(file.clone(), raw, async_)?;
+    #[cfg(feature = "timings")]
+    unsafe {
+        crate::SETUP_DURATION = setup.elapsed();
+
+    }
 
     run_file_in(file, &mut realm, &mut scope, stmt, metadata)
 }

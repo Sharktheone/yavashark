@@ -22,6 +22,23 @@ use flate2::{write::GzEncoder, Compression};
 const TEST262_ROOT: &str = "../../test262";
 
 fn main() {
+    #[cfg(feature = "timings")]
+    let now = std::time::Instant::now();
+    run();
+    #[cfg(feature = "timings")]
+    let total = now.elapsed();
+
+    #[cfg(feature = "timings")]
+    #[allow(static_mut_refs)]
+    unsafe {
+        eprintln!("PARSE: {:?}", yavashark_test262::PARSE_DURATION.as_nanos());
+        eprintln!("SETUP: {:?}", yavashark_test262::SETUP_DURATION.as_nanos());
+        eprintln!("REALM: {:?}", yavashark_test262::REALM_DURATION.as_nanos());
+        eprintln!("TOTAL: {:?}", total.as_nanos());
+    }
+}
+
+fn run() {
     let mut args = std::env::args();
 
     args.next();

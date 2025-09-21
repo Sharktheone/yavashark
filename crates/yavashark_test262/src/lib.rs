@@ -19,3 +19,11 @@ pub use yavashark_env::object;
 use yavashark_env::Realm;
 
 const TEST262_DIR: &str = "../../test262";
+
+
+#[cfg(feature = "timings")]
+pub static mut PARSE_DURATION: std::time::Duration = std::time::Duration::ZERO;
+#[cfg(feature = "timings")]
+pub static mut SETUP_DURATION: std::time::Duration = std::time::Duration::ZERO;
+#[cfg(feature = "timings")]
+pub static mut REALM_DURATION: std::time::Duration = std::time::Duration::ZERO;
