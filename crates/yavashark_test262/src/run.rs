@@ -1,7 +1,7 @@
 use crate::harness::setup_global;
 use crate::metadata::{Flags, Metadata, NegativePhase};
 use crate::utils::parse_file;
-use crate::{PARSE_DURATION, TEST262_DIR};
+use crate::TEST262_DIR;
 use std::path::{Path, PathBuf};
 use swc_ecma_ast::Program;
 use yavashark_env::error::ErrorObj;
@@ -16,7 +16,7 @@ pub fn run_file(file: PathBuf) -> Result<String, Error> {
     #[cfg(feature = "timings")]
     unsafe {
         crate::PARSE_DURATION = parse.elapsed();
-        
+
     }
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
