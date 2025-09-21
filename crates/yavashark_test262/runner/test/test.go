@@ -12,6 +12,7 @@ import (
 	"time"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/status"
+	"yavashark_test262_runner/timing"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 	TIMEOUT = 30 * time.Second
 )
 
-func RunTest(path string) results.Result {
+func RunTest(path string, timings bool) results.Result {
 	startTime := time.Now()
 
 	ctx, cancel := context.WithTimeout(context.Background(), TIMEOUT)
@@ -81,6 +82,10 @@ func RunTest(path string) results.Result {
 			MemoryKB: peakMemoryKB,
 			Duration: duration,
 		}
+	}
+
+	if timings {
+		timing.ParseDurations(out)
 	}
 
 	// what the f... is this code btw?

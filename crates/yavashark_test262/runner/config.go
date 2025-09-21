@@ -18,6 +18,7 @@ type Config struct {
 	DiffFilter  string `toml:"diff_filter"`
 	TestDir     string `toml:"test_dir"`
 	Skips       bool   `toml:"skips"`
+	Timings     bool   `toml:"timings"`
 }
 
 func NewConfig() *Config {
@@ -31,6 +32,7 @@ func NewConfig() *Config {
 		DiffFilter:  "",
 		TestDir:     "",
 		Skips:       true,
+		Timings:     false,
 	}
 }
 
@@ -47,6 +49,7 @@ func LoadConfig() *Config {
 	diffFilter := flag.String("dfilter", config.DiffFilter, "Diff filter to use for CI results")
 	testdir := flag.String("testdir", config.TestDir, "Path in the test directory")
 	noskip := flag.Bool("noskip", false, "Path in the test directory")
+	timings := flag.Bool("timings", false, "Attempt to parse timings from test output (if enabled)")
 
 	flag.Parse()
 
@@ -78,6 +81,8 @@ func LoadConfig() *Config {
 			config.TestDir = *testdir
 		case "noskip":
 			config.Skips = !*noskip
+		case "timings":
+			config.Timings = *timings
 		}
 	})
 

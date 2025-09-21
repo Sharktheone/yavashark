@@ -6,6 +6,7 @@ import (
 	"yavashark_test262_runner/ci"
 	"yavashark_test262_runner/results"
 	"yavashark_test262_runner/run"
+	"yavashark_test262_runner/timing"
 )
 
 const (
@@ -18,7 +19,7 @@ func main() {
 
 	testRoot := filepath.Join(config.TestRootDir, config.TestDir)
 
-	testResults := run.TestsInDir(testRoot, config.Workers, config.Skips)
+	testResults := run.TestsInDir(testRoot, config.Workers, config.Skips, config.Timings)
 
 	if config.Diff && !config.CI {
 		printDiff(testResults, config.DiffFilter)
@@ -35,6 +36,10 @@ func main() {
 
 	if config.TestDir == "" {
 		testResults.Write()
+	}
+
+	if config.Timings {
+		timing.PrintTimings()
 	}
 }
 
