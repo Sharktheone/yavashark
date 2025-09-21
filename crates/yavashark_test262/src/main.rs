@@ -59,7 +59,7 @@ fn main() {
                         let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
                         let test_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("profile");
                         let pid = std::process::id();
-                        let out = format!("profiles/{}-{}-{}.pb.gz", test_name, pid, ts);
+                        let out = format!("profiles/{}.pb.gz", test_name);
                         if let Ok(file) = File::create(&out) {
                             let mut encoder = GzEncoder::new(file, Compression::default());
                             encoder.write_all(&buf).expect("failed to write profile");
