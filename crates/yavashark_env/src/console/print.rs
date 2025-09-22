@@ -151,7 +151,9 @@ impl PrettyPrint for Object<Realm> {
             str.pop();
             str.pop();
         } else {
-            str.push_str("{}");
+            str.pop();
+            str.push('}');
+
         }
 
         str.push_str(" }");
@@ -299,7 +301,9 @@ impl PrettyPrint for Object<Realm> {
             str.pop();
             str.pop();
         } else {
-            str.push_str("{}");
+            str.pop();
+            str.push('}');
+            return str
         }
 
         str.push_str("\n}");
