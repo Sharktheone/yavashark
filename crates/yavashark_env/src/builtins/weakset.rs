@@ -197,6 +197,14 @@ impl WeakSet {
         Ok(Self::with_set(realm, set).into_value())
     }
 
+
+    #[get("size")]
+    fn size(&self) -> usize {
+        let inner = self.inner.borrow();
+
+        inner.set.len()
+    }
+
     // fn entries(&self, #[realm] realm: &mut Realm) -> ValueResult {
     //     let inner = self.inner.borrow();
     //
