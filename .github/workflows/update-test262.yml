@@ -49,7 +49,7 @@ jobs:
       - name: Run Test262 Runner
         working-directory: crates/yavashark_test262
         run: |
-          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test
+          ./runner/yavashark_test262_runner --ci --repo ../../data --test_root ../../test262/test --workers 256
 
       - name: Update results
         working-directory: data
