@@ -176,6 +176,14 @@ impl WeakMap {
         }
     }
 
+
+    #[get("size")]
+    fn size(&self) -> ValueResult {
+        let inner = self.inner.borrow();
+
+        Ok((inner.map.len() as i32).into())
+    }
+
     // fn entries(&self, #[realm] realm: &mut Realm) -> ValueResult {
     //     let inner = self.inner.borrow();
     //
