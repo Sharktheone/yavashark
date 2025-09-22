@@ -122,7 +122,13 @@ impl PrettyPrint for Object<Realm> {
                 _ => "[Primitive] ".bright_green().to_string(),
             }
         } else {
-            String::new()
+            let name = self.name();
+            if name == "Object" {
+                String::new()
+
+            } else {
+                format!("[{name}] ").bright_green().to_string()
+            }
         };
 
         str.push_str("{ ");
@@ -130,11 +136,9 @@ impl PrettyPrint for Object<Realm> {
         if let Ok(properties) = self.properties() {
             if properties.is_empty() {
                 not.pop();
-                if str.len() == 2 {
-                    return "{}".to_string();
-                }
+
                 str.pop();
-                str.pop();
+                str.push('}');
                 return str;
             }
 
@@ -266,7 +270,13 @@ impl PrettyPrint for Object<Realm> {
                 _ => "[Primitive]".bright_green().to_string(),
             }
         } else {
-            String::new()
+            let name = self.name();
+            if name == "Object" {
+                String::new()
+
+            } else {
+                format!("[{name}] ").bright_green().to_string()
+            }
         };
 
         str.push_str("{\n");
@@ -274,11 +284,8 @@ impl PrettyPrint for Object<Realm> {
         if let Ok(properties) = self.properties() {
             if properties.is_empty() {
                 not.pop();
-                if str.len() == 2 {
-                    return "{}".to_string();
-                }
                 str.pop();
-                str.pop();
+                str.push('}');
                 return str;
             }
 
