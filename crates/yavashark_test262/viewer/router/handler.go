@@ -37,7 +37,7 @@ func rerunAll(c *fiber.Ctx) error {
 
 	defer testRun.Unlock()
 
-	res := run.TestsInDir(conf.TestRoot, conf.Workers, true)
+	res := run.TestsInDir(conf.TestRoot, conf.Workers, true, false)
 	res.Write()
 
 	resCi := results.ConvertResultsToCI(res.TestResults, conf.TestRoot)
@@ -63,7 +63,7 @@ func rerun(c *fiber.Ctx) error {
 
 	fullPath := filepath.Join(conf.TestRoot, path)
 
-	run.TestsInDir(fullPath, conf.Workers, true)
+	run.TestsInDir(fullPath, conf.Workers, true, false)
 
 	return current(c)
 }

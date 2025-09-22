@@ -33,7 +33,7 @@ pub fn test_parse_swc(file: PathBuf) {
         Ok(s) => {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    println!("PARSE_ERROR: Expected error but parsed successfully");
+                    println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
                     panic!()
                 }
             }
@@ -80,7 +80,7 @@ mod oxc_parser {
         if !res.panicked && res.errors.is_empty() {
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    println!("PARSE_ERROR: Expected error but parsed successfully");
+                    println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
                     panic!()
                 }
             }

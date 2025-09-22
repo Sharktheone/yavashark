@@ -7,6 +7,8 @@ use std::{fmt, mem};
 
 pub trait AsyncTask {
     fn poll(self: Pin<&mut Self>, cx: &mut Context, realm: &mut Realm) -> Poll<Res>;
+
+    fn run_first_sync(&mut self, realm: &mut Realm) -> Poll<Res>;
 }
 
 #[derive(Default)]
@@ -49,10 +51,14 @@ impl AsyncTaskQueue {
         self.microtasks.push(Box::new(task));
     }
 
-    pub fn queue_task(&mut self, task: impl AsyncTask + 'static) {
-        let boxed: Box<dyn AsyncTask> = Box::new(task);
+    pub fn queue_task(mut task: impl AsyncTask + 'static, realm: &mut Realm) {
+        if task.run_first_sync(realm).is_ready() {
+            return;
+        }
 
-        self.queue.push(Box::into_pin(boxed));
+        let pinned: Pin<Box<dyn AsyncTask>> = Box::pin(task);
+
+        realm.queue.queue.push(pinned);
     }
 
     pub fn flush_microtasks(&mut self) -> Microtasks {

@@ -10,10 +10,24 @@ use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
 
 pub fn run_file(file: PathBuf) -> Result<String, Error> {
+    #[cfg(feature = "timings")]
+    let parse = std::time::Instant::now();
     let (stmt, metadata) = parse_file(&file);
+    #[cfg(feature = "timings")]
+    unsafe {
+        crate::PARSE_DURATION = parse.elapsed();
+
+    }
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
+    #[cfg(feature = "timings")]
+    let setup = std::time::Instant::now();
     let (mut realm, mut scope) = setup_global(file.clone(), raw, async_)?;
+    #[cfg(feature = "timings")]
+    unsafe {
+        crate::SETUP_DURATION = setup.elapsed();
+
+    }
 
     run_file_in(file, &mut realm, &mut scope, stmt, metadata)
 }

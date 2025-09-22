@@ -55,7 +55,13 @@ pub fn run_async_in_realm(realm: &mut Realm, scope: &mut Scope) -> Res {
 }
 
 pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope)> {
+    #[cfg(feature = "timings")]
+    let now = std::time::Instant::now();
     let mut r = Realm::new()?;
+    #[cfg(feature = "timings")]
+    unsafe {
+        crate::REALM_DURATION = now.elapsed();
+    }
     let mut s = Scope::global(&r, file);
 
     let t262 = ObjectHandle::new(Test262::new(&r));

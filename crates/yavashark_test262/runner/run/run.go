@@ -17,7 +17,7 @@ var SKIP = []string{
 	"staging",
 }
 
-func TestsInDir(testRoot string, workers int, skips bool) *results.TestResults {
+func TestsInDir(testRoot string, workers int, skips bool, timings bool) *results.TestResults {
 	jobs := make(chan string, workers*8)
 
 	resultsChan := make(chan results.Result, workers*8)
@@ -27,7 +27,7 @@ func TestsInDir(testRoot string, workers int, skips bool) *results.TestResults {
 	wg.Add(workers)
 
 	for i := range workers {
-		go worker.Worker(i, jobs, resultsChan, wg)
+		go worker.Worker(i, jobs, resultsChan, wg, timings)
 	}
 
 	num := countTests(testRoot)

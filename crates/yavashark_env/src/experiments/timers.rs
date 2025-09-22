@@ -1,6 +1,6 @@
 use crate::builtins::{GcPromise, Promise};
 use crate::conversion::downcast_obj;
-use crate::task_queue::AsyncTask;
+use crate::task_queue::{AsyncTask, AsyncTaskQueue};
 use crate::{Error, NativeFunction, ObjectHandle, Realm, Res, Value};
 use pin_project::pin_project;
 use std::future::Future;
@@ -45,7 +45,7 @@ impl TimeoutTask {
 
         let this = Self { timer, promise, cb };
 
-        realm.queue.queue_task(this);
+        AsyncTaskQueue::queue_task(this, realm);
 
         Ok(promise_obj)
     }
@@ -67,6 +67,10 @@ impl AsyncTask for TimeoutTask {
             }
             Poll::Pending => Poll::Pending,
         }
+    }
+
+    fn run_first_sync(&mut self, _realm: &mut Realm) -> Poll<Res> {
+        Poll::Pending
     }
 }
 

@@ -6,11 +6,11 @@ import (
 	"yavashark_test262_runner/test"
 )
 
-func Worker(id int, jobs <-chan string, results chan<- results.Result, wg *sync.WaitGroup) {
+func Worker(id int, jobs <-chan string, results chan<- results.Result, wg *sync.WaitGroup, timings bool) {
 	defer wg.Done()
 
 	for path := range jobs {
-		res := test.RunTest(path)
+		res := test.RunTest(path, timings)
 
 		results <- res
 	}

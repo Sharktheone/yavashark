@@ -5,7 +5,7 @@ use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yavashark_env::realm::Eval;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm, Value, ValueResult};
-use yavashark_swc_validator::validate_statements;
+use yavashark_swc_validator::Validator;
 
 pub struct InterpreterEval;
 
@@ -30,8 +30,7 @@ impl Eval for InterpreterEval {
         // let scope = &mut scope.child()?;
         // scope.state_set_function();
 
-
-        if let Err(e) = validate_statements(&script.body) {
+        if let Err(e) = Validator::validate_statements(&script.body) {
             return Err(Error::syn_error(e));
         }
 

@@ -9,16 +9,17 @@ import (
 )
 
 type TestResults struct {
-	TestResults    []Result
-	Passed         uint32
-	Failed         uint32
-	Skipped        uint32
-	NotImplemented uint32
-	RunnerError    uint32
-	Crashed        uint32
-	Timeout        uint32
-	ParseError     uint32
-	Total          uint32
+	TestResults       []Result
+	Passed            uint32
+	Failed            uint32
+	Skipped           uint32
+	NotImplemented    uint32
+	RunnerError       uint32
+	Crashed           uint32
+	Timeout           uint32
+	ParseError        uint32
+	ParseSuccessError uint32
+	Total             uint32
 }
 
 func New(num uint32) *TestResults {
@@ -55,6 +56,8 @@ func (tr *TestResults) analyze() {
 			tr.Crashed++
 		case status.PARSE_ERROR:
 			tr.ParseError++
+		case status.PARSE_SUCCESS_ERROR:
+			tr.ParseSuccessError++
 		case status.TIMEOUT:
 			tr.Timeout++
 		}
@@ -78,6 +81,8 @@ func (tr *TestResults) Add(res Result) {
 		tr.Crashed++
 	case status.PARSE_ERROR:
 		tr.ParseError++
+	case status.PARSE_SUCCESS_ERROR:
+		tr.ParseSuccessError++
 	case status.TIMEOUT:
 		tr.Timeout++
 	}
@@ -94,16 +99,17 @@ func (tr *TestResults) PrintResults() {
 	printRes("Crashed", tr.Crashed, tr.Total)
 	printRes("Timeout", tr.Timeout, tr.Total)
 	printRes("Parse Error", tr.ParseError, tr.Total)
+	printRes("Parse Success Error", tr.ParseSuccessError, tr.Total)
 	fmt.Printf("Total: %d\n", tr.Total)
 
-	printRes("Passed (no parse)", tr.Passed, tr.Total-tr.ParseError)
-	fmt.Printf("Total (no parse): %d\n", tr.Total-tr.ParseError)
+	printRes("Passed (no parse)", tr.Passed, tr.Total-(tr.ParseError+tr.ParseSuccessError))
+	fmt.Printf("Total (no parse): %d\n", tr.Total-(tr.ParseError+tr.ParseSuccessError))
 
 	printRes("Passed (skipped)", tr.Passed, tr.Total-tr.Skipped)
 	fmt.Printf("Total (skipped): %d\n", tr.Total-tr.Skipped)
 
-	printRes("Passed (skip, no-parse)", tr.Passed, tr.Total-(tr.Skipped+tr.ParseError))
-	fmt.Printf("Total (skip, no-parse): %d\n", tr.Total-(tr.Skipped+tr.ParseError))
+	printRes("Passed (skip, no-parse)", tr.Passed, tr.Total-(tr.Skipped+tr.ParseError+tr.ParseSuccessError))
+	fmt.Printf("Total (skip, no-parse): %d\n", tr.Total-(tr.Skipped+tr.ParseError+tr.ParseSuccessError))
 
 	// Print memory usage statistics
 	tr.PrintMemoryStats()

@@ -154,6 +154,8 @@ func runCI(testResults *results.TestResults, overall Summary, repo string, histo
 			ds.Crashed++
 		case status.PARSE_ERROR:
 			ds.ParseError++
+		case status.PARSE_SUCCESS_ERROR:
+			ds.ParseSuccessError++
 		case status.TIMEOUT:
 			ds.Timeout++
 		}

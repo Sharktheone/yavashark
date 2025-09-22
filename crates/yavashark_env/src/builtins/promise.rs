@@ -107,14 +107,12 @@ impl Callable {
     }
 }
 
-#[object]
 #[derive(Debug)]
 pub struct FullfilledHandler {
     pub promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
     pub f: Callable,
 }
 
-#[object]
 #[derive(Debug)]
 pub struct RejectedHandler {
     pub promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
@@ -260,11 +258,17 @@ impl Promise {
         let on_fullfilled = Self::get_fullfilled(gc.clone(), realm);
         let on_rejected = Self::get_rejected(gc, realm);
 
-        callback.call(
+        if let Err(e) = callback.call(
             realm,
             vec![on_fullfilled.into(), on_rejected.into()],
             Value::Undefined,
-        )?;
+        ) {
+            let val = ErrorObj::error_to_value(e, realm);
+            let gc = Self::get_gc(promise.clone())?;
+            gc.reject(&val, realm)?;
+        }
+
+
 
         Ok(promise)
     }
@@ -282,7 +286,6 @@ impl Promise {
         on_fulfilled: Option<ObjectHandle>,
         on_rejected: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-        #[this] this: Value,
     ) -> Res<ObjectHandle> {
         let mut inner = self.inner.try_borrow_mut()?;
         // let this_prom = <&Promise>::from_value_out(this.clone())?;
@@ -297,11 +300,12 @@ impl Promise {
             match state {
                 PromiseState::Fulfilled => {
                     let val = inner.value.clone().unwrap_or(Value::Undefined);
-                    let ret = on_fulfilled.call(realm, vec![val], this.clone())?;
-                    promise_obj.resolve(&ret, realm)?;
+                    let handler = FullfilledHandler::new(promise_obj.clone(), on_fulfilled);
+
+                    handler.handle(val, realm)?;
                 }
                 PromiseState::Pending => {
-                    let handler = FullfilledHandler::new(promise_obj.clone(), on_fulfilled, realm);
+                    let handler = FullfilledHandler::new(promise_obj.clone(), on_fulfilled);
                     inner.on_fulfilled.push(handler);
                 }
                 PromiseState::Rejected => {}
@@ -312,31 +316,22 @@ impl Promise {
             match state {
                 PromiseState::Rejected => {
                     let val = inner.value.clone().unwrap_or(Value::Undefined);
-                    let ret = on_rejected.call(realm, vec![val], this)?;
-                    promise_obj.reject(&ret, realm)?;
+                    let handler = RejectedHandler::new(promise_obj.clone(), on_rejected);
+                    handler.handle(val, realm)?;
                 }
                 PromiseState::Pending => {
-                    let handler = RejectedHandler::new(promise_obj.clone(), on_rejected, realm);
+                    let handler = RejectedHandler::new(promise_obj.clone(), on_rejected);
                     inner.on_rejected.push(handler);
                 }
                 PromiseState::Fulfilled => {}
             }
         }
 
-        if promise_obj.state.get() != state {
-            promise_obj.state.set(state);
-            promise_obj
-                .inner
-                .try_borrow_mut()?
-                .value
-                .clone_from(&inner.value);
-        }
-
         Ok(promise)
     }
 
     pub fn catch(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        self.then(None, Some(f), realm, Value::Undefined)
+        self.then(None, Some(f), realm)
     }
 
     pub fn finally(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
@@ -547,12 +542,8 @@ impl FullfilledHandler {
     pub fn new(
         promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
         f: ObjectHandle,
-        realm: &Realm,
     ) -> Self {
         Self {
-            inner: RefCell::new(MutableFullfilledHandler {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
-            }),
             promise,
             f: Callable::JsFunction(f),
         }
@@ -561,12 +552,8 @@ impl FullfilledHandler {
     pub fn new_native(
         promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
         f: impl Fn(Value, Value, &mut Realm) -> Res + 'static,
-        realm: &Realm,
     ) -> Self {
         Self {
-            inner: RefCell::new(MutableFullfilledHandler {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
-            }),
             promise,
             f: Callable::NativeFunction(Box::new(f)),
         }
@@ -574,7 +561,41 @@ impl FullfilledHandler {
 
     pub fn handle(&self, value: Value, realm: &mut Realm) -> Res {
         match self.f.call(realm, value, Value::Undefined) {
-            Ok(ret) => self.promise.resolve(&ret, realm),
+            Ok(ret) => {
+                if let Ok(prom) = downcast_obj::<Promise>(ret.clone()) {
+                    return match prom.state.get() {
+                        PromiseState::Fulfilled => {
+                            let val = prom
+                                .inner
+                                .try_borrow()?
+                                .value
+                                .clone()
+                                .unwrap_or(Value::Undefined);
+                            self.promise.resolve(&val, realm)
+                        }
+                        PromiseState::Rejected => {
+                            let val = prom
+                                .inner
+                                .try_borrow()?
+                                .value
+                                .clone()
+                                .unwrap_or(Value::Undefined);
+                            self.promise.reject(&val, realm)
+                        }
+                        PromiseState::Pending => {
+                            let mut inner = self.promise.inner.try_borrow_mut()?;
+
+                            let mut other = prom.inner.try_borrow_mut()?;
+
+                            other.on_fulfilled.append(&mut inner.on_fulfilled);
+                            other.on_rejected.append(&mut inner.on_rejected);
+                            Ok(())
+                        }
+                    };
+                }
+
+                self.promise.resolve(&ret, realm)
+            }
             Err(err) => {
                 let val = ErrorObj::error_to_value(err, realm);
 
@@ -589,12 +610,8 @@ impl RejectedHandler {
     pub fn new(
         promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
         f: ObjectHandle,
-        realm: &Realm,
     ) -> Self {
         Self {
-            inner: RefCell::new(MutableRejectedHandler {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
-            }),
             promise,
             f: Callable::JsFunction(f),
         }

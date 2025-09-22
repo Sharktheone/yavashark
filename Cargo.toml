@@ -58,6 +58,7 @@ simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/
 lto = "fat"
 opt-level = 3
 codegen-units = 1
+debug = true
 
 [lints]
 workspace = true

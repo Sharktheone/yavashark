@@ -8,7 +8,7 @@ use swc_ecma_ast::{Program, Script};
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
 use yaml_rust2::yaml::YamlDecoder;
 use yaml_rust2::Yaml;
-use yavashark_swc_validator::{validate_module_items, validate_statement, validate_statements};
+use yavashark_swc_validator::Validator;
 
 pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
     let input = std::fs::read_to_string(f).unwrap();
@@ -37,9 +37,36 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let s = match p.parse_program() {
         Ok(s) => {
+            match &s {
+                Program::Script(script) => {
+                    if let Err(e) = Validator::validate_statements(&script.body) {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("PARSE_ERROR:\n{e:?}");
+                        panic!()
+                    }
+                }
+                Program::Module(module) => {
+                    if let Err(e) = Validator::validate_module_items(&module.body) {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("PARSE_ERROR:\n{e:?}");
+                        panic!()
+                    }
+                }
+            }
+
             if let Some(neg) = &metadata.negative {
                 if neg.phase == NegativePhase::Parse {
-                    println!("PARSE_ERROR: Expected error but parsed successfully");
+                    println!("PARSE_SUCCESS_ERROR: Expected error but parsed successfully");
                     panic!()
                 }
             }
@@ -62,36 +89,6 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
             panic!()
         }
     };
-
-
-    match &s {
-        Program::Script(script) => {
-            if let Err(e) = validate_statements(&script.body) {
-                if let Some(neg) = &metadata.negative {
-                    if neg.phase == NegativePhase::Parse {
-                        return (Program::Script(Script::dummy()), Metadata::default());
-                    }
-                }
-
-                println!("VALIDATION_ERROR:\n{e:?}");
-                panic!()
-
-            }
-        }
-        Program::Module(module) => {
-            if let Err(e) = validate_module_items(&module.body) {
-                if let Some(neg) = &metadata.negative {
-                    if neg.phase == NegativePhase::Parse {
-                        return (Program::Script(Script::dummy()), Metadata::default());
-                    }
-                }
-
-                println!("VALIDATION_ERROR:\n{e:?}");
-                panic!()
-
-            }
-        }
-    }
 
     (s, metadata)
 }

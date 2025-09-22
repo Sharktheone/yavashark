@@ -1,6 +1,6 @@
 use crate::builtins::Promise;
 use crate::conversion::{downcast_obj, TryIntoValue};
-use crate::task_queue::AsyncTask;
+use crate::task_queue::{AsyncTask, AsyncTaskQueue};
 use crate::{ObjectHandle, Realm, Res};
 use pin_project::pin_project;
 use std::future::Future;
@@ -41,6 +41,10 @@ impl<F: Future<Output = O>, O: TryIntoValue> AsyncTask for FutureTask<F, O> {
             Poll::Pending => Poll::Pending,
         }
     }
+
+    fn run_first_sync(&mut self, _realm: &mut Realm) -> Poll<Res> {
+        Poll::Pending
+    }
 }
 
 impl<F: Future<Output = O> + 'static, O: TryIntoValue + 'static> IntoPromise for F {
@@ -55,7 +59,7 @@ impl<F: Future<Output = O> + 'static, O: TryIntoValue + 'static> IntoPromise for
             promise,
         };
 
-        realm.queue.queue_task(task);
+        AsyncTaskQueue::queue_task(task, realm);
 
         promise_obj
     }
