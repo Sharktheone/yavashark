@@ -151,6 +151,13 @@ impl Map {
         }
     }
 
+    #[get("size")]
+    fn size(&self) -> ValueResult {
+        let inner = self.inner.borrow();
+
+        Ok((inner.map.len() as i32).into())
+    }
+
     fn keys(&self, #[realm] realm: &Realm) -> ValueResult {
         let inner = self.inner.borrow();
 
