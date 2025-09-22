@@ -16,7 +16,6 @@ pub fn run_file(file: PathBuf) -> Result<String, Error> {
     #[cfg(feature = "timings")]
     unsafe {
         crate::PARSE_DURATION = parse.elapsed();
-
     }
     let raw = metadata.flags.contains(Flags::RAW);
     let async_ = metadata.flags.contains(Flags::ASYNC);
@@ -26,7 +25,6 @@ pub fn run_file(file: PathBuf) -> Result<String, Error> {
     #[cfg(feature = "timings")]
     unsafe {
         crate::SETUP_DURATION = setup.elapsed();
-
     }
 
     run_file_in(file, &mut realm, &mut scope, stmt, metadata)

@@ -268,8 +268,6 @@ impl Promise {
             gc.reject(&val, realm)?;
         }
 
-
-
         Ok(promise)
     }
 }
@@ -539,10 +537,7 @@ impl Promise {
 
 impl FullfilledHandler {
     #[must_use]
-    pub fn new(
-        promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
-        f: ObjectHandle,
-    ) -> Self {
+    pub fn new(promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>, f: ObjectHandle) -> Self {
         Self {
             promise,
             f: Callable::JsFunction(f),
@@ -607,10 +602,7 @@ impl FullfilledHandler {
 
 impl RejectedHandler {
     #[must_use]
-    pub fn new(
-        promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
-        f: ObjectHandle,
-    ) -> Self {
+    pub fn new(promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>, f: ObjectHandle) -> Self {
         Self {
             promise,
             f: Callable::JsFunction(f),

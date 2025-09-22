@@ -6,18 +6,18 @@ use yavashark_test262::parsers::test_file;
 use yavashark_test262::run::run_file;
 
 #[cfg(feature = "pprof")]
-use pprof::ProfilerGuard;
+use flate2::{write::GzEncoder, Compression};
 #[cfg(feature = "pprof")]
 use pprof::protos::Message;
 #[cfg(feature = "pprof")]
-use std::time::{SystemTime, UNIX_EPOCH};
+use pprof::ProfilerGuard;
 use std::fs;
 #[cfg(feature = "pprof")]
 use std::fs::File;
 #[cfg(feature = "pprof")]
 use std::io::Write;
 #[cfg(feature = "pprof")]
-use flate2::{write::GzEncoder, Compression};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 const TEST262_ROOT: &str = "../../test262";
 
@@ -44,10 +44,14 @@ fn run() {
     args.next();
 
     let mut enable_prof = false;
-    let mut next = args.next().expect("please provide a test path or flags followed by a test path");
+    let mut next = args
+        .next()
+        .expect("please provide a test path or flags followed by a test path");
     if next == "--prof" || next == "--profile" {
         enable_prof = true;
-        next = args.next().expect("please provide a test path after --prof");
+        next = args
+            .next()
+            .expect("please provide a test path after --prof");
     }
 
     let f = next;
@@ -73,8 +77,14 @@ fn run() {
                 if let Ok(profile) = report.pprof() {
                     let mut buf = Vec::new();
                     if profile.encode(&mut buf).is_ok() {
-                        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-                        let test_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("profile");
+                        let ts = SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs();
+                        let test_name = path
+                            .file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("profile");
                         let pid = std::process::id();
                         let out = format!("profiles/{}.pb.gz", test_name);
                         if let Ok(file) = File::create(&out) {
@@ -116,8 +126,14 @@ fn run() {
                 if let Ok(profile) = report.pprof() {
                     let mut buf = Vec::new();
                     if profile.encode(&mut buf).is_ok() {
-                        let ts = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-                        let test_name = path.file_stem().and_then(|s| s.to_str()).unwrap_or("profile");
+                        let ts = SystemTime::now()
+                            .duration_since(UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs();
+                        let test_name = path
+                            .file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("profile");
                         let pid = std::process::id();
                         let out = format!("profiles/{}-{}-{}.pb.gz", test_name, pid, ts);
                         if let Ok(file) = File::create(&out) {

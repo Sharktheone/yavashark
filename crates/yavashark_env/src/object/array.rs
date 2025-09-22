@@ -1159,7 +1159,12 @@ impl Array {
         Ok(Obj::into_value(array))
     }
 
-    fn some(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle, this_arg: Option<Value>) -> ValueResult {
+    fn some(
+        #[this] this: Value,
+        #[realm] realm: &mut Realm,
+        func: &ObjectHandle,
+        this_arg: Option<Value>,
+    ) -> ValueResult {
         let this = coerce_object_strict(this, realm)?;
 
         let len = this

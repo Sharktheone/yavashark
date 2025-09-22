@@ -15,7 +15,6 @@ impl Validator {
                         return Err("Invalid assignment target: await expression".to_string());
                     }
 
-
                     Self::validate_expr(&paren.expr)?;
                 }
                 SimpleAssignTarget::OptChain(optchain) => {

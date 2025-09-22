@@ -125,7 +125,6 @@ impl PrettyPrint for Object<Realm> {
             let name = self.name();
             if name == "Object" {
                 String::new()
-
             } else {
                 format!("[{name}] ").bright_green().to_string()
             }
@@ -153,7 +152,6 @@ impl PrettyPrint for Object<Realm> {
         } else {
             str.pop();
             str.push('}');
-
         }
 
         str.push_str(" }");
@@ -275,7 +273,6 @@ impl PrettyPrint for Object<Realm> {
             let name = self.name();
             if name == "Object" {
                 String::new()
-
             } else {
                 format!("[{name}] ").bright_green().to_string()
             }
@@ -303,7 +300,7 @@ impl PrettyPrint for Object<Realm> {
         } else {
             str.pop();
             str.push('}');
-            return str
+            return str;
         }
 
         str.push_str("\n}");
