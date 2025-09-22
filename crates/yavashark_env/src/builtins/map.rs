@@ -108,7 +108,7 @@ impl Map {
         for (key, value) in &inner.map {
             func.call(
                 realm,
-                vec![key.copy(), value.copy(), this.copy()],
+                vec![value.copy(), key.copy(), this.copy()],
                 realm.global.clone().into(),
             )?;
         }
