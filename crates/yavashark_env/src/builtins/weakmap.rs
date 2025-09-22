@@ -6,6 +6,7 @@ use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, MutObj, Obj};
+use crate::array::Array;
 
 #[object]
 #[derive(Debug)]
@@ -182,6 +183,15 @@ impl WeakMap {
         let inner = self.inner.borrow();
 
         Ok((inner.map.len() as i32).into())
+    }
+
+
+    fn keys(&self, #[realm] realm: &Realm) -> ValueResult {
+        let inner = self.inner.borrow();
+
+        let keys = inner.map.keys().filter_map(WeakValue::upgrade).collect::<Vec<_>>();
+
+        Ok(Array::with_elements(realm, keys)?.into_value())
     }
 
     // fn entries(&self, #[realm] realm: &mut Realm) -> ValueResult {
