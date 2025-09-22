@@ -115,7 +115,7 @@ impl WeakMap {
 
             func.call(
                 realm,
-                vec![key, value, this.copy()],
+                vec![value, key, this.copy()],
                 realm.global.clone().into(),
             )?;
         }
