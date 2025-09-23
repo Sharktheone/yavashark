@@ -596,11 +596,11 @@ impl StringObj {
     ) -> ValueResult {
         let limit = limit.unwrap_or(usize::MAX);
 
-        let parts = str.splitn(limit, separator);
+        let parts = str.splitn(limit + 1, separator);
 
         let mut array = Vec::new();
 
-        for part in parts {
+        for part in parts.take(limit) {
             array.push(YSString::from_ref(part).into());
         }
 
