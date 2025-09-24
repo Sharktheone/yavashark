@@ -178,7 +178,7 @@ impl Constructor<Realm> for ArrayBufferConstructor {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
                 buffer,
             }),
-            max_byte_length: Some(len),
+            max_byte_length: Some(max_len),
             resizable: true,
             detached: false,
         };
