@@ -110,6 +110,11 @@ impl ArrayBuffer {
         let inner = self.inner.borrow();
         inner.buffer.len()
     }
+
+    #[get("maxByteLength")]
+    fn max_byte_length(&self) -> Option<usize> {
+        self.max_byte_length
+    }
 }
 
 #[object(constructor)]
