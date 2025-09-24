@@ -3,18 +3,19 @@ mod from_bytes;
 use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::builtins::ArrayBuffer;
 use crate::conversion::downcast_obj;
-use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{GCd, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
-use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{BoxedObj, Constructor, Error, Obj};
+use yavashark_value::{Constructor, Error, Obj};
 
-#[object(direct(buffer, byte_offset, byte_length))]
+#[object]
 #[derive(Debug)]
 pub struct DataView {
     byte_offset: usize,
+    buffer: GCd<ArrayBuffer>,
+    byte_length: usize,
 }
 
 impl DataView {
@@ -24,7 +25,7 @@ impl DataView {
         byte_offset: Option<usize>,
         byte_length: Option<usize>,
     ) -> Res<Self> {
-        let buf = downcast_obj::<ArrayBuffer>(buffer.copy())?;
+        let buf = downcast_obj::<ArrayBuffer>(buffer)?;
         let buf_len = buf.inner.borrow().buffer.len();
         let byte_offset = byte_offset.unwrap_or(0);
 
@@ -46,26 +47,15 @@ impl DataView {
         Ok(Self {
             inner: RefCell::new(MutableDataView {
                 object: MutObject::with_proto(realm.intrinsics.data_view.clone().into()),
-                buffer: buffer.into(),
-                byte_offset: byte_offset.into(),
-                byte_length: byte_length.into(),
             }),
             byte_offset,
+            buffer: buf,
+            byte_length,
         })
     }
 
-    pub fn get_buffer(&self) -> Res<OwningGcGuard<'_, BoxedObj<Realm>, ArrayBuffer>> {
-        let inner = self.inner.borrow();
-
-        let buf = inner.buffer.value.clone();
-
-        downcast_obj::<ArrayBuffer>(buf)
-    }
-
     pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Res<T> {
-        let buffer = self.get_buffer()?;
-
-        let buffer = buffer.inner.borrow();
+        let buffer = self.buffer.inner.borrow();
 
         let slice = buffer.buffer.as_slice();
         let offset = self.byte_offset + offset;
@@ -80,8 +70,7 @@ impl DataView {
     }
 
     pub fn set<T: FromBytes>(&self, offset: usize, value: T, le: bool) -> Res {
-        let buffer = self.get_buffer()?;
-        let mut buffer = buffer.inner.borrow_mut();
+        let mut buffer = self.buffer.inner.borrow_mut();
         let slice = buffer.buffer.as_mut_slice();
 
         let offset = self.byte_offset + offset;
