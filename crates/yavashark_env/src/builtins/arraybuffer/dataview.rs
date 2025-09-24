@@ -88,6 +88,12 @@ impl DataView {
 
 #[properties_new(constructor(DataViewConstructor::new))]
 impl DataView {
+    #[get("byteLength")]
+    pub const fn byte_length(&self) -> usize {
+        self.byte_length
+    }
+
+
     #[prop("getFloat32")]
     pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
