@@ -93,6 +93,11 @@ impl DataView {
         self.byte_length
     }
 
+    #[get("byteOffset")]
+    pub const fn byte_offset(&self) -> usize {
+        self.byte_offset
+    }
+
 
     #[prop("getFloat32")]
     pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
