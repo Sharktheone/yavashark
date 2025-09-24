@@ -19,16 +19,14 @@ use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Obj};
 
-#[object(direct(
-    max_byte_length(maxByteLength),
-    byte_length(byteLength),
-    resizable,
-    detached
-))]
+#[object]
 #[derive(Debug)]
 pub struct ArrayBuffer {
     #[mutable]
     buffer: Vec<u8>,
+    max_byte_length: Option<usize>,
+    resizable: bool,
+    detached: bool,
 }
 
 impl ArrayBuffer {
@@ -38,12 +36,11 @@ impl ArrayBuffer {
         Self {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                max_byte_length: len.into(),
-                byte_length: len.into(),
-                resizable: true.into(),
-                detached: false.into(),
                 buffer,
             }),
+            max_byte_length: Some(len),
+            resizable: true,
+            detached: false,
         }
     }
 
@@ -53,12 +50,11 @@ impl ArrayBuffer {
         Self {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                max_byte_length: len.into(),
-                byte_length: len.into(),
-                resizable: true.into(),
-                detached: false.into(),
                 buffer,
             }),
+            max_byte_length: Some(len),
+            resizable: true,
+            detached: false,
         }
     }
 
@@ -80,7 +76,6 @@ impl ArrayBuffer {
     fn resize(&self, len: usize) {
         let mut inner = self.inner.borrow_mut();
 
-        inner.byte_length = len.into();
         inner.buffer.resize(len, 0);
     }
 
@@ -160,12 +155,11 @@ impl Constructor<Realm> for ArrayBufferConstructor {
         let buffer = ArrayBuffer {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                max_byte_length: max_len.into(),
-                byte_length: len.into(),
-                resizable: true.into(),
-                detached: false.into(),
                 buffer,
             }),
+            max_byte_length: Some(len),
+            resizable: true,
+            detached: false,
         };
 
         Ok(buffer.into_value())
