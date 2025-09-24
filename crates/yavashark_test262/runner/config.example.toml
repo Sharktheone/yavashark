@@ -1,0 +1,26 @@
+# Example configuration file for yavashark_test262_runner
+# Save this as config.toml and use with: ./yavashark_test262_runner -config config.toml
+
+# Enable CI mode to commit results
+ci = false
+
+# Path to external repository for CI results
+repo_path = ""
+
+# Only generate the history file (skip git commit)
+history_only = false
+
+# Number of workers to use for parallel test execution
+workers = 256
+
+# Path to test root directory
+test_root_dir = "test262/test"
+
+# Enable diff output
+diff = true
+
+# Diff filter to use for CI results (empty = no filter)
+diff_filter = ""
+
+# Path in the test directory (empty = run all tests)
+test_dir = ""

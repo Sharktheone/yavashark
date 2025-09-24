@@ -7,9 +7,9 @@ use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
-use temporal_rs::options::ArithmeticOverflow;
 use temporal_rs::partial::PartialDate;
 use temporal_rs::Calendar;
+use temporal_rs::options::Overflow;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
@@ -49,7 +49,7 @@ impl PlainMonthDay {
             month,
             day,
             calendar,
-            ArithmeticOverflow::Constrain,
+            Overflow::Constrain,
             ref_year,
         )
         .map_err(Error::from_temporal)?;
@@ -157,7 +157,7 @@ impl PlainMonthDay {
 pub fn value_to_plain_month_day(
     value: Value,
     realm: &mut Realm,
-    overflow: Option<ArithmeticOverflow>,
+    overflow: Option<Overflow>,
 ) -> Res<temporal_rs::PlainMonthDay> {
     match value {
         Value::Object(obj) => {
@@ -165,7 +165,7 @@ pub fn value_to_plain_month_day(
                 return Ok(plain_month_day.month_day.clone());
             }
 
-            let overflow = overflow.unwrap_or(ArithmeticOverflow::Constrain);
+            let overflow = overflow.unwrap_or(Overflow::Constrain);
 
             if (obj.contains_key(&"month".into())? || obj.contains_key(&"monthCode".into())?)
                 && obj.contains_key(&"day".into())?

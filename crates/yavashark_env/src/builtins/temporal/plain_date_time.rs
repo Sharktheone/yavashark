@@ -1,5 +1,4 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
-use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::PlainDate;
 use crate::builtins::temporal::plain_time::{value_to_plain_time, PlainTime};
 use crate::builtins::temporal::utils::{
@@ -11,7 +10,8 @@ use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
-use temporal_rs::{Calendar, TimeZone};
+use temporal_rs::{Calendar, Temporal, TimeZone};
+use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
@@ -34,14 +34,14 @@ impl PlainDateTime {
         }
     }
 
-    pub fn now(realm: &Realm, tz: Option<TimeZone>) -> Res<temporal_rs::PlainDateTime> {
-        Now::get_now()?
-            .plain_date_time_iso_with_provider(tz, &realm.env.tz_provider)
+    pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDateTime> {
+        Temporal::now()
+            .plain_date_time_iso_with_provider(tz, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)
     }
 
     pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
-        let date = Self::now(realm, tz)?;
+        let date = Self::now(tz)?;
 
         Ok(Self::new(date, realm).into_object())
     }
@@ -355,10 +355,10 @@ impl PlainDateTime {
     }
 
     #[prop("toPlainDate")]
-    pub fn to_plain_date(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let date = self.date.to_plain_date().map_err(Error::from_temporal)?;
+    pub fn to_plain_date(&self, #[realm] realm: &Realm) -> ObjectHandle {
+        let date = self.date.to_plain_date();
 
-        Ok(PlainDate::new(date, realm).into_object())
+        PlainDate::new(date, realm).into_object()
     }
 
     pub fn with(&self, other: &ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
@@ -380,8 +380,7 @@ impl PlainDateTime {
 
         let date = self
             .date
-            .with_calendar(calendar)
-            .map_err(Error::from_temporal)?;
+            .with_calendar(calendar);
 
         Ok(Self::new(date, realm).into_object())
     }
@@ -417,9 +416,9 @@ impl PlainDateTime {
         let date = self
             .date
             .to_zoned_date_time_with_provider(
-                &tz,
+                tz,
                 disambiguation.unwrap_or_default(),
-                &realm.env.tz_provider,
+                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)?;
 
@@ -427,10 +426,10 @@ impl PlainDateTime {
     }
 
     #[prop("toPlainTime")]
-    pub fn to_plain_time(&self, realm: &mut Realm) -> Res<ObjectHandle> {
-        let time = self.date.to_plain_time().map_err(Error::from_temporal)?;
+    pub fn to_plain_time(&self, realm: &mut Realm) -> ObjectHandle {
+        let time = self.date.to_plain_time();
 
-        Ok(PlainTime::new(time, realm).into_object())
+        PlainTime::new(time, realm).into_object()
     }
 }
 

@@ -1,5 +1,4 @@
 use crate::{Realm, Value};
-use std::borrow::Cow;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -456,10 +455,7 @@ impl<C: Realm> Error<C> {
         let kind = err.kind();
         let msg = err.into_message();
 
-        let msg = match msg {
-            Cow::Borrowed(msg) => YSString::new_static(msg),
-            Cow::Owned(msg) => YSString::from(msg),
-        };
+        let msg = YSString::from_ref(msg);
 
         let err = match kind {
             temporal_rs::error::ErrorKind::Generic => ErrorKind::Runtime,
