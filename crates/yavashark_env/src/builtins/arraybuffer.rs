@@ -99,6 +99,11 @@ impl ArrayBuffer {
 
         Ok(Self::from_buffer(realm, buffer.to_vec()).into_value())
     }
+
+    #[get("resizable")]
+    const fn resizable(&self) -> bool {
+        self.resizable
+    }
 }
 
 #[object(constructor)]
