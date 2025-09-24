@@ -104,6 +104,12 @@ impl ArrayBuffer {
     const fn resizable(&self) -> bool {
         self.resizable
     }
+
+    #[get("byteLength")]
+    fn byte_length(&self) -> usize {
+        let inner = self.inner.borrow();
+        inner.buffer.len()
+    }
 }
 
 #[object(constructor)]
