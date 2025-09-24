@@ -112,8 +112,8 @@ impl ArrayBuffer {
     }
 
     #[get("maxByteLength")]
-    fn max_byte_length(&self) -> Option<usize> {
-        self.max_byte_length
+    fn max_byte_length(&self) -> usize {
+        self.max_byte_length.unwrap_or(0)
     }
 
     #[get("detached")]
