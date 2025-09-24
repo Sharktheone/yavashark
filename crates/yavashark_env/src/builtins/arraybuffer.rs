@@ -115,6 +115,11 @@ impl ArrayBuffer {
     fn max_byte_length(&self) -> Option<usize> {
         self.max_byte_length
     }
+
+    #[get("detached")]
+    fn detached(&self) -> bool {
+        self.detached
+    }
 }
 
 #[object(constructor)]
