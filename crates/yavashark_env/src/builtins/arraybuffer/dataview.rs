@@ -98,6 +98,11 @@ impl DataView {
         self.byte_offset
     }
 
+    #[get("buffer")]
+    pub fn buffer(&self) -> Value {
+        self.buffer.gc().into()
+    }
+
 
     #[prop("getFloat32")]
     pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
