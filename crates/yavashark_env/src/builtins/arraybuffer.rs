@@ -69,7 +69,10 @@ impl ArrayBuffer {
 
         RefMut::map(inner, |x| x.buffer.as_mut())
     }
+
+    const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
+
 
 #[props]
 impl ArrayBuffer {
@@ -94,6 +97,10 @@ impl ArrayBuffer {
         }
 
         let max_len = max_len.map_or(len, |x| x as usize);
+
+        if len > Self::ALLOC_MAX || max_len > Self::ALLOC_MAX {
+            return Err(Error::range("length or maxByteLength too large"));
+        }
 
         let buffer = vec![0; len];
 
