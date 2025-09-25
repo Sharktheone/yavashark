@@ -190,7 +190,7 @@ impl Obj<Realm> for Class {
 
             this
         } else if let Some(sup) = &self.sup {
-            let c = sup.construct(realm, Vec::new())?.to_object()?;
+            let c = sup.construct(realm, args)?.to_object()?;
 
             c.set_prototype(self.prototype.try_borrow()?.clone())?;
 
