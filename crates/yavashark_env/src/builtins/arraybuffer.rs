@@ -14,7 +14,7 @@ pub mod uint8clampedarray;
 pub mod unit8array;
 
 use crate::array::convert_index;
-use crate::{Error, MutObject, Realm, Res, Value, ValueResult};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, props};
 use yavashark_value::Obj;
@@ -74,10 +74,9 @@ impl ArrayBuffer {
 #[props]
 impl ArrayBuffer {
     #[constructor]
-    fn construct(realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let len = args.first().map_or(Ok(0), |v| v.to_int_or_null(realm))? as usize;
-        let max_len = match args.get(1).map(|v| {
-            let x = v.get_property(&"maxByteLength".into(), realm);
+    fn construct(realm: &mut Realm, len: usize, opts: Option<ObjectHandle>) -> ValueResult {
+        let max_len = match opts.map(|v| {
+            let x = v.get("maxByteLength", realm);
 
             x.and_then(|x| x.to_int_or_null(realm))
         }) {
