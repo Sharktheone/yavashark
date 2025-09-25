@@ -90,6 +90,10 @@ impl ArrayBuffer {
             return Err(Error::range("maxByteLength must be positive"));
         }
 
+        if len > max_len.unwrap_or(i64::MAX) as usize {
+            return Err(Error::range("length must be less than or equal to maxByteLength"));
+        }
+
         let max_len = max_len.map_or(len, |x| x as usize);
 
         let buffer = vec![0; len];
