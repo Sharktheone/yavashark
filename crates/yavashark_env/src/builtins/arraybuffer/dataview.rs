@@ -309,7 +309,7 @@ impl DataViewConstructor {
 impl Constructor<Realm> for DataViewConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let buffer = args.first().map_or(
-            Err(Error::new("DataView requires a buffer argument")),
+            Err(Error::ty("DataView requires a buffer argument")),
             |v| Ok(v.clone()),
         )?;
 
