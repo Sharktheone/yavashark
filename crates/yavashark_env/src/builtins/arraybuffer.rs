@@ -16,7 +16,7 @@ pub mod unit8array;
 use crate::array::convert_index;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
-use yavashark_macro::{object, properties_new};
+use yavashark_macro::{object, properties_new, props};
 use yavashark_value::{Constructor, Obj};
 
 #[object]
@@ -71,8 +71,42 @@ impl ArrayBuffer {
     }
 }
 
-#[properties_new(constructor(ArrayBufferConstructor::new))]
+#[props]
 impl ArrayBuffer {
+    #[constructor]
+    fn construct(realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+        let len = args.first().map_or(Ok(0), |v| v.to_int_or_null(realm))? as usize;
+        let max_len = match args.get(1).map(|v| {
+            let x = v.get_property(&"maxByteLength".into(), realm);
+
+            x.and_then(|x| x.to_int_or_null(realm))
+        }) {
+            Some(Ok(x)) => Some(x),
+            Some(Err(e)) => return Err(e),
+            None => None,
+        };
+
+        if max_len.is_some_and(i64::is_negative) {
+            return Err(Error::range("maxByteLength must be positive"));
+        }
+
+        let max_len = max_len.map_or(len, |x| x as usize);
+
+        let buffer = vec![0; len];
+
+        let buffer = ArrayBuffer {
+            inner: RefCell::new(MutableArrayBuffer {
+                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
+                buffer,
+            }),
+            max_byte_length: Some(max_len),
+            resizable: true,
+            detached: false,
+        };
+
+        Ok(buffer.into_value())
+    }
+
     fn resize(&self, len: usize) {
         let mut inner = self.inner.borrow_mut();
 
@@ -120,69 +154,13 @@ impl ArrayBuffer {
     fn detached(&self) -> bool {
         self.detached
     }
-}
 
-#[object(constructor)]
-#[derive(Debug)]
-pub struct ArrayBufferConstructor {}
 
-#[properties_new(raw)]
-impl ArrayBufferConstructor {
     #[prop("isView")]
-    pub fn is_view(&self, view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
+    pub fn is_view(view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {
         Ok(
             view.instance_of(&realm.intrinsics.typed_array_constructor().value, realm)?
                 || view.instance_of(&realm.intrinsics.data_view_constructor().value, realm)?,
         )
-    }
-}
-
-impl ArrayBufferConstructor {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
-        let mut this = Self {
-            inner: RefCell::new(MutableArrayBufferConstructor {
-                object: MutObject::with_proto(func.copy()),
-            }),
-        };
-
-        this.initialize(func.copy())?;
-
-        Ok(this.into_object())
-    }
-}
-
-impl Constructor<Realm> for ArrayBufferConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let len = args.first().map_or(Ok(0), |v| v.to_int_or_null(realm))? as usize;
-        let max_len = match args.get(1).map(|v| {
-            let x = v.get_property(&"maxByteLength".into(), realm);
-
-            x.and_then(|x| x.to_int_or_null(realm))
-        }) {
-            Some(Ok(x)) => Some(x),
-            Some(Err(e)) => return Err(e),
-            None => None,
-        };
-
-        if max_len.is_some_and(i64::is_negative) {
-            return Err(Error::range("maxByteLength must be positive"));
-        }
-
-        let max_len = max_len.map_or(len, |x| x as usize);
-
-        let buffer = vec![0; len];
-
-        let buffer = ArrayBuffer {
-            inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                buffer,
-            }),
-            max_byte_length: Some(max_len),
-            resizable: true,
-            detached: false,
-        };
-
-        Ok(buffer.into_value())
     }
 }
