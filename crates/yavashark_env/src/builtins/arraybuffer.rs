@@ -14,10 +14,10 @@ pub mod uint8clampedarray;
 pub mod unit8array;
 
 use crate::array::convert_index;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{Error, MutObject, Realm, Res, Value, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
-use yavashark_macro::{object, properties_new, props};
-use yavashark_value::{Constructor, Obj};
+use yavashark_macro::{object, props};
+use yavashark_value::Obj;
 
 #[object]
 #[derive(Debug)]
