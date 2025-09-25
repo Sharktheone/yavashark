@@ -1,5 +1,4 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
-use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::plain_month_day::PlainMonthDay;
 use crate::builtins::temporal::plain_time::value_to_plain_time;
@@ -14,7 +13,8 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::DisplayCalendar;
-use temporal_rs::{Calendar, TimeZone};
+use temporal_rs::{Calendar, Temporal, TimeZone};
+use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
@@ -35,14 +35,14 @@ impl PlainDate {
         }
     }
 
-    fn now(realm: &Realm, tz: Option<TimeZone>) -> Res<temporal_rs::PlainDate> {
-        Now::get_now()?
-            .plain_date_iso_with_provider(tz, &realm.env.tz_provider)
+    fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainDate> {
+        Temporal::now()
+            .plain_date_iso_with_provider(tz, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)
     }
 
     pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
-        let date = Self::now(realm, tz)?;
+        let date = Self::now(tz)?;
         Ok(Self::new(date, realm).into_object())
     }
 }
@@ -339,7 +339,7 @@ impl PlainDate {
 
         let zoned_date_time = self
             .date
-            .to_zoned_date_time_with_provider(tz, time, &realm.env.tz_provider)
+            .to_zoned_date_time_with_provider(tz, time, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)?;
 
         Ok(ZonedDateTime::new(zoned_date_time, realm).into_object())

@@ -4,14 +4,10 @@ use std::str::FromStr;
 use temporal_rs::fields::{
     CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields,
 };
-use temporal_rs::options::{
-    ArithmeticOverflow, DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset,
-    DisplayTimeZone, OffsetDisambiguation, RelativeTo, RoundingIncrement, RoundingOptions,
-    ToStringRoundingOptions, Unit,
-};
+use temporal_rs::options::{DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset, DisplayTimeZone, OffsetDisambiguation, Overflow, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
 use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
-use temporal_rs::provider::TransitionDirection;
+use temporal_rs::provider::{TransitionDirection, COMPILED_TZ_PROVIDER};
 use temporal_rs::{Calendar, UtcOffset};
 
 pub fn opt_relative_to_wrap(
@@ -35,7 +31,7 @@ pub fn relative_to(rel: Value, realm: &mut Realm) -> Res<Option<RelativeTo>> {
             Some(RelativeTo::PlainDate(plain_date))
         }
         Value::String(str) => Some(
-            RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
+            RelativeTo::try_from_str_with_provider(str.as_str(), &*COMPILED_TZ_PROVIDER)
                 .map_err(Error::from_temporal)?,
         ),
 
@@ -181,7 +177,7 @@ pub fn rounding_options(
                 Some(RelativeTo::PlainDate(plain_date))
             }
             Some(Value::String(str)) => Some(
-                RelativeTo::try_from_str_with_provider(str.as_str(), &realm.env.tz_provider)
+                RelativeTo::try_from_str_with_provider(str.as_str(), &*COMPILED_TZ_PROVIDER)
                     .map_err(Error::from_temporal)?,
             ),
 
@@ -243,7 +239,7 @@ pub fn difference_settings(obj: ObjectHandle, realm: &mut Realm) -> Res<Differen
     Ok(opts)
 }
 
-pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<ArithmeticOverflow>> {
+pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Overflow>> {
     let overflow = obj.get_opt("overflow", realm)?;
 
     let Some(overflow) = overflow else {
@@ -257,8 +253,8 @@ pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Ari
     let overflow = overflow.to_string(realm)?;
 
     let overflow = match overflow.as_str() {
-        "constrain" => ArithmeticOverflow::Constrain,
-        "reject" => ArithmeticOverflow::Reject,
+        "constrain" => Overflow::Constrain,
+        "reject" => Overflow::Reject,
         _ => return Err(Error::range("Invalid overflow option")),
     };
 
@@ -268,7 +264,7 @@ pub fn overflow_options(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<Ari
 pub fn overflow_options_opt(
     obj: Option<&ObjectHandle>,
     realm: &mut Realm,
-) -> Res<Option<ArithmeticOverflow>> {
+) -> Res<Option<Overflow>> {
     Ok(match obj {
         Some(obj) => overflow_options(obj, realm)?,
         None => None,

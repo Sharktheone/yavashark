@@ -1,5 +1,4 @@
 use crate::builtins::temporal::duration::Duration;
-use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::utils::{
     difference_settings, rounding_options, string_rounding_mode_opts,
 };
@@ -11,6 +10,8 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::{DifferenceSettings, ToStringRoundingOptions};
+use temporal_rs::provider::COMPILED_TZ_PROVIDER;
+use temporal_rs::Temporal;
 use temporal_rs::unix_time::EpochNanoseconds;
 use yavashark_macro::{object, props};
 use yavashark_value::ops::BigIntOrNumber;
@@ -48,7 +49,7 @@ impl Instant {
     }
 
     pub fn now() -> Res<temporal_rs::Instant> {
-        Now::get_now()?.instant().map_err(Error::from_temporal)
+        Temporal::now().instant().map_err(Error::from_temporal)
     }
 
     pub fn now_obj(realm: &Realm) -> Res<ObjectHandle> {
@@ -160,12 +161,12 @@ impl Instant {
     }
 
     #[prop("toJSON")]
-    fn to_json(&self, #[realm] realm: &Realm) -> Res<String> {
+    fn to_json(&self) -> Res<String> {
         self.stamp
             .to_ixdtf_string_with_provider(
                 None,
                 ToStringRoundingOptions::default(),
-                &realm.env.tz_provider,
+                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)
     }
@@ -175,17 +176,17 @@ impl Instant {
         let opts = string_rounding_mode_opts(opts, realm)?;
 
         self.stamp
-            .to_ixdtf_string_with_provider(None, opts, &realm.env.tz_provider)
+            .to_ixdtf_string_with_provider(None, opts, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)
     }
 
     #[prop("toLocaleString")]
-    fn to_locale_string(&self, #[realm] realm: &Realm) -> Res<String> {
+    fn to_locale_string(&self) -> Res<String> {
         self.stamp
             .to_ixdtf_string_with_provider(
                 None,
                 ToStringRoundingOptions::default(),
-                &realm.env.tz_provider,
+                &*COMPILED_TZ_PROVIDER,
             )
             .map_err(Error::from_temporal)
     }

@@ -12,7 +12,6 @@ use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Varia
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
-use temporal_rs::tzdb::FsTzdbProvider;
 use yavashark_value::Realm as RealmT;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -32,7 +31,6 @@ impl Realm {
         let mut realm = Self {
             env: Environment {
                 modules: HashMap::new(),
-                tz_provider: FsTzdbProvider::default(),
             },
             intrinsics,
             global: global.clone(),

@@ -70,15 +70,15 @@ impl FunctionPrototype {
 
 #[allow(unused)]
 fn apply(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    if args.is_empty() {
-        return Err(Error::new("Not enough arguments"));
-    }
-
-    let mut new_this = args[0].copy();
-
-    if new_this.is_nullish() {
-        new_this = realm.global.clone().into();
-    }
+    let new_this = if let Some(new_this) = args.get(0) {
+        if new_this.is_nullish() {
+            realm.global.clone().into()
+        } else {
+            new_this.clone()
+        }
+    } else {
+        realm.global.clone().into()
+    };
 
     let args = if let Some(arr) = args.get(1) {
         let array = Array::from_array_like(realm, arr.copy())?;

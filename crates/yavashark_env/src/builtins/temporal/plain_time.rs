@@ -1,5 +1,4 @@
 use crate::builtins::temporal::duration::{value_to_duration, Duration};
-use crate::builtins::temporal::now::Now;
 use crate::builtins::temporal::plain_date::value_to_plain_date;
 use crate::builtins::temporal::plain_date_time::PlainDateTime;
 use crate::builtins::temporal::utils::{
@@ -10,7 +9,8 @@ use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::ToStringRoundingOptions;
-use temporal_rs::TimeZone;
+use temporal_rs::provider::COMPILED_TZ_PROVIDER;
+use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_value::{Obj, Object};
 
@@ -30,14 +30,14 @@ impl PlainTime {
         }
     }
 
-    pub fn now(realm: &Realm, tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
-        Now::get_now()?
-            .plain_time_with_provider(tz, &realm.env.tz_provider)
+    pub fn now(tz: Option<TimeZone>) -> Res<temporal_rs::PlainTime> {
+        Temporal::now()
+            .plain_time_with_provider(tz, &*COMPILED_TZ_PROVIDER)
             .map_err(Error::from_temporal)
     }
 
     pub fn now_obj(realm: &Realm, tz: Option<TimeZone>) -> Res<ObjectHandle> {
-        let time = Self::now(realm, tz)?;
+        let time = Self::now(tz)?;
 
         Ok(Self::new(time, realm).into_object())
     }
@@ -241,10 +241,9 @@ pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
             }
 
             if let Some(plain_date_time) = obj.downcast::<PlainDateTime>() {
-                return plain_date_time
+                return Ok(plain_date_time
                     .date
-                    .to_plain_time()
-                    .map_err(Error::from_temporal);
+                    .to_plain_time())
             }
 
             let hour = obj.get("hour", realm).and_then(|v| v.to_number(realm))? as u8;

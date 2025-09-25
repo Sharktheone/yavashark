@@ -2006,9 +2006,9 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "iana-time-zone"
-version = "0.1.63"
+version = "0.1.64"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0c919e5debc312ad217002b8048a17b7d83f80703865bbfcfebb0458b0b27d8"
+checksum = "33e57f83510bb73707521ebaffa789ec8caf86f9657cad665b092b581d40e9fb"
 dependencies = [
  "android_system_properties",
  "core-foundation-sys",
@@ -2345,9 +2345,9 @@ checksum = "d75a2a4b1b190afb6f5425f10f6a8f959d2ea0b9c2b1d79553551850539e4674"
 
 [[package]]
 name = "ixdtf"
-version = "0.6.1"
+version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba9132ab5fad81d12d374347859866cdf8e21fe44c3bbb76aab3eccae2f7cd72"
+checksum = "33ef2d119044a672ceb96e59608dffe8677f29dc6ec48ed693a4b9ac84751e9b"
 dependencies = [
  "displaydoc",
 ]
@@ -4590,21 +4590,18 @@ dependencies = [
 
 [[package]]
 name = "temporal_rs"
-version = "0.0.14"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "867c429d5aec157c6d4c255366315f5d0d4a3521171d4429c6c0a382812c0034"
+checksum = "7305090e19b67670330fde1365b7c2c8a3b5a5ef6c92efc238b3b964a8c395fd"
 dependencies = [
- "combine",
  "core_maths",
  "iana-time-zone",
  "icu_calendar",
  "icu_locale",
  "ixdtf",
- "jiff-tzdb",
  "num-traits",
  "timezone_provider",
  "tinystr 0.8.1",
- "tzif",
  "web-time",
  "writeable 0.6.1",
 ]
@@ -4682,11 +4679,14 @@ dependencies = [
 
 [[package]]
 name = "timezone_provider"
-version = "0.0.14"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f357f8e2cddee6a7b56b69fbb4cab30a7e82914c80ee7f9a5eb799ee3de3f24d"
+checksum = "071d5533454ed925a1f4841f7128d1d248f3465d6a18e9afe298212916cc3269"
 dependencies = [
+ "combine",
+ "jiff-tzdb",
  "tinystr 0.8.1",
+ "tzif",
  "zerotrie",
  "zerovec 0.11.4",
 ]
@@ -6050,10 +6050,6 @@ dependencies = [
  "slotmap",
  "yavashark_lexer",
 ]
-
-[[package]]
-name = "yavashark_realm"
-version = "0.1.0"
 
 [[package]]
 name = "yavashark_string"
