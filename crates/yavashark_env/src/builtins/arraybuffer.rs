@@ -72,6 +72,12 @@ impl ArrayBuffer {
             .map_err(|_| Error::ty("ArrayBuffer is detached"))
     }
 
+    pub fn detach(&self) -> Option<Vec<u8>> {
+        let mut inner = self.inner.borrow_mut();
+        inner.buffer.take()
+
+    }
+
     const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
 
