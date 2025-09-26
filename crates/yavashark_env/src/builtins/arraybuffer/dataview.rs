@@ -26,7 +26,16 @@ impl DataView {
         byte_length: Option<usize>,
     ) -> Res<Self> {
         let buf = downcast_obj::<ArrayBuffer>(buffer)?;
-        let buf_len = buf.inner.borrow().buffer.len();
+
+        let inner = buf.inner.borrow();
+
+        let Some(b) = &inner.buffer else {
+            return Err(Error::ty("First argument must be an ArrayBuffer"));
+        };
+
+        let buf_len = b.len();
+        drop(inner);
+
         let byte_offset = byte_offset.unwrap_or(0);
 
         if byte_offset > buf_len {
@@ -55,9 +64,8 @@ impl DataView {
     }
 
     pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Res<T> {
-        let buffer = self.buffer.inner.borrow();
+        let slice = self.buffer.get_slice()?;
 
-        let slice = buffer.buffer.as_slice();
         let offset = self.byte_offset + offset;
 
         let value = &slice
@@ -70,8 +78,7 @@ impl DataView {
     }
 
     pub fn set<T: FromBytes>(&self, offset: usize, value: T, le: bool) -> Res {
-        let mut buffer = self.buffer.inner.borrow_mut();
-        let slice = buffer.buffer.as_mut_slice();
+        let mut slice = self.buffer.get_slice_mut()?;
 
         let offset = self.byte_offset + offset;
 

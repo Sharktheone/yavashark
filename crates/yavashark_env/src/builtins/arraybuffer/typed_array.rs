@@ -107,7 +107,7 @@ impl TypedArray {
             downcast_obj::<ArrayBuffer>(buffer.copy())?
         };
 
-        let buf_len = buf.inner.borrow().buffer.len();
+        let buf_len = buf.get_slice()?.len();
         let byte_offset = byte_offset.unwrap_or(0);
 
         // if byte_offset > buf_len { //TODO: re-implement this with BYTES_PER_ELEMENT

@@ -102,9 +102,13 @@ impl Uint8Array {
 
         let mut inner = buf.inner.borrow_mut();
 
-        engine.decode_vec(base64.as_bytes(), &mut inner.buffer)?;
+        let Some(mut inner_buf) = inner.buffer.as_mut() else {
+            return Err(Error::ty("ArrayBuffer is detached"));
+        };
 
-        let written = inner.buffer.len();
+        engine.decode_vec(base64.as_bytes(), &mut inner_buf)?;
+
+        let written = inner_buf.len();
         let read = base64.len();
 
         let obj = Object::new(realm);
@@ -130,7 +134,7 @@ impl Uint8Array {
         let engine = engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
 
         let buf = self.extends.get_buffer()?;
-        let slice = buf.get_slice();
+        let slice = buf.get_slice()?;
 
         Ok(engine.encode(slice.as_ref()))
     }
@@ -138,7 +142,7 @@ impl Uint8Array {
     #[prop("toHex")]
     fn to_hex(&self) -> Res<String> {
         let buf = self.extends.get_buffer()?;
-        let slice = buf.get_slice();
+        let slice = buf.get_slice()?;
 
         Ok(hex::encode(slice.as_ref()))
     }
@@ -148,11 +152,15 @@ impl Uint8Array {
         let buf = self.extends.get_buffer()?;
         let mut inner = buf.inner.borrow_mut();
 
-        if inner.buffer.len() < hex.len() * 2 {
-            inner.buffer.resize(hex.len() * 2, 0);
+        let Some(inner_buf) = inner.buffer.as_mut() else {
+            return Err(Error::ty("ArrayBuffer is detached"));
+        };
+
+        if inner_buf.len() < hex.len() * 2 {
+            inner_buf.resize(hex.len() * 2, 0);
         }
 
-        hex::encode_to_slice(hex, &mut inner.buffer)?;
+        hex::encode_to_slice(hex, inner_buf)?;
 
         Ok(())
     }

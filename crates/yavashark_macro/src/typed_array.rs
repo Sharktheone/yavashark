@@ -24,7 +24,7 @@ pub fn typed_array_run(input: TokenStream) -> TokenStream {
     quote! {
         {
             let buf = self.get_buffer()?;
-            let slice0 = buf.get_slice();
+            let slice0 = buf.get_slice()?;
 
             let slice = self.apply_offsets(&slice0)?;
 
@@ -55,7 +55,7 @@ pub fn typed_array_run_mut(input: TokenStream) -> TokenStream {
     quote! {
         {
             let buf = self.get_buffer()?;
-            let mut slice0 = buf.get_slice_mut();
+            let mut slice0 = buf.get_slice_mut()?;
 
             let mut slice = self.apply_offsets_mut(&mut slice0)?;
 
