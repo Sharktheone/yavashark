@@ -94,7 +94,7 @@ impl Test262 {
 
     #[prop("detachArrayBuffer")]
     fn detach_array_buffer(buf: &ArrayBuffer) -> ValueResult {
-        buf.detach()?;
+        let _ = buf.detach();
 
         Ok(Value::Undefined)
 
