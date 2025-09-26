@@ -23,10 +23,9 @@ use yavashark_value::Obj;
 #[derive(Debug)]
 pub struct ArrayBuffer {
     #[mutable]
-    buffer: Vec<u8>,
+    buffer: Option<Vec<u8>>,
     max_byte_length: Option<usize>,
     resizable: bool,
-    detached: bool,
 }
 
 impl ArrayBuffer {
@@ -36,11 +35,10 @@ impl ArrayBuffer {
         Self {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                buffer,
+                buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
             resizable: true,
-            detached: false,
         }
     }
 
@@ -50,24 +48,28 @@ impl ArrayBuffer {
         Self {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                buffer,
+                buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
             resizable: true,
-            detached: false,
         }
     }
 
-    pub fn get_slice(&self) -> Ref<'_, [u8]> {
+    pub fn get_slice(&self) -> Res<Ref<'_, [u8]>> {
         let inner = self.inner.borrow();
 
-        Ref::map(inner, |x| x.buffer.as_slice())
+        Ref::filter_map(inner, |x| {
+            x.buffer
+                .as_deref()
+        })
+            .map_err(|_| Error::ty("ArrayBuffer is detached"))
     }
 
-    pub fn get_slice_mut(&self) -> RefMut<'_, [u8]> {
+    pub fn get_slice_mut(&self) -> Res<RefMut<'_, [u8]>> {
         let inner = self.inner.borrow_mut();
 
-        RefMut::map(inner, |x| x.buffer.as_mut())
+        RefMut::filter_map(inner, |x| x.buffer.as_deref_mut())
+            .map_err(|_| Error::ty("ArrayBuffer is detached"))
     }
 
     const ALLOC_MAX: usize = 0xFFFFFFFF;
@@ -107,20 +109,31 @@ impl ArrayBuffer {
         let buffer = ArrayBuffer {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
-                buffer,
+                buffer: Some(buffer),
             }),
             max_byte_length: Some(max_len),
             resizable: true,
-            detached: false,
         };
 
         Ok(buffer.into_value())
     }
 
-    fn resize(&self, len: usize) {
+    fn resize(&self, len: usize) -> Res {
+        if !self.resizable {
+            return Err(Error::ty("ArrayBuffer is not resizable"));
+        }
+
         let mut inner = self.inner.borrow_mut();
 
-        inner.buffer.resize(len, 0);
+
+        if let Some(buf) = inner.buffer.as_mut() {
+            buf.resize(len, 0);
+        } else {
+            return Err(Error::ty("ArrayBuffer is detached"));
+        }
+
+        Ok(())
+
     }
 
     fn slice(
@@ -131,13 +144,17 @@ impl ArrayBuffer {
     ) -> ValueResult {
         let inner = self.inner.borrow();
 
+        let Some(buf) = &inner.buffer else {
+            return Err(Error::ty("ArrayBuffer is detached"));
+        };
+
         let start = start.unwrap_or(0);
-        let end = end.unwrap_or(inner.buffer.len() as isize);
+        let end = end.unwrap_or(buf.len() as isize);
 
-        let start = convert_index(start, inner.buffer.len());
-        let end = convert_index(end, inner.buffer.len());
+        let start = convert_index(start, buf.len());
+        let end = convert_index(end, buf.len());
 
-        let Some(buffer) = inner.buffer.get(start..end) else {
+        let Some(buffer) = buf.get(start..end) else {
             return Ok(Self::new(realm, 0).into_value());
         };
 
@@ -152,7 +169,12 @@ impl ArrayBuffer {
     #[get("byteLength")]
     fn byte_length(&self) -> usize {
         let inner = self.inner.borrow();
-        inner.buffer.len()
+
+        let Some(buf) = &inner.buffer else {
+            return 0;
+        };
+
+        buf.len()
     }
 
     #[get("maxByteLength")]
@@ -162,7 +184,9 @@ impl ArrayBuffer {
 
     #[get("detached")]
     fn detached(&self) -> bool {
-        self.detached
+        let inner = self.inner.borrow();
+
+        inner.buffer.is_none()
     }
 
 
