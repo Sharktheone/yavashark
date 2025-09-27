@@ -494,10 +494,11 @@ impl TypedArray {
                 return None;
             }
 
-            let end = end.unwrap_or(usize::MAX).min(start + (len - target));
+            let end = end.unwrap_or(usize::MAX).min(len - target);
 
             Some((start..end, target))
         }
+
 
 
         typed_array_run_mut!({
