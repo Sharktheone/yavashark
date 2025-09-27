@@ -359,6 +359,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
 
 
+            fn has_key(&self, name: &#value) -> Result<bool, #error> {
+                let mut inner = self.inner.borrow_mut();
+                #properties_contains
+
+                #inner_drop
+                #obj_path.has_key(name)
+            }
+
+
             #to_string
             #name
 

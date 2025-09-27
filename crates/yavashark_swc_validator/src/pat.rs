@@ -82,3 +82,18 @@ impl Validator {
         Ok(())
     }
 }
+
+
+// pub fn pattern_has_initializer(pat: &Pat) -> bool {
+//     match pat {
+//         Pat::Assign(_) => true,
+//         Pat::Array(array) => array.elems.iter().flatten().any(pattern_has_initializer),
+//         Pat::Rest(rest) => pattern_has_initializer(&rest.arg),
+//         Pat::Object(object) => object.props.iter().any(|prop| match prop {
+//             ObjectPatProp::KeyValue(kv) => pattern_has_initializer(&kv.value),
+//             ObjectPatProp::Assign(assign) => assign.value.is_some(),
+//             ObjectPatProp::Rest(rest) => pattern_has_initializer(&rest.arg),
+//         }),
+//         _ => false,
+//     }
+// }

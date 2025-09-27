@@ -234,6 +234,22 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
         self.get_wrapped_object().contains_key(&key.into())
     }
 
+    fn has_key(&self, name: &Value) -> Res<bool> {
+        if self.is_detached() {
+            return self.get_wrapped_object().has_key(name);
+        }
+
+        let key = InternalPropertyKey::from(name.copy());
+
+        if let InternalPropertyKey::Index(idx) = key {
+            typed_array_run!({
+                return Ok(slice.get(idx).is_some());
+            });
+        }
+
+        self.get_wrapped_object().has_key(&key.into())
+    }
+
     fn properties(&self) -> Res<Vec<(Value, Value)>> {
         if self.is_detached() {
             return self.get_wrapped_object().properties();

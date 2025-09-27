@@ -171,6 +171,10 @@ pub trait MutObj<R: Realm>: Debug + AsAny + 'static {
     fn contains_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
         Ok(self.get_property(name)?.is_some())
     }
+    
+    fn has_key(&self, name: &Value<R>) -> Result<bool, Error<R>> {
+        Ok(self.resolve_property(name)?.is_some())
+    }
 
     fn name(&self) -> String;
 

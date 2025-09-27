@@ -23,20 +23,20 @@ pub trait Object: Debug + Any + 'static {
         name: InternalPropertyKey,
         value: ObjectProperty,
         realm: &mut Realm,
-    ) -> Res;
+    ) -> Res<bool>;
 
     fn define_setter(
         &self,
         name: InternalPropertyKey,
         setter: ObjectProperty,
         realm: &mut Realm,
-    ) -> Res;
+    ) -> Res<bool>;
     fn define_getter(
         &self,
         name: InternalPropertyKey,
         getter: ObjectProperty,
         realm: &mut Realm,
-    ) -> Res;
+    ) -> Res<bool>;
 
     fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> PropertyResult;
 
