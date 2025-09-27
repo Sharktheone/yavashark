@@ -292,7 +292,7 @@ impl TypedArray {
         realm: &mut Realm,
         mut buffer: Value,
         byte_offset: Option<usize>,
-        byte_length: Option<usize>,
+        length: Option<usize>,
         ty: Type,
     ) -> Res<Self> {
         let buf = if let Ok(buf) = downcast_obj::<ArrayBuffer>(buffer.copy()) {
@@ -322,13 +322,13 @@ impl TypedArray {
         //     return Err(Error::range("byteOffset is out of bounds"));
         // }
         //
-        let byte_length = byte_length.map_or_else(
+        let byte_length = length.map_or_else(
             || usize::MAX,
             |len| {
                 // if len + byte_offset > buf_len {
                 //     return Err(Error::range("byteLength is out of bounds"));
                 // } //TODO
-                len
+                len * ty.size()
             },
         );
 
@@ -341,35 +341,43 @@ impl TypedArray {
         })
     }
 
-    pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> Res<&'a [u8]> {
+    pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> &'a [u8] {
         let start = self.byte_offset;
 
 
+        let mut end = if self.opt_byte_length == usize::MAX {
+            start + self.opt_byte_length.min(slice.len() - start)
+        } else if self.opt_byte_length > slice.len() - start {
+            start
+        } else {
+            start + self.opt_byte_length
+        };
 
-        let mut end = start + self.opt_byte_length.min(slice.len() - start);
         end -= end % self.ty.size();
-
-        if end > slice.len() {
-            return Err(Error::range("TypedArray is out of bounds"));
-        }
 
         slice
             .get(start..end)
-            .ok_or_else(|| Error::range("TypedArray is out of bounds"))
+            .unwrap_or_default()
     }
 
-    pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> Res<&'a mut [u8]> {
+    pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> &'a mut [u8] {
         let start = self.byte_offset;
-        let mut end = start + self.opt_byte_length.min(slice.len() - start);
+
+
+        let mut end = if self.opt_byte_length == usize::MAX {
+            start + self.opt_byte_length.min(slice.len() - start)
+        } else if self.opt_byte_length > slice.len() - start {
+            start
+        } else {
+            start + self.opt_byte_length
+        };
+
         end -= end % self.ty.size();
 
-        if end > slice.len() {
-            return Err(Error::range("TypedArray is out of bounds"));
-        }
 
         slice
             .get_mut(start..end)
-            .ok_or_else(|| Error::range("TypedArray is out of bounds"))
+            .unwrap_or_default()
     }
 
     pub fn to_value_vec(&self) -> Res<Vec<Value>> {
@@ -450,26 +458,47 @@ impl TypedArray {
 
     #[get("byteLength")]
     pub fn get_byte_length(&self) -> usize {
+        let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
+        let len = buf_len.saturating_sub(self.byte_offset);
+
         if self.opt_byte_length == usize::MAX {
-            let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
-            let len = buf_len.saturating_sub(self.byte_offset);
             len - (len % self.ty.size())
+        } else if self.opt_byte_length > len {
+            0
         } else {
             self.opt_byte_length - (self.opt_byte_length % self.ty.size())
         }
     }
 
     #[get("byteOffset")]
-    pub const fn get_byte_offset(&self) -> usize {
-        self.byte_offset
+    pub fn get_byte_offset(&self) -> usize {
+        let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
+
+        if self.byte_offset > buf_len {
+            0
+        } else if self.opt_byte_length != usize::MAX {
+            let len = buf_len.saturating_sub(self.byte_offset);
+
+            if self.opt_byte_length != usize::MAX && self.opt_byte_length > len {
+                0
+            } else {
+                self.byte_offset
+            }
+
+        } else {
+            self.byte_offset
+        }
     }
 
     #[get("length")]
     pub fn get_length(&self) -> usize {
+        let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
+        let len = buf_len.saturating_sub(self.byte_offset);
+
         if self.opt_byte_length == usize::MAX {
-            let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
-            let len = buf_len.saturating_sub(self.byte_offset);
             len / self.ty.size()
+        } else if self.opt_byte_length > len {
+            0
         } else {
             self.opt_byte_length / self.ty.size()
         }
