@@ -22,7 +22,7 @@ impl Float64Array {
 #[props(extends = TypedArray)]
 impl Float64Array {
     #[both]
-    const BYTES_PER_ELEMENT: usize = size_of::<f32>();
+    const BYTES_PER_ELEMENT: usize = size_of::<f64>();
 
     #[constructor]
     #[length(3)]
