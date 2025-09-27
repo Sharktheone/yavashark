@@ -10,7 +10,7 @@ pub struct Float32Array {}
 
 impl Float32Array {
     pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int8array.clone().into())?;
+        ty.set_prototype(realm.intrinsics.float32array.clone().into())?;
 
         Ok(Self {
             inner: RefCell::new(MutableFloat32Array {}),

@@ -11,7 +11,7 @@ pub struct Float16Array {}
 
 impl Float16Array {
     pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int8array.clone().into())?;
+        ty.set_prototype(realm.intrinsics.float16array.clone().into())?;
 
         Ok(Self {
             inner: RefCell::new(MutableFloat16Array {}),

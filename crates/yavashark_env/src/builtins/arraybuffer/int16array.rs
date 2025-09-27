@@ -10,7 +10,7 @@ pub struct Int16Array {}
 
 impl Int16Array {
     pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int8array.clone().into())?;
+        ty.set_prototype(realm.intrinsics.int16array.clone().into())?;
 
         Ok(Self {
             inner: RefCell::new(MutableInt16Array {}),

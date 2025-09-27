@@ -10,7 +10,7 @@ pub struct Float64Array {}
 
 impl Float64Array {
     pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int8array.clone().into())?;
+        ty.set_prototype(realm.intrinsics.float64array.clone().into())?;
 
         Ok(Self {
             inner: RefCell::new(MutableFloat64Array {}),
