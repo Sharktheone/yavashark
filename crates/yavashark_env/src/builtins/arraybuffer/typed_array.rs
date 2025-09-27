@@ -2,14 +2,16 @@ use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::ArrayBuffer;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
-use crate::{Error, GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{Error, GCd, MutObject, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
 use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
 use half::f16;
 use num_traits::FromPrimitive;
 use std::cell::{Cell, RefCell};
-use std::ops::Range;
-use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
-use yavashark_value::Obj;
+use std::fmt::Debug;
+use std::ops::{Deref, DerefMut, Range};
+use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
+use yavashark_value::{MutObj, Obj};
+use yavashark_value::property_key::InternalPropertyKey;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -67,14 +69,222 @@ unsafe impl<T: AnyBitPattern> AnyBitPattern for Packed<T> {}
 
 unsafe impl<T: NoUninit> NoUninit for Packed<T> {}
 
-#[object]
+
 #[derive(Debug)]
 pub struct TypedArray {
     pub byte_offset: usize,
-    pub byte_length: usize,
+    pub opt_byte_length: usize,
     // TODO: this is a memleak!
     pub buffer: GCd<ArrayBuffer>,
     pub ty: Type,
+
+    pub inner: RefCell<MutObject>
+}
+
+impl yavashark_value::ObjectImpl<Realm> for TypedArray {
+    type Inner = MutObject;
+
+    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+        self.inner.borrow_mut()
+    }
+
+    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+        self.inner.borrow()
+    }
+
+    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+        self.inner.borrow_mut()
+    }
+
+    fn define_property(&self, name: Value, value: Value) -> Res {
+        if self.is_detached() {
+            return self.get_wrapped_object().define_property(name, value)
+        }
+
+        let key = InternalPropertyKey::from(name);
+
+        if let InternalPropertyKey::Index(idx) = key {
+                typed_array_run_mut!({
+                    let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
+                        .ok_or(Error::ty("Failed to convert to value"))?;
+
+                    if let Some(slot) = slice.get_mut(idx) {
+                        slot.0 = value;
+                    } else {
+                        return Err(Error::range("Index out of bounds"));
+                    }
+                });
+
+                Ok(())
+        } else {
+            self.get_wrapped_object().define_property(key.into(), value)
+        }
+    }
+
+    fn define_variable(&self, name: Value, value: Variable) -> Res {
+        if self.is_detached() {
+            return self.get_wrapped_object().define_variable(name, value);
+        }
+
+        let key = InternalPropertyKey::from(name);
+
+        if let InternalPropertyKey::Index(idx) = key {
+            typed_array_run_mut!({
+                let value: TY = FromPrimitive::from_f64(value.value.to_number_or_null())
+                    .ok_or(Error::ty("Failed to convert to value"))?;
+
+                if let Some(slot) = slice.get_mut(idx) {
+                    slot.0 = value;
+                } else {
+                    return Err(Error::range("Index out of bounds"));
+                }
+            });
+
+            Ok(())
+        } else {
+            self.get_wrapped_object().define_variable(key.into(), value)
+        }
+    }
+
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().resolve_property(name);
+        }
+
+
+        let key = InternalPropertyKey::from(name.copy());
+
+        if let InternalPropertyKey::Index(idx) = key {
+            typed_array_run!({
+                return Ok(slice.get(idx).map(|x| x.0.into()));
+            });
+        }
+
+        self.get_wrapped_object().resolve_property(&key.into())
+    }
+
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().get_property(name);
+        }
+
+        let key = InternalPropertyKey::from(name.copy());
+
+        if let InternalPropertyKey::Index(idx) = key {
+            typed_array_run!({
+                return Ok(slice.get(idx).map(|x| x.0.into()));
+            });
+        }
+
+        self.get_wrapped_object().get_property(&key.into())
+    }
+
+    fn define_getter(&self, name: Value, value: Value) -> Res {
+        if self.is_detached() {
+            return self.get_wrapped_object().define_getter(name, value);
+        }
+
+        let key = InternalPropertyKey::from(name);
+        if matches!(key, InternalPropertyKey::Index(_)) {
+            return Ok(())
+        }
+
+        self.get_wrapped_object().define_getter(key.into(), value)
+    }
+
+    fn define_setter(&self, name: Value, value: Value) -> Res {
+        if self.is_detached() {
+            return self.get_wrapped_object().define_setter(name, value);
+        }
+
+        let key = InternalPropertyKey::from(name);
+        if matches!(key, InternalPropertyKey::Index(_)) {
+            return Ok(())
+        }
+
+        self.get_wrapped_object().define_setter(key.into(), value)
+    }
+
+    fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().delete_property(name);
+        }
+
+        let key = InternalPropertyKey::from(name.copy());
+        if matches!(key, InternalPropertyKey::Index(_)) {
+            return Ok(None)
+        }
+
+        self.get_wrapped_object().delete_property(&key.into())
+    }
+
+    fn contains_key(&self, name: &Value) -> Res<bool> {
+        if self.is_detached() {
+            return self.get_wrapped_object().contains_key(name);
+        }
+
+        let key = InternalPropertyKey::from(name.copy());
+
+        if let InternalPropertyKey::Index(idx) = key {
+            typed_array_run!({
+                return Ok(slice.get(idx).is_some());
+            });
+        }
+
+        self.get_wrapped_object().contains_key(&key.into())
+    }
+
+    fn properties(&self) -> Res<Vec<(Value, Value)>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().properties();
+        }
+
+        let mut props = typed_array_run!({
+            slice.iter().enumerate().map(|(i, x)| (i.into(), x.0.into())).collect::<Vec<_>>()
+        });
+
+        props.append(&mut self.get_wrapped_object().properties()?);
+
+        Ok(props)
+    }
+
+    fn keys(&self) -> Res<Vec<Value>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().keys();
+        }
+
+        let mut keys = typed_array_run!({
+            slice.iter().enumerate().map(|(i, _)| i.into()).collect::<Vec<_>>()
+        });
+
+        keys.append(&mut self.get_wrapped_object().keys()?);
+
+        Ok(keys)
+    }
+
+    fn values(&self) -> Res<Vec<Value>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().values();
+        }
+
+        let mut values = typed_array_run!({
+            slice.iter().map(|x| x.0.into()).collect::<Vec<_>>()
+        });
+
+        values.append(&mut self.get_wrapped_object().values()?);
+
+        Ok(values)
+    }
+
+    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
+        if self.is_detached() {
+            return self.get_wrapped_object().get_array_or_done(index);
+        }
+
+        typed_array_run!({
+            Ok((index < slice.len(), slice.get(index).map(|x| x.0.into())))
+        })
+    }
 }
 
 impl TypedArray {
@@ -106,7 +316,6 @@ impl TypedArray {
             downcast_obj::<ArrayBuffer>(buffer.copy())?
         };
 
-        let buf_len = buf.get_slice()?.len();
         let byte_offset = byte_offset.unwrap_or(0);
 
         // if byte_offset > buf_len { //TODO: re-implement this with BYTES_PER_ELEMENT
@@ -114,7 +323,7 @@ impl TypedArray {
         // }
         //
         let byte_length = byte_length.map_or_else(
-            || buf_len - byte_offset,
+            || usize::MAX,
             |len| {
                 // if len + byte_offset > buf_len {
                 //     return Err(Error::range("byteLength is out of bounds"));
@@ -124,19 +333,20 @@ impl TypedArray {
         );
 
         Ok(Self {
-            inner: RefCell::new(MutableTypedArray {
-                object: MutObject::with_proto(realm.intrinsics.typed_array.clone().into()),
-            }),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone().into())),
             buffer: buf,
             byte_offset,
-            byte_length,
+            opt_byte_length: byte_length,
             ty,
         })
     }
 
     pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> Res<&'a [u8]> {
         let start = self.byte_offset;
-        let mut end = start + self.byte_length;
+
+
+
+        let mut end = start + self.opt_byte_length.min(slice.len() - start);
         end -= end % self.ty.size();
 
         if end > slice.len() {
@@ -150,7 +360,7 @@ impl TypedArray {
 
     pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> Res<&'a mut [u8]> {
         let start = self.byte_offset;
-        let mut end = start + self.byte_length;
+        let mut end = start + self.opt_byte_length.min(slice.len() - start);
         end -= end % self.ty.size();
 
         if end > slice.len() {
@@ -166,6 +376,14 @@ impl TypedArray {
         Ok(typed_array_run!({
             slice.iter().map(|x| x.0.into()).collect()
         }))
+    }
+
+    pub fn is_attached(&self) -> bool {
+        self.buffer.inner.borrow().buffer.is_some()
+    }
+
+    pub fn is_detached(&self) -> bool {
+        self.buffer.inner.borrow().buffer.is_none()
     }
 }
 
@@ -231,8 +449,14 @@ impl TypedArray {
     }
 
     #[get("byteLength")]
-    pub const fn get_byte_length(&self) -> usize {
-        self.byte_length
+    pub fn get_byte_length(&self) -> usize {
+        if self.opt_byte_length == usize::MAX {
+            let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
+            let len = buf_len.saturating_sub(self.byte_offset);
+            len - (len % self.ty.size())
+        } else {
+            self.opt_byte_length - (self.opt_byte_length % self.ty.size())
+        }
     }
 
     #[get("byteOffset")]
@@ -241,8 +465,14 @@ impl TypedArray {
     }
 
     #[get("length")]
-    pub const fn get_length(&self) -> usize {
-        self.byte_length / self.ty.size()
+    pub fn get_length(&self) -> usize {
+        if self.opt_byte_length == usize::MAX {
+            let buf_len = self.buffer.get_slice().map_or(0, |s| s.len());
+            let len = buf_len.saturating_sub(self.byte_offset);
+            len / self.ty.size()
+        } else {
+            self.opt_byte_length / self.ty.size()
+        }
     }
 
     pub fn at(&self, idx: usize) -> Res<Value> {
