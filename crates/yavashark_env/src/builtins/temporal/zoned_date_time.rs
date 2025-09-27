@@ -16,8 +16,8 @@ use std::cell::RefCell;
 use std::str::FromStr;
 use temporal_rs::options::OffsetDisambiguation;
 use temporal_rs::partial::PartialZonedDateTime;
-use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
+use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::ops::BigIntOrNumber;
@@ -219,9 +219,7 @@ impl ZonedDateTime {
 
     #[prop("toPlainDateTime")]
     pub fn to_plain_date_time(&self, realm: &mut Realm) -> ObjectHandle {
-        let date = self
-            .date
-            .to_plain_date_time();
+        let date = self.date.to_plain_date_time();
 
         PlainDateTime::new(date, realm).into_object()
     }
@@ -305,9 +303,7 @@ impl ZonedDateTime {
     pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
         let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
 
-        let date = self
-            .date
-            .with_calendar(calendar);
+        let date = self.date.with_calendar(calendar);
 
         Ok(Self::new(date, realm).into_object())
     }
@@ -380,8 +376,7 @@ impl ZonedDateTime {
 
     #[get("era")]
     pub fn era(&self) -> Value {
-        self
-            .date
+        self.date
             .era()
             .map(|era| YSString::from(era.to_string()))
             .map_or(Value::Undefined, Into::into)
@@ -389,12 +384,9 @@ impl ZonedDateTime {
 
     #[get("eraYear")]
     pub fn era_year(&self) -> Value {
-        self
-            .date
-            .era()
-            .map_or(Value::Undefined, |era| {
-                YSString::from_ref(era.as_str()).into()
-            })
+        self.date.era().map_or(Value::Undefined, |era| {
+            YSString::from_ref(era.as_str()).into()
+        })
     }
 
     #[get("hour")]
@@ -434,8 +426,7 @@ impl ZonedDateTime {
 
     #[get("monthCode")]
     pub fn month_code(&self) -> YSString {
-        let month_code = self.date
-            .month_code();
+        let month_code = self.date.month_code();
 
         YSString::from_ref(month_code.as_str())
     }
@@ -467,14 +458,15 @@ impl ZonedDateTime {
 
     #[get("timeZoneId")]
     pub fn time_zone_id(&self) -> Res<String> {
-        self.date.time_zone().identifier()
+        self.date
+            .time_zone()
+            .identifier()
             .map_err(Error::from_temporal)
     }
 
     #[get("weekOfYear")]
     pub fn week_of_year(&self) -> Value {
-        self
-            .date
+        self.date
             .week_of_year()
             .map_or(Value::Undefined, Into::into)
     }
@@ -486,8 +478,7 @@ impl ZonedDateTime {
 
     #[get("yearOfWeek")]
     pub fn year_of_week(&self) -> Value {
-        self
-            .date
+        self.date
             .year_of_week()
             .map_or(Value::Undefined, Into::into)
     }

@@ -10,8 +10,8 @@ use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
-use temporal_rs::{Calendar, Temporal, TimeZone};
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
+use temporal_rs::{Calendar, Temporal, TimeZone};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
 use yavashark_value::{Obj, Object};
@@ -378,9 +378,7 @@ impl PlainDateTime {
     pub fn with_calendar(&self, calendar: &str, realm: &Realm) -> Res<ObjectHandle> {
         let calendar = Calendar::from_str(calendar).map_err(Error::from_temporal)?;
 
-        let date = self
-            .date
-            .with_calendar(calendar);
+        let date = self.date.with_calendar(calendar);
 
         Ok(Self::new(date, realm).into_object())
     }

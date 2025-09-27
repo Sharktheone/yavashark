@@ -6052,6 +6052,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "yavashark_realm"
+version = "0.1.0"
+
+[[package]]
 name = "yavashark_string"
 version = "0.1.0"
 
@@ -6070,6 +6074,7 @@ version = "0.1.0"
 dependencies = [
  "swc_common 14.0.3",
  "swc_ecma_ast 15.0.0",
+ "swc_ecma_parser 24.0.1",
 ]
 
 [[package]]

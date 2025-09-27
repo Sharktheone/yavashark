@@ -11,7 +11,15 @@ use yaml_rust2::Yaml;
 use yavashark_swc_validator::Validator;
 
 pub(crate) fn parse_file(f: &Path) -> (Program, Metadata) {
-    let input = std::fs::read_to_string(f).unwrap();
+    let input = match std::fs::read_to_string(f) {
+        Ok(s) => s,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+            panic!("File not found: {f:?}");
+        }
+        Err(e) => {
+            panic!("Error reading file {f:?}: {e}");
+        }
+    };
 
     parse_code(&input)
 }

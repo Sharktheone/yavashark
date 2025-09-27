@@ -3,12 +3,12 @@ use std::path::PathBuf;
 use swc_common::input::StringInput;
 use swc_common::BytePos;
 use swc_ecma_parser::{EsSyntax, Parser, Syntax};
+use yavashark_env::builtins::ArrayBuffer;
 use yavashark_env::scope::Scope;
 use yavashark_env::{
     ControlFlow, Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Realm, Value,
     ValueResult,
 };
-use yavashark_env::builtins::ArrayBuffer;
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_macro::{object, properties_new};
 
@@ -97,7 +97,6 @@ impl Test262 {
         let _ = buf.detach();
 
         Ok(Value::Undefined)
-
     }
 
     #[prop("evalScript")]

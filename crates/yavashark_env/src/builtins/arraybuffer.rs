@@ -58,10 +58,7 @@ impl ArrayBuffer {
     pub fn get_slice(&self) -> Res<Ref<'_, [u8]>> {
         let inner = self.inner.borrow();
 
-        Ref::filter_map(inner, |x| {
-            x.buffer
-                .as_deref()
-        })
+        Ref::filter_map(inner, |x| x.buffer.as_deref())
             .map_err(|_| Error::ty("ArrayBuffer is detached"))
     }
 
@@ -75,12 +72,10 @@ impl ArrayBuffer {
     pub fn detach(&self) -> Option<Vec<u8>> {
         let mut inner = self.inner.borrow_mut();
         inner.buffer.take()
-
     }
 
     const ALLOC_MAX: usize = 0xFFFFFFFF;
 }
-
 
 #[props]
 impl ArrayBuffer {
@@ -101,7 +96,9 @@ impl ArrayBuffer {
         }
 
         if len > max_len.unwrap_or(i64::MAX) as usize {
-            return Err(Error::range("length must be less than or equal to maxByteLength"));
+            return Err(Error::range(
+                "length must be less than or equal to maxByteLength",
+            ));
         }
 
         let max_len = max_len.map_or(len, |x| x as usize);
@@ -131,7 +128,6 @@ impl ArrayBuffer {
 
         let mut inner = self.inner.borrow_mut();
 
-
         if let Some(buf) = inner.buffer.as_mut() {
             buf.resize(len, 0);
         } else {
@@ -139,7 +135,6 @@ impl ArrayBuffer {
         }
 
         Ok(())
-
     }
 
     fn slice(
@@ -194,7 +189,6 @@ impl ArrayBuffer {
 
         inner.buffer.is_none()
     }
-
 
     #[prop("isView")]
     pub fn is_view(view: &Value, #[realm] realm: &mut Realm) -> Res<bool> {

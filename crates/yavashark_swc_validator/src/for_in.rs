@@ -8,8 +8,7 @@ impl Validator {
                 for decl in &var_decl.decls {
                     if decl.init.is_some() {
                         return Err(
-                            "ForInStmt variable declarations cannot have initializers"
-                                .to_string(),
+                            "ForInStmt variable declarations cannot have initializers".to_string()
                         );
                     }
 
@@ -26,7 +25,7 @@ impl Validator {
                 for decl in &using_decl.decls {
                     if decl.init.is_some() {
                         return Err(
-                            "ForInStmt using declarations cannot have initializers".to_string(),
+                            "ForInStmt using declarations cannot have initializers".to_string()
                         );
                     }
 

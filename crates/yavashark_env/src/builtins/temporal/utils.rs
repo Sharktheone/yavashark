@@ -4,7 +4,11 @@ use std::str::FromStr;
 use temporal_rs::fields::{
     CalendarFields, DateTimeFields, YearMonthCalendarFields, ZonedDateTimeFields,
 };
-use temporal_rs::options::{DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset, DisplayTimeZone, OffsetDisambiguation, Overflow, RelativeTo, RoundingIncrement, RoundingOptions, ToStringRoundingOptions, Unit};
+use temporal_rs::options::{
+    DifferenceSettings, Disambiguation, DisplayCalendar, DisplayOffset, DisplayTimeZone,
+    OffsetDisambiguation, Overflow, RelativeTo, RoundingIncrement, RoundingOptions,
+    ToStringRoundingOptions, Unit,
+};
 use temporal_rs::parsers::Precision;
 use temporal_rs::partial::PartialTime;
 use temporal_rs::provider::{TransitionDirection, COMPILED_TZ_PROVIDER};

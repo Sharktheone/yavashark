@@ -110,7 +110,6 @@ impl DataView {
         self.buffer.gc().into()
     }
 
-
     #[prop("getFloat32")]
     pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -315,10 +314,11 @@ impl DataViewConstructor {
 
 impl Constructor<Realm> for DataViewConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        let buffer = args.first().map_or(
-            Err(Error::ty("DataView requires a buffer argument")),
-            |v| Ok(v.clone()),
-        )?;
+        let buffer = args
+            .first()
+            .map_or(Err(Error::ty("DataView requires a buffer argument")), |v| {
+                Ok(v.clone())
+            })?;
 
         let byte_offset = match args.get(1).map(|v| v.to_number(realm).map(|v| v as usize)) {
             Some(Ok(v)) => Some(v),

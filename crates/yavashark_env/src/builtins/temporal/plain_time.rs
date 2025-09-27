@@ -241,9 +241,7 @@ pub fn value_to_plain_time(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
             }
 
             if let Some(plain_date_time) = obj.downcast::<PlainDateTime>() {
-                return Ok(plain_date_time
-                    .date
-                    .to_plain_time())
+                return Ok(plain_date_time.date.to_plain_time());
             }
 
             let hour = obj.get("hour", realm).and_then(|v| v.to_number(realm))? as u8;

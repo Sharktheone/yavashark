@@ -1,3 +1,4 @@
+use crate::array::Array;
 use crate::utils::ValueIterator;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use indexmap::map::Entry;
@@ -6,7 +7,6 @@ use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, MutObj, Obj};
-use crate::array::Array;
 
 #[object]
 #[derive(Debug)]
