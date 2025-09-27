@@ -235,8 +235,8 @@ fn init_constructor(
     let realm = &config.realm;
     let try_into_value = &config.try_into_value;
 
-    let name = ty_to_name(ty)?;
-    let name = format_ident!("{}Constructor", name);
+    let ty_name = ty_to_name(ty)?;
+    let name = format_ident!("{}Constructor", ty_name);
     let mut_name = format_ident!("Mutable{}", name);
     let args = match (constructor.is_some(), call_constructor.is_some()) {
         (true, true) => quote! { constructor, function },
@@ -251,6 +251,8 @@ fn init_constructor(
         pub struct #name {}
     };
 
+    let mut constructor_length = 0;
+
     if let Some(constructor) = constructor {
         let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
 
@@ -264,6 +266,8 @@ fn init_constructor(
                 }
             }
         });
+
+        constructor_length = constructor.calculate_length().0;
     }
 
     if let Some(call_constructor) = call_constructor {
@@ -279,6 +283,8 @@ fn init_constructor(
                 }
             }
         });
+
+        constructor_length = call_constructor.calculate_length().0;
     }
 
     {
@@ -328,6 +334,8 @@ fn init_constructor(
         obj.define_variable("constructor".into(), #variable::write_config(constructor.clone().into()))?;
 
         constructor.define_variable("prototype".into(), #variable::new_read_only(obj.clone().into()))?;
+        constructor.define_variable("length".into(), #variable::config(#value::from(#constructor_length)).into())?;
+        constructor.define_variable("name".into(), #variable::config(#value::from(stringify!(#ty_name)).into()))?;
 
 
     };

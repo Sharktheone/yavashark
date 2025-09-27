@@ -25,6 +25,7 @@ impl Int8Array {
     const BYTES_PER_ELEMENT: usize = size_of::<i8>();
 
     #[constructor]
+    #[length(3)]
     fn construct(
         buf: Value,
         byte_offset: Option<usize>,

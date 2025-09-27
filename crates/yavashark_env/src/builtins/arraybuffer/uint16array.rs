@@ -25,6 +25,7 @@ impl Uint16Array {
     const BYTES_PER_ELEMENT: usize = size_of::<u16>();
 
     #[constructor]
+    #[length(3)]
     fn construct(
         buf: Value,
         byte_offset: Option<usize>,

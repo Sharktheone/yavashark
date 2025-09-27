@@ -80,7 +80,20 @@ impl Method {
             .map(|js| quote! { #js })
             .unwrap_or_else(|| quote! { stringify!(#name_ident) });
 
-        let length = self.length.unwrap_or_else(|| {
+        let (length, _) = self.calculate_length();
+
+        quote! {
+            #native_function::with_proto_and_len(#js_name.as_ref(), |mut args, mut this, realm| {
+                #arg_prepare
+                #prepare_receiver
+                #call.try_into_value(realm)
+            }, func_proto.copy(), #length)
+        }
+    }
+
+
+    pub fn calculate_length(&self) -> (usize, usize) {
+        self.length.map(|len| (len, len)).unwrap_or_else(|| {
             let mut length = self.args.len();
 
             if self.this.is_some() {
@@ -106,18 +119,8 @@ impl Method {
                 })
                 .count();
 
-            length -= optionals;
-
-            length
-        });
-
-        quote! {
-            #native_function::with_proto_and_len(#js_name.as_ref(), |mut args, mut this, realm| {
-                #arg_prepare
-                #prepare_receiver
-                #call.try_into_value(realm)
-            }, func_proto.copy(), #length)
-        }
+            (length - optionals, length)
+        })
     }
 
     pub fn init_tokes_direct(
