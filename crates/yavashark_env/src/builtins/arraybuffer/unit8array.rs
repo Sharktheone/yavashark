@@ -99,7 +99,7 @@ impl Uint8Array {
 
         let engine = engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
 
-        let buf = self.extends.get_buffer()?;
+        let buf = &self.extends.buffer;
 
         let mut inner = buf.inner.borrow_mut();
 
@@ -134,7 +134,7 @@ impl Uint8Array {
 
         let engine = engine::GeneralPurpose::new(engine, engine::GeneralPurposeConfig::default());
 
-        let buf = self.extends.get_buffer()?;
+        let buf = &self.extends.buffer;
         let slice = buf.get_slice()?;
 
         Ok(engine.encode(slice.as_ref()))
@@ -142,7 +142,7 @@ impl Uint8Array {
 
     #[prop("toHex")]
     fn to_hex(&self) -> Res<String> {
-        let buf = self.extends.get_buffer()?;
+        let buf = &self.extends.buffer;
         let slice = buf.get_slice()?;
 
         Ok(hex::encode(slice.as_ref()))
@@ -150,7 +150,8 @@ impl Uint8Array {
 
     #[prop("setFromHex")]
     fn set_from_hex(&self, hex: &str) -> Res<()> {
-        let buf = self.extends.get_buffer()?;
+        let buf = &self.extends.buffer;
+
         let mut inner = buf.inner.borrow_mut();
 
         let Some(inner_buf) = inner.buffer.as_mut() else {

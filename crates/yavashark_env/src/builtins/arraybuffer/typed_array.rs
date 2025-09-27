@@ -2,14 +2,13 @@ use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::ArrayBuffer;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
-use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::{Error, GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
 use half::f16;
 use num_traits::FromPrimitive;
 use std::cell::{Cell, RefCell};
-use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
-use yavashark_value::{BoxedObj, Obj};
+use yavashark_value::Obj;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -67,15 +66,14 @@ unsafe impl<T: AnyBitPattern> AnyBitPattern for Packed<T> {}
 
 unsafe impl<T: NoUninit> NoUninit for Packed<T> {}
 
-#[object(direct(byte_offset, byte_length))]
+#[object]
 #[derive(Debug)]
 pub struct TypedArray {
-    #[allow(unused)]
-    byte_offset: usize,
-    byte_length: usize,
-    #[gc]
-    buffer: Value,
-    ty: Type,
+    pub byte_offset: usize,
+    pub byte_length: usize,
+    // TODO: this is a memleak!
+    pub buffer: GCd<ArrayBuffer>,
+    pub ty: Type,
 }
 
 impl TypedArray {
@@ -101,8 +99,8 @@ impl TypedArray {
 
             downcast_obj::<ArrayBuffer>(buffer.copy())?
         } else {
-            let len = buffer.to_int_or_null(realm)? as usize;
-            buffer = ArrayBuffer::new(realm, len).into_value();
+            let len = buffer.to_int_or_null(realm)? as usize * ty.size();
+            buffer = ArrayBuffer::new(realm, len)?.into_value();
 
             downcast_obj::<ArrayBuffer>(buffer.copy())?
         };
@@ -127,20 +125,12 @@ impl TypedArray {
         Ok(Self {
             inner: RefCell::new(MutableTypedArray {
                 object: MutObject::with_proto(realm.intrinsics.typed_array.clone().into()),
-                byte_offset: byte_offset.into(),
-                byte_length: byte_length.into(),
             }),
-            buffer,
+            buffer: buf,
             byte_offset,
             byte_length,
             ty,
         })
-    }
-
-    pub fn get_buffer(&self) -> Res<OwningGcGuard<'_, BoxedObj<Realm>, ArrayBuffer>> {
-        let buf = self.buffer.clone();
-
-        downcast_obj::<ArrayBuffer>(buf)
     }
 
     pub fn apply_offsets<'a>(&self, slice: &'a [u8]) -> Res<&'a [u8]> {
@@ -235,8 +225,23 @@ impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
 
     #[get("buffer")]
-    pub fn buffer(&self) -> Value {
-        self.buffer.clone()
+    pub fn get_buffer(&self) -> ObjectHandle {
+        self.buffer.gc().into()
+    }
+
+    #[get("byteLength")]
+    pub const fn get_byte_length(&self) -> usize {
+        self.byte_length
+    }
+
+    #[get("byteOffset")]
+    pub const fn get_byte_offset(&self) -> usize {
+        self.byte_offset
+    }
+
+    #[get("length")]
+    pub const fn get_length(&self) -> usize {
+        self.byte_length / self.ty.size()
     }
 
     pub fn at(&self, idx: usize) -> Res<Value> {
@@ -285,8 +290,7 @@ impl TypedArray {
 
         typed_array_run!({
             let owned = slice.to_vec();
-            drop(slice0);
-            drop(buf);
+            // drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![x.0.into(), idx.into(), array.copy()];
 

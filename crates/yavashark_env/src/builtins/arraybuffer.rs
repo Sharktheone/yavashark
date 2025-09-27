@@ -29,17 +29,22 @@ pub struct ArrayBuffer {
 }
 
 impl ArrayBuffer {
-    pub fn new(realm: &mut Realm, len: usize) -> Self {
+    pub fn new(realm: &mut Realm, len: usize) -> Res<Self> {
+        if len > Self::ALLOC_MAX {
+            return Err(Error::range("length too large"));
+        }
+
+
         let buffer = vec![0; len];
 
-        Self {
+        Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
                 object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
             resizable: true,
-        }
+        })
     }
 
     pub fn from_buffer(realm: &mut Realm, buffer: Vec<u8>) -> Self {
@@ -156,7 +161,7 @@ impl ArrayBuffer {
         let end = convert_index(end, buf.len());
 
         let Some(buffer) = buf.get(start..end) else {
-            return Ok(Self::new(realm, 0).into_value());
+            return Ok(Self::new(realm, 0)?.into_value());
         };
 
         Ok(Self::from_buffer(realm, buffer.to_vec()).into_value())
