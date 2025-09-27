@@ -562,13 +562,15 @@ impl TypedArray {
         start: Option<isize>,
         end: Option<isize>,
     ) -> ValueResult {
+        let num = value.to_number(realm)?;
+
         typed_array_run_mut!({
             let len = slice.len();
 
             let start = start.map_or(0, |start| convert_index(start, len));
             let end = end.map_or(len, |end| convert_index(end, len));
 
-            let value: TY = FromPrimitive::from_f64(value.to_number(realm)?)
+            let value: TY = FromPrimitive::from_f64(num)
                 .ok_or(Error::ty("Failed to convert to value"))?;
 
             for val in slice
