@@ -539,7 +539,7 @@ impl TypedArray {
 
         typed_array_run!({
             let owned = slice.to_vec();
-            // drop(slice0);
+            drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![x.0.into(), idx.into(), array.copy()];
 
