@@ -24,7 +24,13 @@ impl Validator {
             }
             Pat::Rest(rest) => Self::validate_pat(&rest.arg)?,
             Pat::Object(object) => {
+                let mut assert_last = false;
+                
                 for prop in &object.props {
+                    if assert_last {
+                        return Err("Object rest element must be last element in object pattern".to_string());
+                    }
+                    
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
                             Self::validate_pat(&kv.value)?;
@@ -33,6 +39,7 @@ impl Validator {
                             Self::validate_ident(&assign.key)?;
                         }
                         ObjectPatProp::Rest(rest) => {
+                            assert_last = true;
                             Self::validate_pat(&rest.arg)?;
                         }
                     }
