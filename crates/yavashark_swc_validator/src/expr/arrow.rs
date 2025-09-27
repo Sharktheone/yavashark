@@ -4,7 +4,7 @@ use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 impl Validator {
     pub fn validate_arrow_expr(arrow: &ArrowExpr) -> Result<(), String> {
         for param in &arrow.params {
-            Self::validate_pat(param)?;
+            Self::validate_pat_dup(param, true)?;
         }
 
         match &*arrow.body {

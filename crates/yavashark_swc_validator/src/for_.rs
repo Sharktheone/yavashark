@@ -1,5 +1,5 @@
 use crate::Validator;
-use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
+use swc_ecma_ast::{ForStmt, VarDeclKind, VarDeclOrExpr};
 use crate::utils::single_stmt_contains_decl;
 
 impl Validator {
@@ -8,7 +8,7 @@ impl Validator {
             match init {
                 VarDeclOrExpr::VarDecl(var_decl) => {
                     for decl in &var_decl.decls {
-                        Self::validate_pat(&decl.name)?;
+                        Self::validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
 
                         if let Some(init) = &decl.init {
                             Self::validate_expr(init)?;

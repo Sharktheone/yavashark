@@ -6,7 +6,7 @@ impl Validator {
         Self::validate_block(&try_.block)?;
         if let Some(handler) = &try_.handler {
             if let Some(param) = &handler.param {
-                Self::validate_pat(param)?;
+                Self::validate_pat_dup(param, true)?;
             }
 
             Self::validate_block(&handler.body)?;

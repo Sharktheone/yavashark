@@ -2,9 +2,35 @@ use crate::Validator;
 use swc_ecma_ast::{ObjectPatProp, Pat};
 
 impl Validator {
+
     pub fn validate_pat(pat: &Pat) -> Result<(), String> {
+        Self::validate_pat_internal(pat, &mut None)
+    }
+
+    pub fn validate_pat_dup(pat: &Pat, check_dups: bool) -> Result<(), String> {
+        let mut idents = if check_dups { Some(Vec::new()) } else { None };
+
+        Self::validate_pat_internal(pat, &mut idents)
+    }
+
+    pub fn validate_pat_internal<'a>(pat: &'a Pat, idents: &mut Option<Vec<&'a str>>) -> Result<(), String> {
         match pat {
-            Pat::Ident(ident) => Self::validate_ident(&ident.id)?,
+            Pat::Ident(ident) => {
+                if let Some(idents) = idents {
+                    if ident.id.as_ref() == "_" {
+                        return Ok(());
+                    }
+
+                    if idents.contains(&&*ident.id.sym) {
+                        return Err(format!("Identifier '{}' has already been declared", ident.id.sym));
+                    }
+
+                    idents.push(&ident.id.sym);
+                }
+
+
+                Self::validate_ident(&ident.id)?;
+            },
             Pat::Array(array) => {
                 let mut assert_last = false;
 
@@ -18,11 +44,11 @@ impl Validator {
                             assert_last = true;
                         }
 
-                        Self::validate_pat(elem)?;
+                        Self::validate_pat_internal(elem, idents)?;
                     }
                 }
             }
-            Pat::Rest(rest) => Self::validate_pat(&rest.arg)?,
+            Pat::Rest(rest) => Self::validate_pat_internal(&rest.arg, idents)?,
             Pat::Object(object) => {
                 let mut assert_last = false;
                 
@@ -33,20 +59,20 @@ impl Validator {
                     
                     match prop {
                         ObjectPatProp::KeyValue(kv) => {
-                            Self::validate_pat(&kv.value)?;
+                            Self::validate_pat_internal(&kv.value, idents)?;
                         }
                         ObjectPatProp::Assign(assign) => {
                             Self::validate_ident(&assign.key)?;
                         }
                         ObjectPatProp::Rest(rest) => {
                             assert_last = true;
-                            Self::validate_pat(&rest.arg)?;
+                            Self::validate_pat_internal(&rest.arg, idents)?;
                         }
                     }
                 }
             }
             Pat::Assign(assign) => {
-                Self::validate_pat(&assign.left)?;
+                Self::validate_pat_internal(&assign.left, idents)?;
                 Self::validate_expr(&assign.right)?;
             }
             Pat::Expr(expr) => Self::validate_expr(expr)?,
