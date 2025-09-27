@@ -1,5 +1,6 @@
 use crate::Validator;
 use swc_ecma_ast::{ForStmt, VarDeclOrExpr};
+use crate::utils::single_stmt_contains_decl;
 
 impl Validator {
     pub fn validate_for(for_: &ForStmt) -> Result<(), String> {
@@ -26,6 +27,11 @@ impl Validator {
 
         if let Some(update) = &for_.update {
             Self::validate_expr(update)?;
+        }
+
+
+        if single_stmt_contains_decl(&for_.body) {
+            return Err("Lexical declaration cannot appear in a single-statement context".to_string());
         }
 
         Self::validate_statement(&for_.body)

@@ -1,5 +1,6 @@
 use crate::Validator;
-use swc_ecma_ast::{ForHead, ForInStmt, ObjectPatProp, Pat};
+use swc_ecma_ast::{ForHead, ForInStmt, Pat};
+use crate::utils::single_stmt_contains_decl;
 
 impl Validator {
     pub fn validate_for_in(for_in: &ForInStmt) -> Result<(), String> {
@@ -9,12 +10,6 @@ impl Validator {
                     if decl.init.is_some() {
                         return Err(
                             "ForInStmt variable declarations cannot have initializers".to_string()
-                        );
-                    }
-
-                    if pattern_has_initializer(&decl.name) {
-                        return Err(
-                            "ForInStmt binding patterns cannot contain initializers".to_string()
                         );
                     }
 
@@ -29,12 +24,6 @@ impl Validator {
                         );
                     }
 
-                    if pattern_has_initializer(&decl.name) {
-                        return Err(
-                            "ForInStmt binding patterns cannot contain initializers".to_string()
-                        );
-                    }
-
                     Self::validate_pat(&decl.name)?;
                 }
             }
@@ -43,32 +32,17 @@ impl Validator {
                     return Err("ForInStmt left side cannot be an expression".to_string());
                 }
 
-                if pattern_has_initializer(pat) {
-                    return Err(
-                        "ForInStmt binding patterns cannot contain initializers".to_string()
-                    );
-                }
-
                 Self::validate_pat(pat)?;
             }
         }
 
         Self::validate_expr(&for_in.right)?;
 
+        if single_stmt_contains_decl(&for_in.body) {
+            return Err("Lexical declaration cannot appear in a single-statement context".to_string());
+        }
+
         Self::validate_statement(&for_in.body)
     }
 }
 
-fn pattern_has_initializer(pat: &Pat) -> bool {
-    match pat {
-        Pat::Assign(_) => true,
-        Pat::Array(array) => array.elems.iter().flatten().any(pattern_has_initializer),
-        Pat::Rest(rest) => pattern_has_initializer(&rest.arg),
-        Pat::Object(object) => object.props.iter().any(|prop| match prop {
-            ObjectPatProp::KeyValue(kv) => pattern_has_initializer(&kv.value),
-            ObjectPatProp::Assign(assign) => assign.value.is_some(),
-            ObjectPatProp::Rest(rest) => pattern_has_initializer(&rest.arg),
-        }),
-        _ => false,
-    }
-}

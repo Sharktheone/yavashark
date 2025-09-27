@@ -19,6 +19,7 @@ mod throw;
 mod try_;
 mod whle;
 mod with;
+mod utils;
 
 use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
 
