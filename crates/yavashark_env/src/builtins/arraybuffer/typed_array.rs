@@ -7,6 +7,7 @@ use bytemuck::{AnyBitPattern, NoUninit, Zeroable};
 use half::f16;
 use num_traits::FromPrimitive;
 use std::cell::{Cell, RefCell};
+use std::ops::Range;
 use yavashark_macro::{object, props, typed_array_run, typed_array_run_mut};
 use yavashark_value::Obj;
 
@@ -253,14 +254,31 @@ impl TypedArray {
     }
 
     #[prop("copyWithin")]
-    pub fn copy_within(&self, target: usize, start: usize, end: Option<usize>) -> Res<()> {
-        typed_array_run_mut!({
-            let end = end.unwrap_or(slice.len());
+    pub fn copy_within(&self, target: usize, start: usize, end: Option<usize>, this: Value) -> ValueResult {
+        fn oob(target: usize, start: usize, end: Option<usize>, len: usize) -> Option<(Range<usize>, usize)> {
+            if target >= len {
+                return None;
+            }
 
-            slice.copy_within(start..end, target);
+            if start >= len {
+                return None;
+            }
+
+            let end = end.unwrap_or(usize::MAX).min(start + (len - target));
+
+            Some((start..end, target))
+        }
+
+
+        typed_array_run_mut!({
+            let Some((range, target)) = oob(target, start, end, slice.len()) else {
+                return Ok(this);
+            };
+
+            slice.copy_within(range, target);
         });
 
-        Ok(())
+        Ok(this)
     }
 
     fn entries(&self, #[realm] realm: &Realm) -> ValueResult {
