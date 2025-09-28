@@ -1,6 +1,6 @@
 use crate::node::ASTNode;
 use crate::{Compiler, Res};
-use swc_ecma_ast::{CallExpr, Callee};
+use swc_ecma_ast::{CallExpr, Callee, Expr};
 use yavashark_bytecode::data::{Acc, OutputData};
 use yavashark_bytecode::instructions::Instruction;
 
@@ -9,7 +9,26 @@ impl Compiler {
         self.compile_call_args(&expr.args)?;
 
         let callee = match &expr.callee {
-            Callee::Expr(expr) => self.compile_expr_data_acc(expr)?,
+            Callee::Expr(expr) => {
+                if let Expr::Member(m) = &**expr {
+                    let member = self.compile_member_prop(&m.prop)?;
+                    let prop = self.compile_expr_data_acc(&m.obj)?;
+
+                    if let Some(out) = out {
+                        self.instructions.push(Instruction::call_member(prop, member, out));
+                    } else {
+                        self.instructions.push(Instruction::call_member_no_output(prop, member));
+                    }
+
+                    self.dealloc(prop);
+                    self.dealloc(member);
+
+                    return Ok(())
+                }
+
+
+                self.compile_expr_data_acc(expr)?
+            },
             Callee::Super(_) => {
                 // self.instructions.push(Instruction::load_super(Acc));
                 todo!()
@@ -22,7 +41,7 @@ impl Compiler {
         if let Some(out) = out {
             self.instructions.push(Instruction::call(callee, out));
         } else {
-            self.instructions.push(Instruction::call(callee, Acc)); //TODO: call_no_output
+            self.instructions.push(Instruction::call_no_output(callee));
         }
 
         Ok(())
