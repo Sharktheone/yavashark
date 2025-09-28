@@ -5,8 +5,9 @@ use crate::builtins::ArrayBuffer;
 use crate::conversion::downcast_obj;
 use crate::{GCd, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;
-use num_traits::ToPrimitive;
+use num_traits::{ToPrimitive};
 use std::cell::RefCell;
+use half::f16;
 use yavashark_macro::{object, properties_new};
 use yavashark_value::{Constructor, Error, Obj};
 
@@ -64,7 +65,19 @@ impl DataView {
     }
 
     pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Res<T> {
+        if offset > self.byte_length {
+            return Err(Error::range("Out of bounds"));
+        }
+
         let slice = self.buffer.get_slice()?;
+
+        if slice.len() < self.byte_offset + self.byte_length {
+            return Err(Error::ty("ArrayBuffer is detached"));
+        }
+
+        if offset + T::N_BYTES > self.byte_length {
+            return Err(Error::range("Out of bounds"));
+        }
 
         let offset = self.byte_offset + offset;
 
@@ -78,9 +91,23 @@ impl DataView {
     }
 
     pub fn set<T: FromBytes>(&self, offset: usize, value: T, le: bool) -> Res {
+        if offset > self.byte_length {
+            return Err(Error::range("Out of bounds"));
+        }
+
         let mut slice = self.buffer.get_slice_mut()?;
 
+        if offset + T::N_BYTES > self.byte_length {
+            return Err(Error::range("Out of bounds"));
+        }
+
         let offset = self.byte_offset + offset;
+
+
+        if slice.len() < self.byte_offset + self.byte_length {
+            return Err(Error::ty("ArrayBuffer is detached"));
+        }
+
 
         let bytes = T::to_bytes(value, le);
         let Some(slice) = slice.get_mut(offset..offset + T::N_BYTES) else {
@@ -110,6 +137,15 @@ impl DataView {
         self.buffer.gc().into()
     }
 
+
+    #[prop("getFloat16")]
+    pub fn get_float16(&self, offset: usize, little: Option<bool>) -> ValueResult {
+        let le = little.unwrap_or(false);
+
+        let value = self.extract::<f16>(offset, le)?;
+
+        Ok(value.into())
+    }
     #[prop("getFloat32")]
     pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
@@ -192,7 +228,18 @@ impl DataView {
     }
 
     #[prop("setFloat32")]
-    pub fn set_float32(&self, offset: usize, value: f64, little: Option<bool>) -> ValueResult {
+    pub fn set_float16(&self, offset: usize, value: f32, little: Option<bool>) -> ValueResult {
+        let le = little.unwrap_or(false);
+        let value = f16::from_f32(value);
+
+        self.set(offset, value, le)?;
+
+        Ok(Value::Undefined)
+    }
+
+
+    #[prop("setFloat32")]
+    pub fn set_float32(&self, offset: usize, value: f32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;

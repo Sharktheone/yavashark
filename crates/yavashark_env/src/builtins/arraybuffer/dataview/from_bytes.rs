@@ -1,3 +1,5 @@
+use half::f16;
+
 pub trait FromBytes: Sized {
     const N_BYTES: usize = size_of::<Self>();
     type Bytes: for<'a> TryFrom<&'a [u8]> + AsRef<[u8]>;
@@ -32,4 +34,4 @@ macro_rules! impl_from_bytes {
     };
 }
 
-impl_from_bytes!(u8, u16, u32, u64, i8, i16, i32, i64, f32, f64);
+impl_from_bytes!(u8, u16, u32, u64, i8, i16, i32, i64, f16, f32, f64);
