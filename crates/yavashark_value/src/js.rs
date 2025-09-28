@@ -368,6 +368,11 @@ impl<C: Realm> Value<C> {
         matches!(self, Self::Object(o) if o.is_function())
     }
 
+    #[must_use]
+    pub fn is_constructor(&self) -> bool {
+        matches!(self, Self::Object(o) if o.is_constructor())
+    }
+
     pub fn assert_no_object(self) -> Result<Self, Error<C>> {
         match self {
             Self::Object(_) => Err(Error::ty("expected primitive, got object")),

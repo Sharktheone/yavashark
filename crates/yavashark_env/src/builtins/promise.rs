@@ -272,6 +272,18 @@ impl Promise {
 
         Ok(promise)
     }
+
+    pub fn rejected(val: &Value, realm: &mut Realm) -> Res<ObjectHandle> {
+        let promise = Self::new(realm);
+        promise.reject(val, realm)?;
+        Ok(promise.into_object())
+    }
+
+    pub fn resolved(val: &Value, realm: &mut Realm) -> Res<ObjectHandle> {
+        let promise = Self::new(realm);
+        promise.resolve(val, realm)?;
+        Ok(promise.into_object())
+    }
 }
 
 #[props]
@@ -370,7 +382,11 @@ impl Promise {
     }
 
     #[prop("resolve")]
-    fn resolve_(val: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn resolve_(val: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
         let promise = Self::new(realm);
 
         promise.resolve(val, realm)?;
@@ -379,12 +395,12 @@ impl Promise {
     }
 
     #[prop("reject")]
-    fn reject_(val: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
-        let promise = Self::new(realm);
+    fn reject_(val: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
 
-        promise.reject(val, realm)?;
-
-        Ok(promise.into_object())
+        Self::rejected(val, realm)
     }
 
     #[prop("try")]
@@ -394,6 +410,11 @@ impl Promise {
         #[realm] realm: &mut Realm,
         #[this] this: Value,
     ) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
+
         let promise = Self::new(realm);
 
         let ret = callback.call(realm, args, this);
@@ -404,7 +425,11 @@ impl Promise {
     }
 
     #[prop("withResolvers")]
-    fn with_resolvers(#[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn with_resolvers(#[realm] realm: &mut Realm, this: Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
         let ret = Object::new(realm);
 
         let promise = Self::new(realm).into_object();
@@ -421,13 +446,17 @@ impl Promise {
         Ok(ret)
     }
 
-    pub fn all(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn all(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         };
 
@@ -440,13 +469,13 @@ impl Promise {
 
                 iter.close(realm)?;
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         } {
             let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
 
             if !then.is_function() {
-                p = Self::resolve_(&p, realm)?.into();
+                p = Self::resolved(&p, realm)?.into();
             }
 
 
@@ -483,13 +512,17 @@ impl Promise {
         Ok(fut.into_promise(realm))
     }
     #[prop("allSettled")]
-    pub fn all_settled(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn all_settled(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         };
 
@@ -502,13 +535,13 @@ impl Promise {
 
                 iter.close(realm)?;
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         } {
             let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
 
             if !then.is_function() {
-                p = Self::resolve_(&p, realm)?.into();
+                p = Self::resolved(&p, realm)?.into();
             }
 
 
@@ -561,13 +594,17 @@ impl Promise {
         Ok(fut.into_promise(realm))
     }
 
-    fn any(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn any(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         };
 
@@ -580,13 +617,13 @@ impl Promise {
 
                 iter.close(realm)?;
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         } {
             let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
 
             if !then.is_function() {
-                p = Self::resolve_(&p, realm)?.into();
+                p = Self::resolved(&p, realm)?.into();
             }
 
 
@@ -598,7 +635,7 @@ impl Promise {
         iter.close(realm)?;
 
         if promises.is_empty() {
-            return Self::resolve_(&Array::from_realm(realm).into_value(), realm);
+            return Self::resolved(&Array::from_realm(realm).into_value(), realm);
         }
 
         for prom in &promises {
@@ -609,7 +646,7 @@ impl Promise {
                     .value
                     .clone()
                     .unwrap_or(Value::Undefined);
-                return Self::resolve_(&val, realm);
+                return Self::resolved(&val, realm);
             }
         }
 
@@ -644,13 +681,17 @@ impl Promise {
     }
 
 
-    fn race(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn race(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+        if !this.is_constructor() {
+            return Err(Error::ty("Promise capability must be a constructor"));
+        }
+
         let iter = match ValueIterator::new(promises, realm) {
             Ok(iter) => iter,
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         };
 
@@ -663,13 +704,13 @@ impl Promise {
 
                 iter.close(realm)?;
 
-                return Self::reject_(&err, realm);
+                return Self::rejected(&err, realm);
             }
         } {
             let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
 
             if !then.is_function() {
-                p = Self::resolve_(&p, realm)?.into();
+                p = Self::resolved(&p, realm)?.into();
             }
 
 
@@ -681,7 +722,7 @@ impl Promise {
         iter.close(realm)?;
 
         if promises.is_empty() {
-            return Self::resolve_(&Array::from_realm(realm).into_value(), realm);
+            return Self::resolved(&Array::from_realm(realm).into_value(), realm);
         }
 
         for prom in &promises {
@@ -693,7 +734,7 @@ impl Promise {
                         .value
                         .clone()
                         .unwrap_or(Value::Undefined);
-                    return Self::resolve_(&val, realm);
+                    return Self::resolved(&val, realm);
                 }
                 PromiseState::Rejected => {
                     let val = prom
@@ -702,7 +743,7 @@ impl Promise {
                         .value
                         .clone()
                         .unwrap_or(Value::Undefined);
-                    return Self::reject_(&val, realm);
+                    return Self::rejected(&val, realm);
                 }
                 PromiseState::Pending => {}
             }
