@@ -9,7 +9,7 @@ use crate::utils::ValueIterator;
 use crate::{
     Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
 };
-use futures::future::join_all;
+use futures::future::{join_all, select_all};
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use tokio::sync::futures::Notified;
@@ -223,7 +223,7 @@ impl Promise {
     }
 
     pub fn get_fullfilled(this: GcPromise, realm: &mut Realm) -> ObjectHandle {
-        NativeFunction::new(
+        NativeFunction::with_len(
             "on_fullfilled",
             move |args, _, realm| {
                 this.resolve(&args.first().cloned().unwrap_or(Value::Undefined), realm)?;
@@ -231,11 +231,12 @@ impl Promise {
                 Ok(Value::Undefined)
             },
             realm,
+            1
         )
     }
 
     pub fn get_rejected(this: GcPromise, realm: &mut Realm) -> ObjectHandle {
-        NativeFunction::new(
+        NativeFunction::with_len(
             "on_rejected",
             move |args, _, realm| {
                 this.reject(&args.first().cloned().unwrap_or(Value::Undefined), realm)?;
@@ -243,6 +244,7 @@ impl Promise {
                 Ok(Value::Undefined)
             },
             realm,
+            1
         )
     }
 
@@ -431,18 +433,30 @@ impl Promise {
 
         let mut promises = Vec::new();
 
-        while let Some(p) = match iter.next(realm) {
+        while let Some(mut p) = match iter.next(realm) {
             Ok(p) => p,
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
+                iter.close(realm)?;
+
                 return Self::reject_(&err, realm);
             }
         } {
+            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+
+            if !then.is_function() {
+                p = Self::resolve_(&p, realm)?.into();
+            }
+
+
+
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
             }
         }
+
+        iter.close(realm)?;
 
         let futures = promises.into_iter().map(|p| p.map_refed(Self::wait_to_res));
 
@@ -481,18 +495,31 @@ impl Promise {
 
         let mut promises = Vec::new();
 
-        while let Some(p) = match iter.next(realm) {
+        while let Some(mut p) = match iter.next(realm) {
             Ok(p) => p,
             Err(err) => {
                 let err = ErrorObj::error_to_value(err, realm);
 
+                iter.close(realm)?;
+
                 return Self::reject_(&err, realm);
             }
         } {
+            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+
+            if !then.is_function() {
+                p = Self::resolve_(&p, realm)?.into();
+            }
+
+
+
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
             }
         }
+
+        iter.close(realm)?;
+
 
         let futures = promises.into_iter().map(|p| p.map_refed(Self::wait_to_res));
 
@@ -533,11 +560,179 @@ impl Promise {
 
         Ok(fut.into_promise(realm))
     }
+
+    fn any(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let iter = match ValueIterator::new(promises, realm) {
+            Ok(iter) => iter,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                return Self::reject_(&err, realm);
+            }
+        };
+
+        let mut promises = Vec::new();
+
+        while let Some(mut p) = match iter.next(realm) {
+            Ok(p) => p,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                iter.close(realm)?;
+
+                return Self::reject_(&err, realm);
+            }
+        } {
+            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+
+            if !then.is_function() {
+                p = Self::resolve_(&p, realm)?.into();
+            }
+
+
+            if let Ok(prom) = downcast_obj::<Self>(p) {
+                promises.push(prom);
+            }
+        }
+
+        iter.close(realm)?;
+
+        if promises.is_empty() {
+            return Self::resolve_(&Array::from_realm(realm).into_value(), realm);
+        }
+
+        for prom in &promises {
+            if prom.state.get() == PromiseState::Fulfilled {
+                let val = prom
+                    .inner
+                    .try_borrow()?
+                    .value
+                    .clone()
+                    .unwrap_or(Value::Undefined);
+                return Self::resolve_(&val, realm);
+            }
+        }
+
+
+        let futures = promises.into_iter().map(|p| Box::pin(p.map_refed(Self::wait_to_res)));
+
+
+
+
+        let mut fut = select_all(futures);
+
+
+        let fut = async move {
+            loop {
+                let (res, _, others) = fut.await;
+
+                match res? {
+                    PromiseResult::Fulfilled(val) => return Ok(val),
+                    PromiseResult::Rejected(_) => {
+                        if others.is_empty() {
+                            return Err(Error::throw(Value::Undefined))
+                        }
+
+                        fut = select_all(others);
+                    }
+                }
+
+            }
+        };
+
+        Ok(fut.into_promise(realm))
+    }
+
+
+    fn race(promises: &Value, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+        let iter = match ValueIterator::new(promises, realm) {
+            Ok(iter) => iter,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                return Self::reject_(&err, realm);
+            }
+        };
+
+        let mut promises = Vec::new();
+
+        while let Some(mut p) = match iter.next(realm) {
+            Ok(p) => p,
+            Err(err) => {
+                let err = ErrorObj::error_to_value(err, realm);
+
+                iter.close(realm)?;
+
+                return Self::reject_(&err, realm);
+            }
+        } {
+            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+
+            if !then.is_function() {
+                p = Self::resolve_(&p, realm)?.into();
+            }
+
+
+            if let Ok(prom) = downcast_obj::<Self>(p) {
+                promises.push(prom);
+            }
+        }
+
+        iter.close(realm)?;
+
+        if promises.is_empty() {
+            return Self::resolve_(&Array::from_realm(realm).into_value(), realm);
+        }
+
+        for prom in &promises {
+            match prom.state.get() {
+                PromiseState::Fulfilled => {
+                    let val = prom
+                        .inner
+                        .try_borrow()?
+                        .value
+                        .clone()
+                        .unwrap_or(Value::Undefined);
+                    return Self::resolve_(&val, realm);
+                }
+                PromiseState::Rejected => {
+                    let val = prom
+                        .inner
+                        .try_borrow()?
+                        .value
+                        .clone()
+                        .unwrap_or(Value::Undefined);
+                    return Self::reject_(&val, realm);
+                }
+                PromiseState::Pending => {}
+            }
+        }
+
+
+        let futures = promises.into_iter().map(|p| Box::pin(p.map_refed(Self::wait_to_res)));
+
+
+
+
+        let fut = select_all(futures);
+
+
+        let fut = async move {
+                let (res, _, _) = fut.await;
+
+                match res? {
+                    PromiseResult::Fulfilled(val) => Ok(val),
+                    PromiseResult::Rejected(val) => Err(Error::throw(val)),
+                }
+        };
+
+        Ok(fut.into_promise(realm))
+    }
 }
 
 impl FullfilledHandler {
     #[must_use]
-    pub fn new(promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>, f: ObjectHandle) -> Self {
+    pub const fn new(promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>, f: ObjectHandle) -> Self {
         Self {
             promise,
             f: Callable::JsFunction(f),
