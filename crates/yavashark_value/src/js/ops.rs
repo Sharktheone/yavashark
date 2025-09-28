@@ -102,6 +102,7 @@ impl<C: Realm> Value<C> {
             Self::Number(n) => *n,
             Self::Boolean(b) => b.num(),
             Self::String(s) => s.parse().unwrap_or(0.0),
+            Self::BigInt(b) => b.to_f64().unwrap_or(f64::NAN),
             _ => 0.0,
         }
     }

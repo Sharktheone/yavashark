@@ -22,7 +22,7 @@ indexmap = "2.7.1"
 chrono = "0.4.40"
 base64 = "0.21.7"
 half = { version = "2.4.1", features = ["bytemuck", "num-traits"]}
-bytemuck = "1.21.0"
+bytemuck = { version = "1.21.0", features = ["extern_crate_alloc"] }
 hex = "0.4.3"
 log = "0.4.25"
 tokio = { version = "1.47.1", default-features = false, features = ["sync"] }
