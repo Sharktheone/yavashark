@@ -165,8 +165,9 @@ impl<C: Realm> Value<C> {
 
                 return v.to_big_int(realm);
             }
-            Self::Symbol(_) | Self::BigInt(_) => {
-                return Err(Error::ty("Cannot convert BigInt or Symbol to number"))
+            Self::BigInt(b) => (**b).clone(),
+            Self::Symbol(_) => {
+                return Err(Error::ty("Cannot convert Symbol to BigInt"))
             }
         })
     }

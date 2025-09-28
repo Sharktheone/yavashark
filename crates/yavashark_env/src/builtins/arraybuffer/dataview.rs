@@ -227,7 +227,7 @@ impl DataView {
         Ok(BigInt::from(value).into())
     }
 
-    #[prop("setFloat32")]
+    #[prop("setFloat16")]
     pub fn set_float16(&self, offset: usize, value: f32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = f16::from_f32(value);

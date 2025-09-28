@@ -1,3 +1,5 @@
+mod conv;
+
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
 use crate::builtins::buf::ArrayBuffer;
 use crate::conversion::downcast_obj;
@@ -5,10 +7,11 @@ use crate::utils::ValueIterator;
 use crate::{Error, GCd, MutObject, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
 use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use half::f16;
-use num_traits::FromPrimitive;
+use num_traits::{FromPrimitive, ToPrimitive};
 use std::cell::{Cell, RefCell};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut, Range};
+use conv::to_value;
 use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
 use yavashark_value::{MutObj, Obj};
 use yavashark_value::property_key::InternalPropertyKey;
@@ -51,6 +54,7 @@ impl Type {
     }
 }
 
+#[repr(Rust, packed)]
 struct Packed<T>(T);
 
 impl<T> From<T> for Packed<T> {
@@ -107,9 +111,9 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
     }
 
     fn define_property(&self, name: Value, value: Value) -> Res {
-        if self.is_detached() {
-            return self.get_wrapped_object().define_property(name, value)
-        }
+        // if self.is_detached() {
+        //     return self.get_wrapped_object().define_property(name, value)
+        // }
 
         let key = InternalPropertyKey::from(name);
 
@@ -166,7 +170,7 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
 
 
             typed_array_run!({
-                return Ok(slice.get(idx).map(|x| x.0.into()));
+                return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
             });
         }
 
@@ -182,7 +186,7 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
 
         if let InternalPropertyKey::Index(idx) = key {
             typed_array_run!({
-                return Ok(slice.get(idx).map(|x| x.0.into()));
+                return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
             });
         }
 
@@ -266,7 +270,7 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
         }
 
         let mut props = typed_array_run!({
-            slice.iter().enumerate().map(|(i, x)| (i.into(), x.0.into())).collect::<Vec<_>>()
+            slice.iter().enumerate().map(|(i, x)| (i.into(), to_value(x.0))).collect::<Vec<_>>()
         });
 
         props.append(&mut self.get_wrapped_object().properties()?);
@@ -294,7 +298,7 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
         }
 
         let mut values = typed_array_run!({
-            slice.iter().map(|x| x.0.into()).collect::<Vec<_>>()
+            slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>()
         });
 
         values.append(&mut self.get_wrapped_object().values()?);
@@ -308,7 +312,7 @@ impl yavashark_value::ObjectImpl<Realm> for TypedArray {
         }
 
         typed_array_run!({
-            Ok((index < slice.len(), slice.get(index).map(|x| x.0.into())))
+            Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0))))
         })
     }
 }
@@ -430,7 +434,7 @@ impl TypedArray {
 
     pub fn to_value_vec(&self) -> Res<Vec<Value>> {
         Ok(typed_array_run!({
-            slice.iter().map(|x| x.0.into()).collect()
+            slice.iter().map(|x| to_value(x.0)).collect()
         }))
     }
 
@@ -471,6 +475,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
     let mut buffer = Vec::with_capacity(len);
 
     for item in items {
+
         match ty {
             Type::U8 => {
                 buffer.push(item.to_number(realm)? as u8);
@@ -482,7 +487,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
                 buffer.extend_from_slice(&(item.to_number(realm)? as u32).to_le_bytes());
             }
             Type::U64 => {
-                buffer.extend_from_slice(&(item.to_number(realm)? as u64).to_le_bytes());
+                buffer.extend_from_slice(&(item.to_big_int(realm)?.to_u64().unwrap_or_default()).to_le_bytes());
             }
             Type::I8 => {
                 buffer.extend_from_slice(&(item.to_number(realm)? as i8).to_le_bytes());
@@ -494,7 +499,7 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
                 buffer.extend_from_slice(&(item.to_number(realm)? as i32).to_le_bytes());
             }
             Type::I64 => {
-                buffer.extend_from_slice(&(item.to_number(realm)? as i64).to_le_bytes());
+                buffer.extend_from_slice(&(item.to_big_int(realm)?.to_i64().unwrap_or_default()).to_le_bytes());
             }
             Type::F16 => {
                 buffer.extend_from_slice(&(f16::from_f64(item.to_number(realm)?)).to_le_bytes());
@@ -573,7 +578,7 @@ impl TypedArray {
 
             slice
                 .get(idx)
-                .map_or(Value::Undefined, |x| Value::from(x.0))
+                .map_or(Value::Undefined, |x| to_value(x.0))
         }))
     }
 
@@ -638,7 +643,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, Value::Undefined)?;
 
@@ -659,7 +664,8 @@ impl TypedArray {
         start: Option<isize>,
         end: Option<isize>,
     ) -> ValueResult {
-        let num = value.to_number(realm)?;
+        let num = value.to_numeric(realm)?;
+        let num = num.to_f64().unwrap_or_default();
 
         typed_array_run_mut!({
             let len = slice.len();
@@ -700,7 +706,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
@@ -730,12 +736,12 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
                 if res.is_truthy() {
-                    return Ok(x.0.into());
+                    return Ok(to_value(x.0));
                 }
             }
         });
@@ -761,7 +767,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
@@ -792,12 +798,12 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate().rev() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
                 if res.is_truthy() {
-                    return Ok(x.0.into());
+                    return Ok(to_value(x.0));
                 }
             }
         });
@@ -823,7 +829,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate().rev() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
@@ -854,7 +860,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 callback.call(realm, args, this_arg.copy())?;
             }
@@ -863,7 +869,12 @@ impl TypedArray {
         Ok(())
     }
 
-    pub fn includes(&self, search_element: f64, from_index: Option<isize>) -> Res<bool> {
+    pub fn includes(&self, search_element: &Value, from_index: Option<isize>, realm: &mut Realm) -> Res<bool> {
+        let search_element = search_element.to_numeric(realm)?;
+        let search_element = search_element.to_f64().unwrap_or_default();
+
+
+
         typed_array_run!({
             let len = slice.len();
             let from_index = from_index.map_or(0, |i| convert_index(i, len));
@@ -872,7 +883,9 @@ impl TypedArray {
                 .ok_or(Error::ty("Failed to convert to value"))?;
 
             for x in slice.get(from_index..).unwrap_or_default() {
-                if x.0 == num {
+                let n = x.0;
+
+                if n == num {
                     return Ok(true);
                 }
             }
@@ -882,7 +895,10 @@ impl TypedArray {
     }
 
     #[prop("indexOf")]
-    pub fn index_of(&self, search_element: f64, from_index: Option<isize>) -> Res<isize> {
+    pub fn index_of(&self, search_element: &Value, from_index: Option<isize>, realm: &mut Realm) -> Res<isize> {
+        let search_element = search_element.to_numeric(realm)?;
+        let search_element = search_element.to_f64().unwrap_or_default();
+
         typed_array_run!({
             let len = slice.len();
             let from_index = from_index.map_or(0, |i| convert_index(i, len));
@@ -891,7 +907,8 @@ impl TypedArray {
                 .ok_or(Error::ty("Failed to convert to value"))?;
 
             for (idx, x) in slice.get(from_index..).unwrap_or_default().iter().enumerate() {
-                if x.0 == num {
+                let n = x.0;
+                if n == num {
                     return Ok((idx + from_index) as isize);
                 }
             }
@@ -913,7 +930,8 @@ impl TypedArray {
                 }
                 first = false;
 
-                str.push_str(&x.0.to_string());
+                let n = x.0;
+                str.push_str(&n.to_string());
             }
         });
 
@@ -937,7 +955,11 @@ impl TypedArray {
     }
 
     #[prop("lastIndexOf")]
-    pub fn last_index_of(&self, search_element: f64, from_index: Option<isize>) -> Res<isize> {
+    pub fn last_index_of(&self, search_element: Value, from_index: Option<isize>, realm: &mut Realm) -> Res<isize> {
+        let search_element = search_element.to_numeric(realm)?;
+        let search_element = search_element.to_f64().unwrap_or_default();
+
+
         typed_array_run!({
             let len = slice.len();
             let from_index = from_index.map_or(0, |i| convert_index(i, len));
@@ -946,7 +968,8 @@ impl TypedArray {
                 .ok_or(Error::ty("Failed to convert to value"))?;
 
             for (idx, x) in slice.get(0..=from_index as usize).unwrap_or_default().iter().enumerate().rev() {
-                if x.0 == num {
+                let n = x.0;
+                if n == num {
                     return Ok(idx as isize);
                 }
             }
@@ -975,7 +998,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
@@ -1010,12 +1033,12 @@ impl TypedArray {
             acc = if let Some(a) = initial_value {
                 a
             } else {
-                owned.first().map(|x| x.0.into())
+                owned.first().map(|x| to_value(x.0))
                 .unwrap_or(Value::Undefined)
             };
 
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![acc, x.0.into(), idx.into(), array.copy()];
+                let args = vec![acc, to_value(x.0), idx.into(), array.copy()];
 
                 acc = callback.call(realm, args, Value::Undefined)?;
             }
@@ -1046,12 +1069,12 @@ impl TypedArray {
             acc = if let Some(a) = initial_value {
                 a
             } else {
-                owned.first().map(|x| x.0.into())
+                owned.first().map(|x| to_value(x.0))
                 .unwrap_or(Value::Undefined)
             };
 
             for (idx, x) in owned.into_iter().enumerate().rev() {
-                let args = vec![acc, x.0.into(), idx.into(), array.copy()];
+                let args = vec![acc, to_value(x.0), idx.into(), array.copy()];
 
                 acc = callback.call(realm, args, Value::Undefined)?;
             }
@@ -1152,7 +1175,7 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
             for (idx, x) in owned.into_iter().enumerate() {
-                let args = vec![x.0.into(), idx.into(), array.copy()];
+                let args = vec![to_value(x.0), idx.into(), array.copy()];
 
                 let res = callback.call(realm, args, this_arg.copy())?;
 
@@ -1180,7 +1203,7 @@ impl TypedArray {
                 let mut vec = owned;
 
                 vec.sort_by(|a, b| {
-                    let args = vec![a.0.into(), b.0.into()];
+                    let args = vec![to_value(a.0), to_value(b.0)];
 
                     let res = compare_fn.call(realm, args, Value::Undefined);
 
@@ -1209,7 +1232,11 @@ impl TypedArray {
 
                 slice.copy_from_slice(&vec);
             } else {
-                slice.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+                slice.sort_by(|a, b| {
+                    let a = a.0;
+                    let b = b.0;
+                    a.partial_cmp(&b).unwrap_or(std::cmp::Ordering::Equal)
+                });
             }
         });
 
@@ -1241,7 +1268,8 @@ impl TypedArray {
                 }
                 first = false;
 
-                str.push_str(&x.0.to_string());
+                let n = x.0;
+                str.push_str(&n.to_string());
             }
         });
 
@@ -1280,7 +1308,7 @@ impl TypedArray {
 
             if let Some(compare_fn) = compare_fn {
                 owned.sort_by(|a, b| {
-                    let args = vec![a.0.into(), b.0.into()];
+                    let args = vec![to_value(a.0), to_value(b.0)];
 
                     let res = compare_fn.call(realm, args, Value::Undefined);
 
@@ -1300,7 +1328,11 @@ impl TypedArray {
                     }
                 });
             } else {
-                owned.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
+                owned.sort_by(|a, b| {
+                    let a = a.0;
+                    let b = b.0;
+                    a.partial_cmp(&b).unwrap_or(std::cmp::Ordering::Equal)
+                });
             }
 
             results = try_cast_vec::<Packed<TY>, u8>(owned).map_err(|(e, _)| bytemuck_err(e))?;
@@ -1321,7 +1353,8 @@ impl TypedArray {
                 }
                 first = false;
 
-                str.push_str(&x.0.to_string());
+                let n = x.0;
+                str.push_str(&n.to_string());
             }
         });
 
@@ -1355,12 +1388,13 @@ impl TypedArray {
         typed_array_run!({
             let len = slice.len();
             let index = convert_index(index, len);
+            let value = Value::from(value);
 
             for (idx, x) in slice.iter().enumerate() {
                 if idx == index {
-                    extend_as_bytes(&mut bytes, Value::from(value), self.ty)?;
+                    extend_as_bytes(&mut bytes, value.copy(), self.ty)?;
                 } else {
-                    extend_as_bytes(&mut bytes, x.0.into(), self.ty)?;
+                    extend_as_bytes(&mut bytes, to_value(x.0), self.ty)?;
                 }
             }
         });
@@ -1453,6 +1487,8 @@ fn extend_as_bytes(bytes: &mut Vec<u8>, value: Value, ty: Type) -> Res<()> {
 
     Ok(())
 }
+
+
 
 fn bytemuck_err(err: bytemuck::PodCastError) -> Error {
     Error::new_error(err.to_string())
