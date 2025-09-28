@@ -29,6 +29,14 @@ impl ValueIterator {
 
         Ok(Some(val.resolve(this, realm)?))
     }
+
+    pub fn close(self, realm: &mut Realm) -> Res {
+        if let Some(return_method) = self.0.get_property_opt(&"return".into(), realm)? {
+            return_method.call(realm, Vec::new(), self.0)?;
+        }
+
+        Ok(())
+    }
 }
 
 pub struct ArrayLike {
@@ -116,8 +124,8 @@ impl ArrayLike {
             let next = next.as_object()?;
 
             let done = next
-                .get_property(&"done".into())?
-                .resolve(iter.clone().into(), realm)?
+                .get_opt("done", realm)?
+                .unwrap_or(Value::Undefined)
                 .is_truthy();
 
             if done {
@@ -125,8 +133,8 @@ impl ArrayLike {
             }
 
             let val = next
-                .get_property(&"value".into())?
-                .resolve(iter.clone().into(), realm)?;
+                .get_opt("value", realm)?
+                .unwrap_or(Value::Undefined);
 
             self.idx.set(self.idx.get() + 1);
 
@@ -150,6 +158,16 @@ impl ArrayLike {
         Ok(Some(val))
     }
 
+    pub fn close(&mut self, realm: &mut Realm) -> Res {
+        if let Some(iter) = &self.iter {
+            if let Some(return_method) = iter.get_opt("return", realm)? {
+                return_method.call(realm, Vec::new(), iter.clone().into())?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub const fn len(&self) -> usize {
         self.len.get()
     }
@@ -162,7 +180,7 @@ impl ArrayLike {
         self.idx.get()
     }
 
-    pub fn to_vec(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
+    pub fn to_vec_no_close(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
         if let Some(values) = &mut self.values {
             return Ok(values.clone());
         }
@@ -178,5 +196,13 @@ impl ArrayLike {
         self.idx.set(idx);
 
         Ok(res)
+    }
+
+
+    pub fn to_vec(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
+        let res = self.to_vec_no_close(realm)?;
+        self.close(realm)?;
+        Ok(res)
+
     }
 }

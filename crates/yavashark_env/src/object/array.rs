@@ -1614,15 +1614,39 @@ impl ArrayConstructor {
 
     fn from(
         items: Value,
-        _mapper: Option<ObjectHandle>,
-        _this_arg: Option<ObjectHandle>,
+        mapper: Option<ObjectHandle>,
+        this_arg: Option<Value>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         if let Value::String(str) = &items {
             return Ok(Obj::into_object(Array::from_string(realm, str)?));
         }
 
-        let array = ArrayLike::new(items, realm)?.to_vec(realm)?;
+        let mut it = ArrayLike::new(items, realm)?;
+
+
+        let array = if let Some(mapper) = mapper {
+            let mut res = Vec::with_capacity(it.len());
+
+            let this_arg = this_arg.unwrap_or(realm.global.clone().into());
+
+            while let Some(val) = it.next(realm)? {
+                let val = mapper.call(realm, vec![val], this_arg.clone())?;
+
+                res.push(val);
+            }
+
+
+            res
+
+        } else {
+            it.to_vec_no_close(realm)?
+        };
+
+        it.close(realm)?;
+
+
+
 
         Ok(Obj::into_object(Array::with_elements(realm, array)?))
     }
