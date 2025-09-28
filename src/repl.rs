@@ -143,7 +143,7 @@ fn run_input(
         }
     };
 
-    if let Err(e) = Validator::validate_statements(&script.body) {
+    if let Err(e) = Validator::new().validate_statements(&script.body) {
         eprintln!("SyntaxError: {e}");
         return;
     }

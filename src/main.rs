@@ -130,7 +130,7 @@ fn main() {
             println!("AST:\n{script:#?}");
         }
 
-        if let Err(e) = Validator::validate_statements(&script.body) {
+        if let Err(e) = Validator::new().validate_statements(&script.body) {
             println!("SyntaxError: {e}");
             return;
         }
