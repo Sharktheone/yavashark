@@ -60,6 +60,7 @@ pub struct Intrinsics {
     pub float64array: ObjectHandle,
     pub bigint64array: ObjectHandle,
     pub biguint64array: ObjectHandle,
+    pub atomics: ObjectHandle,
     pub map: ObjectHandle,
     pub weak_map: ObjectHandle,
     pub set: ObjectHandle,
@@ -158,6 +159,7 @@ impl Intrinsics {
     constructor!(date);
     constructor!(promise);
     constructor!(proxy);
+    constructor!(atomics);
 
     obj!(json);
     obj!(math);
@@ -349,6 +351,11 @@ impl Intrinsics {
             func_prototype.clone().into(),
         )?;
 
+        let atomics = Atomics::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+
         let map = Map::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
@@ -440,6 +447,7 @@ impl Intrinsics {
             float64array,
             bigint64array,
             biguint64array,
+            atomics,
             map,
             weak_map,
             set,

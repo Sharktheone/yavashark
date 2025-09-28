@@ -21,6 +21,7 @@ pub mod temporal;
 mod weakmap;
 mod weakref;
 mod weakset;
+mod atomics;
 
 pub use arguments::*;
 pub use arraybuffer::*;
@@ -44,3 +45,4 @@ pub use temporal::*;
 pub use weakmap::*;
 pub use weakref::*;
 pub use weakset::*;
+pub use atomics::*;

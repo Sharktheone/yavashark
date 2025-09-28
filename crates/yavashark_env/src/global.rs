@@ -191,6 +191,11 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         Variable::write_config(realm.intrinsics.biguint64array_constructor().value),
     )?;
 
+    obj.define_variable(
+        "Atomics".into(),
+        Variable::write_config(realm.intrinsics.atomics_constructor().value),
+    )?;
+
     obj.define_variable("escape".into(), Variable::write_config(get_escape(realm)))?;
     obj.define_variable("unescape".into(), Variable::write_config(get_escape(realm)))?;
     obj.define_variable(
