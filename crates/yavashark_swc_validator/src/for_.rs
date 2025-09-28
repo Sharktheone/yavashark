@@ -2,31 +2,31 @@ use crate::Validator;
 use swc_ecma_ast::{ForStmt, VarDeclKind, VarDeclOrExpr};
 use crate::utils::single_stmt_contains_decl;
 
-impl Validator {
-    pub fn validate_for(for_: &ForStmt) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_for(&mut self, for_: &'a ForStmt) -> Result<(), String> {
         if let Some(init) = &for_.init {
             match init {
                 VarDeclOrExpr::VarDecl(var_decl) => {
                     for decl in &var_decl.decls {
-                        Self::validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
+                        self.validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
 
                         if let Some(init) = &decl.init {
-                            Self::validate_expr(init)?;
+                            self.validate_expr(init)?;
                         }
                     }
                 }
                 VarDeclOrExpr::Expr(expr) => {
-                    Self::validate_expr(expr)?;
+                    self.validate_expr(expr)?;
                 }
             }
         }
 
         if let Some(test) = &for_.test {
-            Self::validate_expr(test)?;
+            self.validate_expr(test)?;
         }
 
         if let Some(update) = &for_.update {
-            Self::validate_expr(update)?;
+            self.validate_expr(update)?;
         }
 
 
@@ -34,6 +34,6 @@ impl Validator {
             return Err("Lexical declaration cannot appear in a single-statement context".to_string());
         }
 
-        Self::validate_statement(&for_.body)
+        self.validate_statement(&for_.body)
     }
 }

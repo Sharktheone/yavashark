@@ -1,12 +1,12 @@
 use crate::Validator;
 use swc_ecma_ast::IfStmt;
 
-impl Validator {
-    pub fn validate_if(if_: &IfStmt) -> Result<(), String> {
-        Self::validate_expr(&if_.test)?;
-        Self::validate_statement(&if_.cons)?;
+impl<'a> Validator<'a> {
+    pub fn validate_if(&mut self, if_: &'a IfStmt) -> Result<(), String> {
+        self.validate_expr(&if_.test)?;
+        self.validate_statement(&if_.cons)?;
         if let Some(alt) = &if_.alt {
-            Self::validate_statement(alt)?;
+            self.validate_statement(alt)?;
         }
 
         Ok(())

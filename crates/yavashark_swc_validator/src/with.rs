@@ -1,9 +1,9 @@
 use crate::Validator;
 use swc_ecma_ast::WithStmt;
 
-impl Validator {
-    pub fn validate_with(with: &WithStmt) -> Result<(), String> {
-        Self::validate_expr(&with.obj)?;
-        Self::validate_statement(&with.body)
+impl<'a> Validator<'a> {
+    pub fn validate_with(&mut self, with: &'a WithStmt) -> Result<(), String> {
+        self.validate_expr(&with.obj)?;
+        self.validate_statement(&with.body)
     }
 }

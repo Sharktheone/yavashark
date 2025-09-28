@@ -1,10 +1,10 @@
 use crate::Validator;
 use swc_ecma_ast::ReturnStmt;
 
-impl Validator {
-    pub fn validate_return(ret: &ReturnStmt) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_return(&mut self, ret: &'a ReturnStmt) -> Result<(), String> {
         if let Some(arg) = &ret.arg {
-            Self::validate_expr(arg)?;
+            self.validate_expr(arg)?;
         }
 
         Ok(())

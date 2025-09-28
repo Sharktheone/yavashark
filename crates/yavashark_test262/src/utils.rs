@@ -47,7 +47,18 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
         Ok(s) => {
             match &s {
                 Program::Script(script) => {
-                    if let Err(e) = Validator::validate_statements(&script.body) {
+                    if !p.take_errors().is_empty() {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("PARSE_ERROR:\n");
+                        panic!()
+                    }
+
+                    if let Err(e) = Validator::new().validate_statements(&script.body) {
                         if let Some(neg) = &metadata.negative {
                             if neg.phase == NegativePhase::Parse {
                                 return (Program::Script(Script::dummy()), Metadata::default());
@@ -59,7 +70,18 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
                     }
                 }
                 Program::Module(module) => {
-                    if let Err(e) = Validator::validate_module_items(&module.body) {
+                    if !p.take_errors().is_empty() {
+                        if let Some(neg) = &metadata.negative {
+                            if neg.phase == NegativePhase::Parse {
+                                return (Program::Script(Script::dummy()), Metadata::default());
+                            }
+                        }
+
+                        println!("PARSE_ERROR:\n");
+                        panic!()
+                    }
+
+                    if let Err(e) = Validator::new().validate_module_items(&module.body) {
                         if let Some(neg) = &metadata.negative {
                             if neg.phase == NegativePhase::Parse {
                                 return (Program::Script(Script::dummy()), Metadata::default());

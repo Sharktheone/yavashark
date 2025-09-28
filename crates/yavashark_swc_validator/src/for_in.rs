@@ -2,10 +2,16 @@ use crate::Validator;
 use swc_ecma_ast::{ForHead, ForInStmt, Pat, VarDeclKind};
 use crate::utils::single_stmt_contains_decl;
 
-impl Validator {
-    pub fn validate_for_in(for_in: &ForInStmt) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_for_in(&mut self, for_in: &'a ForInStmt) -> Result<(), String> {
         match &for_in.left {
             ForHead::VarDecl(var_decl) => {
+                if var_decl.kind != VarDeclKind::Var && var_decl.decls.len() != 1 {
+                    return Err(
+                        "ForInStmt lexical declaration must have a single binding".to_string()
+                    );
+                }
+
                 for decl in &var_decl.decls {
                     if decl.init.is_some() {
                         return Err(
@@ -13,7 +19,7 @@ impl Validator {
                         );
                     }
 
-                    Self::validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
+                    self.validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
                 }
             }
             ForHead::UsingDecl(using_decl) => {
@@ -24,7 +30,7 @@ impl Validator {
                         );
                     }
 
-                    Self::validate_pat(&decl.name)?;
+                    self.validate_pat(&decl.name)?;
                 }
             }
             ForHead::Pat(pat) => {
@@ -32,17 +38,17 @@ impl Validator {
                     return Err("ForInStmt left side cannot be an expression".to_string());
                 }
 
-                Self::validate_pat(pat)?;
+                self.validate_pat(pat)?;
             }
         }
 
-        Self::validate_expr(&for_in.right)?;
+        self.validate_expr(&for_in.right)?;
 
         if single_stmt_contains_decl(&for_in.body) {
             return Err("Lexical declaration cannot appear in a single-statement context".to_string());
         }
 
-        Self::validate_statement(&for_in.body)
+        self.validate_statement(&for_in.body)
     }
 }
 

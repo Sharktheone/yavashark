@@ -1,19 +1,32 @@
 use crate::Validator;
 use swc_ecma_ast::{FnExpr, Function};
 
-impl Validator {
-    pub fn validate_function_expr(function: &FnExpr) -> Result<(), String> {
-        Self::validate_function(&function.function)
+impl<'a> Validator<'a> {
+    pub fn validate_function_expr(&mut self, function: &'a FnExpr) -> Result<(), String> {
+        self.validate_function(&function.function)
     }
 
-    pub fn validate_function(function: &Function) -> Result<(), String> {
+    pub fn validate_function(&mut self, function: &'a Function) -> Result<(), String> {
+        let ctx = self.enter_function_context(function.is_async, function.is_generator);
+
         for param in &function.params {
-            Self::validate_pat(&param.pat)?;
+            if let Err(e) = self.validate_pat(&param.pat) {
+                ctx.exit(self);
+
+                return Err(e);
+            }
         }
 
         if let Some(body) = &function.body {
-            Self::validate_block(body)?;
+            if let Err(e) = self.validate_block(body) {
+                ctx.exit(self);
+
+                return Err(e);
+            }
         }
+
+
+        ctx.exit(self);
 
         Ok(())
     }

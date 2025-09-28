@@ -2,36 +2,36 @@ use crate::Validator;
 use swc_ecma_ast::{ForHead, ForOfStmt, VarDeclKind};
 use crate::utils::single_stmt_contains_decl;
 
-impl Validator {
-    pub fn validate_for_of(for_of: &ForOfStmt) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_for_of(&mut self, for_of: &'a ForOfStmt) -> Result<(), String> {
         match &for_of.left {
             ForHead::VarDecl(var_decl) => {
                 for decl in &var_decl.decls {
                     if let Some(ref init) = decl.init {
-                        Self::validate_expr(init)?;
+                        self.validate_expr(init)?;
                     }
-                    Self::validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
+                    self.validate_pat_dup(&decl.name, var_decl.kind != VarDeclKind::Var)?;
                 }
             }
             ForHead::UsingDecl(using_decl) => {
                 for decl in &using_decl.decls {
                     if let Some(ref init) = decl.init {
-                        Self::validate_expr(init)?;
+                        self.validate_expr(init)?;
                     }
-                    Self::validate_pat(&decl.name)?;
+                    self.validate_pat(&decl.name)?;
                 }
             }
-            ForHead::Pat(pat) => Self::validate_pat(pat)?,
+            ForHead::Pat(pat) => self.validate_pat(pat)?,
         }
 
-        Self::validate_expr(&for_of.right)?;
+        self.validate_expr(&for_of.right)?;
 
         if single_stmt_contains_decl(&for_of.body) {
             return Err("Lexical declaration cannot appear in a single-statement context".to_string());
         }
 
 
-        Self::validate_statement(&for_of.body)
+        self.validate_statement(&for_of.body)
 
     }
 }

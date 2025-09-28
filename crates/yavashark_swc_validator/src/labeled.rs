@@ -1,8 +1,9 @@
 use crate::Validator;
 use swc_ecma_ast::LabeledStmt;
 
-impl Validator {
-    pub fn validate_labeled(labeled: &LabeledStmt) -> Result<(), String> {
-        Self::validate_statement(&labeled.body)
+impl<'a> Validator<'a> {
+    pub fn validate_labeled(&mut self, labeled: &'a LabeledStmt) -> Result<(), String> {
+        self.validate_ident(&labeled.label)?;
+        self.validate_statement(&labeled.body)
     }
 }

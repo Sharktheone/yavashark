@@ -1,8 +1,8 @@
 use crate::Validator;
 use swc_ecma_ast::DebuggerStmt;
 
-impl Validator {
-    pub fn validate_debugger(_debugger: &DebuggerStmt) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_debugger(&mut self, _debugger: &DebuggerStmt) -> Result<(), String> {
         Ok(())
     }
 }

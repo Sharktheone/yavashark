@@ -11,7 +11,7 @@ enum ClassToken {
     Dash,
 }
 
-impl Validator {
+impl<'a> Validator<'a> {
     pub fn validate_lit(lit: &Lit) -> Result<(), String> {
         match lit {
             Lit::Regex(regex) => Self::validate_regex_lit(regex),

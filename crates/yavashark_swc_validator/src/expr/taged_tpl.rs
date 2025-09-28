@@ -1,9 +1,9 @@
 use crate::Validator;
 use swc_ecma_ast::TaggedTpl;
 
-impl Validator {
-    pub fn validate_tagged_tpl_expr(tagged_tpl: &TaggedTpl) -> Result<(), String> {
-        Self::validate_expr(&tagged_tpl.tag)?;
-        Self::validate_tpl_expr(&tagged_tpl.tpl)
+impl<'a> Validator<'a> {
+    pub fn validate_tagged_tpl_expr(&mut self, tagged_tpl: &'a TaggedTpl) -> Result<(), String> {
+        self.validate_expr(&tagged_tpl.tag)?;
+        self.validate_tpl_expr(&tagged_tpl.tpl)
     }
 }

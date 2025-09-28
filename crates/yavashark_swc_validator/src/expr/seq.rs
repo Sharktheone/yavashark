@@ -1,10 +1,10 @@
 use crate::Validator;
 use swc_ecma_ast::SeqExpr;
 
-impl Validator {
-    pub fn validate_seq_expr(seq: &SeqExpr) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_seq_expr(&mut self, seq: &'a SeqExpr) -> Result<(), String> {
         for expr in &seq.exprs {
-            Self::validate_expr(expr)?;
+            self.validate_expr(expr)?;
         }
 
         Ok(())

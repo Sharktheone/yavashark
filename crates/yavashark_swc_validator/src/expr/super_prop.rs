@@ -1,10 +1,10 @@
 use crate::Validator;
 use swc_ecma_ast::{SuperProp, SuperPropExpr};
 
-impl Validator {
-    pub fn validate_super_prop_expr(super_prop: &SuperPropExpr) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_super_prop_expr(&mut self, super_prop: &'a SuperPropExpr) -> Result<(), String> {
         if let SuperProp::Computed(c) = &super_prop.prop {
-            Self::validate_expr(&c.expr)?;
+            self.validate_expr(&c.expr)?;
         }
 
         Ok(())

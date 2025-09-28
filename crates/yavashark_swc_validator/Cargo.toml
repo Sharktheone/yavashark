@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 swc_common = "14.0.3"
 swc_ecma_ast = "15.0.0"
+swc_ecma_visit = "15.0.0"
+unicode-ident = "1.0.19"
 
 [dev-dependencies]
 swc_ecma_parser = "24.0.1"

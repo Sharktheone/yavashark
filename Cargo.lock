@@ -4453,6 +4453,7 @@ dependencies = [
  "swc_atoms 7.0.0",
  "swc_common 14.0.3",
  "swc_ecma_ast 15.0.0",
+ "swc_ecma_visit",
  "tracing",
 ]
 
@@ -4495,6 +4496,22 @@ dependencies = [
  "swc_common 14.0.3",
  "swc_ecma_ast 15.0.0",
  "swc_ecma_lexer 23.0.1",
+ "swc_ecma_visit",
+ "tracing",
+]
+
+[[package]]
+name = "swc_ecma_visit"
+version = "15.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75a579aa8f9e212af521588df720ccead079c09fe5c8f61007cf724324aed3a0"
+dependencies = [
+ "new_debug_unreachable",
+ "num-bigint",
+ "swc_atoms 7.0.0",
+ "swc_common 14.0.3",
+ "swc_ecma_ast 15.0.0",
+ "swc_visit",
  "tracing",
 ]
 
@@ -4902,9 +4919,9 @@ checksum = "2f322b60f6b9736017344fa0635d64be2f458fbc04eef65f6be22976dd1ffd5b"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.16"
+version = "1.0.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a210d160f08b701c8721ba1c726c11662f877ea6b7094007e1ca9a1041945034"
+checksum = "f63a545481291138910575129486daeaf8ac54aee4387fe7906919f7830c7d9d"
 
 [[package]]
 name = "unicode-linebreak"
@@ -6075,6 +6092,8 @@ dependencies = [
  "swc_common 14.0.3",
  "swc_ecma_ast 15.0.0",
  "swc_ecma_parser 24.0.1",
+ "swc_ecma_visit",
+ "unicode-ident",
 ]
 
 [[package]]

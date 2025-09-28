@@ -1,17 +1,17 @@
 use crate::Validator;
 use swc_ecma_ast::{OptChainBase, OptChainExpr};
 
-impl Validator {
-    pub fn validate_opt_chain_expr(opt_chain: &OptChainExpr) -> Result<(), String> {
+impl<'a> Validator<'a> {
+    pub fn validate_opt_chain_expr(&mut self, opt_chain: &'a OptChainExpr) -> Result<(), String> {
         match &*opt_chain.base {
             OptChainBase::Member(member_expr) => {
-                Self::validate_member_expr(member_expr)?;
+                self.validate_member_expr(member_expr)?;
             }
             OptChainBase::Call(call) => {
-                Self::validate_expr(&call.callee)?;
+                self.validate_expr(&call.callee)?;
 
                 for arg in &call.args {
-                    Self::validate_expr(&arg.expr)?;
+                    self.validate_expr(&arg.expr)?;
                 }
             }
         }
