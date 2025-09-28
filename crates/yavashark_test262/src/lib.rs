@@ -18,7 +18,7 @@ pub type NativeFunction = yavashark_env::NativeFunction;
 pub use yavashark_env::object;
 use yavashark_env::Realm;
 
-const TEST262_DIR: &str = "../../test262";
+const TEST262_FALLBACK_DIR: &str = "../../test262";
 
 #[cfg(feature = "timings")]
 pub static mut PARSE_DURATION: std::time::Duration = std::time::Duration::ZERO;
