@@ -13,12 +13,24 @@ impl Interpreter {
 
         let this = scope.this()?;
 
-        let Some(class) = this.downcast::<ClassInstance>()? else {
-            return Err(Error::ty_error("Private name can only be used in class".into()).into());
-        };
+        if let Some(instance) = this.downcast::<ClassInstance>()? {
+            let member = instance
+                .get_private_prop(name)?
+                .ok_or_else(|| Error::ty_error(format!("Private name {name} not found")))?;
 
-        class
-            .get_private_prop(name)?
-            .ok_or(Error::ty_error(format!("Private name {name} not found")).into())
+            return Self::resolve_private_member(realm, member, this.copy())
+                .map(|(value, _)| value);
+        }
+
+        if let Some(class) = this.downcast::<Class>()? {
+            let member = class
+                .get_private_prop(name)
+                .ok_or_else(|| Error::ty_error(format!("Private name {name} not found")))?;
+
+            return Self::resolve_private_member(realm, member, this.copy())
+                .map(|(value, _)| value);
+        }
+
+        Err(Error::ty_error("Private name can only be used in class".into()).into())
     }
 }

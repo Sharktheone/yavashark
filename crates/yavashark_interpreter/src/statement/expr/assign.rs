@@ -8,7 +8,7 @@ use swc_ecma_ast::{
 
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
-use yavashark_env::{Class, ClassInstance, Error, Realm, Res, RuntimeResult, Value};
+use yavashark_env::{Class, ClassInstance, Error, PrivateMember, Realm, Res, RuntimeResult, Value};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 
@@ -76,13 +76,39 @@ impl Interpreter {
                     let name = p.name.as_str();
 
                     if let Some(class) = obj.downcast::<ClassInstance>() {
-                        class.set_private_prop(name.to_owned(), value.copy());
+                        let member = class
+                            .get_private_prop(name)?
+                            .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+
+                        let this_value = Value::Object(obj.clone());
+
+                        Self::write_private_member_on_instance(
+                            realm,
+                            &*class,
+                            name,
+                            member,
+                            value,
+                            this_value,
+                        )?;
 
                         return Ok(());
                     }
 
                     if let Some(class) = obj.downcast::<Class>() {
-                        class.set_private_prop_ref(name.to_owned(), value.copy());
+                        let member = class
+                            .get_private_prop(name)
+                            .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+
+                        let this_value = Value::Object(obj.clone());
+
+                        Self::write_private_member_on_class(
+                            realm,
+                            &*class,
+                            name,
+                            member,
+                            value,
+                            this_value,
+                        )?;
 
                         return Ok(());
                     }
@@ -287,25 +313,65 @@ impl Interpreter {
                     let name = p.name.as_str();
 
                     if let Some(class) = obj.downcast::<ClassInstance>() {
-                        let left = class
+                        let member = class
                             .get_private_prop(name)?
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
+                        if matches!(member, PrivateMember::Method(_)) {
+                            return Err(Error::ty_error(format!(
+                                "Cannot assign to private method {name}"
+                            ))
+                            .into());
+                        }
+
+                        let this_value = Value::Object(obj.clone());
+
+                        let left =
+                            Self::resolve_private_member(realm, member.clone(), this_value.copy())?
+                                .0;
+
                         let value = Self::run_assign_op(op, left, right, realm)?;
 
-                        class.set_private_prop(name.to_owned(), value.copy());
+                        Self::write_private_member_on_instance(
+                            realm,
+                            &*class,
+                            name,
+                            member,
+                            value.copy(),
+                            this_value,
+                        )?;
 
                         return Ok(value);
                     }
 
                     if let Some(class) = obj.downcast::<Class>() {
-                        let left = class
+                        let member = class
                             .get_private_prop(name)
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
+                        if matches!(member, PrivateMember::Method(_)) {
+                            return Err(Error::ty_error(format!(
+                                "Cannot assign to private method {name}"
+                            ))
+                            .into());
+                        }
+
+                        let this_value = Value::Object(obj.clone());
+
+                        let left =
+                            Self::resolve_private_member(realm, member.clone(), this_value.copy())?
+                                .0;
+
                         let value = Self::run_assign_op(op, left, right, realm)?;
 
-                        class.set_private_prop_ref(name.to_owned(), value.copy());
+                        Self::write_private_member_on_class(
+                            realm,
+                            &*class,
+                            name,
+                            member,
+                            value.copy(),
+                            this_value,
+                        )?;
 
                         return Ok(value);
                     }
@@ -505,5 +571,57 @@ impl Interpreter {
                 }
             }
         })
+    }
+}
+
+impl Interpreter {
+    fn write_private_member_on_instance(
+        realm: &mut Realm,
+        instance: &ClassInstance,
+        name: &str,
+        member: PrivateMember,
+        value: Value,
+        this_value: Value,
+    ) -> Res {
+        match member {
+            PrivateMember::Field(_) => {
+                instance.update_private_field(name, value);
+                Ok(())
+            }
+            PrivateMember::Accessor { set: Some(setter), .. } => {
+                setter.call(realm, vec![value], this_value).map(|_| ())
+            }
+            PrivateMember::Accessor { set: None, .. } => Err(Error::ty_error(format!(
+                "Private accessor #{name} does not have a setter"
+            ))),
+            PrivateMember::Method(_) => Err(Error::ty_error(format!(
+                "Cannot assign to private method {name}"
+            ))),
+        }
+    }
+
+    fn write_private_member_on_class(
+        realm: &mut Realm,
+        class: &Class,
+        name: &str,
+        member: PrivateMember,
+        value: Value,
+        this_value: Value,
+    ) -> Res {
+        match member {
+            PrivateMember::Field(_) => {
+                class.update_private_field(name, value);
+                Ok(())
+            }
+            PrivateMember::Accessor { set: Some(setter), .. } => {
+                setter.call(realm, vec![value], this_value).map(|_| ())
+            }
+            PrivateMember::Accessor { set: None, .. } => Err(Error::ty_error(format!(
+                "Private accessor #{name} does not have a setter"
+            ))),
+            PrivateMember::Method(_) => Err(Error::ty_error(format!(
+                "Cannot assign to private method {name}"
+            ))),
+        }
     }
 }

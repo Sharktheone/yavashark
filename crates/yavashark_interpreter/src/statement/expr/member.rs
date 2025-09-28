@@ -3,7 +3,7 @@ use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Class, ClassInstance, ControlFlow, Error, Realm, RuntimeResult, Value};
+use yavashark_env::{Class, ClassInstance, ControlFlow, Error, PrivateMember, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 use yavashark_value::Obj;
 
@@ -39,19 +39,21 @@ impl Interpreter {
                 let obj = value.as_object()?;
 
                 if let Some(class) = obj.downcast::<ClassInstance>() {
-                    let val = class
+                    let member = class
                         .get_private_prop(name)?
-                        .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+                        .ok_or_else(|| ControlFlow::error_type(format!(
+                            "Private name {name} not found"
+                        )))?;
 
-                    return Ok((val, None));
+                    return Self::resolve_private_member(realm, member, value.copy());
                 }
 
                 if let Some(class) = obj.downcast::<Class>() {
-                    let val = class
-                        .get_private_prop(name)
-                        .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
+                    let member = class.get_private_prop(name).ok_or_else(|| {
+                        ControlFlow::error_type(format!("Private name {name} not found"))
+                    })?;
 
-                    return Ok((val.copy(), None));
+                    return Self::resolve_private_member(realm, member, value.copy());
                 }
 
                 return Err(ControlFlow::error_type(format!(
@@ -59,6 +61,7 @@ impl Interpreter {
                 )));
             }
         };
+
 
         match value {
             Value::Object(ref o) => Ok((
@@ -123,6 +126,30 @@ impl Interpreter {
                         .unwrap_or(Value::Undefined),
                     Some(big_int.into()),
                 ))
+            }
+        }
+    }
+}
+
+impl Interpreter {
+    pub(crate) fn resolve_private_member(
+        realm: &mut Realm,
+        member: PrivateMember,
+        base: Value,
+    ) -> Result<(Value, Option<Value>), ControlFlow> {
+        match member {
+            PrivateMember::Field(value) => Ok((value, None)),
+            PrivateMember::Method(func) => Ok((func, Some(base))),
+            PrivateMember::Accessor { get, .. } => {
+                if let Some(getter) = get {
+                    let result = getter
+                        .call(realm, vec![], base.copy())
+                        .map_err(ControlFlow::Error)?;
+
+                    Ok((result, None))
+                } else {
+                    Ok((Value::Undefined, None))
+                }
             }
         }
     }

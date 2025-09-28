@@ -232,23 +232,19 @@ fn define_on_class(
     is_private: bool,
 ) -> Res {
     if is_private {
+        let Value::String(name) = name else {
+            return Err(Error::new(
+                "Private method name must be a string (how tf did you get here?)",
+            ));
+        };
+
         if is_static {
-            let Value::String(name) = name else {
-                return Err(Error::new(
-                    "Private static method name must be a string (how tf did you get here?)",
-                ));
-            };
-
-            class.set_private_prop(name.to_string(), value);
+            class.define_private_field(name.to_string(), value);
         } else {
-            let Value::String(name) = name else {
-                return Err(Error::new(
-                    "Private method name must be a string (how tf did you get here?)",
-                ));
-            };
-
-            proto.set_private_prop(name.to_string(), value);
+            proto.define_private_field(name.to_string(), value);
         }
+
+        return Ok(());
     } else if is_static {
         if name == Value::String("prototype".into()) {
             return Err(Error::new(
@@ -274,25 +270,39 @@ fn define_method_on_class(
     kind: MethodKind,
 ) -> Res {
     if is_private {
-        if is_static {
-            let Value::String(name) = name else {
-                return Err(Error::new(
-                    "Private static method name must be a string (how tf did you get here?)",
-                ));
-            };
+        let Value::String(name) = name else {
+            return Err(Error::new(
+                "Private method name must be a string (how tf did you get here?)",
+            ));
+        };
 
-            //TODO: handle getters and setters
-            class.set_private_prop(name.to_string(), value);
-        } else {
-            let Value::String(name) = name else {
-                return Err(Error::new(
-                    "Private method name must be a string (how tf did you get here?)",
-                ));
-            };
+        let key = name.to_string();
 
-            //TODO: handle getters and setters
-            proto.set_private_prop(name.to_string(), value);
+        match kind {
+            MethodKind::Getter => {
+                if is_static {
+                    class.define_private_getter(key, value)?;
+                } else {
+                    proto.define_private_getter(key, value)?;
+                }
+            }
+            MethodKind::Setter => {
+                if is_static {
+                    class.define_private_setter(key, value)?;
+                } else {
+                    proto.define_private_setter(key, value)?;
+                }
+            }
+            MethodKind::Method => {
+                if is_static {
+                    class.define_private_method(key, value);
+                } else {
+                    proto.define_private_method(key, value);
+                }
+            }
         }
+
+        return Ok(());
     } else if is_static {
         if name == Value::String("prototype".into()) {
             return Err(Error::new(

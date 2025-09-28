@@ -3,11 +3,28 @@ use crate::{Error, Object, ObjectHandle, ObjectProperty, Res, Value, ValueResult
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
 use std::cell::RefCell;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::ptr::NonNull;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
 use yavashark_value::{ConstructorFn, Obj, Variable};
+
+#[derive(Clone, Debug)]
+pub enum PrivateMember {
+    Field(Value),
+    Method(Value),
+    Accessor { get: Option<Value>, set: Option<Value> },
+}
+
+impl PrivateMember {
+    fn as_value(&self) -> Value {
+        match self {
+            Self::Field(v) | Self::Method(v) => v.clone(),
+            Self::Accessor { get, .. } => get.clone().unwrap_or(Value::Undefined),
+        }
+    }
+}
 
 // #[object(function, constructor, direct(prototype))]
 #[derive(Debug)]
@@ -15,7 +32,7 @@ pub struct Class {
     pub inner: ObjectHandle,
     pub sup: Option<ObjectHandle>,
 
-    pub private_props: RefCell<FxHashMap<String, Value>>,
+    pub private_props: RefCell<FxHashMap<String, PrivateMember>>,
     pub name: RefCell<String>,
     // #[gc(untyped)]
     pub prototype: RefCell<ObjectProperty>,
@@ -122,7 +139,7 @@ impl Obj<Realm> for Class {
         ));
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((Value::String(key.clone().into()), value.clone()));
+            props.push((Value::String(key.clone().into()), value.as_value()));
         }
 
         Ok(props)
@@ -146,7 +163,7 @@ impl Obj<Realm> for Class {
         values.push(self.prototype.borrow().value.clone());
 
         for value in self.private_props.try_borrow()?.values() {
-            values.push(value.clone());
+            values.push(value.as_value());
         }
 
         Ok(values)
@@ -257,16 +274,68 @@ impl Class {
         })
     }
 
-    pub fn set_private_prop_ref(&self, key: String, value: Value) {
-        self.private_props.borrow_mut().insert(key, value);
+    fn insert_private_member(&self, key: String, member: PrivateMember) {
+        self.private_props.borrow_mut().insert(key, member);
     }
 
-    pub fn set_private_prop(&mut self, key: String, value: Value) {
-        self.private_props.get_mut().insert(key, value);
+    pub fn define_private_field(&self, key: String, value: Value) {
+        self.insert_private_member(key, PrivateMember::Field(value));
+    }
+
+    pub fn define_private_method(&self, key: String, value: Value) {
+        self.insert_private_member(key, PrivateMember::Method(value));
+    }
+
+    pub fn define_private_getter(&self, key: String, value: Value) -> Res {
+        let mut props = self.private_props.borrow_mut();
+
+        match props.entry(key) {
+            Entry::Vacant(entry) => {
+                entry.insert(PrivateMember::Accessor {
+                    get: Some(value),
+                    set: None,
+                });
+
+                Ok(())
+            }
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                PrivateMember::Accessor { get, .. } => {
+                    *get = Some(value);
+                    Ok(())
+                }
+                _ => Err(Error::ty("Cannot redeclare private field as accessor")),
+            },
+        }
+    }
+
+    pub fn define_private_setter(&self, key: String, value: Value) -> Res {
+        let mut props = self.private_props.borrow_mut();
+
+        match props.entry(key) {
+            Entry::Vacant(entry) => {
+                entry.insert(PrivateMember::Accessor {
+                    get: None,
+                    set: Some(value),
+                });
+
+                Ok(())
+            }
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                PrivateMember::Accessor { set, .. } => {
+                    *set = Some(value);
+                    Ok(())
+                }
+                _ => Err(Error::ty("Cannot redeclare private field as accessor")),
+            },
+        }
+    }
+
+    pub fn update_private_field(&self, key: &str, value: Value) {
+        self.insert_private_member(key.to_string(), PrivateMember::Field(value));
     }
 
     #[must_use]
-    pub fn get_private_prop(&self, key: &str) -> Option<Value> {
+    pub fn get_private_prop(&self, key: &str) -> Option<PrivateMember> {
         self.private_props.borrow().get(key).cloned()
     }
 
@@ -335,7 +404,7 @@ impl Class {
 pub struct ClassInstance {
     pub inner: RefCell<ObjectHandle>,
     // #[mutable]
-    pub(crate) private_props: RefCell<HashMap<String, Value>>,
+    pub(crate) private_props: RefCell<HashMap<String, PrivateMember>>,
     name: String,
 }
 
@@ -392,7 +461,7 @@ impl Obj<Realm> for ClassInstance {
         let mut props = self.inner.try_borrow()?.properties()?;
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((Value::String(key.clone().into()), value.clone()));
+            props.push((Value::String(key.clone().into()), value.as_value()));
         }
 
         Ok(props)
@@ -412,7 +481,7 @@ impl Obj<Realm> for ClassInstance {
         let mut values = self.inner.try_borrow()?.values()?;
 
         for value in self.private_props.try_borrow()?.values() {
-            values.push(value.clone());
+            values.push(value.as_value());
         }
 
         Ok(values)
@@ -462,11 +531,67 @@ impl ClassInstance {
         }
     }
 
-    pub fn set_private_prop(&self, key: String, value: Value) {
-        self.private_props.borrow_mut().insert(key, value);
+    fn insert_private_member(&self, key: String, member: PrivateMember) {
+        self.private_props.borrow_mut().insert(key, member);
     }
 
-    pub fn get_private_prop(&self, key: &str) -> Res<Option<Value>> {
+    pub fn define_private_field(&self, key: String, value: Value) {
+        self.insert_private_member(key, PrivateMember::Field(value));
+    }
+
+    pub fn define_private_method(&self, key: String, value: Value) {
+        self.insert_private_member(key, PrivateMember::Method(value));
+    }
+
+    pub fn define_private_getter(&self, key: String, value: Value) -> Res {
+        let mut props = self.private_props.try_borrow_mut()?;
+
+        match props.entry(key) {
+            Entry::Vacant(entry) => {
+                entry.insert(PrivateMember::Accessor {
+                    get: Some(value),
+                    set: None,
+                });
+
+                Ok(())
+            }
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                PrivateMember::Accessor { get, .. } => {
+                    *get = Some(value);
+                    Ok(())
+                }
+                _ => Err(Error::ty("Cannot redeclare private field as accessor")),
+            },
+        }
+    }
+
+    pub fn define_private_setter(&self, key: String, value: Value) -> Res {
+        let mut props = self.private_props.try_borrow_mut()?;
+
+        match props.entry(key) {
+            Entry::Vacant(entry) => {
+                entry.insert(PrivateMember::Accessor {
+                    get: None,
+                    set: Some(value),
+                });
+
+                Ok(())
+            }
+            Entry::Occupied(mut entry) => match entry.get_mut() {
+                PrivateMember::Accessor { set, .. } => {
+                    *set = Some(value);
+                    Ok(())
+                }
+                _ => Err(Error::ty("Cannot redeclare private field as accessor")),
+            },
+        }
+    }
+
+    pub fn update_private_field(&self, key: &str, value: Value) {
+        self.insert_private_member(key.to_string(), PrivateMember::Field(value));
+    }
+
+    pub fn get_private_prop(&self, key: &str) -> Res<Option<PrivateMember>> {
         let private_props = self.private_props.try_borrow()?;
 
         let mut prop = private_props.get(key).cloned();
