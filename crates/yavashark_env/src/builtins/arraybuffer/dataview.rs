@@ -1,7 +1,7 @@
 mod from_bytes;
 
 use crate::builtins::dataview::from_bytes::FromBytes;
-use crate::builtins::ArrayBuffer;
+use crate::builtins::buf::ArrayBuffer;
 use crate::conversion::downcast_obj;
 use crate::{GCd, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::BigInt;

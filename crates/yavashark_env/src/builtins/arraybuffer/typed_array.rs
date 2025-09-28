@@ -1,5 +1,5 @@
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
-use crate::builtins::ArrayBuffer;
+use crate::builtins::buf::ArrayBuffer;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
 use crate::{Error, GCd, MutObject, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
