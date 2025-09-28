@@ -123,6 +123,10 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         Variable::write_config(realm.intrinsics.arraybuffer_constructor().value),
     )?;
     obj.define_variable(
+        "SharedArrayBuffer".into(),
+        Variable::write_config(realm.intrinsics.sharedarraybuffer_constructor().value),
+    )?;
+    obj.define_variable(
         "DataView".into(),
         Variable::write_config(realm.intrinsics.data_view_constructor().value),
     )?;

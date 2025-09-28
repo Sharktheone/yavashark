@@ -19,6 +19,7 @@ use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Valu
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
 use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::shared_buf::SharedArrayBuffer;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -44,6 +45,7 @@ pub struct Intrinsics {
     pub aggregate_error: ObjectHandle,
     pub eval: Option<ObjectHandle>,
     pub arraybuffer: ObjectHandle,
+    pub sharedarraybuffer: ObjectHandle,
     pub data_view: ObjectHandle,
     pub typed_array: ObjectHandle,
     pub int8array: ObjectHandle,
@@ -133,6 +135,7 @@ impl Intrinsics {
     constructor!(uri_error);
     constructor!(aggregate_error);
     constructor!(arraybuffer);
+    constructor!(sharedarraybuffer);
     constructor!(data_view);
     constructor!(typed_array);
     constructor!(int8array);
@@ -269,6 +272,12 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone().into()),
             func_prototype.clone().into(),
         )?;
+
+        let sharedarraybuffer = SharedArrayBuffer::initialize_proto(
+            Object::raw_with_proto(obj_prototype.clone().into()),
+            func_prototype.clone().into(),
+        )?;
+
 
         let data_view = DataView::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone().into()),
@@ -416,6 +425,7 @@ impl Intrinsics {
             aggregate_error,
             eval: None,
             arraybuffer,
+            sharedarraybuffer,
             data_view,
             typed_array,
             int8array,
