@@ -420,7 +420,7 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let InternalPropertyKey::String(s) = &key {
-            if s == "__proto__" {
+            if s == "__proto__" && (value.is_object() || value.is_null()) {
                 self.prototype = value.into();
                 return Ok(());
             }
@@ -455,7 +455,7 @@ impl MutObj<Realm> for MutObject {
         }
 
         if let InternalPropertyKey::String(s) = &key {
-            if s == "__proto__" {
+            if s == "__proto__" && (value.value.is_object() || value.value.is_null()) {
                 self.prototype = value.into();
                 return Ok(());
             }
