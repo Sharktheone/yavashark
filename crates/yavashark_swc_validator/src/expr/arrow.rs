@@ -5,11 +5,13 @@ impl<'a> Validator<'a> {
     pub fn validate_arrow_expr(&mut self, arrow: &'a ArrowExpr) -> Result<(), String> {
         let scope = self.enter_function_context(arrow.is_async, false);
 
+        let mut seen_params = Some(Vec::new());
+
         for param in &arrow.params {
-            if let Err(e) = self.validate_pat_dup(param, true) {
+            if let Err(e) = self.validate_pat_internal(param, &mut seen_params) {
                 scope.exit(self);
 
-                return Err(e)
+                return Err(e);
             }
         }
 

@@ -11,6 +11,7 @@ pub struct PrivateNameScope;
 pub struct FunctionContext {
     is_async: bool,
     is_generator: bool,
+    await_restricted: bool,
 }
 
 #[must_use]
@@ -40,8 +41,16 @@ impl<'a> Validator<'a> {
         PrivateNameScope
     }
 
-    pub const fn enter_function_context(&mut self, is_async: bool, is_generator: bool) -> FunctionContextScope {
-        let old = self.function_ctx.replace(FunctionContext { is_async, is_generator });
+    pub fn enter_function_context(&mut self, is_async: bool, is_generator: bool) -> FunctionContextScope {
+        let previous = self.function_ctx;
+        let await_restricted = is_async
+            || previous.map_or(false, |ctx| ctx.await_restricted);
+
+        let old = self.function_ctx.replace(FunctionContext {
+            is_async,
+            is_generator,
+            await_restricted,
+        });
 
         FunctionContextScope(old)
     }
@@ -52,12 +61,27 @@ impl<'a> Validator<'a> {
 
     #[must_use]
     pub fn is_await_restricted(&self) -> bool {
-        self.current_function_context().is_async
+        self.current_function_context().await_restricted
     }
 
     #[must_use]
     pub fn is_yield_restricted(&self) -> bool {
         self.current_function_context().is_generator
+    }
+
+    #[must_use]
+    pub fn in_async_function(&self) -> bool {
+        self.current_function_context().is_async
+    }
+
+    #[must_use]
+    pub fn in_generator_function(&self) -> bool {
+        self.current_function_context().is_generator
+    }
+
+    #[must_use]
+    pub fn in_function_context(&self) -> bool {
+        self.function_ctx.is_some()
     }
 
     #[must_use]
@@ -97,11 +121,14 @@ pub fn ensure_valid_identifier(name: &str) -> Result<(), String> {
 }
 
 fn is_valid_identifier_start(ch: char) -> bool {
-    ch == '$' || ch == '_' || is_xid_start(ch)
+    ch == '$' || ch == '_' || is_xid_start(ch) || is_other_id_start(ch)
 }
 
 fn is_valid_identifier_part(ch: char) -> bool {
-    ch == '$' || is_xid_continue(ch) || matches!(ch, '\u{200C}' | '\u{200D}')
+    ch == '$'
+        || is_xid_continue(ch)
+        || matches!(ch, '\u{200C}' | '\u{200D}')
+        || is_other_id_continue(ch)
 }
 
 pub fn single_stmt_contains_decl(stmt: &Stmt) -> bool {
@@ -152,4 +179,19 @@ pub fn is_reserved_word(value: &str) -> bool {
             | "true"
             | "null"
     )
+}
+
+/// Returns `true` for code points listed in ECMA-262 `Other_ID_Start`.
+fn is_other_id_start(ch: char) -> bool {
+    matches!(ch, '\u{1885}' | '\u{1886}' | '\u{2118}' | '\u{212E}' | '\u{309B}' | '\u{309C}')
+}
+
+/// Returns `true` for code points listed in ECMA-262 `Other_ID_Continue` (excluding
+/// U+200C/U+200D which are handled separately for clarity).
+fn is_other_id_continue(ch: char) -> bool {
+    matches!(ch, '\u{00B7}' | '\u{0387}' | '\u{19DA}' | '\u{2054}' | '\u{FF3F}')
+        || ('\u{1369}'..='\u{1371}').contains(&ch)
+        || ('\u{203F}'..='\u{2040}').contains(&ch)
+        || ('\u{FE33}'..='\u{FE34}').contains(&ch)
+        || ('\u{FE4D}'..='\u{FE4F}').contains(&ch)
 }

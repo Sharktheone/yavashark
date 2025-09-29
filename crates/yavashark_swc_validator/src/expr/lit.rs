@@ -1,7 +1,7 @@
 mod regex_data;
 
 use crate::Validator;
-use regex_data::{BINARY_PROPERTIES, PROPERTY_VALUE_PAIRS};
+use regex_data::{BINARY_PROPERTIES, PROPERTY_VALUE_PAIRS, STRING_PROPERTIES};
 use swc_ecma_ast::{Lit, Regex};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -20,9 +20,14 @@ impl<'a> Validator<'a> {
     }
 
     fn validate_regex_lit(regex: &Regex) -> Result<(), String> {
-        let pattern: Vec<char> = regex.exp.as_ref().chars().collect();
-        let flags = regex.flags.as_ref();
-        let unicode_enabled = flags.contains('u') || flags.contains('v');
+    let pattern: Vec<char> = regex.exp.as_ref().chars().collect();
+    let flags = regex.flags.as_ref();
+    let has_v_flag = flags.contains('v');
+    let unicode_enabled = flags.contains('u') || has_v_flag;
+
+        if flags.contains('u') && has_v_flag {
+            return Err("Regular expression literals cannot use both the /u and /v flags".to_string());
+        }
 
         let mut idx = 0usize;
         let mut in_class = false;
@@ -38,8 +43,30 @@ impl<'a> Validator<'a> {
                     return Err("Dangling escape in regular expression literal".to_string());
                 }
 
-                let next = pattern[idx];
+                let mut next = pattern[idx];
+
+                if next == '\\' {
+                    if idx + 1 >= pattern.len() {
+                        return Err("Dangling escape in regular expression literal".to_string());
+                    }
+
+                    let candidate = pattern[idx + 1];
+                    if candidate == 'p' || candidate == 'P' {
+                        idx += 1;
+                        next = candidate;
+                    } else {
+                        if in_class {
+                            class_tokens.push(ClassToken::Atom);
+                            first_in_class = false;
+                        }
+
+                        idx += 1;
+                        continue;
+                    }
+                }
+
                 if next == 'p' || next == 'P' {
+                    let negated = next == 'P';
                     if !unicode_enabled {
                         return Err(
                             "Unicode property escapes require the /u or /v flag".to_string()
@@ -78,8 +105,31 @@ impl<'a> Validator<'a> {
                         if !is_valid_property_with_value(name, value) {
                             return Err(format!("Unknown Unicode property {name}={value}"));
                         }
-                    } else if !is_valid_binary_property(name) {
-                        return Err(format!("Unknown Unicode binary property {name}"));
+                    } else {
+                        if is_string_property(name) {
+                            if !has_v_flag {
+                                return Err(
+                                    "Unicode string properties require the /v flag".to_string()
+                                );
+                            }
+
+                            if negated {
+                                return Err(
+                                    "Unicode string properties cannot be negated".to_string()
+                                );
+                            }
+
+                            if in_class {
+                                return Err(
+                                    "Unicode string properties cannot appear inside character classes"
+                                        .to_string(),
+                                );
+                            }
+                        }
+
+                        if !is_valid_binary_property(name) {
+                            return Err(format!("Unknown Unicode binary property {name}"));
+                        }
                     }
 
                     if in_class {
@@ -200,6 +250,10 @@ fn ensure_no_property_ranges(tokens: &[ClassToken]) -> Result<(), String> {
 
 fn is_valid_binary_property(name: &str) -> bool {
     contains(BINARY_PROPERTIES, name)
+}
+
+fn is_string_property(name: &str) -> bool {
+    contains(STRING_PROPERTIES, name)
 }
 
 fn is_valid_property_with_value(name: &str, value: &str) -> bool {

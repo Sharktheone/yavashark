@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{Validator};
+use crate::{utils::ensure_valid_identifier, Validator};
 use swc_ecma_ast::{
     Callee, Class, ClassExpr, ClassMember, Expr, Ident, IdentName, MethodKind, ParamOrTsParamProp,
     PropName, Super,
@@ -72,6 +72,9 @@ impl<'a> Validator<'a> {
                 }
                 ClassMember::PrivateMethod(private_method) => {
                     let name = private_method.key.name.as_str();
+                    if let Err(err) = ensure_valid_identifier(name) {
+                        return Err(format!("Invalid private identifier: {err}"));
+                    }
                     let entry = private_registry.entry(name).or_default();
                     let added = match private_method.kind {
                         MethodKind::Method => entry.add_method(),
@@ -85,6 +88,9 @@ impl<'a> Validator<'a> {
                 }
                 ClassMember::PrivateProp(private_prop) => {
                     let name = private_prop.key.name.as_str();
+                    if let Err(err) = ensure_valid_identifier(name) {
+                        return Err(format!("Invalid private identifier: {err}"));
+                    }
                     let entry = private_registry.entry(name).or_default();
 
                     if !entry.add_field() {

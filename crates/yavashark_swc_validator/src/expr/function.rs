@@ -9,8 +9,10 @@ impl<'a> Validator<'a> {
     pub fn validate_function(&mut self, function: &'a Function) -> Result<(), String> {
         let ctx = self.enter_function_context(function.is_async, function.is_generator);
 
+        let mut seen_params = Some(Vec::new());
+
         for param in &function.params {
-            if let Err(e) = self.validate_pat(&param.pat) {
+            if let Err(e) = self.validate_pat_internal(&param.pat, &mut seen_params) {
                 ctx.exit(self);
 
                 return Err(e);

@@ -6,6 +6,7 @@ pub const BINARY_PROPERTIES: &[&str] = &[
     "Alphabetic",
     "Any",
     "Assigned",
+    "Basic_Emoji",
     "Bidi_C",
     "Bidi_Control",
     "Bidi_M",
@@ -52,6 +53,7 @@ pub const BINARY_PROPERTIES: &[&str] = &[
     "EPres",
     "Emoji",
     "Emoji_Component",
+    "Emoji_Keycap_Sequence",
     "Emoji_Modifier",
     "Emoji_Modifier_Base",
     "Emoji_Presentation",
@@ -136,6 +138,13 @@ pub const BINARY_PROPERTIES: &[&str] = &[
     "Punctuation",
     "QMark",
     "Quotation_Mark",
+    "RGI_Emoji",
+    "RGI_Emoji_Flag_Sequence",
+    "RGI_Emoji_Modifier",
+    "RGI_Emoji_Modifier_Base",
+    "RGI_Emoji_Modifier_Sequence",
+    "RGI_Emoji_Tag_Sequence",
+    "RGI_Emoji_ZWJ_Sequence",
     "RI",
     "Radical",
     "Regional_Indicator",
@@ -177,6 +186,18 @@ pub const BINARY_PROPERTIES: &[&str] = &[
     "digit",
     "punct",
     "space",
+];
+
+pub const STRING_PROPERTIES: &[&str] = &[
+    "Basic_Emoji",
+    "Emoji_Keycap_Sequence",
+    "RGI_Emoji",
+    "RGI_Emoji_Flag_Sequence",
+    "RGI_Emoji_Modifier",
+    "RGI_Emoji_Modifier_Base",
+    "RGI_Emoji_Modifier_Sequence",
+    "RGI_Emoji_Tag_Sequence",
+    "RGI_Emoji_ZWJ_Sequence",
 ];
 
 pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
@@ -584,6 +605,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Tutg",
             "Ugar",
             "Ugaritic",
+            "Unknown",
             "Vai",
             "Vaii",
             "Vith",
@@ -602,6 +624,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Zanb",
             "Zinh",
             "Zyyy",
+            "Zzzz",
         ],
     ),
     (
@@ -923,6 +946,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Tutg",
             "Ugar",
             "Ugaritic",
+            "Unknown",
             "Vai",
             "Vaii",
             "Vith",
@@ -941,6 +965,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Zanb",
             "Zinh",
             "Zyyy",
+            "Zzzz",
         ],
     ),
     (
@@ -1347,6 +1372,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Tutg",
             "Ugar",
             "Ugaritic",
+            "Unknown",
             "Vai",
             "Vaii",
             "Vith",
@@ -1365,6 +1391,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Zanb",
             "Zinh",
             "Zyyy",
+            "Zzzz",
         ],
     ),
     (
@@ -1686,6 +1713,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Tutg",
             "Ugar",
             "Ugaritic",
+            "Unknown",
             "Vai",
             "Vaii",
             "Vith",
@@ -1704,6 +1732,7 @@ pub const PROPERTY_VALUE_PAIRS: &[(&str, &[&str])] = &[
             "Zanb",
             "Zinh",
             "Zyyy",
+            "Zzzz",
         ],
     ),
 ];
