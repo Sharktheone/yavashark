@@ -65,7 +65,7 @@ impl Atomics {
 
         let hint = n as usize;
 
-        let hint = hint.max(2 << 14);
+        let hint = hint.max(2 << 8);
 
         for _ in 0..hint {
             std::hint::spin_loop();
