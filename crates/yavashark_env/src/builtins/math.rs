@@ -234,7 +234,11 @@ impl Math {
         let iter = ValueIterator::new(iter, realm)?;
 
         while let Some(value) = iter.next(realm)? {
-            sum += value.to_number(realm).unwrap_or(0.0);
+            if let Value::Number(num) = value {
+                sum += num;
+            } else {
+                return Err(Error::ty("Iterator value is not a number"));
+            }
         }
 
         Ok(sum)
