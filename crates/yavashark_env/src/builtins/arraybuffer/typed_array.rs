@@ -1030,14 +1030,21 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
 
-            acc = if let Some(a) = initial_value {
-                a
-            } else {
-                owned.first().map(|x| to_value(x.0))
-                .unwrap_or(Value::Undefined)
-            };
 
-            for (idx, x) in owned.into_iter().enumerate() {
+            let iter = owned.into_iter().enumerate();
+
+            if let Some(initial) = initial_value {
+                acc = initial;
+
+            } else {
+                let Some((_, first_val)) = iter.clone().next() else {
+                    return Ok(Value::Undefined);
+                };
+
+                acc = to_value(first_val.0);
+            }
+
+            for (idx, x) in iter {
                 let args = vec![acc, to_value(x.0), idx.into(), array.copy()];
 
                 acc = callback.call(realm, args, Value::Undefined)?;
@@ -1066,14 +1073,21 @@ impl TypedArray {
             let owned = slice.to_vec();
             drop(slice0);
 
-            acc = if let Some(a) = initial_value {
-                a
-            } else {
-                owned.first().map(|x| to_value(x.0))
-                .unwrap_or(Value::Undefined)
-            };
 
-            for (idx, x) in owned.into_iter().enumerate().rev() {
+            let iter = owned.into_iter().enumerate().rev();
+
+            if let Some(initial) = initial_value {
+                acc = initial;
+
+            } else {
+                let Some((_, first_val)) = iter.clone().next() else {
+                    return Ok(Value::Undefined);
+                };
+
+                acc = to_value(first_val.0);
+            }
+
+            for (idx, x) in iter {
                 let args = vec![acc, to_value(x.0), idx.into(), array.copy()];
 
                 acc = callback.call(realm, args, Value::Undefined)?;
@@ -1188,6 +1202,7 @@ impl TypedArray {
         Ok(false)
     }
 
+    #[length(1)]
     pub fn sort(&self, #[this] array: Value, #[realm] realm: &mut Realm, compare_fn: Option<ObjectHandle>) -> Res<Value> {
         if let Some(compare_fn) = &compare_fn {
             if !compare_fn.is_function() {
@@ -1294,6 +1309,7 @@ impl TypedArray {
     }
 
     #[prop("toSorted")]
+    #[length(1)]
     pub fn to_sorted(&self, #[realm] realm: &mut Realm, compare_fn: Option<ObjectHandle>) -> Res<ObjectHandle> {
         if let Some(compare_fn) = &compare_fn {
             if !compare_fn.is_function() {
