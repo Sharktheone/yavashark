@@ -10,7 +10,7 @@ use indexmap::Equivalent;
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard, Weak};
 use yavashark_string::{ToYSString, YSString};
 use crate::error::Error;
-use crate::{Realm, Symbol};
+use crate::{Realm, Res, Symbol, ValueResult};
 pub use super::object_impl::*;
 
 pub trait AsAny {
@@ -29,37 +29,37 @@ impl<T: Sized + 'static> AsAny for T {
 }
 
 pub trait Obj: Debug + AsAny + Any + 'static {
-    fn define_property(&self, name: Value, value: Value) -> Result<(), Error>;
+    fn define_property(&self, name: Value, value: Value) -> Res;
 
-    fn define_variable(&self, name: Value, value: Variable) -> Result<(), Error>;
+    fn define_variable(&self, name: Value, value: Variable) -> Res;
 
-    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error>;
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>>;
 
-    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error>;
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>>;
 
-    fn define_getter(&self, name: Value, value: Value) -> Result<(), Error>;
-    fn define_setter(&self, name: Value, value: Value) -> Result<(), Error>;
-    fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error>;
+    fn define_getter(&self, name: Value, value: Value) -> Res;
+    fn define_setter(&self, name: Value, value: Value) -> Res;
+    fn delete_property(&self, name: &Value) -> Res<Option<Value>>;
 
-    fn contains_key(&self, name: &Value) -> Result<bool, Error> {
+    fn contains_key(&self, name: &Value) -> Res<bool> {
         Ok(self.get_property(name)?.is_some())
     }
 
-    fn has_key(&self, name: &Value) -> Result<bool, Error> {
+    fn has_key(&self, name: &Value) -> Res<bool> {
         Ok(self.resolve_property(name)?.is_some())
     }
 
     fn name(&self) -> String;
 
-    fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error>;
-    fn to_string_internal(&self) -> Result<YSString, Error>;
+    fn to_string(&self, realm: &mut Realm) -> Res<YSString>;
+    fn to_string_internal(&self) -> Res<YSString>;
 
     #[allow(clippy::type_complexity)]
-    fn properties(&self) -> Result<Vec<(Value, Value)>, Error>;
+    fn properties(&self) -> Res<Vec<(Value, Value)>>;
 
-    fn keys(&self) -> Result<Vec<Value>, Error>;
+    fn keys(&self) -> Res<Vec<Value>>;
 
-    fn values(&self) -> Result<Vec<Value>, Error>;
+    fn values(&self) -> Res<Vec<Value>>;
 
     fn into_object(self) -> Object
     where
@@ -77,9 +77,9 @@ pub trait Obj: Debug + AsAny + Any + 'static {
         Value::Object(self.into_object())
     }
 
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error>;
+    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)>;
 
-    fn clear_values(&self) -> Result<(), Error>;
+    fn clear_values(&self) -> Res;
 
     #[allow(unused_variables)]
     fn call(
@@ -87,7 +87,7 @@ pub trait Obj: Debug + AsAny + Any + 'static {
         realm: &mut Realm,
         args: Vec<Value>,
         this: Value,
-    ) -> Result<Value, Error> {
+    ) -> ValueResult {
         Err(Error::ty_error(format!(
             "{} is not a function",
             self.name()
@@ -102,17 +102,17 @@ pub trait Obj: Debug + AsAny + Any + 'static {
         None
     }
 
-    fn prototype(&self) -> Result<ObjectProperty, Error> {
+    fn prototype(&self) -> Res<ObjectProperty> {
         Ok(self
             .resolve_property(&"__proto__".into())?
             .unwrap_or(Value::Undefined.into()))
     }
 
-    fn set_prototype(&self, proto: ObjectProperty) -> Result<(), Error> {
+    fn set_prototype(&self, proto: ObjectProperty) -> Res {
         self.define_property("__proto__".into(), proto.value)
     }
 
-    fn constructor(&self) -> Result<ObjectProperty, Error> {
+    fn constructor(&self) -> Res<ObjectProperty> {
         Ok(self
             .resolve_property(&"constructor".into())?
             .unwrap_or(Value::Undefined.into()))
@@ -130,7 +130,7 @@ pub trait Obj: Debug + AsAny + Any + 'static {
     }
 
     #[allow(unused_variables)]
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<Value, Error> {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         Err(Error::ty_error(format!(
             "{} is not a constructor",
             self.name()
@@ -154,41 +154,41 @@ pub trait Obj: Debug + AsAny + Any + 'static {
 }
 
 pub trait MutObj: Debug + AsAny + 'static {
-    fn define_property(&mut self, name: Value, value: Value) -> Result<(), Error>;
+    fn define_property(&mut self, name: Value, value: Value) -> Res;
 
-    fn define_variable(&mut self, name: Value, value: Variable) -> Result<(), Error>;
+    fn define_variable(&mut self, name: Value, value: Variable) -> Res;
 
-    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error>;
+    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>>;
 
-    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error>;
+    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>>;
 
-    fn define_getter(&mut self, name: Value, value: Value) -> Result<(), Error>;
-    fn define_setter(&mut self, name: Value, value: Value) -> Result<(), Error>;
-    fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error>;
+    fn define_getter(&mut self, name: Value, value: Value) -> Res;
+    fn define_setter(&mut self, name: Value, value: Value) -> Res;
+    fn delete_property(&mut self, name: &Value) -> Res<Option<Value>>;
 
-    fn contains_key(&self, name: &Value) -> Result<bool, Error> {
+    fn contains_key(&self, name: &Value) -> Res<bool, Error> {
         Ok(self.get_property(name)?.is_some())
     }
     
-    fn has_key(&self, name: &Value) -> Result<bool, Error> {
+    fn has_key(&self, name: &Value) -> Res<bool> {
         Ok(self.resolve_property(name)?.is_some())
     }
 
     fn name(&self) -> String;
 
-    fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error>;
-    fn to_string_internal(&self) -> Result<YSString, Error>;
+    fn to_string(&self, realm: &mut Realm) -> Res<YSString>;
+    fn to_string_internal(&self) -> Res<YSString>;
 
     #[allow(clippy::type_complexity)]
-    fn properties(&self) -> Result<Vec<(Value, Value)>, Error>;
+    fn properties(&self) -> Res<Vec<(Value, Value)>>;
 
-    fn keys(&self) -> Result<Vec<Value>, Error>;
+    fn keys(&self) -> Res<Vec<Value>>;
 
-    fn values(&self) -> Result<Vec<Value>, Error>;
+    fn values(&self) -> Res<Vec<Value>>;
 
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error>;
+    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)>;
 
-    fn clear_values(&mut self) -> Result<(), Error>;
+    fn clear_values(&mut self) -> Res;
 
     #[allow(unused_variables)]
     fn call(
@@ -196,7 +196,7 @@ pub trait MutObj: Debug + AsAny + 'static {
         realm: &mut Realm,
         args: Vec<Value>,
         this: Value,
-    ) -> Result<Value, Error> {
+    ) -> ValueResult {
         Err(Error::ty_error(format!(
             "{} is not a function",
             self.name()
@@ -211,17 +211,17 @@ pub trait MutObj: Debug + AsAny + 'static {
         None
     }
 
-    fn prototype(&self) -> Result<ObjectProperty, Error> {
+    fn prototype(&self) -> Res<ObjectProperty> {
         Ok(self
             .resolve_property(&"__proto__".into())?
             .unwrap_or(Value::Undefined.into()))
     }
 
-    fn set_prototype(&mut self, proto: ObjectProperty) -> Result<(), Error> {
+    fn set_prototype(&mut self, proto: ObjectProperty) -> Res {
         self.define_property("__proto__".into(), proto.value)
     }
 
-    fn constructor(&self) -> Result<ObjectProperty, Error> {
+    fn constructor(&self) -> Res<ObjectProperty> {
         Ok(self
             .resolve_property(&"constructor".into())?
             .unwrap_or(Value::Undefined.into()))
@@ -238,7 +238,7 @@ pub trait MutObj: Debug + AsAny + 'static {
         std::any::type_name::<Self>()
     }
 
-    fn construct(&mut self, _realm: &mut Realm, _args: Vec<Value>) -> Result<Value, Error> {
+    fn construct(&mut self, _realm: &mut Realm, _args: Vec<Value>) -> ValueResult {
         Err(Error::ty_error(format!(
             "{} is not a constructor",
             self.name()
@@ -423,7 +423,7 @@ impl Object {
         &self,
         name: &Value,
         realm: &mut Realm,
-    ) -> Result<Option<Value>, Error> {
+    ) -> Res<Option<Value>> {
         let Some(p) = self.0.resolve_property(name)? else {
             return Ok(None);
         };
@@ -436,7 +436,7 @@ impl Object {
         name: &Value,
         realm: &mut Realm,
         args: Vec<Value>,
-    ) -> Result<Value, Error> {
+    ) -> ValueResult {
         let method = self.resolve_property(name, realm)?.ok_or_else(|| {
             let name = match name.to_string(realm) {
                 Ok(name) => name,
@@ -455,11 +455,11 @@ impl Object {
     pub fn resolve_property_no_get_set(
         &self,
         name: &Value,
-    ) -> Result<Option<ObjectProperty>, Error> {
+    ) -> Res<Option<ObjectProperty>> {
         self.0.resolve_property(name)
     }
 
-    pub fn get_property(&self, name: &Value) -> Result<ObjectProperty, Error> {
+    pub fn get_property(&self, name: &Value) -> Res<ObjectProperty> {
         self.0
             .get_property(name)?
             .ok_or(Error::reference_error(format!(
@@ -467,7 +467,7 @@ impl Object {
             )))
     }
 
-    pub fn get_property_opt(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
+    pub fn get_property_opt(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         self.0.get_property(name)
     }
 
@@ -496,7 +496,7 @@ impl Object {
         name: impl Into<Value>,
         value: impl Into<Variable>,
         _realm: &mut Realm,
-    ) -> Result<Value, Error> {
+    ) -> ValueResult {
         let name = name.into();
         let value = value.into();
 
@@ -505,7 +505,7 @@ impl Object {
             .map(|()| Value::Undefined)
     }
 
-    pub fn get(&self, name: impl IntoValueRef, realm: &mut Realm) -> Result<Value, Error> {
+    pub fn get(&self, name: impl IntoValueRef, realm: &mut Realm) -> ValueResult {
         let name = name.into_value_ref();
 
         self.0
@@ -519,7 +519,7 @@ impl Object {
         &self,
         name: impl IntoValueRef,
         realm: &mut Realm,
-    ) -> Result<Option<Value>, Error> {
+    ) -> Res<Option<Value>> {
         let name = name.into_value_ref();
 
         self.0
@@ -529,7 +529,7 @@ impl Object {
             })
     }
 
-    pub fn to_primitive(&self, hint: Hint, realm: &mut Realm) -> Result<Value, Error> {
+    pub fn to_primitive(&self, hint: Hint, realm: &mut Realm) -> ValueResult {
         if let Some(prim) = self.primitive() {
             return prim.assert_no_object();
         }
@@ -594,7 +594,7 @@ impl Object {
         Err(Error::ty("Cannot convert object to primitive"))
     }
 
-    pub fn enum_properties(&self) -> Result<Vec<(Value, ObjectProperty)>, Error> {
+    pub fn enum_properties(&self) -> Res<Vec<(Value, ObjectProperty)>> {
         let mut properties = Vec::new();
 
         for name in self.0.keys()? {
@@ -636,7 +636,7 @@ impl Object {
         Self(Gc::new(BoxedObj::new(Box::new(obj))))
     }
 
-    pub fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
+    pub fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
         self.0.to_string(realm)
     }
 }
@@ -744,7 +744,7 @@ impl ObjectProperty {
         }
     }
 
-    pub fn get(self, this: Value, realm: &mut Realm) -> Result<Value, Error> {
+    pub fn get(self, this: Value, realm: &mut Realm) -> ValueResult {
         if self.get.is_nullish() {
             Ok(self.value)
         } else {
@@ -752,7 +752,7 @@ impl ObjectProperty {
         }
     }
 
-    pub fn resolve(&self, this: Value, realm: &mut Realm) -> Result<Value, Error> {
+    pub fn resolve(&self, this: Value, realm: &mut Realm) -> ValueResult {
         if self.get.is_nullish() {
             Ok(self.value.copy())
         } else {
@@ -770,7 +770,7 @@ impl ObjectProperty {
         }
     }
 
-    pub fn descriptor(self, obj: &Object) -> Result<(), Error> {
+    pub fn descriptor(self, obj: &Object) -> Res {
         if !self.set.is_undefined() || !self.get.is_undefined() {
             obj.define_property("get".into(), self.get)?;
             obj.define_property("set".into(), self.set)?;
