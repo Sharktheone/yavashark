@@ -1276,17 +1276,32 @@ impl Array {
         let mut idx = start;
 
         let item_len = items.len();
+
+
+        let shift = delete_count as isize + item_len as isize;
+
+
+        while idx + delete_count < len {
+            let rev_idx = len - (idx + delete_count);
+            let (_, val) = this.get_array_or_done(rev_idx)?;
+
+            if let Some(val) = val {
+                this.define_property(((rev_idx as isize + shift) as usize).into(), val)?;
+            } else {
+                this.define_property(((rev_idx as isize + shift) as usize).into(), Value::Undefined)?;
+            }
+
+            idx += 1;
+        }
+
+        idx = start;
+
+
         for item in items {
             this.define_property(idx.into(), item)?;
             idx += 1;
         }
 
-        let mut shift = delete_count as isize - item_len as isize;
-
-        while shift > 0 {
-            this.define_property((idx as isize + shift).into(), Value::Undefined)?;
-            shift -= 1;
-        }
 
         let new_len = len as isize + item_len as isize - delete_count as isize;
 
