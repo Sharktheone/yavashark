@@ -19,7 +19,7 @@ pub struct NativeConstructor {
     pub f: ConstructorFn,
     #[gc]
     /// The prototype of the constructor
-    pub proto: Value,
+    pub proto: ObjectHandle,
     /// Can this constructor be called without `new`?
     pub special: bool,
 }
@@ -80,8 +80,8 @@ impl NativeConstructor {
     pub fn with_proto(
         name: String,
         f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
-        proto: Value,
-        self_proto: Value,
+        proto: ObjectHandle,
+        self_proto: ObjectHandle,
     ) -> ObjectHandle {
         let this = Self {
             inner: RefCell::new(MutableNativeConstructor {
@@ -117,8 +117,8 @@ impl NativeConstructor {
     pub fn with_proto_and_len(
         name: String,
         f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
-        proto: Value,
-        self_proto: Value,
+        proto: ObjectHandle,
+        self_proto: ObjectHandle,
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
@@ -171,8 +171,8 @@ impl NativeConstructor {
     pub fn special_with_proto(
         name: String,
         f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
-        proto: Value,
-        self_proto: Value,
+        proto: ObjectHandle,
+        self_proto: ObjectHandle,
     ) -> ObjectHandle {
         let this = Self {
             inner: RefCell::new(MutableNativeConstructor {

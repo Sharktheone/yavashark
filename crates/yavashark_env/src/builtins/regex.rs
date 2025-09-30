@@ -115,7 +115,7 @@ impl RegExp {
         Self {
             regex,
             inner: RefCell::new(MutableRegExp {
-                object: MutObject::with_proto(realm.intrinsics.regexp.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.regexp.clone()),
             }),
             flags,
             original_source: source,
@@ -185,14 +185,14 @@ impl RegExpConstructor {
 
 impl RegExpConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableRegExpConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }

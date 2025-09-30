@@ -21,15 +21,15 @@ pub struct SymbolConstructor {
 
 impl SymbolConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableSymbolConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
                 symbols: Vec::new(),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }
@@ -133,7 +133,7 @@ impl SymbolObj {
     pub fn new(realm: &Realm, symbol: Symbol) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableSymbolObj {
-                object: MutObject::with_proto(realm.intrinsics.symbol.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.symbol.clone()),
                 symbol,
             }),
         }

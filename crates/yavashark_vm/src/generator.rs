@@ -31,7 +31,7 @@ impl GeneratorFunction {
     ) -> Self {
         Self {
             inner: RefCell::new(MutableGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.generator_function.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.generator_function.clone()),
             }),
             code,
             scope,
@@ -43,7 +43,7 @@ impl GeneratorFunction {
     pub fn empty(realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableGeneratorFunction {
-                object: MutObject::with_proto(realm.intrinsics.generator_function.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.generator_function.clone()),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),
@@ -148,7 +148,7 @@ impl Generator {
         let state = VmState::new(code, scope);
         Self {
             inner: RefCell::new(MutableGenerator {
-                object: MutObject::with_proto(realm.intrinsics.generator.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.generator.clone()),
             }),
             state: RefCell::new(Some(state)),
         }
@@ -156,13 +156,13 @@ impl Generator {
 
     pub fn init(realm: &mut Realm) -> Res {
         let gf = GeneratorFunction::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
-            realm.intrinsics.func.clone().into(),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone(),
         )?;
 
         let g = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
-            realm.intrinsics.func.clone().into(),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone(),
         )?;
 
         realm.intrinsics.generator_function = gf;

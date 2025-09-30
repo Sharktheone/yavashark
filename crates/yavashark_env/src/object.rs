@@ -11,7 +11,7 @@ use std::mem;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{BoxedObj, MutObj, Obj};
+use crate::value::{BoxedObj, MutObj, Obj, ObjectOrNull};
 
 pub mod array;
 pub mod constructor;
@@ -30,7 +30,7 @@ pub struct MutObject {
     pub properties: IndexMap<PropertyKey, usize, FxBuildHasher>,
     pub array: Vec<(usize, usize)>,
     pub values: Vec<ObjectProperty>,
-    pub prototype: ObjectProperty,
+    pub prototype: ObjectOrNull,
 }
 
 impl Object {
@@ -42,11 +42,11 @@ impl Object {
 
     #[must_use]
     pub fn null() -> ObjectHandle {
-        Self::with_proto(Value::Null)
+        Self::with_proto(None)
     }
 
     #[must_use]
-    pub fn with_proto(proto: Value) -> ObjectHandle {
+    pub fn with_proto(proto: impl Into<ObjectOrNull>) -> ObjectHandle {
         ObjectHandle::new(Self::raw_with_proto(proto))
     }
 
@@ -58,7 +58,7 @@ impl Object {
     }
 
     #[must_use]
-    pub fn raw_with_proto(proto: Value) -> Self {
+    pub fn raw_with_proto(proto: impl Into<ObjectOrNull>) -> Self {
         Self {
             inner: RefCell::new(MutObject::with_proto(proto)),
         }
@@ -194,14 +194,14 @@ impl MutObject {
     pub fn null() -> Self {
         Self {
             properties: Default::default(),
-            prototype: Value::Null.into(),
+            prototype: ObjectOrNull::Null,
             values: Vec::new(),
             array: Vec::new(),
         }
     }
 
     #[must_use]
-    pub fn with_proto(proto: Value) -> Self {
+    pub fn with_proto(proto: impl Into<ObjectOrNull>) -> Self {
         Self {
             properties: Default::default(),
             prototype: proto.into(),
@@ -420,8 +420,8 @@ impl MutObj for MutObject {
         }
 
         if let InternalPropertyKey::String(s) = &key {
-            if s == "__proto__" && (value.is_object() || value.is_null()) {
-                self.prototype = value.into();
+            if s == "__proto__" {
+                self.prototype = ObjectOrNull::try_from(value)?;
                 return Ok(());
             }
         }
@@ -455,8 +455,8 @@ impl MutObj for MutObject {
         }
 
         if let InternalPropertyKey::String(s) = &key {
-            if s == "__proto__" && (value.value.is_object() || value.value.is_null()) {
-                self.prototype = value.into();
+            if s == "__proto__"  {
+                self.prototype = ObjectOrNull::try_from(value.value)?;
                 return Ok(());
             }
         }
@@ -487,7 +487,7 @@ impl MutObj for MutObject {
         let key = InternalPropertyKey::from(name.clone());
 
         if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
-            return Ok(Some(self.prototype.clone()));
+            return Ok(Some(self.prototype.clone().into()));
         }
 
         if let InternalPropertyKey::Index(n) = key {
@@ -502,8 +502,8 @@ impl MutObj for MutObject {
             .get::<PropertyKey>(&key.into())
             .and_then(|idx| self.values.get(*idx))
             .cloned()
-            .or_else(|| match &self.prototype.value {
-                Value::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a realm here!
+            .or_else(|| match &self.prototype {
+                ObjectOrNull::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a realm here!
                 _ => None,
             }))
     }
@@ -512,7 +512,7 @@ impl MutObj for MutObject {
         let key = InternalPropertyKey::from(name.clone());
 
         if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
-            return Ok(Some(self.prototype.clone()));
+            return Ok(Some(self.prototype.clone().into()));
         }
 
         if let InternalPropertyKey::Index(n) = key {
@@ -671,7 +671,7 @@ impl MutObj for MutObject {
             return Ok((done, Some(value.value)));
         }
 
-        if let Ok(obj) = self.prototype.value.as_object() {
+        if let ObjectOrNull::Object(obj) = &self.prototype {
             return obj.get_array_or_done(index);
         }
 
@@ -686,11 +686,11 @@ impl MutObj for MutObject {
     }
 
     fn prototype(&self) -> Result<ObjectProperty, Error> {
-        Ok(self.prototype.clone())
+        Ok(self.prototype.clone().into())
     }
 
     fn set_prototype(&mut self, proto: ObjectProperty) -> Res {
-        self.prototype = proto;
+        self.prototype = proto.value.try_into()?;
         Ok(())
     }
 
@@ -722,8 +722,8 @@ mod tests {
 
     #[test]
     fn object_creation_with_proto() {
-        let proto = Value::Number(42.0);
-        let object = Object::with_proto(proto.clone());
+        let proto = Value::Null;
+        let object = Object::with_proto(None);
 
         assert_eq!(
             object.get_property(&"__proto__".into()).unwrap().value,
@@ -733,10 +733,14 @@ mod tests {
 
     #[test]
     fn object_creation_raw_with_proto() {
-        let proto = Value::Number(42.0);
-        let object = Object::raw_with_proto(proto.copy());
+        let realm = Realm::new().unwrap();
+        let object = Object::raw(&realm);
 
-        assert_eq!(object.prototype().unwrap().value, proto);
+        let proto = object.into_object();
+
+        let object = Object::raw_with_proto(proto.clone());
+
+        assert_eq!(object.prototype().unwrap().value, Value::Object(proto));
     }
 
     #[test]

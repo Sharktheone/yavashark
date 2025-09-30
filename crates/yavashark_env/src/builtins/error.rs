@@ -1,10 +1,10 @@
 use crate::error_obj::ErrorObj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Value, Variable};
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Variable};
 use crate::value::Obj;
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-        pub fn $get(error: Value, error_proto: Value) -> Res<ObjectHandle> {
+        pub fn $get(error: ObjectHandle, error_proto: ObjectHandle) -> Res<ObjectHandle> {
             let proto = Object::with_proto(error);
 
             proto.define_property("name".into(), stringify!($name).into())?;

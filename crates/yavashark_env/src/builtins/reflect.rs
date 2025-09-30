@@ -11,7 +11,7 @@ pub struct Reflect {}
 
 impl Reflect {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: Value, func_proto: Value) -> Res<ObjectHandle> {
+    pub fn new(proto: ObjectHandle, func_proto: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableReflect {
                 object: MutObject::with_proto(proto),

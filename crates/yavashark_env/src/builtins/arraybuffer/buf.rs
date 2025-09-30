@@ -24,7 +24,7 @@ impl ArrayBuffer {
 
         Ok(Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
@@ -37,7 +37,7 @@ impl ArrayBuffer {
 
         Self {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(len),
@@ -101,7 +101,7 @@ impl ArrayBuffer {
 
         let buffer = ArrayBuffer {
             inner: RefCell::new(MutableArrayBuffer {
-                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.arraybuffer.clone()),
                 buffer: Some(buffer),
             }),
             max_byte_length: Some(max_len),

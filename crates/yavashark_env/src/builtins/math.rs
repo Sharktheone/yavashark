@@ -15,7 +15,7 @@ impl Math {
     pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMath {
-                object: MutObject::with_proto(proto.into()),
+                object: MutObject::with_proto(proto),
             }),
         };
 

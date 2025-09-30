@@ -21,14 +21,14 @@ pub struct BigIntConstructor {}
 
 impl BigIntConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableBigIntConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }
@@ -57,7 +57,7 @@ impl BigIntObj {
     pub fn new(realm: &Realm, big_int: Rc<BigInt>) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableBigIntObj {
-                object: MutObject::with_proto(realm.intrinsics.bigint.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.bigint.clone()),
                 big_int,
             }),
         }

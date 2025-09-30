@@ -57,7 +57,7 @@ impl DataView {
 
         Ok(Self {
             inner: RefCell::new(MutableDataView {
-                object: MutObject::with_proto(realm.intrinsics.data_view.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.data_view.clone()),
             }),
             byte_offset,
             buffer: buf,
@@ -349,10 +349,10 @@ pub struct DataViewConstructor {}
 
 impl DataViewConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableDataViewConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func),
             }),
         };
 

@@ -22,7 +22,7 @@ impl Set {
     fn with_set(realm: &Realm, set: IndexSet<Value>) -> Self {
         Self {
             inner: RefCell::new(MutableSet {
-                object: MutObject::with_proto(realm.intrinsics.set.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.set.clone()),
                 set,
             }),
         }
@@ -51,14 +51,14 @@ impl Constructor for SetConstructor {
 
 impl SetConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableSetConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }

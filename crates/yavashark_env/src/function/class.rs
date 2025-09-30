@@ -198,7 +198,7 @@ impl Obj for Class {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         Ok(if let Some(constructor) = &self.constructor {
             let this = ClassInstance::new_with_proto(
-                self.prototype.try_borrow()?.value.clone(),
+                self.prototype.try_borrow()?.value.clone().to_object()?,
                 self.name.borrow().clone(),
             )
             .into_value();
@@ -219,7 +219,7 @@ impl Obj for Class {
             .into_value()
         } else {
             ClassInstance::new_with_proto(
-                self.prototype.try_borrow()?.value.clone(),
+                self.prototype.try_borrow()?.value.clone().to_object()?,
                 self.name.borrow().clone(),
             )
             .into_value()
@@ -244,7 +244,7 @@ impl Class {
         Self::new_with_proto(realm.intrinsics.func.clone().into(), name)
     }
 
-    pub fn new_with_proto(proto: Value, name: String) -> Res<Self> {
+    pub fn new_with_proto(proto: ObjectHandle, name: String) -> Res<Self> {
         let inner = Object::with_proto(proto);
 
         inner.define_variable("name".into(), Variable::write_config(name.clone().into()))?;
@@ -260,7 +260,7 @@ impl Class {
     }
 
     pub fn with_super(sup: ObjectHandle, name: String) -> Res<Self> {
-        let inner = Object::with_proto(sup.clone().into());
+        let inner = Object::with_proto(sup.clone());
 
         inner.define_variable("name".into(), Variable::write_config(name.clone().into()))?;
 
@@ -523,7 +523,7 @@ impl ClassInstance {
     }
 
     #[must_use]
-    pub fn new_with_proto(proto: Value, name: String) -> Self {
+    pub fn new_with_proto(proto: ObjectHandle, name: String) -> Self {
         Self {
             inner: RefCell::new(Object::with_proto(proto)),
             private_props: RefCell::new(HashMap::new()),

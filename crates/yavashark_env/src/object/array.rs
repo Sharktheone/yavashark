@@ -11,7 +11,7 @@ use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
+use crate::value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl, ObjectOrNull};
 
 #[derive(Debug)]
 pub struct Array {
@@ -142,17 +142,17 @@ impl ObjectImpl for Array {
 
 impl ProtoDefault for Array {
     fn proto_default(realm: &Realm) -> Self {
-        Self::new(realm.intrinsics.array.clone().into())
+        Self::new(realm.intrinsics.array.clone())
     }
 
     fn null_proto_default() -> Self {
-        Self::new(Value::Null)
+        Self::new(ObjectOrNull::Null)
     }
 }
 
 impl Array {
     pub fn with_elements(realm: &Realm, elements: Vec<Value>) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone().into());
+        let array = Self::new(realm.intrinsics.array.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
@@ -164,7 +164,7 @@ impl Array {
         Ok(array)
     }
 
-    pub fn with_elements_and_proto(proto: Value, elements: Vec<Value>) -> Res<Self> {
+    pub fn with_elements_and_proto(proto: ObjectHandle, elements: Vec<Value>) -> Res<Self> {
         let array = Self::new(proto);
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -178,7 +178,7 @@ impl Array {
     }
 
     pub fn with_len(realm: &Realm, len: usize) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone().into());
+        let array = Self::new(realm.intrinsics.array.clone());
 
         array.length.set(len);
 
@@ -209,7 +209,7 @@ impl Array {
             }
         };
 
-        let array = Self::new(realm.intrinsics.array.clone().into());
+        let array = Self::new(realm.intrinsics.array.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
 
@@ -240,7 +240,7 @@ impl Array {
     }
 
     #[must_use]
-    pub fn new(proto: Value) -> Self {
+    pub fn new(proto: impl Into<ObjectOrNull>) -> Self {
         Self {
             inner: RefCell::new(MutObject::with_proto(proto)),
             length: Cell::new(0),
@@ -249,7 +249,7 @@ impl Array {
 
     #[must_use]
     pub fn from_realm(realm: &Realm) -> Self {
-        Self::new(realm.intrinsics.array.clone().into())
+        Self::new(realm.intrinsics.array.clone())
     }
 
     pub fn insert_array(&self, val: Value, idx: usize) -> Res {
@@ -319,7 +319,7 @@ impl Array {
     }
 
     pub fn shallow_clone(&self, realm: &Realm) -> Res<Self> {
-        let array = Self::new(realm.intrinsics.array.clone().into());
+        let array = Self::new(realm.intrinsics.array.clone());
 
         let other_array = &self.inner.try_borrow()?;
 
@@ -437,7 +437,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array: this,
             next: Cell::new(0),
@@ -890,7 +890,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array: this,
             next: Cell::new(0),
@@ -1395,7 +1395,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array: this,
             next: Cell::new(0),
@@ -1439,7 +1439,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array: obj,
             next: Cell::new(0),
@@ -1460,7 +1460,7 @@ impl Array {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array: obj,
             next: Cell::new(0),
@@ -1547,7 +1547,7 @@ impl Constructor for ArrayConstructor {
             return Ok(Obj::into_value(Array::with_len(realm, len as usize)?));
         }
 
-        let this = Array::new(realm.intrinsics.array.clone().into());
+        let this = Array::new(realm.intrinsics.array.clone());
 
         let mut inner = this.inner.try_borrow_mut()?;
 
@@ -1568,14 +1568,14 @@ impl Func for ArrayConstructor {
 
 impl ArrayConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, proto: &Value) -> Res<ObjectHandle> {
+    pub fn new(_: &Object, proto: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableArrayConstructor {
-                object: MutObject::with_proto(proto.copy()),
+                object: MutObject::with_proto(proto.clone()),
             }),
         };
 
-        this.initialize(proto.copy())?;
+        this.initialize(proto)?;
 
         Ok(this.into_object())
     }

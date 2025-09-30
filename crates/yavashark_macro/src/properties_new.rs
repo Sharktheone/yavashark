@@ -132,7 +132,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let env = &config.env_path;
 
     let init_fn = quote! {
-        pub fn initialize_proto(mut obj: #proto_object, func_proto: #value) -> ::core::result::Result<#object_handle, #error> {
+        pub fn initialize_proto(mut obj: #proto_object, func_proto: #object_handle) -> ::core::result::Result<#object_handle, #error> {
             use #env::value::{AsAny, Obj, IntoValue, FromValue};
             use #try_into_value;
 
@@ -294,20 +294,20 @@ fn init_constructor(
         constructor_tokens.extend(quote! {
             impl #name {
                 #[allow(clippy::new_ret_no_self)]
-                pub fn new(func: & #value) -> ::core::result::Result<#object_handle, #error> {
+                pub fn new(func: & #object_handle) -> ::core::result::Result<#object_handle, #error> {
                     use #env::value::Obj;
                     let mut this = Self {
                         inner: ::core::cell::RefCell::new(#mut_name {
-                            object: #mut_obj::with_proto(func.copy()),
+                            object: #mut_obj::with_proto(func.clone()),
                         }),
                     };
 
-                    this.initialize(func.copy())?;
+                    this.initialize(func.clone())?;
 
                     Ok(this.into_object())
                 }
 
-                pub fn initialize(&mut self, func_proto: #value) -> core::result::Result<(), #error> {
+                pub fn initialize(&mut self, func_proto: #object_handle) -> core::result::Result<(), #error> {
                     use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
                     let obj = self;
@@ -324,7 +324,7 @@ fn init_constructor(
 
     let constr_proto = if extends {
         quote! { {
-            &obj.prototype()?.value.get_property_no_get_set(&"constructor".into())?.value
+            &obj.prototype()?.value.get_property_no_get_set(&"constructor".into())?.value.to_object()?
         } }
     } else {
         quote! { &func_proto }

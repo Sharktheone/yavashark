@@ -20,7 +20,7 @@ impl State {
     pub fn new(value: Value, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableState {
-                object: MutObject::with_proto(realm.intrinsics.signal_state.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.signal_state.clone()),
                 value,
                 dependents: Vec::new(),
             }),

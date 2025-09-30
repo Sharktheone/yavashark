@@ -126,7 +126,7 @@ impl Promise {
             notify: PromiseNotify::new(),
             state: Cell::new(PromiseState::Pending),
             inner: RefCell::new(MutablePromise {
-                object: MutObject::with_proto(realm.intrinsics.promise.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.promise.clone()),
                 value: None,
                 on_fulfilled: Vec::new(),
                 on_rejected: Vec::new(),
@@ -558,8 +558,8 @@ impl Promise {
 
         let fut = join_all(futures);
 
-        let array_proto = realm.intrinsics.array.clone().into();
-        let obj_proto: Value = realm.intrinsics.obj.clone().into();
+        let array_proto = realm.intrinsics.array.clone();
+        let obj_proto = realm.intrinsics.obj.clone();
 
         let fut = async move {
             let results = fut.await;

@@ -30,7 +30,7 @@ impl ErrorObj {
 
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(proto.into()),
+                object: MutObject::with_proto(proto),
                 error,
             }),
         };
@@ -50,7 +50,7 @@ impl ErrorObj {
     pub fn new_from(message: YSString, realm: &Realm) -> ObjectHandle {
         let this = Self {
             inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.error.clone()),
                 error: Error::unknown_error(message),
             }),
         };
@@ -72,7 +72,7 @@ impl ErrorObj {
 
         Self {
             inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(proto.into()),
+                object: MutObject::with_proto(proto),
                 error,
             }),
         }
@@ -82,7 +82,7 @@ impl ErrorObj {
     pub fn raw_from(message: YSString, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableErrorObj {
-                object: MutObject::with_proto(realm.intrinsics.error.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.error.clone()),
                 error: Error::unknown_error(message),
             }),
         }

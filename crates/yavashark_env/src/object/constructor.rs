@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use crate::value::{Constructor, Func, IntoValue, Obj};
+use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull};
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -41,7 +41,7 @@ impl Func for ObjectConstructor {
 
 impl ObjectConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: Value, func: Value) -> Res<ObjectHandle> {
+    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableObjectConstructor {
                 object: MutObject::with_proto(proto),
@@ -57,9 +57,7 @@ impl ObjectConstructor {
 #[properties_new(raw)]
 impl ObjectConstructor {
     fn create(proto: Value, properties: Option<ObjectHandle>) -> Res<ObjectHandle> {
-        if !proto.is_object() && !proto.is_null() {
-            return Err(Error::ty("Object prototype must be an object or null"));
-        }
+        let proto: ObjectOrNull = proto.try_into()?;
 
         let obj = Object::with_proto(proto);
 

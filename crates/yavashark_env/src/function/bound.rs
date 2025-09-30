@@ -52,7 +52,7 @@ impl BoundFunction {
         let obj = ObjectHandle::new(Self {
             func,
             inner: RefCell::new(MutableBoundFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
             }),
             bound_this: this,
             bound_args: args,

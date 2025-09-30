@@ -23,7 +23,7 @@ impl ProtoDefault for BooleanObj {
     fn proto_default(realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableBooleanObj {
-                object: MutObject::with_proto(realm.intrinsics.boolean.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.boolean.clone()),
                 boolean: false,
             }),
         }
@@ -51,10 +51,10 @@ impl CustomName for BooleanConstructor {
 
 impl BooleanConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableBooleanConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func),
             }),
         };
 
@@ -92,7 +92,7 @@ impl BooleanObj {
     pub fn new(realm: &mut Realm, boolean: bool) -> ObjectHandle {
         Self {
             inner: RefCell::new(MutableBooleanObj {
-                object: MutObject::with_proto(realm.intrinsics.boolean.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.boolean.clone()),
                 boolean,
             }),
         }

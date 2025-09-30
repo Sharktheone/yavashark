@@ -20,7 +20,7 @@ impl Arguments {
     pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutObject::with_proto(
-                realm.intrinsics.arguments.clone().into(),
+                realm.intrinsics.arguments.clone(),
             )),
             callee,
             length: RefCell::new(args.len().into()),
@@ -165,7 +165,7 @@ impl Arguments {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array: obj,
             next: Cell::new(0),

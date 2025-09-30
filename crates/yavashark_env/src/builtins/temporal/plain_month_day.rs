@@ -25,7 +25,7 @@ impl PlainMonthDay {
         Self {
             inner: RefCell::new(MutablePlainMonthDay {
                 object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_month_day.clone().into(),
+                    realm.intrinsics.temporal_plain_month_day.clone(),
                 ),
             }),
             month_day,

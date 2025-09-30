@@ -10,7 +10,7 @@ use std::fmt::Debug;
 use swc_ecma_ast::{Param, Pat};
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
-use crate::value::{BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func};
+use crate::value::{BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull};
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function, constructor, direct(prototype), name)]
@@ -63,7 +63,7 @@ impl OptimFunction {
 
         let this = Self {
             inner: RefCell::new(MutableOptimFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
                 prototype: prototype.clone().into(),
             }),
             raw: RawOptimFunction {
@@ -86,7 +86,7 @@ impl OptimFunction {
     pub fn new_instance(&self) -> ValueResult {
         let inner = self.inner.try_borrow()?;
 
-        let proto = inner.prototype.value.clone();
+        let proto: ObjectOrNull = inner.prototype.value.clone().try_into()?;
 
         let obj = Object::with_proto(proto);
 

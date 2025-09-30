@@ -5,12 +5,12 @@ use common::{
 use std::any::Any;
 use std::cell::RefCell;
 use yavashark_string::YSString;
-use crate::value::{MutObj, Obj};
+use crate::value::{MutObj, Obj, ObjectOrNull};
 
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Value, Variable};
+use crate::{Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, Variable};
 
 pub mod common;
 
@@ -53,7 +53,7 @@ impl Prototype {
     pub fn new() -> Self {
         Self {
             inner: RefCell::new(MutPrototype {
-                object: MutObject::with_proto(Value::Undefined),
+                object: MutObject::with_proto(ObjectOrNull::Null),
                 defined_getter: Value::Undefined.into(),
                 defined_setter: Value::Undefined.into(),
                 lookup_getter: Value::Undefined.into(),
@@ -70,25 +70,25 @@ impl Prototype {
         }
     }
 
-    pub(crate) fn initialize(&self, func: Value, this: Value) -> Res {
-        let obj_constructor = ObjectConstructor::new(this.copy(), func.copy())?;
+    pub(crate) fn initialize(&self, func: ObjectHandle, this: ObjectHandle) -> Res {
+        let obj_constructor = ObjectConstructor::new(this.clone(), func.clone())?;
 
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter = Variable::write_config(
-            NativeFunction::with_proto("__defineGetter__", define_getter, func.copy()).into(),
+            NativeFunction::with_proto("__defineGetter__", define_getter, func.clone()).into(),
         )
         .into();
         this_borrow.defined_setter = Variable::write_config(
-            NativeFunction::with_proto("__defineSetter__", define_setter, func.copy()).into(),
+            NativeFunction::with_proto("__defineSetter__", define_setter, func.clone()).into(),
         )
         .into();
         this_borrow.lookup_getter = Variable::write_config(
-            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.copy()).into(),
+            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.clone()).into(),
         )
         .into();
         this_borrow.lookup_setter = Variable::write_config(
-            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.copy()).into(),
+            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.clone()).into(),
         )
         .into();
         this_borrow.constructor = obj_constructor.into();
@@ -97,25 +97,25 @@ impl Prototype {
             .constructor
             .value
             .as_object()?
-            .define_variable("prototype".into(), Variable::new_read_only(this))?;
+            .define_variable("prototype".into(), Variable::new_read_only(this.into()))?;
 
         this_borrow.has_own_property =
-            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.copy()).into();
+            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.clone()).into();
         this_borrow.get_own_property_descriptor = NativeFunction::with_proto(
             "getOwnPropertyDescriptor",
             get_own_property_descriptor,
-            func.copy(),
+            func.clone(),
         )
         .into();
         this_borrow.is_prototype_of =
-            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.copy()).into();
+            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.clone()).into();
         this_borrow.property_is_enumerable =
-            NativeFunction::with_proto("propertyIsEnumerable", property_is_enumerable, func.copy())
+            NativeFunction::with_proto("propertyIsEnumerable", property_is_enumerable, func.clone())
                 .into();
         this_borrow.to_locale_string =
-            NativeFunction::with_proto("toLocaleString", to_locale_string, func.copy()).into();
+            NativeFunction::with_proto("toLocaleString", to_locale_string, func.clone()).into();
         this_borrow.to_string =
-            NativeFunction::with_proto("toString", to_string, func.copy()).into();
+            NativeFunction::with_proto("toString", to_string, func.clone()).into();
         this_borrow.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
 
         Ok(())

@@ -34,7 +34,7 @@ impl ZonedDateTime {
         Self {
             inner: RefCell::new(MutableZonedDateTime {
                 object: MutObject::with_proto(
-                    realm.intrinsics.temporal_zoned_date_time.clone().into(),
+                    realm.intrinsics.temporal_zoned_date_time.clone(),
                 ),
             }),
             date,

@@ -202,49 +202,49 @@ impl Intrinsics {
         }
 
         let array_prototype = Array::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let error_prototype = ErrorObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone())?;
 
         let string_prototype = StringObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let number_prototype = NumberObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let boolean_prototype = BooleanObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let symbol_prototype = SymbolObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let bigint_prototype = BigIntObj::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let regex = RegExp::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
@@ -253,7 +253,7 @@ impl Intrinsics {
         let error_constructor = error_prototype
             .get_property(&"constructor".into())
             .unwrap_or(Value::Undefined.into())
-            .value;
+            .value.to_object()?;
 
         let type_error = get_type_error(error_prototype.clone().into(), error_constructor.clone())?;
         let range_error =
@@ -271,118 +271,118 @@ impl Intrinsics {
             get_aggregate_error(error_prototype.clone().into(), error_constructor)?;
 
         let arraybuffer = ArrayBuffer::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let sharedarraybuffer = SharedArrayBuffer::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
 
         let data_view = DataView::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let typed_array = TypedArray::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let int8array = Int8Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let uint8array = Uint8Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let uint8clampedarray = Uint8ClampedArray::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let int16array = Int16Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let uint16array = Uint16Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let int32array = Int32Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let uint32array = Uint32Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let float16array = Float16Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let float32array = Float32Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let float64array = Float64Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let bigint64array = BigInt64Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let biguint64array = BigUint64Array::initialize_proto(
-            Object::raw_with_proto(typed_array.clone().into()),
+            Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
         )?;
 
         let atomics = Atomics::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let map = Map::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let weak_map = WeakMap::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let set = Set::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let weak_set = WeakSet::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let weak_ref = WeakRef::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let date = Date::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
@@ -395,17 +395,17 @@ impl Intrinsics {
             crate::builtins::signal::get_signal(obj_prototype.clone(), func_prototype.clone())?;
 
         let promise = Promise::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let arguments = Arguments::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 
         let proxy = Proxy::initialize_proto(
-            Object::raw_with_proto(obj_prototype.clone().into()),
+            Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
 

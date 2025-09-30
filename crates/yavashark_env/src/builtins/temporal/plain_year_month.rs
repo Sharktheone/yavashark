@@ -24,7 +24,7 @@ impl PlainYearMonth {
         Self {
             inner: RefCell::new(MutablePlainYearMonth {
                 object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_year_month.clone().into(),
+                    realm.intrinsics.temporal_plain_year_month.clone(),
                 ),
             }),
             year_month,

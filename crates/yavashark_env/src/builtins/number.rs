@@ -19,7 +19,7 @@ impl ProtoDefault for NumberObj {
     fn proto_default(realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.number.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.number.clone()),
                 number: 0.0,
             }),
         }
@@ -41,14 +41,14 @@ pub struct NumberConstructor {}
 
 impl NumberConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableNumberConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }
@@ -179,7 +179,7 @@ impl NumberObj {
     pub fn with_number(realm: &Realm, number: impl Into<f64>) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableNumberObj {
-                object: MutObject::with_proto(realm.intrinsics.number.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.number.clone()),
                 number: number.into(),
             }),
         };

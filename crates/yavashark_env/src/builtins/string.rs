@@ -143,16 +143,16 @@ impl CustomName for StringConstructor {
 
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableStringConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
         this.define_property("name".into(), "String".into())?;
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }
@@ -280,7 +280,7 @@ impl StringObj {
     pub fn with_string(realm: &Realm, string: YSString) -> Self {
         Self {
             inner: RefCell::new(MutableStringObj {
-                object: MutObject::with_proto(realm.intrinsics.string.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.string.clone()),
                 string,
             }),
         }

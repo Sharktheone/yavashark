@@ -80,7 +80,7 @@ impl JSFunction {
 
         let this = Self {
             inner: RefCell::new(MutableJSFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
                 prototype: prototype.clone().into(),
             }),
             raw: RawJSFunction {
@@ -129,7 +129,7 @@ impl JSFunction {
     pub fn new_instance(&self, realm: &mut Realm) -> ValueResult {
         let inner = self.inner.try_borrow()?;
 
-        let proto = inner.prototype.value.clone();
+        let proto = inner.prototype.value.clone().to_object()?;
 
         let obj = Object::with_proto(proto);
 

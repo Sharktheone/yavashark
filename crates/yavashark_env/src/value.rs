@@ -15,7 +15,7 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
 use yavashark_string::{ToYSString, YSString};
-use crate::Realm;
+use crate::{ObjectHandle, Realm};
 
 mod constructor;
 mod conversion;
@@ -56,7 +56,7 @@ pub enum WeakValue {
 }
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum PrimitiveValue {
     Null,
     Undefined,
@@ -67,11 +67,12 @@ pub enum PrimitiveValue {
     BigInt(Rc<BigInt>),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ObjectOrNull {
     Object(Object),
     Null,
 }
+
 
 impl Clone for Value {
     fn clone(&self) -> Self {
@@ -224,6 +225,33 @@ impl Hash for Value {
             Self::Object(o) => (Type::Object, o).hash(state),
             Self::Symbol(s) => (Type::Symbol, s).hash(state),
             Self::BigInt(b) => (Type::BigInt, b).hash(state),
+        }
+    }
+}
+
+impl From<ObjectHandle> for ObjectOrNull {
+    fn from(o: ObjectHandle) -> Self {
+        ObjectOrNull::Object(o)
+    }
+}
+
+impl From<Option<ObjectHandle>> for ObjectOrNull {
+    fn from(o: Option<ObjectHandle>) -> Self {
+        match o {
+            Some(o) => ObjectOrNull::Object(o),
+            None => ObjectOrNull::Null,
+        }
+    }
+}
+
+impl TryFrom<Value> for ObjectOrNull {
+    type Error = Error;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        match value {
+            Value::Object(o) => Ok(ObjectOrNull::Object(o)),
+            Value::Null => Ok(ObjectOrNull::Null),
+            _ => Err(Error::ty("expected object or null")),
         }
     }
 }

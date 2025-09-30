@@ -25,7 +25,7 @@ impl Realm {
     pub fn new() -> Res<Self> {
         let intrinsics = Intrinsics::new()?;
 
-        let global = Object::with_proto(intrinsics.obj.clone().into());
+        let global = Object::with_proto(intrinsics.obj.clone());
 
         let mut realm = Self {
             env: Environment {

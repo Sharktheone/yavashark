@@ -612,6 +612,13 @@ impl Object {
     pub fn downgrade(&self) -> WeakObject {
         WeakObject::new(self)
     }
+
+
+    #[must_use]
+    pub fn gc_ref(&self) -> Option<GcRef<BoxedObj>> {
+        Some(self.get_ref())
+    }
+
 }
 
 impl From<Box<dyn Obj>> for Object {

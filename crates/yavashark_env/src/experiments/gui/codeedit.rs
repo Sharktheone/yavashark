@@ -67,7 +67,7 @@ pub struct JSCodeEditor {
 impl JSCodeEditor {
     pub fn init(realm: &mut Realm) -> Res {
         let proto = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
         )?;
 
@@ -81,7 +81,7 @@ impl JSCodeEditor {
 
         Ok(Self {
             mut_object: RefCell::new(MutObject::with_proto(
-                realm.intrinsics.get_of::<Self>()?.into(),
+                realm.intrinsics.get_of::<Self>()?,
             )),
             code: Rc::clone(&code),
             editor: RefCell::new(Some(CodeEdit::new(lang, code))),

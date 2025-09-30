@@ -37,7 +37,7 @@ impl AsyncGeneratorFunction {
         Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
                 object: MutObject::with_proto(
-                    realm.intrinsics.async_generator_function.clone().into(),
+                    realm.intrinsics.async_generator_function.clone(),
                 ),
             }),
             code,
@@ -51,7 +51,7 @@ impl AsyncGeneratorFunction {
         Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
                 object: MutObject::with_proto(
-                    realm.intrinsics.async_generator_function.clone().into(),
+                    realm.intrinsics.async_generator_function.clone(),
                 ),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
@@ -167,7 +167,7 @@ impl AsyncGenerator {
         let state = VmState::new(code, scope);
         Self {
             inner: RefCell::new(MutableAsyncGenerator {
-                object: MutObject::with_proto(realm.intrinsics.async_generator.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.async_generator.clone()),
             }),
             state: RefCell::new(Some(state)),
             notify: Notify::new(),
@@ -176,12 +176,12 @@ impl AsyncGenerator {
 
     pub fn init(realm: &mut Realm) -> Res {
         let gf = AsyncGeneratorFunction::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
         )?;
 
         let g = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
         )?;
 

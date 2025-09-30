@@ -363,7 +363,7 @@ impl TypedArray {
         );
 
         Ok(Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone().into())),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone())),
             buffer: buf,
             byte_offset,
             opt_byte_length: byte_length,
@@ -378,7 +378,7 @@ impl TypedArray {
 
 
         Ok(Self {
-            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone().into())),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone())),
             buffer,
             byte_offset: 0,
             opt_byte_length: usize::MAX,
@@ -619,7 +619,7 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array,
             next: Cell::new(0),
@@ -944,7 +944,7 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array,
             next: Cell::new(0),
@@ -1383,7 +1383,7 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array,
             next: Cell::new(0),
@@ -1426,7 +1426,7 @@ impl TypedArray {
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
-                object: MutObject::with_proto(realm.intrinsics.array_iter.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.array_iter.clone()),
             }),
             array,
             next: Cell::new(0),

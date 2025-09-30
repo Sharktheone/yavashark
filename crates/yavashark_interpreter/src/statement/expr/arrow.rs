@@ -68,7 +68,7 @@ impl Interpreter {
 
         let arrow = ArrowFunction {
             inner: RefCell::new(MutableArrowFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
             }),
             expr: stmt.clone(),
             this,

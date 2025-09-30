@@ -23,7 +23,7 @@ pub struct Gui {
 impl Gui {
     pub fn init(realm: &mut Realm) -> Res {
         let proto = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
         )?;
 
@@ -36,7 +36,7 @@ impl Gui {
     pub fn new(realm: &Realm, name: String, w: f32, h: f32) -> Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableGui {
-                object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?.into()),
+                object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?),
             }),
             name,
             w,

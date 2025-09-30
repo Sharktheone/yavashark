@@ -21,7 +21,7 @@ pub fn create_class(
 ) -> Res<(JSClass, Vec<BlockStmt>)> {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
-        let p = super_class.get_property(&"prototype".into(), realm)?;
+        let p = super_class.get_property(&"prototype".into(), realm)?.to_object()?;
 
         (
             JSClass::with_super(super_class.to_object()?, name.clone())?,

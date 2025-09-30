@@ -463,7 +463,7 @@ impl Date {
     pub fn new(date: DateTime<Local>, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableDate {
-                object: MutObject::with_proto(realm.intrinsics.date.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.date.clone()),
                 date,
             }),
         }
@@ -544,14 +544,14 @@ pub struct DateConstructor {}
 
 impl DateConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableDateConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func.clone())?;
 
         Ok(this.into_object())
     }

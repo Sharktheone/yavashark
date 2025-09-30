@@ -45,59 +45,59 @@ pub fn get_temporal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
 ) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.clone().into());
+    let obj = Object::with_proto(obj_proto.clone());
 
     let duration = Duration::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("Duration".into(), constr(&duration))?;
 
     let instant = Instant::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("Instant".into(), constr(&instant))?;
 
     let now = Now::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("Now".into(), constr(&now))?;
 
     let plain_date = PlainDate::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
 
     obj.define_variable("PlainDate".into(), constr(&plain_date))?;
 
     let plain_time = PlainTime::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("PlainTime".into(), constr(&plain_time))?;
 
     let plain_date_time = PlainDateTime::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("PlainDateTime".into(), constr(&plain_date_time))?;
 
     let plain_month_day = PlainMonthDay::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("PlainMonthDay".into(), constr(&plain_month_day))?;
 
     let plain_year_month = PlainYearMonth::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
     obj.define_variable("PlainYearMonth".into(), constr(&plain_year_month))?;
 
     let zoned_date_time = ZonedDateTime::initialize_proto(
-        Object::raw_with_proto(obj_proto.into()),
+        Object::raw_with_proto(obj_proto),
         func_proto.into(),
     )?;
     obj.define_variable("ZonedDateTime".into(), constr(&zoned_date_time))?;

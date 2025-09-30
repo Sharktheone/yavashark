@@ -329,7 +329,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     #value::Object(ref x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this))),
                 }
-            }, func_proto.copy()).into();
+            }, func_proto.clone()).into();
 
             #def
         };
@@ -357,7 +357,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
         };
 
         let prop = quote! {
-            let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, obj.clone().into(), func_proto.copy()).into();
+            let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, obj.clone().into(), func_proto.clone()).into();
 
 
             function.define_property("prototype".into(), obj.clone().into())?;
@@ -377,7 +377,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let new_fn = quote! {
-        pub(crate) fn initialize_proto(obj: #object, func_proto: #value) -> Result<#object_handle, #error> {
+        pub(crate) fn initialize_proto(obj: #object, func_proto: #object_handle) -> Result<#object_handle, #error> {
             use #env::value::{AsAny, Obj};
             #props
 

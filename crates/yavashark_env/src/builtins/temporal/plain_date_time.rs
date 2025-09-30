@@ -27,7 +27,7 @@ impl PlainDateTime {
         Self {
             inner: RefCell::new(MutablePlainDateTime {
                 object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_date_time.clone().into(),
+                    realm.intrinsics.temporal_plain_date_time.clone(),
                 ),
             }),
             date,

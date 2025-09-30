@@ -7,10 +7,7 @@ use crate::value::{MutObj, Obj};
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{
-    Error, MutObject, NativeConstructor, NativeFunction, ObjectProperty, Res, Value, ValueResult,
-    Variable,
-};
+use crate::{Error, MutObject, NativeConstructor, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -31,7 +28,7 @@ pub struct FunctionPrototype {
 
 impl FunctionPrototype {
     #[must_use]
-    pub fn new(obj: Value) -> Self {
+    pub fn new(obj: ObjectHandle) -> Self {
         Self {
             inner: RefCell::new(MutableFunctionPrototype {
                 object: MutObject::with_proto(obj),
@@ -46,25 +43,25 @@ impl FunctionPrototype {
         }
     }
 
-    pub fn initialize(&self, func: Value) -> Res {
+    pub fn initialize(&self, func: ObjectHandle) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
-        this.apply = NativeFunction::with_proto("apply", apply, func.copy()).into();
-        this.bind = NativeFunction::with_proto("bind", bind, func.copy()).into();
-        this.call = NativeFunction::with_proto("call", call, func.copy()).into();
+        this.apply = NativeFunction::with_proto("apply", apply, func.clone()).into();
+        this.bind = NativeFunction::with_proto("bind", bind, func.clone()).into();
+        this.call = NativeFunction::with_proto("call", call, func.clone()).into();
         this.constructor = NativeConstructor::special_with_proto(
             "Function".to_string(),
             constructor,
-            func.copy(),
-            func.copy(),
+            func.clone(),
+            func.clone(),
         )
         .into();
-        this.to_string = NativeFunction::with_proto("toString", to_string, func.copy()).into();
+        this.to_string = NativeFunction::with_proto("toString", to_string, func.clone()).into();
 
         this.constructor
             .value
             .as_object()?
-            .define_variable("prototype".into(), Variable::new_read_only(func))
+            .define_variable("prototype".into(), Variable::new_read_only(func.into()))
     }
 }
 

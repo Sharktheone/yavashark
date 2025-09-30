@@ -37,7 +37,7 @@ impl Constructor for MapConstructor {
 
         let map = Map {
             inner: RefCell::new(MutableMap {
-                object: MutObject::with_proto(realm.intrinsics.map.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.map.clone()),
                 map,
             }),
         };
@@ -48,14 +48,14 @@ impl Constructor for MapConstructor {
 
 impl MapConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMapConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }

@@ -9,7 +9,7 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
 use yavashark_string::YSString;
-use crate::value::{MutObj, Obj, ObjectImpl};
+use crate::value::{MutObj, Obj, ObjectImpl, ObjectOrNull};
 
 mod bound;
 mod class;
@@ -63,6 +63,8 @@ impl ObjectImpl for NativeFunction {
         let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
             .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
 
+        let proto: ObjectOrNull = proto.try_into()?;
+
         let obj = Object::with_proto(proto).into();
 
         (self.f)(args, obj, realm)
@@ -95,7 +97,7 @@ impl NativeFunction {
             constructor: false,
 
             inner: RefCell::new(MutNativeFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
                 constructor: Value::Undefined.into(),
             }),
         };
@@ -136,7 +138,7 @@ impl NativeFunction {
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
                 constructor: Value::Undefined.into(),
             }),
         };
@@ -178,7 +180,7 @@ impl NativeFunction {
             f: Box::new(f),
             constructor: false,
             inner: RefCell::new(MutNativeFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
                 constructor: Value::Undefined.into(),
             }),
         };
@@ -216,7 +218,7 @@ impl NativeFunction {
             f: Box::new(f),
             constructor: true,
             inner: RefCell::new(MutNativeFunction {
-                object: MutObject::with_proto(realm.intrinsics.func.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.func.clone()),
                 constructor: Value::Undefined.into(),
             }),
         };
@@ -249,7 +251,7 @@ impl NativeFunction {
     pub fn with_proto(
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
-        proto: Value,
+        proto: ObjectHandle,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -286,7 +288,7 @@ impl NativeFunction {
     pub fn with_proto_and_len(
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
-        proto: Value,
+        proto: ObjectHandle,
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
@@ -325,7 +327,7 @@ impl NativeFunction {
     pub fn special_with_proto(
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
-        proto: Value,
+        proto: ObjectHandle,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -369,7 +371,7 @@ impl NativeFunction {
                 f: Box::new(|_, _, _| Ok(Value::Undefined)),
                 constructor: false,
                 inner: RefCell::new(MutNativeFunction {
-                    object: MutObject::with_proto(Value::Undefined),
+                    object: MutObject::with_proto(None),
                     constructor: Value::Undefined.into(),
                 }),
             },
@@ -413,7 +415,7 @@ impl NativeFunctionBuilder {
 
     /// Note: Overwrites a potential object that was previously set
     #[must_use]
-    pub fn proto(self, proto: Value) -> Self {
+    pub fn proto(self, proto: ObjectHandle) -> Self {
         let mut inner = self.0.inner.borrow_mut();
 
         inner.object.prototype = proto.into();

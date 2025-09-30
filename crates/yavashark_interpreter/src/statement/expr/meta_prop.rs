@@ -3,6 +3,7 @@ use swc_ecma_ast::TsKeywordTypeKind::TsObjectKeyword;
 use swc_ecma_ast::{MetaPropExpr, MetaPropKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::{NativeFunction, Object, Realm, RuntimeResult, Value};
+use yavashark_env::value::ObjectOrNull;
 
 impl Interpreter {
     pub fn run_meta_prop(
@@ -13,7 +14,7 @@ impl Interpreter {
         Ok(match stmt.kind {
             MetaPropKind::NewTarget => scope.get_target()?,
             MetaPropKind::ImportMeta => {
-                let obj = Object::with_proto(Value::Null);
+                let obj = Object::with_proto(ObjectOrNull::Null);
 
                 obj.define_property(
                     "url".into(),

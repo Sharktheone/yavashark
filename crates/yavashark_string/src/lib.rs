@@ -16,7 +16,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Deref, DerefMut};
 use std::rc::Rc;
 
-pub use const_string::*;
+pub use const_string::ConstString;
 pub struct YSString {
     inner: UnsafeCell<InnerString>,
 }

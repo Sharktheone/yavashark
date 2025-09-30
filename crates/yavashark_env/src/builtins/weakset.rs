@@ -21,7 +21,7 @@ impl WeakSet {
     fn with_set(realm: &Realm, set: IndexSet<WeakValue>) -> Self {
         Self {
             inner: RefCell::new(MutableWeakSet {
-                object: MutObject::with_proto(realm.intrinsics.weak_set.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.weak_set.clone()),
                 set,
             }),
         }
@@ -50,14 +50,14 @@ impl Constructor for WeakSetConstructor {
 
 impl WeakSetConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: &Value) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableWeakSetConstructor {
-                object: MutObject::with_proto(func.copy()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.copy())?;
+        this.initialize(func)?;
 
         Ok(this.into_object())
     }

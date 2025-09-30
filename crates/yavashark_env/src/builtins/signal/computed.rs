@@ -31,7 +31,7 @@ impl Computed {
 
         Ok(Self {
             inner: RefCell::new(MutableComputed {
-                object: MutObject::with_proto(realm.intrinsics.signal_computed.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.signal_computed.clone()),
                 value: Value::Undefined,
                 dependents: Vec::new(),
             }),

@@ -21,8 +21,8 @@ impl Debug for Ui {
 impl Ui {
     pub fn init(realm: &mut Realm) -> Res {
         let proto = Self::initialize_proto(
-            Object::raw_with_proto(realm.intrinsics.obj.clone().into()),
-            realm.intrinsics.func.clone().into(),
+            Object::raw_with_proto(realm.intrinsics.obj.clone()),
+            realm.intrinsics.func.clone(),
         )?;
 
         realm.intrinsics.insert::<Self>(proto);
@@ -34,7 +34,7 @@ impl Ui {
     pub fn new(realm: &Realm) -> Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableUi {
-                object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?.into()),
+                object: MutObject::with_proto(realm.intrinsics.get_of::<Self>()?),
             }),
             ui: RuntimeLifetime::empty(),
         };

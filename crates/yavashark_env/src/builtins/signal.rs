@@ -19,15 +19,15 @@ pub fn get_signal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
 ) -> Res<(ObjectHandle, Protos)> {
-    let obj = Object::with_proto(obj_proto.clone().into());
+    let obj = Object::with_proto(obj_proto.clone());
 
     let state = State::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone().into()),
+        Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
     )?;
 
     let proto = ComputedProtoObj {
-        obj: Object::raw_with_proto(obj_proto.into()),
+        obj: Object::raw_with_proto(obj_proto),
         current_dep: RefCell::default(),
     };
 

@@ -27,7 +27,7 @@ impl Instant {
     pub fn from_stamp(stamp: temporal_rs::Instant, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableInstant {
-                object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone().into()),
+                object: MutObject::with_proto(realm.intrinsics.temporal_instant.clone()),
             }),
             stamp,
         }
