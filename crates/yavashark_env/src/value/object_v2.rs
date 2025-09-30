@@ -161,4 +161,23 @@ pub trait ObjV2: Collectable + Debug + 'static {
         _ = ty;
         None
     }
+
+
+    fn is_extensible(&self) -> bool {
+        true
+    }
+
+    fn prevent_extensions(&self) -> Res;
+
+    fn is_frozen(&self) -> bool {
+        false
+    }
+
+    fn freeze(&self) -> Res;
+
+    fn is_sealed(&self) -> bool {
+        false
+    }
+
+    fn seal(&self) -> Res;
 }
