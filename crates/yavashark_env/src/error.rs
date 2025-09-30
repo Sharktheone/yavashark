@@ -443,11 +443,13 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
 //     impl std::error::Error for SyncError {}
 // }
 
+
 impl<T: std::error::Error> From<T> for Error {
     fn from(value: T) -> Self {
         Self::new_error(value.to_string())
     }
 }
+
 
 impl Error {
     #[must_use]

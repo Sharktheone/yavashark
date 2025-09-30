@@ -47,7 +47,7 @@ impl<T> RuntimeLifetime<T> {
         Self(Rc::default())
     }
 
-    pub fn with(&self, f: impl FnOnce(&mut T) -> Res) -> Res {
+    pub fn with<R>(&self, f: impl FnOnce(&mut T) -> Res<R>) -> Res<R> {
         if self.0 .1.get() {
             return Err(Error::new("Value already borrowed"));
         }
