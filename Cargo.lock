@@ -5933,7 +5933,7 @@ dependencies = [
  "bincode",
  "num-bigint",
  "swc_ecma_ast 15.0.0",
- "yavashark_value",
+ "yavashark_string",
 ]
 
 [[package]]
@@ -6069,10 +6069,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "yavashark_realm"
-version = "0.1.0"
-
-[[package]]
 name = "yavashark_string"
 version = "0.1.0"
 
@@ -6129,7 +6125,6 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "rand 0.9.0",
- "temporal_rs",
  "yavashark_garbage",
  "yavashark_string",
 ]

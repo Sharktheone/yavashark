@@ -3,7 +3,7 @@ use crate::metadata::{Flags, Metadata, NegativePhase};
 use crate::utils::parse_file;
 use std::path::{Path, PathBuf};
 use swc_ecma_ast::Program;
-use yavashark_env::error::ErrorObj;
+use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;

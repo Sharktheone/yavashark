@@ -129,10 +129,11 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let object_handle = &config.object_handle;
     let value = &config.value;
     let error = &config.error;
+    let env = &config.env_path;
 
     let init_fn = quote! {
         pub fn initialize_proto(mut obj: #proto_object, func_proto: #value) -> ::core::result::Result<#object_handle, #error> {
-            use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+            use #env::value::{AsAny, Obj, IntoValue, FromValue};
             use #try_into_value;
 
             #init
@@ -234,6 +235,7 @@ fn init_constructor(
     let object_handle = &config.object_handle;
     let realm = &config.realm;
     let try_into_value = &config.try_into_value;
+    let env = &config.env_path;
 
     let ty_name = ty_to_name(ty)?;
     let name = format_ident!("{}Constructor", ty_name);
@@ -257,9 +259,9 @@ fn init_constructor(
         let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
 
         constructor_tokens.extend(quote! {
-            impl yavashark_value::Constructor<#realm> for #name {
+            impl #env::value::Constructor<#realm> for #name {
                 fn construct(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>) -> ::core::result::Result<#value, #error> {
-                    use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                    use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
 
                     #fn_tok
@@ -274,9 +276,9 @@ fn init_constructor(
         let fn_tok = call_constructor.init_tokes_direct(config, ty.to_token_stream());
 
         constructor_tokens.extend(quote! {
-            impl yavashark_value::Func<#realm> for #name {
+            impl #env::value::Func<#realm> for #name {
                 pub fn call(&self, realm: #realm, args: std::vec::Vec<#value>, this: #value) -> crate::Res<ObjectHandle> {
-                    use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                    use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
 
                     #fn_tok
@@ -293,7 +295,7 @@ fn init_constructor(
             impl #name {
                 #[allow(clippy::new_ret_no_self)]
                 pub fn new(func: & #value) -> ::core::result::Result<#object_handle, #error> {
-                    use yavashark_value::Obj;
+                    use #env::value::Obj;
                     let mut this = Self {
                         inner: ::core::cell::RefCell::new(#mut_name {
                             object: #mut_obj::with_proto(func.copy()),
@@ -306,7 +308,7 @@ fn init_constructor(
                 }
 
                 pub fn initialize(&mut self, func_proto: #value) -> core::result::Result<(), #error> {
-                    use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                    use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
                     let obj = self;
 

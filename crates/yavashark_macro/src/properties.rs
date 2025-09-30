@@ -33,6 +33,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let object = config.object;
     let object_handle = config.object_handle;
     let error = config.error;
+    let env = config.env_path;
 
     let mut constructor = None;
     let mut properties: Vec<Item> = Vec::new();
@@ -377,7 +378,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let new_fn = quote! {
         pub(crate) fn initialize_proto(obj: #object, func_proto: #value) -> Result<#object_handle, #error> {
-            use yavashark_value::{AsAny, Obj};
+            use #env::value::{AsAny, Obj};
             #props
 
             let obj = obj.into_object();

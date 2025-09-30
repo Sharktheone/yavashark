@@ -3,7 +3,7 @@ use swc_ecma_ast::{SuperProp, SuperPropExpr};
 use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult};
-use yavashark_value::Obj;
+use yavashark_env::value::Obj;
 
 impl Interpreter {
     pub fn run_super_prop(

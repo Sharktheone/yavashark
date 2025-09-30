@@ -8,7 +8,7 @@ use crate::builtins::signal::state::State;
 use crate::{Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_garbage::Gc;
-use yavashark_value::BoxedObj;
+use crate::value::BoxedObj;
 
 pub struct Protos {
     pub state: ObjectHandle,

@@ -346,10 +346,11 @@ mod temp_test {
         // #[cfg(not(miri))]
         // std::thread::sleep(std::time::Duration::from_secs(20));
 
+        #[cfg(feature = "dbg_object_gc")]
         println!(
             "LEAKED OBJECTS: {}/{}",
-            yavashark_value::OBJECT_COUNT.get(),
-            yavashark_value::OBJECT_ALLOC.get()
+            yavashark_env::value::OBJECT_COUNT.get(),
+            yavashark_env::value::OBJECT_ALLOC.get()
         );
     }
 

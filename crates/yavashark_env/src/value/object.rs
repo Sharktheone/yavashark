@@ -1,8 +1,4 @@
-use super::Value;
-use crate::js::context::Realm;
-use crate::variable::Variable;
-use crate::{Attributes, Error, IntoValue, IntoValueRef, Symbol};
-use equivalent::Equivalent;
+use super::{Attributes, IntoValue, IntoValueRef, Realm, Value, Variable};
 use std::any::{Any, TypeId};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
@@ -10,9 +6,11 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
+use indexmap::Equivalent;
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard, Weak};
 use yavashark_string::{ToYSString, YSString};
-
+use crate::error::Error;
+use crate::Symbol;
 pub use super::object_impl::*;
 
 pub trait AsAny {
@@ -352,7 +350,7 @@ impl<C: Realm> BoxedObj<C> {
     }
 
     #[allow(clippy::needless_lifetimes)]
-    pub(crate) fn downcast<'a, T: 'static>(&'a self) -> Option<&'a T> {
+    pub fn downcast<'a, T: 'static>(&'a self) -> Option<&'a T> {
         // Safety:
         // - we only interpret the returned pointer as T
         // - we only say the reference is valid for 'a this being the lifetime of self
@@ -375,7 +373,6 @@ impl<C: Realm> Deref for Object<C> {
     }
 }
 
-#[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Realm> Display for Object<C> {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -386,7 +383,6 @@ impl<C: Realm> Display for Object<C> {
     }
 }
 
-#[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Realm> ToYSString for Object<C> {
     fn to_ys_string(&self) -> YSString {
         self.to_string_internal().unwrap_or_else(|_| {

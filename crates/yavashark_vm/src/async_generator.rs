@@ -15,7 +15,8 @@ use yavashark_env::scope::Scope;
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use yavashark_value::{Error, Func, Obj};
+use yavashark_env::value::{Func, Obj};
+use yavashark_env::error::Error;
 
 #[object(function)]
 #[derive(Debug)]

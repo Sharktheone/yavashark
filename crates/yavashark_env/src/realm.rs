@@ -12,7 +12,7 @@ use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Varia
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
-use yavashark_value::Realm as RealmT;
+use crate::value::Realm as RealmT;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Realm {

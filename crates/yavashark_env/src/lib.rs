@@ -8,7 +8,7 @@ use std::ops::Deref;
 use yavashark_garbage::OwningGcGuard;
 
 pub mod console;
-pub mod error;
+pub mod error_obj;
 mod function;
 pub mod object;
 pub mod scope;
@@ -28,21 +28,24 @@ pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
+pub mod error;
+// #[cfg(feature = "js")]
+pub mod value;
 
-use crate::error::ErrorObj;
+use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
-pub use yavashark_value as value;
-use yavashark_value::{BoxedObj, Location};
+use value::BoxedObj;
+use error::Location;
 
-pub type Value = yavashark_value::Value<Realm>;
-pub type WeakValue = yavashark_value::WeakValue<Realm>;
-pub type Error = yavashark_value::Error<Realm>;
-pub type ObjectHandle = yavashark_value::Object<Realm>;
-pub type WeakObjectHandle = yavashark_value::WeakObject<Realm>;
-pub type Variable = yavashark_value::variable::Variable<Realm>;
-pub type Symbol = yavashark_value::Symbol;
+pub type Value = value::Value<Realm>;
+pub type WeakValue = value::WeakValue<Realm>;
+pub type Error = error::Error<Realm>;
+pub type ObjectHandle = value::Object<Realm>;
+pub type WeakObjectHandle = value::WeakObject<Realm>;
+pub type Variable = value::variable::Variable<Realm>;
+pub type Symbol = value::Symbol;
 
-pub type ObjectProperty = yavashark_value::ObjectProperty<Realm>;
+pub type ObjectProperty = value::ObjectProperty<Realm>;
 
 pub type GCd<T> = OwningGcGuard<'static, BoxedObj<Realm>, T>;
 

@@ -6,7 +6,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, Func, Obj, Symbol};
+use crate::value::{Constructor, Func, Obj, Symbol};
 
 #[object()]
 #[derive(Debug)]
@@ -544,7 +544,7 @@ impl RegExp {
 impl PrettyObjectOverride for RegExp {
     fn pretty_inline(
         &self,
-        _obj: &yavashark_value::Object<Realm>,
+        _obj: &crate::value::Object<Realm>,
         _not: &mut Vec<usize>,
     ) -> Option<String> {
         let mut s = String::new();
@@ -558,7 +558,7 @@ impl PrettyObjectOverride for RegExp {
 
     fn pretty_multiline(
         &self,
-        _obj: &yavashark_value::Object<Realm>,
+        _obj: &crate::value::Object<Realm>,
         _not: &mut Vec<usize>,
     ) -> Option<String> {
         self.pretty_inline(_obj, _not)

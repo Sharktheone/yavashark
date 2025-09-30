@@ -12,7 +12,7 @@ use temporal_rs::options::ToStringRoundingOptions;
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Temporal, TimeZone};
 use yavashark_macro::{object, props};
-use yavashark_value::{Obj, Object};
+use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]

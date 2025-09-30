@@ -3,7 +3,7 @@ use crate::{ObjectHandle, Realm, Res, Value};
 use half::f16;
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
-use yavashark_value::Obj;
+use crate::value::Obj;
 
 #[object(extends = TypedArray)]
 #[derive(Debug)]

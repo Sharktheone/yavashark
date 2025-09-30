@@ -4,7 +4,7 @@ use num_traits::One;
 use std::cell::RefCell;
 use std::ops::Rem;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::Obj;
+use crate::value::Obj;
 
 #[object]
 #[derive(Debug)]

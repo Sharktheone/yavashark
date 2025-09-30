@@ -5,7 +5,7 @@ use num_bigint::BigInt;
 use std::cell::RefCell;
 use std::rc::Rc;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Func, Obj};
+use crate::value::{Func, Obj};
 
 #[object]
 #[derive(Debug)]

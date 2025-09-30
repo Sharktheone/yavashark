@@ -2,7 +2,7 @@ use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueRes
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::ToYSString;
-use yavashark_value::{Func, IntoValue, Obj};
+use crate::value::{Func, IntoValue, Obj};
 
 #[object]
 #[derive(Debug)]

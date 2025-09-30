@@ -1,5 +1,5 @@
 use yavashark_bytecode::Reg;
-use yavashark_env::value::Error;
+use yavashark_env::error::Error;
 use yavashark_env::{Res, Value};
 
 pub const NUM_REGS: usize = 32;

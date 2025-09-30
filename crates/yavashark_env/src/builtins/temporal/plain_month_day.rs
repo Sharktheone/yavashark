@@ -12,7 +12,7 @@ use temporal_rs::partial::PartialDate;
 use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use yavashark_value::{Obj, Object};
+use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]

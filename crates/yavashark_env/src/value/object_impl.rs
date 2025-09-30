@@ -1,10 +1,11 @@
-use crate::{AsAny, BoxedObj, Error, MutObj, Obj, Object, ObjectProperty, Realm, Value, Variable};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
+use crate::error::Error;
+use crate::value::{AsAny, BoxedObj, MutObj, Obj, Object, ObjectProperty, Realm, Value, Variable};
 
 pub trait ObjectImpl<R: Realm>: Debug + AsAny + 'static {
     type Inner;

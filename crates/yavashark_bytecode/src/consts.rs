@@ -3,7 +3,7 @@ use crate::instructions;
 use num_bigint::BigInt;
 use std::rc::Rc;
 use swc_ecma_ast::Param;
-use yavashark_value::ConstString;
+use yavashark_string::ConstString;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ConstValue {

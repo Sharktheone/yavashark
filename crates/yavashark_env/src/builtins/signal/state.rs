@@ -4,7 +4,7 @@ use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Weak;
 use yavashark_macro::{object, props};
-use yavashark_value::{BoxedObj, Obj};
+use crate::value::{BoxedObj, Obj};
 
 #[object]
 #[derive(Debug)]

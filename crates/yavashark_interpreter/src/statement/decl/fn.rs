@@ -7,7 +7,7 @@ use swc_ecma_ast::FnDecl;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
 use yavashark_env::{optimizer::OptimFunction, Realm, Res, Value};
-use yavashark_value::AsAny;
+use yavashark_env::value::AsAny;
 
 impl Interpreter {
     pub fn decl_fn_ret(

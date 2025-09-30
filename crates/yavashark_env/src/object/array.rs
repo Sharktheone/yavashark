@@ -10,8 +10,8 @@ use std::ops::{Deref, DerefMut};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::property_key::InternalPropertyKey;
-use yavashark_value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
+use crate::value::property_key::InternalPropertyKey;
+use crate::value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl};
 
 #[derive(Debug)]
 pub struct Array {
@@ -1481,7 +1481,7 @@ impl Array {
 impl PrettyObjectOverride for Array {
     fn pretty_inline(
         &self,
-        _obj: &yavashark_value::Object<Realm>,
+        _obj: &crate::value::Object<Realm>,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         let Ok(inner) = self.inner.try_borrow() else {
@@ -1503,7 +1503,7 @@ impl PrettyObjectOverride for Array {
 
     fn pretty_multiline(
         &self,
-        _obj: &yavashark_value::Object<Realm>,
+        _obj: &crate::value::Object<Realm>,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         let Ok(inner) = self.inner.try_borrow() else {
@@ -1595,7 +1595,7 @@ impl ArrayConstructor {
         }
 
         let this: Res<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
-            yavashark_value::FromValue::from_value(test);
+            crate::value::FromValue::from_value(test);
 
         this.is_ok()
     }

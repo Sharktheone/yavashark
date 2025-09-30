@@ -258,6 +258,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let handle = &config.object_handle;
     let error = &config.error;
     let try_into_value = &config.try_into_value;
+    let env = &config.env_path;
 
     let mut init = TokenStream::new();
 
@@ -333,7 +334,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let init_fn = match mode {
         Mode::Prototype => quote! {
             pub fn initialize_proto(mut obj: #object, func_proto: #value) -> Result<#handle, #error> {
-                use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                use #env::value::{AsAny, Obj, IntoValue, FromValue};
                 use #try_into_value;
 
                 #init
@@ -350,7 +351,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         },
         Mode::Raw => quote! {
             pub fn initialize(&mut self, func_proto: #value) -> Result<(), #error> {
-                use yavashark_value::{AsAny, Obj, IntoValue, FromValue};
+                use #env::value::{AsAny, Obj, IntoValue, FromValue};
                 use #try_into_value;
 
                 let obj = self;

@@ -10,7 +10,7 @@ use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_macro::props;
 use yavashark_string::YSString;
-use yavashark_value::{BoxedObj, Obj};
+use crate::value::{BoxedObj, Obj};
 
 #[derive(Debug)]
 pub struct Proxy {

@@ -5,7 +5,7 @@ use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use yavashark_macro::{object, props};
-use yavashark_value::Obj;
+use crate::value::Obj;
 
 #[object]
 pub struct Ui {

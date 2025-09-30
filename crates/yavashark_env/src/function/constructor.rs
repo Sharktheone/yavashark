@@ -4,7 +4,7 @@ use std::fmt::{Debug, Formatter};
 
 use yavashark_macro::object;
 use yavashark_string::YSString;
-use yavashark_value::{Constructor, Func};
+use crate::value::{Constructor, Func};
 
 use crate::realm::Realm;
 use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};

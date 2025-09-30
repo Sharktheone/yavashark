@@ -1,6 +1,7 @@
-use crate::{BoxedObj, Error, Obj, ObjectProperty, Realm, Value};
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
+use crate::error::Error;
+use crate::value::{BoxedObj, Obj, ObjectProperty, Realm, Value};
 
 pub trait Constructor<R: Realm>: Debug + Obj<R> {
     fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>>;

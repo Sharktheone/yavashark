@@ -1,6 +1,6 @@
-use crate::error::ErrorObj;
+use crate::error_obj::ErrorObj;
 use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Value, Variable};
-use yavashark_value::Obj;
+use crate::value::Obj;
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {

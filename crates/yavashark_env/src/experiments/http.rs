@@ -7,7 +7,7 @@ use std::fmt::Write;
 use std::io::{BufRead, BufReader, Read, Write as _};
 use std::{io, mem};
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{IntoValue, Obj};
+use crate::value::{IntoValue, Obj};
 
 #[object]
 #[derive(Debug)]

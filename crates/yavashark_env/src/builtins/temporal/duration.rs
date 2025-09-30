@@ -9,7 +9,7 @@ use std::str::FromStr;
 use temporal_rs::options::{ToStringRoundingOptions, Unit};
 use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use yavashark_macro::{object, props};
-use yavashark_value::{Obj, Object};
+use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]

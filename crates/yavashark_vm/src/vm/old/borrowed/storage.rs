@@ -2,7 +2,7 @@ use crate::consts::ConstIntoValue;
 use crate::vm::old::borrowed::OldBorrowedVM;
 use yavashark_bytecode::data::Label;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
-use yavashark_env::value::Error;
+use yavashark_env::error::Error;
 use yavashark_env::{Res, Value};
 
 #[allow(unused)]

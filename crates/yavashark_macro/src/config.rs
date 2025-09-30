@@ -26,7 +26,10 @@ pub struct Config {
 impl Config {
     pub fn new(span: Span) -> Self {
         let env_path = crate::env_path();
-        let value_path = crate::value_path();
+        let mut value_path = crate::env_path();
+        value_path
+            .segments
+            .push(PathSegment::from(Ident::new("value", span)));
 
         let mut realm = env_path.clone();
         realm

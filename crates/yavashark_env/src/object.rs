@@ -10,8 +10,8 @@ use std::fmt::Debug;
 use std::mem;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
-use yavashark_value::property_key::{InternalPropertyKey, PropertyKey};
-use yavashark_value::{BoxedObj, MutObj, Obj};
+use crate::value::property_key::{InternalPropertyKey, PropertyKey};
+use crate::value::{BoxedObj, MutObj, Obj};
 
 pub mod array;
 pub mod constructor;

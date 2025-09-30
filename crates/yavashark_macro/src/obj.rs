@@ -38,6 +38,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let value_result = &conf.value_result;
     let object_property = &conf.object_property;
     let mut_obj = &conf.mut_obj;
+    let env = &conf.env_path;
 
     let Fields::Named(fields) = &mut input.fields else {
         return syn::Error::new(input.span(), "Object must have named fields")
@@ -158,7 +159,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let function = if args.function {
         quote! {
             fn call(&self, realm: &mut #realm, args: Vec< #value>, this: #value) -> #value_result {
-                yavashark_value::Func::call(self, realm, args, this)
+                #env::value::Func::call(self, realm, args, this)
             }
 
             fn is_function(&self) -> bool {
@@ -205,8 +206,8 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .collect::<TokenStream>();
 
         quote! {
-            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<yavashark_value::BoxedObj<#realm >>> {
-                use yavashark_value::{CustomGcRef, CustomGcRefUntyped};
+            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<#env::value::BoxedObj<#realm >>> {
+                use #env::value::{CustomGcRef, CustomGcRefUntyped};
                 let mut refs = Vec::with_capacity(#len);
 
                 #refs
@@ -219,15 +220,15 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let constructor = if args.constructor {
         quote! {
             fn construct(&self, realm: &mut #realm, args: Vec<#value>) -> Result<#value, #error> {
-                yavashark_value::Constructor::construct(self, realm, args)
+                #env::value::Constructor::construct(self, realm, args)
             }
 
             fn is_constructor(&self) -> bool {
-                yavashark_value::Constructor::is_constructor(self)
+                #env::value::Constructor::is_constructor(self)
             }
 
             // fn construct_proto(&self) -> Result<#object_property, #error> {
-            //     yavashark_value::Constructor::constructor_proto(self)
+            //     #env::value::Constructor::constructor_proto(self)
             // }
         }
     } else {
@@ -259,7 +260,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let name = if args.name {
         quote! {
             fn name(&self) -> String {
-                yavashark_value::CustomName::custom_name(self)
+                #env::value::CustomName::custom_name(self)
             }
         }
     } else {
@@ -300,7 +301,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         #input
         #region_code
 
-        impl yavashark_value::Obj<#realm> for #struct_name {
+        impl #env::value::Obj<#realm> for #struct_name {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_define

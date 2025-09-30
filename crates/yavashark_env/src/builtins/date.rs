@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::ops::Rem;
 use std::str::FromStr;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, Obj};
+use crate::value::{Constructor, Func, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -642,7 +642,7 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
 impl PrettyObjectOverride for Date {
     fn pretty_inline(
         &self,
-        obj: &yavashark_value::Object<Realm>,
+        obj: &crate::value::Object<Realm>,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         let mut s = self.date().format("%Y-%m-%d %H:%M:%S").to_string();
@@ -654,7 +654,7 @@ impl PrettyObjectOverride for Date {
 
     fn pretty_multiline(
         &self,
-        obj: &yavashark_value::Object<Realm>,
+        obj: &crate::value::Object<Realm>,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         self.pretty_inline(obj, not)

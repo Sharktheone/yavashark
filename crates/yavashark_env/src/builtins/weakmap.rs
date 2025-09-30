@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, MutObj, Obj};
+use crate::value::{Constructor, MutObj, Obj};
 
 #[object]
 #[derive(Debug)]

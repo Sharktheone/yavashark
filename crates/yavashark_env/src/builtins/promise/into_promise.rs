@@ -7,7 +7,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use yavashark_garbage::OwningGcGuard;
-use yavashark_value::{BoxedObj, Obj};
+use crate::value::{BoxedObj, Obj};
 
 pub type GcPromise = OwningGcGuard<'static, BoxedObj<Realm>, Promise>;
 

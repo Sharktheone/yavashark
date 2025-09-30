@@ -7,7 +7,7 @@ use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Func, IntoValue, Obj};
+use crate::value::{Constructor, Func, IntoValue, Obj};
 
 #[object(constructor, function)]
 #[derive(Debug)]

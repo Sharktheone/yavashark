@@ -9,7 +9,7 @@ use yavashark_env::{
     Variable,
 };
 use yavashark_string::YSString;
-use yavashark_value::Obj;
+use yavashark_env::value::Obj;
 
 use crate::Interpreter;
 

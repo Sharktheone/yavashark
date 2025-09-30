@@ -16,7 +16,7 @@ use yavashark_env::{
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
 use yavashark_string::YSString;
-use yavashark_value::{
+use yavashark_env::value::{
     BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, Obj, ObjectProperty,
 };
 

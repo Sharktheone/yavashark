@@ -4,7 +4,7 @@ pub use into_promise::*;
 
 use crate::array::Array;
 use crate::conversion::downcast_obj;
-use crate::error::ErrorObj;
+use crate::error_obj::ErrorObj;
 use crate::utils::ValueIterator;
 use crate::{
     Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
@@ -16,7 +16,7 @@ use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
-use yavashark_value::{BoxedObj, Obj};
+use crate::value::{BoxedObj, Obj};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PromiseState {

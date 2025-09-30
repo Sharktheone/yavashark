@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use crate::property_key::{InternalPropertyKey, PropertyKey};
+use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
 use std::ptr::NonNull;

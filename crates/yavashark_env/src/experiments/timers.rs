@@ -8,7 +8,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
 use tokio::time::{sleep, Sleep};
-use yavashark_value::Obj;
+use crate::value::Obj;
 
 pub struct SleepDuration {
     dur: Duration,

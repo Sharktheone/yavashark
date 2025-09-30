@@ -1,6 +1,6 @@
 use crate::VM;
 use yavashark_bytecode::{Reg, VarName};
-use yavashark_env::value::Error;
+use yavashark_env::error::Error;
 use yavashark_env::{ControlFlow, ControlResult};
 
 pub fn throw_acc(vm: &impl VM) -> ControlResult {

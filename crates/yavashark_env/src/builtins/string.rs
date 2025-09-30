@@ -10,8 +10,8 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::property_key::InternalPropertyKey;
-use yavashark_value::{Constructor, CustomName, Func, MutObj, Obj};
+use crate::value::property_key::InternalPropertyKey;
+use crate::value::{Constructor, CustomName, Func, MutObj, Obj};
 
 #[derive(Debug)]
 pub struct StringObj {
@@ -53,7 +53,7 @@ impl DerefMut for MutableStringObj {
     }
 }
 
-impl yavashark_value::ObjectImpl<Realm> for StringObj {
+impl crate::value::ObjectImpl<Realm> for StringObj {
     type Inner = MutableStringObj;
 
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
@@ -112,7 +112,7 @@ impl yavashark_value::ObjectImpl<Realm> for StringObj {
         "String".to_string()
     }
 
-    fn primitive(&self) -> Option<yavashark_value::Value<Realm>> {
+    fn primitive(&self) -> Option<crate::value::Value<Realm>> {
         Some(self.inner.borrow().string.clone().into())
     }
 

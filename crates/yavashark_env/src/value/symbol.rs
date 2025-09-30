@@ -1,8 +1,7 @@
-use crate::ConstString;
 use std::fmt::Display;
 use std::hash::Hash;
 use std::rc::Rc;
-use yavashark_string::{ToYSString, YSString};
+use yavashark_string::{ConstString, ToYSString, YSString};
 
 macro_rules! symbol {
     ($name:ident, $symbol:ident) => {

@@ -5,7 +5,7 @@ use base64::alphabet::{STANDARD, URL_SAFE};
 use base64::{engine, Engine};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
-use yavashark_value::Obj;
+use crate::value::Obj;
 
 #[object(extends = TypedArray)]
 #[derive(Debug)]

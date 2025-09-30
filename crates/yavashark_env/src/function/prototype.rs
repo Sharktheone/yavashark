@@ -2,7 +2,7 @@
 
 use std::cell::RefCell;
 use yavashark_string::YSString;
-use yavashark_value::{MutObj, Obj};
+use crate::value::{MutObj, Obj};
 
 use crate::array::Array;
 use crate::function::bound::BoundFunction;

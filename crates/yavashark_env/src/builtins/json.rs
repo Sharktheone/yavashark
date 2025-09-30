@@ -3,7 +3,7 @@ use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use serde_json::{Map, Number};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Hint, Obj};
+use crate::value::{Hint, Obj};
 
 #[object]
 #[derive(Debug)]

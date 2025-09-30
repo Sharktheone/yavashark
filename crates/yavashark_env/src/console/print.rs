@@ -3,7 +3,7 @@ use colored::Colorize;
 use crate::array::Array;
 use crate::builtins::RegExp;
 use crate::realm::Realm;
-use yavashark_value::{Object, Value};
+use crate::value::{Object, Value};
 
 pub trait PrettyObjectOverride {
     fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String>;

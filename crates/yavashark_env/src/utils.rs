@@ -5,7 +5,7 @@ use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::{Object, ObjectHandle, Realm, Res, Value};
 pub use iterator::*;
 pub use protodefault::*;
-use yavashark_value::ObjectImpl;
+use crate::value::ObjectImpl;
 
 pub fn coerce_object(value: Value, realm: &mut Realm) -> Res<ObjectHandle> {
     Ok(match value {
@@ -28,7 +28,7 @@ pub fn coerce_object_strict(value: Value, realm: &mut Realm) -> Res<ObjectHandle
         Value::Symbol(symbol) => SymbolObj::new(realm, symbol),
         Value::BigInt(bigint) => BigIntObj::new(realm, bigint),
         Value::Undefined | Value::Null => {
-            return Err(yavashark_value::Error::ty(
+            return Err(crate::error::Error::ty(
                 "Cannot convert undefined or null to object",
             ))
         }

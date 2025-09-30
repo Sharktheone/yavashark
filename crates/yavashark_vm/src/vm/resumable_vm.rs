@@ -6,7 +6,7 @@ use std::rc::Rc;
 use yavashark_bytecode::control::{ControlBlock, TryBlock};
 use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, OutputDataType};
 use yavashark_bytecode::{instructions, BytecodeFunctionCode, ConstIdx, Reg, VarName};
-use yavashark_env::error::ErrorObj;
+use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 

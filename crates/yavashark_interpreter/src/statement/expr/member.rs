@@ -5,7 +5,7 @@ use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, Symbo
 use yavashark_env::scope::Scope;
 use yavashark_env::{Class, ClassInstance, ControlFlow, Error, PrivateMember, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
-use yavashark_value::Obj;
+use yavashark_env::value::Obj;
 
 impl Interpreter {
     pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {

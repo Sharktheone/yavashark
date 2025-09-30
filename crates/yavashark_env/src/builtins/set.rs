@@ -3,7 +3,7 @@ use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use indexmap::IndexSet;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, MutObj, Obj};
+use crate::value::{Constructor, MutObj, Obj};
 
 #[object]
 #[derive(Debug)]

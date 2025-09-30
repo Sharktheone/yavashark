@@ -1,5 +1,6 @@
-use crate::js::ops::BigIntOrNumber;
-use crate::{Error, Hint, Realm, Value};
+use crate::error::Error;
+use crate::value::{Hint, Realm, Value};
+use crate::value::ops::BigIntOrNumber;
 
 impl<R: Realm> Value<R> {
     pub fn add(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {

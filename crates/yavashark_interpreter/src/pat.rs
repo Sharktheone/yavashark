@@ -10,7 +10,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Class, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
 use yavashark_string::YSString;
-use yavashark_value::IntoValue;
+use yavashark_env::value::IntoValue;
 use yavashark_vm::async_generator::AsyncGeneratorFunction;
 use yavashark_vm::generator::GeneratorFunction;
 

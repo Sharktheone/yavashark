@@ -7,7 +7,7 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::rc::Rc;
 use yavashark_macro::props;
-use yavashark_value::{MutObj, ObjectImpl};
+use crate::value::{MutObj, ObjectImpl};
 
 #[derive(Debug)]
 pub struct CodeEdit {

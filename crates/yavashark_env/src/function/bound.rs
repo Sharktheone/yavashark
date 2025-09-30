@@ -1,7 +1,7 @@
 use crate::{Error, MutObject, ObjectHandle, Realm, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use yavashark_macro::object;
-use yavashark_value::{Constructor, Func};
+use crate::value::{Constructor, Func};
 
 #[object(function, constructor)]
 #[derive(Debug)]

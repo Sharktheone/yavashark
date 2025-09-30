@@ -5,7 +5,7 @@ use common::{
 use std::any::Any;
 use std::cell::RefCell;
 use yavashark_string::YSString;
-use yavashark_value::{MutObj, Obj};
+use crate::value::{MutObj, Obj};
 
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;

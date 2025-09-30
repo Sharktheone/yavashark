@@ -5,7 +5,7 @@ use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use yavashark_value::{fmt_num, Constructor, Func, Obj};
+use crate::value::{fmt_num, Constructor, Func, Obj};
 
 #[object]
 #[derive(Debug)]

@@ -1,8 +1,7 @@
-use crate::Error;
+use crate::error::Error;
 pub use constructor::*;
 pub use context::*;
 pub use conversion::*;
-use equivalent::Equivalent;
 pub use function::*;
 pub use name::*;
 use num_bigint::BigInt;
@@ -12,6 +11,7 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
+use indexmap::Equivalent;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
@@ -31,31 +31,6 @@ pub mod property_key;
 mod symbol;
 pub mod variable;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone)]
-pub enum ConstString {
-    String(&'static str),
-    Owned(String),
-}
-
-impl AsRef<str> for ConstString {
-    fn as_ref(&self) -> &str {
-        match self {
-            Self::String(s) => s,
-            Self::Owned(s) => s,
-        }
-    }
-}
-
-impl Display for ConstString {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::String(s) => write!(f, "{s}")?,
-            Self::Owned(s) => write!(f, "{s}")?,
-        }
-
-        Ok(())
-    }
-}
 
 #[derive(Debug, PartialEq)]
 pub enum Value<C: Realm> {
@@ -416,7 +391,6 @@ impl<R: Realm> WeakValue<R> {
     }
 }
 
-#[cfg(any(test, debug_assertions, feature = "display_object"))]
 impl<C: Realm> Display for Value<C> {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

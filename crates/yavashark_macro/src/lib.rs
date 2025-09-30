@@ -80,15 +80,6 @@ fn env_path() -> syn::Path {
     }
 }
 
-fn value_path() -> syn::Path {
-    let name = env::var("CARGO_PKG_NAME").unwrap_or("".to_string());
-    if name == "yavashark_value" {
-        syn::parse_str("crate").unwrap()
-    } else {
-        syn::parse_str("yavashark_value").unwrap()
-    }
-}
-
 fn deref_type(ty: &syn::Type) -> &syn::Type {
     match ty {
         syn::Type::Reference(r) => deref_type(&r.elem),

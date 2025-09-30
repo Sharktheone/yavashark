@@ -8,7 +8,7 @@ use swc_ecma_ast::{
 use swc_ecma_parser::token::Keyword::Export;
 use yavashark_env::scope::{ModuleScope, Scope};
 use yavashark_env::{Error, Realm, RuntimeResult, Value, Variable};
-use yavashark_value::IntoValue;
+use yavashark_env::value::IntoValue;
 
 impl Interpreter {
     pub fn run_export_decl(

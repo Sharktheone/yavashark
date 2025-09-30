@@ -9,7 +9,8 @@ use num_traits::{ToPrimitive};
 use std::cell::RefCell;
 use half::f16;
 use yavashark_macro::{object, properties_new};
-use yavashark_value::{Constructor, Error, Obj};
+use crate::value::{Constructor, Obj};
+use crate::error::Error;
 
 #[object]
 #[derive(Debug)]

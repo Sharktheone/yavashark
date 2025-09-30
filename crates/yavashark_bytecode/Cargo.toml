@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-yavashark_value = { path = "../yavashark_value" }
+yavashark_string = { path = "../yavashark_string" }
 bincode = "2.0.0-rc.3"
 num-bigint = "0.4.6"
 swc_ecma_ast = "15.0.0"

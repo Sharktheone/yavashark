@@ -6,7 +6,7 @@ use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use yavashark_garbage::{Gc, OwningGcGuard, Weak};
 use yavashark_macro::{object, props};
-use yavashark_value::{BoxedObj, MutObj, Obj};
+use crate::value::{BoxedObj, MutObj, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -102,7 +102,7 @@ impl Deref for ComputedProtoObj {
     }
 }
 
-impl yavashark_value::ObjectImpl<Realm> for ComputedProtoObj {
+impl crate::value::ObjectImpl<Realm> for ComputedProtoObj {
     type Inner = Option<GCd<Computed>>;
 
     fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {

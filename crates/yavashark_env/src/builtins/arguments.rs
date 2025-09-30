@@ -4,7 +4,8 @@ use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::props;
 use yavashark_string::YSString;
-use yavashark_value::{Error, MutObj, Obj, ObjectImpl};
+use crate::value::{MutObj, Obj, ObjectImpl};
+use crate::error::Error;
 
 #[derive(Debug)]
 pub struct Arguments {

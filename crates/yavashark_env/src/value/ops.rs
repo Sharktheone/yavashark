@@ -13,13 +13,13 @@ mod sub;
 mod ushr;
 mod xor;
 
-use super::Value;
-use crate::{Error, Hint, Realm};
+use super::{Hint, Realm, Value};
 use num_bigint::BigInt;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::rc::Rc;
 use std::str::FromStr;
+use crate::error::Error;
 
 pub trait ToNumber {
     fn num(&self) -> f64;

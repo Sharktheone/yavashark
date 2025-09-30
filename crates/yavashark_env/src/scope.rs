@@ -7,7 +7,7 @@ use std::rc::Rc;
 use yavashark_garbage::collectable::CellCollectable;
 use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_string::YSString;
-use yavashark_value::CustomGcRefUntyped;
+use crate::value::CustomGcRefUntyped;
 
 use crate::realm::Realm;
 use crate::{Error, Object, ObjectHandle, Res, Value, Variable};

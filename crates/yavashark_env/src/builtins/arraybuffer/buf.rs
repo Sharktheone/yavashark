@@ -1,6 +1,6 @@
 use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, props};
-use yavashark_value::Obj;
+use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use crate::array::convert_index;
 

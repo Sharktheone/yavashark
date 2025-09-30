@@ -3,6 +3,7 @@
 mod smallstring;
 pub(crate) mod smallvec;
 pub(crate) mod uz;
+mod const_string;
 
 use crate::smallstring::SmallString;
 use crate::smallvec::SmallVecLenCap;
@@ -15,6 +16,7 @@ use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Deref, DerefMut};
 use std::rc::Rc;
 
+pub use const_string::*;
 pub struct YSString {
     inner: UnsafeCell<InnerString>,
 }

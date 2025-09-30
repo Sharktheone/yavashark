@@ -1,10 +1,11 @@
-use crate::{BoxedObj, Error, Object, Realm, Symbol, Value};
 use half::f16;
 use num_bigint::BigInt;
 use std::any::type_name;
 use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
+use crate::error::Error;
+use crate::value::{BoxedObj, Object, Realm, Symbol, Value};
 
 impl<C: Realm> From<&'static str> for Value<C> {
     fn from(s: &'static str) -> Self {

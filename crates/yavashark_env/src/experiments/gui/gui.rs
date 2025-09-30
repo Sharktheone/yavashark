@@ -10,7 +10,7 @@ use std::fmt::Display;
 use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
-use yavashark_value::{BoxedObj, Obj};
+use crate::value::{BoxedObj, Obj};
 
 #[object]
 #[derive(Debug)]

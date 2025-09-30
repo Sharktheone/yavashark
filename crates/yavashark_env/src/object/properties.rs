@@ -13,7 +13,7 @@ use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::mem;
-use yavashark_value::property_key::{
+use crate::value::property_key::{
     BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey,
 };
 

@@ -9,7 +9,7 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
 use yavashark_string::YSString;
-use yavashark_value::{MutObj, Obj, ObjectImpl};
+use crate::value::{MutObj, Obj, ObjectImpl};
 
 mod bound;
 mod class;
@@ -68,11 +68,11 @@ impl ObjectImpl<Realm> for NativeFunction {
         (self.f)(args, obj, realm)
     }
 
-    fn to_string(&self, _: &mut Realm) -> Result<YSString, yavashark_value::Error<Realm>> {
+    fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error<Realm>> {
         Ok(format!("function {}() {{ [native code] }}", self.name).into())
     }
 
-    fn to_string_internal(&self) -> Result<YSString, yavashark_value::Error<Realm>> {
+    fn to_string_internal(&self) -> Result<YSString, crate::error::Error<Realm>> {
         Ok(format!("function {}() {{ [native code] }}", self.name).into())
     }
 

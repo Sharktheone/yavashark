@@ -5,7 +5,7 @@ use yavashark_bytecode::JmpAddr;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
-use yavashark_value::ObjectImpl;
+use yavashark_env::value::ObjectImpl;
 
 pub fn nullish_coalescing(
     left: impl Data,

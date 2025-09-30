@@ -10,7 +10,7 @@ use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Class, ClassInstance, Error, PrivateMember, Realm, Res, RuntimeResult, Value};
 use yavashark_string::YSString;
-use yavashark_value::Obj;
+use yavashark_env::value::Obj;
 
 impl Interpreter {
     pub fn run_assign(realm: &mut Realm, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {

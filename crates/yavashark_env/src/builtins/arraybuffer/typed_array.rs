@@ -13,8 +13,8 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut, Range};
 use conv::to_value;
 use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
-use yavashark_value::{MutObj, Obj};
-use yavashark_value::property_key::InternalPropertyKey;
+use crate::value::{MutObj, Obj};
+use crate::value::property_key::InternalPropertyKey;
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
 use crate::builtins::float16array::Float16Array;
@@ -95,7 +95,7 @@ pub struct TypedArray {
     pub inner: RefCell<MutObject>
 }
 
-impl yavashark_value::ObjectImpl<Realm> for TypedArray {
+impl crate::value::ObjectImpl<Realm> for TypedArray {
     type Inner = MutObject;
 
     fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {

@@ -7,8 +7,8 @@ use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
-use yavashark_value::ops::BigIntOrNumber;
-use yavashark_value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
+use crate::value::ops::BigIntOrNumber;
+use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult;
