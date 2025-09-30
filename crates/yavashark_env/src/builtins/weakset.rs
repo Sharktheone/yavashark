@@ -32,7 +32,7 @@ impl WeakSet {
 #[derive(Debug)]
 pub struct WeakSetConstructor {}
 
-impl Constructor<Realm> for WeakSetConstructor {
+impl Constructor for WeakSetConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let mut set = IndexSet::new();
 

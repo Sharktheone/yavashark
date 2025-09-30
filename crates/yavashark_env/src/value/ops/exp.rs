@@ -1,10 +1,11 @@
 use num_traits::ToPrimitive;
 use crate::error::Error;
-use crate::value::{Hint, Realm, Value};
+use crate::Realm;
+use crate::value::{Hint, Value};
 use crate::value::ops::BigIntOrNumber;
 
-impl<R: Realm> Value<R> {
-    pub fn exp(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {
+impl Value {
+    pub fn exp(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left = self.to_primitive(Hint::None, realm)?;
         let right = other.to_primitive(Hint::None, realm)?;

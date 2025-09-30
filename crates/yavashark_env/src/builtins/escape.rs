@@ -260,7 +260,7 @@ fn parse_percent_sequence(chars: &mut Peekable<Chars>, _realm: &Realm) -> Res<Ve
     Ok(bytes)
 }
 
-fn utf8_sequence_length(first_byte: u8) -> Result<usize, Error<Realm>> {
+fn utf8_sequence_length(first_byte: u8) -> Result<usize, Error> {
     if first_byte < 0x80 {
         Ok(1) // ASCII
     } else if (first_byte & 0xE0) == 0xC0 {

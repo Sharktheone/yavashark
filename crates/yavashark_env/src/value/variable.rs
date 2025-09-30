@@ -1,17 +1,16 @@
 use std::fmt::Debug;
 use crate::error::Error;
 use crate::value::Value;
-use crate::value::Realm;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Variable<C: Realm> {
-    pub value: Value<C>,
+pub struct Variable {
+    pub value: Value,
     pub properties: Attributes,
 }
 
-impl<C: Realm> Variable<C> {
+impl Variable {
     #[must_use]
-    pub const fn new(value: Value<C>) -> Self {
+    pub const fn new(value: Value) -> Self {
         Self {
             value,
             properties: Attributes::new(),
@@ -19,7 +18,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn config(value: Value<C>) -> Self {
+    pub const fn config(value: Value) -> Self {
         Self {
             value,
             properties: Attributes::config(),
@@ -27,7 +26,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn enumerable(value: Value<C>) -> Self {
+    pub const fn enumerable(value: Value) -> Self {
         Self {
             value,
             properties: Attributes::enumerable(),
@@ -35,7 +34,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn write_config(value: Value<C>) -> Self {
+    pub const fn write_config(value: Value) -> Self {
         Self {
             value,
             properties: Attributes::write_config(),
@@ -43,7 +42,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn write(value: Value<C>) -> Self {
+    pub const fn write(value: Value) -> Self {
         Self {
             value,
             properties: Attributes::write(),
@@ -51,7 +50,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn with_attributes(value: Value<C>, attributes: Attributes) -> Self {
+    pub const fn with_attributes(value: Value, attributes: Attributes) -> Self {
         Self {
             value,
             properties: attributes,
@@ -59,7 +58,7 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn new_read_only(value: Value<C>) -> Self {
+    pub const fn new_read_only(value: Value) -> Self {
         Self {
             value,
             properties: Attributes::new_read_only(),
@@ -68,7 +67,7 @@ impl<C: Realm> Variable<C> {
 
     #[must_use]
     pub const fn new_with_attributes(
-        value: Value<C>,
+        value: Value,
         writable: bool,
         enumerable: bool,
         configurable: bool,
@@ -79,7 +78,7 @@ impl<C: Realm> Variable<C> {
         }
     }
 
-    pub fn mutate(&mut self, value: Value<C>) -> Result<(), Error<C>> {
+    pub fn mutate(&mut self, value: Value) -> Result<(), Error> {
         if !self.properties.is_writable() {
             return Err(Error::new("Cannot assign to read-only variable"));
         }
@@ -89,12 +88,12 @@ impl<C: Realm> Variable<C> {
     }
 
     #[must_use]
-    pub const fn get_value(&self) -> &Value<C> {
+    pub const fn get_value(&self) -> &Value {
         &self.value
     }
 
     #[must_use]
-    pub fn copy(&self) -> Value<C> {
+    pub fn copy(&self) -> Value {
         self.value.copy()
     }
 
@@ -234,7 +233,7 @@ impl Default for Attributes {
     }
 }
 
-impl<C: Realm, V: Into<Value<C>>> From<V> for Variable<C> {
+impl<V: Into<Value>> From<V> for Variable {
     fn from(value: V) -> Self {
         Self::new(value.into())
     }

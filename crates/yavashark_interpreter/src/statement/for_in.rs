@@ -17,7 +17,7 @@ impl Interpreter {
 
     pub fn run_for_in_obj(
         realm: &mut Realm,
-        obj: &dyn Obj<Realm>,
+        obj: &dyn Obj,
         stmt: &ForInStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {

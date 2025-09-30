@@ -1,6 +1,5 @@
 use crate::error::Error;
 pub use constructor::*;
-pub use context::*;
 pub use conversion::*;
 pub use function::*;
 pub use name::*;
@@ -16,9 +15,9 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
 use yavashark_string::{ToYSString, YSString};
+use crate::Realm;
 
 mod constructor;
-mod context;
 mod conversion;
 mod function;
 mod name;
@@ -33,40 +32,40 @@ pub mod variable;
 
 
 #[derive(Debug, PartialEq)]
-pub enum Value<C: Realm> {
+pub enum Value {
     Null,
     Undefined,
     Number(f64),
     String(YSString),
     Boolean(bool),
-    Object(Object<C>),
+    Object(Object),
     Symbol(Symbol),
     BigInt(Rc<BigInt>),
 }
 
 #[derive(Debug, PartialEq, Clone)]
-pub enum WeakValue<C: Realm> {
+pub enum WeakValue {
     Null,
     Undefined,
     Number(f64),
     String(YSString),
     Boolean(bool),
-    Object(WeakObject<C>),
+    Object(WeakObject),
     Symbol(Symbol),
     BigInt(Rc<BigInt>),
 }
 
-impl<C: Realm> Clone for Value<C> {
+impl Clone for Value {
     fn clone(&self) -> Self {
         self.copy()
     }
 }
 
-impl<C: Realm> Eq for Value<C> {}
-impl<C: Realm> Eq for WeakValue<C> {}
+impl Eq for Value {}
+impl Eq for WeakValue {}
 
-impl<R: Realm> Equivalent<Value<R>> for WeakValue<R> {
-    fn equivalent(&self, other: &Value<R>) -> bool {
+impl Equivalent<Value> for WeakValue {
+    fn equivalent(&self, other: &Value) -> bool {
         match (self, other) {
             (Self::Null, Value::Null) => true,
             (Self::Undefined, Value::Undefined) => true,
@@ -81,13 +80,13 @@ impl<R: Realm> Equivalent<Value<R>> for WeakValue<R> {
     }
 }
 
-impl<R: Realm> Equivalent<WeakValue<R>> for Value<R> {
-    fn equivalent(&self, other: &WeakValue<R>) -> bool {
+impl Equivalent<WeakValue> for Value {
+    fn equivalent(&self, other: &WeakValue) -> bool {
         other.equivalent(self)
     }
 }
 
-impl<R: Realm> Hash for WeakValue<R> {
+impl Hash for WeakValue {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match self {
             Self::Null => Type::Null.hash(state),
@@ -102,7 +101,7 @@ impl<R: Realm> Hash for WeakValue<R> {
     }
 }
 
-impl<C: Realm> AsRef<Self> for Value<C> {
+impl AsRef<Self> for Value {
     fn as_ref(&self) -> &Self {
         self
     }
@@ -137,7 +136,7 @@ impl Display for Type {
     }
 }
 
-impl<C: Realm> Hash for Value<C> {
+impl Hash for Value {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         //Hash the type and the value to minimize collisions
         match self {
@@ -153,7 +152,7 @@ impl<C: Realm> Hash for Value<C> {
     }
 }
 
-impl<C: Realm> Value<C> {
+impl Value {
     #[must_use]
     pub fn copy(&self) -> Self {
         match self {
@@ -251,14 +250,14 @@ impl<C: Realm> Value<C> {
     }
 
     #[must_use]
-    pub fn gc_ref(&self) -> Option<GcRef<BoxedObj<C>>> {
+    pub fn gc_ref(&self) -> Option<GcRef<BoxedObj>> {
         match self {
             Self::Object(o) => Some(o.get_ref()),
             _ => None,
         }
     }
 
-    pub fn prototype(&self, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn prototype(&self, realm: &mut Realm) -> Result<Self, Error> {
         let obj = self.as_object()?;
 
         let proto = obj.prototype()?;
@@ -266,7 +265,7 @@ impl<C: Realm> Value<C> {
         proto.resolve(self.copy(), realm)
     }
 
-    pub const fn as_object(&self) -> Result<&Object<C>, Error<C>> {
+    pub const fn as_object(&self) -> Result<&Object, Error> {
         let Self::Object(obj) = &self else {
             return Err(Error::ty("expected object"));
         };
@@ -277,13 +276,13 @@ impl<C: Realm> Value<C> {
     #[allow(clippy::needless_lifetimes)]
     pub fn downcast<T: 'static>(
         &self,
-    ) -> Result<Option<OwningGcGuard<'static, BoxedObj<C>, T>>, Error<C>> {
+    ) -> Result<Option<OwningGcGuard<'static, BoxedObj, T>>, Error> {
         let obj = self.as_object()?;
 
         Ok(obj.downcast())
     }
 
-    pub fn to_object(self) -> Result<Object<C>, Error<C>> {
+    pub fn to_object(self) -> Result<Object, Error> {
         match self {
             Self::Object(o) => Ok(o),
             _ => Err(Error::ty("expected object")),
@@ -348,21 +347,21 @@ impl<C: Realm> Value<C> {
         matches!(self, Self::Object(o) if o.is_constructor())
     }
 
-    pub fn assert_no_object(self) -> Result<Self, Error<C>> {
+    pub fn assert_no_object(self) -> Result<Self, Error> {
         match self {
             Self::Object(_) => Err(Error::ty("expected primitive, got object")),
             _ => Ok(self),
         }
     }
 
-    pub fn to_primitive(&self, hint: Hint, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn to_primitive(&self, hint: Hint, realm: &mut Realm) -> Result<Self, Error> {
         match self {
             Self::Object(o) => o.to_primitive(hint, realm),
             _ => Ok(self.copy()),
         }
     }
 
-    pub fn downgrade(&self) -> WeakValue<C> {
+    pub fn downgrade(&self) -> WeakValue {
         match self {
             Self::Null => WeakValue::Null,
             Self::Undefined => WeakValue::Undefined,
@@ -376,8 +375,8 @@ impl<C: Realm> Value<C> {
     }
 }
 
-impl<R: Realm> WeakValue<R> {
-    pub fn upgrade(&self) -> Option<Value<R>> {
+impl WeakValue {
+    pub fn upgrade(&self) -> Option<Value> {
         Some(match self {
             Self::Null => Value::Null,
             Self::Undefined => Value::Undefined,
@@ -391,7 +390,7 @@ impl<R: Realm> WeakValue<R> {
     }
 }
 
-impl<C: Realm> Display for Value<C> {
+impl Display for Value {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
@@ -407,7 +406,7 @@ impl<C: Realm> Display for Value<C> {
     }
 }
 
-impl<C: Realm> ToYSString for Value<C> {
+impl ToYSString for Value {
     fn to_ys_string(&self) -> YSString {
         match self {
             Self::Null => YSString::new_static("null"),
@@ -422,7 +421,7 @@ impl<C: Realm> ToYSString for Value<C> {
     }
 }
 
-impl<C: Realm> CustomGcRefUntyped for Value<C> {
+impl CustomGcRefUntyped for Value {
     fn gc_untyped_ref<U: Collectable>(&self) -> Option<GcRef<U>> {
         match self {
             Self::Object(o) => Some(o.get_untyped_ref()),
@@ -431,9 +430,9 @@ impl<C: Realm> CustomGcRefUntyped for Value<C> {
     }
 }
 
-impl<C: Realm> Object<C> {
+impl Object {
     #[allow(clippy::iter_not_returning_iterator)]
-    pub fn iter<'a>(&self, realm: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
+    pub fn iter<'a>(&self, realm: &'a mut Realm) -> Result<CtxIter<'a>, Error> {
         let iter = self.get_iter(realm)?;
 
         Ok(CtxIter {
@@ -442,13 +441,13 @@ impl<C: Realm> Object<C> {
         })
     }
 
-    pub fn iter_no_realm(&self, realm: &mut C) -> Result<Iter<C>, Error<C>> {
+    pub fn iter_no_realm(&self, realm: &mut Realm) -> Result<Iter, Error> {
         let iter = self.get_iter(realm)?;
 
         Ok(Iter { next_obj: iter })
     }
 
-    pub fn get_iter(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
+    pub fn get_iter(&self, realm: &mut Realm) -> Result<Value, Error> {
         let iter = self
             .resolve_property(&Symbol::ITERATOR.into(), realm)?
             .ok_or(Error::reference("Object is not iterable"))?;
@@ -456,7 +455,7 @@ impl<C: Realm> Object<C> {
         iter.call(realm, Vec::new(), self.clone().into())
     }
 
-    pub fn get_async_iter(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
+    pub fn get_async_iter(&self, realm: &mut Realm) -> Result<Value, Error> {
         let iter = self
             .resolve_property(&Symbol::ASYNC_ITERATOR.into(), realm)?
             .ok_or(Error::reference("Object is not async iterable"))?;
@@ -465,25 +464,25 @@ impl<C: Realm> Object<C> {
     }
 }
 
-impl<C: Realm> Value<C> {
+impl Value {
     #[allow(clippy::iter_not_returning_iterator)]
-    pub fn iter<'a>(&self, realm: &'a mut C) -> Result<CtxIter<'a, C>, Error<C>> {
+    pub fn iter<'a>(&self, realm: &'a mut Realm) -> Result<CtxIter<'a>, Error> {
         self.as_object()?.iter(realm)
     }
 
-    pub fn iter_no_realm(&self, realm: &mut C) -> Result<Iter<C>, Error<C>> {
+    pub fn iter_no_realm(&self, realm: &mut Realm) -> Result<Iter, Error> {
         self.as_object()?.iter_no_realm(realm)
     }
 
-    pub fn get_iter(&self, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn get_iter(&self, realm: &mut Realm) -> Result<Self, Error> {
         self.as_object()?.get_iter(realm)
     }
 
-    pub fn get_async_iter(&self, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn get_async_iter(&self, realm: &mut Realm) -> Result<Self, Error> {
         self.as_object()?.get_async_iter(realm)
     }
 
-    pub fn get_property(&self, name: &Self, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn get_property(&self, name: &Self, realm: &mut Realm) -> Result<Self, Error> {
         match self {
             Self::Object(o) => o
                 .resolve_property(name, realm)?
@@ -494,14 +493,14 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn get_property_opt(&self, name: &Self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
+    pub fn get_property_opt(&self, name: &Self, realm: &mut Realm) -> Result<Option<Self>, Error> {
         match self {
             Self::Object(o) => o.resolve_property(name, realm),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn get_property_no_get_set(&self, name: &Self) -> Result<ObjectProperty<C>, Error<C>> {
+    pub fn get_property_no_get_set(&self, name: &Self) -> Result<ObjectProperty, Error> {
         match self {
             Self::Object(o) => o
                 .resolve_property_no_get_set(name)?
@@ -512,28 +511,28 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn define_property(&self, name: Self, value: Self) -> Result<(), Error<C>> {
+    pub fn define_property(&self, name: Self, value: Self) -> Result<(), Error> {
         match self {
             Self::Object(o) => o.define_property(name, value),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn contains_key(&self, name: &Self) -> Result<bool, Error<C>> {
+    pub fn contains_key(&self, name: &Self) -> Result<bool, Error> {
         match self {
             Self::Object(o) => o.contains_key(name),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn has_key(&self, name: &Self) -> Result<bool, Error<C>> {
+    pub fn has_key(&self, name: &Self) -> Result<bool, Error> {
         match self {
             Self::Object(o) => o.has_key(name),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn call(&self, realm: &mut C, args: Vec<Self>, this: Self) -> Result<Self, Error<C>> {
+    pub fn call(&self, realm: &mut Realm, args: Vec<Self>, this: Self) -> Result<Self, Error> {
         match self {
             Self::Object(o) => o.call(realm, args, this),
             _ => Err(Error::ty("Value is not a function")),
@@ -543,9 +542,9 @@ impl<C: Realm> Value<C> {
     pub fn call_method(
         &self,
         name: &Self,
-        realm: &mut C,
+        realm: &mut Realm,
         args: Vec<Self>,
-    ) -> Result<Self, Error<C>> {
+    ) -> Result<Self, Error> {
         let method = self.get_property(name, realm)?;
 
         method.call(realm, args, self.copy())
@@ -553,28 +552,28 @@ impl<C: Realm> Value<C> {
 
     #[allow(clippy::type_complexity)]
     ///(name, value)
-    pub fn properties(&self) -> Result<Vec<(Self, Self)>, Error<C>> {
+    pub fn properties(&self) -> Result<Vec<(Self, Self)>, Error> {
         match self {
             Self::Object(o) => o.properties(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn keys(&self) -> Result<Vec<Self>, Error<C>> {
+    pub fn keys(&self) -> Result<Vec<Self>, Error> {
         match self {
             Self::Object(o) => o.keys(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn values(&self) -> Result<Vec<Self>, Error<C>> {
+    pub fn values(&self) -> Result<Vec<Self>, Error> {
         match self {
             Self::Object(o) => o.values(),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn to_string(&self, realm: &mut C) -> Result<YSString, Error<C>> {
+    pub fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
@@ -593,7 +592,7 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    pub fn to_string_no_realm(&self) -> Result<YSString, Error<C>> {
+    pub fn to_string_no_realm(&self) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
@@ -612,7 +611,7 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    pub fn into_string(self, realm: &mut C) -> Result<YSString, Error<C>> {
+    pub fn into_string(self, realm: &mut Realm) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
                 if let Some(prim) = o.primitive() {
@@ -662,30 +661,30 @@ pub fn fmt_num(n: f64) -> YSString {
     }
 }
 
-impl<C: Realm> From<Symbol> for Value<C> {
+impl From<Symbol> for Value {
     fn from(s: Symbol) -> Self {
         Self::Symbol(s)
     }
 }
 
-impl<C: Realm> From<&Symbol> for Value<C> {
+impl From<&Symbol> for Value {
     fn from(s: &Symbol) -> Self {
         Self::Symbol(s.clone())
     }
 }
 
 #[derive(Debug)]
-pub struct Iter<C: Realm> {
-    next_obj: Value<C>,
+pub struct Iter {
+    next_obj: Value,
 }
 
-pub struct CtxIter<'a, C: Realm> {
-    next_obj: Value<C>,
-    realm: &'a mut C,
+pub struct CtxIter<'a> {
+    next_obj: Value,
+    realm: &'a mut Realm,
 }
 
-impl<C: Realm> Iterator for CtxIter<'_, C> {
-    type Item = Result<Value<C>, Error<C>>;
+impl Iterator for CtxIter<'_> {
+    type Item = Result<Value, Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let next = self
@@ -711,42 +710,42 @@ impl<C: Realm> Iterator for CtxIter<'_, C> {
     }
 }
 
-impl<C: Realm> Iter<C> {
-    pub fn next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+impl Iter {
+    pub fn next(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
         self.next_obj.iter_next(realm)
     }
 
-    pub fn close(self, realm: &mut C) -> Result<(), Error<C>> {
+    pub fn close(self, realm: &mut Realm) -> Result<(), Error> {
         self.next_obj.iter_close(realm)
     }
 }
 
-impl<C: Realm> Value<C> {
-    pub fn iter_next(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
+impl Value {
+    pub fn iter_next(&self, realm: &mut Realm) -> Result<Option<Self>, Error> {
         self.as_object()?.iter_next(realm)
     }
 
-    pub fn async_iter_next(&self, realm: &mut C) -> Result<Self, Error<C>> {
+    pub fn async_iter_next(&self, realm: &mut Realm) -> Result<Self, Error> {
         self.as_object()?.async_iter_next(realm)
     }
 
-    pub fn iter_res(&self, realm: &mut C) -> Result<Option<Self>, Error<C>> {
+    pub fn iter_res(&self, realm: &mut Realm) -> Result<Option<Self>, Error> {
         self.as_object()?.iter_res(realm)
     }
 
-    pub fn iter_done(&self, realm: &mut C) -> Result<bool, Error<C>> {
+    pub fn iter_done(&self, realm: &mut Realm) -> Result<bool, Error> {
         self.as_object()?.iter_done(realm)
     }
 
-    pub fn iter_next_no_out(&self, realm: &mut C) -> Result<(), Error<C>> {
+    pub fn iter_next_no_out(&self, realm: &mut Realm) -> Result<(), Error> {
         self.as_object()?.iter_next_no_out(realm)
     }
 
-    pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
+    pub fn iter_next_is_finished(&self, realm: &mut Realm) -> Result<bool, Error> {
         self.as_object()?.iter_next_is_finished(realm)
     }
 
-    pub fn iter_close(&self, realm: &mut C) -> Result<(), Error<C>> {
+    pub fn iter_close(&self, realm: &mut Realm) -> Result<(), Error> {
         let obj = self.as_object()?;
         let return_method = obj.resolve_property(&"return".into(), realm)?;
 
@@ -758,8 +757,8 @@ impl<C: Realm> Value<C> {
     }
 }
 
-impl<C: Realm> Object<C> {
-    pub fn iter_next(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+impl Object {
+    pub fn iter_next(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
         let next = self.call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property_opt(&Value::string("done"), realm)?;
 
@@ -771,13 +770,13 @@ impl<C: Realm> Object<C> {
             .map(|opt| Some(opt.unwrap_or(Value::Undefined)))
     }
 
-    pub fn async_iter_next(&self, realm: &mut C) -> Result<Value<C>, Error<C>> {
+    pub fn async_iter_next(&self, realm: &mut Realm) -> Result<Value, Error> {
         let promise = self.call_method(&"next".into(), realm, Vec::new())?;
 
         Ok(promise)
     }
 
-    pub fn iter_res(&self, realm: &mut C) -> Result<Option<Value<C>>, Error<C>> {
+    pub fn iter_res(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
         let done = self.resolve_property(&Value::string("done"), realm)?;
 
         if done.is_some_and(|x| x.is_truthy()) {
@@ -787,19 +786,19 @@ impl<C: Realm> Object<C> {
             .map(|x| Some(x.unwrap_or(Value::Undefined)))
     }
 
-    pub fn iter_done(&self, realm: &mut C) -> Result<bool, Error<C>> {
+    pub fn iter_done(&self, realm: &mut Realm) -> Result<bool, Error> {
         let done = self.resolve_property(&Value::string("done"), realm)?;
 
         Ok(done.is_some_and(|x| x.is_truthy()))
     }
 
-    pub fn iter_next_no_out(&self, realm: &mut C) -> Result<(), Error<C>> {
+    pub fn iter_next_no_out(&self, realm: &mut Realm) -> Result<(), Error> {
         let _ = self.call_method(&"next".into(), realm, Vec::new())?;
 
         Ok(())
     }
 
-    pub fn iter_next_is_finished(&self, realm: &mut C) -> Result<bool, Error<C>> {
+    pub fn iter_next_is_finished(&self, realm: &mut Realm) -> Result<bool, Error> {
         let next = self.call_method(&"next".into(), realm, Vec::new())?;
         let done = next.get_property_opt(&Value::string("done"), realm)?;
 

@@ -12,7 +12,6 @@ use crate::{NativeFunction, Object, ObjectHandle, Res, Value, ValueResult, Varia
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::path::PathBuf;
-use crate::value::Realm as RealmT;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Realm {
@@ -75,5 +74,3 @@ pub trait Eval {
 }
 
 impl Eq for Realm {}
-
-impl RealmT for Realm {}

@@ -19,10 +19,10 @@ pub struct Array {
     length: Cell<usize>,
 }
 
-impl ObjectImpl<Realm> for Array {
+impl ObjectImpl for Array {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         self.inner.borrow_mut()
     }
 
@@ -1446,7 +1446,7 @@ impl Array {
             done: Cell::new(false),
         };
 
-        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
+        let iter: Box<dyn Obj> = Box::new(iter);
 
         Ok(iter.into())
     }
@@ -1467,7 +1467,7 @@ impl Array {
             done: Cell::new(false),
         };
 
-        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
+        let iter: Box<dyn Obj> = Box::new(iter);
 
         Ok(iter.into())
     }
@@ -1481,7 +1481,7 @@ impl Array {
 impl PrettyObjectOverride for Array {
     fn pretty_inline(
         &self,
-        _obj: &crate::value::Object<Realm>,
+        _obj: &crate::value::Object,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         let Ok(inner) = self.inner.try_borrow() else {
@@ -1503,7 +1503,7 @@ impl PrettyObjectOverride for Array {
 
     fn pretty_multiline(
         &self,
-        _obj: &crate::value::Object<Realm>,
+        _obj: &crate::value::Object,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         let Ok(inner) = self.inner.try_borrow() else {
@@ -1535,7 +1535,7 @@ impl CustomName for ArrayConstructor {
     }
 }
 
-impl Constructor<Realm> for ArrayConstructor {
+impl Constructor for ArrayConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         if args.len() == 1 {
             let len = args[0].to_number(realm)?;
@@ -1560,7 +1560,7 @@ impl Constructor<Realm> for ArrayConstructor {
     }
 }
 
-impl Func<Realm> for ArrayConstructor {
+impl Func for ArrayConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
         Constructor::construct(self, realm, args)
     }
@@ -1594,7 +1594,7 @@ impl ArrayConstructor {
             return true;
         }
 
-        let this: Res<OwningGcGuard<BoxedObj<Realm>, Array>, _> =
+        let this: Res<OwningGcGuard<BoxedObj, Array>, _> =
             crate::value::FromValue::from_value(test);
 
         this.is_ok()

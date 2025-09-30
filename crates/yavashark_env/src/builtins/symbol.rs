@@ -109,7 +109,7 @@ impl SymbolConstructor {
     }
 }
 
-impl Func<Realm> for SymbolConstructor {
+impl Func for SymbolConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let sym = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
             if v.is_undefined() {

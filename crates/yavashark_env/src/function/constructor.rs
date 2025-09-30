@@ -30,7 +30,7 @@ impl Debug for NativeConstructor {
     }
 }
 
-impl Constructor<Realm> for NativeConstructor {
+impl Constructor for NativeConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         (self.f)(args, realm)
     }
@@ -40,7 +40,7 @@ impl Constructor<Realm> for NativeConstructor {
     }
 }
 
-impl Func<Realm> for NativeConstructor {
+impl Func for NativeConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
         if self.special {
             (self.f)(args, realm)

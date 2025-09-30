@@ -109,7 +109,7 @@ impl Gui {
 pub struct GuiApp<'a> {
     realm: &'a mut Realm,
     ui: ObjectHandle,
-    ui_ref: OwningGcGuard<'a, BoxedObj<Realm>, Ui>,
+    ui_ref: OwningGcGuard<'a, BoxedObj, Ui>,
     error: Rc<RefCell<Option<Error>>>,
     f: ObjectHandle,
 }

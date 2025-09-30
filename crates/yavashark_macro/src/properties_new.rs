@@ -259,7 +259,7 @@ fn init_constructor(
         let fn_tok = constructor.init_tokes_direct(config, ty.to_token_stream());
 
         constructor_tokens.extend(quote! {
-            impl #env::value::Constructor<#realm> for #name {
+            impl #env::value::Constructor for #name {
                 fn construct(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>) -> ::core::result::Result<#value, #error> {
                     use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
@@ -276,7 +276,7 @@ fn init_constructor(
         let fn_tok = call_constructor.init_tokes_direct(config, ty.to_token_stream());
 
         constructor_tokens.extend(quote! {
-            impl #env::value::Func<#realm> for #name {
+            impl #env::value::Func for #name {
                 pub fn call(&self, realm: #realm, args: std::vec::Vec<#value>, this: #value) -> crate::Res<ObjectHandle> {
                     use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;

@@ -1,10 +1,10 @@
 use crate::error::Error;
+use crate::Realm;
 use crate::value::Value;
 use crate::value::ops::BigIntOrNumber;
-use crate::value::Realm;
 
-impl<R: Realm> Value<R> {
-    pub fn ushr(&self, other: &Self, realm: &mut R) -> Result<Self, Error<R>> {
+impl Value {
+    pub fn ushr(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {
         //TODO: maybe in the future we could make this more performant by just matching against both types (just like the old Add trait), but this is what the spec says
         let left_num = self.to_numeric(realm)?;
         let right_num = other.to_numeric(realm)?;

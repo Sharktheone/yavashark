@@ -21,7 +21,7 @@ pub struct ArrowFunction {
     scope: Scope,
 }
 
-impl Func<Realm> for ArrowFunction {
+impl Func for ArrowFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let scope = &mut self.scope.child()?;
         scope.state_set_function()?;

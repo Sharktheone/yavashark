@@ -37,10 +37,10 @@ pub struct Class {
     // #[gc(untyped)]
     pub prototype: RefCell<ObjectProperty>,
     // #[gc(untyped)]
-    pub constructor: Option<Box<dyn ConstructorFn<Realm>>>,
+    pub constructor: Option<Box<dyn ConstructorFn>>,
 }
 
-impl Obj<Realm> for Class {
+impl Obj for Class {
     fn define_property(&self, name: Value, value: Value) -> Res {
         if matches!(&name, Value::String(s) if s.as_str() == "prototype") {
             self.prototype.borrow_mut().value = value;
@@ -50,7 +50,7 @@ impl Obj<Realm> for Class {
         }
     }
 
-    fn define_variable(&self, name: Value, value: Variable<Realm>) -> Res {
+    fn define_variable(&self, name: Value, value: Variable) -> Res {
         if matches!(&name, Value::String(s) if s.as_str() == "prototype") {
             *self.prototype.borrow_mut() = value.into();
 
@@ -345,7 +345,7 @@ impl Class {
         Ok(())
     }
 
-    pub fn set_constructor(&mut self, constructor: impl ConstructorFn<Realm> + 'static) {
+    pub fn set_constructor(&mut self, constructor: impl ConstructorFn + 'static) {
         self.constructor = Some(Box::new(constructor));
     }
 
@@ -408,12 +408,12 @@ pub struct ClassInstance {
     name: String,
 }
 
-impl Obj<Realm> for ClassInstance {
+impl Obj for ClassInstance {
     fn define_property(&self, name: Value, value: Value) -> Res {
         self.inner.try_borrow()?.define_property(name, value)
     }
 
-    fn define_variable(&self, name: Value, value: Variable<Realm>) -> Res {
+    fn define_variable(&self, name: Value, value: Variable) -> Res {
         self.inner.try_borrow()?.define_variable(name, value)
     }
 

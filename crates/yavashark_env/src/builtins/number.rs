@@ -146,7 +146,7 @@ impl NumberConstructor {
     }
 }
 
-impl Constructor<Realm> for NumberConstructor {
+impl Constructor for NumberConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let str = match args.first() {
             Some(v) => Self::construct_from(realm, v)?,
@@ -159,7 +159,7 @@ impl Constructor<Realm> for NumberConstructor {
     }
 }
 
-impl Func<Realm> for NumberConstructor {
+impl Func for NumberConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let str = match args.first() {
             Some(v) => Self::construct_from(realm, v)?,

@@ -37,17 +37,17 @@ pub use crate::realm::Realm;
 use value::BoxedObj;
 use error::Location;
 
-pub type Value = value::Value<Realm>;
-pub type WeakValue = value::WeakValue<Realm>;
-pub type Error = error::Error<Realm>;
-pub type ObjectHandle = value::Object<Realm>;
-pub type WeakObjectHandle = value::WeakObject<Realm>;
-pub type Variable = value::variable::Variable<Realm>;
+pub type Value = value::Value;
+pub type WeakValue = value::WeakValue;
+pub type Error = error::Error;
+pub type ObjectHandle = value::Object;
+pub type WeakObjectHandle = value::WeakObject;
+pub type Variable = value::variable::Variable;
 pub type Symbol = value::Symbol;
 
-pub type ObjectProperty = value::ObjectProperty<Realm>;
+pub type ObjectProperty = value::ObjectProperty;
 
-pub type GCd<T> = OwningGcGuard<'static, BoxedObj<Realm>, T>;
+pub type GCd<T> = OwningGcGuard<'static, BoxedObj, T>;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ControlFlow {
@@ -134,7 +134,7 @@ pub type RuntimeResult = Result<Value, ControlFlow>;
 pub type ControlResult = Result<(), ControlFlow>;
 
 pub enum RefOrOwned<T: 'static> {
-    Ref(OwningGcGuard<'static, BoxedObj<Realm>, T>),
+    Ref(OwningGcGuard<'static, BoxedObj, T>),
     Owned(T),
 }
 

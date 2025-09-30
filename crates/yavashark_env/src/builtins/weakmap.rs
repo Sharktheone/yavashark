@@ -19,7 +19,7 @@ pub struct WeakMap {
 #[derive(Debug)]
 pub struct WeakMapConstructor {}
 
-impl Constructor<Realm> for WeakMapConstructor {
+impl Constructor for WeakMapConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let mut map = IndexMap::<_, _, FxBuildHasher>::default();
 

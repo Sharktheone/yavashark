@@ -4,15 +4,16 @@ use std::io::{BufRead, BufReader};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
 use yavashark_string::{ToYSString, YSString};
-use crate::value::{Realm, Value};
+use crate::Realm;
+use crate::value::Value;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct Error<C: Realm> {
-    pub kind: ErrorKind<C>,
+pub struct Error {
+    pub kind: ErrorKind,
     pub stacktrace: StackTrace,
 }
 
-impl<C: Realm> Error<C> {
+impl Error {
     #[must_use]
     pub const fn new(error: &'static str) -> Self {
         Self {
@@ -134,7 +135,7 @@ impl<C: Realm> Error<C> {
     }
 
     #[must_use]
-    pub const fn throw(val: Value<C>) -> Self {
+    pub const fn throw(val: Value) -> Self {
         Self {
             kind: ErrorKind::Throw(val),
             stacktrace: StackTrace { frames: vec![] },
@@ -158,7 +159,7 @@ impl<C: Realm> Error<C> {
         }
     }
 
-    pub fn message(&self, realm: &mut C) -> Result<YSString, Self> {
+    pub fn message(&self, realm: &mut Realm) -> Result<YSString, Self> {
         Ok(match &self.kind {
             ErrorKind::Type(msg)
             | ErrorKind::Reference(msg)
@@ -220,7 +221,7 @@ impl<C: Realm> Error<C> {
     }
 }
 
-impl<C: Realm> Display for Error<C> {
+impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let msg = self.message_internal();
 
@@ -232,7 +233,7 @@ impl<C: Realm> Display for Error<C> {
     }
 }
 
-impl<C: Realm> ToYSString for Error<C> {
+impl ToYSString for Error {
     fn to_ys_string(&self) -> YSString {
         let msg = self.message_internal();
         let name = self.name();
@@ -246,7 +247,7 @@ impl<C: Realm> ToYSString for Error<C> {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub enum ErrorKind<C: Realm> {
+pub enum ErrorKind {
     Type(YSString),
     Reference(YSString),
     Range(YSString),
@@ -256,7 +257,7 @@ pub enum ErrorKind<C: Realm> {
     Eval(YSString),
     URI(YSString),
     Aggregate(YSString),
-    Throw(Value<C>),
+    Throw(Value),
     Error(Option<YSString>),
 }
 
@@ -400,13 +401,13 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
     0
 }
 
-// impl<R: Realm> From<BorrowError> for Error<R> {
+// impl From<BorrowError> for Error {
 //     fn from(value: BorrowError) -> Self {
 //         Self::new("Failed to borrow object")
 //     }
 // }
 //
-// impl<R: Realm> From<BorrowMutError> for Error<R> {
+// impl From<BorrowMutError> for Error {
 //     fn from(value: BorrowMutError) -> Self {
 //         Self::new("Failed to borrow object mutably")
 //     }
@@ -442,13 +443,13 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
 //     impl std::error::Error for SyncError {}
 // }
 
-impl<T: std::error::Error, C: Realm> From<T> for Error<C> {
+impl<T: std::error::Error> From<T> for Error {
     fn from(value: T) -> Self {
         Self::new_error(value.to_string())
     }
 }
 
-impl<C: Realm> Error<C> {
+impl Error {
     #[must_use]
     pub fn from_temporal(err: temporal_rs::TemporalError) -> Self {
         let kind = err.kind();

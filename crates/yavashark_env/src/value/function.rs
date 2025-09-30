@@ -1,12 +1,13 @@
 use std::fmt::Debug;
 use crate::error::Error;
-use crate::value::{Obj, Realm, Value};
+use crate::Realm;
+use crate::value::{Obj, Value};
 
-pub trait Func<C: Realm>: Debug + Obj<C> {
+pub trait Func: Debug + Obj {
     fn call(
         &self,
-        realm: &mut C,
-        args: Vec<Value<C>>,
-        this: Value<C>,
-    ) -> Result<Value<C>, Error<C>>;
+        realm: &mut Realm,
+        args: Vec<Value>,
+        this: Value,
+    ) -> Result<Value, Error>;
 }

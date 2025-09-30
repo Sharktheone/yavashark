@@ -14,7 +14,7 @@ pub trait TryIntoValue: Sized {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult;
 }
 
-impl<T: IntoValue<Realm>> TryIntoValue for T {
+impl<T: IntoValue> TryIntoValue for T {
     fn try_into_value(self, _: &mut Realm) -> ValueResult {
         Ok(self.into_value())
     }
@@ -32,7 +32,7 @@ pub trait FromValueOutput {
 }
 
 // TODO: this might work in future rust versions with specialization, but unfortunately not at this time...
-// default impl<T: FromValue<Realm>> FromValueOutput for T {
+// default impl<T: FromValue> FromValueOutput for T {
 //     type Output = T;
 //
 //     fn from_value_out(value: Value) -> Result<Self::Output> {
@@ -40,15 +40,15 @@ pub trait FromValueOutput {
 //     }
 // }
 
-impl<O: Obj<Realm>> FromValueOutput for &O {
-    type Output = OwningGcGuard<'static, BoxedObj<Realm>, O>;
+impl<O: Obj> FromValueOutput for &O {
+    type Output = OwningGcGuard<'static, BoxedObj, O>;
 
     fn from_value_out(value: Value, _: &mut Realm) -> Res<Self::Output> {
         FromValue::from_value(value)
     }
 }
 
-pub fn downcast_obj<O: Obj<Realm>>(value: Value) -> Res<GCd<O>> {
+pub fn downcast_obj<O: Obj>(value: Value) -> Res<GCd<O>> {
     FromValue::from_value(value)
 }
 

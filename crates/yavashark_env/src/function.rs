@@ -33,10 +33,10 @@ pub struct NativeFunction {
 }
 
 #[custom_props(constructor)]
-impl ObjectImpl<Realm> for NativeFunction {
+impl ObjectImpl for NativeFunction {
     type Inner = MutNativeFunction;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
     }
 
@@ -68,11 +68,11 @@ impl ObjectImpl<Realm> for NativeFunction {
         (self.f)(args, obj, realm)
     }
 
-    fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error<Realm>> {
+    fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error> {
         Ok(format!("function {}() {{ [native code] }}", self.name).into())
     }
 
-    fn to_string_internal(&self) -> Result<YSString, crate::error::Error<Realm>> {
+    fn to_string_internal(&self) -> Result<YSString, crate::error::Error> {
         Ok(format!("function {}() {{ [native code] }}", self.name).into())
     }
 

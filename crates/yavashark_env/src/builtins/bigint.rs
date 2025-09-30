@@ -34,7 +34,7 @@ impl BigIntConstructor {
     }
 }
 
-impl Func<Realm> for BigIntConstructor {
+impl Func for BigIntConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let first = args.first().unwrap_or(&Value::Undefined);
 

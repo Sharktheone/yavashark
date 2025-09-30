@@ -101,10 +101,10 @@ impl JSWidget for JSCodeEditor {
     }
 }
 
-impl ObjectImpl<Realm> for JSCodeEditor {
+impl ObjectImpl for JSCodeEditor {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         self.mut_object.borrow_mut()
     }
 

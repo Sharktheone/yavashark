@@ -41,10 +41,10 @@ impl Arguments {
     }
 }
 
-impl ObjectImpl<Realm> for Arguments {
+impl ObjectImpl for Arguments {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         self.inner.borrow_mut()
     }
 
@@ -134,15 +134,15 @@ impl ObjectImpl<Realm> for Arguments {
         "Arguments".to_string()
     }
 
-    fn to_string(&self, _: &mut Realm) -> Result<YSString, Error<Realm>> {
+    fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
         Ok("[object Arguments]".into())
     }
 
-    fn to_string_internal(&self) -> Result<YSString, Error<Realm>> {
+    fn to_string_internal(&self) -> Result<YSString, Error> {
         Ok("[object Arguments]".into())
     }
 
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error<Realm>> {
+    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
         let args = self.args.borrow();
         if index < args.len() {
             Ok((false, Some(args[index].clone())))
@@ -172,7 +172,7 @@ impl Arguments {
             done: Cell::new(false),
         };
 
-        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
+        let iter: Box<dyn Obj> = Box::new(iter);
 
         Ok(iter.into())
     }

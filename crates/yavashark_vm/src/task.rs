@@ -17,8 +17,8 @@ use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
 pub struct BytecodeAsyncTask {
     state: Option<VmState>,
     await_promise:
-        Option<OwningGcGuardRefed<BoxedObj<Realm>, (&'static Promise, Notified<'static>)>>,
-    promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
+        Option<OwningGcGuardRefed<BoxedObj, (&'static Promise, Notified<'static>)>>,
+    promise: OwningGcGuard<'static, BoxedObj, Promise>,
 }
 
 impl Unpin for BytecodeAsyncTask {}

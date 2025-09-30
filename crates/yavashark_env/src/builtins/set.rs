@@ -33,7 +33,7 @@ impl Set {
 #[derive(Debug)]
 pub struct SetConstructor {}
 
-impl Constructor<Realm> for SetConstructor {
+impl Constructor for SetConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let mut set = IndexSet::new();
 

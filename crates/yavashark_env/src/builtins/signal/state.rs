@@ -13,7 +13,7 @@ pub struct State {
     pub value: Value,
 
     #[mutable]
-    pub dependents: Vec<Weak<BoxedObj<Realm>>>, //TODO: this should be Vec<Weak<Computed>> or maybe even Vec<Weak<dyn Signal>> in the future
+    pub dependents: Vec<Weak<BoxedObj>>, //TODO: this should be Vec<Weak<Computed>> or maybe even Vec<Weak<dyn Signal>> in the future
 }
 
 impl State {

@@ -1,12 +1,13 @@
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
 use crate::error::Error;
-use crate::value::{BoxedObj, Obj, ObjectProperty, Realm, Value};
+use crate::Realm;
+use crate::value::{BoxedObj, Obj, ObjectProperty, Value};
 
-pub trait Constructor<R: Realm>: Debug + Obj<R> {
-    fn construct(&self, realm: &mut R, args: Vec<Value<R>>) -> Result<Value<R>, Error<R>>;
+pub trait Constructor: Debug + Obj {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<Value, Error>;
 
-    fn construct_proto(&self) -> Result<ObjectProperty<R>, Error<R>> {
+    fn construct_proto(&self) -> Result<ObjectProperty, Error> {
         Ok(self
             .resolve_property(&"prototype".into())?
             .unwrap_or(Value::Undefined.into()))
@@ -17,26 +18,26 @@ pub trait Constructor<R: Realm>: Debug + Obj<R> {
     }
 }
 
-pub trait ConstructorFn<R: Realm>: Debug {
-    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj<R>>>;
-    fn construct(&self, args: Vec<Value<R>>, this: Value<R>, realm: &mut R)
-        -> Result<(), Error<R>>;
+pub trait ConstructorFn: Debug {
+    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>>;
+    fn construct(&self, args: Vec<Value>, this: Value, realm: &mut Realm)
+        -> Result<(), Error>;
 }
 
 #[derive(Debug)]
 pub struct NoOpConstructorFn;
 
-impl<R: Realm> ConstructorFn<R> for NoOpConstructorFn {
-    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj<R>>> {
+impl ConstructorFn for NoOpConstructorFn {
+    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         None
     }
 
     fn construct(
         &self,
-        _args: Vec<Value<R>>,
-        _this: Value<R>,
-        _realm: &mut R,
-    ) -> Result<(), Error<R>> {
+        _args: Vec<Value>,
+        _this: Value,
+        _realm: &mut Realm,
+    ) -> Result<(), Error> {
         Ok(())
     }
 }

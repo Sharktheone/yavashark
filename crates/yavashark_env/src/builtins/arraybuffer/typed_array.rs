@@ -95,10 +95,10 @@ pub struct TypedArray {
     pub inner: RefCell<MutObject>
 }
 
-impl crate::value::ObjectImpl<Realm> for TypedArray {
+impl crate::value::ObjectImpl for TypedArray {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj> {
         self.inner.borrow_mut()
     }
 
@@ -1433,7 +1433,7 @@ impl TypedArray {
             done: Cell::new(false),
         };
 
-        let iter: Box<dyn Obj<Realm>> = Box::new(iter);
+        let iter: Box<dyn Obj> = Box::new(iter);
 
         Ok(iter.into())
     }

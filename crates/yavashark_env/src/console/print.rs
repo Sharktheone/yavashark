@@ -2,13 +2,12 @@ use colored::Colorize;
 
 use crate::array::Array;
 use crate::builtins::RegExp;
-use crate::realm::Realm;
 use crate::value::{Object, Value};
 
 pub trait PrettyObjectOverride {
-    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String>;
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String>;
 
-    fn pretty_multiline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_multiline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
         self.pretty_inline(obj, not)
     }
 }
@@ -29,7 +28,7 @@ pub trait PrettyPrint {
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>) -> String;
 }
 
-impl PrettyPrint for Object<Realm> {
+impl PrettyPrint for Object {
     fn pretty_print_key(&self) -> String {
         format!("'{self}'").green().to_string()
     }
@@ -311,7 +310,7 @@ impl PrettyPrint for Object<Realm> {
     }
 }
 
-impl PrettyPrint for Value<Realm> {
+impl PrettyPrint for Value {
     fn pretty_print_key(&self) -> String {
         match self {
             Self::Undefined => "undefined".to_string(),
@@ -362,7 +361,7 @@ impl PrettyPrint for Value<Realm> {
     }
 }
 
-pub fn fmt_properties_to(obj: &Object<Realm>, str: &mut String, not: &mut Vec<usize>) {
+pub fn fmt_properties_to(obj: &Object, str: &mut String, not: &mut Vec<usize>) {
     let Ok(properties) = obj.properties() else {
         return;
     };

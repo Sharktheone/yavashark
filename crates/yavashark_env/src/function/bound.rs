@@ -14,7 +14,7 @@ pub struct BoundFunction {
     bound_args: Vec<Value>, //TODO: this is a memleak!
 }
 
-impl Func<Realm> for BoundFunction {
+impl Func for BoundFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let args = if self.bound_args.is_empty() {
             args
@@ -28,7 +28,7 @@ impl Func<Realm> for BoundFunction {
     }
 }
 
-impl Constructor<Realm> for BoundFunction {
+impl Constructor for BoundFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         self.func.as_object()?.construct(realm, args)
     }

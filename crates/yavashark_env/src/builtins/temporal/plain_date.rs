@@ -437,7 +437,7 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
 }
 
 impl PrettyObjectOverride for PlainDate {
-    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.date.to_ixdtf_string(DisplayCalendar::Auto);
 
         fmt_properties_to(obj, &mut s, not);

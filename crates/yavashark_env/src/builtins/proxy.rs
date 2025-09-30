@@ -19,7 +19,7 @@ pub struct Proxy {
     revoke: Cell<bool>,
 }
 
-impl Obj<Realm> for Proxy {
+impl Obj for Proxy {
     fn define_property(&self, name: Value, value: Value) -> Res {
         if self.revoke.get() {
             return self.inner.define_property(name, value);
@@ -191,7 +191,7 @@ impl Obj<Realm> for Proxy {
         self.inner.constructor()
     }
 
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         vec![self.inner.get_ref(), self.handler.get_ref()]
     }
 

@@ -532,7 +532,7 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
 }
 
 impl PrettyObjectOverride for PlainDateTime {
-    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.date.to_string();
 
         fmt_properties_to(obj, &mut s, not);

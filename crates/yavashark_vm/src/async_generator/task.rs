@@ -15,10 +15,10 @@ use yavashark_env::value::{BoxedObj, Obj};
 pub struct AsyncGeneratorTask {
     state: Option<VmState>,
     await_promise:
-        Option<OwningGcGuardRefed<BoxedObj<Realm>, (&'static Promise, Notified<'static>, bool)>>,
-    promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
-    gen: OwningGcGuard<'static, BoxedObj<Realm>, AsyncGenerator>,
-    gen_notify: Option<OwningGcGuardRefed<BoxedObj<Realm>, Notified<'static>>>,
+        Option<OwningGcGuardRefed<BoxedObj, (&'static Promise, Notified<'static>, bool)>>,
+    promise: OwningGcGuard<'static, BoxedObj, Promise>,
+    gen: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
+    gen_notify: Option<OwningGcGuardRefed<BoxedObj, Notified<'static>>>,
 }
 
 impl Unpin for AsyncGeneratorTask {}
@@ -28,7 +28,7 @@ impl AsyncGeneratorTask {
     pub fn new(
         realm: &mut Realm,
         state: Option<VmState>,
-        gen: OwningGcGuard<'static, BoxedObj<Realm>, AsyncGenerator>,
+        gen: OwningGcGuard<'static, BoxedObj, AsyncGenerator>,
     ) -> Res<ObjectHandle> {
         let promise_obj = Promise::new(realm).into_object();
         let promise = downcast_obj::<Promise>(promise_obj.clone().into())?;

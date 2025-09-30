@@ -94,7 +94,7 @@ impl Object {
     }
 }
 
-impl Obj<Realm> for Object {
+impl Obj for Object {
     fn define_property(&self, name: Value, value: Value) -> Result<(), Error> {
         self.inner_mut()?.define_property(name, value)
     }
@@ -172,7 +172,7 @@ impl Obj<Realm> for Object {
         self.inner()?.constructor()
     }
 
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
+    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         self.inner().map(|o| o.custom_gc_refs()).unwrap_or_default()
     }
 }
@@ -410,7 +410,7 @@ impl MutObject {
     }
 }
 
-impl MutObj<Realm> for MutObject {
+impl MutObj for MutObject {
     fn define_property(&mut self, name: Value, value: Value) -> Result<(), Error> {
         let key = InternalPropertyKey::from(name);
 

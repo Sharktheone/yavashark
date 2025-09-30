@@ -67,7 +67,7 @@ pub trait Object: Debug + Any + 'static {
     // /// # Safety
     // /// This function should only return references that are actually in the object!
     // /// Else it will leak memory and cause undefined behavior, same for references that are in the object but not known to the gc!
-    // unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj<Realm>>> {
+    // unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
     //     Vec::new()
     // }
 

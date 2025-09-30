@@ -70,7 +70,7 @@ impl BooleanConstructor {
     }
 }
 
-impl Constructor<Realm> for BooleanConstructor {
+impl Constructor for BooleanConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let boolean = args.first().is_some_and(|v| v.is_object() || v.is_truthy());
 
@@ -79,7 +79,7 @@ impl Constructor<Realm> for BooleanConstructor {
         Ok(obj.into())
     }
 }
-impl Func<Realm> for BooleanConstructor {
+impl Func for BooleanConstructor {
     fn call(&self, _realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let boolean = args.first().is_some_and(|v| v.is_object() || v.is_truthy());
 

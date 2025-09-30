@@ -13,7 +13,7 @@ use crate::value::{Constructor, Func, IntoValue, Obj};
 #[derive(Debug)]
 pub struct ObjectConstructor {}
 
-impl Constructor<Realm> for ObjectConstructor {
+impl Constructor for ObjectConstructor {
     fn construct(&self, realm: &mut Realm, mut args: Vec<Value>) -> ValueResult {
         let Some(value) = args.first_mut() else {
             return Ok(Object::new(realm).into());
@@ -33,7 +33,7 @@ impl Constructor<Realm> for ObjectConstructor {
     }
 }
 
-impl Func<Realm> for ObjectConstructor {
+impl Func for ObjectConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
         Constructor::construct(self, realm, args)
     }

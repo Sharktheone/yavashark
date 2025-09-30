@@ -13,13 +13,14 @@ mod sub;
 mod ushr;
 mod xor;
 
-use super::{Hint, Realm, Value};
+use super::{Hint, Value};
 use num_bigint::BigInt;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::rc::Rc;
 use std::str::FromStr;
 use crate::error::Error;
+use crate::Realm;
 
 pub trait ToNumber {
     fn num(&self) -> f64;
@@ -95,7 +96,7 @@ impl BigIntOrNumber {
     }
 }
 
-impl<C: Realm> Value<C> {
+impl Value {
     #[must_use]
     pub fn to_number_or_null(&self) -> f64 {
         match self {
@@ -107,7 +108,7 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    pub fn to_numeric(&self, realm: &mut C) -> Result<BigIntOrNumber, Error<C>> {
+    pub fn to_numeric(&self, realm: &mut Realm) -> Result<BigIntOrNumber, Error> {
         Ok(BigIntOrNumber::Number(match self {
             Self::Number(n) => *n,
             Self::Undefined => f64::NAN,
@@ -123,7 +124,7 @@ impl<C: Realm> Value<C> {
             Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to numeric value")),
         }))
     }
-    pub fn to_number(&self, realm: &mut C) -> Result<f64, Error<C>> {
+    pub fn to_number(&self, realm: &mut Realm) -> Result<f64, Error> {
         Ok(match self {
             Self::Number(n) => *n,
             Self::Undefined => f64::NAN,
@@ -141,7 +142,7 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    pub fn to_big_int(&self, realm: &mut C) -> Result<BigInt, Error<C>> {
+    pub fn to_big_int(&self, realm: &mut Realm) -> Result<BigInt, Error> {
         Ok(match self {
             Self::Number(n) => {
                 if n.fract() > 0.0 {
@@ -172,7 +173,7 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    pub fn to_int_or_null(&self, realm: &mut C) -> Result<i64, Error<C>> {
+    pub fn to_int_or_null(&self, realm: &mut Realm) -> Result<i64, Error> {
         Ok(match self {
             Self::Number(n) => *n as i64,
             Self::Boolean(b) => i64::from(*b),
@@ -187,7 +188,7 @@ impl<C: Realm> Value<C> {
     }
 }
 
-fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
+fn parse_big_int(s: &str) -> Result<BigInt, Error> {
     if s.is_empty() {
         return Err(Error::ty("Cannot convert empty string to BigInt"));
     }
@@ -210,8 +211,8 @@ fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
     BigInt::from_str(s).map_err(|_| Error::ty("Cannot convert string to BigInt"))
 }
 
-// impl<C: Realm> Add for Value<C> {
-//     // type Output = Result<Value<C>, Error<C>>;
+// impl Add for Value {
+//     // type Output = Result<Value, Error>;
 //
 //     type Output = Self;
 //
@@ -263,7 +264,7 @@ fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
 //     }
 // }
 //
-// impl<C: Realm> Sub for Value<C> {
+// impl Sub for Value {
 //     type Output = Self;
 //
 //     fn sub(self, rhs: Self) -> Self::Output {
@@ -325,7 +326,7 @@ fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
 //     }
 // }
 //
-// impl<C: Realm> Mul for Value<C> {
+// impl Mul for Value {
 //     type Output = Self;
 //
 //     fn mul(self, rhs: Self) -> Self::Output {
@@ -371,7 +372,7 @@ fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
 //     }
 // }
 //
-// impl<C: Realm> Div for Value<C> {
+// impl Div for Value {
 //     type Output = Self;
 //
 //     //TODO: handle div by zero => return Infinity
@@ -436,7 +437,7 @@ fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
 //     }
 // }
 //
-// impl<C: Realm> Rem for Value<C> {
+// impl Rem for Value {
 //     type Output = Self;
 //
 //     fn rem(self, rhs: Self) -> Self::Output {
@@ -486,7 +487,7 @@ fn parse_big_int<R: Realm>(s: &str) -> Result<BigInt, Error<R>> {
 //     }
 // }
 //
-impl<C: Realm> PartialOrd for Value<C> {
+impl PartialOrd for Value {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         match (self, other) {
             (Self::Null, Self::Null) => Some(Ordering::Equal),
@@ -564,7 +565,7 @@ impl<C: Realm> PartialOrd for Value<C> {
     }
 }
 //
-// impl<C: Realm> Shl for Value<C> {
+// impl Shl for Value {
 //     type Output = Self;
 //
 //     fn shl(self, rhs: Self) -> Self::Output {
@@ -670,7 +671,7 @@ impl<C: Realm> PartialOrd for Value<C> {
 //     }
 // }
 //
-// impl<C: Realm> Shr for Value<C> {
+// impl Shr for Value {
 //     type Output = Self;
 //
 //     fn shr(self, rhs: Self) -> Self::Output {
@@ -776,7 +777,7 @@ impl<C: Realm> PartialOrd for Value<C> {
 //     }
 // }
 //
-// impl<C: Realm> BitOr for Value<C> {
+// impl BitOr for Value {
 //     type Output = Self;
 //
 //     fn bitor(self, rhs: Self) -> Self::Output {
@@ -784,7 +785,7 @@ impl<C: Realm> PartialOrd for Value<C> {
 //     }
 // }
 //
-// impl<C: Realm> BitAnd for Value<C> {
+// impl BitAnd for Value {
 //     type Output = Self;
 //
 //     fn bitand(self, rhs: Self) -> Self::Output {
@@ -792,7 +793,7 @@ impl<C: Realm> PartialOrd for Value<C> {
 //     }
 // }
 //
-// impl<C: Realm> BitXor for Value<C> {
+// impl BitXor for Value {
 //     type Output = Self;
 //
 //     fn bitxor(self, rhs: Self) -> Self::Output {
@@ -800,7 +801,7 @@ impl<C: Realm> PartialOrd for Value<C> {
 //     }
 // }
 
-impl<C: Realm> Value<C> {
+impl Value {
     #[must_use]
     pub fn log_or(&self, rhs: Self) -> Self {
         if self.is_truthy() {
@@ -819,7 +820,7 @@ impl<C: Realm> Value<C> {
         }
     }
 
-    // pub fn pow(&self, rhs: &Self, realm: &mut C) -> Result<Self, Error<C>> {
+    // pub fn pow(&self, rhs: &Self, realm: &mut Realm) -> Result<Self, Error> {
     //     if let (Self::BigInt(a), Self::BigInt(b)) = (self, rhs) {
     //         return Ok(Self::BigInt(a.pow(b.to_u32().unwrap_or(0))));
     //     }
@@ -829,7 +830,7 @@ impl<C: Realm> Value<C> {
     //     ))
     // }
 
-    pub fn normal_eq(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
+    pub fn normal_eq(&self, rhs: &Self, realm: &mut Realm) -> Result<bool, Error> {
         if let (Self::Object(lhs), Self::Object(rhs)) = (self, rhs) {
             return Ok(lhs == rhs);
         }
@@ -893,7 +894,7 @@ impl<C: Realm> Value<C> {
         })
     }
 
-    pub fn instance_of(&self, rhs: &Self, realm: &mut C) -> Result<bool, Error<C>> {
+    pub fn instance_of(&self, rhs: &Self, realm: &mut Realm) -> Result<bool, Error> {
         let Self::Object(obj) = self else {
             return Ok(false);
         };
@@ -936,13 +937,13 @@ impl<C: Realm> Value<C> {
     }
 }
 
-// impl<C: Realm> AddAssign for Value<C> {
+// impl AddAssign for Value {
 //     fn add_assign(&mut self, rhs: Self) {
 //         *self = self.copy() + rhs; //TODO: don't copy the value
 //     }
 // }
 //
-// impl<C: Realm> SubAssign for Value<C> {
+// impl SubAssign for Value {
 //     fn sub_assign(&mut self, rhs: Self) {
 //         *self = self.copy() - rhs; //TODO: don't copy the value
 //     }

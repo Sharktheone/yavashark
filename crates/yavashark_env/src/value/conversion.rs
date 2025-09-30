@@ -5,188 +5,188 @@ use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
 use crate::error::Error;
-use crate::value::{BoxedObj, Object, Realm, Symbol, Value};
+use crate::value::{BoxedObj, Object, Symbol, Value};
 
-impl<C: Realm> From<&'static str> for Value<C> {
+impl From<&'static str> for Value {
     fn from(s: &'static str) -> Self {
         Self::String(YSString::new_static(s))
     }
 }
 
-impl<C: Realm> From<String> for Value<C> {
+impl From<String> for Value {
     fn from(s: String) -> Self {
         Self::String(YSString::from_string(s))
     }
 }
 
-impl<C: Realm> From<&String> for Value<C> {
+impl From<&String> for Value {
     fn from(s: &String) -> Self {
         Self::String(YSString::from_ref(s))
     }
 }
 
-impl<C: Realm> From<YSString> for Value<C> {
+impl From<YSString> for Value {
     fn from(s: YSString) -> Self {
         Self::String(s)
     }
 }
 
-impl<C: Realm> From<&YSString> for Value<C> {
+impl From<&YSString> for Value {
     fn from(s: &YSString) -> Self {
         Self::String(s.clone())
     }
 }
 
-impl<C: Realm> From<()> for Value<C> {
+impl From<()> for Value {
     fn from((): ()) -> Self {
         Self::Undefined
     }
 }
 
-impl<C: Realm> From<f64> for Value<C> {
+impl From<f64> for Value {
     fn from(n: f64) -> Self {
         Self::Number(n)
     }
 }
 
-impl<C: Realm> From<bool> for Value<C> {
+impl From<bool> for Value {
     fn from(b: bool) -> Self {
         Self::Boolean(b)
     }
 }
 
-impl<C: Realm> From<u8> for Value<C> {
+impl From<u8> for Value {
     fn from(n: u8) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<u16> for Value<C> {
+impl From<u16> for Value {
     fn from(n: u16) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<u32> for Value<C> {
+impl From<u32> for Value {
     fn from(n: u32) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<u64> for Value<C> {
+impl From<u64> for Value {
     fn from(n: u64) -> Self {
         Self::Number(n as f64)
     }
 }
 
-impl<C: Realm> From<i8> for Value<C> {
+impl From<i8> for Value {
     fn from(n: i8) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<i16> for Value<C> {
+impl From<i16> for Value {
     fn from(n: i16) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<i32> for Value<C> {
+impl From<i32> for Value {
     fn from(n: i32) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<i64> for Value<C> {
+impl From<i64> for Value {
     fn from(n: i64) -> Self {
         Self::Number(n as f64)
     }
 }
 
-impl<C: Realm> From<usize> for Value<C> {
+impl From<usize> for Value {
     fn from(n: usize) -> Self {
         Self::Number(n as f64)
     }
 }
 
-impl<C: Realm> From<isize> for Value<C> {
+impl From<isize> for Value {
     fn from(n: isize) -> Self {
         Self::Number(n as f64)
     }
 }
 
-impl<C: Realm> From<f16> for Value<C> {
+impl From<f16> for Value {
     fn from(n: f16) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<f32> for Value<C> {
+impl From<f32> for Value {
     fn from(n: f32) -> Self {
         Self::Number(f64::from(n))
     }
 }
 
-impl<C: Realm> From<BigInt> for Value<C> {
+impl From<BigInt> for Value {
     fn from(n: BigInt) -> Self {
         Self::BigInt(Rc::new(n))
     }
 }
 
-impl<C: Realm> From<Rc<BigInt>> for Value<C> {
+impl From<Rc<BigInt>> for Value {
     fn from(n: Rc<BigInt>) -> Self {
         Self::BigInt(n)
     }
 }
 
-impl<C: Realm> From<Value<C>> for Result<Value<C>, Error<C>> {
-    fn from(value: Value<C>) -> Self {
+impl From<Value> for Result<Value, Error> {
+    fn from(value: Value) -> Self {
         Ok(value)
     }
 }
 
-impl<O: Into<Object<C>>, C: Realm> From<O> for Value<C> {
+impl<O: Into<Object>> From<O> for Value {
     fn from(o: O) -> Self {
         Self::Object(o.into())
     }
 }
 
-pub trait FromValue<R: Realm>: Sized {
-    fn from_value(value: Value<R>) -> Result<Self, Error<R>>;
+pub trait FromValue: Sized {
+    fn from_value(value: Value) -> Result<Self, Error>;
 }
 
-pub trait IntoValue<C: Realm> {
-    fn into_value(self) -> Value<C>;
+pub trait IntoValue {
+    fn into_value(self) -> Value;
 }
 
-pub trait IntoValueRef<C: Realm> {
-    type ValueRef: AsRef<Value<C>>;
+pub trait IntoValueRef {
+    type ValueRef: AsRef<Value>;
 
     fn into_value_ref(self) -> Self::ValueRef;
 }
 
-impl<V: IntoValue<C>, C: Realm> IntoValueRef<C> for V {
-    type ValueRef = Value<C>;
+impl<V: IntoValue> IntoValueRef for V {
+    type ValueRef = Value;
 
     fn into_value_ref(self) -> Self::ValueRef {
         self.into_value()
     }
 }
 
-impl<C: Realm> IntoValue<C> for Value<C> {
+impl IntoValue for Value {
     fn into_value(self) -> Self {
         self
     }
 }
 
-impl<C: Realm> FromValue<C> for Value<C> {
-    fn from_value(value: Self) -> Result<Self, Error<C>> {
+impl FromValue for Value {
+    fn from_value(value: Self) -> Result<Self, Error> {
         Ok(value)
     }
 }
 
-impl<C: Realm> FromValue<C> for YSString {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+impl FromValue for YSString {
+    fn from_value(value: Value) -> Result<Self, Error> {
         match value {
             Value::String(s) => Ok(s),
             _ => Err(Error::ty_error(format!(
@@ -196,8 +196,8 @@ impl<C: Realm> FromValue<C> for YSString {
     }
 }
 
-// impl<C: Realm> FromValue<C> for String {
-//     fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+// impl FromValue for String {
+//     fn from_value(value: Value) -> Result<Self, Error> {
 //         match value {
 //             Value::String(s) => Ok(s.to_string()),
 //             _ => Err(Error::ty_error(format!(
@@ -207,8 +207,8 @@ impl<C: Realm> FromValue<C> for YSString {
 //     }
 // }
 
-impl<C: Realm> FromValue<C> for bool {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+impl FromValue for bool {
+    fn from_value(value: Value) -> Result<Self, Error> {
         match value {
             Value::Boolean(b) => Ok(b),
             _ => Err(Error::ty_error(format!(
@@ -218,8 +218,8 @@ impl<C: Realm> FromValue<C> for bool {
     }
 }
 
-impl<C: Realm> FromValue<C> for BigInt {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+impl FromValue for BigInt {
+    fn from_value(value: Value) -> Result<Self, Error> {
         match value {
             Value::BigInt(n) => Ok((*n).clone()),
             _ => Err(Error::ty_error(format!(
@@ -229,8 +229,8 @@ impl<C: Realm> FromValue<C> for BigInt {
     }
 }
 
-impl<C: Realm> FromValue<C> for Object<C> {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+impl FromValue for Object {
+    fn from_value(value: Value) -> Result<Self, Error> {
         match value {
             Value::Object(o) => Ok(o),
             _ => Err(Error::ty_error(format!(
@@ -240,8 +240,8 @@ impl<C: Realm> FromValue<C> for Object<C> {
     }
 }
 
-impl<C: Realm> FromValue<C> for () {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+impl FromValue for () {
+    fn from_value(value: Value) -> Result<Self, Error> {
         match value {
             Value::Undefined => Ok(()),
             _ => Err(Error::ty_error(format!(
@@ -251,62 +251,62 @@ impl<C: Realm> FromValue<C> for () {
     }
 }
 
-impl<C: Realm> IntoValue<C> for String {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for String {
+    fn into_value(self) -> Value {
         Value::String(self.into())
     }
 }
 
-impl<C: Realm> IntoValue<C> for YSString {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for YSString {
+    fn into_value(self) -> Value {
         Value::String(self)
     }
 }
 
-impl<C: Realm> IntoValue<C> for &'static str {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for &'static str {
+    fn into_value(self) -> Value {
         Value::String(YSString::new_static(self))
     }
 }
 
-impl<C: Realm> IntoValue<C> for bool {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for bool {
+    fn into_value(self) -> Value {
         Value::Boolean(self)
     }
 }
 
-impl<C: Realm> IntoValue<C> for Object<C> {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for Object {
+    fn into_value(self) -> Value {
         Value::Object(self)
     }
 }
 
-impl<C: Realm> IntoValue<C> for BigInt {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for BigInt {
+    fn into_value(self) -> Value {
         Value::BigInt(Rc::new(self))
     }
 }
 
-impl<C: Realm> IntoValue<C> for Rc<BigInt> {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for Rc<BigInt> {
+    fn into_value(self) -> Value {
         Value::BigInt(self)
     }
 }
 
-impl<C: Realm> IntoValue<C> for Symbol {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for Symbol {
+    fn into_value(self) -> Value {
         Value::Symbol(self)
     }
 }
 
-impl<C: Realm> IntoValue<C> for &Symbol {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for &Symbol {
+    fn into_value(self) -> Value {
         Value::Symbol(self.clone())
     }
 }
 
-impl<C: Realm> IntoValue<C> for () {
-    fn into_value(self) -> Value<C> {
+impl IntoValue for () {
+    fn into_value(self) -> Value {
         Value::Undefined
     }
 }
@@ -314,8 +314,8 @@ impl<C: Realm> IntoValue<C> for () {
 macro_rules! impl_from_value {
     ($($t:ty),*) => {
         $(
-            impl<C: Realm> FromValue<C> for $t {
-                fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+            impl FromValue for $t {
+                fn from_value(value: Value) -> Result<Self, Error> {
                     match value {
                         Value::Number(n) => Ok(n as $t),
                         _ => Err(Error::ty_error(format!("Expected a number, found {:?}", value))),
@@ -323,8 +323,8 @@ macro_rules! impl_from_value {
                 }
             }
 
-            impl<C: Realm> IntoValue<C> for $t {
-                fn into_value(self) -> Value<C> {
+            impl IntoValue for $t {
+                fn into_value(self) -> Value {
                     #[allow(clippy::cast_lossless)]
                     Value::Number(self as f64)
                 }
@@ -336,8 +336,8 @@ macro_rules! impl_from_value {
 
 impl_from_value!(u8, u16, u32, u64, i8, i16, i32, i64, i128, usize, isize, f32, f64);
 
-impl<C: Realm, V: 'static> FromValue<C> for OwningGcGuard<'_, BoxedObj<C>, V> {
-    fn from_value(value: Value<C>) -> Result<Self, Error<C>> {
+impl<V: 'static> FromValue for OwningGcGuard<'_, BoxedObj, V> {
+    fn from_value(value: Value) -> Result<Self, Error> {
         let obj = match value {
             Value::Object(obj) => Ok(obj.get_owning()),
             _ => Err(Error::ty_error(format!(

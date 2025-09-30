@@ -385,7 +385,7 @@ pub fn value_to_duration(value: Value, realm: &mut Realm) -> Res<temporal_rs::Du
 }
 
 impl PrettyObjectOverride for Duration {
-    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self
             .dur
             .as_temporal_string(ToStringRoundingOptions::default())

@@ -18,7 +18,7 @@ pub struct Computed {
 
     pub dirty: Cell<bool>,
     #[mutable]
-    pub dependents: Vec<Weak<BoxedObj<Realm>>>, //TODO: this should be Vec<Weak<Computed>> or maybe even Vec<Weak<dyn Signal>> in the future
+    pub dependents: Vec<Weak<BoxedObj>>, //TODO: this should be Vec<Weak<Computed>> or maybe even Vec<Weak<dyn Signal>> in the future
 }
 
 impl Computed {
@@ -102,10 +102,10 @@ impl Deref for ComputedProtoObj {
     }
 }
 
-impl crate::value::ObjectImpl<Realm> for ComputedProtoObj {
+impl crate::value::ObjectImpl for ComputedProtoObj {
     type Inner = Option<GCd<Computed>>;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         self.obj
             .inner_mut()
             .expect("TODO: handle this case properly")

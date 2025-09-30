@@ -150,7 +150,7 @@ fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     Ok(this.to_string(realm)?.into())
 }
 
-impl Obj<Realm> for FunctionPrototype {
+impl Obj for FunctionPrototype {
     fn define_property(&self, name: Value, value: Value) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 

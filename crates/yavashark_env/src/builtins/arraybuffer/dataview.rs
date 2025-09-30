@@ -360,7 +360,7 @@ impl DataViewConstructor {
     }
 }
 
-impl Constructor<Realm> for DataViewConstructor {
+impl Constructor for DataViewConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let buffer = args
             .first()

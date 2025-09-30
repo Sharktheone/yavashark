@@ -53,10 +53,10 @@ impl DerefMut for MutableStringObj {
     }
 }
 
-impl crate::value::ObjectImpl<Realm> for StringObj {
+impl crate::value::ObjectImpl for StringObj {
     type Inner = MutableStringObj;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj<Realm>> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         RefMut::map(self.inner.borrow_mut(), |inner| &mut inner.object)
     }
 
@@ -112,7 +112,7 @@ impl crate::value::ObjectImpl<Realm> for StringObj {
         "String".to_string()
     }
 
-    fn primitive(&self) -> Option<crate::value::Value<Realm>> {
+    fn primitive(&self) -> Option<crate::value::Value> {
         Some(self.inner.borrow().string.clone().into())
     }
 
@@ -247,7 +247,7 @@ impl StringConstructor {
     }
 }
 
-impl Constructor<Realm> for StringConstructor {
+impl Constructor for StringConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,
@@ -260,7 +260,7 @@ impl Constructor<Realm> for StringConstructor {
     }
 }
 
-impl Func<Realm> for StringConstructor {
+impl Func for StringConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,

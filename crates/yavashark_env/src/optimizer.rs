@@ -94,7 +94,7 @@ impl OptimFunction {
     }
 }
 
-impl Func<Realm> for OptimFunction {
+impl Func for OptimFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         self.raw.call(realm, args, this)
     }
@@ -156,7 +156,7 @@ impl CustomGcRefUntyped for RawOptimFunction {
     }
 }
 
-impl Constructor<Realm> for OptimFunction {
+impl Constructor for OptimFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let this = self.new_instance()?;
 
@@ -172,8 +172,8 @@ impl Constructor<Realm> for OptimFunction {
     }
 }
 
-impl ConstructorFn<Realm> for RawOptimFunction {
-    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj<Realm>>> {
+impl ConstructorFn for RawOptimFunction {
+    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         self.scope.gc_untyped_ref()
     }
 

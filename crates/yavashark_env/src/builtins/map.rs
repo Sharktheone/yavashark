@@ -20,7 +20,7 @@ pub struct Map {
 #[derive(Debug)]
 pub struct MapConstructor {}
 
-impl Constructor<Realm> for MapConstructor {
+impl Constructor for MapConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let mut map = IndexMap::<_, _, FxBuildHasher>::default();
 

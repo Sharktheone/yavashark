@@ -109,13 +109,13 @@ impl Callable {
 
 #[derive(Debug)]
 pub struct FullfilledHandler {
-    pub promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
+    pub promise: OwningGcGuard<'static, BoxedObj, Promise>,
     pub f: Callable,
 }
 
 #[derive(Debug)]
 pub struct RejectedHandler {
-    pub promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
+    pub promise: OwningGcGuard<'static, BoxedObj, Promise>,
     pub f: Callable,
 }
 
@@ -773,7 +773,7 @@ impl Promise {
 
 impl FullfilledHandler {
     #[must_use]
-    pub const fn new(promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>, f: ObjectHandle) -> Self {
+    pub const fn new(promise: OwningGcGuard<'static, BoxedObj, Promise>, f: ObjectHandle) -> Self {
         Self {
             promise,
             f: Callable::JsFunction(f),
@@ -781,7 +781,7 @@ impl FullfilledHandler {
     }
 
     pub fn new_native(
-        promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>,
+        promise: OwningGcGuard<'static, BoxedObj, Promise>,
         f: impl Fn(Value, Value, &mut Realm) -> Res + 'static,
     ) -> Self {
         Self {
@@ -838,7 +838,7 @@ impl FullfilledHandler {
 
 impl RejectedHandler {
     #[must_use]
-    pub fn new(promise: OwningGcGuard<'static, BoxedObj<Realm>, Promise>, f: ObjectHandle) -> Self {
+    pub fn new(promise: OwningGcGuard<'static, BoxedObj, Promise>, f: ObjectHandle) -> Self {
         Self {
             promise,
             f: Callable::JsFunction(f),

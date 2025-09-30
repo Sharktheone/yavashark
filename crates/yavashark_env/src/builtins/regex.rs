@@ -208,7 +208,7 @@ impl RegExpConstructor {
     }
 }
 
-impl Constructor<Realm> for RegExpConstructor {
+impl Constructor for RegExpConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let regex = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
             Ok(v.to_string(realm)?.to_string())
@@ -224,7 +224,7 @@ impl Constructor<Realm> for RegExpConstructor {
     }
 }
 
-impl Func<Realm> for RegExpConstructor {
+impl Func for RegExpConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         Constructor::construct(self, realm, args)
     }
@@ -544,7 +544,7 @@ impl RegExp {
 impl PrettyObjectOverride for RegExp {
     fn pretty_inline(
         &self,
-        _obj: &crate::value::Object<Realm>,
+        _obj: &crate::value::Object,
         _not: &mut Vec<usize>,
     ) -> Option<String> {
         let mut s = String::new();
@@ -558,7 +558,7 @@ impl PrettyObjectOverride for RegExp {
 
     fn pretty_multiline(
         &self,
-        _obj: &crate::value::Object<Realm>,
+        _obj: &crate::value::Object,
         _not: &mut Vec<usize>,
     ) -> Option<String> {
         self.pretty_inline(_obj, _not)

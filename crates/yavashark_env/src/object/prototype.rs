@@ -14,7 +14,7 @@ use crate::{Error, MutObject, NativeFunction, ObjectProperty, Res, Value, Variab
 
 pub mod common;
 
-pub trait Proto: Obj<Realm> {
+pub trait Proto: Obj {
     fn as_any(&mut self) -> &mut dyn Any;
 }
 
@@ -136,7 +136,7 @@ impl Prototype {
     ];
 }
 
-impl Obj<Realm> for Prototype {
+impl Obj for Prototype {
     fn define_property(&self, name: Value, value: Value) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 

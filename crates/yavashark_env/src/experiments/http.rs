@@ -178,7 +178,7 @@ struct SimpleHttpServer<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> {
     callback: C,
 }
 
-impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer<C> {
+impl<C: FnMut(&mut Realm, HttpRequest, HttpResponseWriter)> SimpleHttpServer {
     const fn new(ip: String, port: u16, callback: C) -> Self {
         Self { ip, port, callback }
     }

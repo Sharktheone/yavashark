@@ -557,13 +557,13 @@ impl DateConstructor {
     }
 }
 
-impl Constructor<Realm> for DateConstructor {
+impl Constructor for DateConstructor {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         Date::js_construct(&args, realm).map(Obj::into_value)
     }
 }
 
-impl Func<Realm> for DateConstructor {
+impl Func for DateConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
         Date::js_construct(&args, realm).map(|date| {
             let inner = date.inner.borrow();
@@ -642,7 +642,7 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
 impl PrettyObjectOverride for Date {
     fn pretty_inline(
         &self,
-        obj: &crate::value::Object<Realm>,
+        obj: &crate::value::Object,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         let mut s = self.date().format("%Y-%m-%d %H:%M:%S").to_string();
@@ -654,7 +654,7 @@ impl PrettyObjectOverride for Date {
 
     fn pretty_multiline(
         &self,
-        obj: &crate::value::Object<Realm>,
+        obj: &crate::value::Object,
         not: &mut Vec<usize>,
     ) -> Option<String> {
         self.pretty_inline(obj, not)

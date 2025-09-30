@@ -143,7 +143,7 @@ impl JSFunction {
     }
 }
 
-impl Func<Realm> for JSFunction {
+impl Func for JSFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         self.raw.call(realm, args, this)
     }
@@ -206,7 +206,7 @@ impl CustomGcRefUntyped for RawJSFunction {
     }
 }
 
-impl Constructor<Realm> for JSFunction {
+impl Constructor for JSFunction {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let this = self.new_instance(realm)?;
 
@@ -217,15 +217,15 @@ impl Constructor<Realm> for JSFunction {
         Ok(this)
     }
 
-    fn construct_proto(&self) -> Res<ObjectProperty<Realm>> {
+    fn construct_proto(&self) -> Res<ObjectProperty> {
         let inner = self.inner.try_borrow()?;
 
         Ok(inner.prototype.clone())
     }
 }
 
-impl ConstructorFn<Realm> for RawJSFunction {
-    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj<Realm>>> {
+impl ConstructorFn for RawJSFunction {
+    fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>> {
         self.scope.gc_untyped_ref()
     }
 

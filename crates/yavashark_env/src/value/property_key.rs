@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use indexmap::Equivalent;
 use yavashark_string::{ToYSString, YSString};
-use crate::value::{fmt_num, Realm, Symbol, Value};
+use crate::value::{fmt_num, Symbol, Value};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {
@@ -68,8 +68,8 @@ impl Display for InternalPropertyKey {
     }
 }
 
-impl<R: Realm> From<Value<R>> for PropertyKey {
-    fn from(value: Value<R>) -> Self {
+impl From<Value> for PropertyKey {
+    fn from(value: Value) -> Self {
         match value {
             Value::String(s) => Self::String(s),
             Value::Symbol(s) => Self::Symbol(s),
@@ -83,7 +83,7 @@ impl<R: Realm> From<Value<R>> for PropertyKey {
     }
 }
 
-impl<R: Realm> From<PropertyKey> for Value<R> {
+impl From<PropertyKey> for Value {
     fn from(key: PropertyKey) -> Self {
         match key {
             PropertyKey::String(s) => Self::String(s),
@@ -92,8 +92,8 @@ impl<R: Realm> From<PropertyKey> for Value<R> {
     }
 }
 
-impl<R: Realm> From<Value<R>> for InternalPropertyKey {
-    fn from(value: Value<R>) -> Self {
+impl From<Value> for InternalPropertyKey {
+    fn from(value: Value) -> Self {
         match value {
             Value::String(s) => {
                 s.parse::<usize>()
@@ -117,7 +117,7 @@ impl<R: Realm> From<Value<R>> for InternalPropertyKey {
     }
 }
 
-impl<R: Realm> From<InternalPropertyKey> for Value<R> {
+impl From<InternalPropertyKey> for Value {
     fn from(key: InternalPropertyKey) -> Self {
         match key {
             InternalPropertyKey::String(s) => Self::String(s),

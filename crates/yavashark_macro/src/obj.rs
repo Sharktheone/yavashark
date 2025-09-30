@@ -206,7 +206,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .collect::<TokenStream>();
 
         quote! {
-            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<#env::value::BoxedObj<#realm >>> {
+            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<#env::value::BoxedObj>> {
                 use #env::value::{CustomGcRef, CustomGcRefUntyped};
                 let mut refs = Vec::with_capacity(#len);
 
@@ -301,7 +301,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         #input
         #region_code
 
-        impl #env::value::Obj<#realm> for #struct_name {
+        impl #env::value::Obj for #struct_name {
             fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_define

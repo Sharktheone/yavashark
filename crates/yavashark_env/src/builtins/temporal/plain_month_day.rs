@@ -255,7 +255,7 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
 }
 
 impl PrettyObjectOverride for PlainMonthDay {
-    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.month_day.to_string();
 
         fmt_properties_to(obj, &mut s, not);

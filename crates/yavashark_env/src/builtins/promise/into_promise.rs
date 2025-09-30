@@ -9,7 +9,7 @@ use std::task::{Context, Poll};
 use yavashark_garbage::OwningGcGuard;
 use crate::value::{BoxedObj, Obj};
 
-pub type GcPromise = OwningGcGuard<'static, BoxedObj<Realm>, Promise>;
+pub type GcPromise = OwningGcGuard<'static, BoxedObj, Promise>;
 
 pub trait IntoPromise {
     fn into_promise(self, realm: &mut Realm) -> ObjectHandle;

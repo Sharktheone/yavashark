@@ -348,7 +348,7 @@ pub fn value_to_plain_year_month(
 }
 
 impl PrettyObjectOverride for PlainYearMonth {
-    fn pretty_inline(&self, obj: &Object<Realm>, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.year_month.to_string();
 
         fmt_properties_to(obj, &mut s, not);
