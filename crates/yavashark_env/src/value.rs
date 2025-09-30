@@ -55,6 +55,24 @@ pub enum WeakValue {
     BigInt(Rc<BigInt>),
 }
 
+
+#[derive(Debug, PartialEq)]
+pub enum PrimitiveValue {
+    Null,
+    Undefined,
+    Number(f64),
+    String(YSString),
+    Boolean(bool),
+    Symbol(Symbol),
+    BigInt(Rc<BigInt>),
+}
+
+#[derive(Debug, PartialEq)]
+pub enum ObjectOrNull {
+    Object(Object),
+    Null,
+}
+
 impl Clone for Value {
     fn clone(&self) -> Self {
         self.copy()
@@ -82,6 +100,64 @@ impl Equivalent<Value> for WeakValue {
 
 impl Equivalent<WeakValue> for Value {
     fn equivalent(&self, other: &WeakValue) -> bool {
+        other.equivalent(self)
+    }
+}
+
+impl Equivalent<PrimitiveValue> for Value {
+    fn equivalent(&self, other: &PrimitiveValue) -> bool {
+        match (self, other) {
+            (Value::Null, PrimitiveValue::Null) => true,
+            (Value::Undefined, PrimitiveValue::Undefined) => true,
+            (Value::Number(a), PrimitiveValue::Number(b)) => a.to_bits() == b.to_bits(),
+            (Value::String(a), PrimitiveValue::String(b)) => a == b,
+            (Value::Boolean(a), PrimitiveValue::Boolean(b)) => a == b,
+            (Value::Symbol(a), PrimitiveValue::Symbol(b)) => a == b,
+            (Value::BigInt(a), PrimitiveValue::BigInt(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+impl Equivalent<Value> for PrimitiveValue {
+    fn equivalent(&self, other: &Value) -> bool {
+        other.equivalent(self)
+    }
+}
+
+impl Equivalent<PrimitiveValue> for WeakValue {
+    fn equivalent(&self, other: &PrimitiveValue) -> bool {
+        match (self, other) {
+            (Self::Null, PrimitiveValue::Null) => true,
+            (Self::Undefined, PrimitiveValue::Undefined) => true,
+            (Self::Number(a), PrimitiveValue::Number(b)) => a.to_bits() == b.to_bits(),
+            (Self::String(a), PrimitiveValue::String(b)) => a == b,
+            (Self::Boolean(a), PrimitiveValue::Boolean(b)) => a == b,
+            (Self::Symbol(a), PrimitiveValue::Symbol(b)) => a == b,
+            (Self::BigInt(a), PrimitiveValue::BigInt(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+impl Equivalent<WeakValue> for PrimitiveValue {
+    fn equivalent(&self, other: &WeakValue) -> bool {
+        other.equivalent(self)
+    }
+}
+
+impl Equivalent<ObjectOrNull> for Value {
+    fn equivalent(&self, other: &ObjectOrNull) -> bool {
+        match (self, other) {
+            (Value::Null, ObjectOrNull::Null) => true,
+            (Value::Object(a), ObjectOrNull::Object(b)) => a.equivalent(b),
+            _ => false,
+        }
+    }
+}
+
+impl Equivalent<Value> for ObjectOrNull {
+    fn equivalent(&self, other: &Value) -> bool {
         other.equivalent(self)
     }
 }
@@ -670,6 +746,29 @@ impl From<Symbol> for Value {
 impl From<&Symbol> for Value {
     fn from(s: &Symbol) -> Self {
         Self::Symbol(s.clone())
+    }
+}
+
+impl From<PrimitiveValue> for Value {
+    fn from(p: PrimitiveValue) -> Self {
+        match p {
+            PrimitiveValue::Null => Self::Null,
+            PrimitiveValue::Undefined => Self::Undefined,
+            PrimitiveValue::Number(n) => Self::Number(n),
+            PrimitiveValue::String(s) => Self::String(s),
+            PrimitiveValue::Boolean(b) => Self::Boolean(b),
+            PrimitiveValue::Symbol(s) => Self::Symbol(s),
+            PrimitiveValue::BigInt(b) => Self::BigInt(b),
+        }
+    }
+}
+
+impl From<ObjectOrNull> for Value {
+    fn from(o: ObjectOrNull) -> Self {
+        match o {
+            ObjectOrNull::Object(o) => Self::Object(o),
+            ObjectOrNull::Null => Self::Null,
+        }
     }
 }
 

@@ -36,6 +36,7 @@ use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
 use value::BoxedObj;
 use error::Location;
+use crate::value::property_key::InternalPropertyKey;
 
 pub type Value = value::Value;
 pub type WeakValue = value::WeakValue;
@@ -48,6 +49,8 @@ pub type Symbol = value::Symbol;
 pub type ObjectProperty = value::ObjectProperty;
 
 pub type GCd<T> = OwningGcGuard<'static, BoxedObj, T>;
+
+type PreHashedPropertyKey = (InternalPropertyKey, u64);
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ControlFlow {

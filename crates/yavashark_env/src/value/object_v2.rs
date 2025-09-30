@@ -5,27 +5,17 @@ use std::any::TypeId;
 use std::fmt::Debug;
 use std::ptr::NonNull;
 use yavashark_garbage::Collectable;
-
-pub struct Realm;
-
-type Value = ();
-type PrimitiveValue = ();
-type Res<T = ()> = Result<T, ()>;
-type Variable = ();
-type ObjectHandle = ();
-
-type NullableObjectHandle = Option<ObjectHandle>;
-
-type PreHashedPropertyKey = (InternalPropertyKey, u64);
+use crate::{ObjectHandle, PreHashedPropertyKey, Realm, Res};
+use crate::value::{ObjectOrNull, PrimitiveValue, Value, Variable};
 
 pub trait ObjV2: Collectable + Debug + 'static {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res;
+    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<bool>;
     fn define_property_attributes(
         &self,
         name: InternalPropertyKey,
         value: Variable,
         realm: &mut Realm,
-    ) -> Res;
+    ) -> Res<bool>;
 
     fn resolve_property(
         &self,
@@ -66,7 +56,7 @@ pub trait ObjV2: Collectable + Debug + 'static {
         name: PreHashedPropertyKey,
         value: Value,
         realm: &mut Realm,
-    ) -> Res {
+    ) -> Res<bool> {
         self.define_property(name.0, value, realm)
     }
     fn define_property_attributes_pre_hash(
@@ -74,7 +64,7 @@ pub trait ObjV2: Collectable + Debug + 'static {
         name: PreHashedPropertyKey,
         value: Variable,
         realm: &mut Realm,
-    ) -> Res {
+    ) -> Res<bool> {
         self.define_property_attributes(name.0, value, realm)
     }
 
@@ -146,8 +136,8 @@ pub trait ObjV2: Collectable + Debug + 'static {
 
     fn primitive(&self, realm: &mut Realm) -> Res<Option<PrimitiveValue>>;
 
-    fn prototype(&self, realm: &mut Realm) -> Res<NullableObjectHandle>;
-    fn set_prototype(&self, prototype: NullableObjectHandle, realm: &mut Realm) -> Res;
+    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull>;
+    fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res;
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle>; //TODO: i think this somehow needs to work differently
     fn is_constructable(&self) -> bool;
@@ -165,5 +155,10 @@ pub trait ObjV2: Collectable + Debug + 'static {
         } else {
             None
         }
+    }
+
+    unsafe fn inner_downcast_fat_ptr(&self, ty: TypeId) -> Option<NonNull<[()]>> {
+        _ = ty;
+        None
     }
 }
