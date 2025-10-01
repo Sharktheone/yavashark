@@ -12,6 +12,7 @@ mod properties_new;
 mod props;
 mod typed_array;
 mod inline_props;
+mod data_object;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -71,6 +72,15 @@ pub fn inline_props(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     inline_props::inline_props(attrs, item)
+}
+
+
+#[proc_macro_attribute]
+pub fn data_object(
+    attrs: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    data_object::data_object(attrs, item)
 }
 
 #[proc_macro]
