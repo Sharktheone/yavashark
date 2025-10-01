@@ -11,6 +11,7 @@ mod properties;
 mod properties_new;
 mod props;
 mod typed_array;
+mod inline_props;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -62,6 +63,14 @@ pub fn typed_array_run(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 pub fn typed_array_run_mut(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let output = typed_array::typed_array_run_mut(input.into());
     output.into()
+}
+
+#[proc_macro_attribute]
+pub fn inline_props(
+    attrs: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    inline_props::inline_props(attrs, item)
 }
 
 #[proc_macro]
