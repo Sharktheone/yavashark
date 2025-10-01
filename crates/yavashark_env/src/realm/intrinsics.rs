@@ -1,6 +1,7 @@
 use crate::array::{Array, ArrayIterator};
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::buf::ArrayBuffer;
 use crate::builtins::dataview::DataView;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
@@ -8,18 +9,22 @@ use crate::builtins::float64array::Float64Array;
 use crate::builtins::int16array::Int16Array;
 use crate::builtins::int32array::Int32Array;
 use crate::builtins::int8array::Int8Array;
+use crate::builtins::shared_buf::SharedArrayBuffer;
 use crate::builtins::typed_array::TypedArray;
 use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::uint8clampedarray::Uint8ClampedArray;
 use crate::builtins::unit8array::Uint8Array;
-use crate::builtins::{get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error, get_temporal, get_type_error, get_uri_error, Arguments, Atomics, BigIntObj, BooleanObj, Date, Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap, WeakRef, WeakSet, JSON};
+use crate::builtins::{
+    get_aggregate_error, get_eval_error, get_range_error, get_reference_error, get_syntax_error,
+    get_temporal, get_type_error, get_uri_error, Arguments, Atomics, BigIntObj, BooleanObj, Date,
+    Map, Math, NumberObj, Promise, Proxy, Reflect, RegExp, Set, StringObj, SymbolObj, WeakMap,
+    WeakRef, WeakSet, JSON,
+};
 use crate::error_obj::ErrorObj;
 use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Value, Variable};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
-use crate::builtins::buf::ArrayBuffer;
-use crate::builtins::shared_buf::SharedArrayBuffer;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Intrinsics {
@@ -253,7 +258,8 @@ impl Intrinsics {
         let error_constructor = error_prototype
             .get_property(&"constructor".into())
             .unwrap_or(Value::Undefined.into())
-            .value.to_object()?;
+            .value
+            .to_object()?;
 
         let type_error = get_type_error(error_prototype.clone().into(), error_constructor.clone())?;
         let range_error =
@@ -279,7 +285,6 @@ impl Intrinsics {
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
         )?;
-
 
         let data_view = DataView::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),

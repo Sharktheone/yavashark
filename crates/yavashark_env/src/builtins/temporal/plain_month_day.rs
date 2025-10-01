@@ -4,6 +4,7 @@ use crate::builtins::temporal::utils::{
     value_to_calendar_fields,
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
@@ -12,7 +13,6 @@ use temporal_rs::partial::PartialDate;
 use temporal_rs::Calendar;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]
@@ -24,9 +24,7 @@ impl PlainMonthDay {
     pub fn new(month_day: temporal_rs::PlainMonthDay, realm: &crate::Realm) -> Self {
         Self {
             inner: RefCell::new(MutablePlainMonthDay {
-                object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_month_day.clone(),
-                ),
+                object: MutObject::with_proto(realm.intrinsics.temporal_plain_month_day.clone()),
             }),
             month_day,
         }

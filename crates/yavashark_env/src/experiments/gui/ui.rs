@@ -1,11 +1,11 @@
 use super::jswidget::DynWidget;
 use crate::experiments::gui::runtime_lifetime::{RuntimeLifetime, RuntimeLifetimeGuard};
+use crate::value::Obj;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value};
 use std::any::TypeId;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use yavashark_macro::{object, props};
-use crate::value::Obj;
 
 #[object]
 pub struct Ui {

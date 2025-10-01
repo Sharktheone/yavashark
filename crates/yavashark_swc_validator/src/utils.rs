@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 
+use crate::Validator;
 use swc_ecma_ast::Stmt;
 use unicode_ident::{is_xid_continue, is_xid_start};
-use crate::Validator;
 
 #[must_use]
 pub struct PrivateNameScope;
@@ -17,12 +17,10 @@ pub struct FunctionContext {
 #[must_use]
 pub struct FunctionContextScope(Option<FunctionContext>);
 
-
 impl PrivateNameScope {
     #[allow(clippy::unused_self)]
     pub fn exit(self, validator: &mut Validator<'_>) {
         validator.private_names.pop();
-
     }
 }
 
@@ -32,19 +30,20 @@ impl FunctionContextScope {
     }
 }
 
-
 impl<'a> Validator<'a> {
-
     pub fn enter_private_name_scope(&mut self, names: HashSet<&'a str>) -> PrivateNameScope {
         self.private_names.push(names);
 
         PrivateNameScope
     }
 
-    pub fn enter_function_context(&mut self, is_async: bool, is_generator: bool) -> FunctionContextScope {
+    pub fn enter_function_context(
+        &mut self,
+        is_async: bool,
+        is_generator: bool,
+    ) -> FunctionContextScope {
         let previous = self.function_ctx;
-        let await_restricted = is_async
-            || previous.map_or(false, |ctx| ctx.await_restricted);
+        let await_restricted = is_async || previous.map_or(false, |ctx| ctx.await_restricted);
 
         let old = self.function_ctx.replace(FunctionContext {
             is_async,
@@ -92,7 +91,6 @@ impl<'a> Validator<'a> {
             .any(|scope| scope.contains(name))
     }
 }
-
 
 pub fn ensure_valid_identifier(name: &str) -> Result<(), String> {
     let mut chars = name.chars();
@@ -183,14 +181,19 @@ pub fn is_reserved_word(value: &str) -> bool {
 
 /// Returns `true` for code points listed in ECMA-262 `Other_ID_Start`.
 fn is_other_id_start(ch: char) -> bool {
-    matches!(ch, '\u{1885}' | '\u{1886}' | '\u{2118}' | '\u{212E}' | '\u{309B}' | '\u{309C}')
+    matches!(
+        ch,
+        '\u{1885}' | '\u{1886}' | '\u{2118}' | '\u{212E}' | '\u{309B}' | '\u{309C}'
+    )
 }
 
 /// Returns `true` for code points listed in ECMA-262 `Other_ID_Continue` (excluding
 /// U+200C/U+200D which are handled separately for clarity).
 fn is_other_id_continue(ch: char) -> bool {
-    matches!(ch, '\u{00B7}' | '\u{0387}' | '\u{19DA}' | '\u{2054}' | '\u{FF3F}')
-        || ('\u{1369}'..='\u{1371}').contains(&ch)
+    matches!(
+        ch,
+        '\u{00B7}' | '\u{0387}' | '\u{19DA}' | '\u{2054}' | '\u{FF3F}'
+    ) || ('\u{1369}'..='\u{1371}').contains(&ch)
         || ('\u{203F}'..='\u{2040}').contains(&ch)
         || ('\u{FE33}'..='\u{FE34}').contains(&ch)
         || ('\u{FE4D}'..='\u{FE4F}').contains(&ch)

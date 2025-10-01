@@ -4,8 +4,8 @@ use swc_common::Spanned;
 use swc_ecma_ast::TaggedTpl;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 use yavashark_env::value::Obj;
+use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_tagged_tpl(realm: &mut Realm, stmt: &TaggedTpl, scope: &mut Scope) -> RuntimeResult {

@@ -11,12 +11,12 @@ use tokio::sync::Notify;
 use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
 use yavashark_env::builtins::Arguments;
 use yavashark_env::conversion::downcast_obj;
+use yavashark_env::error::Error;
 use yavashark_env::scope::Scope;
+use yavashark_env::value::{Func, Obj};
 use yavashark_env::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use yavashark_env::value::{Func, Obj};
-use yavashark_env::error::Error;
 
 #[object(function)]
 #[derive(Debug)]
@@ -36,9 +36,7 @@ impl AsyncGeneratorFunction {
     ) -> Self {
         Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
-                object: MutObject::with_proto(
-                    realm.intrinsics.async_generator_function.clone(),
-                ),
+                object: MutObject::with_proto(realm.intrinsics.async_generator_function.clone()),
             }),
             code,
             scope,
@@ -50,9 +48,7 @@ impl AsyncGeneratorFunction {
     pub fn empty(realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableAsyncGeneratorFunction {
-                object: MutObject::with_proto(
-                    realm.intrinsics.async_generator_function.clone(),
-                ),
+                object: MutObject::with_proto(realm.intrinsics.async_generator_function.clone()),
             }),
             code: Rc::new(BytecodeFunctionCode::default()),
             scope: Scope::new(realm, PathBuf::new()),

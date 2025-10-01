@@ -1,8 +1,8 @@
+use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use std::fs;
 use yavashark_macro::{object, properties_new};
-use crate::value::Obj;
 
 #[object]
 #[derive(Debug)]

@@ -4,12 +4,12 @@ use swc_common::Span;
 use swc_ecma_ast::{
     BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
 };
+use yavashark_env::value::Obj;
 use yavashark_env::{
     scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
     Variable,
 };
 use yavashark_string::YSString;
-use yavashark_env::value::Obj;
 
 use crate::Interpreter;
 
@@ -21,7 +21,9 @@ pub fn create_class(
 ) -> Res<(JSClass, Vec<BlockStmt>)> {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
-        let p = super_class.get_property(&"prototype".into(), realm)?.to_object()?;
+        let p = super_class
+            .get_property(&"prototype".into(), realm)?
+            .to_object()?;
 
         (
             JSClass::with_super(super_class.to_object()?, name.clone())?,

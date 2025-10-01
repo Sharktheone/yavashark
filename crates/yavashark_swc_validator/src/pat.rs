@@ -2,7 +2,6 @@ use crate::Validator;
 use swc_ecma_ast::{ArrayPat, ObjectPat, ObjectPatProp, Pat};
 
 impl<'a> Validator<'a> {
-
     pub fn validate_pat(&mut self, pat: &'a Pat) -> Result<(), String> {
         self.validate_pat_internal(pat, &mut None)
     }
@@ -13,7 +12,11 @@ impl<'a> Validator<'a> {
         self.validate_pat_internal(pat, &mut idents)
     }
 
-    pub fn validate_pat_internal(&mut self, pat: &'a Pat, idents: &mut Option<Vec<&'a str>>) -> Result<(), String> {
+    pub fn validate_pat_internal(
+        &mut self,
+        pat: &'a Pat,
+        idents: &mut Option<Vec<&'a str>>,
+    ) -> Result<(), String> {
         match pat {
             Pat::Ident(ident) => {
                 if let Some(idents) = idents {
@@ -22,22 +25,20 @@ impl<'a> Validator<'a> {
                     }
 
                     if idents.contains(&&*ident.id.sym) {
-                        return Err(format!("Identifier '{}' has already been declared", ident.id.sym));
+                        return Err(format!(
+                            "Identifier '{}' has already been declared",
+                            ident.id.sym
+                        ));
                     }
 
                     idents.push(&ident.id.sym);
                 }
 
-
                 self.validate_ident(&ident.id)?;
-            },
-            Pat::Array(array) => {
-                self.validate_array_pat(array, idents)?
             }
+            Pat::Array(array) => self.validate_array_pat(array, idents)?,
             Pat::Rest(rest) => self.validate_pat_internal(&rest.arg, idents)?,
-            Pat::Object(object) => {
-                self.validate_object_pat(object, idents)?
-            }
+            Pat::Object(object) => self.validate_object_pat(object, idents)?,
             Pat::Assign(assign) => {
                 self.validate_pat_internal(&assign.left, idents)?;
                 self.validate_expr(&assign.right)?;
@@ -49,12 +50,18 @@ impl<'a> Validator<'a> {
         Ok(())
     }
 
-    pub fn validate_object_pat(&mut self, object: &'a ObjectPat, idents: &mut Option<Vec<&'a str>>) -> Result<(), String> {
+    pub fn validate_object_pat(
+        &mut self,
+        object: &'a ObjectPat,
+        idents: &mut Option<Vec<&'a str>>,
+    ) -> Result<(), String> {
         let mut assert_last = false;
 
         for prop in &object.props {
             if assert_last {
-                return Err("Object rest element must be last element in object pattern".to_string());
+                return Err(
+                    "Object rest element must be last element in object pattern".to_string()
+                );
             }
 
             match prop {
@@ -74,7 +81,11 @@ impl<'a> Validator<'a> {
         Ok(())
     }
 
-    pub fn validate_array_pat(&mut self, array: &'a ArrayPat, idents: &mut Option<Vec<&'a str>>) -> Result<(), String> {
+    pub fn validate_array_pat(
+        &mut self,
+        array: &'a ArrayPat,
+        idents: &mut Option<Vec<&'a str>>,
+    ) -> Result<(), String> {
         let mut assert_last = false;
 
         for elem in &array.elems {
@@ -94,7 +105,6 @@ impl<'a> Validator<'a> {
         Ok(())
     }
 }
-
 
 // pub fn pattern_has_initializer(pat: &Pat) -> bool {
 //     match pat {

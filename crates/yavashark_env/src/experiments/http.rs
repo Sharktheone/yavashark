@@ -1,13 +1,13 @@
 mod status;
 
 use crate::experiments::http::status::status_code_to_reason;
+use crate::value::{IntoValue, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use std::fmt::Write;
 use std::io::{BufRead, BufReader, Read, Write as _};
 use std::{io, mem};
 use yavashark_macro::{object, properties_new};
-use crate::value::{IntoValue, Obj};
 
 #[object]
 #[derive(Debug)]

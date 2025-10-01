@@ -1,7 +1,7 @@
+use crate::error::ErrorKind;
 use crate::print::PrettyPrint;
 use crate::Error;
 use std::fmt::Write;
-use crate::error::ErrorKind;
 
 impl PrettyPrint for Error {
     fn pretty_print_key(&self) -> String {

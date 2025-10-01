@@ -1,8 +1,8 @@
-use num_traits::ToPrimitive;
 use crate::error::Error;
-use crate::Realm;
-use crate::value::{Hint, Value};
 use crate::value::ops::BigIntOrNumber;
+use crate::value::{Hint, Value};
+use crate::Realm;
+use num_traits::ToPrimitive;
 
 impl Value {
     pub fn exp(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {

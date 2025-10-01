@@ -2,9 +2,9 @@ use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
+use crate::value::{Constructor, Func};
 use yavashark_macro::object;
 use yavashark_string::YSString;
-use crate::value::{Constructor, Func};
 
 use crate::realm::Realm;
 use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};

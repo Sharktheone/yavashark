@@ -1,16 +1,16 @@
 mod from_bytes;
 
-use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::builtins::buf::ArrayBuffer;
+use crate::builtins::dataview::from_bytes::FromBytes;
 use crate::conversion::downcast_obj;
-use crate::{GCd, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
-use num_bigint::BigInt;
-use num_traits::{ToPrimitive};
-use std::cell::RefCell;
-use half::f16;
-use yavashark_macro::{object, properties_new};
-use crate::value::{Constructor, Obj};
 use crate::error::Error;
+use crate::value::{Constructor, Obj};
+use crate::{GCd, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use half::f16;
+use num_bigint::BigInt;
+use num_traits::ToPrimitive;
+use std::cell::RefCell;
+use yavashark_macro::{object, properties_new};
 
 #[object]
 #[derive(Debug)]
@@ -104,11 +104,9 @@ impl DataView {
 
         let offset = self.byte_offset + offset;
 
-
         if slice.len() < self.byte_offset + self.byte_length {
             return Err(Error::ty("ArrayBuffer is detached"));
         }
-
 
         let bytes = T::to_bytes(value, le);
         let Some(slice) = slice.get_mut(offset..offset + T::N_BYTES) else {
@@ -137,7 +135,6 @@ impl DataView {
     pub fn buffer(&self) -> Value {
         self.buffer.gc().into()
     }
-
 
     #[prop("getFloat16")]
     pub fn get_float16(&self, offset: usize, little: Option<bool>) -> ValueResult {
@@ -237,7 +234,6 @@ impl DataView {
 
         Ok(Value::Undefined)
     }
-
 
     #[prop("setFloat32")]
     pub fn set_float32(&self, offset: usize, value: f32, little: Option<bool>) -> ValueResult {

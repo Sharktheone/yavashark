@@ -1,11 +1,10 @@
+use crate::Value;
 use half::f16;
 use num_bigint::BigInt;
-use crate::Value;
 
 pub(crate) trait ArrayNumberToValue {
     fn to_value(&self) -> Value;
 }
-
 
 impl ArrayNumberToValue for u8 {
     fn to_value(&self) -> Value {

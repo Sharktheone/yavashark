@@ -1,7 +1,7 @@
 use crate::error::Error;
-use crate::Realm;
-use crate::value::{Hint, Value};
 use crate::value::ops::BigIntOrNumber;
+use crate::value::{Hint, Value};
+use crate::Realm;
 
 impl Value {
     pub fn add(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {

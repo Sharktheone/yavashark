@@ -1,11 +1,11 @@
 use crate::utils::ProtoDefault;
+use crate::value::{fmt_num, Constructor, Func, Obj};
 use crate::{MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use num_bigint::Sign;
 use num_traits::ToPrimitive;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use crate::value::{fmt_num, Constructor, Func, Obj};
 
 #[object]
 #[derive(Debug)]

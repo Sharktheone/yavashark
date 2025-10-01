@@ -1,8 +1,8 @@
-use std::cell::{Ref, RefCell, RefMut};
-use yavashark_macro::{object, props};
+use crate::array::convert_index;
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
-use crate::array::convert_index;
+use std::cell::{Ref, RefCell, RefMut};
+use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
@@ -18,7 +18,6 @@ impl ArrayBuffer {
         if len > Self::ALLOC_MAX {
             return Err(Error::range("length too large"));
         }
-
 
         let buffer = vec![0; len];
 
@@ -152,7 +151,6 @@ impl ArrayBuffer {
         Ok(Self::from_buffer(realm, buffer.to_vec()).into_value())
     }
 
-
     fn transfer(&self, realm: &mut Realm) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
@@ -162,7 +160,6 @@ impl ArrayBuffer {
 
         Ok(Self::from_buffer(realm, buf).into_value())
     }
-
 
     #[prop("transferToFixedLength")]
     fn transfer_to_fixed_length(&self, new_len: Option<usize>, realm: &mut Realm) -> ValueResult {
@@ -175,8 +172,6 @@ impl ArrayBuffer {
         if let Some(new_len) = new_len {
             buf.resize(new_len, 0);
         }
-
-
 
         Ok(Self::from_buffer(realm, buf).into_value())
     }

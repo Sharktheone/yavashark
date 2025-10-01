@@ -8,9 +8,9 @@ use yavashark_env::builtins::Promise;
 use yavashark_env::conversion::downcast_obj;
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::task_queue::{AsyncTask, AsyncTaskQueue};
+use yavashark_env::value::{BoxedObj, Obj};
 use yavashark_env::{Object, ObjectHandle, Realm, Res, Value};
 use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
-use yavashark_env::value::{BoxedObj, Obj};
 
 pub struct AsyncGeneratorTask {
     state: Option<VmState>,

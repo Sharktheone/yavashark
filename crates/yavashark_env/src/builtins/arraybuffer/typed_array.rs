@@ -1,22 +1,9 @@
 mod conv;
 
 use crate::array::{convert_index, Array, ArrayIterator, MutableArrayIterator};
-use crate::builtins::buf::ArrayBuffer;
-use crate::conversion::downcast_obj;
-use crate::utils::ValueIterator;
-use crate::{Error, GCd, MutObject, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
-use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
-use half::f16;
-use num_traits::{FromPrimitive, ToPrimitive};
-use std::cell::{Cell, RefCell};
-use std::fmt::Debug;
-use std::ops::{Deref, DerefMut, Range};
-use conv::to_value;
-use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
-use crate::value::{MutObj, Obj};
-use crate::value::property_key::InternalPropertyKey;
 use crate::builtins::bigint64array::BigInt64Array;
 use crate::builtins::biguint64array::BigUint64Array;
+use crate::builtins::buf::ArrayBuffer;
 use crate::builtins::float16array::Float16Array;
 use crate::builtins::float32array::Float32Array;
 use crate::builtins::float64array::Float64Array;
@@ -26,6 +13,21 @@ use crate::builtins::int8array::Int8Array;
 use crate::builtins::uint16array::Uint16Array;
 use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::unit8array::Uint8Array;
+use crate::conversion::downcast_obj;
+use crate::utils::ValueIterator;
+use crate::value::property_key::InternalPropertyKey;
+use crate::value::{MutObj, Obj};
+use crate::{
+    Error, GCd, MutObject, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Variable,
+};
+use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
+use conv::to_value;
+use half::f16;
+use num_traits::{FromPrimitive, ToPrimitive};
+use std::cell::{Cell, RefCell};
+use std::fmt::Debug;
+use std::ops::{Deref, DerefMut, Range};
+use yavashark_macro::{props, typed_array_run, typed_array_run_mut};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Type {
@@ -83,7 +85,6 @@ unsafe impl<T: AnyBitPattern> AnyBitPattern for Packed<T> {}
 
 unsafe impl<T: NoUninit> NoUninit for Packed<T> {}
 
-
 #[derive(Debug)]
 pub struct TypedArray {
     pub byte_offset: usize,
@@ -92,21 +93,21 @@ pub struct TypedArray {
     pub buffer: GCd<ArrayBuffer>,
     pub ty: Type,
 
-    pub inner: RefCell<MutObject>
+    pub inner: RefCell<MutObject>,
 }
 
 impl crate::value::ObjectImpl for TypedArray {
     type Inner = MutObject;
 
-    fn get_wrapped_object(&self) -> impl DerefMut<Target=impl MutObj> {
+    fn get_wrapped_object(&self) -> impl DerefMut<Target = impl MutObj> {
         self.inner.borrow_mut()
     }
 
-    fn get_inner(&self) -> impl Deref<Target=Self::Inner> {
+    fn get_inner(&self) -> impl Deref<Target = Self::Inner> {
         self.inner.borrow()
     }
 
-    fn get_inner_mut(&self) -> impl DerefMut<Target=Self::Inner> {
+    fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }
 
@@ -118,18 +119,18 @@ impl crate::value::ObjectImpl for TypedArray {
         let key = InternalPropertyKey::from(name);
 
         if let InternalPropertyKey::Index(idx) = key {
-                typed_array_run_mut!({
-                    let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
-                        .ok_or(Error::ty("Failed to convert to value"))?;
+            typed_array_run_mut!({
+                let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
+                    .ok_or(Error::ty("Failed to convert to value"))?;
 
-                    if let Some(slot) = slice.get_mut(idx) {
-                        slot.0 = value;
-                    } else {
-                        return Err(Error::range("Index out of bounds"));
-                    }
-                });
+                if let Some(slot) = slice.get_mut(idx) {
+                    slot.0 = value;
+                } else {
+                    return Err(Error::range("Index out of bounds"));
+                }
+            });
 
-                Ok(())
+            Ok(())
         } else {
             self.get_wrapped_object().define_property(key.into(), value)
         }
@@ -168,7 +169,6 @@ impl crate::value::ObjectImpl for TypedArray {
                 return self.get_wrapped_object().get_property(name);
             }
 
-
             typed_array_run!({
                 return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
             });
@@ -200,7 +200,7 @@ impl crate::value::ObjectImpl for TypedArray {
 
         let key = InternalPropertyKey::from(name);
         if matches!(key, InternalPropertyKey::Index(_)) {
-            return Ok(())
+            return Ok(());
         }
 
         self.get_wrapped_object().define_getter(key.into(), value)
@@ -213,7 +213,7 @@ impl crate::value::ObjectImpl for TypedArray {
 
         let key = InternalPropertyKey::from(name);
         if matches!(key, InternalPropertyKey::Index(_)) {
-            return Ok(())
+            return Ok(());
         }
 
         self.get_wrapped_object().define_setter(key.into(), value)
@@ -226,7 +226,7 @@ impl crate::value::ObjectImpl for TypedArray {
 
         let key = InternalPropertyKey::from(name.copy());
         if matches!(key, InternalPropertyKey::Index(_)) {
-            return Ok(None)
+            return Ok(None);
         }
 
         self.get_wrapped_object().delete_property(&key.into())
@@ -270,7 +270,11 @@ impl crate::value::ObjectImpl for TypedArray {
         }
 
         let mut props = typed_array_run!({
-            slice.iter().enumerate().map(|(i, x)| (i.into(), to_value(x.0))).collect::<Vec<_>>()
+            slice
+                .iter()
+                .enumerate()
+                .map(|(i, x)| (i.into(), to_value(x.0)))
+                .collect::<Vec<_>>()
         });
 
         props.append(&mut self.get_wrapped_object().properties()?);
@@ -284,7 +288,11 @@ impl crate::value::ObjectImpl for TypedArray {
         }
 
         let mut keys = typed_array_run!({
-            slice.iter().enumerate().map(|(i, _)| i.into()).collect::<Vec<_>>()
+            slice
+                .iter()
+                .enumerate()
+                .map(|(i, _)| i.into())
+                .collect::<Vec<_>>()
         });
 
         keys.append(&mut self.get_wrapped_object().keys()?);
@@ -297,9 +305,8 @@ impl crate::value::ObjectImpl for TypedArray {
             return self.get_wrapped_object().values();
         }
 
-        let mut values = typed_array_run!({
-            slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>()
-        });
+        let mut values =
+            typed_array_run!({ slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>() });
 
         values.append(&mut self.get_wrapped_object().values()?);
 
@@ -311,9 +318,7 @@ impl crate::value::ObjectImpl for TypedArray {
             return self.get_wrapped_object().get_array_or_done(index);
         }
 
-        typed_array_run!({
-            Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0))))
-        })
+        typed_array_run!({ Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))) })
     }
 }
 
@@ -372,10 +377,8 @@ impl TypedArray {
     }
 
     pub fn from_buffer(realm: &Realm, buffer: ArrayBuffer, ty: Type) -> Res<Self> {
-
         let buffer = buffer.into_value();
         let buffer = downcast_obj::<ArrayBuffer>(buffer)?;
-
 
         Ok(Self {
             inner: RefCell::new(MutObject::with_proto(realm.intrinsics.typed_array.clone())),
@@ -393,7 +396,6 @@ impl TypedArray {
             return Err(Error::ty("TypedArray detached"));
         }
 
-
         let mut end = if self.opt_byte_length == usize::MAX {
             start + self.opt_byte_length.min(slice.len() - start)
         } else if self.opt_byte_length > slice.len() - start {
@@ -404,9 +406,7 @@ impl TypedArray {
 
         end -= end % self.ty.size();
 
-        Ok(slice
-            .get(start..end)
-            .unwrap_or_default())
+        Ok(slice.get(start..end).unwrap_or_default())
     }
 
     pub fn apply_offsets_mut<'a>(&self, slice: &'a mut [u8]) -> Res<&'a mut [u8]> {
@@ -426,10 +426,7 @@ impl TypedArray {
 
         end -= end % self.ty.size();
 
-
-        Ok(slice
-            .get_mut(start..end)
-            .unwrap_or_default())
+        Ok(slice.get_mut(start..end).unwrap_or_default())
     }
 
     pub fn to_value_vec(&self) -> Res<Vec<Value>> {
@@ -475,7 +472,6 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
     let mut buffer = Vec::with_capacity(len);
 
     for item in items {
-
         match ty {
             Type::U8 => {
                 buffer.push(item.to_number(realm)? as u8);
@@ -487,7 +483,9 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
                 buffer.extend_from_slice(&(item.to_number(realm)? as u32).to_le_bytes());
             }
             Type::U64 => {
-                buffer.extend_from_slice(&(item.to_big_int(realm)?.to_u64().unwrap_or_default()).to_le_bytes());
+                buffer.extend_from_slice(
+                    &(item.to_big_int(realm)?.to_u64().unwrap_or_default()).to_le_bytes(),
+                );
             }
             Type::I8 => {
                 buffer.extend_from_slice(&(item.to_number(realm)? as i8).to_le_bytes());
@@ -499,7 +497,9 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
                 buffer.extend_from_slice(&(item.to_number(realm)? as i32).to_le_bytes());
             }
             Type::I64 => {
-                buffer.extend_from_slice(&(item.to_big_int(realm)?.to_i64().unwrap_or_default()).to_le_bytes());
+                buffer.extend_from_slice(
+                    &(item.to_big_int(realm)?.to_i64().unwrap_or_default()).to_le_bytes(),
+                );
             }
             Type::F16 => {
                 buffer.extend_from_slice(&(f16::from_f64(item.to_number(realm)?)).to_le_bytes());
@@ -576,19 +576,27 @@ impl TypedArray {
         Ok(typed_array_run!({
             let idx = convert_index(idx, slice.len());
 
-            slice
-                .get(idx)
-                .map_or(Value::Undefined, |x| to_value(x.0))
+            slice.get(idx).map_or(Value::Undefined, |x| to_value(x.0))
         }))
     }
 
     #[prop("copyWithin")]
-    pub fn copy_within(&self, target: isize, start: isize, end: Option<isize>, this: Value) -> ValueResult {
-        fn oob(target: isize, start: isize, end: Option<isize>, len: usize) -> Option<(Range<usize>, usize)> {
+    pub fn copy_within(
+        &self,
+        target: isize,
+        start: isize,
+        end: Option<isize>,
+        this: Value,
+    ) -> ValueResult {
+        fn oob(
+            target: isize,
+            start: isize,
+            end: Option<isize>,
+            len: usize,
+        ) -> Option<(Range<usize>, usize)> {
             let target = convert_index(target, len);
             let start = convert_index(start, len);
             let end = end.map(|end| convert_index(end, len));
-
 
             if target >= len {
                 return None;
@@ -673,8 +681,8 @@ impl TypedArray {
             let start = start.map_or(0, |start| convert_index(start, len));
             let end = end.map_or(len, |end| convert_index(end, len));
 
-            let value: TY = FromPrimitive::from_f64(num)
-                .ok_or(Error::ty("Failed to convert to value"))?;
+            let value: TY =
+                FromPrimitive::from_f64(num).ok_or(Error::ty("Failed to convert to value"))?;
 
             for val in slice
                 .get_mut(start..end)
@@ -869,11 +877,14 @@ impl TypedArray {
         Ok(())
     }
 
-    pub fn includes(&self, search_element: &Value, from_index: Option<isize>, realm: &mut Realm) -> Res<bool> {
+    pub fn includes(
+        &self,
+        search_element: &Value,
+        from_index: Option<isize>,
+        realm: &mut Realm,
+    ) -> Res<bool> {
         let search_element = search_element.to_numeric(realm)?;
         let search_element = search_element.to_f64().unwrap_or_default();
-
-
 
         typed_array_run!({
             let len = slice.len();
@@ -895,7 +906,12 @@ impl TypedArray {
     }
 
     #[prop("indexOf")]
-    pub fn index_of(&self, search_element: &Value, from_index: Option<isize>, realm: &mut Realm) -> Res<isize> {
+    pub fn index_of(
+        &self,
+        search_element: &Value,
+        from_index: Option<isize>,
+        realm: &mut Realm,
+    ) -> Res<isize> {
         let search_element = search_element.to_numeric(realm)?;
         let search_element = search_element.to_f64().unwrap_or_default();
 
@@ -906,7 +922,12 @@ impl TypedArray {
             let num: TY = FromPrimitive::from_f64(search_element)
                 .ok_or(Error::ty("Failed to convert to value"))?;
 
-            for (idx, x) in slice.get(from_index..).unwrap_or_default().iter().enumerate() {
+            for (idx, x) in slice
+                .get(from_index..)
+                .unwrap_or_default()
+                .iter()
+                .enumerate()
+            {
                 let n = x.0;
                 if n == num {
                     return Ok((idx + from_index) as isize);
@@ -940,7 +961,8 @@ impl TypedArray {
 
     #[prop("keys")]
     pub fn keys_js(&self, #[realm] realm: &Realm) -> Res<ObjectHandle> {
-        let array = Array::with_elements(realm, (0..self.get_length()).map(Into::into).collect())?.into_object();
+        let array = Array::with_elements(realm, (0..self.get_length()).map(Into::into).collect())?
+            .into_object();
 
         let iter = ArrayIterator {
             inner: RefCell::new(MutableArrayIterator {
@@ -955,10 +977,14 @@ impl TypedArray {
     }
 
     #[prop("lastIndexOf")]
-    pub fn last_index_of(&self, search_element: Value, from_index: Option<isize>, realm: &mut Realm) -> Res<isize> {
+    pub fn last_index_of(
+        &self,
+        search_element: Value,
+        from_index: Option<isize>,
+        realm: &mut Realm,
+    ) -> Res<isize> {
         let search_element = search_element.to_numeric(realm)?;
         let search_element = search_element.to_f64().unwrap_or_default();
-
 
         typed_array_run!({
             let len = slice.len();
@@ -967,7 +993,13 @@ impl TypedArray {
             let num: TY = FromPrimitive::from_f64(search_element)
                 .ok_or(Error::ty("Failed to convert to value"))?;
 
-            for (idx, x) in slice.get(0..=from_index as usize).unwrap_or_default().iter().enumerate().rev() {
+            for (idx, x) in slice
+                .get(0..=from_index as usize)
+                .unwrap_or_default()
+                .iter()
+                .enumerate()
+                .rev()
+            {
                 let n = x.0;
                 if n == num {
                     return Ok(idx as isize);
@@ -1023,19 +1055,16 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-
         let mut acc;
 
         typed_array_run!({
             let owned = slice.to_vec();
             drop(slice0);
 
-
             let iter = owned.into_iter().enumerate();
 
             if let Some(initial) = initial_value {
                 acc = initial;
-
             } else {
                 let Some((_, first_val)) = iter.clone().next() else {
                     return Ok(Value::Undefined);
@@ -1066,19 +1095,16 @@ impl TypedArray {
             return Err(Error::ty("Callback is not a function"));
         }
 
-
         let mut acc;
 
         typed_array_run!({
             let owned = slice.to_vec();
             drop(slice0);
 
-
             let iter = owned.into_iter().enumerate().rev();
 
             if let Some(initial) = initial_value {
                 acc = initial;
-
             } else {
                 let Some((_, first_val)) = iter.clone().next() else {
                     return Ok(Value::Undefined);
@@ -1203,7 +1229,12 @@ impl TypedArray {
     }
 
     #[length(1)]
-    pub fn sort(&self, #[this] array: Value, #[realm] realm: &mut Realm, compare_fn: Option<ObjectHandle>) -> Res<Value> {
+    pub fn sort(
+        &self,
+        #[this] array: Value,
+        #[realm] realm: &mut Realm,
+        compare_fn: Option<ObjectHandle>,
+    ) -> Res<Value> {
         if let Some(compare_fn) = &compare_fn {
             if !compare_fn.is_function() {
                 return Err(Error::ty("Compare function is not a function"));
@@ -1238,12 +1269,12 @@ impl TypedArray {
                     }
                 });
 
-
                 let mut slice0 = self.buffer.get_slice_mut()?;
 
                 let slice = self.apply_offsets_mut(&mut slice0)?;
 
-                let slice = bytemuck::try_cast_slice_mut::<u8, Packed<TY>>(slice).map_err(bytemuck_err)?;
+                let slice =
+                    bytemuck::try_cast_slice_mut::<u8, Packed<TY>>(slice).map_err(bytemuck_err)?;
 
                 slice.copy_from_slice(&vec);
             } else {
@@ -1258,7 +1289,12 @@ impl TypedArray {
         Ok(array)
     }
 
-    pub fn subarray(&self, start: isize, end: Option<isize>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn subarray(
+        &self,
+        start: isize,
+        end: Option<isize>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let len = self.get_length();
 
         let start = convert_index(start, len);
@@ -1267,8 +1303,14 @@ impl TypedArray {
         let byte_offset = self.byte_offset + start * self.ty.size();
         let length = end.saturating_sub(start);
 
-        TypedArray::new(realm, self.buffer.gc().into(), Some(byte_offset), Some(length), self.ty)
-            .map(|ta| ta.into_object())
+        TypedArray::new(
+            realm,
+            self.buffer.gc().into(),
+            Some(byte_offset),
+            Some(length),
+            self.ty,
+        )
+        .map(|ta| ta.into_object())
     }
 
     #[prop("toLocaleString")]
@@ -1291,7 +1333,6 @@ impl TypedArray {
         Ok(str)
     }
 
-
     #[prop("toReversed")]
     pub fn to_reversed(&self, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
         let results;
@@ -1301,8 +1342,6 @@ impl TypedArray {
             owned.reverse();
 
             results = try_cast_vec::<Packed<TY>, u8>(owned).map_err(|(e, _)| bytemuck_err(e))?;
-
-
         });
 
         create_ta(realm, self.ty, results)
@@ -1310,7 +1349,11 @@ impl TypedArray {
 
     #[prop("toSorted")]
     #[length(1)]
-    pub fn to_sorted(&self, #[realm] realm: &mut Realm, compare_fn: Option<ObjectHandle>) -> Res<ObjectHandle> {
+    pub fn to_sorted(
+        &self,
+        #[realm] realm: &mut Realm,
+        compare_fn: Option<ObjectHandle>,
+    ) -> Res<ObjectHandle> {
         if let Some(compare_fn) = &compare_fn {
             if !compare_fn.is_function() {
                 return Err(Error::ty("Compare function is not a function"));
@@ -1393,12 +1436,7 @@ impl TypedArray {
         Ok(iter.into_object())
     }
 
-    pub fn with(
-        &self,
-        #[realm] realm: &mut Realm,
-        index: isize,
-        value: f64,
-    ) -> Res<ObjectHandle> {
+    pub fn with(&self, #[realm] realm: &mut Realm, index: isize, value: f64) -> Res<ObjectHandle> {
         let mut bytes = Vec::new();
 
         typed_array_run!({
@@ -1417,7 +1455,6 @@ impl TypedArray {
 
         create_ta(realm, self.ty, bytes)
     }
-
 
     #[prop(crate::Symbol::ITERATOR)]
     #[allow(clippy::unused_self)]
@@ -1439,12 +1476,10 @@ impl TypedArray {
     }
 }
 
-
 fn create_ta(realm: &mut Realm, ty: Type, bytes: Vec<u8>) -> Res<ObjectHandle> {
     let buffer = ArrayBuffer::from_buffer(realm, bytes);
 
     let ta = TypedArray::from_buffer(realm, buffer, ty)?;
-
 
     Ok(match ty {
         Type::U8 => Uint8Array::new(realm, ta)?.into_object(),
@@ -1463,7 +1498,6 @@ fn create_ta(realm: &mut Realm, ty: Type, bytes: Vec<u8>) -> Res<ObjectHandle> {
 
 fn extend_as_bytes(bytes: &mut Vec<u8>, value: Value, ty: Type) -> Res<()> {
     let value = value.to_number_or_null();
-
 
     match ty {
         Type::U8 => {
@@ -1503,8 +1537,6 @@ fn extend_as_bytes(bytes: &mut Vec<u8>, value: Value, ty: Type) -> Res<()> {
 
     Ok(())
 }
-
-
 
 fn bytemuck_err(err: bytemuck::PodCastError) -> Error {
     Error::new_error(err.to_string())

@@ -7,7 +7,9 @@ impl<'a> Validator<'a> {
         self.validate_expr(&do_while.test)?;
 
         if single_stmt_contains_decl(&do_while.body) {
-            return Err("Lexical declaration cannot appear in a single-statement context".to_string());
+            return Err(
+                "Lexical declaration cannot appear in a single-statement context".to_string(),
+            );
         }
 
         self.validate_statement(&do_while.body)

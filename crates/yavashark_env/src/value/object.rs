@@ -1,4 +1,8 @@
+pub use super::object_impl::*;
 use super::{Attributes, IntoValue, IntoValueRef, Value, Variable};
+use crate::error::Error;
+use crate::{Realm, Res, Symbol, ValueResult};
+use indexmap::Equivalent;
 use std::any::{Any, TypeId};
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
@@ -6,12 +10,8 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
-use indexmap::Equivalent;
 use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard, Weak};
 use yavashark_string::{ToYSString, YSString};
-use crate::error::Error;
-use crate::{Realm, Res, Symbol, ValueResult};
-pub use super::object_impl::*;
 
 pub trait AsAny {
     fn as_any_mut(&mut self) -> &mut dyn Any;
@@ -82,12 +82,7 @@ pub trait Obj: Debug + AsAny + Any + 'static {
     fn clear_values(&self) -> Res;
 
     #[allow(unused_variables)]
-    fn call(
-        &self,
-        realm: &mut Realm,
-        args: Vec<Value>,
-        this: Value,
-    ) -> ValueResult {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         Err(Error::ty_error(format!(
             "{} is not a function",
             self.name()
@@ -169,7 +164,7 @@ pub trait MutObj: Debug + AsAny + 'static {
     fn contains_key(&self, name: &Value) -> Res<bool, Error> {
         Ok(self.get_property(name)?.is_some())
     }
-    
+
     fn has_key(&self, name: &Value) -> Res<bool> {
         Ok(self.resolve_property(name)?.is_some())
     }
@@ -191,12 +186,7 @@ pub trait MutObj: Debug + AsAny + 'static {
     fn clear_values(&mut self) -> Res;
 
     #[allow(unused_variables)]
-    fn call(
-        &mut self,
-        realm: &mut Realm,
-        args: Vec<Value>,
-        this: Value,
-    ) -> ValueResult {
+    fn call(&mut self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         Err(Error::ty_error(format!(
             "{} is not a function",
             self.name()
@@ -419,11 +409,7 @@ impl PartialEq for Object {
 }
 
 impl Object {
-    pub fn resolve_property(
-        &self,
-        name: &Value,
-        realm: &mut Realm,
-    ) -> Res<Option<Value>> {
+    pub fn resolve_property(&self, name: &Value, realm: &mut Realm) -> Res<Option<Value>> {
         let Some(p) = self.0.resolve_property(name)? else {
             return Ok(None);
         };
@@ -431,12 +417,7 @@ impl Object {
         p.get(Value::Object(self.clone()), realm).map(Some)
     }
 
-    pub fn call_method(
-        &self,
-        name: &Value,
-        realm: &mut Realm,
-        args: Vec<Value>,
-    ) -> ValueResult {
+    pub fn call_method(&self, name: &Value, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
         let method = self.resolve_property(name, realm)?.ok_or_else(|| {
             let name = match name.to_string(realm) {
                 Ok(name) => name,
@@ -452,10 +433,7 @@ impl Object {
 
         method.call(realm, args, self.clone().into())
     }
-    pub fn resolve_property_no_get_set(
-        &self,
-        name: &Value,
-    ) -> Res<Option<ObjectProperty>> {
+    pub fn resolve_property_no_get_set(&self, name: &Value) -> Res<Option<ObjectProperty>> {
         self.0.resolve_property(name)
     }
 
@@ -515,11 +493,7 @@ impl Object {
             })
     }
 
-    pub fn get_opt(
-        &self,
-        name: impl IntoValueRef,
-        realm: &mut Realm,
-    ) -> Res<Option<Value>> {
+    pub fn get_opt(&self, name: impl IntoValueRef, realm: &mut Realm) -> Res<Option<Value>> {
         let name = name.into_value_ref();
 
         self.0
@@ -613,12 +587,10 @@ impl Object {
         WeakObject::new(self)
     }
 
-
     #[must_use]
     pub fn gc_ref(&self) -> Option<GcRef<BoxedObj>> {
         Some(self.get_ref())
     }
-
 }
 
 impl From<Box<dyn Obj>> for Object {

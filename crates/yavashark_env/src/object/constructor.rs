@@ -2,12 +2,12 @@ use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
 use crate::utils::coerce_object;
+use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull};
 
 #[object(constructor, function)]
 #[derive(Debug)]

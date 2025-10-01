@@ -1,8 +1,8 @@
+use crate::error::Error;
+use crate::value::{BoxedObj, Obj, ObjectProperty, Value};
+use crate::Realm;
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
-use crate::error::Error;
-use crate::Realm;
-use crate::value::{BoxedObj, Obj, ObjectProperty, Value};
 
 pub trait Constructor: Debug + Obj {
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<Value, Error>;
@@ -20,8 +20,7 @@ pub trait Constructor: Debug + Obj {
 
 pub trait ConstructorFn: Debug {
     fn gc_untyped_ref(&self) -> Option<GcRef<BoxedObj>>;
-    fn construct(&self, args: Vec<Value>, this: Value, realm: &mut Realm)
-        -> Result<(), Error>;
+    fn construct(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<(), Error>;
 }
 
 #[derive(Debug)]
@@ -32,12 +31,7 @@ impl ConstructorFn for NoOpConstructorFn {
         None
     }
 
-    fn construct(
-        &self,
-        _args: Vec<Value>,
-        _this: Value,
-        _realm: &mut Realm,
-    ) -> Result<(), Error> {
+    fn construct(&self, _args: Vec<Value>, _this: Value, _realm: &mut Realm) -> Result<(), Error> {
         Ok(())
     }
 }

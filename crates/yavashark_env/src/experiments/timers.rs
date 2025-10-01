@@ -1,6 +1,7 @@
 use crate::builtins::{GcPromise, Promise};
 use crate::conversion::downcast_obj;
 use crate::task_queue::{AsyncTask, AsyncTaskQueue};
+use crate::value::Obj;
 use crate::{Error, NativeFunction, ObjectHandle, Realm, Res, Value};
 use pin_project::pin_project;
 use std::future::Future;
@@ -8,7 +9,6 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
 use tokio::time::{sleep, Sleep};
-use crate::value::Obj;
 
 pub struct SleepDuration {
     dur: Duration,

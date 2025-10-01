@@ -132,9 +132,7 @@ impl ArrayLike {
                 return Ok(None);
             }
 
-            let val = next
-                .get_opt("value", realm)?
-                .unwrap_or(Value::Undefined);
+            let val = next.get_opt("value", realm)?.unwrap_or(Value::Undefined);
 
             self.idx.set(self.idx.get() + 1);
 
@@ -198,11 +196,9 @@ impl ArrayLike {
         Ok(res)
     }
 
-
     pub fn to_vec(&mut self, realm: &mut Realm) -> Res<Vec<Value>> {
         let res = self.to_vec_no_close(realm)?;
         self.close(realm)?;
         Ok(res)
-
     }
 }

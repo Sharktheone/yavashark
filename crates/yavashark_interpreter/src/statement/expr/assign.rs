@@ -8,9 +8,9 @@ use swc_ecma_ast::{
 
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
+use yavashark_env::value::Obj;
 use yavashark_env::{Class, ClassInstance, Error, PrivateMember, Realm, Res, RuntimeResult, Value};
 use yavashark_string::YSString;
-use yavashark_env::value::Obj;
 
 impl Interpreter {
     pub fn run_assign(realm: &mut Realm, stmt: &AssignExpr, scope: &mut Scope) -> RuntimeResult {
@@ -83,12 +83,7 @@ impl Interpreter {
                         let this_value = Value::Object(obj.clone());
 
                         Self::write_private_member_on_instance(
-                            realm,
-                            &*class,
-                            name,
-                            member,
-                            value,
-                            this_value,
+                            realm, &*class, name, member, value, this_value,
                         )?;
 
                         return Ok(());
@@ -102,12 +97,7 @@ impl Interpreter {
                         let this_value = Value::Object(obj.clone());
 
                         Self::write_private_member_on_class(
-                            realm,
-                            &*class,
-                            name,
-                            member,
-                            value,
-                            this_value,
+                            realm, &*class, name, member, value, this_value,
                         )?;
 
                         return Ok(());
@@ -588,9 +578,9 @@ impl Interpreter {
                 instance.update_private_field(name, value);
                 Ok(())
             }
-            PrivateMember::Accessor { set: Some(setter), .. } => {
-                setter.call(realm, vec![value], this_value).map(|_| ())
-            }
+            PrivateMember::Accessor {
+                set: Some(setter), ..
+            } => setter.call(realm, vec![value], this_value).map(|_| ()),
             PrivateMember::Accessor { set: None, .. } => Err(Error::ty_error(format!(
                 "Private accessor #{name} does not have a setter"
             ))),
@@ -613,9 +603,9 @@ impl Interpreter {
                 class.update_private_field(name, value);
                 Ok(())
             }
-            PrivateMember::Accessor { set: Some(setter), .. } => {
-                setter.call(realm, vec![value], this_value).map(|_| ())
-            }
+            PrivateMember::Accessor {
+                set: Some(setter), ..
+            } => setter.call(realm, vec![value], this_value).map(|_| ()),
             PrivateMember::Accessor { set: None, .. } => Err(Error::ty_error(format!(
                 "Private accessor #{name} does not have a setter"
             ))),

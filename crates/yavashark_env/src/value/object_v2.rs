@@ -1,15 +1,20 @@
 #![allow(warnings)]
 
 use crate::value::property_key::InternalPropertyKey;
+use crate::value::{ObjectOrNull, PrimitiveValue, Value, Variable};
+use crate::{ObjectHandle, PreHashedPropertyKey, Realm, Res};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ptr::NonNull;
 use yavashark_garbage::Collectable;
-use crate::{ObjectHandle, PreHashedPropertyKey, Realm, Res};
-use crate::value::{ObjectOrNull, PrimitiveValue, Value, Variable};
 
 pub trait ObjV2: Collectable + Debug + 'static {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<bool>;
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<bool>;
     fn define_property_attributes(
         &self,
         name: InternalPropertyKey,
@@ -161,7 +166,6 @@ pub trait ObjV2: Collectable + Debug + 'static {
         _ = ty;
         None
     }
-
 
     fn is_extensible(&self) -> bool {
         true

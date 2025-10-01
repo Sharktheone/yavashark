@@ -27,7 +27,6 @@ impl<'a> Validator<'a> {
             }
         }
 
-
         ctx.exit(self);
 
         Ok(())

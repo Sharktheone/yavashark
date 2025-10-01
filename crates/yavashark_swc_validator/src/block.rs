@@ -106,20 +106,21 @@ fn collect_var_declared_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
 fn collect_lexical_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
     if let Stmt::Decl(decl) = stmt {
         match decl {
-        Decl::Var(var_decl) if var_decl.kind != VarDeclKind::Var => {
-            for declarator in &var_decl.decls {
-                collect_pat_idents(&declarator.name, out);
+            Decl::Var(var_decl) if var_decl.kind != VarDeclKind::Var => {
+                for declarator in &var_decl.decls {
+                    collect_pat_idents(&declarator.name, out);
+                }
             }
-        }
-        Decl::Class(class_decl) => out.push(class_decl.ident.sym.as_str()),
-        Decl::Fn(fn_decl) => out.push(fn_decl.ident.sym.as_str()),
-        Decl::Using(using_decl) => {
-            for declarator in &using_decl.decls {
-                collect_pat_idents(&declarator.name, out);
+            Decl::Class(class_decl) => out.push(class_decl.ident.sym.as_str()),
+            Decl::Fn(fn_decl) => out.push(fn_decl.ident.sym.as_str()),
+            Decl::Using(using_decl) => {
+                for declarator in &using_decl.decls {
+                    collect_pat_idents(&declarator.name, out);
+                }
             }
+            _ => {}
         }
-        _ => {}
-    } }
+    }
 }
 
 impl<'a> Validator<'a> {

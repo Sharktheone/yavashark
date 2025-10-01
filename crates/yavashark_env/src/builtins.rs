@@ -1,5 +1,6 @@
 mod arguments;
 mod arraybuffer;
+mod atomics;
 mod bigint;
 mod boolean;
 mod date;
@@ -21,10 +22,10 @@ pub mod temporal;
 mod weakmap;
 mod weakref;
 mod weakset;
-mod atomics;
 
 pub use arguments::*;
 pub use arraybuffer::*;
+pub use atomics::*;
 pub use bigint::*;
 pub use boolean::*;
 pub use date::*;
@@ -45,4 +46,3 @@ pub use temporal::*;
 pub use weakmap::*;
 pub use weakref::*;
 pub use weakset::*;
-pub use atomics::*;

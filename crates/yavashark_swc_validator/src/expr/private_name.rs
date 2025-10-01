@@ -1,4 +1,4 @@
-use crate::{utils::ensure_valid_identifier, Validator};
+use crate::{Validator, utils::ensure_valid_identifier};
 use swc_ecma_ast::PrivateName;
 
 impl<'a> Validator<'a> {

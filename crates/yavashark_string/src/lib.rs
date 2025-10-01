@@ -1,9 +1,9 @@
 #![allow(unused)]
 
+mod const_string;
 mod smallstring;
 pub(crate) mod smallvec;
 pub(crate) mod uz;
-mod const_string;
 
 use crate::smallstring::SmallString;
 use crate::smallvec::SmallVecLenCap;

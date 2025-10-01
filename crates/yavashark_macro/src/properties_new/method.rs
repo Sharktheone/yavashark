@@ -91,7 +91,6 @@ impl Method {
         }
     }
 
-
     pub fn calculate_length(&self) -> (usize, usize) {
         self.length.map(|len| (len, len)).unwrap_or_else(|| {
             let mut length = self.args.len();

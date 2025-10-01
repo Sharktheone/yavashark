@@ -1,5 +1,6 @@
 use crate::conversion::{downcast_obj, FromValueOutput};
 use crate::experiments::gui::ui::Ui;
+use crate::value::{BoxedObj, Obj};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};
 use eframe::{App, Frame, NativeOptions};
 use egui::{Context, ViewportCommand};
@@ -10,7 +11,6 @@ use std::fmt::Display;
 use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
-use crate::value::{BoxedObj, Obj};
 
 #[object]
 #[derive(Debug)]

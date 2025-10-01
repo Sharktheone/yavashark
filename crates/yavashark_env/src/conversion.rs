@@ -1,3 +1,5 @@
+use crate::value::ops::BigIntOrNumber;
+use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
 use crate::{Error, GCd, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use std::fmt::Display;
@@ -7,8 +9,6 @@ use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
-use crate::value::ops::BigIntOrNumber;
-use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult;

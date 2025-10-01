@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::{utils::ensure_valid_identifier, Validator};
+use crate::{Validator, utils::ensure_valid_identifier};
 use swc_ecma_ast::{
     Callee, Class, ClassExpr, ClassMember, Expr, Ident, IdentName, MethodKind, ParamOrTsParamProp,
     PropName, Super,
@@ -149,9 +149,7 @@ impl<'a> Validator<'a> {
                 if prop.is_static {
                     if let Some(name) = prop_name_to_string(&prop.key) {
                         if matches!(name.as_str(), "prototype" | "constructor") {
-                            return Err(format!(
-                                "Static field cannot be named '{name}'"
-                            ));
+                            return Err(format!("Static field cannot be named '{name}'"));
                         }
                     }
                 }
@@ -277,5 +275,4 @@ impl Visit for ContainsSuper {
         self.found = true;
         expr.visit_children_with(self);
     }
-
 }

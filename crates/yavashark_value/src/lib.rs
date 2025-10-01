@@ -6,4 +6,3 @@ compile_error!("Cannot enable both `ts` and `js` features at the same time");
 
 #[cfg(feature = "ts")]
 mod ts;
-

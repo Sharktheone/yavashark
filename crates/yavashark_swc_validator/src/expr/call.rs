@@ -23,9 +23,7 @@ impl<'a> Validator<'a> {
 
         for arg in &call.args {
             if is_import_call && arg.spread.is_some() {
-                return Err(
-                    "Dynamic import arguments cannot use the spread operator".to_string(),
-                );
+                return Err("Dynamic import arguments cannot use the spread operator".to_string());
             }
 
             self.validate_expr(&arg.expr)?;

@@ -16,8 +16,7 @@ use yavashark_garbage::{OwningGcGuard, OwningGcGuardRefed};
 
 pub struct BytecodeAsyncTask {
     state: Option<VmState>,
-    await_promise:
-        Option<OwningGcGuardRefed<BoxedObj, (&'static Promise, Notified<'static>)>>,
+    await_promise: Option<OwningGcGuardRefed<BoxedObj, (&'static Promise, Notified<'static>)>>,
     promise: OwningGcGuard<'static, BoxedObj, Promise>,
 }
 

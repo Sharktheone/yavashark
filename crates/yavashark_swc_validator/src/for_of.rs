@@ -1,6 +1,6 @@
 use crate::Validator;
-use swc_ecma_ast::{ForHead, ForOfStmt, VarDeclKind};
 use crate::utils::single_stmt_contains_decl;
+use swc_ecma_ast::{ForHead, ForOfStmt, VarDeclKind};
 
 impl<'a> Validator<'a> {
     pub fn validate_for_of(&mut self, for_of: &'a ForOfStmt) -> Result<(), String> {
@@ -27,11 +27,11 @@ impl<'a> Validator<'a> {
         self.validate_expr(&for_of.right)?;
 
         if single_stmt_contains_decl(&for_of.body) {
-            return Err("Lexical declaration cannot appear in a single-statement context".to_string());
+            return Err(
+                "Lexical declaration cannot appear in a single-statement context".to_string(),
+            );
         }
 
-
         self.validate_statement(&for_of.body)
-
     }
 }

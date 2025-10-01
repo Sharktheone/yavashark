@@ -1,4 +1,5 @@
 use super::jswidget::{DynWidget, JSWidget};
+use crate::value::{MutObj, ObjectImpl};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};
 use egui::{Response, TextEdit, Ui, Widget};
 use std::any::TypeId;
@@ -7,7 +8,6 @@ use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use std::rc::Rc;
 use yavashark_macro::props;
-use crate::value::{MutObj, ObjectImpl};
 
 #[derive(Debug)]
 pub struct CodeEdit {
@@ -80,9 +80,7 @@ impl JSCodeEditor {
         let code = Rc::new(RefCell::new(code));
 
         Ok(Self {
-            mut_object: RefCell::new(MutObject::with_proto(
-                realm.intrinsics.get_of::<Self>()?,
-            )),
+            mut_object: RefCell::new(MutObject::with_proto(realm.intrinsics.get_of::<Self>()?)),
             code: Rc::clone(&code),
             editor: RefCell::new(Some(CodeEdit::new(lang, code))),
         })

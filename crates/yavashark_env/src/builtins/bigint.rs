@@ -1,11 +1,11 @@
 use crate::builtins::check_radix;
 use crate::conversion::downcast_obj;
+use crate::value::{Func, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
 use num_bigint::BigInt;
 use std::cell::RefCell;
 use std::rc::Rc;
 use yavashark_macro::{object, properties_new};
-use crate::value::{Func, Obj};
 
 #[object]
 #[derive(Debug)]

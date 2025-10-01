@@ -6,6 +6,7 @@ use crate::array::Array;
 use crate::conversion::downcast_obj;
 use crate::error_obj::ErrorObj;
 use crate::utils::ValueIterator;
+use crate::value::{BoxedObj, Obj};
 use crate::{
     Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
 };
@@ -16,7 +17,6 @@ use tokio::sync::futures::Notified;
 use tokio::sync::Notify;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, props};
-use crate::value::{BoxedObj, Obj};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum PromiseState {
@@ -231,7 +231,7 @@ impl Promise {
                 Ok(Value::Undefined)
             },
             realm,
-            1
+            1,
         )
     }
 
@@ -244,7 +244,7 @@ impl Promise {
                 Ok(Value::Undefined)
             },
             realm,
-            1
+            1,
         )
     }
 
@@ -414,7 +414,6 @@ impl Promise {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
-
         let promise = Self::new(realm);
 
         let ret = callback.call(realm, args, this);
@@ -472,13 +471,13 @@ impl Promise {
                 return Self::rejected(&err, realm);
             }
         } {
-            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+            let then = p
+                .get_property_opt(&"then".into(), realm)?
+                .unwrap_or(Value::Undefined);
 
             if !then.is_function() {
                 p = Self::resolved(&p, realm)?.into();
             }
-
-
 
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
@@ -512,7 +511,11 @@ impl Promise {
         Ok(fut.into_promise(realm))
     }
     #[prop("allSettled")]
-    pub fn all_settled(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
+    pub fn all_settled(
+        promises: &Value,
+        #[realm] realm: &mut Realm,
+        this: &Value,
+    ) -> Res<ObjectHandle> {
         if !this.is_constructor() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
@@ -538,13 +541,13 @@ impl Promise {
                 return Self::rejected(&err, realm);
             }
         } {
-            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+            let then = p
+                .get_property_opt(&"then".into(), realm)?
+                .unwrap_or(Value::Undefined);
 
             if !then.is_function() {
                 p = Self::resolved(&p, realm)?.into();
             }
-
-
 
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
@@ -552,7 +555,6 @@ impl Promise {
         }
 
         iter.close(realm)?;
-
 
         let futures = promises.into_iter().map(|p| p.map_refed(Self::wait_to_res));
 
@@ -620,12 +622,13 @@ impl Promise {
                 return Self::rejected(&err, realm);
             }
         } {
-            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+            let then = p
+                .get_property_opt(&"then".into(), realm)?
+                .unwrap_or(Value::Undefined);
 
             if !then.is_function() {
                 p = Self::resolved(&p, realm)?.into();
             }
-
 
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
@@ -650,14 +653,11 @@ impl Promise {
             }
         }
 
-
-        let futures = promises.into_iter().map(|p| Box::pin(p.map_refed(Self::wait_to_res)));
-
-
-
+        let futures = promises
+            .into_iter()
+            .map(|p| Box::pin(p.map_refed(Self::wait_to_res)));
 
         let mut fut = select_all(futures);
-
 
         let fut = async move {
             loop {
@@ -667,19 +667,17 @@ impl Promise {
                     PromiseResult::Fulfilled(val) => return Ok(val),
                     PromiseResult::Rejected(_) => {
                         if others.is_empty() {
-                            return Err(Error::throw(Value::Undefined))
+                            return Err(Error::throw(Value::Undefined));
                         }
 
                         fut = select_all(others);
                     }
                 }
-
             }
         };
 
         Ok(fut.into_promise(realm))
     }
-
 
     fn race(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
         if !this.is_constructor() {
@@ -707,12 +705,13 @@ impl Promise {
                 return Self::rejected(&err, realm);
             }
         } {
-            let then = p.get_property_opt(&"then".into(), realm)?.unwrap_or(Value::Undefined);
+            let then = p
+                .get_property_opt(&"then".into(), realm)?
+                .unwrap_or(Value::Undefined);
 
             if !then.is_function() {
                 p = Self::resolved(&p, realm)?.into();
             }
-
 
             if let Ok(prom) = downcast_obj::<Self>(p) {
                 promises.push(prom);
@@ -749,22 +748,19 @@ impl Promise {
             }
         }
 
-
-        let futures = promises.into_iter().map(|p| Box::pin(p.map_refed(Self::wait_to_res)));
-
-
-
+        let futures = promises
+            .into_iter()
+            .map(|p| Box::pin(p.map_refed(Self::wait_to_res)));
 
         let fut = select_all(futures);
 
-
         let fut = async move {
-                let (res, _, _) = fut.await;
+            let (res, _, _) = fut.await;
 
-                match res? {
-                    PromiseResult::Fulfilled(val) => Ok(val),
-                    PromiseResult::Rejected(val) => Err(Error::throw(val)),
-                }
+            match res? {
+                PromiseResult::Fulfilled(val) => Ok(val),
+                PromiseResult::Rejected(val) => Err(Error::throw(val)),
+            }
         };
 
         Ok(fut.into_promise(realm))

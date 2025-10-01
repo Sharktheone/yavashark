@@ -7,15 +7,15 @@ use crate::array::ArrayIterator;
 use crate::object::properties::iter::{
     ArrayPropertiesIter, ObjectPropertiesIter, ObjectPropertiesKeysIter, ObjectPropertiesValuesIter,
 };
+use crate::value::property_key::{
+    BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey,
+};
 use crate::{Error, ObjectProperty, Res};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cmp::Ordering;
 use std::mem;
-use crate::value::property_key::{
-    BorrowedInternalPropertyKey, BorrowedPropertyKey, InternalPropertyKey, PropertyKey,
-};
 
 pub struct ObjectProperties {
     pub properties: IndexMap<PropertyKey, ObjectProperty, FxBuildHasher>,

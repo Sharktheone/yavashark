@@ -1,6 +1,8 @@
 use crate::array::Array;
 use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
+use crate::value::property_key::InternalPropertyKey;
+use crate::value::{Constructor, CustomName, Func, MutObj, Obj};
 use crate::{
     Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
 };
@@ -10,8 +12,6 @@ use std::ops::{Deref, DerefMut};
 use unicode_normalization::UnicodeNormalization;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Constructor, CustomName, Func, MutObj, Obj};
 
 #[derive(Debug)]
 pub struct StringObj {

@@ -1,9 +1,9 @@
+use crate::error::Error;
+use crate::value::IntoValue;
 use crate::{NativeFunction, Realm, Res, Value, ValueResult};
 use std::fmt::Write;
 use std::iter::Peekable;
 use std::str::Chars;
-use crate::value::{IntoValue};
-use crate::error::Error;
 
 #[must_use]
 pub fn get_escape(realm: &Realm) -> Value {

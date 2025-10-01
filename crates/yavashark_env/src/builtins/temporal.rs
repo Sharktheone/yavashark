@@ -96,10 +96,8 @@ pub fn get_temporal(
     )?;
     obj.define_variable("PlainYearMonth".into(), constr(&plain_year_month))?;
 
-    let zoned_date_time = ZonedDateTime::initialize_proto(
-        Object::raw_with_proto(obj_proto),
-        func_proto.into(),
-    )?;
+    let zoned_date_time =
+        ZonedDateTime::initialize_proto(Object::raw_with_proto(obj_proto), func_proto.into())?;
     obj.define_variable("ZonedDateTime".into(), constr(&zoned_date_time))?;
 
     Ok((

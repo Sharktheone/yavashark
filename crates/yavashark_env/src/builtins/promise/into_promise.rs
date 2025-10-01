@@ -1,13 +1,13 @@
 use crate::builtins::Promise;
 use crate::conversion::{downcast_obj, TryIntoValue};
 use crate::task_queue::{AsyncTask, AsyncTaskQueue};
+use crate::value::{BoxedObj, Obj};
 use crate::{ObjectHandle, Realm, Res};
 use pin_project::pin_project;
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use yavashark_garbage::OwningGcGuard;
-use crate::value::{BoxedObj, Obj};
 
 pub type GcPromise = OwningGcGuard<'static, BoxedObj, Promise>;
 

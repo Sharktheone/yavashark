@@ -1,11 +1,11 @@
+use crate::value::Value;
+use crate::Realm;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::ops::Range;
 use std::path::{Path, PathBuf};
 use yavashark_string::{ToYSString, YSString};
-use crate::Realm;
-use crate::value::Value;
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub struct Error {
@@ -443,13 +443,11 @@ fn col_of_range(range: Range<u32>, path: &Path) -> u32 {
 //     impl std::error::Error for SyncError {}
 // }
 
-
 impl<T: std::error::Error> From<T> for Error {
     fn from(value: T) -> Self {
         Self::new_error(value.to_string())
     }
 }
-
 
 impl Error {
     #[must_use]

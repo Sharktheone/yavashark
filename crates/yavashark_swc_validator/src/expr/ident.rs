@@ -1,7 +1,5 @@
-use crate::utils::{
-    ensure_valid_identifier, is_reserved_word
-};
 use crate::Validator;
+use crate::utils::{ensure_valid_identifier, is_reserved_word};
 use swc_ecma_ast::{Ident, IdentName};
 
 impl<'a> Validator<'a> {

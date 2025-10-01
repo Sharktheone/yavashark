@@ -1,10 +1,10 @@
 use crate::utils::ValueIterator;
+use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_traits::One;
 use std::cell::RefCell;
 use std::ops::Rem;
 use yavashark_macro::{object, properties_new};
-use crate::value::Obj;
 
 #[object]
 #[derive(Debug)]

@@ -31,7 +31,10 @@ impl<'a> Validator<'a> {
         self.validate_expr(&assign.right)
     }
 
-    pub(crate) fn ensure_valid_assignment_target_expr(&mut self, expr: &'a Expr) -> Result<(), String> {
+    pub(crate) fn ensure_valid_assignment_target_expr(
+        &mut self,
+        expr: &'a Expr,
+    ) -> Result<(), String> {
         match expr {
             Expr::Ident(ident) => self.validate_ident(ident),
             Expr::Member(member) => self.validate_member_expr(member),

@@ -1,7 +1,7 @@
-use num_traits::ToPrimitive;
 use crate::error::Error;
-use crate::value::{Realm, Value};
 use crate::value::ops::BigIntOrNumber;
+use crate::value::{Realm, Value};
+use num_traits::ToPrimitive;
 
 impl Value {
     pub fn shl(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {

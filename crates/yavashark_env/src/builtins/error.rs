@@ -1,6 +1,6 @@
 use crate::error_obj::ErrorObj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Variable};
 use crate::value::Obj;
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Variable};
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {

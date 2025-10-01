@@ -2,10 +2,10 @@ mod iterator;
 mod protodefault;
 
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
+use crate::value::ObjectImpl;
 use crate::{Object, ObjectHandle, Realm, Res, Value};
 pub use iterator::*;
 pub use protodefault::*;
-use crate::value::ObjectImpl;
 
 pub fn coerce_object(value: Value, realm: &mut Realm) -> Res<ObjectHandle> {
     Ok(match value {

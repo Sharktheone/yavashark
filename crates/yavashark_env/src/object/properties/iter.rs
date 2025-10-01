@@ -1,9 +1,9 @@
 use crate::object::properties::{ArrayProperties, ObjectProperties};
+use crate::value::property_key::{BorrowedInternalPropertyKey, PropertyKey};
 use crate::ObjectProperty;
 use indexmap::map::{Iter, Keys, Values};
 use std::ops::Range;
 use std::slice;
-use crate::value::property_key::{BorrowedInternalPropertyKey, PropertyKey};
 
 pub struct ObjectPropertiesIter<'a> {
     props: &'a ObjectProperties,

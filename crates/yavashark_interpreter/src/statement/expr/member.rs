@@ -3,9 +3,11 @@ use swc_common::Span;
 use swc_ecma_ast::{MemberExpr, MemberProp, ObjectLit};
 use yavashark_env::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use yavashark_env::scope::Scope;
-use yavashark_env::{Class, ClassInstance, ControlFlow, Error, PrivateMember, Realm, RuntimeResult, Value};
-use yavashark_string::YSString;
 use yavashark_env::value::Obj;
+use yavashark_env::{
+    Class, ClassInstance, ControlFlow, Error, PrivateMember, Realm, RuntimeResult, Value,
+};
+use yavashark_string::YSString;
 
 impl Interpreter {
     pub fn run_member(realm: &mut Realm, stmt: &MemberExpr, scope: &mut Scope) -> RuntimeResult {
@@ -39,11 +41,9 @@ impl Interpreter {
                 let obj = value.as_object()?;
 
                 if let Some(class) = obj.downcast::<ClassInstance>() {
-                    let member = class
-                        .get_private_prop(name)?
-                        .ok_or_else(|| ControlFlow::error_type(format!(
-                            "Private name {name} not found"
-                        )))?;
+                    let member = class.get_private_prop(name)?.ok_or_else(|| {
+                        ControlFlow::error_type(format!("Private name {name} not found"))
+                    })?;
 
                     return Self::resolve_private_member(realm, member, value.copy());
                 }
@@ -61,7 +61,6 @@ impl Interpreter {
                 )));
             }
         };
-
 
         match value {
             Value::Object(ref o) => Ok((

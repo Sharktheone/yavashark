@@ -2,6 +2,10 @@ use crate::console::print::{PrettyObjectOverride, PrettyPrint};
 use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
+use crate::value::property_key::InternalPropertyKey;
+use crate::value::{
+    BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl, ObjectOrNull,
+};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 use std::cell::{Cell, RefCell};
@@ -10,8 +14,6 @@ use std::ops::{Deref, DerefMut};
 use yavashark_garbage::OwningGcGuard;
 use yavashark_macro::{object, properties, properties_new};
 use yavashark_string::YSString;
-use crate::value::property_key::InternalPropertyKey;
-use crate::value::{BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl, ObjectOrNull};
 
 #[derive(Debug)]
 pub struct Array {
@@ -1277,9 +1279,7 @@ impl Array {
 
         let item_len = items.len();
 
-
         let shift = delete_count as isize + item_len as isize;
-
 
         while idx + delete_count < len {
             let rev_idx = len - (idx + delete_count);
@@ -1288,7 +1288,10 @@ impl Array {
             if let Some(val) = val {
                 this.define_property(((rev_idx as isize + shift) as usize).into(), val)?;
             } else {
-                this.define_property(((rev_idx as isize + shift) as usize).into(), Value::Undefined)?;
+                this.define_property(
+                    ((rev_idx as isize + shift) as usize).into(),
+                    Value::Undefined,
+                )?;
             }
 
             idx += 1;
@@ -1296,12 +1299,10 @@ impl Array {
 
         idx = start;
 
-
         for item in items {
             this.define_property(idx.into(), item)?;
             idx += 1;
         }
-
 
         let new_len = len as isize + item_len as isize - delete_count as isize;
 
@@ -1494,11 +1495,7 @@ impl Array {
 }
 
 impl PrettyObjectOverride for Array {
-    fn pretty_inline(
-        &self,
-        _obj: &crate::value::Object,
-        not: &mut Vec<usize>,
-    ) -> Option<String> {
+    fn pretty_inline(&self, _obj: &crate::value::Object, not: &mut Vec<usize>) -> Option<String> {
         let Ok(inner) = self.inner.try_borrow() else {
             return None;
         };
@@ -1639,7 +1636,6 @@ impl ArrayConstructor {
 
         let mut it = ArrayLike::new(items, realm)?;
 
-
         let array = if let Some(mapper) = mapper {
             let mut res = Vec::with_capacity(it.len());
 
@@ -1651,17 +1647,12 @@ impl ArrayConstructor {
                 res.push(val);
             }
 
-
             res
-
         } else {
             it.to_vec_no_close(realm)?
         };
 
         it.close(realm)?;
-
-
-
 
         Ok(Obj::into_object(Array::with_elements(realm, array)?))
     }

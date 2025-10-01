@@ -15,20 +15,21 @@ impl Compiler {
                     let prop = self.compile_expr_data_acc(&m.obj)?;
 
                     if let Some(out) = out {
-                        self.instructions.push(Instruction::call_member(prop, member, out));
+                        self.instructions
+                            .push(Instruction::call_member(prop, member, out));
                     } else {
-                        self.instructions.push(Instruction::call_member_no_output(prop, member));
+                        self.instructions
+                            .push(Instruction::call_member_no_output(prop, member));
                     }
 
                     self.dealloc(prop);
                     self.dealloc(member);
 
-                    return Ok(())
+                    return Ok(());
                 }
 
-
                 self.compile_expr_data_acc(expr)?
-            },
+            }
             Callee::Super(_) => {
                 // self.instructions.push(Instruction::load_super(Acc));
                 todo!()

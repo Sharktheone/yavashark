@@ -1,13 +1,16 @@
 #![allow(clippy::needless_pass_by_value)]
 
+use crate::value::{MutObj, Obj};
 use std::cell::RefCell;
 use yavashark_string::YSString;
-use crate::value::{MutObj, Obj};
 
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeConstructor, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, MutObject, NativeConstructor, NativeFunction, ObjectHandle, ObjectProperty, Res, Value,
+    ValueResult, Variable,
+};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {

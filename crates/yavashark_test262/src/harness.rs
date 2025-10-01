@@ -1,7 +1,7 @@
-use std::fs;
 use crate::test262::{print, Test262};
 use crate::utils::parse_file;
 use crate::{ObjectHandle, TEST262_FALLBACK_DIR};
+use std::fs;
 use std::path::{Path, PathBuf};
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, Res};
@@ -12,7 +12,6 @@ const NON_RAW_HARNESS: [&str; 2] = ["harness/assert.js", "harness/sta.js"];
 
 pub fn run_harness_in_realm(realm: &mut Realm, scope: &mut Scope, p: &Path) -> Res {
     let path = scope.get_current_path()?;
-
 
     let compiled = NON_RAW_HARNESS.iter().map(|f| {
         let path = p.join(Path::new(f));
@@ -66,13 +65,10 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope
 
     let p = s.get_current_path()?;
 
-    let harness_dir = find_test_root_from_test(&p)
-        .unwrap_or_else(|| Path::new(TEST262_FALLBACK_DIR));
+    let harness_dir =
+        find_test_root_from_test(&p).unwrap_or_else(|| Path::new(TEST262_FALLBACK_DIR));
 
     if !raw {
-
-
-
         run_harness_in_realm(&mut r, &mut s, &harness_dir)?;
 
         if async_ {

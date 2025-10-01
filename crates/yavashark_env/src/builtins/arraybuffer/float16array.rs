@@ -1,9 +1,9 @@
 use crate::builtins::typed_array::{Type, TypedArray};
+use crate::value::Obj;
 use crate::{ObjectHandle, Realm, Res, Value};
 use half::f16;
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
-use crate::value::Obj;
 
 #[object(extends = TypedArray)]
 #[derive(Debug)]

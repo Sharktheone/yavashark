@@ -5,10 +5,10 @@ mod state;
 
 use crate::builtins::signal::computed::{Computed, ComputedProtoObj};
 use crate::builtins::signal::state::State;
+use crate::value::BoxedObj;
 use crate::{Object, ObjectHandle, Realm, Res};
 use std::cell::RefCell;
 use yavashark_garbage::Gc;
-use crate::value::BoxedObj;
 
 pub struct Protos {
     pub state: ObjectHandle,

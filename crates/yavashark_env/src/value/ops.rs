@@ -14,13 +14,13 @@ mod ushr;
 mod xor;
 
 use super::{Hint, Value};
+use crate::error::Error;
+use crate::Realm;
 use num_bigint::BigInt;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
 use std::rc::Rc;
 use std::str::FromStr;
-use crate::error::Error;
-use crate::Realm;
 
 pub trait ToNumber {
     fn num(&self) -> f64;
@@ -167,9 +167,7 @@ impl Value {
                 return v.to_big_int(realm);
             }
             Self::BigInt(b) => (**b).clone(),
-            Self::Symbol(_) => {
-                return Err(Error::ty("Cannot convert Symbol to BigInt"))
-            }
+            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to BigInt")),
         })
     }
 

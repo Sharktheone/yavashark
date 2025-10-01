@@ -1,12 +1,12 @@
 use crate::array::Array;
 use crate::console::print::PrettyObjectOverride;
+use crate::value::{Constructor, Func, Obj, Symbol};
 use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use regress::{Range, Regex};
 use std::cell::{Cell, RefCell};
 use std::collections::BTreeSet;
 use yavashark_macro::{object, properties_new};
 use yavashark_string::YSString;
-use crate::value::{Constructor, Func, Obj, Symbol};
 
 #[object()]
 #[derive(Debug)]
@@ -86,8 +86,7 @@ impl Flags {
 
         if parsed.unicode && parsed.unicode_sets {
             return Err(Error::syn_error(
-                "Flags 'u' and 'v' cannot be combined in the same regular expression"
-                    .to_string(),
+                "Flags 'u' and 'v' cannot be combined in the same regular expression".to_string(),
             ));
         }
 
@@ -156,12 +155,7 @@ impl RegExp {
         ))
     }
 
-    fn set_last_index_value(
-        &self,
-        this: &Value,
-        value: usize,
-        _realm: &mut Realm,
-    ) -> Res<()> {
+    fn set_last_index_value(&self, this: &Value, value: usize, _realm: &mut Realm) -> Res<()> {
         let obj = this.as_object()?;
 
         obj.define_property("lastIndex".into(), value.into())?;
@@ -284,10 +278,7 @@ impl RegExp {
 
         let indices_array = if self.flags.has_indices {
             let arr = Array::from_realm(realm);
-            let range = Array::with_elements(
-                realm,
-                vec![match_start.into(), match_end.into()],
-            )?;
+            let range = Array::with_elements(realm, vec![match_start.into(), match_end.into()])?;
             arr.insert_array(range.into_value(), 0)?;
             Some(arr)
         } else {
@@ -304,9 +295,7 @@ impl RegExp {
             (Value::Undefined, Value::Undefined)
         } else {
             let groups_obj = Object::null();
-            let indices_groups_obj = indices_array
-                .as_ref()
-                .map(|_| Object::null());
+            let indices_groups_obj = indices_array.as_ref().map(|_| Object::null());
 
             for (name, range_opt) in &named_groups {
                 let name = YSString::from_ref(name);
@@ -320,14 +309,8 @@ impl RegExp {
 
                 if let Some(indices_obj) = indices_groups_obj.as_ref() {
                     let indices_value = if let Some(range) = range_opt {
-                        Array::with_elements(
-                            realm,
-                            vec![
-                                range.start.into(),
-                                range.end.into(),
-                            ],
-                        )?
-                        .into_value()
+                        Array::with_elements(realm, vec![range.start.into(), range.end.into()])?
+                            .into_value()
                     } else {
                         Value::Undefined
                     };
@@ -335,8 +318,7 @@ impl RegExp {
                 }
             }
 
-            let indices_groups_value = indices_groups_obj
-                .map_or(Value::Undefined, Into::into);
+            let indices_groups_value = indices_groups_obj.map_or(Value::Undefined, Into::into);
 
             (groups_obj.into(), indices_groups_value)
         };
@@ -354,14 +336,9 @@ impl RegExp {
             result.insert_array(capture_value, index)?;
 
             if let (Some(indices_arr), Some(range)) = (indices_array.as_ref(), capture.clone()) {
-                let indices_value = Array::with_elements(
-                    realm,
-                    vec![
-                        range.start.into(),
-                        range.end.into(),
-                    ],
-                )?
-                .into_value();
+                let indices_value =
+                    Array::with_elements(realm, vec![range.start.into(), range.end.into()])?
+                        .into_value();
                 indices_arr.insert_array(indices_value, index)?;
             } else if let Some(indices_arr) = indices_array.as_ref() {
                 indices_arr.insert_array(Value::Undefined, index)?;
@@ -458,9 +435,7 @@ impl RegExp {
         }
 
         let Value::Object(result_obj) = exec_result else {
-            return Err(
-                Error::ty("RegExp exec must return an object"),
-            );
+            return Err(Error::ty("RegExp exec must return an object"));
         };
 
         let index_value = result_obj.get("index", realm)?;
@@ -542,11 +517,7 @@ impl RegExp {
 }
 
 impl PrettyObjectOverride for RegExp {
-    fn pretty_inline(
-        &self,
-        _obj: &crate::value::Object,
-        _not: &mut Vec<usize>,
-    ) -> Option<String> {
+    fn pretty_inline(&self, _obj: &crate::value::Object, _not: &mut Vec<usize>) -> Option<String> {
         let mut s = String::new();
         s.push('/');
         let escaped = escape_pattern(&self.original_source);

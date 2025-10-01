@@ -1,12 +1,12 @@
 use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::value::{Constructor, Func, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
 use chrono::{DateTime, Datelike, Local, LocalResult, Offset, TimeZone, Timelike};
 use std::cell::RefCell;
 use std::ops::Rem;
 use std::str::FromStr;
 use yavashark_macro::{object, properties_new};
-use crate::value::{Constructor, Func, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -640,11 +640,7 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
 }
 
 impl PrettyObjectOverride for Date {
-    fn pretty_inline(
-        &self,
-        obj: &crate::value::Object,
-        not: &mut Vec<usize>,
-    ) -> Option<String> {
+    fn pretty_inline(&self, obj: &crate::value::Object, not: &mut Vec<usize>) -> Option<String> {
         let mut s = self.date().format("%Y-%m-%d %H:%M:%S").to_string();
 
         fmt_properties_to(obj, &mut s, not);
@@ -652,11 +648,7 @@ impl PrettyObjectOverride for Date {
         Some(s)
     }
 
-    fn pretty_multiline(
-        &self,
-        obj: &crate::value::Object,
-        not: &mut Vec<usize>,
-    ) -> Option<String> {
+    fn pretty_multiline(&self, obj: &crate::value::Object, not: &mut Vec<usize>) -> Option<String> {
         self.pretty_inline(obj, not)
     }
 }

@@ -1,5 +1,8 @@
 use crate::array::Array;
 use crate::scope::Scope;
+use crate::value::{
+    BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull,
+};
 use crate::{
     ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult,
     Value, ValueResult, Variable,
@@ -10,7 +13,6 @@ use std::fmt::Debug;
 use swc_ecma_ast::{Param, Pat};
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_macro::object;
-use crate::value::{BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull};
 
 #[allow(clippy::module_name_repetitions)]
 #[object(function, constructor, direct(prototype), name)]

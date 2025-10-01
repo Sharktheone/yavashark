@@ -9,6 +9,8 @@ use crate::builtins::temporal::utils::{
     transition_direction, value_to_zoned_date_time_fields,
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::value::ops::BigIntOrNumber;
+use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
@@ -20,8 +22,6 @@ use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::{Calendar, MonthCode, Temporal, TimeZone, TinyAsciiStr, UtcOffset};
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use crate::value::ops::BigIntOrNumber;
-use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]
@@ -33,9 +33,7 @@ impl ZonedDateTime {
     pub fn new(date: temporal_rs::ZonedDateTime, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutableZonedDateTime {
-                object: MutObject::with_proto(
-                    realm.intrinsics.temporal_zoned_date_time.clone(),
-                ),
+                object: MutObject::with_proto(realm.intrinsics.temporal_zoned_date_time.clone()),
             }),
             date,
         }

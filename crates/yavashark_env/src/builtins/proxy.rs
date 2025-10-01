@@ -1,5 +1,6 @@
 #![allow(unused)]
 use crate::array::Array;
+use crate::value::{BoxedObj, Obj};
 use crate::{
     Error, NativeFunction, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, Variable,
 };
@@ -10,7 +11,6 @@ use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_macro::props;
 use yavashark_string::YSString;
-use crate::value::{BoxedObj, Obj};
 
 #[derive(Debug)]
 pub struct Proxy {

@@ -1,4 +1,6 @@
 use crate::realm::Realm;
+use crate::value::property_key::{InternalPropertyKey, PropertyKey};
+use crate::value::{BoxedObj, MutObj, Obj, ObjectOrNull};
 use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
@@ -10,8 +12,6 @@ use std::fmt::Debug;
 use std::mem;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
-use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{BoxedObj, MutObj, Obj, ObjectOrNull};
 
 pub mod array;
 pub mod constructor;
@@ -455,7 +455,7 @@ impl MutObj for MutObject {
         }
 
         if let InternalPropertyKey::String(s) = &key {
-            if s == "__proto__"  {
+            if s == "__proto__" {
                 self.prototype = ObjectOrNull::try_from(value.value)?;
                 return Ok(());
             }

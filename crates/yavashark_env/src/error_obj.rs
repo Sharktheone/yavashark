@@ -1,10 +1,10 @@
+use crate::error::ErrorKind;
 use crate::realm::Realm;
+use crate::value::CustomName;
 use crate::{Error, MutObject, ObjectHandle, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
 use yavashark_string::{ToYSString, YSString};
-use crate::error::ErrorKind;
-use crate::value::CustomName;
 
 #[object(to_string, name)]
 #[derive(Debug)]

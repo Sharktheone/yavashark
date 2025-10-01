@@ -1,5 +1,6 @@
 use crate::object::Object;
 use crate::realm::Realm;
+use crate::value::{MutObj, Obj, ObjectImpl, ObjectOrNull};
 use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
 pub use class::*;
 pub use constructor::*;
@@ -9,7 +10,6 @@ use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::custom_props;
 use yavashark_string::YSString;
-use crate::value::{MutObj, Obj, ObjectImpl, ObjectOrNull};
 
 mod bound;
 mod class;

@@ -1,4 +1,5 @@
 use crate::builtins::signal::notify_dependent;
+use crate::value::{BoxedObj, MutObj, Obj};
 use crate::{ControlFlow, GCd, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::{Cell, RefCell};
@@ -6,7 +7,6 @@ use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use yavashark_garbage::{Gc, OwningGcGuard, Weak};
 use yavashark_macro::{object, props};
-use crate::value::{BoxedObj, MutObj, Obj};
 
 #[object]
 #[derive(Debug)]

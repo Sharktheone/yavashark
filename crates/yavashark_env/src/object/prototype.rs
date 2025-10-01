@@ -1,3 +1,4 @@
+use crate::value::{MutObj, Obj, ObjectOrNull};
 use common::{
     define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
     property_is_enumerable, to_locale_string, to_string, value_of,
@@ -5,7 +6,6 @@ use common::{
 use std::any::Any;
 use std::cell::RefCell;
 use yavashark_string::YSString;
-use crate::value::{MutObj, Obj, ObjectOrNull};
 
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
@@ -109,9 +109,12 @@ impl Prototype {
         .into();
         this_borrow.is_prototype_of =
             NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.clone()).into();
-        this_borrow.property_is_enumerable =
-            NativeFunction::with_proto("propertyIsEnumerable", property_is_enumerable, func.clone())
-                .into();
+        this_borrow.property_is_enumerable = NativeFunction::with_proto(
+            "propertyIsEnumerable",
+            property_is_enumerable,
+            func.clone(),
+        )
+        .into();
         this_borrow.to_locale_string =
             NativeFunction::with_proto("toLocaleString", to_locale_string, func.clone()).into();
         this_borrow.to_string =

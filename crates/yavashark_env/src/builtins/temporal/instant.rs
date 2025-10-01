@@ -4,6 +4,8 @@ use crate::builtins::temporal::utils::{
 };
 use crate::conversion::downcast_obj;
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::value::ops::BigIntOrNumber;
+use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;
@@ -14,8 +16,6 @@ use temporal_rs::provider::COMPILED_TZ_PROVIDER;
 use temporal_rs::unix_time::EpochNanoseconds;
 use temporal_rs::Temporal;
 use yavashark_macro::{object, props};
-use crate::value::ops::BigIntOrNumber;
-use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]

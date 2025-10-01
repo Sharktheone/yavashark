@@ -1,7 +1,7 @@
-use std::fmt::Display;
-use indexmap::Equivalent;
-use yavashark_string::{ToYSString, YSString};
 use crate::value::{fmt_num, Symbol, Value};
+use indexmap::Equivalent;
+use std::fmt::Display;
+use yavashark_string::{ToYSString, YSString};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {

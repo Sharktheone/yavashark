@@ -1,8 +1,8 @@
-use std::cell::{Ref, RefCell, RefMut};
-use yavashark_macro::{object, props};
+use crate::array::convert_index;
 use crate::value::Obj;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, ValueResult};
-use crate::array::convert_index;
+use std::cell::{Ref, RefCell, RefMut};
+use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
@@ -18,7 +18,6 @@ impl SharedArrayBuffer {
         if len > Self::ALLOC_MAX {
             return Err(Error::range("length too large"));
         }
-
 
         let buffer = vec![0; len];
 
@@ -48,17 +47,13 @@ impl SharedArrayBuffer {
     pub fn get_slice(&self) -> Res<Ref<'_, [u8]>> {
         let inner = self.inner.borrow();
 
-        Ok(
-            Ref::map(inner, |x| x.buffer.as_slice())
-        )
+        Ok(Ref::map(inner, |x| x.buffer.as_slice()))
     }
 
     pub fn get_slice_mut(&self) -> Res<RefMut<'_, [u8]>> {
         let inner = self.inner.borrow_mut();
 
-        Ok(
-            RefMut::map(inner, |x| x.buffer.as_mut_slice())
-        )
+        Ok(RefMut::map(inner, |x| x.buffer.as_mut_slice()))
     }
 
     const ALLOC_MAX: usize = 0xFFFFFFFF;

@@ -6,12 +6,12 @@ use crate::builtins::temporal::utils::{
     value_to_year_month_fields,
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
+use crate::value::{Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use std::str::FromStr;
 use yavashark_macro::{object, props};
 use yavashark_string::YSString;
-use crate::value::{Obj, Object};
 
 #[object]
 #[derive(Debug)]
@@ -23,9 +23,7 @@ impl PlainYearMonth {
     pub fn new(year_month: temporal_rs::PlainYearMonth, realm: &Realm) -> Self {
         Self {
             inner: RefCell::new(MutablePlainYearMonth {
-                object: MutObject::with_proto(
-                    realm.intrinsics.temporal_plain_year_month.clone(),
-                ),
+                object: MutObject::with_proto(realm.intrinsics.temporal_plain_year_month.clone()),
             }),
             year_month,
         }

@@ -1,8 +1,8 @@
-use num_traits::Zero;
 use crate::error::Error;
-use crate::Realm;
-use crate::value::Value;
 use crate::value::ops::BigIntOrNumber;
+use crate::value::Value;
+use crate::Realm;
+use num_traits::Zero;
 
 impl Value {
     pub fn div(&self, other: &Self, realm: &mut Realm) -> Result<Self, Error> {

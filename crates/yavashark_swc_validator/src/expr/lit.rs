@@ -20,13 +20,15 @@ impl<'a> Validator<'a> {
     }
 
     fn validate_regex_lit(regex: &Regex) -> Result<(), String> {
-    let pattern: Vec<char> = regex.exp.as_ref().chars().collect();
-    let flags = regex.flags.as_ref();
-    let has_v_flag = flags.contains('v');
-    let unicode_enabled = flags.contains('u') || has_v_flag;
+        let pattern: Vec<char> = regex.exp.as_ref().chars().collect();
+        let flags = regex.flags.as_ref();
+        let has_v_flag = flags.contains('v');
+        let unicode_enabled = flags.contains('u') || has_v_flag;
 
         if flags.contains('u') && has_v_flag {
-            return Err("Regular expression literals cannot use both the /u and /v flags".to_string());
+            return Err(
+                "Regular expression literals cannot use both the /u and /v flags".to_string(),
+            );
         }
 
         let mut idx = 0usize;

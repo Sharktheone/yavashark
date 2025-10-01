@@ -17,25 +17,24 @@ mod ret;
 mod switch;
 mod throw;
 mod try_;
+mod utils;
 mod whle;
 mod with;
-mod utils;
 
+use crate::utils::FunctionContext;
 use std::collections::HashSet;
 use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
-use crate::utils::FunctionContext;
 
 #[derive(Default)]
 pub struct Validator<'a> {
     function_ctx: Option<FunctionContext>,
-    private_names: Vec<HashSet<&'a str>>
+    private_names: Vec<HashSet<&'a str>>,
 }
 
 impl<'a> Validator<'a> {
     pub fn new() -> Self {
         Self::default()
     }
-
 
     pub fn validate_statements(&mut self, ast: &'a [Stmt]) -> Result<(), String> {
         for stmt in ast {

@@ -1,10 +1,10 @@
 use crate::builtins::signal::computed::Computed;
 use crate::builtins::signal::notify_dependent;
+use crate::value::{BoxedObj, Obj};
 use crate::{MutObject, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Weak;
 use yavashark_macro::{object, props};
-use crate::value::{BoxedObj, Obj};
 
 #[object]
 #[derive(Debug)]

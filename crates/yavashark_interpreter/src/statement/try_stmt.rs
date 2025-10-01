@@ -1,10 +1,10 @@
 use crate::Interpreter;
 use std::iter;
 use swc_ecma_ast::{ObjectPatProp, Pat, PropName, TryStmt};
+use yavashark_env::error::ErrorKind;
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Realm, RuntimeResult, Value};
-use yavashark_env::error::ErrorKind;
 
 impl Interpreter {
     pub fn run_try(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult {
@@ -51,8 +51,8 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
 
 #[cfg(test)]
 mod tests {
-    use yavashark_env::{test_eval, Value};
     use yavashark_env::error::ErrorKind;
+    use yavashark_env::{test_eval, Value};
 
     #[test]
     fn try_stmt() {

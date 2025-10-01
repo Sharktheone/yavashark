@@ -1,5 +1,5 @@
-use crate::{ObjectProperty, Res};
 use crate::value::property_key::InternalPropertyKey;
+use crate::{ObjectProperty, Res};
 
 pub struct ObjectProperties<H: Hooks> {
     pub(crate) hooks: H,

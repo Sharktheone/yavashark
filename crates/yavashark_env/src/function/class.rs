@@ -1,4 +1,5 @@
 use crate::realm::Realm;
+use crate::value::{ConstructorFn, Obj, Variable};
 use crate::{Error, Object, ObjectHandle, ObjectProperty, Res, Value, ValueResult};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
@@ -8,13 +9,15 @@ use std::collections::HashMap;
 use std::ptr::NonNull;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
-use crate::value::{ConstructorFn, Obj, Variable};
 
 #[derive(Clone, Debug)]
 pub enum PrivateMember {
     Field(Value),
     Method(Value),
-    Accessor { get: Option<Value>, set: Option<Value> },
+    Accessor {
+        get: Option<Value>,
+        set: Option<Value>,
+    },
 }
 
 impl PrivateMember {

@@ -1,12 +1,12 @@
 use crate::array::Array;
 use crate::utils::ValueIterator;
+use crate::value::{Constructor, MutObj, Obj};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, WeakValue};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use crate::value::{Constructor, MutObj, Obj};
 
 #[object]
 #[derive(Debug)]
@@ -50,7 +50,7 @@ impl WeakMapConstructor {
     pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableWeakMapConstructor {
-                object: MutObject::with_proto( func.clone()),
+                object: MutObject::with_proto(func.clone()),
             }),
         };
 

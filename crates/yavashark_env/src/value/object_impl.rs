@@ -1,12 +1,12 @@
+use crate::error::Error;
+use crate::value::{AsAny, BoxedObj, MutObj, Obj, Object, ObjectProperty, Value, Variable};
+use crate::Realm;
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_string::YSString;
-use crate::error::Error;
-use crate::Realm;
-use crate::value::{AsAny, BoxedObj, MutObj, Obj, Object, ObjectProperty, Value, Variable};
 
 pub trait ObjectImpl: Debug + AsAny + 'static {
     type Inner;
@@ -100,12 +100,7 @@ pub trait ObjectImpl: Debug + AsAny + 'static {
         self.get_wrapped_object().clear_values()
     }
 
-    fn call(
-        &self,
-        realm: &mut Realm,
-        args: Vec<Value>,
-        this: Value,
-    ) -> Result<Value, Error> {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
         self.get_wrapped_object().call(realm, args, this)
     }
 
@@ -242,12 +237,7 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::clear_values(self)
     }
 
-    fn call(
-        &self,
-        realm: &mut Realm,
-        args: Vec<Value>,
-        this: Value,
-    ) -> Result<Value, Error> {
+    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
         ObjectImpl::call(self, realm, args, this)
     }
 

@@ -1,6 +1,6 @@
-use std::fmt::Debug;
 use crate::error::Error;
 use crate::value::Value;
+use std::fmt::Debug;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Variable {

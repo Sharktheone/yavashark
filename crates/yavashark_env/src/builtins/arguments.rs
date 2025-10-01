@@ -1,11 +1,11 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
+use crate::error::Error;
+use crate::value::{MutObj, Obj, ObjectImpl};
 use crate::{MutObject, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::props;
 use yavashark_string::YSString;
-use crate::value::{MutObj, Obj, ObjectImpl};
-use crate::error::Error;
 
 #[derive(Debug)]
 pub struct Arguments {
@@ -19,9 +19,7 @@ impl Arguments {
     #[must_use]
     pub fn new(args: Vec<Value>, callee: Value, realm: &Realm) -> Self {
         Self {
-            inner: RefCell::new(MutObject::with_proto(
-                realm.intrinsics.arguments.clone(),
-            )),
+            inner: RefCell::new(MutObject::with_proto(realm.intrinsics.arguments.clone())),
             callee,
             length: RefCell::new(args.len().into()),
             args: RefCell::new(args),

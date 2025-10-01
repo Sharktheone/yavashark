@@ -1,9 +1,9 @@
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
+use crate::value::Obj;
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
-use crate::value::Obj;
 
 #[object]
 #[derive(Debug)]

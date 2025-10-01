@@ -1,8 +1,8 @@
 #![allow(unused)]
-use crate::Symbol;
-use std::marker::PhantomData;
 use crate::value::property_key::BorrowedPropertyKey;
 use crate::value::Attributes;
+use crate::Symbol;
+use std::marker::PhantomData;
 
 type PreallocPropertyKey = BorrowedPropertyKey<'static>;
 

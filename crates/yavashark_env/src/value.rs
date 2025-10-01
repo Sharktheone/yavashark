@@ -1,7 +1,9 @@
 use crate::error::Error;
+use crate::{ObjectHandle, Realm};
 pub use constructor::*;
 pub use conversion::*;
 pub use function::*;
+use indexmap::Equivalent;
 pub use name::*;
 use num_bigint::BigInt;
 use num_traits::Zero;
@@ -10,12 +12,10 @@ use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
-use indexmap::Equivalent;
 pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
 use yavashark_string::{ToYSString, YSString};
-use crate::{ObjectHandle, Realm};
 
 mod constructor;
 mod conversion;
@@ -29,7 +29,6 @@ pub mod ops;
 pub mod property_key;
 mod symbol;
 pub mod variable;
-
 
 #[derive(Debug, PartialEq)]
 pub enum Value {
@@ -55,7 +54,6 @@ pub enum WeakValue {
     BigInt(Rc<BigInt>),
 }
 
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum PrimitiveValue {
     Null,
@@ -72,7 +70,6 @@ pub enum ObjectOrNull {
     Object(Object),
     Null,
 }
-
 
 impl Clone for Value {
     fn clone(&self) -> Self {

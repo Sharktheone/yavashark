@@ -16,6 +16,7 @@ pub mod scope;
 pub mod args;
 pub mod builtins;
 pub mod conversion;
+pub mod error;
 #[cfg(feature = "out-of-spec-experiments")]
 pub mod experiments;
 mod function_conversion;
@@ -28,15 +29,14 @@ pub mod task_queue;
 #[cfg(feature = "tests")]
 pub mod tests;
 pub mod utils;
-pub mod error;
 // #[cfg(feature = "js")]
 pub mod value;
 
 use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
-use value::BoxedObj;
-use error::Location;
 use crate::value::property_key::InternalPropertyKey;
+use error::Location;
+use value::BoxedObj;
 
 pub type Value = value::Value;
 pub type WeakValue = value::WeakValue;
