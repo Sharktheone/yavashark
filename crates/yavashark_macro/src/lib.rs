@@ -13,6 +13,7 @@ mod props;
 mod typed_array;
 mod inline_props;
 mod data_object;
+mod native_object;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -81,6 +82,15 @@ pub fn data_object(
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     data_object::data_object(attrs, item)
+}
+
+
+#[proc_macro_attribute]
+pub fn native_object(
+    attrs: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    native_object::native_object(attrs, item)
 }
 
 #[proc_macro]
