@@ -31,6 +31,7 @@ pub mod tests;
 pub mod utils;
 // #[cfg(feature = "js")]
 pub mod value;
+pub mod inline_props;
 
 use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
