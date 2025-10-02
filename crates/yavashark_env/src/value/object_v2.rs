@@ -1,14 +1,14 @@
 #![allow(warnings)]
 
-use crate::value::property_key::InternalPropertyKey;
-use crate::value::{ObjectOrNull, PrimitiveValue, Value, Variable};
+use crate::value::property_key::{InternalPropertyKey, PropertyKey};
+use crate::value::{BoxedObj, ObjectOrNull, PrimitiveValue, Value, Variable};
 use crate::{ObjectHandle, PreHashedPropertyKey, Realm, Res};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ptr::NonNull;
-use yavashark_garbage::Collectable;
+use yavashark_garbage::GcRef;
 
-pub trait ObjV2: Collectable + Debug + 'static {
+pub trait ObjV2: Debug + 'static {
     fn define_property(
         &self,
         name: InternalPropertyKey,
@@ -125,12 +125,12 @@ pub trait ObjV2: Collectable + Debug + 'static {
         self.contains_key(name.0, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(Value, Value)>>;
-    fn keys(&self, realm: &mut Realm) -> Res<Vec<Value>>;
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>>;
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>>;
     fn values(&self, realm: &mut Realm) -> Res<Vec<Value>>;
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(Value, Value)>>;
-    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<Value>>;
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>>;
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>>;
     fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<Value>>;
 
     fn clear_properties(&self, realm: &mut Realm) -> Res;
@@ -184,4 +184,7 @@ pub trait ObjV2: Collectable + Debug + 'static {
     }
 
     fn seal(&self) -> Res;
+
+
+    fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
 }
