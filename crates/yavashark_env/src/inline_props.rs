@@ -33,5 +33,5 @@ pub trait PropertiesHook {
         self.values()
     }
 
-    unsafe fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
+    fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
 }
