@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 use swc_ecma_ast::{Function, Stmt};
 
@@ -9,13 +8,13 @@ pub use yavashark_vm as vm;
 
 use yavashark_codegen::ByteCodegen;
 use yavashark_compiler::Compiler;
-use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, ObjectHandle, Realm, Res, ValueResult};
+use yavashark_vm::async_bytecode_function::AsyncBytecodeFunction;
 use yavashark_vm::OldBorrowedVM;
 use yavashark_vm::async_generator::AsyncGeneratorFunction;
-use yavashark_vm::function_code::BytecodeFunction;
+use yavashark_vm::bytecode_function::BytecodeFunction;
 use yavashark_vm::generator::GeneratorFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
@@ -97,21 +96,21 @@ impl ByteCodeInterpreter {
             return Ok(g.into_object());
         }
 
-        let compiled = compiled.map(|code| {
-            let x: RefCell<Box<dyn FunctionCode + 'static>> =
-                RefCell::new(Box::new(BytecodeFunction {
-                    code,
-                    is_generator: func.is_generator,
-                    is_async: func.is_async,
-                }));
 
-            x
-        });
+        if func.is_async {
+            let f = AsyncBytecodeFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
-        let f = OptimFunction::new(name, func.params.clone(), compiled, scope, realm)?;
+            f.define_variable("length".into(), len.into())?;
+            f.define_variable("name".into(), name.into())?;
+
+            return Ok(f.into_object());
+        }
+
+        let f = BytecodeFunction::new(compiled.unwrap_or_default(), scope, realm, params);
 
         f.define_variable("length".into(), len.into())?;
+        f.define_variable("name".into(), name.into())?;
 
-        Ok(f)
+        Ok(f.into_object())
     }
 }

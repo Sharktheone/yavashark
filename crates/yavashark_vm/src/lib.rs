@@ -14,6 +14,8 @@ mod storage;
 mod task;
 mod value_ext;
 mod vm;
+pub mod bytecode_function;
+pub mod async_bytecode_function;
 
 pub use regs::*;
 pub use stack::*;

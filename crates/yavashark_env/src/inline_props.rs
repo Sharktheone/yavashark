@@ -1,5 +1,5 @@
 use yavashark_garbage::GcRef;
-use crate::{Error, Res, Value};
+use crate::{Res, Value};
 use crate::value::BoxedObj;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 

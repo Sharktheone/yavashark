@@ -125,8 +125,6 @@ impl RawOptimFunction {
 
         let args = ObjectHandle::new(args);
 
-        args.define_property("callee".into(), this.copy())?;
-
         args.define_variable("callee".into(), Variable::write_config(this.copy()))?;
 
         if let Some(block) = &self.block {
