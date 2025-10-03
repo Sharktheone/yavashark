@@ -50791,6 +50791,16 @@ impl Execute for Instruction {
             Self::BitwiseNotUndefinedToStack(arg0, output) => {
                 instruction::bitwise_not(arg0, output, vm)?
             }
+            Self::GetNewTargetToVar(output) => instruction::get_new_target(output, vm)?,
+            Self::GetNewTargetToReg(output) => instruction::get_new_target(output, vm)?,
+            Self::GetNewTargetToAcc(output) => instruction::get_new_target(output, vm)?,
+            Self::GetNewTargetToStack(output) => instruction::get_new_target(output, vm)?,
+            Self::GetImportMetaToVar(output) => instruction::get_import_meta(output, vm)?,
+            Self::GetImportMetaToReg(output) => instruction::get_import_meta(output, vm)?,
+            Self::GetImportMetaToAcc(output) => instruction::get_import_meta(output, vm)?,
+            Self::GetImportMetaToStack(output) => {
+                instruction::get_import_meta(output, vm)?
+            }
         }
         Ok(())
     }
@@ -51047,6 +51057,8 @@ impl Execute for Instruction {
             Self::Negate(arg0, output) => instruction::negate(arg0, output, vm)?,
             Self::LogicalNot(arg0, output) => instruction::logical_not(arg0, output, vm)?,
             Self::BitwiseNot(arg0, output) => instruction::bitwise_not(arg0, output, vm)?,
+            Self::GetNewTarget(output) => instruction::get_new_target(output, vm)?,
+            Self::GetImportMeta(output) => instruction::get_import_meta(output, vm)?,
         }
         Ok(())
     }

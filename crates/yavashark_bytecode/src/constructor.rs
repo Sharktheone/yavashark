@@ -63932,6 +63932,24 @@ impl Instruction {
             }
         }
     }
+    #[must_use]
+    pub fn get_new_target(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::GetNewTargetToAcc(output),
+            OutputDataType::Reg(output) => Self::GetNewTargetToReg(output),
+            OutputDataType::Stack(output) => Self::GetNewTargetToStack(output),
+            OutputDataType::Var(output) => Self::GetNewTargetToVar(output),
+        }
+    }
+    #[must_use]
+    pub fn get_import_meta(output: impl OutputData) -> Self {
+        match output.data_type() {
+            OutputDataType::Acc(output) => Self::GetImportMetaToAcc(output),
+            OutputDataType::Reg(output) => Self::GetImportMetaToReg(output),
+            OutputDataType::Stack(output) => Self::GetImportMetaToStack(output),
+            OutputDataType::Var(output) => Self::GetImportMetaToVar(output),
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -64546,5 +64564,13 @@ impl Instruction {
     #[must_use]
     pub fn bitwise_not(arg0: impl Data, output: impl OutputData) -> Self {
         Self::BitwiseNot(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn get_new_target(output: impl OutputData) -> Self {
+        Self::GetNewTarget(output.data_type())
+    }
+    #[must_use]
+    pub fn get_import_meta(output: impl OutputData) -> Self {
+        Self::GetImportMeta(output.data_type())
     }
 }

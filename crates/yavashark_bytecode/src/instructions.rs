@@ -17279,6 +17279,14 @@ pub enum Instruction {
     BitwiseNotBoolToStack(Boolean, Stack),
     BitwiseNotNullToStack(Null, Stack),
     BitwiseNotUndefinedToStack(Undefined, Stack),
+    GetNewTargetToVar(VarName),
+    GetNewTargetToReg(Reg),
+    GetNewTargetToAcc(Acc),
+    GetNewTargetToStack(Stack),
+    GetImportMetaToVar(VarName),
+    GetImportMetaToReg(Reg),
+    GetImportMetaToAcc(Acc),
+    GetImportMetaToStack(Stack),
 }
 #[cfg(feature = "simple_bytecode")]
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17427,4 +17435,6 @@ pub enum Instruction {
     Negate(DataType, OutputDataType),
     LogicalNot(DataType, OutputDataType),
     BitwiseNot(DataType, OutputDataType),
+    GetNewTarget(OutputDataType),
+    GetImportMeta(OutputDataType),
 }

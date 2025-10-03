@@ -175,3 +175,6 @@ Negate(Data) => Data
 
 LogicalNot(Data) => Data
 BitwiseNot(Data) => Data
+
+GetNewTarget => Data
+GetImportMeta => Data

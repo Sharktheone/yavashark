@@ -4,8 +4,8 @@ use yavashark_bytecode::data::{ControlIdx, Label};
 use yavashark_bytecode::JmpAddr;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
-use yavashark_env::value::ObjectImpl;
-use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
+use yavashark_env::value::{ObjectImpl, ObjectOrNull};
+use yavashark_env::{ControlFlow, ControlResult, Error, Object, Res, Value};
 
 pub fn nullish_coalescing(
     left: impl Data,
@@ -471,4 +471,29 @@ pub fn bitwise_not(data: impl Data, output: impl OutputData, vm: &mut impl VM) -
     };
 
     output.set(num, vm)
+}
+
+
+pub fn get_new_target(output: impl OutputData, vm: &mut impl VM) -> Res {
+    let new_target = vm.get_scope().get_target()?;
+
+    output.set(new_target, vm)
+}
+
+
+pub fn get_import_meta(output: impl OutputData, vm: &mut impl VM) -> Res {
+    let obj = Object::with_proto(ObjectOrNull::Null);
+
+    obj.define_property(
+        "url".into(),
+        vm.get_scope()
+            .get_current_path()?
+            .to_string_lossy()
+            .into_owned()
+            .into(),
+    )?;
+
+    obj.define_property("resolve".into(), Value::Undefined)?; //TODO
+
+    output.set(obj.into(), vm)
 }
