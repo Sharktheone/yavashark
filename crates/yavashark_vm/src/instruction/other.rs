@@ -5,7 +5,7 @@ use yavashark_bytecode::JmpAddr;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
 use yavashark_env::value::{ObjectImpl, ObjectOrNull};
-use yavashark_env::{ControlFlow, ControlResult, Error, Object, Res, Value};
+use yavashark_env::{Class, ClassInstance, ControlFlow, ControlResult, Error, Object, PrivateMember, Realm, Res, Value};
 
 pub fn nullish_coalescing(
     left: impl Data,
@@ -60,6 +60,26 @@ pub fn load_member(
     let result = left.get_property_opt(&right, vm.get_realm())?;
 
     output.set(result.unwrap_or(Value::Undefined), vm)
+}
+
+
+pub fn load_private_member(
+    left: impl Data,
+    right: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
+    let base = left.get(vm)?;
+
+    let right = right.get(vm)?;
+
+    let Value::String(name) = right else {
+        return Err(Error::ty("Private member name must be a string"));
+    };
+
+    let res = get_private_member(vm.get_realm(), base, &name)?.0;
+
+    output.set(res, vm)
 }
 
 pub fn load_var(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
@@ -496,4 +516,55 @@ pub fn get_import_meta(output: impl OutputData, vm: &mut impl VM) -> Res {
     obj.define_property("resolve".into(), Value::Undefined)?; //TODO
 
     output.set(obj.into(), vm)
+}
+
+pub(crate) fn resolve_private_member(
+    realm: &mut Realm,
+    member: PrivateMember,
+    base: Value,
+) -> Res<(Value, Option<Value>)> {
+    match member {
+        PrivateMember::Field(value) => Ok((value, None)),
+        PrivateMember::Method(func) => Ok((func, Some(base))),
+        PrivateMember::Accessor { get, .. } => {
+            if let Some(getter) = get {
+                let result = getter
+                    .call(realm, vec![], base.copy())?;
+
+                Ok((result, None))
+            } else {
+                Ok((Value::Undefined, None))
+            }
+        }
+    }
+}
+
+
+pub fn get_private_member(
+    realm: &mut Realm,
+    base: Value,
+    name: &str,
+) -> Res<(Value, Option<Value>)> {
+    let obj = base.as_object()?;
+
+    if let Some(class) = obj.downcast::<ClassInstance>() {
+        let member = class.get_private_prop(&&name)?.ok_or_else(|| {
+            ControlFlow::error_type(format!("Private name {name} not found"))
+        })?;
+
+        return resolve_private_member(realm, member, base.copy());
+    }
+
+    if let Some(class) = obj.downcast::<Class>() {
+        let member = class.get_private_prop(&name).ok_or_else(|| {
+            ControlFlow::error_type(format!("Private name {name} not found"))
+        })?;
+
+        return resolve_private_member(realm, member, base.copy());
+    }
+
+    return Err(Error::ty_error(format!(
+        "Private name {name} can only be used in class"
+    )));
+
 }

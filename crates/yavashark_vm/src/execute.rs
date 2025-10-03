@@ -38345,6 +38345,1821 @@ impl Execute for Instruction {
             Self::CallMemberNoOutputUndefinedUndefined(arg0, arg1) => {
                 instruction::call_member_no_output(arg0, arg1, vm)?
             }
+            Self::CallPrivateMemberVarVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32VarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32VarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32VarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedVarToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32RegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32RegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32RegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedRegToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32AccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32AccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32AccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedAccToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32StackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32StackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32StackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedStackToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32ConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32ConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32ConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedConstToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32F32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32F32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32F32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedF32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32I32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32I32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32I32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedI32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32U32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32U32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32U32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedU32ToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32BoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32BoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32BoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedBoolToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32NullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32NullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32NullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedNullToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32UndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32UndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32UndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedUndefinedToVar(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32VarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32VarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32VarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedVarToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32RegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32RegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32RegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedRegToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32AccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32AccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32AccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedAccToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32StackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32StackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32StackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedStackToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32ConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32ConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32ConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedConstToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32F32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32F32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32F32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedF32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32I32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32I32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32I32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedI32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32U32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32U32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32U32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedU32ToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32BoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32BoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32BoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedBoolToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32NullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32NullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32NullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedNullToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32UndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32UndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32UndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedUndefinedToReg(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32VarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32VarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32VarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedVarToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32RegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32RegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32RegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedRegToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32AccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32AccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32AccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedAccToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32StackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32StackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32StackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedStackToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32ConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32ConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32ConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedConstToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32F32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32F32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32F32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedF32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32I32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32I32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32I32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedI32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32U32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32U32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32U32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedU32ToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32BoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32BoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32BoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedBoolToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32NullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32NullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32NullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedNullToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32UndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32UndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32UndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedUndefinedToAcc(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32VarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32VarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32VarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedVarToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32RegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32RegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32RegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedRegToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32AccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32AccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32AccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedAccToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32StackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32StackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32StackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedStackToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32ConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32ConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32ConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedConstToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32F32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32F32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32F32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedF32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32I32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32I32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32I32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedI32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32U32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32U32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32U32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedU32ToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32BoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32BoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32BoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedBoolToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32NullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32NullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32NullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedNullToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberVarUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberRegUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberAccUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberStackUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberConstUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberF32UndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberI32UndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberU32UndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberBoolUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNullUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberUndefinedUndefinedToStack(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Var(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Var(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Var(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedVar(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Reg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Reg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Reg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedReg(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Acc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Acc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Acc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedAcc(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Stack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Stack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Stack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedStack(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Const(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Const(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Const(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedConst(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32F32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32F32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32F32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedF32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32I32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32I32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32I32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedI32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32U32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32U32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32U32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedU32(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Bool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Bool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Bool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedBool(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Null(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Null(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Null(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedNull(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputVarUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputRegUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputAccUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputStackUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputConstUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputF32Undefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputI32Undefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputU32Undefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputBoolUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputNullUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
+            Self::CallPrivateMemberNoOutputUndefinedUndefined(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
             Self::CallSuperToVar(output) => instruction::call_super(output, vm)?,
             Self::CallSuperToReg(output) => instruction::call_super(output, vm)?,
             Self::CallSuperToAcc(output) => instruction::call_super(output, vm)?,
@@ -46245,6 +48060,1458 @@ impl Execute for Instruction {
             Self::LoadMemberUndefinedUndefinedToStack(arg0, arg1, output) => {
                 instruction::load_member(arg0, arg1, output, vm)?
             }
+            Self::LoadPrivateMemberVarVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32VarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32VarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32VarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedVarToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32RegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32RegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32RegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedRegToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32AccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32AccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32AccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedAccToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32StackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32StackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32StackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedStackToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32ConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32ConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32ConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedConstToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32F32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32F32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32F32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedF32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32I32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32I32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32I32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedI32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32U32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32U32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32U32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedU32ToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32BoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32BoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32BoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedBoolToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32NullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32NullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32NullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedNullToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32UndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32UndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32UndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedUndefinedToVar(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32VarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32VarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32VarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedVarToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32RegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32RegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32RegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedRegToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32AccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32AccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32AccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedAccToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32StackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32StackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32StackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedStackToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32ConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32ConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32ConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedConstToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32F32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32F32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32F32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedF32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32I32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32I32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32I32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedI32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32U32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32U32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32U32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedU32ToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32BoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32BoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32BoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedBoolToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32NullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32NullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32NullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedNullToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32UndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32UndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32UndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedUndefinedToReg(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32VarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32VarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32VarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedVarToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32RegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32RegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32RegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedRegToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32AccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32AccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32AccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedAccToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32StackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32StackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32StackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedStackToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32ConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32ConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32ConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedConstToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32F32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32F32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32F32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedF32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32I32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32I32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32I32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedI32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32U32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32U32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32U32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedU32ToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32BoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32BoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32BoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedBoolToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32NullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32NullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32NullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedNullToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32UndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32UndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32UndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedUndefinedToAcc(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32VarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32VarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32VarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedVarToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32RegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32RegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32RegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedRegToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32AccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32AccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32AccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedAccToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32StackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32StackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32StackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedStackToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32ConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32ConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32ConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedConstToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32F32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32F32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32F32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedF32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32I32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32I32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32I32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedI32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32U32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32U32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32U32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedU32ToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32BoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32BoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32BoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedBoolToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32NullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32NullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32NullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedNullToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberVarUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberRegUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberAccUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberStackUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberConstUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberF32UndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberI32UndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberU32UndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberBoolUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberNullUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMemberUndefinedUndefinedToStack(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
+            }
             Self::LoadVarVarToVar(arg0, output) => {
                 instruction::load_var(arg0, output, vm)?
             }
@@ -50862,6 +54129,12 @@ impl Execute for Instruction {
             Self::CallMemberNoOutput(arg0, arg1) => {
                 instruction::call_member_no_output(arg0, arg1, vm)?
             }
+            Self::CallPrivateMember(arg0, arg1, output) => {
+                instruction::call_private_member(arg0, arg1, output, vm)?
+            }
+            Self::CallPrivateMemberNoOutput(arg0, arg1) => {
+                instruction::call_private_member_no_output(arg0, arg1, vm)?
+            }
             Self::CallSuper(output) => instruction::call_super(output, vm)?,
             Self::CallSuperNoOutput => instruction::call_super_no_output(vm)?,
             Self::Construct(arg0, output) => instruction::construct(arg0, output, vm)?,
@@ -50958,6 +54231,9 @@ impl Execute for Instruction {
             }
             Self::LoadMember(arg0, arg1, output) => {
                 instruction::load_member(arg0, arg1, output, vm)?
+            }
+            Self::LoadPrivateMember(arg0, arg1, output) => {
+                instruction::load_private_member(arg0, arg1, output, vm)?
             }
             Self::LoadVar(arg0, output) => instruction::load_var(arg0, output, vm)?,
             Self::TypeOf(arg0, output) => instruction::type_of(arg0, output, vm)?,

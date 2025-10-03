@@ -1,7 +1,8 @@
 use crate::data::{Data, OutputData};
 use crate::VM;
 use yavashark_env::utils::ValueIterator;
-use yavashark_env::{ControlFlow, ControlResult, Res, Value};
+use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
+use crate::instruction::get_private_member;
 
 pub fn call(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let func = func.get(vm)?;
@@ -52,6 +53,55 @@ pub fn call_member_no_output(obj: impl Data, member: impl Data, vm: &mut impl VM
     Ok(())
 }
 
+
+
+pub fn call_private_member(
+    obj: impl Data,
+    member: impl Data,
+    output: impl OutputData,
+    vm: &mut impl VM,
+) -> Res {
+    let base = obj.get(vm)?;
+
+    let right = member.get(vm)?;
+
+    let Value::String(name) = right else {
+        return Err(Error::ty("Private member name must be a string"));
+    };
+
+    let res = get_private_member(vm.get_realm(), base, &name)?;
+
+    let args = vm.get_call_args();
+
+    let this = res.1.unwrap_or(vm.get_this()?);
+
+    let res = res.0.call(vm.get_realm(), args, this)?;
+    
+    output.set(res, vm)?;
+
+    Ok(())
+
+}
+
+pub fn call_private_member_no_output(obj: impl Data, member: impl Data, vm: &mut impl VM) -> Res {
+    let base = obj.get(vm)?;
+
+    let right = member.get(vm)?;
+
+    let Value::String(name) = right else {
+        return Err(Error::ty("Private member name must be a string"));
+    };
+
+    let res = get_private_member(vm.get_realm(), base, &name)?;
+
+    let args = vm.get_call_args();
+    
+    let this = res.1.unwrap_or(vm.get_this()?);
+
+    res.0.call(vm.get_realm(), args, this)?;
+
+    Ok(())
+}
 pub fn construct(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> ControlResult {
     let func = func.get(vm)?;
 

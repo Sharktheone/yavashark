@@ -52528,6 +52528,2599 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn call_private_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberAccUndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberAccUndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberAccUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberAccUndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberConstUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberConstUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberConstUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberConstUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberRegUndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberRegUndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberRegUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberRegUndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberStackUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberStackUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberStackUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberStackUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberVarUndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberVarUndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberVarUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberVarUndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32AccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32AccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32AccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32AccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32ConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32ConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32ConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32ConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32RegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32RegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32RegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32RegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32StackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32StackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32StackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32StackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32VarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32VarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32VarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32VarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32F32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32F32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32F32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32F32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32I32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32I32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32I32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32I32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32U32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32U32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32U32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32U32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32BoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32BoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32BoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32BoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32NullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32NullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32NullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32NullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberF32UndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberF32UndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberF32UndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberF32UndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32AccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32AccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32AccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32AccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32ConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32ConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32ConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32ConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32RegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32RegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32RegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32RegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32StackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32StackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32StackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32StackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32VarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32VarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32VarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32VarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32F32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32F32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32F32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32F32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32I32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32I32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32I32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32I32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32U32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32U32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32U32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32U32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32BoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32BoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32BoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32BoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32NullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32NullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32NullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32NullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberI32UndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberI32UndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberI32UndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberI32UndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32AccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32AccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32AccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32AccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32ConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32ConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32ConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32ConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32RegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32RegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32RegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32RegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32StackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32StackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32StackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32StackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32VarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32VarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32VarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32VarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32F32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32F32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32F32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32F32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32I32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32I32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32I32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32I32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32U32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32U32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32U32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32U32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32BoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32BoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32BoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32BoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32NullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32NullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32NullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32NullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberU32UndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberU32UndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberU32UndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberU32UndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberBoolUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberBoolUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberBoolUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberBoolUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberNullUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberNullUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberNullUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberNullUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedAccToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedConstToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedConstToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedConstToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedConstToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedRegToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedStackToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedStackToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedStackToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedStackToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedVarToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedF32ToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedI32ToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedU32ToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedBoolToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedBoolToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedBoolToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedBoolToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedNullToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedNullToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedNullToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedNullToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::CallPrivateMemberUndefinedUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::CallPrivateMemberUndefinedUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::CallPrivateMemberUndefinedUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::CallPrivateMemberUndefinedUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn call_private_member_no_output(arg0: impl Data, arg1: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputAccUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputConstUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputRegUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputStackUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputVarUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Acc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Const(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Reg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Stack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Var(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32F32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32I32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32U32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Bool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Null(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputF32Undefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Acc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Const(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Reg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Stack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Var(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32F32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32I32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32U32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Bool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Null(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputI32Undefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Acc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Const(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Reg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Stack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Var(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32F32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32I32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32U32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Bool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Null(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputU32Undefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputBoolUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputNullUndefined(arg0, arg1)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedAcc(arg0, arg1)
+                    }
+                    DataType::Const(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedConst(arg0, arg1)
+                    }
+                    DataType::Reg(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedReg(arg0, arg1)
+                    }
+                    DataType::Stack(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedStack(arg0, arg1)
+                    }
+                    DataType::Var(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedVar(arg0, arg1)
+                    }
+                    DataType::F32(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedF32(arg0, arg1)
+                    }
+                    DataType::I32(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedI32(arg0, arg1)
+                    }
+                    DataType::U32(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedU32(arg0, arg1)
+                    }
+                    DataType::Boolean(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedBool(arg0, arg1)
+                    }
+                    DataType::Null(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedNull(arg0, arg1)
+                    }
+                    DataType::Undefined(arg1) => {
+                        Self::CallPrivateMemberNoOutputUndefinedUndefined(arg0, arg1)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
     pub fn call_super(output: impl OutputData) -> Self {
         match output.data_type() {
             OutputDataType::Acc(output) => Self::CallSuperToAcc(output),
@@ -58723,6 +61316,2187 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn load_private_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberAccUndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberAccUndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberAccUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberAccUndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberConstUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberConstUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberConstUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberConstUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberRegUndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberRegUndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberRegUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberRegUndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberStackUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberStackUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberStackUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberStackUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberVarUndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberVarUndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberVarUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberVarUndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32AccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32AccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32AccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32AccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32ConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32ConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32ConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32ConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32RegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32RegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32RegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32RegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32StackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32StackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32StackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32StackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32VarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32VarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32VarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32VarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32F32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32F32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32F32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32F32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32I32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32I32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32I32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32I32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32U32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32U32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32U32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32U32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32BoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32BoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32BoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32BoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32NullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32NullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32NullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32NullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberF32UndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberF32UndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberF32UndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberF32UndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32AccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32AccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32AccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32AccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32ConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32ConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32ConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32ConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32RegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32RegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32RegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32RegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32StackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32StackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32StackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32StackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32VarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32VarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32VarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32VarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32F32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32F32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32F32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32F32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32I32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32I32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32I32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32I32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32U32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32U32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32U32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32U32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32BoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32BoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32BoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32BoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32NullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32NullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32NullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32NullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberI32UndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberI32UndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberI32UndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberI32UndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32AccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32AccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32AccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32AccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32ConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32ConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32ConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32ConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32RegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32RegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32RegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32RegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32StackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32StackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32StackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32StackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32VarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32VarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32VarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32VarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32F32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32F32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32F32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32F32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32I32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32I32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32I32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32I32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32U32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32U32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32U32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32U32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32BoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32BoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32BoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32BoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32NullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32NullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32NullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32NullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberU32UndefinedToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberU32UndefinedToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberU32UndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberU32UndefinedToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberBoolUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberBoolUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberBoolUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberBoolUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullAccToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullConstToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullConstToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullConstToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullConstToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullRegToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullStackToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullStackToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullStackToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullStackToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullVarToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullF32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullI32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullU32ToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullBoolToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullBoolToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullBoolToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullBoolToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullNullToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullNullToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullNullToStack(arg0, arg1, output)
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullNullToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberNullUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberNullUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberNullUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberNullUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedAccToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedAccToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedAccToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedAccToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedConstToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedConstToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedConstToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedConstToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedRegToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedRegToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedRegToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedRegToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedStackToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedStackToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedStackToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedStackToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedVarToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedVarToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedVarToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedVarToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedF32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedF32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedF32ToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedF32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedI32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedI32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedI32ToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedI32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedU32ToAcc(arg0, arg1, output)
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedU32ToReg(arg0, arg1, output)
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedU32ToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedU32ToVar(arg0, arg1, output)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedBoolToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedBoolToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedBoolToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedBoolToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedNullToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedNullToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedNullToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedNullToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match output.data_type() {
+                            OutputDataType::Acc(output) => {
+                                Self::LoadPrivateMemberUndefinedUndefinedToAcc(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Reg(output) => {
+                                Self::LoadPrivateMemberUndefinedUndefinedToReg(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Stack(output) => {
+                                Self::LoadPrivateMemberUndefinedUndefinedToStack(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                            OutputDataType::Var(output) => {
+                                Self::LoadPrivateMemberUndefinedUndefinedToVar(
+                                    arg0,
+                                    arg1,
+                                    output,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
     pub fn load_var(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => {
@@ -64110,6 +68884,18 @@ impl Instruction {
         Self::CallMemberNoOutput(arg0.data_type(), arg1.data_type())
     }
     #[must_use]
+    pub fn call_private_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::CallPrivateMember(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn call_private_member_no_output(arg0: impl Data, arg1: impl Data) -> Self {
+        Self::CallPrivateMemberNoOutput(arg0.data_type(), arg1.data_type())
+    }
+    #[must_use]
     pub fn call_super(output: impl OutputData) -> Self {
         Self::CallSuper(output.data_type())
     }
@@ -64284,6 +69070,14 @@ impl Instruction {
         output: impl OutputData,
     ) -> Self {
         Self::LoadMember(arg0.data_type(), arg1.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn load_private_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        output: impl OutputData,
+    ) -> Self {
+        Self::LoadPrivateMember(arg0.data_type(), arg1.data_type(), output.data_type())
     }
     #[must_use]
     pub fn load_var(arg0: impl Data, output: impl OutputData) -> Self {

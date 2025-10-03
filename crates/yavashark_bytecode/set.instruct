@@ -41,7 +41,9 @@ PopScope
 Call(Data) => Data
 CallNoOutput(Data) 
 CallMember(Data, Data) => Data
-CallMemberNoOutput(Data, Data) 
+CallMemberNoOutput(Data, Data)
+CallPrivateMember(Data, Data) => Data
+CallPrivateMemberNoOutput(Data, Data)
 CallSuper => Data
 CallSuperNoOutput  
 
@@ -90,6 +92,7 @@ JmpIfGtRel(Data, Data, JmpOffset)
 JmpIfGtEqRel(Data, Data, JmpOffset)
 
 LoadMember(Data, Data) => Data
+LoadPrivateMember(Data, Data) => Data
 LoadVar(Data) => Data
 
 TypeOf(Data) => Data

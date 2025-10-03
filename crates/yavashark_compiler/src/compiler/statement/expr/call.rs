@@ -3,6 +3,7 @@ use crate::{Compiler, Res};
 use swc_ecma_ast::{CallExpr, Callee, Expr};
 use yavashark_bytecode::data::{Acc, OutputData};
 use yavashark_bytecode::instructions::Instruction;
+use crate::compiler::statement::expr::member::MemberKey;
 
 impl Compiler {
     pub fn compile_call(&mut self, expr: &CallExpr, out: Option<impl OutputData>) -> Res {
@@ -14,16 +15,31 @@ impl Compiler {
                     let member = self.compile_member_prop(&m.prop)?;
                     let prop = self.compile_expr_data_acc(&m.obj)?;
 
-                    if let Some(out) = out {
-                        self.instructions
-                            .push(Instruction::call_member(prop, member, out));
-                    } else {
-                        self.instructions
-                            .push(Instruction::call_member_no_output(prop, member));
+
+                    match member {
+                        MemberKey::Public(member) => {
+                            if let Some(out) = out {
+                                self.instructions
+                                    .push(Instruction::call_member(prop, member, out));
+                            } else {
+                                self.instructions
+                                    .push(Instruction::call_member_no_output(prop, member));
+                            }
+                        }
+                        MemberKey::Private(member) => {
+                            if let Some(out) = out {
+                                self.instructions
+                                    .push(Instruction::call_private_member(prop, member, out));
+                            } else {
+                                self.instructions
+                                    .push(Instruction::call_private_member_no_output(prop, member));
+                            }
+                        }
                     }
 
+
                     self.dealloc(prop);
-                    self.dealloc(member);
+                    self.dealloc(member.data_type());
 
                     return Ok(());
                 }
