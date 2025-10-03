@@ -63618,6 +63618,9238 @@ impl Instruction {
         }
     }
     #[must_use]
+    pub fn store_member(arg0: impl Data, arg1: impl Data, arg2: impl Data) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberAccUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberAccUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberAccUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberAccUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberAccUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberAccUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberAccUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberAccUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberAccUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberAccUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberAccUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberConstUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberConstUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberConstUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberConstUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberConstUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberConstUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberConstUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberConstUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberConstUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberConstUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberConstUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberRegUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberRegUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberRegUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberRegUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberRegUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberRegUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberRegUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberRegUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberRegUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberRegUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberRegUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberStackUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberStackUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberStackUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberStackUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberStackUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberStackUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberStackUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberStackUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberStackUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberStackUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberStackUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberVarUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberVarUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberVarUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberVarUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberVarUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberVarUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberVarUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberVarUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberVarUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberVarUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberVarUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32AccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32AccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32AccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32AccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32AccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32AccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32AccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32AccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32AccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32AccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32AccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32ConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32ConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32ConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32ConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32ConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32ConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32ConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32ConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32ConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32ConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32ConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32RegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32RegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32RegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32RegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32RegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32RegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32RegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32RegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32RegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32RegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32RegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32StackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32StackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32StackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32StackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32StackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32StackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32StackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32StackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32StackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32StackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32StackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32VarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32VarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32VarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32VarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32VarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32VarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32VarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32VarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32VarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32VarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32VarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32F32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32F32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32F32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32F32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32F32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32F32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32F32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32F32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32F32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32F32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32F32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32I32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32I32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32I32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32I32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32I32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32I32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32I32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32I32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32I32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32I32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32I32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32U32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32U32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32U32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32U32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32U32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32U32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32U32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32U32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32U32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32U32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32U32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32BoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32BoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32BoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32BoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32BoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32BoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32BoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32BoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32BoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32BoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32BoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32NullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32NullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32NullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32NullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32NullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32NullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32NullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32NullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32NullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32NullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32NullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberF32UndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberF32UndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberF32UndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberF32UndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberF32UndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberF32UndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberF32UndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberF32UndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberF32UndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberF32UndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberF32UndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32AccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32AccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32AccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32AccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32AccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32AccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32AccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32AccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32AccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32AccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32AccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32ConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32ConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32ConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32ConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32ConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32ConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32ConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32ConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32ConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32ConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32ConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32RegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32RegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32RegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32RegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32RegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32RegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32RegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32RegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32RegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32RegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32RegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32StackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32StackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32StackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32StackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32StackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32StackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32StackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32StackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32StackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32StackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32StackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32VarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32VarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32VarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32VarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32VarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32VarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32VarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32VarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32VarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32VarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32VarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32F32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32F32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32F32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32F32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32F32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32F32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32F32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32F32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32F32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32F32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32F32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32I32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32I32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32I32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32I32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32I32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32I32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32I32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32I32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32I32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32I32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32I32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32U32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32U32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32U32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32U32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32U32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32U32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32U32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32U32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32U32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32U32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32U32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32BoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32BoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32BoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32BoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32BoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32BoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32BoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32BoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32BoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32BoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32BoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32NullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32NullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32NullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32NullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32NullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32NullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32NullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32NullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32NullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32NullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32NullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberI32UndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberI32UndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberI32UndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberI32UndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberI32UndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberI32UndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberI32UndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberI32UndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberI32UndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberI32UndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberI32UndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32AccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32AccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32AccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32AccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32AccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32AccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32AccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32AccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32AccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32AccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32AccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32ConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32ConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32ConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32ConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32ConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32ConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32ConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32ConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32ConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32ConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32ConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32RegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32RegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32RegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32RegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32RegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32RegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32RegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32RegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32RegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32RegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32RegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32StackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32StackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32StackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32StackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32StackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32StackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32StackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32StackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32StackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32StackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32StackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32VarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32VarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32VarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32VarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32VarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32VarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32VarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32VarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32VarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32VarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32VarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32F32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32F32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32F32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32F32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32F32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32F32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32F32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32F32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32F32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32F32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32F32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32I32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32I32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32I32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32I32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32I32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32I32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32I32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32I32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32I32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32I32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32I32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32U32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32U32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32U32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32U32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32U32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32U32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32U32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32U32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32U32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32U32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32U32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32BoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32BoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32BoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32BoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32BoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32BoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32BoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32BoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32BoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32BoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32BoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32NullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32NullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32NullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32NullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32NullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32NullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32NullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32NullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32NullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32NullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32NullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberU32UndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberU32UndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberU32UndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberU32UndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberU32UndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberU32UndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberU32UndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberU32UndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberU32UndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberU32UndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberU32UndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberBoolUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberBoolUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberBoolUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberBoolUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberBoolUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberBoolUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberBoolUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberBoolUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberBoolUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberBoolUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberBoolUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberNullUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberNullUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberNullUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberNullUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberNullUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberNullUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberNullUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberNullUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberNullUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberNullUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberNullUndefinedUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StoreMemberUndefinedUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn store_private_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        arg2: impl Data,
+    ) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberAccUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Const(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstConstUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstStackUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedConst(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedStack(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberConstUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberRegUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Stack(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackConstUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackStackUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedConst(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedStack(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberStackUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberVarUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::F32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32AccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32AccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32AccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32AccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32AccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32AccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32AccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32AccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32AccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32AccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32AccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32ConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32ConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32ConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32ConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32ConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32ConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32ConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32ConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32ConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32ConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32ConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32RegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32RegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32RegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32RegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32RegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32RegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32RegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32RegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32RegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32RegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32RegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32StackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32StackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32StackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32StackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32StackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32StackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32StackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32StackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32StackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32StackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32StackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32VarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32VarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32VarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32VarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32VarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32VarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32VarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32VarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32VarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32VarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32VarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32F32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32F32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32F32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32F32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32F32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32F32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32F32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32F32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32F32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32F32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32F32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32I32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32I32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32I32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32I32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32I32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32I32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32I32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32I32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32I32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32I32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32I32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32U32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32U32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32U32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32U32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32U32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32U32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32U32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32U32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32U32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32U32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32U32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32BoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32BoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32BoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32BoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32BoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32BoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32BoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32BoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32BoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32BoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32BoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32NullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32NullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32NullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32NullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32NullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32NullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32NullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32NullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32NullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32NullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32NullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberF32UndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::I32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32AccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32AccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32AccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32AccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32AccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32AccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32AccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32AccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32AccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32AccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32AccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32ConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32ConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32ConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32ConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32ConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32ConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32ConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32ConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32ConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32ConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32ConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32RegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32RegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32RegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32RegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32RegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32RegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32RegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32RegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32RegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32RegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32RegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32StackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32StackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32StackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32StackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32StackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32StackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32StackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32StackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32StackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32StackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32StackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32VarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32VarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32VarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32VarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32VarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32VarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32VarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32VarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32VarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32VarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32VarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32F32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32F32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32F32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32F32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32F32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32F32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32F32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32F32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32F32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32F32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32F32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32I32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32I32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32I32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32I32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32I32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32I32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32I32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32I32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32I32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32I32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32I32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32U32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32U32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32U32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32U32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32U32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32U32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32U32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32U32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32U32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32U32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32U32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32BoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32BoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32BoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32BoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32BoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32BoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32BoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32BoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32BoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32BoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32BoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32NullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32NullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32NullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32NullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32NullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32NullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32NullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32NullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32NullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32NullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32NullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberI32UndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::U32(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32AccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32AccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32AccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32AccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32AccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32AccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32AccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32AccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32AccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32AccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32AccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32ConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32ConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32ConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32ConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32ConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32ConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32ConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32ConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32ConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32ConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32ConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32RegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32RegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32RegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32RegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32RegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32RegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32RegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32RegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32RegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32RegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32RegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32StackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32StackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32StackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32StackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32StackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32StackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32StackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32StackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32StackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32StackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32StackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32VarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32VarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32VarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32VarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32VarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32VarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32VarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32VarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32VarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32VarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32VarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32F32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32F32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32F32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32F32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32F32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32F32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32F32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32F32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32F32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32F32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32F32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32I32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32I32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32I32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32I32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32I32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32I32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32I32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32I32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32I32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32I32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32I32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32U32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32U32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32U32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32U32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32U32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32U32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32U32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32U32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32U32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32U32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32U32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32BoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32BoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32BoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32BoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32BoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32BoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32BoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32BoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32BoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32BoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32BoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32NullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32NullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32NullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32NullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32NullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32NullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32NullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32NullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32NullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32NullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32NullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberU32UndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberBoolUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullAccUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullConstConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullConstStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullConstUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullRegUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullStackConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullStackStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullStackUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullVarUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullF32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullI32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullU32Undefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullBoolUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullNullUndefined(arg0, arg1, arg2)
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberNullUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match arg1.data_type() {
+                    DataType::Acc(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedAccUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Const(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstConst(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstStack(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedConstUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Reg(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedRegUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Stack(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackConst(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackStack(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedStackUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Var(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedVarUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::F32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedF32Undefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::I32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedI32Undefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::U32(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Acc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Const(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Reg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Stack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Var(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32F32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32I32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32U32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Bool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Null(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedU32Undefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Boolean(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedBoolUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Null(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullAcc(arg0, arg1, arg2)
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullConst(arg0, arg1, arg2)
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullReg(arg0, arg1, arg2)
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullStack(arg0, arg1, arg2)
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullVar(arg0, arg1, arg2)
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullF32(arg0, arg1, arg2)
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullI32(arg0, arg1, arg2)
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullU32(arg0, arg1, arg2)
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullBool(arg0, arg1, arg2)
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullNull(arg0, arg1, arg2)
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedNullUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                    DataType::Undefined(arg1) => {
+                        match arg2.data_type() {
+                            DataType::Acc(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedAcc(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Const(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedConst(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Reg(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedReg(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Stack(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedStack(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Var(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedVar(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::F32(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedF32(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::I32(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedI32(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::U32(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedU32(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Boolean(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedBool(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Null(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedNull(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                            DataType::Undefined(arg2) => {
+                                Self::StorePrivateMemberUndefinedUndefinedUndefined(
+                                    arg0,
+                                    arg1,
+                                    arg2,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
     pub fn type_of(arg0: impl Data, output: impl OutputData) -> Self {
         match arg0.data_type() {
             DataType::Acc(arg0) => {
@@ -69082,6 +78314,18 @@ impl Instruction {
     #[must_use]
     pub fn load_var(arg0: impl Data, output: impl OutputData) -> Self {
         Self::LoadVar(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn store_member(arg0: impl Data, arg1: impl Data, arg2: impl Data) -> Self {
+        Self::StoreMember(arg0.data_type(), arg1.data_type(), arg2.data_type())
+    }
+    #[must_use]
+    pub fn store_private_member(
+        arg0: impl Data,
+        arg1: impl Data,
+        arg2: impl Data,
+    ) -> Self {
+        Self::StorePrivateMember(arg0.data_type(), arg1.data_type(), arg2.data_type())
     }
     #[must_use]
     pub fn type_of(arg0: impl Data, output: impl OutputData) -> Self {

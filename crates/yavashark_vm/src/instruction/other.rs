@@ -82,6 +82,49 @@ pub fn load_private_member(
     output.set(res, vm)
 }
 
+pub fn store_member(
+    obj: impl Data,
+    prop: impl Data,
+    value: impl Data,
+    vm: &mut impl VM,
+) -> Res {
+    let obj = obj.get(vm)?;
+    let prop = prop.get(vm)?;
+    let value = value.get(vm)?;
+
+    obj.define_property(prop, value)?;
+
+    Ok(())
+}
+
+pub fn store_private_member(
+    obj: impl Data,
+    prop: impl Data,
+    value: impl Data,
+    vm: &mut impl VM,
+) -> Res {
+    let base = obj.get(vm)?;
+    let prop = prop.get(vm)?;
+    let value = value.get(vm)?;
+
+    let Value::String(name) = prop else {
+        return Err(Error::ty("Private member name must be a string"));
+    };
+
+    let obj = base.as_object()?;
+
+    if let Some(class) = obj.downcast::<ClassInstance>() {
+        class.update_private_field(&name, value);
+        return Ok(());
+    }
+    if let Some(class) = obj.downcast::<Class>() {
+        class.update_private_field(&name, value);
+        return Ok(());
+    }
+
+    Err(Error::ty("Private member can only be set on class instance or class"))
+}
+
 pub fn load_var(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let result = data.get(vm)?;
 

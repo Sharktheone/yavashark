@@ -95,6 +95,9 @@ LoadMember(Data, Data) => Data
 LoadPrivateMember(Data, Data) => Data
 LoadVar(Data) => Data
 
+StoreMember(Data, Data, Data)
+StorePrivateMember(Data, Data, Data)
+
 TypeOf(Data) => Data
 
 Push(Data)

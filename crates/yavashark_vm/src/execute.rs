@@ -49644,6 +49644,7992 @@ impl Execute for Instruction {
             Self::LoadVarUndefinedToStack(arg0, output) => {
                 instruction::load_var(arg0, output, vm)?
             }
+            Self::StoreMemberVarVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Var(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Reg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Acc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Stack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Const(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32F32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32I32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32U32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Bool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Null(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32VarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32VarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32VarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32RegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32RegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32RegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32AccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32AccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32AccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32StackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32StackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32StackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32ConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32ConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32ConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32F32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32F32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32F32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32I32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32I32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32I32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32U32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32U32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32U32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32BoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32BoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32BoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32NullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32NullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32NullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberVarUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberRegUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberAccUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberStackUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberConstUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberF32UndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberI32UndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberU32UndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberBoolUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberNullUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StoreMemberUndefinedUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Var(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedVar(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Reg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedReg(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Acc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedAcc(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Stack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedStack(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Const(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedConst(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32F32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedF32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32I32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedI32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32U32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedU32(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Bool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedBool(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Null(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedNull(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32VarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32VarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32VarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedVarUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32RegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32RegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32RegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedRegUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32AccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32AccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32AccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedAccUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32StackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32StackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32StackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedStackUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32ConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32ConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32ConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedConstUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32F32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32F32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32F32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedF32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32I32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32I32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32I32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedI32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32U32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32U32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32U32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedU32Undefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32BoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32BoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32BoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedBoolUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32NullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32NullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32NullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedNullUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberVarUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberRegUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberAccUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberStackUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberConstUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberF32UndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberI32UndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberU32UndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberBoolUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberNullUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMemberUndefinedUndefinedUndefined(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
             Self::TypeOfVarToVar(arg0, output) => instruction::type_of(arg0, output, vm)?,
             Self::TypeOfRegToVar(arg0, output) => instruction::type_of(arg0, output, vm)?,
             Self::TypeOfAccToVar(arg0, output) => instruction::type_of(arg0, output, vm)?,
@@ -54236,6 +62222,12 @@ impl Execute for Instruction {
                 instruction::load_private_member(arg0, arg1, output, vm)?
             }
             Self::LoadVar(arg0, output) => instruction::load_var(arg0, output, vm)?,
+            Self::StoreMember(arg0, arg1, arg2) => {
+                instruction::store_member(arg0, arg1, arg2, vm)?
+            }
+            Self::StorePrivateMember(arg0, arg1, arg2) => {
+                instruction::store_private_member(arg0, arg1, arg2, vm)?
+            }
             Self::TypeOf(arg0, output) => instruction::type_of(arg0, output, vm)?,
             Self::Push(arg0) => instruction::push(arg0, vm)?,
             Self::Pop => instruction::pop(vm)?,

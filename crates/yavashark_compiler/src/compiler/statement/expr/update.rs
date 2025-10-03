@@ -51,11 +51,16 @@ impl Compiler {
         }
 
         if let Some((m, prop)) = member {
-            todo!();
-            //TODO: store member
-
-            // self.instructions
-            //     .push(Instruction::store_member(prop, m, source));
+            match m {
+                MemberKey::Public(member) => {
+                    self.instructions
+                        .push(Instruction::store_member(prop, member, source));
+                }
+                MemberKey::Private(member) => {
+                    self.instructions
+                        .push(Instruction::store_private_member(prop, member, source));
+                }
+            }
 
             self.dealloc(prop);
             self.dealloc(m.data_type());
