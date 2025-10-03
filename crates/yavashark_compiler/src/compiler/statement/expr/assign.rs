@@ -1,5 +1,6 @@
+use anyhow::anyhow;
 use crate::{Compiler, Res};
-use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, SimpleAssignTarget};
+use swc_ecma_ast::{AssignExpr, AssignOp, AssignTarget, AssignTargetPat, SimpleAssignTarget};
 use yavashark_bytecode::data::{Acc, Data, OutputData, OutputDataType};
 use yavashark_bytecode::instructions::Instruction;
 
@@ -40,8 +41,40 @@ impl Compiler {
                     _ => todo!(),
                 }
             }
-            AssignTarget::Pat(_) => {
-                todo!()
+            AssignTarget::Pat(pat) => {
+                if expr.op != AssignOp::Assign {
+                    return Err(anyhow!(
+                        "Only simple assignment is allowed for patterns, found: {:?}",
+                        expr.op
+                    ));
+                }
+
+
+                match pat {
+                    AssignTargetPat::Object(obj) => {
+
+                        self.compile_object_pat(obj, val, &mut |compiler, dtype, name| {
+                            compiler
+                                .instructions
+                                .push(Instruction::move_(dtype, name))
+                        })?;
+                    },
+                    AssignTargetPat::Array(array) => {
+                        self.compile_array_pat(array, val, &mut |compiler, dtype, name| {
+                            compiler
+                                .instructions
+                                .push(Instruction::move_(dtype, name))
+                        })?;
+                    },
+                    AssignTargetPat::Invalid(_) => {
+                        return Err(anyhow!("Invalid pattern in assignment"));
+                    },
+                }
+
+                self.dealloc(val);
+                self.dealloc(val_);
+
+                return Ok(());
             }
         };
 
