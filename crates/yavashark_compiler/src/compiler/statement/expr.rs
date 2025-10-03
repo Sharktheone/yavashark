@@ -28,6 +28,7 @@ use anyhow::anyhow;
 use swc_ecma_ast::{Expr, ExprStmt};
 use yavashark_bytecode::data::{Acc, Data, DataType, OutputData};
 use yavashark_bytecode::instructions::Instruction;
+use crate::compiler::statement::expr::member::MemberKey;
 
 #[must_use]
 pub struct MoveOptimization {
@@ -143,7 +144,20 @@ impl Compiler {
     pub fn compile_assign_expr(&mut self, expr: &Expr, value: impl Data) -> Res {
         match expr {
             Expr::Member(m) => {
-                todo!()
+                let key = self.compile_member_prop(&m.prop)?;
+                let obj = self.compile_expr_data_acc(&m.obj)?;
+
+                match key {
+                    MemberKey::Public(member) => {
+                        self.instructions
+                            .push(Instruction::store_member(obj, member, value));
+                    }
+                    MemberKey::Private(member) => {
+                        self.instructions
+                            .push(Instruction::store_private_member(obj, member, value));
+                    }
+                }
+
             }
             Expr::SuperProp(super_prop) => {
                 todo!()
