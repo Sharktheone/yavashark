@@ -455,7 +455,7 @@ impl Error {
         let kind = err.kind();
         let msg = err.into_message();
 
-        let msg = YSString::from_ref(msg);
+        let msg = YSString::new_static(msg);
 
         let err = match kind {
             temporal_rs::error::ErrorKind::Generic => ErrorKind::Runtime,
