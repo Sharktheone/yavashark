@@ -277,7 +277,7 @@ fn init_constructor(
 
         constructor_tokens.extend(quote! {
             impl #env::value::Func for #name {
-                pub fn call(&self, realm: #realm, args: std::vec::Vec<#value>, this: #value) -> crate::Res<ObjectHandle> {
+                fn call(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>, this: #value) -> crate::ValueResult {
                     use #env::value::{AsAny, Obj, IntoValue, FromValue};
                     use #try_into_value;
 
