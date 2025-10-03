@@ -417,3 +417,58 @@ pub fn end_spread(obj: impl Data, out: impl OutputData, vm: &mut impl VM) -> Res
 pub fn end_spread_no_output(vm: &mut impl VM) -> Res {
     vm.end_spread_no_output()
 }
+
+pub fn to_number(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    let num = data.to_number(vm.get_realm())?;
+
+    output.set(num.into(), vm)
+}
+
+pub fn to_string(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    let string = data.to_string(vm.get_realm())?;
+
+    output.set(string.into(), vm)
+}
+pub fn to_boolean(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    let boolean = data.is_truthy();
+
+    output.set(boolean.into(), vm)
+}
+
+pub fn negate(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    let num = if let Value::BigInt(b) = data {
+        (-(&*b)).into()
+    } else {
+        Value::Number(-data.to_number(vm.get_realm())?)
+    };
+
+    output.set(num, vm)
+}
+
+pub fn logical_not(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    let boolean = !data.is_truthy();
+
+    output.set(boolean.into(), vm)
+}
+
+pub fn bitwise_not(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
+    let data = data.get(vm)?;
+
+    let num = if let Value::BigInt(b) = data {
+        (!(&*b)).into()
+    } else {
+        Value::Number(f64::from(!(data.to_number(vm.get_realm())? as i32)))
+    };
+
+    output.set(num, vm)
+}

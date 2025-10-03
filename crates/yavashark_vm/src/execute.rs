@@ -50047,6 +50047,750 @@ impl Execute for Instruction {
             Self::ThrowIfNotObjectUndefined(arg0) => {
                 instruction::throw_if_not_object(arg0, vm)?
             }
+            Self::ToNumberVarToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberRegToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberAccToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberStackToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberConstToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberF32ToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberI32ToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberU32ToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberBoolToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberNullToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberUndefinedToVar(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberVarToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberRegToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberAccToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberStackToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberConstToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberF32ToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberI32ToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberU32ToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberBoolToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberNullToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberUndefinedToReg(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberVarToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberRegToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberAccToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberStackToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberConstToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberF32ToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberI32ToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberU32ToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberBoolToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberNullToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberUndefinedToAcc(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberVarToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberRegToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberAccToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberStackToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberConstToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberF32ToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberI32ToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberU32ToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberBoolToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberNullToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToNumberUndefinedToStack(arg0, output) => {
+                instruction::to_number(arg0, output, vm)?
+            }
+            Self::ToStringVarToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringRegToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringAccToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringStackToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringConstToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringF32ToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringI32ToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringU32ToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringBoolToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringNullToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringUndefinedToVar(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringVarToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringRegToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringAccToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringStackToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringConstToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringF32ToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringI32ToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringU32ToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringBoolToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringNullToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringUndefinedToReg(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringVarToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringRegToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringAccToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringStackToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringConstToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringF32ToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringI32ToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringU32ToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringBoolToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringNullToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringUndefinedToAcc(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringVarToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringRegToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringAccToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringStackToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringConstToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringF32ToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringI32ToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringU32ToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringBoolToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringNullToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToStringUndefinedToStack(arg0, output) => {
+                instruction::to_string(arg0, output, vm)?
+            }
+            Self::ToBooleanVarToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanRegToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanAccToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanStackToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanConstToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanF32ToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanI32ToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanU32ToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanBoolToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanNullToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanUndefinedToVar(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanVarToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanRegToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanAccToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanStackToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanConstToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanF32ToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanI32ToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanU32ToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanBoolToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanNullToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanUndefinedToReg(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanVarToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanRegToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanAccToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanStackToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanConstToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanF32ToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanI32ToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanU32ToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanBoolToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanNullToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanUndefinedToAcc(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanVarToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanRegToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanAccToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanStackToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanConstToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanF32ToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanI32ToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanU32ToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanBoolToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanNullToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::ToBooleanUndefinedToStack(arg0, output) => {
+                instruction::to_boolean(arg0, output, vm)?
+            }
+            Self::NegateVarToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateRegToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateAccToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateStackToVar(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateConstToVar(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateF32ToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateI32ToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateU32ToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateBoolToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateNullToVar(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateUndefinedToVar(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateVarToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateRegToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateAccToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateStackToReg(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateConstToReg(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateF32ToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateI32ToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateU32ToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateBoolToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateNullToReg(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateUndefinedToReg(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateVarToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateRegToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateAccToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateStackToAcc(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateConstToAcc(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateF32ToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateI32ToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateU32ToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateBoolToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateNullToAcc(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::NegateUndefinedToAcc(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateVarToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateRegToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateAccToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateStackToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateConstToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateF32ToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateI32ToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateU32ToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateBoolToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateNullToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::NegateUndefinedToStack(arg0, output) => {
+                instruction::negate(arg0, output, vm)?
+            }
+            Self::LogicalNotVarToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotRegToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotAccToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotStackToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotConstToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotF32ToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotI32ToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotU32ToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotBoolToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotNullToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotUndefinedToVar(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotVarToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotRegToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotAccToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotStackToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotConstToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotF32ToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotI32ToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotU32ToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotBoolToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotNullToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotUndefinedToReg(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotVarToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotRegToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotAccToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotStackToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotConstToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotF32ToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotI32ToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotU32ToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotBoolToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotNullToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotUndefinedToAcc(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotVarToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotRegToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotAccToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotStackToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotConstToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotF32ToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotI32ToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotU32ToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotBoolToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotNullToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::LogicalNotUndefinedToStack(arg0, output) => {
+                instruction::logical_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotVarToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotRegToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotAccToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotStackToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotConstToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotF32ToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotI32ToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotU32ToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotBoolToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotNullToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotUndefinedToVar(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotVarToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotRegToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotAccToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotStackToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotConstToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotF32ToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotI32ToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotU32ToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotBoolToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotNullToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotUndefinedToReg(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotVarToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotRegToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotAccToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotStackToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotConstToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotF32ToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotI32ToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotU32ToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotBoolToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotNullToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotUndefinedToAcc(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotVarToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotRegToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotAccToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotStackToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotConstToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotF32ToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotI32ToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotU32ToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotBoolToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotNullToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
+            Self::BitwiseNotUndefinedToStack(arg0, output) => {
+                instruction::bitwise_not(arg0, output, vm)?
+            }
         }
         Ok(())
     }
@@ -50297,6 +51041,12 @@ impl Execute for Instruction {
                 instruction::async_iter_next_no_output_jmp(arg0, arg1, vm)?
             }
             Self::ThrowIfNotObject(arg0) => instruction::throw_if_not_object(arg0, vm)?,
+            Self::ToNumber(arg0, output) => instruction::to_number(arg0, output, vm)?,
+            Self::ToString(arg0, output) => instruction::to_string(arg0, output, vm)?,
+            Self::ToBoolean(arg0, output) => instruction::to_boolean(arg0, output, vm)?,
+            Self::Negate(arg0, output) => instruction::negate(arg0, output, vm)?,
+            Self::LogicalNot(arg0, output) => instruction::logical_not(arg0, output, vm)?,
+            Self::BitwiseNot(arg0, output) => instruction::bitwise_not(arg0, output, vm)?,
         }
         Ok(())
     }

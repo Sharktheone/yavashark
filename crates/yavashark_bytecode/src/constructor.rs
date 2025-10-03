@@ -63158,6 +63158,780 @@ impl Instruction {
             DataType::Undefined(arg0) => Self::ThrowIfNotObjectUndefined(arg0),
         }
     }
+    #[must_use]
+    pub fn to_number(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberConstToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberConstToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberConstToVar(arg0, output),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberStackToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberStackToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberStackToVar(arg0, output),
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberBoolToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberBoolToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberBoolToVar(arg0, output),
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToNumberNullToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToNumberNullToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToNumberNullToVar(arg0, output),
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ToNumberUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ToNumberUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ToNumberUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ToNumberUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn to_string(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringConstToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringConstToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringConstToVar(arg0, output),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringStackToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringStackToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringStackToVar(arg0, output),
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringBoolToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringBoolToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringBoolToVar(arg0, output),
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToStringNullToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToStringNullToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToStringNullToVar(arg0, output),
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ToStringUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ToStringUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ToStringUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ToStringUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn to_boolean(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ToBooleanConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ToBooleanConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ToBooleanConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ToBooleanStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ToBooleanStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ToBooleanStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanBoolToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanBoolToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanBoolToVar(arg0, output),
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::ToBooleanNullToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::ToBooleanNullToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::ToBooleanNullToVar(arg0, output),
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::ToBooleanUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::ToBooleanUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::ToBooleanUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::ToBooleanUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn negate(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::NegateAccToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::NegateAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateConstToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateConstToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::NegateConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::NegateConstToVar(arg0, output),
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::NegateRegToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::NegateRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateStackToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateStackToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::NegateStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::NegateStackToVar(arg0, output),
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::NegateVarToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::NegateVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::NegateF32ToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::NegateF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::NegateI32ToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::NegateI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => Self::NegateU32ToStack(arg0, output),
+                    OutputDataType::Var(output) => Self::NegateU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateBoolToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateBoolToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::NegateBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::NegateBoolToVar(arg0, output),
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::NegateNullToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::NegateNullToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::NegateNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::NegateNullToVar(arg0, output),
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::NegateUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::NegateUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::NegateUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::NegateUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn logical_not(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::LogicalNotAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::LogicalNotAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::LogicalNotAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LogicalNotConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LogicalNotConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LogicalNotConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::LogicalNotRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::LogicalNotRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::LogicalNotRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LogicalNotStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LogicalNotStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LogicalNotStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::LogicalNotVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::LogicalNotVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::LogicalNotVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::LogicalNotF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::LogicalNotF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::LogicalNotF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::LogicalNotI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::LogicalNotI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::LogicalNotI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::LogicalNotU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::LogicalNotU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::LogicalNotU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LogicalNotBoolToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LogicalNotBoolToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LogicalNotBoolToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LogicalNotNullToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LogicalNotNullToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LogicalNotNullToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::LogicalNotUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::LogicalNotUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::LogicalNotUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::LogicalNotUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
+    #[must_use]
+    pub fn bitwise_not(arg0: impl Data, output: impl OutputData) -> Self {
+        match arg0.data_type() {
+            DataType::Acc(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BitwiseNotAccToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BitwiseNotAccToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotAccToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BitwiseNotAccToVar(arg0, output),
+                }
+            }
+            DataType::Const(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BitwiseNotConstToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BitwiseNotConstToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotConstToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BitwiseNotConstToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Reg(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BitwiseNotRegToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BitwiseNotRegToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotRegToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BitwiseNotRegToVar(arg0, output),
+                }
+            }
+            DataType::Stack(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BitwiseNotStackToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BitwiseNotStackToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotStackToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BitwiseNotStackToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Var(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BitwiseNotVarToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BitwiseNotVarToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotVarToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BitwiseNotVarToVar(arg0, output),
+                }
+            }
+            DataType::F32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BitwiseNotF32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BitwiseNotF32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotF32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BitwiseNotF32ToVar(arg0, output),
+                }
+            }
+            DataType::I32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BitwiseNotI32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BitwiseNotI32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotI32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BitwiseNotI32ToVar(arg0, output),
+                }
+            }
+            DataType::U32(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => Self::BitwiseNotU32ToAcc(arg0, output),
+                    OutputDataType::Reg(output) => Self::BitwiseNotU32ToReg(arg0, output),
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotU32ToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => Self::BitwiseNotU32ToVar(arg0, output),
+                }
+            }
+            DataType::Boolean(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BitwiseNotBoolToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BitwiseNotBoolToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotBoolToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BitwiseNotBoolToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Null(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BitwiseNotNullToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BitwiseNotNullToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotNullToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BitwiseNotNullToVar(arg0, output)
+                    }
+                }
+            }
+            DataType::Undefined(arg0) => {
+                match output.data_type() {
+                    OutputDataType::Acc(output) => {
+                        Self::BitwiseNotUndefinedToAcc(arg0, output)
+                    }
+                    OutputDataType::Reg(output) => {
+                        Self::BitwiseNotUndefinedToReg(arg0, output)
+                    }
+                    OutputDataType::Stack(output) => {
+                        Self::BitwiseNotUndefinedToStack(arg0, output)
+                    }
+                    OutputDataType::Var(output) => {
+                        Self::BitwiseNotUndefinedToVar(arg0, output)
+                    }
+                }
+            }
+        }
+    }
 }
 #[cfg(feature = "simple_bytecode")]
 impl Instruction {
@@ -63748,5 +64522,29 @@ impl Instruction {
     #[must_use]
     pub fn throw_if_not_object(arg0: impl Data) -> Self {
         Self::ThrowIfNotObject(arg0.data_type())
+    }
+    #[must_use]
+    pub fn to_number(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::ToNumber(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn to_string(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::ToString(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn to_boolean(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::ToBoolean(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn negate(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::Negate(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn logical_not(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::LogicalNot(arg0.data_type(), output.data_type())
+    }
+    #[must_use]
+    pub fn bitwise_not(arg0: impl Data, output: impl OutputData) -> Self {
+        Self::BitwiseNot(arg0.data_type(), output.data_type())
     }
 }

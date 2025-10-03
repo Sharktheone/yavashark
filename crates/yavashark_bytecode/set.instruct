@@ -166,3 +166,12 @@ AsyncIterNextJmp(Data, JmpAddr) => Data
 AsyncIterNextNoOutputJmp(Data, JmpAddr)
 
 ThrowIfNotObject(Data)
+
+ToNumber(Data) => Data
+ToString(Data) => Data
+ToBoolean(Data) => Data
+
+Negate(Data) => Data
+
+LogicalNot(Data) => Data
+BitwiseNot(Data) => Data
