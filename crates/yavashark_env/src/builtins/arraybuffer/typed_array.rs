@@ -520,6 +520,12 @@ fn convert_buffer(items: Vec<Value>, ty: Type, realm: &mut Realm) -> Res<ArrayBu
 impl TypedArray {
     const BYTES_PER_ELEMENT: u8 = 1;
 
+    #[call_constructor]
+    pub fn construct() -> Res {
+        Err(Error::ty("Abstract class TypedArray not directly constructable") )
+    }
+
+
     #[get("buffer")]
     pub fn get_buffer(&self) -> ObjectHandle {
         self.buffer.gc().into()
