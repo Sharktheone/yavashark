@@ -1,7 +1,8 @@
 mod env;
 pub mod initialize;
 mod intrinsics;
-mod resolve;
+
+pub mod resolve;
 
 use crate::global::init_global_obj;
 use crate::realm::env::Environment;

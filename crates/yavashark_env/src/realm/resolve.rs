@@ -1,6 +1,7 @@
 use crate::scope::Module;
 use crate::{Error, Realm, Res};
 use std::path::{Path, PathBuf};
+use std::pin::Pin;
 
 impl Realm {
     pub fn get_module(
@@ -27,6 +28,66 @@ impl Realm {
         self.env
             .modules
             .get(&path)
+            .ok_or(Error::new("failed to get module"))
+    }
+
+    pub fn get_module_async(
+        &mut self,
+        spec: &str,
+        cur_path: &Path,
+        cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
+    ) -> Res<ResolveModuleResult> {
+        let path = resolve_path(spec, cur_path)?;
+
+        if path == cur_path {
+            return Err(Error::new("TODO: handle circular dependencies"));
+        }
+
+        if !self.env.modules.contains_key(&path) {
+            let fut = async move {
+                let source = tokio::fs::read_to_string(&path)
+                    .await
+                    .map_err(|e| Error::new_error(e.to_string()))?;
+
+                Ok(ModuleFinalizer { source, path, cb: Box::new(cb) })
+            };
+
+            return Ok(ResolveModuleResult::Async(Box::pin(fut)));
+        }
+
+        Ok(ResolveModuleResult::Module(
+            self.env
+                .modules
+                .get(&path)
+                .ok_or(Error::new("failed to get module"))?,
+        ))
+    }
+}
+
+pub enum ResolveModuleResult<'a> {
+    Module(&'a Module),
+    Async(Pin<Box<dyn std::future::Future<Output = Res<ModuleFinalizer>>>>),
+}
+
+pub struct ModuleFinalizer {
+    pub source: String,
+    cb: Box<dyn FnOnce(String, PathBuf, &mut Realm) -> Res<Module>>,
+    pub path: PathBuf,
+}
+
+impl ModuleFinalizer {
+    pub fn finalize(
+        self,
+        realm: &mut Realm,
+    ) -> Res<&Module> {
+        let module = (self.cb)(self.source, self.path.clone(), realm)?;
+
+        realm.env.modules.insert(self.path.clone(), module);
+
+        realm
+            .env
+            .modules
+            .get(&self.path)
             .ok_or(Error::new("failed to get module"))
     }
 }

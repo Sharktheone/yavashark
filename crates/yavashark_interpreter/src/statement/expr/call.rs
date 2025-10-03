@@ -8,6 +8,7 @@ use yavashark_env::scope::Scope;
 use yavashark_env::utils::ValueIterator;
 use yavashark_env::value::Obj;
 use yavashark_env::{ClassInstance, ControlFlow, Error, Realm, Value, ValueResult};
+use yavashark_env::import::DynamicImport;
 
 impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
@@ -67,7 +68,25 @@ impl Interpreter {
             }
 
             Callee::Import(import) => {
-                todo!()
+                if stmt.args.is_empty() {
+                    return Err(Error::ty("import() requires at least one argument"));
+                }
+
+                let module_name = Self::run_expr(
+                    realm,
+                    &stmt.args[0].expr,
+                    stmt.args[0].span(),
+                    scope,
+                )?;
+
+                let name = module_name.to_string(realm)?;
+                let path = scope.get_current_path()?;
+
+                let prom = DynamicImport::new(&name, &path,|source, path, realm| {
+                    Self::run_module_source(&source, path, realm)
+                }, realm)?;
+
+                Ok(prom.into())
             }
         }
     }
