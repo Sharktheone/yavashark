@@ -1,4 +1,5 @@
 use proc_macro2::TokenStream;
+use quote::quote;
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Name, Property};
 
@@ -21,11 +22,19 @@ pub fn generate_set_property(
         let key = &prop.name;
         let ty = &prop.ty;
         let field = &prop.field;
+
+        let partial_get = if prop.partial {
+            quote! {
+                .get(realm)?
+            }
+        } else {
+            quote! {}
+        };
         
         let value_expr = if prop.readonly {
             if prop.kind == Kind::Setter {
                 quote::quote! {
-                return Ok(#env::inline_props::UpdatePropertyResult::Setter(self.#field.clone(), value));
+                return Ok(#env::inline_props::UpdatePropertyResult::Setter(self.#field #partial_get .clone(), value));
                 }
             } else {
                 quote::quote! {
@@ -34,12 +43,12 @@ pub fn generate_set_property(
             }
         } else if prop.copy {
             quote::quote! {
-                self.#field.set(<#ty as #from_value_output>::from_value_out(value, realm)?);
+                self.#field #partial_get .set(<#ty as #from_value_output>::from_value_out(value, realm)?);
                 return Ok(#env::inline_props::UpdatePropertyResult::Handled);
             }
         } else {
             quote::quote! {
-                *self.#field.borrow_mut() = <#ty as #from_value_output>::from_value_out(value, realm)?;
+                *self.#field #partial_get .borrow_mut() = <#ty as #from_value_output>::from_value_out(value, realm)?;
                 return Ok(#env::inline_props::UpdatePropertyResult::Handled);
             }
         };

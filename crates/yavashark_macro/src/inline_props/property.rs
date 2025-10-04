@@ -1,5 +1,5 @@
 use proc_macro2::Ident;
-use syn::{Attribute, Expr, Field, Path, Type};
+use syn::{Expr, Field, Path, Type};
 use syn::spanned::Spanned;
 
 pub struct Property {
@@ -11,6 +11,7 @@ pub struct Property {
     pub field: Ident,
     pub kind: Kind,
     pub ty: Type,
+    pub partial: bool,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -36,7 +37,8 @@ impl Default for Property {
             name: Name::Str(String::new()),
             field: Ident::new("unknown", proc_macro2::Span::call_site()),
             kind: Kind::Property,
-            ty: syn::parse_quote! { () }
+            ty: syn::parse_quote! { () },
+            partial: false,
         }
     }
 }
@@ -51,9 +53,14 @@ impl Property {
 
         flags.name = Name::Str(name.to_string());
         flags.field = name.clone();
-        flags.ty = field.ty.clone();
+        if flags.partial {
+            flags.ty = get_partial_type(&field.ty).clone();
+        } else {
+            flags.ty = field.ty.clone();
+        }
 
         let mut copy_auto = true;
+        let mut partial_auto = true;
 
         field.attrs.retain(|attr| {
             let Some(id) = attr.meta.path().get_ident() else {
@@ -130,12 +137,26 @@ impl Property {
                     flags.kind = Kind::Setter;
                     false
                 }
+                "partial" => {
+                    flags.partial = true;
+                    partial_auto = false;
+                    false
+                }
+                "no_partial" => {
+                    flags.partial = false;
+                    partial_auto = false;
+                    false
+                }
                 _ => true,
             }
         });
 
         if copy_auto {
             flags.copy = type_is_copy(&field.ty);
+        }
+
+        if partial_auto {
+            flags.partial = type_is_partial(&field.ty);
         }
 
 
@@ -164,5 +185,48 @@ fn type_is_copy(ty: &syn::Type) -> bool {
             }
         }
         _ => false,
+    }
+}
+
+fn type_is_partial(ty: &syn::Type) -> bool {
+    match ty {
+        syn::Type::Path(type_path) => {
+            if type_path.qself.is_some() {
+                return false;
+            }
+            if let Some(ident) = type_path.path.segments.last().map(|s| &s.ident) {
+                matches!(
+                    ident.to_string().as_str(),
+                    "Partial"
+                )
+            } else {
+                false
+            }
+        }
+        _ => false,
+    }
+}
+
+
+fn get_partial_type(ty: &syn::Type) -> &Type {
+    match ty {
+        syn::Type::Path(type_path) => {
+            if type_path.qself.is_some() {
+                return ty;
+            }
+            if let Some(segment) = type_path.path.segments.last() {
+                if segment.ident == "Partial" {
+                    if let syn::PathArguments::AngleBracketed(args) = &segment.arguments {
+                        if args.args.len() == 2 {
+                            if let syn::GenericArgument::Type(inner_ty) = &args.args[0] {
+                                return inner_ty;
+                            }
+                        }
+                    }
+                }
+            }
+            ty
+        }
+        _ => ty,
     }
 }

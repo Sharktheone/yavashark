@@ -1,6 +1,7 @@
 use std::borrow::Cow;
-use std::cell::UnsafeCell;
-use crate::{Error, Realm, Res};
+use std::cell::{Cell, RefCell, UnsafeCell};
+use crate::{Error, Realm, Res, Value};
+use crate::conversion::FromValueOutput;
 
 pub struct Partial<T, I: Initializer<T>> {
     value: UnsafeCell<Option<T>>,
@@ -61,4 +62,26 @@ impl<T, I: Initializer<T>> Partial<T, I> {
 
 pub trait Initializer<T> {
     fn initialize(realm: &mut Realm) -> Res<T>;
+}
+
+
+impl<T: FromValueOutput, I: Initializer<T>> FromValueOutput for Partial<T, I> {
+    type Output = T::Output;
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        T::from_value_out(value, realm)
+    }
+}
+
+
+impl<T, I: Initializer<T>> Initializer<RefCell<T>> for I {
+    fn initialize(realm: &mut Realm) -> Res<RefCell<T>> {
+        let v = I::initialize(realm)?;
+        Ok(RefCell::new(v))
+    }
+}
+impl<T, I: Initializer<T>> Initializer<Cell<T>> for I {
+    fn initialize(realm: &mut Realm) -> Res<Cell<T>> {
+        let v = I::initialize(realm)?;
+        Ok(Cell::new(v))
+    }
 }

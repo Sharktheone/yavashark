@@ -7,8 +7,7 @@ pub fn generate_properties(
     config: &Config,
 ) -> proc_macro2::TokenStream {
 
-    let internal_property_key = &config.internal_property_key;
-    let value = &config.value;
+    let realm = &config.realm;
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
@@ -23,18 +22,26 @@ pub fn generate_properties(
         let key = &prop.name;
         let field = &prop.field;
 
+        let partial_get = if prop.partial {
+            quote! {
+                .get(realm)?
+            }
+        } else {
+            quote! {}
+        };
+
 
         let get = if prop.copy && !prop.readonly {
             quote! {
-                .get()
+                #partial_get .get()
             }
         } else if !prop.copy && !prop.readonly {
             quote! {
-                .borrow().clone()
+                #partial_get .borrow().clone()
             }
         } else {
             quote! {
-                .clone()
+                #partial_get .clone()
             }
         };
 
@@ -71,7 +78,7 @@ pub fn generate_properties(
 
     quote::quote! {
         #[inline(always)]
-        fn properties(&self) -> #res<impl ::core::iter::Iterator<Item=(#property_key, #env::inline_props::Property)>> {
+        fn properties(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=(#property_key, #env::inline_props::Property)>> {
             ::core::result::Result::Ok(
                 ::core::iter::IntoIterator::into_iter([
                     #(#prop_items),*
@@ -91,6 +98,7 @@ pub fn generate_enumerable_properties(
     let into_value = &config.into_value;
     let res = &config.res;
     let property_key = &config.property_key;
+    let realm = &config.realm;
 
 
     let mut prop_items = Vec::with_capacity(props.len());
@@ -101,17 +109,25 @@ pub fn generate_enumerable_properties(
         let key = &prop.name;
         let field = &prop.field;
 
+        let partial_get = if prop.partial {
+            quote! {
+                .get(realm)?
+            }
+        } else {
+            quote! {}
+        };
+
         let get = if prop.copy && !prop.readonly {
             quote! {
-                .get()
+                #partial_get .get()
             }
         } else if !prop.copy && !prop.readonly {
             quote! {
-                .borrow().clone()
+                #partial_get .borrow().clone()
             }
         } else {
             quote! {
-                .clone()
+                #partial_get .clone()
             }
         };
 
@@ -148,7 +164,7 @@ pub fn generate_enumerable_properties(
 
     quote::quote! {
         #[inline(always)]
-        fn enumerable_properties(&self) -> #res<impl ::core::iter::Iterator<Item=(#property_key, #env::inline_props::Property)>> {
+        fn enumerable_properties(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=(#property_key, #env::inline_props::Property)>> {
             ::core::result::Result::Ok(
                 ::core::iter::IntoIterator::into_iter([
                     #(#prop_items),*

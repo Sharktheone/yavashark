@@ -23,25 +23,33 @@ pub fn generate_get_property(
         let ty = &prop.ty;
         let field = &prop.field;
 
+        let partial_get = if prop.partial {
+            quote::quote! {
+                .get(realm)?
+            }
+        } else {
+            quote::quote! {}
+        };
+
         let value_expr = if prop.readonly {
             if prop.kind == Kind::Getter {
                 quote::quote! {
-                    return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Getter(self.#field.clone())));
+                    return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Getter(self.#field #partial_get .clone())));
                 }
             } else {
                 quote::quote! {
-                    let val = #into_value::into_value(self.#field.clone());
+                    let val = #into_value::into_value(self.#field #partial_get.clone());
                     return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Value(val)));
                 }
             }
         } else if prop.copy {
             quote::quote! {
-                let val = #into_value::into_value(self.#field.get());
+                let val = #into_value::into_value(self.#field #partial_get .get());
                 return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Value(val)));
             }
         } else {
             quote::quote! {
-                let val = self.#field.borrow().clone();
+                let val = self.#field #partial_get.borrow().clone();
                 let val = #into_value::into_value(val);
 
                 return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Value(val)));

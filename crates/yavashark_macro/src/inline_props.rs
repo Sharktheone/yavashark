@@ -43,14 +43,20 @@ pub fn inline_props(
 
         if !prop.readonly {
             if prop.copy {
-                field.ty = syn::parse_quote! {
+                if prop.partial {
+                    field.ty = update_partial_type(field.ty.clone(), quote::quote! { ::core::cell::Cell });
+                } else {
+                    field.ty = syn::parse_quote! {
                     ::core::cell::Cell<#ty>
                 };
+                }
+            } else if prop.partial {
+                field.ty = update_partial_type(field.ty.clone(), quote::quote! { ::core::cell::RefCell });
             } else {
                 //TODO: we would want to only have one cell for all mutable props -> we need to add a Mutable<#StructName> struct
                 field.ty = syn::parse_quote! {
-                    ::core::cell::RefCell<#ty>
-                };
+                ::core::cell::RefCell<#ty>
+            };
             }
         }
 
@@ -101,4 +107,23 @@ fn generate_impl(
             }
         }
     }
+}
+
+fn update_partial_type(mut ty: syn::Type, wrapper: TokenStream) -> syn::Type {
+    if let syn::Type::Path(type_path) = &mut ty {
+        if let Some(segment) = type_path.path.segments.last_mut() {
+            if segment.ident == "Partial" {
+                if let syn::PathArguments::AngleBracketed(args) = &mut segment.arguments {
+                    if let Some(syn::GenericArgument::Type(inner_ty)) = args.args.first_mut() {
+                        *inner_ty = syn::parse_quote! {
+                            #wrapper<#inner_ty>
+                        };
+
+                    }
+                }
+            }
+        }
+    }
+
+    ty
 }

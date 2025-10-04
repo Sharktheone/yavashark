@@ -22,19 +22,19 @@ pub trait PropertiesHook {
 
     fn contains_property(&self, key: &InternalPropertyKey) -> Res<bool>;
 
-    fn properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Property)>>;
-    fn keys(&self) -> Res<impl Iterator<Item = PropertyKey>>;
-    fn values(&self) -> Res<impl Iterator<Item = Property>>;
+    fn properties(&self, realm: &mut Realm) -> Res<impl Iterator<Item = (PropertyKey, Property)>>;
+    fn keys(&self, realm: &mut Realm) -> Res<impl Iterator<Item = PropertyKey>>;
+    fn values(&self, realm: &mut Realm) -> Res<impl Iterator<Item = Property>>;
 
 
-    fn enumerable_properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Property)>> {
-        self.properties()
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<impl Iterator<Item = (PropertyKey, Property)>> {
+        self.properties(realm)
     }
-    fn enumerable_keys(&self) -> Res<impl Iterator<Item = PropertyKey>> {
-        self.keys()
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<impl Iterator<Item = PropertyKey>> {
+        self.keys(realm)
     }
-    fn enumerable_values(&self) -> Res<impl Iterator<Item = Property>> {
-        self.values()
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<impl Iterator<Item = Property>> {
+        self.values(realm)
     }
 
     fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;

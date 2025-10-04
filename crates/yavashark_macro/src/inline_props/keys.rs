@@ -8,6 +8,7 @@ pub fn generate_keys(
 ) -> proc_macro2::TokenStream {
     let res = &config.res;
     let property_key = &config.property_key;
+    let realm = &config.realm;
 
 
     let mut prop_items = Vec::with_capacity(props.len());
@@ -37,7 +38,7 @@ pub fn generate_keys(
 
     quote::quote! {
         #[inline(always)]
-        fn keys(&self) -> #res<impl ::core::iter::Iterator<Item=(#property_key)>> {
+        fn keys(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=(#property_key)>> {
             ::core::result::Result::Ok(
                 ::core::iter::IntoIterator::into_iter([
                     #(#prop_items),*
@@ -53,6 +54,7 @@ pub fn generate_enumerable_keys(
 ) -> proc_macro2::TokenStream {
     let res = &config.res;
     let property_key = &config.property_key;
+    let realm = &config.realm;
 
 
     let mut prop_items = Vec::with_capacity(props.len());
@@ -82,7 +84,7 @@ pub fn generate_enumerable_keys(
 
     quote::quote! {
         #[inline(always)]
-        fn enumerable_keys(&self) -> #res<impl ::core::iter::Iterator<Item=(#property_key)>> {
+        fn enumerable_keys(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=(#property_key)>> {
             ::core::result::Result::Ok(
                 ::core::iter::IntoIterator::into_iter([
                     #(#prop_items),*

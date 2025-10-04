@@ -8,9 +8,6 @@ pub fn generate_contains_property(
 ) -> proc_macro2::TokenStream {
 
     let internal_property_key = &config.internal_property_key;
-    let value = &config.value;
-    let env = &config.env_path;
-    let into_value = &config.into_value;
     let res = &config.res;
 
 
