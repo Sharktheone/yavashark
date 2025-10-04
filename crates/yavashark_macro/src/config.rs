@@ -14,13 +14,17 @@ pub struct Config {
     pub object: Path,
     pub value: Path,
     pub value_result: Path,
+    pub res: Path,
     pub object_property: Path,
     pub try_into_value: Path,
+    pub into_value: Path,
     pub mut_object: Path,
     pub mut_obj: Path,
     pub extractor: Path,
     pub extract_value: Path,
     pub from_value_output: Path,
+    pub property_key: Path,
+    pub internal_property_key: Path,
 }
 
 impl Config {
@@ -78,6 +82,9 @@ impl Config {
         value_result
             .segments
             .push(PathSegment::from(Ident::new("ValueResult", span)));
+        
+        let mut res = env_path.clone();
+        res.segments.push(PathSegment::from(Ident::new("Res", span)));
 
         let mut object_property = env_path.clone();
         object_property
@@ -91,6 +98,16 @@ impl Config {
         try_into_value
             .segments
             .push(PathSegment::from(Ident::new("TryIntoValue", span)));
+
+
+        let mut into_value = env_path.clone();
+        into_value
+            .segments
+            .push(PathSegment::from(Ident::new("value", span)));
+        
+        into_value
+            .segments
+            .push(PathSegment::from(Ident::new("IntoValue", span)));
 
         let mut mut_object = env_path.clone();
         mut_object
@@ -125,6 +142,16 @@ impl Config {
         from_value_output
             .segments
             .push(PathSegment::from(Ident::new("FromValueOutput", span)));
+        
+        let mut property_key = env_path.clone();
+        property_key
+            .segments
+            .push(PathSegment::from(Ident::new("PropertyKey", span)));
+        
+        let mut internal_property_key = env_path.clone();
+        internal_property_key
+            .segments
+            .push(PathSegment::from(Ident::new("InternalPropertyKey", span)));
 
         Self {
             env_path,
@@ -138,13 +165,17 @@ impl Config {
             object,
             value,
             value_result,
+            res,
             object_property,
             try_into_value,
+            into_value,
             mut_object,
             mut_obj,
             extractor,
             extract_value,
             from_value_output,
+            property_key,
+            internal_property_key,
         }
     }
 }

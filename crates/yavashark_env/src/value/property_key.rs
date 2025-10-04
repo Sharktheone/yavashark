@@ -9,6 +9,23 @@ pub enum PropertyKey {
     Symbol(Symbol),
 }
 
+impl PropertyKey {
+    pub fn as_str(&self) -> &str {
+        match self {
+            Self::String(s) => s.as_str(),
+            Self::Symbol(s) => s.as_str(),
+        }
+    }
+    
+    pub fn from_static(s: &'static str) -> Self {
+        Self::String(YSString::new_static(s))
+    }
+    
+    pub fn from_symbol(s: Symbol) -> Self {
+        Self::Symbol(s)
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BorrowedPropertyKey<'a> {
     String(&'a str),

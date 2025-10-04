@@ -1,5 +1,5 @@
 use yavashark_garbage::GcRef;
-use crate::{Res, Value};
+use crate::{ObjectHandle, Realm, Res, Value};
 use crate::value::BoxedObj;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 
@@ -7,29 +7,35 @@ use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 pub enum UpdatePropertyResult {
     Handled,
     NotHandled(Value),
-    Invalid,
+    Setter(ObjectHandle, Value),
+    ReadOnly,
+}
+
+pub enum Property {
+    Value(Value),
+    Getter(ObjectHandle),
 }
 
 pub trait PropertiesHook {
-    fn set_property(&self, key: InternalPropertyKey, value: Value) -> Res<UpdatePropertyResult>;
-    fn get_property(&self, key: InternalPropertyKey) -> Res<Option<Value>>;
+    fn set_property(&self, key: &InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<UpdatePropertyResult>;
+    fn get_property(&self, key: &InternalPropertyKey) -> Res<Option<Property>>;
 
-    fn contains_property(&self, key: InternalPropertyKey) -> Res<bool> {
+    fn contains_property(&self, key: &InternalPropertyKey) -> Res<bool> {
         Ok(self.get_property(key)?.is_some())
     }
 
-    fn properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Value)>>;
+    fn properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Property)>>;
     fn keys(&self) -> Res<impl Iterator<Item = PropertyKey>>;
-    fn values(&self) -> Res<impl Iterator<Item = Value>>;
+    fn values(&self) -> Res<impl Iterator<Item = Property>>;
 
 
-    fn enumerable_properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Value)>> {
+    fn enumerable_properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Property)>> {
         self.properties()
     }
     fn enumerable_keys(&self) -> Res<impl Iterator<Item = PropertyKey>> {
         self.keys()
     }
-    fn enumerable_values(&self) -> Res<impl Iterator<Item = Value>> {
+    fn enumerable_values(&self) -> Res<impl Iterator<Item = Property>> {
         self.values()
     }
 

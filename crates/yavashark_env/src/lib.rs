@@ -34,9 +34,10 @@ pub mod value;
 pub mod inline_props;
 pub mod import;
 
+
 use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
-use crate::value::property_key::InternalPropertyKey;
+pub use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use error::Location;
 use value::BoxedObj;
 
