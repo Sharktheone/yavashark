@@ -41,7 +41,7 @@ impl Interpreter {
                 let obj = value.as_object()?;
 
                 if let Some(class) = obj.downcast::<ClassInstance>() {
-                    let member = class.get_private_prop(name)?.ok_or_else(|| {
+                    let member = class.get_private_prop(name, realm)?.ok_or_else(|| {
                         ControlFlow::error_type(format!("Private name {name} not found"))
                     })?;
 

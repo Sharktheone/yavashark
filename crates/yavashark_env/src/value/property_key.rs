@@ -2,6 +2,7 @@ use crate::value::{fmt_num, Symbol, Value};
 use indexmap::Equivalent;
 use std::fmt::Display;
 use yavashark_string::{ToYSString, YSString};
+use crate::{Realm, Res};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {
@@ -24,6 +25,15 @@ impl PropertyKey {
     pub fn from_symbol(s: Symbol) -> Self {
         Self::Symbol(s)
     }
+
+    pub fn is_symbol(&self) -> bool {
+        matches!(self, Self::Symbol(_))
+    }
+
+    pub fn is_string(&self) -> bool {
+        matches!(self, Self::String(_))
+    }
+
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -134,6 +144,20 @@ impl From<Value> for InternalPropertyKey {
     }
 }
 
+impl From<PropertyKey> for InternalPropertyKey {
+    fn from(key: PropertyKey) -> Self {
+        match key {
+            PropertyKey::String(s) => {
+                s.parse::<usize>()
+                    .map_or_else(|_| Self::String(s), Self::Index)
+                //TODO: this is a hack, we should not parse strings to usize
+            }
+            PropertyKey::Symbol(s) => Self::Symbol(s),
+        }
+    }
+}
+
+
 impl From<InternalPropertyKey> for Value {
     fn from(key: InternalPropertyKey) -> Self {
         match key {
@@ -153,6 +177,178 @@ impl From<InternalPropertyKey> for PropertyKey {
         }
     }
 }
+
+
+pub trait IntoPropertyKey: Sized {
+    fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
+        self.into_internal_property_key(realm)
+            .map(Into::into)
+    }
+    fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey>;
+}
+
+impl IntoPropertyKey for PropertyKey {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(self)
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        match self {
+            PropertyKey::String(s) => Ok(InternalPropertyKey::String(s)),
+            PropertyKey::Symbol(s) => Ok(InternalPropertyKey::Symbol(s)),
+        }
+    }
+}
+
+impl IntoPropertyKey for InternalPropertyKey {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(self.into())
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(self)
+    }
+}
+
+impl IntoPropertyKey for &'static str {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(PropertyKey::String(self.into()))
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(InternalPropertyKey::String(self.into()))
+    }
+}
+
+impl IntoPropertyKey for String {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(PropertyKey::String(self.into()))
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(InternalPropertyKey::String(self.into()))
+    }
+}
+
+impl IntoPropertyKey for YSString {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(PropertyKey::String(self))
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(InternalPropertyKey::String(self))
+    }
+}
+
+impl IntoPropertyKey for Value {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(self.into())
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(self.into())
+    }
+}
+
+impl IntoPropertyKey for &Value {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(self.copy().into())
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(self.copy().into())
+    }
+}
+
+impl IntoPropertyKey for Symbol {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(PropertyKey::Symbol(self))
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(InternalPropertyKey::Symbol(self))
+    }
+}
+
+
+impl IntoPropertyKey for &Symbol {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(PropertyKey::Symbol(self.clone()))
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(InternalPropertyKey::Symbol(self.clone()))
+    }
+}
+
+impl IntoPropertyKey for usize {
+    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(PropertyKey::String(self.to_string().into()))
+    }
+    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(InternalPropertyKey::Index(self))
+    }
+}
+
+impl From<&'static str> for InternalPropertyKey {
+    fn from(s: &'static str) -> Self {
+        Self::String(s.into())
+    }
+}
+
+
+impl From<String> for InternalPropertyKey {
+    fn from(s: String) -> Self {
+        Self::String(s.into())
+    }
+}
+
+impl From<YSString> for InternalPropertyKey {
+    fn from(s: YSString) -> Self {
+        Self::String(s)
+    }
+}
+
+
+impl From<usize> for InternalPropertyKey {
+    fn from(i: usize) -> Self {
+        Self::Index(i)
+    }
+}
+
+impl From<Symbol> for InternalPropertyKey {
+    fn from(s: Symbol) -> Self {
+        Self::Symbol(s)
+    }
+}
+
+impl From<&Symbol> for InternalPropertyKey {
+    fn from(s: &Symbol) -> Self {
+        Self::Symbol(s.clone())
+    }
+}
+
+impl From<Symbol> for PropertyKey {
+    fn from(s: Symbol) -> Self {
+        Self::Symbol(s)
+    }
+}
+
+impl From<&Symbol> for PropertyKey {
+    fn from(s: &Symbol) -> Self {
+        Self::Symbol(s.clone())
+    }
+}
+
+impl From<&'static str> for PropertyKey {
+    fn from(s: &'static str) -> Self {
+        Self::String(s.into())
+    }
+}
+
+impl From<String> for PropertyKey {
+    fn from(s: String) -> Self {
+        Self::String(s.into())
+    }
+}
+
+impl From<YSString> for PropertyKey {
+    fn from(s: YSString) -> Self {
+        Self::String(s)
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

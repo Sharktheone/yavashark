@@ -1,6 +1,6 @@
 use crate::Interpreter;
 use swc_ecma_ast::WithStmt;
-use yavashark_env::{Realm, RuntimeResult, Value};
+use yavashark_env::{PropertyKey, Realm, RuntimeResult, Value};
 
 use crate::scope::Scope;
 
@@ -10,12 +10,12 @@ impl Interpreter {
 
         let mut scope = scope.child()?;
 
-        for (key, value) in obj.properties()? {
-            let Value::String(key) = key else {
+        for (key, value) in obj.properties(realm)? {
+            let PropertyKey::String(key) = key else {
                 continue;
             };
 
-            scope.declare_var(key.to_string(), value)?;
+            scope.declare_var(key.to_string(), value, realm)?;
         }
 
         Self::run_statement(realm, &stmt.body, &mut scope)

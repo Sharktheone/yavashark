@@ -35,6 +35,6 @@ impl Interpreter {
             }
         }
 
-        Ok(constructor.construct(realm, call_args)?)
+        Ok(constructor.construct(call_args, realm)?.into())
     }
 }

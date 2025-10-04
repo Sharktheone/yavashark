@@ -5,11 +5,9 @@ use swc_ecma_ast::{
     BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
 };
 use yavashark_env::value::Obj;
-use yavashark_env::{
-    scope::Scope, Class as JSClass, ClassInstance, Error, Object, Realm, Res, Value, ValueResult,
-    Variable,
-};
-use yavashark_string::YSString;
+use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey, Realm, Res, Value, ValueResult, Variable};
+use yavashark_env::value::property_key::{BorrowedInternalPropertyKey, IntoPropertyKey};
+use yavashark_string::{ToYSString, YSString};
 
 use crate::Interpreter;
 
@@ -22,11 +20,11 @@ pub fn create_class(
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
         let p = super_class
-            .get_property(&"prototype".into(), realm)?
+            .get_property("prototype", realm)?
             .to_object()?;
 
         (
-            JSClass::with_super(super_class.to_object()?, name.clone())?,
+            JSClass::with_super(super_class.to_object()?, name.clone(), realm)?,
             ClassInstance::new_with_proto(p, name),
         )
     } else {
@@ -45,13 +43,14 @@ pub fn create_class(
                     create_method(&method.key, &method.function, scope, realm, stmt.span)?;
 
                 define_method_on_class(
-                    name,
+                    name.to_string(realm)?,
                     func,
                     &mut class,
                     &mut proto,
                     method.is_static,
                     false,
                     method.kind,
+                    realm,
                 );
             }
             ClassMember::Constructor(constructor) => {
@@ -84,13 +83,14 @@ pub fn create_class(
                 )?;
 
                 define_method_on_class(
-                    name,
+                    name.to_string(realm)?,
                     func,
                     &mut class,
                     &mut proto,
                     method.is_static,
                     true,
                     method.kind,
+                    realm,
                 )?;
             }
 
@@ -113,6 +113,7 @@ pub fn create_class(
                     &mut proto,
                     o.is_static,
                     true,
+                    realm,
                 );
             }
             ClassMember::Empty(_) => {}
@@ -127,7 +128,7 @@ pub fn create_class(
                     (|val| Interpreter::run_expr(realm, val, p.span, scope)),
                 )?;
 
-                define_on_class(name, value, &mut class, &mut proto, p.is_static, false)?;
+                define_on_class(name.into_internal_property_key(realm)?, value, &mut class, &mut proto, p.is_static, false, realm)?;
             }
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
@@ -158,16 +159,16 @@ pub fn decl_class_ret(
         Interpreter::run_block_this(realm, &static_block, &mut static_scope, this.copy())?;
     }
 
-    let proto = this.get_property(&"prototype".into(), realm)?;
+    let proto = this.get_property("prototype", realm)?;
 
-    proto.define_property("constructor".into(), this.copy());
+    proto.define_property("constructor", this.copy(), realm)?;
 
     Ok(this)
 }
 pub fn decl_class(realm: &mut Realm, stmt: &Class, scope: &mut Scope, name: String) -> Res {
     let class = decl_class_ret(realm, stmt, scope, name.clone())?;
 
-    scope.declare_var(name, class);
+    scope.declare_var(name, class, realm);
     Ok(())
 }
 
@@ -226,15 +227,16 @@ fn prop_name_to_value(
 }
 
 fn define_on_class(
-    name: Value,
+    name: InternalPropertyKey,
     value: Value,
     class: &mut JSClass,
     proto: &mut ClassInstance,
     is_static: bool,
     is_private: bool,
+    realm: &mut Realm,
 ) -> Res {
     if is_private {
-        let Value::String(name) = name else {
+        let PropertyKey::String(name) = name.into() else {
             return Err(Error::new(
                 "Private method name must be a string (how tf did you get here?)",
             ));
@@ -248,80 +250,81 @@ fn define_on_class(
 
         return Ok(());
     } else if is_static {
-        if name == Value::String("prototype".into()) {
+        if name == InternalPropertyKey::String("prototype".into()) {
             return Err(Error::new(
                 "Classes may not have a static property named 'prototype'",
             ));
         }
 
-        class.define_property(name, value);
+        class.define_property(name, value, realm);
     } else {
-        proto.define_property(name, value);
+        proto.define_property(name, value, realm);
     }
 
     Ok(())
 }
 
 fn define_method_on_class(
-    name: Value,
+    key: YSString,
     value: Value,
     class: &mut JSClass,
     proto: &mut ClassInstance,
     is_static: bool,
     is_private: bool,
     kind: MethodKind,
+    realm: &mut Realm,
 ) -> Res {
     if is_private {
-        let Value::String(name) = name else {
-            return Err(Error::new(
-                "Private method name must be a string (how tf did you get here?)",
-            ));
-        };
-
-        let key = name.to_string();
-
         match kind {
             MethodKind::Getter => {
                 if is_static {
-                    class.define_private_getter(key, value)?;
+                    class.define_private_getter(key.to_string(), value)?;
                 } else {
-                    proto.define_private_getter(key, value)?;
+                    proto.define_private_getter(key.to_string(), value)?;
                 }
             }
             MethodKind::Setter => {
                 if is_static {
-                    class.define_private_setter(key, value)?;
+                    class.define_private_setter(key.to_string(), value)?;
                 } else {
-                    proto.define_private_setter(key, value)?;
+                    proto.define_private_setter(key.to_string(), value)?;
                 }
             }
             MethodKind::Method => {
                 if is_static {
-                    class.define_private_method(key, value);
+                    class.define_private_method(key.to_string(), value);
                 } else {
-                    proto.define_private_method(key, value);
+                    proto.define_private_method(key.to_string(), value);
                 }
             }
         }
 
         return Ok(());
     } else if is_static {
-        if name == Value::String("prototype".into()) {
+        if key.as_str() == "prototype" {
             return Err(Error::new(
                 "Classes may not have a static property named 'prototype'",
             ));
         }
 
         match kind {
-            MethodKind::Getter => class.define_getter(name, value),
-            MethodKind::Setter => class.define_setter(name, value),
-            MethodKind::Method => class.define_variable(name, Variable::write_config(value)),
+            MethodKind::Getter => class.define_getter(key.into(), value.to_object()?, realm),
+            MethodKind::Setter => class.define_setter(key.into(), value.to_object()?, realm),
+            MethodKind::Method => {
+                class.define_property_attributes(key.into(), Variable::write_config(value), realm)?;
+
+                Ok(())
+            },
         };
     } else {
         match kind {
-            MethodKind::Getter => proto.define_getter(name, value),
-            MethodKind::Setter => proto.define_setter(name, value),
-            MethodKind::Method => proto.define_variable(name, Variable::write_config(value)),
+            MethodKind::Getter => proto.define_getter(key.into(), value.to_object()?, realm),
+            MethodKind::Setter => proto.define_setter(key.into(), value.to_object()?, realm),
+            MethodKind::Method => {
+                proto.define_property_attributes(key.into(), Variable::write_config(value), realm)?;
+
+                Ok(())
+            },
         };
     }
 

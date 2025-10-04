@@ -1,13 +1,13 @@
 use crate::error_obj::ErrorObj;
 use crate::value::Obj;
-use crate::{Error, NativeConstructor, Object, ObjectHandle, Res, Variable};
+use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Variable};
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-        pub fn $get(error: ObjectHandle, error_proto: ObjectHandle) -> Res<ObjectHandle> {
+        pub fn $get(error: ObjectHandle, error_proto: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
             let proto = Object::with_proto(error);
 
-            proto.define_property("name".into(), stringify!($name).into())?;
+            proto.define_property("name".into(), stringify!($name).into(), realm)?;
 
             let constr = NativeConstructor::with_proto(
                 stringify!($name).into(),
@@ -20,21 +20,22 @@ macro_rules! error {
 
                     let obj = ErrorObj::raw(Error::$create(msg), realm);
 
-                    Ok(obj.into_value())
+                    Ok(obj.into_object())
                 },
                 error_proto.clone(),
                 error_proto,
             );
 
-            constr.define_variable(
+            constr.define_property_attributes(
                 "prototype".into(),
                 Variable::new_read_only(proto.clone().into()),
+                realm,
             )?;
-            constr.define_variable("name".into(), Variable::config(stringify!($name).into()))?;
+            constr.define_property_attributes("name".into(), Variable::config(stringify!($name).into()), realm)?;
 
-            constr.define_variable("length".into(), Variable::config(1.into()))?;
+            constr.define_property_attributes("length".into(), Variable::config(1.into()), realm)?;
 
-            proto.define_variable("constructor".into(), Variable::write_config(constr.into()))?;
+            proto.define_property_attributes("constructor".into(), Variable::write_config(constr.into()), realm)?;
 
             Ok(proto.into())
         }

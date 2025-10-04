@@ -15,12 +15,12 @@ mod timers;
 pub fn init(obj: &ObjectHandle, realm: &mut Realm) -> Res {
     let obj = obj.guard();
 
-    obj.define_variable("fs".into(), Fs::new(realm)?.into())?;
-    obj.define_variable("http".into(), Http::new(realm)?.into())?;
-    obj.define_variable("tcp".into(), Tcp::new(realm)?.into())?;
-    obj.define_variable("io".into(), io::Io::new(realm)?.into())?;
-    obj.define_variable("time".into(), time::Timer::new(realm)?.into())?;
-    obj.define_variable("setTimeout".into(), timers::get_set_timeout(realm).into())?;
+    obj.define_property_attributes("fs".into(), Fs::new(realm)?.into(), realm)?;
+    obj.define_property_attributes("http".into(), Http::new(realm)?.into(), realm)?;
+    obj.define_property_attributes("tcp".into(), Tcp::new(realm)?.into(), realm)?;
+    obj.define_property_attributes("io".into(), io::Io::new(realm)?.into(), realm)?;
+    obj.define_property_attributes("time".into(), time::Timer::new(realm)?.into(), realm)?;
+    obj.define_property_attributes("setTimeout".into(), timers::get_set_timeout(realm).into(), realm)?;
 
     #[cfg(feature = "gui")]
     gui::init(realm)?;

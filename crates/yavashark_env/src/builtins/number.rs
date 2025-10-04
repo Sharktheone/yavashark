@@ -41,14 +41,14 @@ pub struct NumberConstructor {}
 
 impl NumberConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableNumberConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
@@ -147,7 +147,7 @@ impl NumberConstructor {
 }
 
 impl Constructor for NumberConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let str = match args.first() {
             Some(v) => Self::construct_from(realm, v)?,
             None => 0.0,
@@ -155,7 +155,7 @@ impl Constructor for NumberConstructor {
 
         let obj = NumberObj::with_number(realm, str)?;
 
-        Ok(obj.into())
+        Ok(obj)
     }
 }
 
@@ -495,7 +495,7 @@ fn parse_int(string: &str, radix: Option<u32>) -> f64 {
 }
 
 #[must_use]
-pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
+pub fn get_is_nan(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "isNaN",
         |args, _, realm| {
@@ -511,7 +511,7 @@ pub fn get_is_nan(realm: &Realm) -> ObjectHandle {
 }
 
 #[must_use]
-pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
+pub fn get_is_finite(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "isFinite",
         |args, _, realm| {
@@ -527,7 +527,7 @@ pub fn get_is_finite(realm: &Realm) -> ObjectHandle {
 }
 
 #[must_use]
-pub fn get_parse_int(realm: &Realm) -> ObjectHandle {
+pub fn get_parse_int(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "parseInt",
         |args, _, realm| {
@@ -549,7 +549,7 @@ pub fn get_parse_int(realm: &Realm) -> ObjectHandle {
 }
 
 #[must_use]
-pub fn get_parse_float(realm: &Realm) -> ObjectHandle {
+pub fn get_parse_float(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::with_len(
         "parseFloat",
         |args, _, realm| {

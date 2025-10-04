@@ -9,7 +9,8 @@ use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::IntoValue;
 use yavashark_env::value::Obj;
-use yavashark_env::{Class, ClassInstance, Error, Object, Realm, Res, Value, ValueResult};
+use yavashark_env::{Class, ClassInstance, Error, Object, PropertyKey, Realm, Res, Value, ValueResult};
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_string::YSString;
 use yavashark_vm::async_generator::AsyncGeneratorFunction;
 use yavashark_vm::generator::GeneratorFunction;
@@ -20,7 +21,7 @@ impl Interpreter {
         stmt: &Pat,
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
-        mut cb: &mut impl FnMut(&mut Scope, String, Value) -> Res,
+        mut cb: &mut impl FnMut(&mut Scope, String, Value, &mut Realm) -> Res,
     ) -> Res {
         Self::run_pat_internal(realm, stmt, scope, value, DUMMY_SP, cb)
     }
@@ -32,15 +33,15 @@ impl Interpreter {
         scope: &mut Scope,
         value: &mut impl Iterator<Item = Value>,
         span: Span,
-        mut cb: &mut impl FnMut(&mut Scope, String, Value) -> Res,
+        mut cb: &mut impl FnMut(&mut Scope, String, Value, &mut Realm) -> Res,
     ) -> Res {
         match stmt {
             Pat::Ident(id) => {
                 let value = value.next().unwrap_or(Value::Undefined);
 
-                set_value_name(id.id.sym.as_str(), &value)?;
+                set_value_name(id.id.sym.as_str(), &value, realm)?;
 
-                cb(scope, id.id.sym.to_string(), value)?;
+                cb(scope, id.id.sym.to_string(), value, realm)?;
             }
             Pat::Array(arr) => {
                 let mut iter = value
@@ -106,7 +107,7 @@ impl Interpreter {
                         ObjectPatProp::KeyValue(kv) => {
                             let key = Self::prop_name_to_value(realm, &kv.key, scope)?;
                             let value = object
-                                .get_property_opt(&key, realm)?
+                                .get_property_opt(key.clone(), realm)?
                                 .unwrap_or(Value::Undefined);
 
                             Self::run_pat(realm, &kv.value, scope, &mut iter::once(value), cb)?;
@@ -115,7 +116,7 @@ impl Interpreter {
                         ObjectPatProp::Assign(assign) => {
                             let key = assign.key.sym.to_string();
                             let mut value = object
-                                .get_property_opt(&key.clone().into(), realm)?
+                                .get_property_opt(key.clone(), realm)?
                                 .unwrap_or(Value::Undefined);
 
                             if let Some(val_expr) = &assign.value {
@@ -123,15 +124,15 @@ impl Interpreter {
                                     value = Self::run_expr(realm, val_expr, assign.span, scope)?;
                                 }
                             }
-                            set_value_name(&key, &value)?;
+                            set_value_name(&key, &value, realm)?;
 
-                            cb(scope, key.clone(), value)?;
+                            cb(scope, key.clone(), value, realm)?;
                             rest_not_props.push(key.into());
                         }
                         ObjectPatProp::Rest(rest) => {
                             let mut rest_props = Vec::new();
 
-                            for (name, value) in object.properties()? {
+                            for (name, value) in object.properties(realm)? {
                                 if !rest_not_props.contains(&name) {
                                     rest_props.push((name, value));
                                 }
@@ -176,18 +177,18 @@ impl Interpreter {
         realm: &mut Realm,
         prop: &PropName,
         scope: &mut Scope,
-    ) -> ValueResult {
+    ) -> Res<PropertyKey> {
         Ok(match prop {
-            PropName::Ident(ident) => Value::String(YSString::from_ref(&ident.sym)),
-            PropName::Str(str_) => Value::String(YSString::from_ref(&str_.value)),
-            PropName::Num(num) => Value::Number(num.value),
-            PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?,
+            PropName::Ident(ident) => PropertyKey::String(YSString::from_ref(&ident.sym)),
+            PropName::Str(str_) => PropertyKey::String(YSString::from_ref(&str_.value)),
+            PropName::Num(num) => PropertyKey::String(num.value.to_string().into()),
+            PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?.into_property_key(realm)?,
             PropName::BigInt(_) => todo!(),
         })
     }
 }
 
-pub fn set_value_name(name: &str, value: &Value) -> Res {
+pub fn set_value_name(name: &str, value: &Value, realm: &mut Realm) -> Res {
     if name.is_empty() {
         return Ok(());
     }
@@ -198,19 +199,19 @@ pub fn set_value_name(name: &str, value: &Value) -> Res {
         }
 
         if let Some(arrow) = obj.downcast::<ArrowFunction>() {
-            arrow.define_variable("name".into(), YSString::from_ref(name).into())?;
+            arrow.define_property_attributes("name".into(), YSString::from_ref(name).into(), realm)?;
         }
 
         if let Some(class) = obj.downcast::<Class>() {
-            class.update_name(name)?;
+            class.update_name(name, realm)?;
         }
 
         if let Some(gen) = obj.downcast::<GeneratorFunction>() {
-            gen.update_name(name)?;
+            gen.update_name(name, realm)?;
         }
 
         if let Some(gen) = obj.downcast::<AsyncGeneratorFunction>() {
-            gen.update_name(name)?;
+            gen.update_name(name, realm)?;
         }
     }
 

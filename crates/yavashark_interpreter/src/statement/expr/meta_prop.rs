@@ -23,9 +23,10 @@ impl Interpreter {
                         .to_string_lossy()
                         .into_owned()
                         .into(),
+                    realm,
                 )?;
 
-                obj.define_property("resolve".into(), Value::Undefined)?; //TODO
+                obj.define_property("resolve".into(), Value::Undefined, realm)?; //TODO
 
                 obj.into()
             }

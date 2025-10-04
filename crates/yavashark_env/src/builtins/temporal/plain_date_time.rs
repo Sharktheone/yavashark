@@ -442,20 +442,20 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
 
     let obj = info.to_object()?;
 
-    if obj.contains_key(&"year".into())?
-        || obj.contains_key(&"month".into())?
-        || obj.contains_key(&"monthCode".into())?
-        || obj.contains_key(&"day".into())?
+    if obj.contains_key("year".into(), realm)?
+        || obj.contains_key("month".into(), realm)?
+        || obj.contains_key("monthCode".into(), realm)?
+        || obj.contains_key("day".into(), realm)?
     {
         let year = obj
-            .resolve_property(&"year".into(), realm)?
+            .resolve_property("year", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as i32))?;
         let month = obj
-            .resolve_property(&"month".into(), realm)?
+            .resolve_property("month", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
 
         let month = if month == 0 {
-            obj.resolve_property(&"monthCode".into(), realm)?
+            obj.resolve_property("monthCode", realm)?
                 .and_then(|v| v.to_string(realm).ok())
                 .and_then(|s| {
                     if s.is_empty() {
@@ -470,29 +470,29 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
         };
 
         let day = obj
-            .resolve_property(&"day".into(), realm)?
+            .resolve_property("day", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
         let hour = obj
-            .resolve_property(&"hour".into(), realm)?
+            .resolve_property("hour", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
         let minute = obj
-            .resolve_property(&"minute".into(), realm)?
+            .resolve_property("minute", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
         let second = obj
-            .resolve_property(&"second".into(), realm)?
+            .resolve_property("second", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
         let millisecond = obj
-            .resolve_property(&"millisecond".into(), realm)?
+            .resolve_property("millisecond", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
         let microsecond = obj
-            .resolve_property(&"microsecond".into(), realm)?
+            .resolve_property("microsecond", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
         let nanosecond = obj
-            .resolve_property(&"nanosecond".into(), realm)?
+            .resolve_property("nanosecond", realm)?
             .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u16))?;
 
         let calendar = obj
-            .resolve_property(&"calendar".into(), realm)?
+            .resolve_property("calendar", realm)?
             .and_then(|v| v.to_string(realm).ok())
             .and_then(|s| {
                 if s.is_empty() {
@@ -530,10 +530,10 @@ pub fn value_to_plain_date_time(info: Value, realm: &mut Realm) -> Res<temporal_
 }
 
 impl PrettyObjectOverride for PlainDateTime {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
         let mut s = self.date.to_string();
 
-        fmt_properties_to(obj, &mut s, not);
+        fmt_properties_to(obj, &mut s, not, realm);
 
         Some(s)
     }

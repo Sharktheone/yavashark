@@ -54,100 +54,100 @@ impl ObjectImpl for Arguments {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: Value, value: Value) -> Res<()> {
-        if let Value::Number(idx) = &name {
-            if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
-                *v = value;
-                return Ok(());
-            }
-        }
-
-        if let Value::String(s) = &name {
-            if s == "length" {
-                *self.length.borrow_mut() = value;
-                return Ok(());
-            }
-        }
-
-        self.get_wrapped_object().define_property(name, value)
-    }
-
-    fn define_variable(&self, name: Value, value: Variable) -> Res<()> {
-        if let Value::Number(idx) = &name {
-            if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
-                *v = value.value;
-                return Ok(());
-            }
-        }
-
-        if let Value::String(s) = &name {
-            if s == "length" {
-                *self.length.borrow_mut() = value.value;
-                return Ok(());
-            }
-        }
-
-        self.get_wrapped_object().define_variable(name, value)
-    }
-
-    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(idx) = &name {
-            if let Some(value) = self.resolve_array(*idx as usize) {
-                return Ok(Some(value));
-            }
-        }
-
-        if let Value::String(s) = &name {
-            if s == "length" {
-                return Ok(Some(self.length.borrow().clone().into()));
-            }
-            if s == "callee" {
-                return Ok(Some(self.callee.clone().into()));
-            }
-        }
-
-        self.get_wrapped_object().resolve_property(name)
-    }
-
-    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(idx) = &name {
-            if let Some(value) = self.resolve_array(*idx as usize) {
-                return Ok(Some(value));
-            }
-        }
-
-        if let Value::String(s) = &name {
-            if s == "length" {
-                return Ok(Some(self.length.borrow().clone().into()));
-            }
-            if s == "callee" {
-                return Ok(Some(self.callee.clone().into()));
-            }
-        }
-
-        self.get_wrapped_object().get_property(name)
-    }
-
-    fn name(&self) -> String {
-        "Arguments".to_string()
-    }
-
-    fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
-        Ok("[object Arguments]".into())
-    }
-
-    fn to_string_internal(&self) -> Result<YSString, Error> {
-        Ok("[object Arguments]".into())
-    }
-
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
-        let args = self.args.borrow();
-        if index < args.len() {
-            Ok((false, Some(args[index].clone())))
-        } else {
-            Ok((true, None))
-        }
-    }
+    // fn define_property(&self, name: Value, value: Value) -> Res<()> {
+    //     if let Value::Number(idx) = &name {
+    //         if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
+    //             *v = value;
+    //             return Ok(());
+    //         }
+    //     }
+    //
+    //     if let Value::String(s) = &name {
+    //         if s == "length" {
+    //             *self.length.borrow_mut() = value;
+    //             return Ok(());
+    //         }
+    //     }
+    //
+    //     self.get_wrapped_object().define_property(name, value)
+    // }
+    //
+    // fn define_variable(&self, name: Value, value: Variable) -> Res<()> {
+    //     if let Value::Number(idx) = &name {
+    //         if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
+    //             *v = value.value;
+    //             return Ok(());
+    //         }
+    //     }
+    //
+    //     if let Value::String(s) = &name {
+    //         if s == "length" {
+    //             *self.length.borrow_mut() = value.value;
+    //             return Ok(());
+    //         }
+    //     }
+    //
+    //     self.get_wrapped_object().define_variable(name, value)
+    // }
+    //
+    // fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    //     if let Value::Number(idx) = &name {
+    //         if let Some(value) = self.resolve_array(*idx as usize) {
+    //             return Ok(Some(value));
+    //         }
+    //     }
+    //
+    //     if let Value::String(s) = &name {
+    //         if s == "length" {
+    //             return Ok(Some(self.length.borrow().clone().into()));
+    //         }
+    //         if s == "callee" {
+    //             return Ok(Some(self.callee.clone().into()));
+    //         }
+    //     }
+    //
+    //     self.get_wrapped_object().resolve_property(name)
+    // }
+    //
+    // fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    //     if let Value::Number(idx) = &name {
+    //         if let Some(value) = self.resolve_array(*idx as usize) {
+    //             return Ok(Some(value));
+    //         }
+    //     }
+    //
+    //     if let Value::String(s) = &name {
+    //         if s == "length" {
+    //             return Ok(Some(self.length.borrow().clone().into()));
+    //         }
+    //         if s == "callee" {
+    //             return Ok(Some(self.callee.clone().into()));
+    //         }
+    //     }
+    //
+    //     self.get_wrapped_object().get_property(name)
+    // }
+    //
+    // fn name(&self) -> String {
+    //     "Arguments".to_string()
+    // }
+    //
+    // fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
+    //     Ok("[object Arguments]".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Result<YSString, Error> {
+    //     Ok("[object Arguments]".into())
+    // }
+    //
+    // fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+    //     let args = self.args.borrow();
+    //     if index < args.len() {
+    //         Ok((false, Some(args[index].clone())))
+    //     } else {
+    //         Ok((true, None))
+    //     }
+    // }
 }
 
 #[props]

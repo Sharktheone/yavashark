@@ -34,6 +34,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let object_handle = config.object_handle;
     let error = config.error;
     let env = config.env_path;
+    let realm = config.realm;
 
     let mut constructor = None;
     let mut properties: Vec<Item> = Vec::new();
@@ -288,8 +289,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             });
 
         let any_cast = quote! {{
-            let x = x.guard();
-            let deez = (**x).as_any().downcast_ref::<Self>()
+            let deez = x.downcast::<Self>()
                 .ok_or(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?} trace: {}", #fn_name, this, x.class_name())))?;
 
             deez.#name(args #realm #this)
@@ -303,22 +303,23 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
         let def = if let Some(name) = prop.get {
             quote! {
-                obj.define_getter(stringify!(#name).into(), function)?;
+                obj.define_getter(stringify!(#name).into(), function, realm)?;
             }
         } else if let Some(name) = prop.set {
             quote! {
-                obj.define_setter(stringify!(#name).into(), function)?;
+                obj.define_setter(stringify!(#name).into(), function, realm)?;
             }
         } else {
             quote! {
-                obj.define_variable(
+                obj.define_property_attributes(
                     #fn_name.into(),
                     #variable::new_with_attributes(
                         function,
                         #writable,
                         #enumerable,
                         #configurable
-                    )
+                    ),
+                    realm,
                 )?;
             }
         };
@@ -329,7 +330,7 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     #value::Object(ref x) => #any_cast,
                     _ => Err(Error::ty_error(format!("Function {:?} was not called with a valid this value: {:?}", #fn_name, this))),
                 }
-            }, func_proto.clone()).into();
+            }, func_proto.clone(), realm).into();
 
             #def
         };
@@ -360,16 +361,17 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
             let function: #value = #native_constructor::#create("constructor".to_string(), #constructor_fn, obj.clone().into(), func_proto.clone()).into();
 
 
-            function.define_property("prototype".into(), obj.clone().into())?;
+            function.define_property("prototype", obj.clone().into(), realm)?;
 
-            obj.define_variable(
+            obj.define_property_attributes(
                 "constructor".into(),
                 #variable::new_with_attributes(
                     function,
                     true,
                     false,
                     false
-                )
+                ),
+                realm,
             )?;
         };
 
@@ -377,8 +379,8 @@ pub fn properties(_: TokenStream1, item: TokenStream1) -> TokenStream1 {
     }
 
     let new_fn = quote! {
-        pub(crate) fn initialize_proto(obj: #object, func_proto: #object_handle) -> Result<#object_handle, #error> {
-            use #env::value::{AsAny, Obj};
+        pub(crate) fn initialize_proto(obj: #object, func_proto: #object_handle, realm: &mut #realm) -> Result<#object_handle, #error> {
+            use #env::value::{Obj};
             #props
 
             let obj = obj.into_object();

@@ -3,7 +3,7 @@ use std::iter;
 use swc_ecma_ast::{ForHead, ForInStmt, VarDeclKind};
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{ControlFlow, Error, Realm, Res, RuntimeResult, Value};
+use yavashark_env::{ControlFlow, Error, PropertyKey, Realm, Res, RuntimeResult, Value};
 
 impl Interpreter {
     pub fn run_for_in(realm: &mut Realm, stmt: &ForInStmt, scope: &mut Scope) -> RuntimeResult {
@@ -21,21 +21,21 @@ impl Interpreter {
         stmt: &ForInStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {
-        for key in obj.keys()? {
+        for key in obj.keys(realm)? {
             let scope = &mut Scope::with_parent(scope)?;
             let label = scope.last_label()?;
             scope.state_set_loop()?;
 
-            let Some(prop) = obj.get_property(&key)? else {
+            let Some(prop) = obj.resolve_property(key.clone().into(), realm)? else {
                 //TODO: we should directly return the attributes and so on in `.keys`
                 continue;
             };
 
-            if !prop.attributes.is_enumerable() {
+            if !prop.attributes().is_enumerable() {
                 continue;
             }
 
-            Self::run_for_head(realm, &stmt.left, scope, &key)?;
+            Self::run_for_head(realm, &stmt.left, scope, &key.into())?;
 
             let result = Self::run_statement(realm, &stmt.body, scope);
             match result {
@@ -75,10 +75,10 @@ impl Interpreter {
                         &d.name,
                         scope,
                         &mut iter::once(value.clone()),
-                        &mut |scope, name, value| match kind {
-                            VarDeclKind::Var => scope.declare_global_var(name, value),
-                            VarDeclKind::Let => scope.declare_var(name, value),
-                            VarDeclKind::Const => scope.declare_read_only_var(name, value),
+                        &mut |scope, name, value, realm| match kind {
+                            VarDeclKind::Var => scope.declare_global_var(name, value, realm),
+                            VarDeclKind::Let => scope.declare_var(name, value, realm),
+                            VarDeclKind::Const => scope.declare_read_only_var(name, value, realm),
                         },
                     )?;
                 }
@@ -98,7 +98,7 @@ impl Interpreter {
                         &decl.name,
                         scope,
                         &mut iter::once(value.clone()),
-                        &mut |scope, name, value| scope.declare_var(name, value),
+                        &mut |scope, name, value, realm| scope.declare_var(name, value, realm),
                     )?;
                 }
             }
@@ -108,7 +108,7 @@ impl Interpreter {
                     pat,
                     scope,
                     &mut iter::once(value.clone()),
-                    &mut |scope, name, value| scope.declare_var(name, value),
+                    &mut |scope, name, value, realm| scope.declare_var(name, value, realm),
                 )?;
             }
         }

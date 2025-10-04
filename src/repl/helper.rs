@@ -6,6 +6,8 @@ use rustyline::validate::MatchingBracketValidator;
 use rustyline::{Context, Helper};
 use rustyline_derive::{Completer, Hinter, Validator};
 use std::borrow::Cow;
+use std::collections::HashSet;
+use yavashark_env::Realm;
 use yavashark_env::scope::Scope;
 
 pub struct ScopeCompleter {
@@ -36,9 +38,11 @@ impl Completer for ScopeCompleter {
             return Ok((pos, pairs));
         }
 
-        let Ok(names) = self.scope.get_variable_names() else {
-            return Ok((0, vec![]));
-        };
+        // let Ok(names) = self.scope.get_variable_names(realm) else {
+        //     return Ok((0, vec![]));
+        // };
+
+        let names = HashSet::<String>::default();
 
         let mut completions = vec![];
         for name in names {

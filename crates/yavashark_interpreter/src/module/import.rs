@@ -15,6 +15,8 @@ impl Interpreter {
             realm,
         )?;
 
+        let module = module.clone();
+
         for spec in &stmt.specifiers {
             match spec {
                 ImportSpecifier::Named(named) => {
@@ -27,12 +29,13 @@ impl Interpreter {
 
                     let val = module
                         .exports
-                        .get_property(&name.clone().into())
+                        .resolve_property(name.clone(), realm)
                         .map_err(|_| {
                             Error::reference_error(format!("Export `{name}` not found in module"))
-                        })?;
+                        })?
+                        .unwrap_or(Value::Undefined);
 
-                    scope.declare_var(local, val.value.copy())?;
+                    scope.declare_var(local, val, realm)?;
                 }
 
                 ImportSpecifier::Default(default) => {
@@ -40,11 +43,11 @@ impl Interpreter {
                         return Err(Error::reference("Module has no default export").into());
                     };
 
-                    scope.declare_var(default.local.to_string(), val.copy())?;
+                    scope.declare_var(default.local.to_string(), val.copy(), realm)?;
                 }
 
                 ImportSpecifier::Namespace(ns) => {
-                    scope.declare_var(ns.local.to_string(), module.exports.clone().into())?;
+                    scope.declare_var(ns.local.to_string(), module.exports.clone().into(), realm)?;
                 }
             }
         }

@@ -1,15 +1,12 @@
-use crate::object::Object;
 use crate::realm::Realm;
-use crate::value::{MutObj, Obj, ObjectImpl, ObjectOrNull};
-use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
+use crate::value::{MutObj, ObjectImpl};
+use crate::{MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
-use yavashark_macro::custom_props;
-use yavashark_string::YSString;
 
 mod bound;
 mod class;
@@ -32,7 +29,8 @@ pub struct NativeFunction {
     inner: RefCell<MutNativeFunction>,
 }
 
-#[custom_props(constructor)]
+
+// #[custom_props(constructor)]
 impl ObjectImpl for NativeFunction {
     type Inner = MutNativeFunction;
 
@@ -48,49 +46,49 @@ impl ObjectImpl for NativeFunction {
         self.inner.borrow_mut()
     }
 
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-        (self.f)(args, this, realm)
-    }
-
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        if !self.constructor {
-            return Err(Error::ty_error(format!(
-                "{} is not a constructor",
-                self.name
-            )));
-        }
-
-        let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
-            .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
-
-        let proto: ObjectOrNull = proto.try_into()?;
-
-        let obj = Object::with_proto(proto).into();
-
-        (self.f)(args, obj, realm)
-    }
-
-    fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error> {
-        Ok(format!("function {}() {{ [native code] }}", self.name).into())
-    }
-
-    fn to_string_internal(&self) -> Result<YSString, crate::error::Error> {
-        Ok(format!("function {}() {{ [native code] }}", self.name).into())
-    }
-
-    fn is_function(&self) -> bool {
-        true
-    }
-
-    fn name(&self) -> String {
-        "Function".to_string()
-    }
+    // fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
+    //     (self.f)(args, this, realm)
+    // }
+    //
+    // fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    //     if !self.constructor {
+    //         return Err(Error::ty_error(format!(
+    //             "{} is not a constructor",
+    //             self.name
+    //         )));
+    //     }
+    //
+    //     let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
+    //         .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
+    //
+    //     let proto: ObjectOrNull = proto.try_into()?;
+    //
+    //     let obj = Object::with_proto(proto).into();
+    //
+    //     (self.f)(args, obj, realm)
+    // }
+    //
+    // fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error> {
+    //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Result<YSString, crate::error::Error> {
+    //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
+    // }
+    //
+    // fn is_function(&self) -> bool {
+    //     true
+    // }
+    //
+    // fn name(&self) -> String {
+    //     "Function".to_string()
+    // }
 }
 
 impl NativeFunction {
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn new_boxed(name: &'static str, f: NativeFn, realm: &Realm) -> ObjectHandle {
+    pub fn new_boxed(name: &'static str, f: NativeFn, realm: &mut Realm) -> ObjectHandle {
         let this = Self {
             name,
             f,
@@ -104,20 +102,17 @@ impl NativeFunction {
 
         let handle = ObjectHandle::new(this);
 
-        let _ = handle.define_variable(
+        let _ = handle.define_property_attributes(
             "name".into(),
             Variable::new_with_attributes(name.into(), false, false, true),
+            realm,
         );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -131,7 +126,7 @@ impl NativeFunction {
     pub fn new(
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
-        realm: &Realm,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -145,20 +140,17 @@ impl NativeFunction {
 
         let handle = ObjectHandle::new(this);
 
-        let _ = handle.define_variable(
+        let _ = handle.define_property_attributes(
             "name".into(),
             Variable::new_with_attributes(name.into(), false, false, true),
+            realm,
         );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -172,7 +164,7 @@ impl NativeFunction {
     pub fn with_len(
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
-        realm: &Realm,
+        realm: &mut Realm,
         len: usize,
     ) -> ObjectHandle {
         let this = Self {
@@ -186,18 +178,14 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable("name".into(), Variable::config(name.into()));
-        let _ = handle.define_variable("length".into(), Variable::config(len.into()));
+        let _ = handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+        let _ = handle.define_property_attributes("length".into(), Variable::config(len.into()), realm);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -211,7 +199,7 @@ impl NativeFunction {
     pub fn special(
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
-        realm: &Realm,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -224,20 +212,17 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable(
+        let _ = handle.define_property_attributes(
             "name".into(),
             Variable::new_with_attributes(name.into(), false, false, true),
+            realm,
         );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -252,6 +237,7 @@ impl NativeFunction {
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: ObjectHandle,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -264,17 +250,13 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable("name".into(), Variable::config(name.into()));
+        let _ = handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -290,6 +272,7 @@ impl NativeFunction {
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: ObjectHandle,
         len: usize,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -302,18 +285,14 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable("name".into(), Variable::config(name.into()));
-        let _ = handle.define_variable("length".into(), Variable::config(Value::from(len)));
+        let _ = handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+        let _ = handle.define_property_attributes("length".into(), Variable::config(Value::from(len)), realm);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -328,6 +307,7 @@ impl NativeFunction {
         name: &'static str,
         f: impl Fn(Vec<Value>, Value, &mut Realm) -> ValueResult + 'static,
         proto: ObjectHandle,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
             name,
@@ -340,20 +320,17 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_variable(
+        let _ = handle.define_property_attributes(
             "name".into(),
             Variable::new_with_attributes(name.into(), false, false, true),
+            realm,
         );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -455,23 +432,20 @@ impl NativeFunctionBuilder {
     /// Builds the function handle.
     #[must_use]
     #[allow(clippy::missing_panics_doc)]
-    pub fn build(self) -> ObjectHandle {
+    pub fn build(self, realm: &mut Realm) -> ObjectHandle {
         let name = self.0.name;
         let handle = ObjectHandle::new(self.0);
 
         let constructor = ObjectProperty::new(handle.clone().into());
-        let _ = handle.define_variable(
+        let _ = handle.define_property_attributes(
             "name".into(),
             Variable::new_with_attributes(name.into(), false, false, true),
+            realm,
         );
 
         #[allow(clippy::expect_used)]
         {
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<NativeFunction>().expect("unreachable");
+            let this = handle.downcast::<NativeFunction>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 

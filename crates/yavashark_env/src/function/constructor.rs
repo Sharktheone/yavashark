@@ -9,7 +9,7 @@ use yavashark_string::YSString;
 use crate::realm::Realm;
 use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
 
-pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> ValueResult>;
+pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle>>;
 
 #[object(function, constructor, direct(constructor), to_string)]
 pub struct NativeConstructor {
@@ -31,19 +31,19 @@ impl Debug for NativeConstructor {
 }
 
 impl Constructor for NativeConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         (self.f)(args, realm)
     }
 
-    fn construct_proto(&self) -> Res<ObjectProperty> {
-        Ok(self.proto.clone().into())
-    }
+    // fn construct_proto(&self) -> Res<ObjectProperty> {
+    //     Ok(self.proto.clone().into())
+    // }
 }
 
 impl Func for NativeConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _: Value) -> ValueResult {
         if self.special {
-            (self.f)(args, realm)
+            Ok((self.f)(args, realm)?.into())
         } else {
             Err(Error::ty_error(format!(
                 "Constructor {} requires 'new'",
@@ -65,7 +65,7 @@ impl NativeConstructor {
     #[allow(clippy::new_ret_no_self)]
     pub fn new(
         name: String,
-        f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         realm: &Realm,
     ) -> ObjectHandle {
         Self::with_proto(
@@ -79,7 +79,7 @@ impl NativeConstructor {
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto(
         name: String,
-        f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         proto: ObjectHandle,
         self_proto: ObjectHandle,
     ) -> ObjectHandle {
@@ -99,11 +99,8 @@ impl NativeConstructor {
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let this = handle.guard();
 
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -116,10 +113,11 @@ impl NativeConstructor {
     #[allow(clippy::missing_panics_doc)]
     pub fn with_proto_and_len(
         name: String,
-        f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         proto: ObjectHandle,
         self_proto: ObjectHandle,
         len: usize,
+        realm: &mut Realm,
     ) -> ObjectHandle {
         let this = Self {
             inner: RefCell::new(MutableNativeConstructor {
@@ -135,16 +133,13 @@ impl NativeConstructor {
         let handle = ObjectHandle::new(this);
 
         let _ =
-            handle.define_variable("length".into(), Variable::config(Value::Number(len as f64)));
+            handle.define_property_attributes("length".into(), Variable::config(Value::Number(len as f64)), realm);
 
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let this = handle.guard();
 
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 
@@ -156,7 +151,7 @@ impl NativeConstructor {
 
     pub fn special(
         name: String,
-        f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         realm: &Realm,
     ) -> ObjectHandle {
         Self::special_with_proto(
@@ -170,7 +165,7 @@ impl NativeConstructor {
     #[allow(clippy::missing_panics_doc)]
     pub fn special_with_proto(
         name: String,
-        f: impl Fn(Vec<Value>, &mut Realm) -> ValueResult + 'static,
+        f: impl Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle> + 'static,
         proto: ObjectHandle,
         self_proto: ObjectHandle,
     ) -> ObjectHandle {
@@ -190,11 +185,7 @@ impl NativeConstructor {
         #[allow(clippy::expect_used)]
         {
             let constructor = handle.clone();
-            let this = handle.guard();
-
-            let this = this.as_any();
-
-            let this = this.downcast_ref::<Self>().expect("unreachable");
+            let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut inner = this.inner.borrow_mut();
 

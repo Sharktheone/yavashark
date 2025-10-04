@@ -9,6 +9,7 @@ mod plain_year_month;
 mod utils;
 mod zoned_date_time;
 
+use futures::future::ok;
 pub use crate::builtins::temporal::duration::*;
 pub use crate::builtins::temporal::instant::*;
 pub use crate::builtins::temporal::now::*;
@@ -19,7 +20,7 @@ pub use crate::builtins::temporal::plain_time::*;
 pub use crate::builtins::temporal::plain_year_month::*;
 pub use crate::builtins::temporal::zoned_date_time::*;
 
-use crate::{Object, ObjectHandle, Res, Value, Variable};
+use crate::{Object, ObjectHandle, Realm, Res, Value, Variable};
 
 pub struct Protos {
     pub duration: ObjectHandle,
@@ -33,72 +34,82 @@ pub struct Protos {
     pub zoned_date_time: ObjectHandle,
 }
 
-fn constr(obj: &ObjectHandle) -> Variable {
+fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
     Variable::write_config(
-        obj.get_property(&"constructor".into())
-            .unwrap_or(Value::Undefined.into())
-            .value,
+        obj.resolve_property("constructor", realm)
+            .ok()
+            .flatten()
+            .unwrap_or(Value::Undefined)
     )
 }
 
 pub fn get_temporal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
+    realm: &mut crate::Realm,
 ) -> Res<(ObjectHandle, Protos)> {
     let obj = Object::with_proto(obj_proto.clone());
 
     let duration = Duration::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("Duration".into(), constr(&duration))?;
+    obj.define_property_attributes("Duration".into(), constr(&duration, realm), realm)?;
 
     let instant = Instant::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("Instant".into(), constr(&instant))?;
+    obj.define_property_attributes("Instant".into(), constr(&instant, realm), realm)?;
 
     let now = Now::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("Now".into(), constr(&now))?;
+    obj.define_property_attributes("Now".into(), constr(&now, realm), realm)?;
 
     let plain_date = PlainDate::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
 
-    obj.define_variable("PlainDate".into(), constr(&plain_date))?;
+    obj.define_property_attributes("PlainDate".into(), constr(&plain_date, realm), realm)?;
 
     let plain_time = PlainTime::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("PlainTime".into(), constr(&plain_time))?;
+    obj.define_property_attributes("PlainTime".into(), constr(&plain_time, realm), realm)?;
 
     let plain_date_time = PlainDateTime::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("PlainDateTime".into(), constr(&plain_date_time))?;
+    obj.define_property_attributes("PlainDateTime".into(), constr(&plain_date_time, realm), realm)?;
 
     let plain_month_day = PlainMonthDay::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("PlainMonthDay".into(), constr(&plain_month_day))?;
+    obj.define_property_attributes("PlainMonthDay".into(), constr(&plain_month_day, realm), realm)?;
 
     let plain_year_month = PlainYearMonth::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
-    obj.define_variable("PlainYearMonth".into(), constr(&plain_year_month))?;
+    obj.define_property_attributes("PlainYearMonth".into(), constr(&plain_year_month, realm), realm)?;
 
     let zoned_date_time =
-        ZonedDateTime::initialize_proto(Object::raw_with_proto(obj_proto), func_proto.into())?;
-    obj.define_variable("ZonedDateTime".into(), constr(&zoned_date_time))?;
+        ZonedDateTime::initialize_proto(Object::raw_with_proto(obj_proto), func_proto.into(), realm)?;
+    obj.define_property_attributes("ZonedDateTime".into(), constr(&zoned_date_time, realm), realm)?;
 
     Ok((
         obj,

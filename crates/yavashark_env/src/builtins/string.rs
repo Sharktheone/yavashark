@@ -68,67 +68,67 @@ impl crate::value::ObjectImpl for StringObj {
         self.inner.borrow_mut()
     }
 
-    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(n) = name {
-            let index = *n as isize;
-
-            let inner = self.inner.borrow();
-
-            let chr =
-                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
-
-            return Ok(Some(chr.into()));
-        }
-
-        let key = InternalPropertyKey::from(name.copy());
-
-        if let InternalPropertyKey::Index(index) = key {
-            let inner = self.inner.borrow();
-            let chr = Self::get_single_str(&inner.string, index as isize)
-                .map_or(Value::Undefined, Into::into);
-
-            return Ok(Some(chr.into()));
-        }
-
-        self.get_wrapped_object().resolve_property(name)
-    }
-
-    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(n) = name {
-            let index = *n as isize;
-
-            let inner = self.inner.borrow();
-
-            let chr =
-                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
-
-            return Ok(Some(chr.into()));
-        }
-
-        self.get_wrapped_object().get_property(name)
-    }
-
-    fn name(&self) -> String {
-        "String".to_string()
-    }
-
-    fn primitive(&self) -> Option<crate::value::Value> {
-        Some(self.inner.borrow().string.clone().into())
-    }
-
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
-        let inner = self.inner.borrow();
-
-        if index >= inner.string.len() {
-            return Ok((false, None));
-        }
-
-        let c = inner.string.chars().nth(index).unwrap_or_default();
-
-        let value = c.to_string().into();
-
-        Ok((true, Some(value)))
-    }
+    // fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    //     if let Value::Number(n) = name {
+    //         let index = *n as isize;
+    //
+    //         let inner = self.inner.borrow();
+    //
+    //         let chr =
+    //             Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+    //
+    //         return Ok(Some(chr.into()));
+    //     }
+    //
+    //     let key = InternalPropertyKey::from(name.copy());
+    //
+    //     if let InternalPropertyKey::Index(index) = key {
+    //         let inner = self.inner.borrow();
+    //         let chr = Self::get_single_str(&inner.string, index as isize)
+    //             .map_or(Value::Undefined, Into::into);
+    //
+    //         return Ok(Some(chr.into()));
+    //     }
+    //
+    //     self.get_wrapped_object().resolve_property(name)
+    // }
+    //
+    // fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    //     if let Value::Number(n) = name {
+    //         let index = *n as isize;
+    //
+    //         let inner = self.inner.borrow();
+    //
+    //         let chr =
+    //             Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+    //
+    //         return Ok(Some(chr.into()));
+    //     }
+    //
+    //     self.get_wrapped_object().get_property(name)
+    // }
+    //
+    // fn name(&self) -> String {
+    //     "String".to_string()
+    // }
+    //
+    // fn primitive(&self) -> Option<crate::value::Value> {
+    //     Some(self.inner.borrow().string.clone().into())
+    // }
+    //
+    // fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+    //     let inner = self.inner.borrow();
+    //
+    //     if index >= inner.string.len() {
+    //         return Ok((false, None));
+    //     }
+    //
+    //     let c = inner.string.chars().nth(index).unwrap_or_default();
+    //
+    //     let value = c.to_string().into();
+    //
+    //     Ok((true, Some(value)))
+    // }
 }
 
 #[object(constructor, function, to_string, name)]
@@ -143,16 +143,16 @@ impl CustomName for StringConstructor {
 
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableStringConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.define_property("name".into(), "String".into())?;
+        this.define_property("name".into(), "String".into(), realm)?;
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
@@ -248,7 +248,7 @@ impl StringConstructor {
 }
 
 impl Constructor for StringConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,
             None => YSString::new(),
@@ -256,7 +256,7 @@ impl Constructor for StringConstructor {
 
         let obj = StringObj::with_string(realm, str);
 
-        Ok(Obj::into_value(obj))
+        Ok(Obj::into_object(obj))
     }
 }
 

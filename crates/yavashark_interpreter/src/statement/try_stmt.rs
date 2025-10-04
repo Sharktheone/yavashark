@@ -33,8 +33,8 @@ fn catch(realm: &mut Realm, stmt: &TryStmt, scope: &mut Scope) -> RuntimeResult 
                     param,
                     scope,
                     &mut iter::once(err),
-                    &mut |scope, name, value| {
-                        scope.declare_var(name, value)?;
+                    &mut |scope, name, value, realm| {
+                        scope.declare_var(name, value, realm)?;
                         Ok(())
                     },
                 )?;

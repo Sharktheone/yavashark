@@ -12,8 +12,8 @@ use yavashark_macro::{object, props};
 pub struct Uint8Array {}
 
 impl Uint8Array {
-    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.uint8array.clone().into())?;
+    pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.uint8array.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableUint8Array {}),
@@ -48,7 +48,7 @@ impl Uint8Array {
     ) -> Res<ObjectHandle> {
         let standard = if let Some(options) = options {
             options
-                .resolve_property(&"alphabet".into(), realm)?
+                .resolve_property("alphabet", realm)?
                 .map_or(Ok(false), |x| x.normal_eq(&"base64url".into(), realm))?
         } else {
             false
@@ -89,7 +89,7 @@ impl Uint8Array {
     ) -> Res<ObjectHandle> {
         let standard = if let Some(options) = options {
             options
-                .resolve_property(&"alphabet".into(), realm)?
+                .resolve_property("alphabet", realm)?
                 .map_or(Ok(false), |x| x.normal_eq(&"base64url".into(), realm))?
         } else {
             false
@@ -114,8 +114,8 @@ impl Uint8Array {
 
         let obj = Object::new(realm);
 
-        obj.define_property("written".into(), written.into())?;
-        obj.define_property("read".into(), read.into())?;
+        obj.define_property("written".into(), written.into(), realm)?;
+        obj.define_property("read".into(), read.into(), realm)?;
 
         Ok(obj)
     }
@@ -124,7 +124,7 @@ impl Uint8Array {
     fn to_base_64(&self, options: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<String> {
         let standard = if let Some(options) = options {
             options
-                .resolve_property(&"alphabet".into(), realm)?
+                .resolve_property("alphabet", realm)?
                 .map_or(Ok(false), |x| x.normal_eq(&"base64url".into(), realm))?
         } else {
             false

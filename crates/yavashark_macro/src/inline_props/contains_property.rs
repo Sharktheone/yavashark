@@ -1,6 +1,6 @@
 use quote::quote;
 use crate::config::Config;
-use crate::inline_props::property::{Kind, Name, Property};
+use crate::inline_props::property::{Name, Property};
 
 pub fn generate_contains_property(
     props: &[Property],

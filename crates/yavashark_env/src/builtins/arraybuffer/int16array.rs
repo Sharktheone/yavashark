@@ -9,8 +9,8 @@ use yavashark_macro::{object, props};
 pub struct Int16Array {}
 
 impl Int16Array {
-    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.int16array.clone().into())?;
+    pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.int16array.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableInt16Array {}),
@@ -37,3 +37,5 @@ impl Int16Array {
         Ok(Self::new(realm, ty)?.into_object())
     }
 }
+
+

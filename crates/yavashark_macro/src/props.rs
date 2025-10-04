@@ -259,6 +259,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let error = &config.error;
     let try_into_value = &config.try_into_value;
     let env = &config.env_path;
+    let realm = &config.realm;
 
     let mut init = TokenStream::new();
 
@@ -290,7 +291,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     {
                         let prop = #prop_tokens;
 
-                        obj.define_variable(#name.into(), #variable_fn(prop.into()))?;
+                        obj.define_property_attributes(#name.into(), #variable_fn(prop.into()), realm)?;
                     }
                 });
             }
@@ -299,7 +300,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     {
                         let prop = #prop_tokens;
 
-                        obj.define_getter(#name.into(), prop.into())?;
+                        obj.define_getter(#name.into(), prop.into(), realm)?;
                     }
                 });
             }
@@ -309,7 +310,7 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
                     {
                         let prop = #prop_tokens;
 
-                        obj.define_setter(#name.into(), prop.into())?;
+                        obj.define_setter(#name.into(), prop.into(), realm)?;
                     }
                 });
             }
@@ -319,12 +320,12 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let (constructor, proto_define) = if let Some(constructor) = constructor {
         (
             quote! {
-                let constructor = #constructor(&obj, func_proto.clone())?;
-                obj.define_variable("constructor".into(), #variable::write_config(constructor.clone().into()))?;
+                let constructor = #constructor(&obj, func_proto.clone(), realm)?;
+                obj.define_property_attributes("constructor".into(), #variable::write_config(constructor.clone().into()), realm)?;
 
             },
             quote! {
-                constructor.define_variable("prototype".into(), #variable::new_read_only(obj.clone().into()))?;
+                constructor.define_property_attributes("prototype".into(), #variable::new_read_only(obj.clone().into()), realm)?;
             },
         )
     } else {
@@ -333,8 +334,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let init_fn = match mode {
         Mode::Prototype => quote! {
-            pub fn initialize_proto(mut obj: #object, func_proto: #handle) -> Result<#handle, #error> {
-                use #env::value::{AsAny, Obj, IntoValue, FromValue};
+            pub fn initialize_proto(mut obj: #object, func_proto: #handle, realm: &mut #realm) -> Result<#handle, #error> {
+                use #env::value::{Obj, IntoValue, FromValue};
                 use #try_into_value;
 
                 #init
@@ -350,8 +351,8 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             }
         },
         Mode::Raw => quote! {
-            pub fn initialize(&mut self, func_proto: #handle) -> Result<(), #error> {
-                use #env::value::{AsAny, Obj, IntoValue, FromValue};
+            pub fn initialize(&mut self, func_proto: #handle, realm: &mut #realm) -> Result<(), #error> {
+                use #env::value::{Obj, IntoValue, FromValue};
                 use #try_into_value;
 
                 let obj = self;
@@ -512,7 +513,7 @@ impl Method {
                 #arg_prepare
                 #prepare_receiver
                 #call.try_into_value(realm)
-            }, func_proto.clone(), #length)
+            }, func_proto.clone(), #length, realm)
         }
     }
 }

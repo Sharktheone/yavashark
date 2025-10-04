@@ -1,6 +1,6 @@
 use crate::realm::Realm;
-use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::{BoxedObj, MutObj, Obj, ObjectOrNull};
+use crate::value::property_key::{InternalPropertyKey, IntoPropertyKey, PropertyKey};
+use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
 use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
@@ -64,11 +64,11 @@ impl Object {
         }
     }
 
-    pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<ObjectHandle, Error> {
+    pub fn from_values(values: Vec<(PropertyKey, Value)>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
         Ok(ObjectHandle::new(Self::raw_from_values(values, realm)?))
     }
 
-    pub fn raw_from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<Self, Error> {
+    pub fn raw_from_values(values: Vec<(PropertyKey, Value)>, realm: &mut Realm) -> Result<Self, Error> {
         Ok(Self {
             inner: RefCell::new(MutObject::from_values(values, realm)?),
         })
@@ -94,87 +94,170 @@ impl Object {
     }
 }
 
+#[allow(unused)]
 impl Obj for Object {
-    fn define_property(&self, name: Value, value: Value) -> Result<(), Error> {
-        self.inner_mut()?.define_property(name, value)
+    fn define_property(&self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        todo!()
     }
 
-    fn define_variable(&self, name: Value, value: Variable) -> Result<(), Error> {
-        self.inner_mut()?.define_variable(name, value)
+    fn define_property_attributes(&self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        todo!()
     }
 
-    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        self.inner()?.resolve_property(name)
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        todo!()
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        self.inner()?.get_property(name)
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        todo!()
     }
 
-    fn define_getter(&self, name: Value, value: Value) -> Result<(), Error> {
-        self.inner_mut()?.define_getter(name, value)
+    fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+        todo!()
     }
 
-    fn define_setter(&self, name: Value, value: Value) -> Result<(), Error> {
-        self.inner_mut()?.define_setter(name, value)
+    fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+        todo!()
     }
 
-    fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error> {
-        self.inner_mut()?.delete_property(name)
+    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        todo!()
     }
 
-    fn contains_key(&self, name: &Value) -> Result<bool, Error> {
-        self.inner()?.contains_key(name)
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        todo!()
     }
 
-    fn name(&self) -> String {
-        self.inner()
-            .map_or_else(|_| "Object".to_string(), |i| i.name())
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        todo!()
     }
 
-    fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
-        self.inner()?.to_string(realm)
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        todo!()
     }
 
-    fn to_string_internal(&self) -> Result<YSString, Error> {
-        self.inner()?.to_string_internal()
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        todo!()
     }
 
-    fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
-        self.inner()?.properties()
+    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        todo!()
     }
 
-    fn keys(&self) -> Result<Vec<Value>, Error> {
-        self.inner()?.keys()
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        todo!()
     }
 
-    fn values(&self) -> Result<Vec<Value>, Error> {
-        self.inner()?.values()
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        todo!()
     }
 
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
-        self.inner()?.get_array_or_done(index)
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        todo!()
     }
 
-    fn clear_values(&self) -> Result<(), Error> {
-        self.inner_mut()?.clear_values()
+    fn clear_properties(&self, realm: &mut Realm) -> Res {
+        todo!()
     }
 
-    fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
-        self.inner_mut()?.call(realm, args, this)
+    fn get_array_or_done(&self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
+        todo!()
     }
 
-    fn prototype(&self) -> Result<ObjectProperty, Error> {
-        self.inner()?.prototype()
+    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
+        todo!()
     }
 
-    fn constructor(&self) -> Result<ObjectProperty, Error> {
-        self.inner()?.constructor()
+    fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
+        todo!()
     }
 
-    unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-        self.inner().map(|o| o.custom_gc_refs()).unwrap_or_default()
+    fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
+        todo!()
     }
+
+
+    // impl Obj for Object {
+//     fn define_property(&self, name: Value, value: Value) -> Result<(), Error> {
+//         self.inner_mut()?.define_property(name, value)
+//     }
+//
+//     fn define_variable(&self, name: Value, value: Variable) -> Result<(), Error> {
+//         self.inner_mut()?.define_variable(name, value)
+//     }
+//
+//     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
+//         self.inner()?.resolve_property(name)
+//     }
+//
+//     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
+//         self.inner()?.get_property(name)
+//     }
+//
+//     fn define_getter(&self, name: Value, value: Value) -> Result<(), Error> {
+//         self.inner_mut()?.define_getter(name, value)
+//     }
+//
+//     fn define_setter(&self, name: Value, value: Value) -> Result<(), Error> {
+//         self.inner_mut()?.define_setter(name, value)
+//     }
+//
+//     fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error> {
+//         self.inner_mut()?.delete_property(name)
+//     }
+//
+//     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
+//         self.inner()?.contains_key(name)
+//     }
+//
+//     fn name(&self) -> String {
+//         self.inner()
+//             .map_or_else(|_| "Object".to_string(), |i| i.name())
+//     }
+//
+//     fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
+//         self.inner()?.to_string(realm)
+//     }
+//
+//     fn to_string_internal(&self) -> Result<YSString, Error> {
+//         self.inner()?.to_string_internal()
+//     }
+//
+//     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
+//         self.inner()?.properties()
+//     }
+//
+//     fn keys(&self) -> Result<Vec<Value>, Error> {
+//         self.inner()?.keys()
+//     }
+//
+//     fn values(&self) -> Result<Vec<Value>, Error> {
+//         self.inner()?.values()
+//     }
+//
+//     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+//         self.inner()?.get_array_or_done(index)
+//     }
+//
+//     fn clear_values(&self) -> Result<(), Error> {
+//         self.inner_mut()?.clear_values()
+//     }
+//
+//     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
+//         self.inner_mut()?.call(realm, args, this)
+//     }
+//
+//     fn prototype(&self) -> Result<ObjectProperty, Error> {
+//         self.inner()?.prototype()
+//     }
+//
+//     fn constructor(&self) -> Result<ObjectProperty, Error> {
+//         self.inner()?.constructor()
+//     }
+//
+//     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
+//         self.inner().map(|o| o.custom_gc_refs()).unwrap_or_default()
+//     }
 }
 
 impl MutObject {
@@ -364,11 +447,11 @@ impl MutObject {
         }
     }
 
-    pub fn from_values(values: Vec<(Value, Value)>, realm: &Realm) -> Result<Self, Error> {
+    pub fn from_values(values: Vec<(PropertyKey, Value)>, realm: &mut Realm) -> Result<Self, Error> {
         let mut object = Self::new(realm);
 
         for (key, value) in values {
-            object.define_property(key, value)?;
+            object.define_property(key.into(), value, realm)?;
         }
 
         Ok(object)
@@ -410,6 +493,7 @@ impl MutObject {
     }
 }
 
+/*
 impl MutObj for MutObject {
     fn define_property(&mut self, name: Value, value: Value) -> Result<(), Error> {
         let key = InternalPropertyKey::from(name);
@@ -714,175 +798,264 @@ impl MutObj for MutObject {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::Value;
+*/
 
-    use super::*;
-
-    #[test]
-    fn object_creation_with_proto() {
-        let proto = Value::Null;
-        let object = Object::with_proto(None);
-
-        assert_eq!(
-            object.get_property(&"__proto__".into()).unwrap().value,
-            proto
-        );
+#[allow(unused)]
+impl MutObj for MutObject {
+    fn define_property(&mut self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        todo!()
     }
 
-    #[test]
-    fn object_creation_raw_with_proto() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-
-        let proto = object.into_object();
-
-        let object = Object::raw_with_proto(proto.clone());
-
-        assert_eq!(object.prototype().unwrap().value, Value::Object(proto));
+    fn define_property_attributes(&mut self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        todo!()
     }
 
-    #[test]
-    fn array_position_empty_array() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-
-        let (index, found) = object.inner().unwrap().array_position(0);
-
-        assert_eq!(index, 0);
-        assert!(!found);
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        todo!()
     }
 
-    #[test]
-    fn array_position_non_empty_array() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .inner_mut()
-            .unwrap()
-            .insert_array(0, Value::Number(42.0));
-
-        let (index, found) = object.inner().unwrap().array_position(0);
-
-        assert_eq!(index, 0);
-        assert!(found);
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        todo!()
     }
 
-    #[test]
-    fn insert_array() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .inner_mut()
-            .unwrap()
-            .insert_array(0, Value::Number(42.0));
-
-        let inner = object.inner().unwrap();
-        let array_index = inner.array[0].1;
-        assert_eq!(inner.values[array_index].value, Value::Number(42.0));
+    fn define_getter(&mut self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+        todo!()
     }
 
-    #[test]
-    fn resolve_array() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .inner_mut()
-            .unwrap()
-            .insert_array(0, Value::Number(42.0));
-
-        let value = object.inner().unwrap().resolve_array(0);
-
-        assert_eq!(value, Some(Value::Number(42.0).into()));
+    fn define_setter(&mut self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+        todo!()
     }
 
-    #[test]
-    fn get_array() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .inner_mut()
-            .unwrap()
-            .insert_array(0, Value::Number(42.0));
-
-        let inner = object.inner().unwrap();
-
-        let value = inner.get_array(0).unwrap();
-
-        assert_eq!(&value.value, &Value::Number(42.0));
+    fn delete_property(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        todo!()
     }
 
-    #[test]
-    fn get_array_mut() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .inner_mut()
-            .unwrap()
-            .insert_array(0, Value::Number(42.0));
-
-        let mut inner = object.inner_mut().unwrap();
-
-        let value = inner.get_array_mut(0).unwrap();
-
-        assert_eq!(value, &mut Value::Number(42.0));
+    fn contains_own_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        todo!()
     }
 
-    #[test]
-    fn contains_array_key() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .inner_mut()
-            .unwrap()
-            .insert_array(0, Value::Number(42.0));
-
-        let contains = object.inner().unwrap().contains_array_key(0);
-
-        assert!(contains);
+    fn contains_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        todo!()
     }
 
-    #[test]
-    fn define_property() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .define_property(Value::string("key"), Value::Number(42.0))
-            .unwrap();
-
-        let inner = object.inner().unwrap();
-        let key: PropertyKey = Value::string("key").into();
-        let property_index = inner.properties.get(&key).unwrap();
-        assert_eq!(inner.values[*property_index].value, Value::Number(42.0));
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        todo!()
     }
 
-    #[test]
-    fn resolve_property() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .define_property(Value::string("key"), Value::Number(42.0))
-            .unwrap();
-
-        let property = object
-            .resolve_property(&Value::string("key"))
-            .unwrap()
-            .unwrap();
-
-        assert_eq!(property.value, Value::Number(42.0));
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        todo!()
     }
 
-    #[test]
-    fn contains_key() {
-        let realm = Realm::new().unwrap();
-        let object = Object::raw(&realm);
-        object
-            .define_property(Value::string("key"), Value::Number(42.0))
-            .unwrap();
+    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        todo!()
+    }
 
-        let contains = object.contains_key(&Value::string("key")).unwrap();
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        todo!()
+    }
 
-        assert!(contains);
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        todo!()
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        todo!()
+    }
+
+    fn clear_properties(&mut self, realm: &mut Realm) -> Res {
+        todo!()
+    }
+
+    fn get_array_or_done(&mut self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
+        todo!()
+    }
+
+    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
+        todo!()
+    }
+
+    fn set_prototype(&mut self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
+        todo!()
+    }
+
+    fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
+        todo!()
     }
 }
+
+
+
+
+
+// #[cfg(test)]
+// mod tests {
+//     use crate::Value;
+//
+//     use super::*;
+//
+//     #[test]
+//     fn object_creation_with_proto() {
+//         let proto = Value::Null;
+//         let object = Object::with_proto(None);
+//
+//         assert_eq!(
+//             object.get_property(&"__proto__".into()).unwrap().value,
+//             proto
+//         );
+//     }
+//
+//     #[test]
+//     fn object_creation_raw_with_proto() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//
+//         let proto = object.into_object();
+//
+//         let object = Object::raw_with_proto(proto.clone());
+//
+//         assert_eq!(object.prototype().unwrap().value, Value::Object(proto));
+//     }
+//
+//     #[test]
+//     fn array_position_empty_array() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//
+//         let (index, found) = object.inner().unwrap().array_position(0);
+//
+//         assert_eq!(index, 0);
+//         assert!(!found);
+//     }
+//
+//     #[test]
+//     fn array_position_non_empty_array() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .inner_mut()
+//             .unwrap()
+//             .insert_array(0, Value::Number(42.0));
+//
+//         let (index, found) = object.inner().unwrap().array_position(0);
+//
+//         assert_eq!(index, 0);
+//         assert!(found);
+//     }
+//
+//     #[test]
+//     fn insert_array() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .inner_mut()
+//             .unwrap()
+//             .insert_array(0, Value::Number(42.0));
+//
+//         let inner = object.inner().unwrap();
+//         let array_index = inner.array[0].1;
+//         assert_eq!(inner.values[array_index].value, Value::Number(42.0));
+//     }
+//
+//     #[test]
+//     fn resolve_array() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .inner_mut()
+//             .unwrap()
+//             .insert_array(0, Value::Number(42.0));
+//
+//         let value = object.inner().unwrap().resolve_array(0);
+//
+//         assert_eq!(value, Some(Value::Number(42.0).into()));
+//     }
+//
+//     #[test]
+//     fn get_array() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .inner_mut()
+//             .unwrap()
+//             .insert_array(0, Value::Number(42.0));
+//
+//         let inner = object.inner().unwrap();
+//
+//         let value = inner.get_array(0).unwrap();
+//
+//         assert_eq!(&value.value, &Value::Number(42.0));
+//     }
+//
+//     #[test]
+//     fn get_array_mut() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .inner_mut()
+//             .unwrap()
+//             .insert_array(0, Value::Number(42.0));
+//
+//         let mut inner = object.inner_mut().unwrap();
+//
+//         let value = inner.get_array_mut(0).unwrap();
+//
+//         assert_eq!(value, &mut Value::Number(42.0));
+//     }
+//
+//     #[test]
+//     fn contains_array_key() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .inner_mut()
+//             .unwrap()
+//             .insert_array(0, Value::Number(42.0));
+//
+//         let contains = object.inner().unwrap().contains_array_key(0);
+//
+//         assert!(contains);
+//     }
+//
+//     #[test]
+//     fn define_property() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .define_property(Value::string("key"), Value::Number(42.0))
+//             .unwrap();
+//
+//         let inner = object.inner().unwrap();
+//         let key: PropertyKey = Value::string("key").into();
+//         let property_index = inner.properties.get(&key).unwrap();
+//         assert_eq!(inner.values[*property_index].value, Value::Number(42.0));
+//     }
+//
+//     #[test]
+//     fn resolve_property() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .define_property(Value::string("key"), Value::Number(42.0))
+//             .unwrap();
+//
+//         let property = object
+//             .resolve_property(&Value::string("key"))
+//             .unwrap()
+//             .unwrap();
+//
+//         assert_eq!(property.value, Value::Number(42.0));
+//     }
+//
+//     #[test]
+//     fn contains_key() {
+//         let realm = Realm::new().unwrap();
+//         let object = Object::raw(&realm);
+//         object
+//             .define_property(Value::string("key"), Value::Number(42.0))
+//             .unwrap();
+//
+//         let contains = object.contains_key(&Value::string("key")).unwrap();
+//
+//         assert!(contains);
+//     }
+// }

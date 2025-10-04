@@ -50,12 +50,12 @@ impl AsyncBytecodeFunction {
         }
     }
 
-    pub fn update_name(&self, n: &str) -> Res {
+    pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {
         let name = self
-            .get_property(&"name".into())
+            .resolve_property("name".into(), realm)
             .ok()
             .flatten()
-            .and_then(|v| v.value.to_string_no_realm().ok())
+            .and_then(|v| v.assert_value().value.to_string(realm).ok())
             .unwrap_or_default();
 
         if name.is_empty() {
@@ -92,7 +92,7 @@ impl Func for AsyncBytecodeFunction {
 
         let args = ObjectHandle::new(args);
 
-        scope.declare_var("arguments".to_string(), args.into())?;
+        scope.declare_var("arguments".to_string(), args.into(), realm)?;
 
 
         Ok(BytecodeAsyncTask::new(Rc::clone(&self.code), realm, scope)?.into())

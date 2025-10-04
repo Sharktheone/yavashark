@@ -1,4 +1,3 @@
-use quote::quote;
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Name, Property};
 

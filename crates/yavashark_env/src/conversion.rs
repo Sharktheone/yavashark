@@ -1,6 +1,6 @@
 use crate::value::ops::BigIntOrNumber;
-use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
-use crate::{Error, GCd, ObjectHandle, Realm, Res, Symbol, Value, ValueResult};
+use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj, Property};
+use crate::{Error, GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value, ValueResult};
 use num_bigint::BigInt;
 use std::fmt::Display;
 use std::mem;
@@ -214,6 +214,43 @@ impl FromValueOutput for &BigIntOrNumber {
     }
 }
 
+impl FromValueOutput for InternalPropertyKey {
+    type Output = Self;
+
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        Ok(InternalPropertyKey::from(value))
+    }
+}
+
+impl FromValueOutput for &InternalPropertyKey {
+    type Output = InternalPropertyKey;
+
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        InternalPropertyKey::from_value_out(value, realm)
+    }
+}
+
+impl FromValueOutput for PropertyKey {
+    type Output = Self;
+
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        if let Value::Symbol(sym) = &value {
+            return Ok(PropertyKey::Symbol(sym.clone()));
+        }
+
+        let s = YSString::from_value_out(value, realm)?;
+        Ok(PropertyKey::String(s))
+    }
+}
+
+impl FromValueOutput for &PropertyKey {
+    type Output = PropertyKey;
+
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        PropertyKey::from_value_out(value, realm)
+    }
+}
+
 pub struct Stringable(String);
 
 impl Deref for Stringable {
@@ -254,8 +291,8 @@ impl FromValueOutput for Stringable {
     fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(ref o) => {
-                if let Some(p) = o.primitive() {
-                    return Self::from_value_out(p, realm);
+                if let Some(p) = o.primitive(realm)? {
+                    return Self::from_value_out(p.into(), realm);
                 }
             }
             Value::String(s) => return Ok(Self(s.to_string())),
@@ -316,8 +353,8 @@ impl FromValueOutput for ActualString {
     fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
         match value {
             Value::Object(ref o) => {
-                if let Some(p) = o.primitive() {
-                    return Self::from_value_out(p, realm);
+                if let Some(p) = o.primitive(realm)? {
+                    return Self::from_value_out(p.into(), realm);
                 }
             }
             Value::String(s) => return Ok(Self(s.to_string())),

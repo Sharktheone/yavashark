@@ -33,7 +33,7 @@ impl Interpreter {
         args.append(&mut exprs);
 
         Ok(tag
-            .call(realm, args, scope.this()?) //In strict mode, this is undefined
+            .call(args, scope.this()?, realm) //In strict mode, this is undefined
             .map_err(|mut e| {
                 e.attach_function_stack(tag.name(), get_location(stmt.span, scope));
 

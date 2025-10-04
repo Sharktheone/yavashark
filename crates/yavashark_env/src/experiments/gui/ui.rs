@@ -23,6 +23,7 @@ impl Ui {
         let proto = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone(),
+            realm,
         )?;
 
         realm.intrinsics.insert::<Self>(proto);
@@ -70,7 +71,7 @@ impl Ui {
             ui.horizontal(|ui| {
                 let x = self.ui.update(ui);
                 let global = realm.global.clone().into();
-                f.call(realm, vec![this], global)?;
+                f.call(vec![this], global, realm)?;
 
                 drop(x);
 

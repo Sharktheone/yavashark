@@ -23,7 +23,7 @@ pub fn repl(conf: Conf) -> Res {
     let mut interpreter_realm = Realm::new()?;
 
     #[cfg(feature = "vm")]
-    crate::optimizer::define_optimizer(&interpreter_realm)?;
+    crate::optimizer::define_optimizer(&mut interpreter_realm)?;
     #[cfg(feature = "vm")]
     yavashark_vm::init(&mut interpreter_realm)?;
     interpreter_realm.set_eval(InterpreterEval)?;
@@ -160,15 +160,15 @@ fn run_input(
         ) {
             Ok(r) => r,
             Err(e) => {
-                eprintln!("Uncaught {}", e.pretty_print());
+                eprintln!("Uncaught {}", e.pretty_print(interpreter_realm));
                 return;
             }
         };
 
         if conf.old_bytecode || conf.bytecode {
-            println!("Interpreter: {}", result.pretty_print());
+            println!("Interpreter: {}", result.pretty_print(interpreter_realm));
         } else {
-            println!("{}", result.pretty_print());
+            println!("{}", result.pretty_print(interpreter_realm));
         }
 
         rt.block_on(interpreter_realm.run_event_loop());

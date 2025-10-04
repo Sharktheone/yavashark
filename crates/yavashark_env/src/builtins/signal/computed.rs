@@ -23,7 +23,7 @@ pub struct Computed {
 
 impl Computed {
     pub fn new(compute_fn: ObjectHandle, realm: &Realm) -> Res<Self> {
-        if !compute_fn.is_function() {
+        if !compute_fn.is_callable() {
             return Err(Error::ty(
                 "Computed constructor expects a function as the first argument",
             ));
@@ -139,7 +139,7 @@ impl Computed {
                 old.add_dependent(this);
             }
 
-            let new = self.compute_fn.call(realm, Vec::new(), Value::Undefined)?;
+            let new = self.compute_fn.call(Vec::new(), Value::Undefined, realm)?;
             Self::restore_dependency_tracking(realm, old)?;
 
             let mut inner = self.inner.try_borrow_mut()?;

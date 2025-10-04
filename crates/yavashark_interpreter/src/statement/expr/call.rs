@@ -27,12 +27,12 @@ impl Interpreter {
                     .downcast::<ClassInstance>()?
                     .ok_or(Error::ty("`super` can only be used in class constructor"))?;
 
-                let proto = class.prototype()?;
-                let sup = proto.value.prototype(realm)?;
+                let proto = class.prototype(realm)?
+                    .to_object()?;
 
-                let constructor = sup.as_object()?.constructor()?;
+                let sup = proto.prototype(realm)?;
 
-                let constructor = constructor.resolve(proto.value.copy(), realm)?;
+                let constructor = sup.to_object()?.get("constructor", realm)?;
 
                 let constructor = constructor.as_object()?;
 
@@ -54,13 +54,12 @@ impl Interpreter {
 
                 //TODO: we somehow need to run the constructor ON the super class
                 let instance = constructor
-                    .construct(realm, values) //In strict mode, this is undefined
+                    .construct(values, realm) //In strict mode, this is undefined
                     .map_err(|mut e| {
                         e.attach_function_stack(constructor.name(), get_location(stmt.span, scope));
 
                         e
-                    })?
-                    .to_object()?;
+                    })?;
 
                 *class.inner.try_borrow_mut()? = instance;
 
@@ -116,7 +115,7 @@ impl Interpreter {
                 }
             }
 
-            f.call(realm, values, this) //In strict mode, this is undefined
+            f.call(values, this, realm) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, scope));
 

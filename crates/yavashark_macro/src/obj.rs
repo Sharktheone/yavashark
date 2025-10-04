@@ -32,13 +32,20 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());
 
     let realm = &conf.realm;
-    let error = &conf.error;
     let variable = &conf.variable;
     let value = &conf.value;
     let value_result = &conf.value_result;
-    let object_property = &conf.object_property;
     let mut_obj = &conf.mut_obj;
     let env = &conf.env_path;
+    let internal_property_key = &conf.internal_property_key;
+    let property_key = &conf.property_key;
+    let primitive_value = &conf.primitive_value;
+    let res = &conf.res;
+    let object_or_null = &conf.object_or_null;
+    let object_handle = &conf.object_handle;
+    let property = &conf.property;
+    let define_property_result = &conf.define_property_result;
+
 
     let Fields::Named(fields) = &mut input.fields else {
         return syn::Error::new(input.span(), "Object must have named fields")
@@ -144,25 +151,25 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let struct_name = &input.ident;
 
-    let properties_define = match_prop(direct, Act::Set, value);
-    let properties_variable_define = match_prop(direct, Act::SetVar, value);
-    let properties_resolve = match_prop(direct, Act::None, value);
-    let properties_get = match_prop(direct, Act::Get, value);
-    let properties_contains = match_prop(direct, Act::Contains, value);
-    let properties_delete = match_prop(direct, Act::Delete, value);
+    let properties_define = match_prop(direct, Act::Set, &conf);
+    let properties_variable_define = match_prop(direct, Act::SetVar, &conf);
+    let properties_resolve = match_prop(direct, Act::None, &conf);
+    let properties_get = match_prop(direct, Act::Get, &conf);
+    let properties_contains = match_prop(direct, Act::Contains, &conf);
+    let properties_delete = match_prop(direct, Act::Delete, &conf);
 
-    let properties = match_list(direct, List::Properties, value);
-    let keys = match_list(direct, List::Keys, value);
-    let values = match_list(direct, List::Values, value);
-    let clear = match_list(direct, List::Clear, value);
+    let properties = match_list(direct, List::Properties, &conf);
+    let keys = match_list(direct, List::Keys, &conf);
+    let values = match_list(direct, List::Values, &conf);
+    let clear = match_list(direct, List::Clear, &conf);
 
     let function = if args.function {
         quote! {
-            fn call(&self, realm: &mut #realm, args: Vec< #value>, this: #value) -> #value_result {
+            fn call(&self, args: ::std::vec::Vec< #value>, this: #value, realm: &mut #realm) -> #value_result {
                 #env::value::Func::call(self, realm, args, this)
             }
 
-            fn is_function(&self) -> bool {
+            fn is_callable(&self) -> bool {
                 true
             }
         }
@@ -206,25 +213,19 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             .collect::<TokenStream>();
 
         quote! {
-            unsafe fn custom_gc_refs(&self) -> Vec<yavashark_garbage::GcRef<#env::value::BoxedObj>> {
-                use #env::value::{CustomGcRef, CustomGcRefUntyped};
-                let mut refs = Vec::with_capacity(#len);
-
-                #refs
-
-                refs
-            }
+            //TODO
         }
+
     };
 
     let constructor = if args.constructor {
         quote! {
-            fn construct(&self, realm: &mut #realm, args: Vec<#value>) -> Result<#value, #error> {
+            fn construct(&self, args: ::std::vec::Vec<#value>, realm: &mut #realm) -> #res<#object_handle> {
                 #env::value::Constructor::construct(self, realm, args)
             }
 
-            fn is_constructor(&self) -> bool {
-                #env::value::Constructor::is_constructor(self)
+            fn is_constructable(&self) -> bool {
+                #env::value::Constructor::is_constructable(self)
             }
 
             // fn construct_proto(&self) -> Result<#object_property, #error> {
@@ -235,58 +236,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         TokenStream::new()
     };
 
-    let to_string = if args.to_string {
-        quote! {
-            fn to_string(&self, realm: &mut #realm) -> Result<yavashark_string::YSString, #error> {
-                self.override_to_string(realm)
-            }
-
-            fn to_string_internal(&self) -> Result<yavashark_string::YSString, #error> {
-                self.override_to_string_internal()
-            }
-        }
-    } else {
-        quote! {
-            fn to_string(&self, realm: &mut #realm) -> Result<yavashark_string::YSString, #error> {
-                Ok(format!("[object {}]", self.name()).into())
-            }
-
-            fn to_string_internal(&self) -> Result<yavashark_string::YSString, #error> {
-                Ok(format!("[object {}]", self.name()).into())
-            }
-        }
-    };
-
-    let name = if args.name {
-        quote! {
-            fn name(&self) -> String {
-                #env::value::CustomName::custom_name(self)
-            }
-        }
-    } else {
-        quote! {
-
-            fn name(&self) -> String {
-                stringify!(#struct_name).to_owned()
-            }
-        }
-    };
-
     let primitive = if let Some(primitive) = item_args.primitive {
         let is_mutable = mutable_region.contains(&primitive);
 
         if is_mutable {
             quote! {
-                fn primitive(&self) -> ::core::option::Option<#value> {
+                fn primitive(&self, realm: &mut #realm) -> #res<::core::option::Option<#primitive_value>> {
                     let inner = self.inner.borrow();
 
-                    ::core::option::Option::Some(inner.#primitive.clone().into())
+                    ::core::result::Result::Ok(::core::option::Option::Some(inner.#primitive.clone().into()))
                 }
             }
         } else {
             quote! {
-                fn primitive(&self) -> ::core::option::Option<#value> {
-                    ::core::option::Option::Some(self.#primitive.clone().into())
+                fn primitive(&self, realm: &mut #realm) -> #res<::core::option::Option<#primitive_value>> {
+                    ::core::result::Result::Ok(::core::option::Option::Some(self.#primitive.clone().into()))
                 }
             }
         }
@@ -302,131 +266,188 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         #region_code
 
         impl #env::value::Obj for #struct_name {
-            fn define_property(&self, name: #value, value: #value) -> Result<(), #error> {
+            fn define_property(&self, name: #internal_property_key, value: #value, realm: &mut #realm) -> #res<#define_property_result> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_define
 
                 #inner_drop
-                #obj_path.define_property(name, value)
+                #obj_path.define_property(name, value, realm)
             }
 
-            fn define_variable(&self, name: #value, value: #variable) -> Result<(), #error> {
+            fn define_property_attributes(&self, name: #internal_property_key, value: #variable, realm: &mut #realm) -> #res<#define_property_result> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_variable_define
 
                 #inner_drop
-                #obj_path.define_variable(name, value)
+                #obj_path.define_property_attributes(name, value, realm)
             }
 
-            fn resolve_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
+            fn resolve_property(&self, name: #internal_property_key, realm: &mut #realm) -> #res<Option<#property>> {
                 let inner = self.inner.borrow();
                 #properties_resolve
 
-                #obj_path.resolve_property(name)
+                #obj_path.resolve_property(name, realm)
             }
 
-            fn get_property(&self, name: &#value) -> Result<Option<#object_property>, #error> {
+            fn get_own_property(&self, name: #internal_property_key, realm: &mut #realm) -> #res<Option<#property>> {
                 let inner = self.inner.borrow();
                 #properties_get
 
-                #obj_path.get_property(name)
+                #obj_path.get_own_property(name, realm)
             }
 
-            fn define_getter(&self, name: #value, value: #value) -> Result<(), #error> {
+            fn define_getter(&self, name: #internal_property_key, getter: #object_handle, realm: &mut #realm) -> #res {
                 #inner_borrow_mut
-                #obj_path.define_getter(name, value)
+                #obj_path.define_getter(name, getter, realm)
             }
 
-            fn define_setter(&self, name: #value, value: #value) -> Result<(), #error> {
+            fn define_setter(&self, name: #internal_property_key, setter: #object_handle, realm: &mut #realm) -> #res {
                 #inner_borrow_mut
-                #obj_path.define_setter(name, value)
+                #obj_path.define_setter(name, setter, realm)
             }
 
-            fn delete_property(&self, name: &#value) -> Result<Option<#value>, #error> {
+            fn delete_property(&self, name: #internal_property_key, realm: &mut #realm) -> #res<Option<#property>> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_delete
 
                 #inner_drop
-                #obj_path.delete_property(name)
+                #obj_path.delete_property(name, realm)
             }
 
 
-            fn contains_key(&self, name: &#value) -> Result<bool, #error> {
+            fn contains_own_key(&self, name: #internal_property_key, realm: &mut Realm) -> #res<bool> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_contains
 
                 #inner_drop
-                #obj_path.contains_key(name)
+                #obj_path.contains_own_key(name, realm)
             }
 
 
-            fn has_key(&self, name: &#value) -> Result<bool, #error> {
+            fn contains_key(&self, name: #internal_property_key, realm: &mut Realm) -> #res<bool> {
                 let mut inner = self.inner.borrow_mut();
                 #properties_contains
 
                 #inner_drop
-                #obj_path.has_key(name)
+                #obj_path.contains_key(name, realm)
             }
 
 
-            #to_string
-            #name
-
-            fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
+            fn properties(&self, realm: &mut #realm) -> #res<::std::vec::Vec<(#property_key, #value)>> {
                 let inner = self.inner.borrow();
-                let mut props = #obj_path.properties()?;
+                let mut props = #obj_path.properties(realm)?;
                 #properties
 
                 Ok(props)
             }
 
-            fn keys(&self) -> Result<Vec<#value>, #error> {
+            fn keys(&self, realm: &mut #realm) -> #res<::std::vec::Vec<#property_key>> {
                 let inner = self.inner.borrow();
-                let mut keys = #obj_path.keys()?;
+                let mut keys = #obj_path.keys(realm)?;
                 #keys
 
                 Ok(keys)
             }
 
-            fn values(&self) -> Result<Vec<#value>, #error> {
+            fn values(&self, realm: &mut #realm) -> #res<::std::vec::Vec<#value>> {
                 let inner = self.inner.borrow();
-                let mut values = #obj_path.values()?;
+                let mut values = #obj_path.values(realm)?;
                 #values
 
                 Ok(values)
             }
-            fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<#value>), #error> {
+
+
+            fn enumerable_properties(&self, realm: &mut #realm) -> #res<::std::vec::Vec<(#property_key, #value)>> {
                 let inner = self.inner.borrow();
-                #obj_path.get_array_or_done(index)
+                let mut props = #obj_path.properties(realm)?;
+                #properties
+
+                Ok(props)
             }
 
-            fn clear_values(&self) -> Result<(), #error> {
+            fn enumerable_keys(&self, realm: &mut #realm) -> #res<::std::vec::Vec<#property_key>> {
+                let inner = self.inner.borrow();
+                let mut keys = #obj_path.keys(realm)?;
+                #keys
+
+                Ok(keys)
+            }
+
+            fn enumerable_values(&self, realm: &mut #realm) -> #res<::std::vec::Vec<#value>> {
+                let inner = self.inner.borrow();
+                let mut values = #obj_path.values(realm)?;
+                #values
+
+                Ok(values)
+            }
+
+            fn clear_properties(&self, realm: &mut #realm) -> #res {
                 let mut inner = self.inner.borrow_mut();
                 #clear
 
                 #inner_drop
-                #obj_path.clear_values()
+                #obj_path.clear_properties(realm)
             }
 
-            fn prototype(&self) -> Result<#object_property, #error> {
+            fn get_array_or_done(&self, index: usize, realm: &mut #realm) -> #res<(bool, Option<#value>)> {
+                let mut inner = self.inner.borrow_mut();
+                #obj_path.get_array_or_done(index, realm)
+            }
+
+
+            fn prototype(&self, realm: &mut #realm) -> #res<#object_or_null> {
                 #inner_borrow
-                #obj_path.prototype()
+                #obj_path.prototype(realm)
             }
 
-            fn set_prototype(&self, proto: #object_property) -> Result<(), #error> {
+            fn set_prototype(&self, proto: #object_or_null, realm: &mut #realm) -> #res {
                 #inner_borrow_mut
-                #obj_path.set_prototype(proto)
+                #obj_path.set_prototype(proto, realm)
             }
 
             #constructor
 
             #function
 
-            #custom_refs
-
             #primitive
 
             #downcast
+
+            fn is_extensible(&self) -> bool {
+                #inner_borrow
+                #obj_path.is_extensible()
+            }
+
+            fn prevent_extensions(&self) -> #res {
+                #inner_borrow_mut
+                #obj_path.prevent_extensions()
+            }
+
+            fn is_frozen(&self) -> bool {
+                #inner_borrow
+                #obj_path.is_frozen()
+            }
+
+            fn freeze(&self) -> #res {
+                #inner_borrow_mut
+                #obj_path.freeze()
+            }
+
+            fn is_sealed(&self) -> bool {
+                #inner_borrow
+                #obj_path.is_sealed()
+            }
+
+            fn seal(&self) -> #res {
+                #inner_borrow_mut
+                #obj_path.seal()
+            }
+
+            fn gc_refs(&self) -> ::std::vec::Vec<yavashark_garbage::GcRef<#env::value::BoxedObj>> {
+                #inner_borrow
+                #obj_path.gc_refs()
+            }
         }
     };
 

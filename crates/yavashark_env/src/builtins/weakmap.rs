@@ -1,7 +1,7 @@
 use crate::array::Array;
 use crate::utils::ValueIterator;
 use crate::value::{Constructor, MutObj, Obj};
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult, WeakValue};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
@@ -20,15 +20,15 @@ pub struct WeakMap {
 pub struct WeakMapConstructor {}
 
 impl Constructor for WeakMapConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let mut map = IndexMap::<_, _, FxBuildHasher>::default();
 
         if let Some(iter) = args.first() {
             let iter = ValueIterator::new(iter, realm)?;
 
             while let Some(val) = iter.next(realm)? {
-                let key = val.get_property(&0.into(), realm)?;
-                let value = val.get_property(&1.into(), realm)?;
+                let key = val.get_property(0, realm)?;
+                let value = val.get_property(1, realm)?;
 
                 map.insert(key.downgrade(), value.downgrade());
             }
@@ -41,20 +41,20 @@ impl Constructor for WeakMapConstructor {
             }),
         };
 
-        Ok(map.into_value())
+        Ok(map.into_object())
     }
 }
 
 impl WeakMapConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableWeakMapConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
@@ -144,7 +144,7 @@ impl WeakMap {
     ) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback must be a function"));
         }
 
@@ -153,7 +153,7 @@ impl WeakMap {
                 if let Some(value) = entry.get().upgrade() {
                     Ok(value)
                 } else {
-                    let value = callback.call(realm, vec![key], Value::Undefined)?;
+                    let value = callback.call(vec![key], Value::Undefined, realm)?;
 
                     if value.is_undefined() {
                         entry.shift_remove();
@@ -166,7 +166,7 @@ impl WeakMap {
             }
 
             Entry::Vacant(entry) => {
-                let value = callback.call(realm, vec![key], Value::Undefined)?;
+                let value = callback.call(vec![key], Value::Undefined, realm)?;
 
                 if !value.is_undefined() {
                     entry.insert(value.downgrade());

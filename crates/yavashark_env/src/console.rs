@@ -9,18 +9,18 @@ pub mod print;
 pub mod sink;
 
 #[must_use]
-pub fn get_console(realm: &Realm) -> Value {
+pub fn get_console(realm: &mut Realm) -> Value {
     let console = Object::new(realm);
 
     let _ = console.define_property(
         "log".into(),
         NativeFunction::new(
             "log",
-            |args, _, _| {
+            |args, _, realm| {
                 let mut str = String::new();
 
                 for arg in args {
-                    str.push_str(&arg.pretty_print());
+                    str.push_str(&arg.pretty_print(realm));
                     str.push(' ');
                 }
 
@@ -38,6 +38,7 @@ pub fn get_console(realm: &Realm) -> Value {
             realm,
         )
         .into(),
+        realm,
     ); // This can only fail if we have an existing borrow to the object, which we clearly don't
 
     console.into()

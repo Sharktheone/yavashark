@@ -1,7 +1,9 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
 use crate::realm::Realm;
-use crate::{Error, Object, Value, ValueResult};
+use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
+use crate::value::Property;
+use crate::value::property_key::IntoPropertyKey;
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.len() < 2 {
@@ -9,11 +11,11 @@ pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     }
 
     let name = args[0].copy();
-    let get = args[1].copy();
+    let get = args[1].copy().to_object()?;
 
     let this = this.as_object()?;
 
-    this.define_getter(name, get)?;
+    this.define_getter(name.into_internal_property_key(realm)?, get, realm)?;
 
     Ok(Value::Undefined)
 }
@@ -24,11 +26,11 @@ pub fn define_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     }
 
     let name = args[0].copy();
-    let set = args[1].copy();
+    let set = args[1].copy().to_object()?;
 
     let this = this.as_object()?;
 
-    this.define_setter(name, set)?;
+    this.define_setter(name.into_internal_property_key(realm)?, set, realm)?;
 
     Ok(Value::Undefined)
 }
@@ -43,8 +45,14 @@ pub fn lookup_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     let this = this.as_object()?;
 
     Ok(this
-        .resolve_property_no_get_set(name)?
-        .map_or(Value::Undefined, |p| p.get))
+        .resolve_property_no_get_set(name, realm)?
+        .map_or(Value::Undefined, |p| {
+            if let Property::Getter(get) = p {
+                get.clone().into()
+            } else {
+                Value::Undefined
+            }
+        }))
 }
 
 pub fn lookup_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
@@ -54,11 +62,13 @@ pub fn lookup_setter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
 
     let name = &args[0];
 
-    let this = this.as_object()?;
+    let _this = this.as_object()?;
 
-    Ok(this
-        .resolve_property_no_get_set(name)?
-        .map_or(Value::Undefined, |p| p.set))
+    Ok(Value::Undefined)
+
+    // Ok(this
+    //     .resolve_property_no_get_set(name, realm)?
+    //     .map_or(Value::Undefined, |p| ))
 }
 
 pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
@@ -70,9 +80,9 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
         return Ok(Value::Boolean(false));
     };
 
-    let key = &args[0];
+    let key = (&args[0]).into_internal_property_key(realm)?;
 
-    Ok(obj.contains_key(key)?.into())
+    Ok(obj.contains_key(key, realm)?.into())
 }
 
 pub fn get_own_property_descriptor(
@@ -88,19 +98,14 @@ pub fn get_own_property_descriptor(
         return Ok(Value::Undefined);
     };
 
-    let key = &args[1];
+    let key = (&args[1])
+        .into_internal_property_key(realm)?;
 
-    let obj = obj.guard();
-
-    let Some(prop) = obj.get_property(key)? else {
+    let Some(prop) = obj.get_property_descriptor(key, realm)? else {
         return Ok(Value::Undefined);
     };
 
-    let desc = Object::new(realm);
-
-    prop.descriptor(&desc)?;
-
-    Ok(desc.into())
+    prop.into_value(realm)
 }
 
 pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
@@ -115,10 +120,9 @@ pub fn is_prototype_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> Valu
     let o = this.to_object()?;
 
     loop {
-        let proto = v.prototype()?;
-        let proto = proto.get(v.clone().into(), realm)?;
+        let proto = v.prototype(realm)?;
 
-        let Value::Object(proto) = proto else {
+        let ObjectOrNull::Object(proto) = proto else {
             return Ok(false.into());
         };
 
@@ -139,9 +143,11 @@ pub fn property_is_enumerable(args: Vec<Value>, this: Value, realm: &mut Realm) 
         return Ok(false.into());
     };
 
-    let prop = obj.get_property(prop)?;
+    let Some(prop) = obj.resolve_property_no_get_set(prop, realm)? else {
+        return Ok(false.into());
+    };
 
-    Ok(prop.attributes.is_enumerable().into())
+    Ok(prop.attributes().is_enumerable().into())
 }
 
 pub fn to_locale_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {

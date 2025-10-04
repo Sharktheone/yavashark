@@ -165,20 +165,20 @@ pub fn value_to_plain_month_day(
 
             let overflow = overflow.unwrap_or(Overflow::Constrain);
 
-            if (obj.contains_key(&"month".into())? || obj.contains_key(&"monthCode".into())?)
-                && obj.contains_key(&"day".into())?
+            if (obj.contains_key("month".into(), realm)? || obj.contains_key("monthCode".into(), realm)?)
+                && obj.contains_key("day".into(), realm)?
             {
                 let year = obj
-                    .resolve_property(&"year".into(), realm)?
+                    .resolve_property("year", realm)?
                     .map(|v| v.to_number(realm).map(|v| v as i32))
                     .transpose()?;
 
                 let month = obj
-                    .resolve_property(&"month".into(), realm)?
+                    .resolve_property("month", realm)?
                     .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
 
                 let month = if month == 0 {
-                    obj.resolve_property(&"monthCode".into(), realm)?
+                    obj.resolve_property("monthCode", realm)?
                         .and_then(|v| v.to_string(realm).ok())
                         .and_then(|s| {
                             if s.is_empty() {
@@ -193,11 +193,11 @@ pub fn value_to_plain_month_day(
                 };
 
                 let day = obj
-                    .resolve_property(&"day".into(), realm)?
+                    .resolve_property("day", realm)?
                     .map_or(Ok(0), |v| v.to_number(realm).map(|v| v as u8))?;
 
                 let calendar = obj
-                    .resolve_property(&"calendar".into(), realm)?
+                    .resolve_property("calendar", realm)?
                     .and_then(|v| v.to_string(realm).ok());
 
                 let calendar = calendar
@@ -253,10 +253,10 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
 }
 
 impl PrettyObjectOverride for PlainMonthDay {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
         let mut s = self.month_day.to_string();
 
-        fmt_properties_to(obj, &mut s, not);
+        fmt_properties_to(obj, &mut s, not, realm);
 
         Some(s)
     }

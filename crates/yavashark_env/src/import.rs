@@ -29,7 +29,7 @@ impl DynamicImport {
 
         Ok(match module {
             ResolveModuleResult::Module(m) => {
-                let obj = Value::Object(module_to_object(m)?);
+                let obj = Value::Object(module_to_object(&m.clone(), realm)?);
 
                 promise.resolve(&obj, realm)?;
 
@@ -81,9 +81,9 @@ impl AsyncTask for DynamicImport {
             }
         };
 
-        let module = finalizer.finalize(realm)?;
+        let module = finalizer.finalize(realm)?.clone();
 
-        let obj = module_to_object(&module)?;
+        let obj = module_to_object(&module, realm)?;
 
         let val = Value::Object(obj);
 
@@ -95,15 +95,15 @@ impl AsyncTask for DynamicImport {
     }
 }
 
-pub fn module_to_object(module: &Module) -> Res<ObjectHandle> {
+pub fn module_to_object(module: &Module, realm: &mut Realm) -> Res<ObjectHandle> {
     let obj = Object::null();
 
-    for (key, val) in module.exports.properties()? {
-        obj.define_property(key, val)?;
+    for (key, val) in module.exports.properties(realm)? {
+        obj.set(key, val, realm)?;
     }
 
     if let Some(default) = &module.default {
-        obj.define_property("default".into(), default.clone().into())?;
+        obj.set("default", default.clone(), realm)?;
     }
 
     Ok(obj)

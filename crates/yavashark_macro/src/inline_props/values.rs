@@ -1,6 +1,6 @@
 use quote::quote;
 use crate::config::Config;
-use crate::inline_props::property::{Kind, Name, Property};
+use crate::inline_props::property::{Kind, Property};
 
 pub fn generate_values(
     props: &[Property],
@@ -27,7 +27,7 @@ pub fn generate_values(
         } else {
             quote! {}
         };
-        
+
         let get = if prop.copy && !prop.readonly {
             quote! {
                 #partial_get .get()
@@ -56,7 +56,7 @@ pub fn generate_values(
             }
         };
 
-        
+
         prop_items.push(value_expr);
     }
 

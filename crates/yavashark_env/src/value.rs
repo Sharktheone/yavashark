@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::{ObjectHandle, Realm};
+use crate::{GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res};
 pub use constructor::*;
 pub use conversion::*;
 pub use function::*;
@@ -16,6 +16,7 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
 use yavashark_string::{ToYSString, YSString};
+use crate::value::property_key::IntoPropertyKey;
 
 mod constructor;
 mod conversion;
@@ -65,10 +66,51 @@ pub enum PrimitiveValue {
     BigInt(Rc<BigInt>),
 }
 
+impl Display for PrimitiveValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Null => write!(f, "null"),
+            Self::Undefined => write!(f, "undefined"),
+            Self::Number(n) => write!(f, "{n}"),
+            Self::String(s) => write!(f, "{s}"),
+            Self::Boolean(b) => write!(f, "{b}"),
+            Self::Symbol(s) => write!(f, "Symbol({s})"),
+            Self::BigInt(b) => write!(f, "{b}"),
+        }
+    }
+}
+
+impl PrimitiveValue {
+    pub fn into_string(self) -> YSString {
+        match self {
+            Self::Null => YSString::new_static("null"),
+            Self::Undefined => YSString::new_static("undefined"),
+            Self::Number(n) => fmt_num(n),
+            Self::String(s) => s,
+            Self::Boolean(b) => b.to_ys_string(),
+            Self::Symbol(s) => format!("Symbol({})", s.as_ref()).into(),
+            Self::BigInt(b) => b.to_string().into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ObjectOrNull {
     Object(Object),
     Null,
+}
+
+impl ObjectOrNull {
+    pub fn is_null(&self) -> bool {
+        matches!(self, Self::Null)
+    }
+
+    pub fn to_object(self) -> Res<Object> {
+        match self {
+            Self::Object(o) => Ok(o),
+            Self::Null => Err(Error::ty("expected object, got null")),
+        }
+    }
 }
 
 impl Clone for Value {
@@ -277,7 +319,7 @@ impl Value {
             Self::String(_) => Type::String,
             Self::Boolean(_) => Type::Boolean,
             Self::Object(o) => {
-                if o.is_function() {
+                if o.is_callable() {
                     Type::Function
                 } else {
                     Type::Object
@@ -339,7 +381,7 @@ impl Value {
             Self::String(_) => "string",
             Self::Boolean(_) => "boolean",
             Self::Object(o) => {
-                if o.is_function() | o.is_constructor() {
+                if o.is_callable() | o.is_constructable() {
                     "function"
                 } else {
                     "object"
@@ -358,15 +400,13 @@ impl Value {
         }
     }
 
-    pub fn prototype(&self, realm: &mut Realm) -> Result<Self, Error> {
+    pub fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
         let obj = self.as_object()?;
 
-        let proto = obj.prototype()?;
-
-        proto.resolve(self.copy(), realm)
+        obj.prototype(realm)
     }
 
-    pub const fn as_object(&self) -> Result<&Object, Error> {
+    pub const fn as_object(&self) -> Res<&Object> {
         let Self::Object(obj) = &self else {
             return Err(Error::ty("expected object"));
         };
@@ -377,13 +417,13 @@ impl Value {
     #[allow(clippy::needless_lifetimes)]
     pub fn downcast<T: 'static>(
         &self,
-    ) -> Result<Option<OwningGcGuard<'static, BoxedObj, T>>, Error> {
+    ) -> Res<Option<GCd<T>>> {
         let obj = self.as_object()?;
 
         Ok(obj.downcast())
     }
 
-    pub fn to_object(self) -> Result<Object, Error> {
+    pub fn to_object(self) -> Res<Object> {
         match self {
             Self::Object(o) => Ok(o),
             _ => Err(Error::ty("expected object")),
@@ -439,13 +479,13 @@ impl Value {
     }
 
     #[must_use]
-    pub fn is_function(&self) -> bool {
-        matches!(self, Self::Object(o) if o.is_function())
+    pub fn is_callable(&self) -> bool {
+        matches!(self, Self::Object(o) if o.is_callable())
     }
 
     #[must_use]
-    pub fn is_constructor(&self) -> bool {
-        matches!(self, Self::Object(o) if o.is_constructor())
+    pub fn is_constructable(&self) -> bool {
+        matches!(self, Self::Object(o) if o.is_constructable())
     }
 
     pub fn assert_no_object(self) -> Result<Self, Error> {
@@ -550,7 +590,7 @@ impl Object {
 
     pub fn get_iter(&self, realm: &mut Realm) -> Result<Value, Error> {
         let iter = self
-            .resolve_property(&Symbol::ITERATOR.into(), realm)?
+            .resolve_property(Symbol::ITERATOR, realm)?
             .ok_or(Error::reference("Object is not iterable"))?;
 
         iter.call(realm, Vec::new(), self.clone().into())
@@ -558,7 +598,7 @@ impl Object {
 
     pub fn get_async_iter(&self, realm: &mut Realm) -> Result<Value, Error> {
         let iter = self
-            .resolve_property(&Symbol::ASYNC_ITERATOR.into(), realm)?
+            .resolve_property(Symbol::ASYNC_ITERATOR, realm)?
             .ok_or(Error::reference("Object is not async iterable"))?;
 
         iter.call(realm, Vec::new(), self.clone().into())
@@ -583,10 +623,11 @@ impl Value {
         self.as_object()?.get_async_iter(realm)
     }
 
-    pub fn get_property(&self, name: &Self, realm: &mut Realm) -> Result<Self, Error> {
+    pub fn get_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<Self, Error> {
+        let name = name.into_property_key(realm)?;
         match self {
             Self::Object(o) => o
-                .resolve_property(name, realm)?
+                .resolve_property(name.clone(), realm)?
                 .ok_or(Error::reference_error(format!(
                     "{name} does not exist on object"
                 ))),
@@ -594,48 +635,60 @@ impl Value {
         }
     }
 
-    pub fn get_property_opt(&self, name: &Self, realm: &mut Realm) -> Result<Option<Self>, Error> {
+    pub fn get_property_opt(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<Option<Self>, Error> {
         match self {
             Self::Object(o) => o.resolve_property(name, realm),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn get_property_no_get_set(&self, name: &Self) -> Result<ObjectProperty, Error> {
+    // pub fn get_property_no_get_set(&self, name: &Self) -> Result<ObjectProperty, Error> {
+    //     match self {
+    //         Self::Object(o) => o
+    //             .resolve_property_no_get_set(name)?
+    //             .ok_or(Error::reference_error(format!(
+    //                 "{name} does not exist on object"
+    //             ))),
+    //         _ => Err(Error::ty("Value is not an object")),
+    //     }
+    // }
+
+    pub fn define_property(&self, name: impl IntoPropertyKey, value: Self, realm: &mut Realm) -> Result<(), Error> {
+
         match self {
-            Self::Object(o) => o
-                .resolve_property_no_get_set(name)?
-                .ok_or(Error::reference_error(format!(
-                    "{name} does not exist on object"
-                ))),
+            Self::Object(o) => {
+                let name = name.into_internal_property_key(realm)?;
+                o.define_property(name, value, realm)?;
+
+                Ok(())
+            },
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn define_property(&self, name: Self, value: Self) -> Result<(), Error> {
+    pub fn contains_key(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
         match self {
-            Self::Object(o) => o.define_property(name, value),
+            Self::Object(o) => {
+                let name = name.into_internal_property_key(realm)?;
+                o.contains_own_key(name, realm)
+            },
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn contains_key(&self, name: &Self) -> Result<bool, Error> {
+    pub fn has_key(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
         match self {
-            Self::Object(o) => o.contains_key(name),
-            _ => Err(Error::ty("Value is not an object")),
-        }
-    }
-
-    pub fn has_key(&self, name: &Self) -> Result<bool, Error> {
-        match self {
-            Self::Object(o) => o.has_key(name),
+            Self::Object(o) => {
+                let name = name.into_internal_property_key(realm)?;
+                o.contains_key(name, realm)
+            },
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
     pub fn call(&self, realm: &mut Realm, args: Vec<Self>, this: Self) -> Result<Self, Error> {
         match self {
-            Self::Object(o) => o.call(realm, args, this),
+            Self::Object(o) => o.call(args, this, realm),
             _ => Err(Error::ty("Value is not a function")),
         }
     }
@@ -653,23 +706,23 @@ impl Value {
 
     #[allow(clippy::type_complexity)]
     ///(name, value)
-    pub fn properties(&self) -> Result<Vec<(Self, Self)>, Error> {
+    pub fn properties(&self, realm: &mut Realm) -> Result<Vec<(PropertyKey, Self)>, Error> {
         match self {
-            Self::Object(o) => o.properties(),
+            Self::Object(o) => o.properties(realm),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn keys(&self) -> Result<Vec<Self>, Error> {
+    pub fn keys(&self, realm: &mut Realm) -> Result<Vec<PropertyKey>, Error> {
         match self {
-            Self::Object(o) => o.keys(),
+            Self::Object(o) => o.keys(realm),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn values(&self) -> Result<Vec<Self>, Error> {
+    pub fn values(&self, realm: &mut Realm) -> Result<Vec<Self>, Error> {
         match self {
-            Self::Object(o) => o.values(),
+            Self::Object(o) => o.values(realm),
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -677,8 +730,8 @@ impl Value {
     pub fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
-                if let Some(prim) = o.primitive() {
-                    return prim.to_string(realm);
+                if let Some(prim) = o.primitive(realm)? {
+                    return Ok(prim.to_string().into());
                 }
 
                 o.to_string(realm)?
@@ -693,30 +746,11 @@ impl Value {
         })
     }
 
-    pub fn to_string_no_realm(&self) -> Result<YSString, Error> {
-        Ok(match self {
-            Self::Object(o) => {
-                if let Some(prim) = o.primitive() {
-                    return prim.to_string_no_realm();
-                }
-
-                o.to_string_internal()?
-            }
-            Self::Null => YSString::new_static("null"),
-            Self::Undefined => YSString::new_static("undefined"),
-            Self::Number(n) => fmt_num(*n),
-            Self::String(s) => s.clone(),
-            Self::Boolean(b) => b.to_ys_string(),
-            Self::Symbol(_) => return Err(Error::ty("Cannot convert Symbol to string")),
-            Self::BigInt(b) => b.to_string().into(),
-        })
-    }
-
     pub fn into_string(self, realm: &mut Realm) -> Result<YSString, Error> {
         Ok(match self {
             Self::Object(o) => {
-                if let Some(prim) = o.primitive() {
-                    return prim.into_string(realm);
+                if let Some(prim) = o.primitive(realm)? {
+                    return Ok(prim.into_string());
                 }
 
                 o.to_string(realm)?
@@ -871,7 +905,7 @@ impl Value {
 
     pub fn iter_close(&self, realm: &mut Realm) -> Result<(), Error> {
         let obj = self.as_object()?;
-        let return_method = obj.resolve_property(&"return".into(), realm)?;
+        let return_method = obj.resolve_property("return", realm)?;
 
         if let Some(return_method) = return_method {
             return_method.call(realm, Vec::new(), self.clone())?;
@@ -883,7 +917,7 @@ impl Value {
 
 impl Object {
     pub fn iter_next(&self, realm: &mut Realm) -> Result<Option<Value>, Error> {
-        let next = self.call_method(&"next".into(), realm, Vec::new())?;
+        let next = self.call_method("next", realm, Vec::new())?;
         let done = next.get_property_opt(&Value::string("done"), realm)?;
 
         if done.is_some_and(|x| x.is_truthy()) {
@@ -895,7 +929,7 @@ impl Object {
     }
 
     pub fn async_iter_next(&self, realm: &mut Realm) -> Result<Value, Error> {
-        let promise = self.call_method(&"next".into(), realm, Vec::new())?;
+        let promise = self.call_method("next", realm, Vec::new())?;
 
         Ok(promise)
     }
@@ -917,13 +951,13 @@ impl Object {
     }
 
     pub fn iter_next_no_out(&self, realm: &mut Realm) -> Result<(), Error> {
-        let _ = self.call_method(&"next".into(), realm, Vec::new())?;
+        let _ = self.call_method("next", realm, Vec::new())?;
 
         Ok(())
     }
 
     pub fn iter_next_is_finished(&self, realm: &mut Realm) -> Result<bool, Error> {
-        let next = self.call_method(&"next".into(), realm, Vec::new())?;
+        let next = self.call_method("next", realm, Vec::new())?;
         let done = next.get_property_opt(&Value::string("done"), realm)?;
 
         Ok(done.is_some_and(|done| done.is_truthy()))

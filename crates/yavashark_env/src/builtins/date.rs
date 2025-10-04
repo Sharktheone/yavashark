@@ -544,22 +544,22 @@ pub struct DateConstructor {}
 
 impl DateConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableDateConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func.clone())?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
 }
 
 impl Constructor for DateConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        Date::js_construct(&args, realm).map(Obj::into_value)
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+        Date::js_construct(&args, realm).map(Obj::into_object)
     }
 }
 
@@ -640,15 +640,15 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
 }
 
 impl PrettyObjectOverride for Date {
-    fn pretty_inline(&self, obj: &crate::value::Object, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(&self, obj: &crate::value::Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
         let mut s = self.date().format("%Y-%m-%d %H:%M:%S").to_string();
 
-        fmt_properties_to(obj, &mut s, not);
+        fmt_properties_to(obj, &mut s, not, realm);
 
         Some(s)
     }
 
-    fn pretty_multiline(&self, obj: &crate::value::Object, not: &mut Vec<usize>) -> Option<String> {
-        self.pretty_inline(obj, not)
+    fn pretty_multiline(&self, obj: &crate::value::Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+        self.pretty_inline(obj, not, realm)
     }
 }

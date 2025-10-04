@@ -17,7 +17,7 @@ use yavashark_env::{ObjectHandle, Res, Value};
 pub trait VM {
     fn acc(&self) -> Value;
     fn set_acc(&mut self, value: Value);
-    fn get_variable(&self, name: VarName) -> Res<Value>;
+    fn get_variable(&mut self, name: VarName) -> Res<Value>;
     fn var_name(&self, name: VarName) -> Option<&str>;
     fn get_register(&self, reg: Reg) -> Res<Value>;
     fn get_label(&self, label: Label) -> Res<&str>;
@@ -30,7 +30,7 @@ pub trait VM {
     fn pop(&mut self) -> Option<Value>;
     fn set_accb(&mut self, value: bool);
     fn get_this(&self) -> yavashark_env::Res<Value>;
-    fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value>;
+    fn get_constant(&mut self, const_idx: ConstIdx) -> yavashark_env::Res<Value>;
     #[must_use]
     fn get_stack(&self, idx: u32) -> Option<Value>;
     fn set_stack(&mut self, idx: u32, value: Value) -> Res;

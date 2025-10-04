@@ -1,19 +1,13 @@
 use crate::error::Error;
 use crate::value::{BoxedObj, Obj, ObjectProperty, Value};
-use crate::Realm;
+use crate::{ObjectHandle, Realm};
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;
 
 pub trait Constructor: Debug + Obj {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<Value, Error>;
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Result<ObjectHandle, Error>;
 
-    fn construct_proto(&self) -> Result<ObjectProperty, Error> {
-        Ok(self
-            .resolve_property(&"prototype".into())?
-            .unwrap_or(Value::Undefined.into()))
-    }
-
-    fn is_constructor(&self) -> bool {
+    fn is_constructable(&self) -> bool {
         true
     }
 }

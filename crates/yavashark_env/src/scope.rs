@@ -1,8 +1,9 @@
-use crate::value::CustomGcRefUntyped;
+use crate::value::{CustomGcRefUntyped, Property};
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashSet;
+use std::ops::Deref;
 use std::path::PathBuf;
 use std::rc::Rc;
 use yavashark_garbage::collectable::CellCollectable;
@@ -10,7 +11,8 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_string::YSString;
 
 use crate::realm::Realm;
-use crate::{Error, Object, ObjectHandle, Res, Value, Variable};
+use crate::{Error, InternalPropertyKey, Object, ObjectHandle, PropertyKey, Res, Value, Variable};
+use crate::value::property_key::IntoPropertyKey;
 
 pub struct MutValue {
     pub name: String,
@@ -160,7 +162,7 @@ pub struct ModuleScope {
 
 #[derive(Debug)]
 pub struct VariableReference {
-    name: Value,
+    name: YSString,
     object: ObjectHandle,
 }
 
@@ -172,34 +174,39 @@ pub enum VariableOrRef {
 
 impl VariableReference {
     #[must_use]
-    pub fn get(&self) -> Variable {
+    pub fn get(&self, realm: &mut Realm) -> Variable {
         self.object
-            .resolve_property_no_get_set(&self.name)
+            .resolve_property_no_get_set(self.name.clone(), realm)
             .ok()
             .flatten()
             .map_or(Value::Undefined.into(), |p| {
-                Variable::with_attributes(p.value, p.attributes)
+                let var = p.assert_value();
+                Variable::with_attributes(var.value, var.properties)
             })
     }
 
-    pub fn update(&self, value: Value) -> Res {
-        self.object.define_property(self.name.clone(), value)
+    pub fn update(&self, value: Value, realm: &mut Realm) -> Res {
+        let name = self.name.clone();
+        let name = name.into_internal_property_key(realm)?;
+        self.object.define_property(name, value, realm,)?;
+
+        Ok(())
     }
 }
 
 impl VariableOrRef {
     #[must_use]
-    pub fn get(&self) -> Variable {
+    pub fn get(&self, realm: &mut Realm) -> Variable {
         match self {
             Self::Variable(v) => v.clone(),
-            Self::Ref(r) => r.get(),
+            Self::Ref(r) => r.get(realm),
         }
     }
 
-    pub fn update(&mut self, value: Value) -> Res {
+    pub fn update(&mut self, value: Value, realm: &mut Realm) -> Res {
         match self {
             Self::Variable(v) => v.value = value,
-            Self::Ref(r) => return r.update(value),
+            Self::Ref(r) => return r.update(value, realm),
         }
 
         Ok(())
@@ -225,9 +232,11 @@ impl From<VariableReference> for VariableOrRef {
 }
 
 impl ObjectOrVariables {
-    fn insert(&mut self, name: String, variable: Variable) -> Res {
+    fn insert(&mut self, name: String, variable: Variable, realm: &mut Realm) -> Res {
         match self {
-            Self::Object(o) => o.define_variable(name.into(), variable)?,
+            Self::Object(o) => {
+                o.define_property_attributes(name.into(), variable, realm)?;
+            },
             Self::Variables(v) => {
                 v.insert(name, variable.into());
             }
@@ -236,9 +245,11 @@ impl ObjectOrVariables {
         Ok(())
     }
 
-    fn insert_opt(&mut self, name: String, variable: Variable) -> Res {
+    fn insert_opt(&mut self, name: String, variable: Variable, realm: &mut Realm) -> Res {
         match self {
-            Self::Object(o) => o.define_variable(name.into(), variable)?,
+            Self::Object(o) => {
+                o.define_property_attributes(name.into(), variable, realm)?;
+            },
             Self::Variables(v) => {
                 let entry = v.entry(name);
 
@@ -258,34 +269,37 @@ impl ObjectOrVariables {
         Ok(())
     }
 
-    fn get(&self, name: &str) -> Option<Variable> {
+    fn get(&self, name: &str, realm: &mut Realm) -> Option<Variable> {
         match self {
             Self::Object(o) => o
-                .resolve_property_no_get_set(&YSString::from_ref(name).into())
+                .resolve_property_no_get_set(YSString::from_ref(name), realm)
                 .ok()
                 .flatten()
-                .map(|x| Variable::with_attributes(x.value, x.attributes)),
-            Self::Variables(v) => v.get(name).map(VariableOrRef::get),
+                .map(|x| {
+                    let x = x.assert_value();
+                    Variable::with_attributes(x.value, x.properties)
+                }),
+            Self::Variables(v) => v.get(name).map(|v| VariableOrRef::get(v, realm)),
         }
     }
 
-    fn contains_key(&self, name: &str) -> bool {
+    fn contains_key(&self, name: &str, realm: &mut Realm) -> bool {
         match self {
             Self::Object(o) => o
-                .contains_key(&YSString::from_ref(name).into())
+                .contains_key(YSString::from_ref(name).into(), realm)
                 .unwrap_or_default(),
             Self::Variables(v) => v.contains_key(name),
         }
     }
 
-    fn keys(&self) -> Vec<YSString> {
+    fn keys(&self, realm: &mut Realm) -> Vec<YSString> {
         match self {
             Self::Object(o) => o
-                .keys()
+                .keys(realm)
                 .map(|x| {
                     x.iter()
                         .filter_map(|v| {
-                            if let Value::String(s) = v {
+                            if let PropertyKey::String(s) = v {
                                 Some(s.clone())
                             } else {
                                 None
@@ -320,8 +334,17 @@ unsafe impl CellCollectable<RefCell<Self>> for ScopeInternal {
                 let mut refs = Vec::with_capacity(v.len());
 
                 for v in v.values() {
-                    if let Value::Object(o) = &v.get().value {
-                        refs.push(o.get_untyped_ref());
+                    match v {
+                        VariableOrRef::Variable(var) => {
+                            if let Some(obj) = var.value.gc_untyped_ref() {
+                                refs.push(obj);
+                            }
+                        }
+                        VariableOrRef::Ref(r) => {
+                            let obj = r.object.deref().get_untyped_ref();
+
+                            refs.push(obj);
+                        }
                     }
                 }
 
@@ -433,34 +456,34 @@ impl ScopeInternal {
         Ok(new)
     }
 
-    pub fn declare_var(&mut self, name: String, value: Value) -> Res {
-        self.variables.insert_opt(name, Variable::new(value))
+    pub fn declare_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
+        self.variables.insert_opt(name, Variable::new(value), realm)
     }
 
-    pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
-        if self.variables.contains_key(&name) {
+    pub fn declare_read_only_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
+        if self.variables.contains_key(&name, realm) {
             return Err(Error::new("Variable already declared"));
         }
 
         self.variables
-            .insert(name, Variable::new_read_only(value))?;
+            .insert(name, Variable::new_read_only(value), realm)?;
 
         Ok(())
     }
 
-    pub fn declare_global_var(&mut self, name: String, value: Value) -> Res {
+    pub fn declare_global_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
         #[allow(clippy::if_same_then_else)]
         if let ObjectOrVariables::Object(obj) = &mut self.variables {
-            obj.define_property(name.into(), value)?;
+            obj.define_property(name.into(), value, realm)?;
         } else if self.state.is_function() {
-            self.variables.insert_opt(name, Variable::new(value))?;
+            self.variables.insert_opt(name, Variable::new(value), realm)?;
         } else {
             match &self.parent {
                 Some(p) => {
-                    p.borrow_mut()?.declare_global_var(name, value.copy())?;
+                    p.borrow_mut()?.declare_global_var(name, value.copy(), realm)?;
                 }
                 None => {
-                    self.variables.insert_opt(name, Variable::new(value))?;
+                    self.variables.insert_opt(name, Variable::new(value), realm)?;
                 }
             }
         }
@@ -468,8 +491,8 @@ impl ScopeInternal {
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str) -> Res<Option<Value>> {
-        if let Some(v) = self.variables.get(name) {
+    pub fn resolve(&self, name: &str, realm: &mut Realm) -> Res<Option<Value>> {
+        if let Some(v) = self.variables.get(name, realm) {
             return Ok(Some(v.copy()));
         }
 
@@ -480,17 +503,17 @@ impl ScopeInternal {
         }
 
         match &self.parent {
-            Some(parent) => parent.borrow()?.resolve(name),
+            Some(parent) => parent.borrow()?.resolve(name, realm),
             None => Ok(None),
         }
     }
 
-    pub fn has_value(&self, name: &str) -> Res<bool> {
-        if self.variables.contains_key(name) {
+    pub fn has_value(&self, name: &str, realm: &mut Realm) -> Res<bool> {
+        if self.variables.contains_key(name, realm) {
             Ok(true)
         } else {
             match &self.parent {
-                Some(parent) => parent.borrow()?.has_value(name),
+                Some(parent) => parent.borrow()?.has_value(name, realm),
                 None => Ok(false),
             }
         }
@@ -576,70 +599,72 @@ impl ScopeInternal {
         self.state.is_opt_chain()
     }
 
-    pub fn update(&mut self, name: &str, value: Value) -> Res<bool> {
+    pub fn update(&mut self, name: &str, value: Value, realm: &mut Realm) -> Res<bool> {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
-                let name = YSString::from_ref(name).into();
-                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(&name) {
-                    if !prop.attributes.is_writable() {
+                let name: InternalPropertyKey = YSString::from_ref(name).into();
+                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(name.clone(), realm) {
+                    let prop = prop.assert_value();
+                    if !prop.properties.is_writable() {
                         return Ok(false);
                     }
 
-                    obj.define_variable(name, Variable::with_attributes(value, prop.attributes))?;
+                    obj.define_property_attributes(name, Variable::with_attributes(value, prop.properties), realm)?;
                     return Ok(true);
                 }
             }
             ObjectOrVariables::Variables(ref mut v) => {
                 if let Some(var) = v.get_mut(name) {
-                    if !var.get().properties.is_writable() {
+                    if !var.get(realm).properties.is_writable() {
                         return Ok(false);
                     }
 
-                    var.update(value)?;
+                    var.update(value, realm)?;
                     return Ok(true);
                 }
             }
         }
 
         if let Some(p) = &self.parent {
-            return p.borrow_mut()?.update(name, value);
+            return p.borrow_mut()?.update(name, value, realm);
         }
 
         Ok(false)
     }
 
-    pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
+    pub fn update_or_define(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
-                let name = name.clone().into();
-                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(&name) {
-                    if !prop.attributes.is_writable() {
+                let name: InternalPropertyKey = name.clone().into();
+                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(name.clone(), realm) {
+                    let prop = prop.assert_value();
+                    if !prop.properties.is_writable() {
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
-                    obj.define_variable(name, Variable::with_attributes(value, prop.attributes))?;
+                    obj.define_property_attributes(name, Variable::with_attributes(value, prop.properties), realm)?;
                     return Ok(());
                 }
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
-                    if !var.get().properties.is_writable() {
+                    if !var.get(realm).properties.is_writable() {
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
-                    var.update(value)?;
+                    var.update(value, realm)?;
                     return Ok(());
                 }
             }
         }
 
         if let Some(p) = &self.parent {
-            if p.borrow_mut()?.update(&name, value.copy())? {
+            if p.borrow_mut()?.update(&name, value.copy(), realm)? {
                 return Ok(());
             }
         }
 
-        self.declare_var(name, value)?;
+        self.declare_var(name, value, realm)?;
 
         Ok(())
     }
@@ -663,23 +688,23 @@ impl ScopeInternal {
         self.file = self.get_current_file().ok();
     }
 
-    pub fn get_variables(&self) -> Res<FxHashMap<String, Variable>> {
+    pub fn get_variables(&self, realm: &mut Realm) -> Res<FxHashMap<String, Variable>> {
         let mut variables: FxHashMap<String, Variable> = match &self.parent {
-            Some(p) => p.borrow()?.get_variables()?,
+            Some(p) => p.borrow()?.get_variables(realm)?,
             None => FxHashMap::default(),
         };
 
         match &self.variables {
             ObjectOrVariables::Object(o) => {
-                for (k, v) in &o.properties()? {
-                    if let Value::String(s) = k {
+                for (k, v) in &o.properties(realm)? {
+                    if let PropertyKey::String(s) = k {
                         variables.insert(s.to_string(), v.clone().into());
                     }
                 }
             }
             ObjectOrVariables::Variables(v) => {
                 for (name, variable) in v {
-                    variables.insert(name.clone(), variable.get());
+                    variables.insert(name.clone(), variable.get(realm));
                 }
             }
         }
@@ -687,13 +712,13 @@ impl ScopeInternal {
         Ok(variables)
     }
 
-    pub fn get_variable_names(&self) -> Res<HashSet<String>> {
+    pub fn get_variable_names(&self, realm: &mut Realm) -> Res<HashSet<String>> {
         let mut variables = match &self.parent {
-            Some(p) => p.borrow()?.get_variable_names()?,
+            Some(p) => p.borrow()?.get_variable_names(realm)?,
             None => HashSet::new(),
         };
 
-        variables.extend(self.variables.keys().iter().map(ToString::to_string));
+        variables.extend(self.variables.keys(realm).iter().map(ToString::to_string));
 
         Ok(variables)
     }
@@ -760,21 +785,21 @@ impl Scope {
         })
     }
 
-    pub fn declare_var(&mut self, name: String, value: Value) -> Res {
-        self.scope.borrow_mut()?.declare_var(name, value)
+    pub fn declare_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
+        self.scope.borrow_mut()?.declare_var(name, value, realm)
     }
 
-    pub fn declare_read_only_var(&mut self, name: String, value: Value) -> Res {
-        self.scope.borrow_mut()?.declare_read_only_var(name, value)
+    pub fn declare_read_only_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
+        self.scope.borrow_mut()?.declare_read_only_var(name, value, realm)
     }
 
-    pub fn declare_global_var(&mut self, name: String, value: Value) -> Res {
-        self.scope.borrow_mut()?.declare_global_var(name, value)?;
+    pub fn declare_global_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
+        self.scope.borrow_mut()?.declare_global_var(name, value, realm)?;
         Ok(())
     }
 
-    pub fn resolve(&self, name: &str) -> Res<Option<Value>> {
-        self.scope.borrow()?.resolve(name)
+    pub fn resolve(&self, name: &str, realm: &mut Realm) -> Res<Option<Value>> {
+        self.scope.borrow()?.resolve(name, realm)
     }
 
     pub fn has_label(&self, label: &str) -> Res<bool> {
@@ -882,16 +907,16 @@ impl Scope {
         Ok(self.scope.borrow()?.state_is_opt_chain())
     }
 
-    pub fn has_value(&self, name: &str) -> Res<bool> {
-        self.scope.borrow()?.has_value(name)
+    pub fn has_value(&self, name: &str, realm: &mut Realm) -> Res<bool> {
+        self.scope.borrow()?.has_value(name, realm)
     }
 
-    pub fn update(&mut self, name: &str, value: Value) -> Res<bool> {
-        self.scope.borrow_mut()?.update(name, value)
+    pub fn update(&mut self, name: &str, value: Value, realm: &mut Realm) -> Res<bool> {
+        self.scope.borrow_mut()?.update(name, value, realm)
     }
 
-    pub fn update_or_define(&mut self, name: String, value: Value) -> Res {
-        self.scope.borrow_mut()?.update_or_define(name, value)
+    pub fn update_or_define(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
+        self.scope.borrow_mut()?.update_or_define(name, value, realm)
     }
 
     pub fn child(&self) -> Res<Self> {
@@ -925,12 +950,12 @@ impl Scope {
         Ok(())
     }
 
-    pub fn get_variables(&self) -> Res<FxHashMap<String, Variable>> {
-        self.scope.borrow()?.get_variables()
+    pub fn get_variables(&self, realm: &mut Realm) -> Res<FxHashMap<String, Variable>> {
+        self.scope.borrow()?.get_variables(realm)
     }
 
-    pub fn get_variable_names(&self) -> Res<HashSet<String>> {
-        self.scope.borrow()?.get_variable_names()
+    pub fn get_variable_names(&self, realm: &mut Realm) -> Res<HashSet<String>> {
+        self.scope.borrow()?.get_variable_names(realm)
     }
 
     #[must_use]
@@ -1018,45 +1043,45 @@ mod tests {
 
     #[test]
     fn scope_internal_declare_var_and_resolve() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
-            .declare_var("test".to_string(), Value::Number(42.0))
+            .declare_var("test".to_string(), Value::Number(42.0), &mut realm)
             .unwrap();
-        let value = scope.resolve("test").unwrap().unwrap();
+        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
     #[test]
     fn scope_internal_declare_read_only_var_and_update_fails() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
-            .declare_read_only_var("test".to_string(), Value::Number(42.0))
+            .declare_read_only_var("test".to_string(), Value::Number(42.0), &mut realm)
             .unwrap();
-        let result = scope.update("test", Value::Number(43.0)).unwrap();
+        let result = scope.update("test", Value::Number(43.0), &mut realm).unwrap();
         assert!(!result);
     }
 
     #[test]
     fn scope_internal_declare_global_var_and_resolve() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
-            .declare_global_var("test".to_string(), Value::Number(42.0))
+            .declare_global_var("test".to_string(), Value::Number(42.0), &mut realm)
             .unwrap();
-        let value = scope.resolve("test").unwrap().unwrap();
+        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 
     #[test]
     fn scope_internal_update_or_define_and_resolve() {
-        let realm = Realm::new().unwrap();
+        let mut realm = Realm::new().unwrap();
         let mut scope = ScopeInternal::new(&realm, PathBuf::from("test.js"));
         scope
-            .update_or_define("test".to_string(), Value::Number(42.0))
+            .update_or_define("test".to_string(), Value::Number(42.0), &mut realm)
             .unwrap();
-        let value = scope.resolve("test").unwrap().unwrap();
+        let value = scope.resolve("test", &mut realm).unwrap().unwrap();
         assert_eq!(value, Value::Number(42.0));
     }
 }

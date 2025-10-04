@@ -9,8 +9,8 @@ use yavashark_macro::{object, props};
 pub struct Float32Array {}
 
 impl Float32Array {
-    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.float32array.clone().into())?;
+    pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.float32array.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableFloat32Array {}),

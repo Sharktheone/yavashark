@@ -59,7 +59,7 @@ impl AsyncTask for TimeoutTask {
 
         match sleep.poll(cx) {
             Poll::Ready(()) => {
-                let res = proj.cb.call(realm, Vec::new(), Value::Undefined);
+                let res = proj.cb.call(Vec::new(), Value::Undefined, realm);
 
                 proj.promise.set_res(res, realm)?;
 
@@ -74,7 +74,7 @@ impl AsyncTask for TimeoutTask {
     }
 }
 
-pub fn get_set_timeout(realm: &Realm) -> ObjectHandle {
+pub fn get_set_timeout(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
         "setTimeout",
         |args, _, realm| {
@@ -84,7 +84,7 @@ pub fn get_set_timeout(realm: &Realm) -> ObjectHandle {
                 .unwrap_or(Value::Undefined)
                 .to_object()?;
 
-            if !callback.is_function() {
+            if !callback.is_callable() {
                 return Err(Error::ty("Expected a function"));
             }
 

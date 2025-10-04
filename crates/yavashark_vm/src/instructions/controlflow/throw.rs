@@ -13,7 +13,7 @@ pub fn throw_reg(reg: Reg, vm: &impl VM) -> ControlResult {
     Err(ControlFlow::Error(Error::throw(value)))
 }
 
-pub fn throw(var: VarName, vm: &impl VM) -> ControlResult {
+pub fn throw(var: VarName, vm: &mut impl VM) -> ControlResult {
     let value = vm.get_variable(var)?;
     Err(ControlFlow::Error(Error::throw(value)))
 }

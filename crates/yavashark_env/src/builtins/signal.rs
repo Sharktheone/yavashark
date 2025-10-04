@@ -6,7 +6,7 @@ mod state;
 use crate::builtins::signal::computed::{Computed, ComputedProtoObj};
 use crate::builtins::signal::state::State;
 use crate::value::BoxedObj;
-use crate::{Object, ObjectHandle, Realm, Res};
+use crate::{Object, ObjectHandle, Realm, Res, Value};
 use std::cell::RefCell;
 use yavashark_garbage::Gc;
 
@@ -18,12 +18,14 @@ pub struct Protos {
 pub fn get_signal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
+    realm: &mut Realm
 ) -> Res<(ObjectHandle, Protos)> {
     let obj = Object::with_proto(obj_proto.clone());
 
     let state = State::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
+        realm,
     )?;
 
     let proto = ComputedProtoObj {
@@ -31,14 +33,14 @@ pub fn get_signal(
         current_dep: RefCell::default(),
     };
 
-    let computed = Computed::initialize_proto(proto, func_proto.into())?;
+    let computed = Computed::initialize_proto(proto, func_proto.into(), realm)?;
 
-    let state_constructor = state.get_property(&"constructor".into())?.value;
-    let computed_constructor = computed.get_property(&"constructor".into())?.value;
+    let state_constructor = state.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined);
+    let computed_constructor = computed.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined);
 
-    obj.define_property("State".into(), state_constructor);
+    obj.define_property("State".into(), state_constructor, realm);
 
-    obj.define_property("Computed".into(), computed_constructor);
+    obj.define_property("Computed".into(), computed_constructor, realm);
 
     let protos = Protos { state, computed };
 

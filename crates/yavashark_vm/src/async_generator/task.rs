@@ -83,7 +83,7 @@ impl AsyncTask for AsyncGeneratorTask {
                     inner.promise.resolve(&val, realm)?;
                     return Poll::Ready(Ok(()));
                 }
-                state.continue_async(val)?;
+                state.continue_async(val, realm)?;
             }
         }
 
@@ -128,7 +128,7 @@ impl AsyncGeneratorTask {
                                 .clone()
                                 .unwrap_or(Value::Undefined);
 
-                            self.state.as_mut().map(|state| state.continue_async(val));
+                            self.state.as_mut().map(|state| state.continue_async(val, realm));
 
                             return self.poll_next(realm);
                         }
@@ -142,8 +142,8 @@ impl AsyncGeneratorTask {
                             self.gen.notify.notify_waiters();
                             let obj = Object::new(realm);
 
-                            obj.define_property("done".into(), true.into())?;
-                            obj.define_property("value".into(), val)?;
+                            obj.define_property("done".into(), true.into(), realm)?;
+                            obj.define_property("value".into(), val, realm)?;
 
                             self.promise.resolve(&obj.into(), realm)?;
                         }
@@ -191,8 +191,8 @@ impl AsyncGeneratorTask {
 
                     let obj = Object::new(realm);
 
-                    obj.define_property("done".into(), false.into())?;
-                    obj.define_property("value".into(), val)?;
+                    obj.define_property("done".into(), false.into(), realm)?;
+                    obj.define_property("value".into(), val, realm)?;
 
                     self.promise.resolve(&obj.into(), realm)?;
 

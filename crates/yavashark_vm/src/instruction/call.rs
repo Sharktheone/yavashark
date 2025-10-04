@@ -76,7 +76,7 @@ pub fn call_private_member(
     let this = res.1.unwrap_or(vm.get_this()?);
 
     let res = res.0.call(vm.get_realm(), args, this)?;
-    
+
     output.set(res, vm)?;
 
     Ok(())
@@ -95,7 +95,7 @@ pub fn call_private_member_no_output(obj: impl Data, member: impl Data, vm: &mut
     let res = get_private_member(vm.get_realm(), base, &name)?;
 
     let args = vm.get_call_args();
-    
+
     let this = res.1.unwrap_or(vm.get_this()?);
 
     res.0.call(vm.get_realm(), args, this)?;
@@ -113,9 +113,9 @@ pub fn construct(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> 
 
     let args = vm.get_call_args();
 
-    let ret = constructor.construct(vm.get_realm(), args)?;
+    let ret = constructor.construct(args, vm.get_realm())?;
 
-    output.set(ret, vm)?;
+    output.set(ret.into(), vm)?;
 
     Ok(())
 }
@@ -131,7 +131,7 @@ pub fn construct_no_output(func: impl Data, vm: &mut impl VM) -> ControlResult {
 
     let args = vm.get_call_args();
 
-    constructor.construct(vm.get_realm(), args)?;
+    constructor.construct(args, vm.get_realm())?;
 
     Ok(())
 }
@@ -140,37 +140,37 @@ pub fn call_super(output: impl OutputData, vm: &mut impl VM) -> Res {
     let class = vm.get_scope().this()?;
     let realm = vm.get_realm();
 
-    let proto = class.prototype(realm)?;
+    let proto = class.prototype(realm)?
+        .to_object()?;
+
     let sup = proto.prototype(realm)?;
 
-    let constructor = sup.as_object()?.constructor()?;
-
-    let constructor = constructor.resolve(proto.copy(), realm)?;
+    let constructor = sup.to_object()?.get("constructor", realm)?;
 
     let constructor = constructor.as_object()?;
 
     let args = vm.get_call_args();
-    let ret = constructor.construct(vm.get_realm(), args)?;
+    let ret = constructor.construct(args, vm.get_realm())?;
 
-    output.set(ret, vm)
+    output.set(ret.into(), vm)
 }
 
 pub fn call_super_no_output(vm: &mut impl VM) -> Res {
     let class = vm.get_scope().this()?;
     let realm = vm.get_realm();
 
-    let proto = class.prototype(realm)?;
+    let proto = class.prototype(realm)?
+        .to_object()?;
+
     let sup = proto.prototype(realm)?;
 
-    let constructor = sup.as_object()?.constructor()?;
-
-    let constructor = constructor.resolve(proto.copy(), realm)?;
+    let constructor = sup.to_object()?.get("constructor", realm)?;
 
     let constructor = constructor.as_object()?;
 
     let args = vm.get_call_args();
 
-    constructor.construct(vm.get_realm(), args)?;
+    constructor.construct(args, vm.get_realm())?;
 
     Ok(())
 }

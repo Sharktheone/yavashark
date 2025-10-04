@@ -49,7 +49,7 @@ impl OptimFunction {
         params: Vec<Param>,
         block: Option<RefCell<Box<dyn FunctionCode>>>,
         scope: Scope,
-        realm: &Realm,
+        realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let prototype = Object::new(realm);
 
@@ -78,21 +78,21 @@ impl OptimFunction {
 
         let handle = ObjectHandle::new(this);
 
-        handle.define_property("name".into(), handle.clone().into())?;
-        handle.define_property("length".into(), len.into())?;
-        prototype.define_property("constructor".into(), handle.clone().into())?;
+        handle.define_property("name".into(), handle.clone().into(), realm)?;
+        handle.define_property("length".into(), len.into(), realm)?;
+        prototype.define_property("constructor".into(), handle.clone().into(), realm)?;
 
         Ok(handle)
     }
 
-    pub fn new_instance(&self) -> ValueResult {
+    pub fn new_instance(&self) -> Res<ObjectHandle> {
         let inner = self.inner.try_borrow()?;
 
         let proto: ObjectOrNull = inner.prototype.value.clone().try_into()?;
 
         let obj = Object::with_proto(proto);
 
-        Ok(obj.into())
+        Ok(obj)
     }
 }
 
@@ -114,6 +114,7 @@ impl RawOptimFunction {
             scope.declare_var(
                 name.sym.to_string(),
                 args.get(i).unwrap_or(&Value::Undefined).copy(),
+                realm,
             )?;
         }
 
@@ -125,7 +126,7 @@ impl RawOptimFunction {
 
         let args = ObjectHandle::new(args);
 
-        args.define_variable("callee".into(), Variable::write_config(this.copy()))?;
+        args.define_property_attributes("callee".into(), Variable::write_config(this.copy()), realm)?;
 
         if let Some(block) = &self.block {
             let func = block.borrow();
@@ -157,19 +158,19 @@ impl CustomGcRefUntyped for RawOptimFunction {
 }
 
 impl Constructor for OptimFunction {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let this = self.new_instance()?;
 
-        self.raw.call(realm, args, this.copy())?;
+        self.raw.call(realm, args, this.clone().into())?;
 
         Ok(this)
     }
 
-    fn construct_proto(&self) -> Res<ObjectProperty> {
-        let inner = self.inner.try_borrow()?;
-
-        Ok(inner.prototype.clone())
-    }
+    // fn construct_proto(&self) -> Res<ObjectProperty> {
+    //     let inner = self.inner.try_borrow()?;
+    //
+    //     Ok(inner.prototype.clone())
+    // }
 }
 
 impl ConstructorFn for RawOptimFunction {

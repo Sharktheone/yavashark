@@ -9,7 +9,8 @@ use swc_ecma_ast::{
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
-use yavashark_env::{Class, ClassInstance, Error, PrivateMember, Realm, Res, RuntimeResult, Value};
+use yavashark_env::{Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult, Value};
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -33,7 +34,7 @@ impl Interpreter {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
                     let name = i.sym.to_string();
-                    scope.update_or_define(name, value)
+                    scope.update_or_define(name, value, realm)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
                 SimpleAssignTarget::SuperProp(super_prop) => {
@@ -77,7 +78,7 @@ impl Interpreter {
 
                     if let Some(class) = obj.downcast::<ClassInstance>() {
                         let member = class
-                            .get_private_prop(name)?
+                            .get_private_prop(name, realm)?
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
                         let this_value = Value::Object(obj.clone());
@@ -110,7 +111,7 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
-            obj.define_property(name, value);
+            obj.define_property(name.into_internal_property_key(realm)?, value, realm);
             Ok(())
         } else {
             Err(Error::ty_error(format!(
@@ -129,21 +130,23 @@ impl Interpreter {
 
         let obj = this.as_object()?;
 
-        let proto = obj.prototype()?;
-        let sup = proto.resolve(this, realm)?;
+        let sup = obj.prototype(realm)?
+            .to_object()?;
 
         match &super_prop.prop {
             SuperProp::Ident(i) => {
                 let name = i.sym.to_string();
 
-                sup.define_property(name.into(), value)
+                sup.define_property(name.into(), value, realm)?;
             }
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
 
-                sup.define_property(name, value)
+                sup.define_property(name.into(), value, realm)?;
             }
         }
+
+        Ok(())
     }
 
     pub fn assign_opt_chain(
@@ -216,7 +219,7 @@ impl Interpreter {
                     &pat,
                     scope,
                     &mut iter::once(value),
-                    &mut |scope, name, value| scope.update_or_define(name, value),
+                    &mut |scope, name, value, realm| scope.update_or_define(name, value, realm),
                 )?;
             }
             AssignTargetPat::Object(expr) => {
@@ -227,7 +230,7 @@ impl Interpreter {
                     &pat,
                     scope,
                     &mut iter::once(value),
-                    &mut |scope, name, value| scope.update_or_define(name, value),
+                    &mut |scope, name, value, realm| scope.update_or_define(name, value, realm),
                 )?;
             }
             AssignTargetPat::Invalid(_) => {
@@ -251,12 +254,12 @@ impl Interpreter {
                     let name = i.sym.to_string();
 
                     let left = scope
-                        .resolve(&name)?
+                        .resolve(&name, realm)?
                         .ok_or_else(|| Error::reference_error(format!("{name} is not defined")))?;
 
                     let value = Self::run_assign_op(op, left, right, realm)?;
 
-                    scope.update(&name, value.copy())?;
+                    scope.update(&name, value.copy(), realm)?;
 
                     Ok(value)
                 }
@@ -304,7 +307,7 @@ impl Interpreter {
 
                     if let Some(class) = obj.downcast::<ClassInstance>() {
                         let member = class
-                            .get_private_prop(name)?
+                            .get_private_prop(name, realm)?
                             .ok_or(Error::ty_error(format!("Private name {name} not found")))?;
 
                         if matches!(member, PrivateMember::Method(_)) {
@@ -380,7 +383,7 @@ impl Interpreter {
 
             let value = Self::run_assign_op(op, left, right, realm)?;
 
-            obj.define_property(name, value.copy());
+            obj.define_property(name.into_internal_property_key(realm)?, value.copy(), realm);
             Ok(value)
         } else {
             Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")).into())
@@ -398,28 +401,30 @@ impl Interpreter {
 
         let obj = this.as_object()?;
 
-        let proto = obj.prototype()?;
-        let sup = proto.resolve(this, realm)?;
+        let sup = obj.prototype(realm)?
+            .to_object()?;
 
         match &super_prop.prop {
             SuperProp::Ident(i) => {
-                let name = i.sym.to_string().into();
+                let name: InternalPropertyKey = i.sym.to_string().into();
 
-                let left = sup.get_property(&name, realm)?;
+                let left = sup.resolve_property(name.clone(), realm)?.unwrap_or(Value::Undefined);
 
                 let value = Self::run_assign_op(op, left, right, realm)?;
 
-                sup.define_property(name, value.copy());
+                sup.define_property(name, value.copy(), realm);
                 Ok(value)
             }
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
 
-                let left = sup.get_property(&name, realm)?;
+                let name = name.into_internal_property_key(realm)?;
+
+                let left = sup.resolve_property(name.clone(), realm)?.unwrap_or(Value::Undefined);
 
                 let value = Self::run_assign_op(op, left, right, realm)?;
 
-                sup.define_property(name, value.copy());
+                sup.define_property(name, value.copy(), realm);
                 Ok(value)
             }
         }
@@ -503,8 +508,8 @@ impl Interpreter {
                     &pat,
                     scope,
                     &mut iter::once(left.copy()),
-                    &mut |scope, name, value| {
-                        scope.update_or_define(name, value);
+                    &mut |scope, name, value, realm| {
+                        scope.update_or_define(name, value, realm);
                         Ok(())
                     },
                 )?;
@@ -517,8 +522,8 @@ impl Interpreter {
                     &pat,
                     scope,
                     &mut iter::once(left.copy()),
-                    &mut |scope, name, value| {
-                        scope.update_or_define(name, value);
+                    &mut |scope, name, value, realm| {
+                        scope.update_or_define(name, value, realm);
                         Ok(())
                     },
                 )?;

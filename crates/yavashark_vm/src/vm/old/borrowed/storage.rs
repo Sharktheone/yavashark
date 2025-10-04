@@ -7,13 +7,13 @@ use yavashark_env::{Res, Value};
 
 #[allow(unused)]
 impl OldBorrowedVM<'_> {
-    pub fn get_variable(&self, name: VarName) -> yavashark_env::Res<Value> {
+    pub fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
 
         self.current_scope
-            .resolve(name)?
+            .resolve(name, self.realm)?
             .ok_or(Error::reference("Variable not found"))
     }
 
@@ -43,7 +43,7 @@ impl OldBorrowedVM<'_> {
         let name = self
             .var_name(name)
             .ok_or(Error::reference("Invalid variable name"))?;
-        self.current_scope.update_or_define(name.into(), value)
+        self.current_scope.update_or_define(name.into(), value, self.realm)
     }
 
     pub fn set_register(&mut self, reg: Reg, value: Value) -> Res {
@@ -75,7 +75,7 @@ impl OldBorrowedVM<'_> {
         self.current_scope.this()
     }
 
-    pub fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
+    pub fn get_constant(&mut self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
         let val = self
             .data
             .constants

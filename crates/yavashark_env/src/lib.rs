@@ -39,6 +39,7 @@ pub mod partial_init;
 use crate::error_obj::ErrorObj;
 pub use crate::realm::Realm;
 pub use crate::value::property_key::{InternalPropertyKey, PropertyKey};
+pub use crate::value::{ObjectOrNull, PrimitiveValue};
 use error::Location;
 use value::BoxedObj;
 
@@ -104,10 +105,7 @@ impl ControlFlow {
     pub fn throw(val: Value) -> Self {
         if let Value::Object(obj) = &val {
             {
-                let obj = obj.guard();
-                let this = (**obj).as_any();
-
-                if let Some(err) = this.downcast_ref::<ErrorObj>() {
+                if let Some(err) = obj.downcast::<ErrorObj>() {
                     let inner = match err.inner.try_borrow() {
                         Ok(inner) => inner,
                         Err(e) => {

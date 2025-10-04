@@ -345,7 +345,7 @@ pub struct DataViewConstructor {}
 
 impl DataViewConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, _realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableDataViewConstructor {
                 object: MutObject::with_proto(func),
@@ -357,7 +357,7 @@ impl DataViewConstructor {
 }
 
 impl Constructor for DataViewConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let buffer = args
             .first()
             .map_or(Err(Error::ty("DataView requires a buffer argument")), |v| {
@@ -376,6 +376,6 @@ impl Constructor for DataViewConstructor {
             None => None,
         };
 
-        Ok(DataView::new(realm, buffer, byte_offset, byte_length)?.into_value())
+        Ok(DataView::new(realm, buffer, byte_offset, byte_length)?.into_object())
     }
 }

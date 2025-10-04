@@ -6,7 +6,6 @@ use std::mem;
 use swc_ecma_ast::FnDecl;
 use yavashark_env::optimizer::FunctionCode;
 use yavashark_env::scope::Scope;
-use yavashark_env::value::AsAny;
 use yavashark_env::{optimizer::OptimFunction, Realm, Res, Value};
 
 impl Interpreter {
@@ -63,7 +62,7 @@ impl Interpreter {
     pub fn decl_fn(realm: &mut Realm, stmt: &FnDecl, scope: &mut Scope) -> Res {
         let (name, function) = Self::decl_fn_ret(realm, stmt, scope)?;
 
-        scope.declare_var(name, function);
+        scope.declare_var(name, function, realm);
 
         Ok(())
     }
