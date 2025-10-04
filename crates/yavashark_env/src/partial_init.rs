@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::cell::UnsafeCell;
 use crate::{Error, Realm, Res};
 
@@ -27,13 +28,13 @@ impl<T, I: Initializer<T>> Partial<T, I> {
                 let v = I::initialize(realm)?;
                 *self.value.get() = Some(v);
             }
-            
+
             (*self.value.get()).as_ref()
                 .ok_or_else(|| Error::new("Failed to initialize Partial value"))
         }
     }
-    
-    pub fn get_option(&self) -> Option<&T> {
+
+    pub fn get_opt(&self) -> Option<&T> {
         unsafe {
             (*self.value.get()).as_ref()
         }
@@ -49,7 +50,7 @@ impl<T, I: Initializer<T>> Partial<T, I> {
             }
         }
     }
-    
+
     pub fn is_initialized(&self) -> bool {
         unsafe {
             (*self.value.get()).is_some()

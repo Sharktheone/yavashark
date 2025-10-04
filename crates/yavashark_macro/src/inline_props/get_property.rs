@@ -7,7 +7,7 @@ pub fn generate_get_property(
 ) -> proc_macro2::TokenStream {
 
     let internal_property_key = &config.internal_property_key;
-    let value = &config.value;
+    let realm = &config.realm;
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
@@ -93,7 +93,7 @@ pub fn generate_get_property(
 
     quote::quote! {
         #[inline(always)]
-        fn get_property(&self, key: &#internal_property_key) -> #res<::core::option::Option<#env::inline_props::Property>> {
+        fn get_property(&self, key: &#internal_property_key, realm: &mut #realm) -> #res<::core::option::Option<#env::inline_props::Property>> {
             match key {
                 #str_check
                 #symbol_check

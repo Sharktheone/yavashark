@@ -18,11 +18,9 @@ pub enum Property {
 
 pub trait PropertiesHook {
     fn set_property(&self, key: &InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<UpdatePropertyResult>;
-    fn get_property(&self, key: &InternalPropertyKey) -> Res<Option<Property>>;
+    fn get_property(&self, key: &InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>>;
 
-    fn contains_property(&self, key: &InternalPropertyKey) -> Res<bool> {
-        Ok(self.get_property(key)?.is_some())
-    }
+    fn contains_property(&self, key: &InternalPropertyKey) -> Res<bool>;
 
     fn properties(&self) -> Res<impl Iterator<Item = (PropertyKey, Property)>>;
     fn keys(&self) -> Res<impl Iterator<Item = PropertyKey>>;
