@@ -45,9 +45,16 @@ impl Realm {
 
         if !self.env.modules.contains_key(&path) {
             let fut = async move {
+                #[cfg(not(target_arch = "wasm32"))]
                 let source = tokio::fs::read_to_string(&path)
                     .await
                     .map_err(|e| Error::new_error(e.to_string()))?;
+                #[cfg(target_arch = "wasm32")]
+                let source = {
+                    // load in sync with stdlib
+                    std::fs::read_to_string(&path)
+                        .map_err(|e| Error::new_error(e.to_string()))?
+                };
 
                 Ok(ModuleFinalizer { source, path, cb: Box::new(cb) })
             };
