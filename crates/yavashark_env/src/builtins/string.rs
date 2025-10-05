@@ -2,10 +2,8 @@ use crate::array::Array;
 use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Constructor, CustomName, Func, MutObj, Obj};
-use crate::{
-    Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
-};
+use crate::value::{Constructor, CustomName, Func, MutObj, Obj, Property};
+use crate::{Error, MutObject, Object, ObjectHandle, ObjectProperty, PrimitiveValue, Realm, Res, Value, ValueResult};
 use std::cell::{RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
@@ -68,67 +66,57 @@ impl crate::value::ObjectImpl for StringObj {
         self.inner.borrow_mut()
     }
 
-    // fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-    //     if let Value::Number(n) = name {
-    //         let index = *n as isize;
-    //
-    //         let inner = self.inner.borrow();
-    //
-    //         let chr =
-    //             Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
-    //
-    //         return Ok(Some(chr.into()));
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name.copy());
-    //
-    //     if let InternalPropertyKey::Index(index) = key {
-    //         let inner = self.inner.borrow();
-    //         let chr = Self::get_single_str(&inner.string, index as isize)
-    //             .map_or(Value::Undefined, Into::into);
-    //
-    //         return Ok(Some(chr.into()));
-    //     }
-    //
-    //     self.get_wrapped_object().resolve_property(name)
-    // }
-    //
-    // fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-    //     if let Value::Number(n) = name {
-    //         let index = *n as isize;
-    //
-    //         let inner = self.inner.borrow();
-    //
-    //         let chr =
-    //             Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
-    //
-    //         return Ok(Some(chr.into()));
-    //     }
-    //
-    //     self.get_wrapped_object().get_property(name)
-    // }
-    //
-    // fn name(&self) -> String {
-    //     "String".to_string()
-    // }
-    //
-    // fn primitive(&self) -> Option<crate::value::Value> {
-    //     Some(self.inner.borrow().string.clone().into())
-    // }
-    //
-    // fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
-    //     let inner = self.inner.borrow();
-    //
-    //     if index >= inner.string.len() {
-    //         return Ok((false, None));
-    //     }
-    //
-    //     let c = inner.string.chars().nth(index).unwrap_or_default();
-    //
-    //     let value = c.to_string().into();
-    //
-    //     Ok((true, Some(value)))
-    // }
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(n) = name {
+            let index = n as isize;
+
+            let inner = self.inner.borrow();
+
+            let chr =
+                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+
+            return Ok(Some(chr.into()));
+        }
+
+        self.get_wrapped_object().resolve_property(name, realm)
+    }
+
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(n) = name {
+            let index = n as isize;
+
+            let inner = self.inner.borrow();
+
+            let chr =
+                Self::get_single_str(&inner.string, index).map_or(Value::Undefined, Into::into);
+
+            return Ok(Some(chr.into()));
+        }
+
+        self.get_wrapped_object().get_own_property(name, realm)
+    }
+
+    fn name(&self) -> String {
+        "String".to_string()
+    }
+
+    fn primitive(&self, _: &mut Realm) -> Res<Option<PrimitiveValue>> {
+        Ok(Some(self.inner.borrow().string.clone().into()))
+    }
+
+    fn get_array_or_done(&self, index: usize, _: &mut Realm) -> Result<(bool, Option<Value>), Error> {
+        let inner = self.inner.borrow();
+
+        if index >= inner.string.len() {
+            return Ok((false, None));
+        }
+
+        let c = inner.string.chars().nth(index).unwrap_or_default();
+
+        let value = c.to_string().into();
+
+        Ok((true, Some(value)))
+    }
 }
 
 #[object(constructor, function, to_string, name)]
