@@ -1,12 +1,13 @@
 use crate::realm::Realm;
-use crate::value::{MutObj, ObjectImpl};
-use crate::{MutObject, ObjectHandle, ObjectProperty, Value, ValueResult, Variable};
+use crate::value::{MutObj, Obj, ObjectImpl};
+use crate::{Error, MutObject, Object, ObjectHandle, ObjectOrNull, ObjectProperty, Res, Value, ValueResult, Variable};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
 use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
+use yavashark_macro::custom_props;
 
 mod bound;
 mod class;
@@ -46,28 +47,28 @@ impl ObjectImpl for NativeFunction {
         self.inner.borrow_mut()
     }
 
-    // fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
-    //     (self.f)(args, this, realm)
-    // }
-    //
-    // fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-    //     if !self.constructor {
-    //         return Err(Error::ty_error(format!(
-    //             "{} is not a constructor",
-    //             self.name
-    //         )));
-    //     }
-    //
-    //     let proto = Obj::resolve_property(self, &Value::from("prototype".to_string()))?
-    //         .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.value);
-    //
-    //     let proto: ObjectOrNull = proto.try_into()?;
-    //
-    //     let obj = Object::with_proto(proto).into();
-    //
-    //     (self.f)(args, obj, realm)
-    // }
-    //
+    fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+        (self.f)(args, this, realm)
+    }
+
+    fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+        if !self.constructor {
+            return Err(Error::ty_error(format!(
+                "{} is not a constructor",
+                self.name
+            )));
+        }
+
+        let proto = Obj::resolve_property(self, "prototype".into(), realm)?
+            .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.assert_value());
+
+        let proto: ObjectOrNull = proto.value.try_into()?;
+
+        let obj = Object::with_proto(proto).into();
+
+        (self.f)(args, obj, realm)?.to_object()
+    }
+
     // fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error> {
     //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
     // }
@@ -75,14 +76,18 @@ impl ObjectImpl for NativeFunction {
     // fn to_string_internal(&self) -> Result<YSString, crate::error::Error> {
     //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
     // }
-    //
-    // fn is_function(&self) -> bool {
-    //     true
-    // }
-    //
-    // fn name(&self) -> String {
-    //     "Function".to_string()
-    // }
+
+    fn is_callable(&self) -> bool {
+        true
+    }
+
+    fn is_constructable(&self) -> bool {
+        self.constructor
+    }
+
+    fn name(&self) -> String {
+        "Function".to_string()
+    }
 }
 
 impl NativeFunction {
