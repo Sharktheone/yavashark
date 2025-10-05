@@ -210,6 +210,10 @@ pub trait ObjectImpl: Debug + 'static {
         self.get_wrapped_object().is_constructable()
     }
 
+    fn name(&self) -> String {
+        String::new()
+    }
+
     fn class_name(&self) -> &'static str {
         std::any::type_name::<Self>()
     }
