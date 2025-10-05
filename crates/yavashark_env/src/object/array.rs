@@ -3,9 +3,7 @@ use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{
-    BoxedObj, Constructor, CustomName, Func, MutObj, Obj, ObjectImpl, ObjectOrNull,
-};
+use crate::value::{BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use crate::{MutObject, ObjectProperty};
 use std::cell::{Cell, RefCell};
@@ -36,68 +34,68 @@ impl ObjectImpl for Array {
         self.inner.borrow_mut()
     }
 
-    // fn define_property(&self, name: Value, value: Value) -> Res {
-    //     if matches!(&name, Value::String(s) if s == "length") {
-    //         let length = value.as_number() as usize;
-    //
-    //         self.set_len(length)?;
-    //
-    //         return Ok(());
-    //     }
-    //
-    //     self.get_wrapped_object().define_property(name, value)?;
-    //
-    //     let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
-    //     self.length.set(len);
-    //
-    //     Ok(())
-    // }
-    //
-    // fn define_variable(&self, name: Value, value: Variable) -> Res {
-    //     if matches!(&name, Value::String(s) if s == "length") {
-    //         let length = value.value.as_number() as usize;
-    //
-    //         self.set_len(length)?;
-    //
-    //         return Ok(());
-    //     }
-    //
-    //     self.get_wrapped_object().define_variable(name, value)?;
-    //
-    //     let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
-    //     self.length.set(len);
-    //
-    //     Ok(())
-    // }
-    //
-    // fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-    //     if matches!(&name, Value::String(s) if s == "length") {
-    //         return Ok(Some(Variable::write(self.length.get().into()).into()));
-    //     }
-    //
-    //     self.get_wrapped_object().resolve_property(name)
-    // }
-    //
-    // fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-    //     if matches!(&name, Value::String(s) if s == "length") {
-    //         return Ok(Some(self.length.get().into()));
-    //     }
-    //
-    //     self.get_wrapped_object().get_property(name)
-    // }
-    //
-    // fn contains_key(&self, name: &Value) -> Res<bool> {
-    //     if matches!(&name, Value::String(s) if s == "length") {
-    //         return Ok(true);
-    //     }
-    //
-    //     self.get_wrapped_object().contains_key(name)
-    // }
-    //
-    // fn name(&self) -> String {
-    //     "Array".to_string()
-    // }
-    //
+    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            let length = value.as_number() as usize;
+
+            self.set_len(length)?;
+
+            return Ok(DefinePropertyResult::Handled);
+        }
+
+        self.get_wrapped_object().define_property(name, value, realm)?;
+
+        let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        self.length.set(len);
+
+        Ok(DefinePropertyResult::Handled)
+    }
+
+    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            let length = value.value.as_number() as usize;
+
+            self.set_len(length)?;
+
+            return Ok(DefinePropertyResult::Handled);
+        }
+
+        self.get_wrapped_object().define_property_attributes(name, value, realm)?;
+
+        let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
+        self.length.set(len);
+
+        Ok(DefinePropertyResult::Handled)
+    }
+
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(Some(Property::Value(Variable::write(self.length.get().into()))));
+        }
+
+        self.get_wrapped_object().resolve_property(name, realm)
+    }
+
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(Some(Property::Value(self.length.get().into())));
+        }
+
+        self.get_wrapped_object().get_own_property(name, realm)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
+            return Ok(true);
+        }
+
+        self.get_wrapped_object().contains_key(name, realm)
+    }
+
+    fn name(&self) -> String {
+        "Array".to_string()
+    }
+
     // fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
     //     let mut buf = String::new();
     //
