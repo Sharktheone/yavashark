@@ -10,7 +10,6 @@ use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Value, ValueResult};
 use yavashark_env::value::property_key::IntoPropertyKey;
-use crate::instruction::get_private_member;
 
 pub trait ConstIntoValue {
     fn into_value(self, vm: &mut impl VM) -> ValueResult;

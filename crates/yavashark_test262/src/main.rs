@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use yavashark_env::print::PrettyPrint;
 #[cfg(feature = "parser_test")]
 use yavashark_test262::parsers::test_file;
 #[cfg(not(feature = "parser_test"))]
