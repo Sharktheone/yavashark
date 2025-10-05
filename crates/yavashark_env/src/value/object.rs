@@ -38,6 +38,21 @@ impl From<ObjectProperty> for Property {
     }
 }
 
+impl From<Variable> for Property {
+    fn from(var: Variable) -> Self {
+        Self::Value(var)
+    }
+}
+
+impl From<Value> for Property {
+    fn from(value: Value) -> Self {
+        Self::Value(Variable {
+            value,
+            properties: Attributes::default(),
+        })
+    }
+}
+
 impl Property {
     pub fn attributes(&self) -> Attributes {
         match self {
