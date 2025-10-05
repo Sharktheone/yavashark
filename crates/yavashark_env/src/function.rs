@@ -51,6 +51,18 @@ impl ObjectImpl for NativeFunction {
         (self.f)(args, this, realm)
     }
 
+    fn is_callable(&self) -> bool {
+        true
+    }
+
+    // fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error> {
+    //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Result<YSString, crate::error::Error> {
+    //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
+    // }
+
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         if !self.constructor {
             return Err(Error::ty_error(format!(
@@ -67,18 +79,6 @@ impl ObjectImpl for NativeFunction {
         let obj = Object::with_proto(proto).into();
 
         (self.f)(args, obj, realm)?.to_object()
-    }
-
-    // fn to_string(&self, _: &mut Realm) -> Result<YSString, crate::error::Error> {
-    //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
-    // }
-    //
-    // fn to_string_internal(&self) -> Result<YSString, crate::error::Error> {
-    //     Ok(format!("function {}() {{ [native code] }}", self.name).into())
-    // }
-
-    fn is_callable(&self) -> bool {
-        true
     }
 
     fn is_constructable(&self) -> bool {
