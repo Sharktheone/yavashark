@@ -95,8 +95,7 @@ pub trait ObjectImpl: Debug + 'static {
         value: Value,
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
-        self.get_wrapped_object()
-            .define_property_pre_hash(name, value, realm)
+        self.define_property(name.0, value, realm)
     }
     fn define_property_attributes_pre_hash(
         &self,
@@ -104,8 +103,7 @@ pub trait ObjectImpl: Debug + 'static {
         value: Variable,
         realm: &mut Realm,
     ) -> Res<DefinePropertyResult> {
-        self.get_wrapped_object()
-            .define_property_attributes_pre_hash(name, value, realm)
+        self.define_property_attributes(name.0, value, realm)
     }
 
     fn resolve_property_pre_hash(
@@ -113,16 +111,14 @@ pub trait ObjectImpl: Debug + 'static {
         name: PreHashedPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        self.get_wrapped_object()
-            .resolve_property_pre_hash(name, realm)
+        self.resolve_property(name.0, realm)
     }
     fn get_own_property_pre_hash(
         &self,
         name: PreHashedPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        self.get_wrapped_object()
-            .get_own_property_pre_hash(name, realm)
+        self.get_own_property(name.0, realm)
     }
 
     fn define_getter_pre_hash(
@@ -131,8 +127,7 @@ pub trait ObjectImpl: Debug + 'static {
         callback: ObjectHandle,
         realm: &mut Realm,
     ) -> Res {
-        self.get_wrapped_object()
-            .define_getter_pre_hash(name, callback, realm)
+        self.define_getter(name.0, callback, realm)
     }
     fn define_setter_pre_hash(
         &self,
@@ -140,8 +135,7 @@ pub trait ObjectImpl: Debug + 'static {
         callback: ObjectHandle,
         realm: &mut Realm,
     ) -> Res {
-        self.get_wrapped_object()
-            .define_setter_pre_hash(name, callback, realm)
+        self.define_setter(name.0, callback, realm)
     }
 
     fn delete_property_pre_hash(
@@ -149,8 +143,7 @@ pub trait ObjectImpl: Debug + 'static {
         name: PreHashedPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        self.get_wrapped_object()
-            .delete_property_pre_hash(name, realm)
+        self.delete_property(name.0, realm)
     }
 
     fn contains_own_key_pre_hash(
@@ -158,13 +151,11 @@ pub trait ObjectImpl: Debug + 'static {
         name: PreHashedPropertyKey,
         realm: &mut Realm,
     ) -> Res<bool> {
-        self.get_wrapped_object()
-            .contains_own_key_pre_hash(name, realm)
+        self.contains_own_key(name.0, realm)
     }
 
     fn contains_key_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<bool> {
-        self.get_wrapped_object()
-            .contains_key_pre_hash(name, realm)
+        self.contains_key(name.0, realm)
     }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
