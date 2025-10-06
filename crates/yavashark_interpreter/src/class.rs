@@ -134,7 +134,7 @@ pub fn create_class(
         }
     }
 
-    class.set_proto(proto.into_value().into());
+    class.set_proto(proto.into_object());
 
     // scope.declare_var(name, this.clone());
 
