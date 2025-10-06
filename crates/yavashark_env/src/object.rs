@@ -96,83 +96,84 @@ impl Object {
 #[allow(unused)]
 impl Obj for Object {
     fn define_property(&self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        todo!()
+        self.inner_mut()?.define_property(name, value, realm)
+
     }
 
     fn define_property_attributes(&self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        todo!()
+        self.inner_mut()?.define_property_attributes(name, value, realm)
     }
 
     fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
+        self.inner()?.resolve_property(name, realm)
     }
 
     fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
+        self.inner()?.get_own_property(name, realm)
     }
 
     fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
-        todo!()
+        self.inner_mut()?.define_getter(name, callback, realm)
     }
 
     fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
-        todo!()
+        self.inner_mut()?.define_setter(name, callback, realm)
     }
 
     fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
+        self.inner_mut()?.delete_property(name, realm)
     }
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        todo!()
+        self.inner_mut()?.contains_own_key(name, realm)
     }
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        todo!()
+        self.inner_mut()?.contains_key(name, realm)
     }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        todo!()
+        self.inner()?.properties(realm)
     }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        todo!()
+        self.inner()?.keys(realm)
     }
 
     fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        todo!()
+        self.inner()?.values(realm)
     }
 
     fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        todo!()
+        self.inner()?.enumerable_properties(realm)
     }
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        todo!()
+        self.inner()?.enumerable_keys(realm)
     }
 
     fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        todo!()
+        self.inner()?.enumerable_values(realm)
     }
 
     fn clear_properties(&self, realm: &mut Realm) -> Res {
-        todo!()
+        self.inner_mut()?.clear_properties(realm)
     }
 
     fn get_array_or_done(&self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
-        todo!()
+        self.inner_mut()?.get_array_or_done(idx, realm)
     }
 
     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
-        todo!()
+        self.inner()?.prototype(realm)
     }
 
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
-        todo!()
+        self.inner_mut()?.set_prototype(prototype.into(), realm)
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-        todo!()
+        self.inner.borrow().gc_refs()
     }
 
 
