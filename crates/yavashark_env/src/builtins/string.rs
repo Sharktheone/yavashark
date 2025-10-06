@@ -96,14 +96,6 @@ impl crate::value::ObjectImpl for StringObj {
         self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn name(&self) -> String {
-        "String".to_string()
-    }
-
-    fn primitive(&self, _: &mut Realm) -> Res<Option<PrimitiveValue>> {
-        Ok(Some(self.inner.borrow().string.clone().into()))
-    }
-
     fn get_array_or_done(&self, index: usize, _: &mut Realm) -> Result<(bool, Option<Value>), Error> {
         let inner = self.inner.borrow();
 
@@ -116,6 +108,14 @@ impl crate::value::ObjectImpl for StringObj {
         let value = c.to_string().into();
 
         Ok((true, Some(value)))
+    }
+
+    fn primitive(&self, _: &mut Realm) -> Res<Option<PrimitiveValue>> {
+        Ok(Some(self.inner.borrow().string.clone().into()))
+    }
+
+    fn name(&self) -> String {
+        "String".to_string()
     }
 }
 
