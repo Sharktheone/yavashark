@@ -15,10 +15,8 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::unit8array::Uint8Array;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
-use crate::value::{MutObj, Obj};
-use crate::{
-    Error, GCd, MutObject, ObjectHandle, Realm, Res, Value, ValueResult,
-};
+use crate::value::{DefinePropertyResult, MutObj, Obj, Property};
+use crate::{Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult, Variable};
 use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use conv::to_value;
 use half::f16;
@@ -110,215 +108,200 @@ impl crate::value::ObjectImpl for TypedArray {
         self.inner.borrow_mut()
     }
 
-    // fn define_property(&self, name: Value, value: Value) -> Res {
-    //     // if self.is_detached() {
-    //     //     return self.get_wrapped_object().define_property(name, value)
-    //     // }
-    //
-    //     let key = InternalPropertyKey::from(name);
-    //
-    //     if let InternalPropertyKey::Index(idx) = key {
-    //         typed_array_run_mut!({
-    //             let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
-    //                 .ok_or(Error::ty("Failed to convert to value"))?;
-    //
-    //             if let Some(slot) = slice.get_mut(idx) {
-    //                 slot.0 = value;
-    //             } else {
-    //                 return Err(Error::range("Index out of bounds"));
-    //             }
-    //         });
-    //
-    //         Ok(())
-    //     } else {
-    //         self.get_wrapped_object().define_property(key.into(), value)
-    //     }
-    // }
-    //
-    // fn define_variable(&self, name: Value, value: Variable) -> Res {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().define_variable(name, value);
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name);
-    //
-    //     if let InternalPropertyKey::Index(idx) = key {
-    //         typed_array_run_mut!({
-    //             let value: TY = FromPrimitive::from_f64(value.value.to_number_or_null())
-    //                 .ok_or(Error::ty("Failed to convert to value"))?;
-    //
-    //             if let Some(slot) = slice.get_mut(idx) {
-    //                 slot.0 = value;
-    //             } else {
-    //                 return Err(Error::range("Index out of bounds"));
-    //             }
-    //         });
-    //
-    //         Ok(())
-    //     } else {
-    //         self.get_wrapped_object().define_variable(key.into(), value)
-    //     }
-    // }
-    //
-    // fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-    //     let key = InternalPropertyKey::from(name.copy());
-    //
-    //     if let InternalPropertyKey::Index(idx) = key {
-    //         if self.is_detached() {
-    //             return self.get_wrapped_object().get_property(name);
-    //         }
-    //
-    //         typed_array_run!({
-    //             return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
-    //         });
-    //     }
-    //
-    //     self.get_wrapped_object().resolve_property(&key.into())
-    // }
-    //
-    // fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().get_property(name);
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name.copy());
-    //
-    //     if let InternalPropertyKey::Index(idx) = key {
-    //         typed_array_run!({
-    //             return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
-    //         });
-    //     }
-    //
-    //     self.get_wrapped_object().get_property(&key.into())
-    // }
-    //
-    // fn define_getter(&self, name: Value, value: Value) -> Res {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().define_getter(name, value);
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name);
-    //     if matches!(key, InternalPropertyKey::Index(_)) {
-    //         return Ok(());
-    //     }
-    //
-    //     self.get_wrapped_object().define_getter(key.into(), value)
-    // }
-    //
-    // fn define_setter(&self, name: Value, value: Value) -> Res {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().define_setter(name, value);
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name);
-    //     if matches!(key, InternalPropertyKey::Index(_)) {
-    //         return Ok(());
-    //     }
-    //
-    //     self.get_wrapped_object().define_setter(key.into(), value)
-    // }
-    //
-    // fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().delete_property(name);
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name.copy());
-    //     if matches!(key, InternalPropertyKey::Index(_)) {
-    //         return Ok(None);
-    //     }
-    //
-    //     self.get_wrapped_object().delete_property(&key.into())
-    // }
-    //
-    // fn contains_key(&self, name: &Value) -> Res<bool> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().contains_key(name);
-    //     }
-    //
-    //     let key = InternalPropertyKey::from(name.copy());
-    //
-    //     if let InternalPropertyKey::Index(idx) = key {
-    //         typed_array_run!({
-    //             return Ok(slice.get(idx).is_some());
-    //         });
-    //     }
-    //
-    //     self.get_wrapped_object().contains_key(&key.into())
-    // }
-    //
-    // fn has_key(&self, name: &Value) -> Res<bool> {
-    //     let key = InternalPropertyKey::from(name.copy());
-    //
-    //     if let InternalPropertyKey::Index(idx) = key {
-    //         if self.is_detached() {
-    //             return self.get_wrapped_object().contains_key(name);
-    //         }
-    //
-    //         typed_array_run!({
-    //             return Ok(slice.get(idx).is_some());
-    //         });
-    //     }
-    //
-    //     self.get_wrapped_object().has_key(&key.into())
-    // }
-    //
-    // fn properties(&self) -> Res<Vec<(Value, Value)>> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().properties();
-    //     }
-    //
-    //     let mut props = typed_array_run!({
-    //         slice
-    //             .iter()
-    //             .enumerate()
-    //             .map(|(i, x)| (i.into(), to_value(x.0)))
-    //             .collect::<Vec<_>>()
-    //     });
-    //
-    //     props.append(&mut self.get_wrapped_object().properties()?);
-    //
-    //     Ok(props)
-    // }
-    //
-    // fn keys(&self) -> Res<Vec<Value>> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().keys();
-    //     }
-    //
-    //     let mut keys = typed_array_run!({
-    //         slice
-    //             .iter()
-    //             .enumerate()
-    //             .map(|(i, _)| i.into())
-    //             .collect::<Vec<_>>()
-    //     });
-    //
-    //     keys.append(&mut self.get_wrapped_object().keys()?);
-    //
-    //     Ok(keys)
-    // }
-    //
-    // fn values(&self) -> Res<Vec<Value>> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().values();
-    //     }
-    //
-    //     let mut values =
-    //         typed_array_run!({ slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>() });
-    //
-    //     values.append(&mut self.get_wrapped_object().values()?);
-    //
-    //     Ok(values)
-    // }
-    //
-    // fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
-    //     if self.is_detached() {
-    //         return self.get_wrapped_object().get_array_or_done(index);
-    //     }
-    //
-    //     typed_array_run!({ Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))) })
-    // }
+    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        // if self.is_detached() {
+        //     return self.get_wrapped_object().define_property(name, value, realm)
+        // }
+
+        if let InternalPropertyKey::Index(idx) = name {
+            typed_array_run_mut!({
+                let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
+                    .ok_or(Error::ty("Failed to convert to value"))?;
+
+                if let Some(slot) = slice.get_mut(idx) {
+                    slot.0 = value;
+                } else {
+                    return Err(Error::range("Index out of bounds"));
+                }
+            });
+
+            Ok(DefinePropertyResult::Handled)
+        } else {
+            self.get_wrapped_object().define_property(name, value, realm)
+        }
+    }
+
+    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        // if self.is_detached() {
+        //     return self.get_wrapped_object().define_property_attributes(name, value, realm);
+        // }
+
+        if let InternalPropertyKey::Index(idx) = name {
+            typed_array_run_mut!({
+                let value: TY = FromPrimitive::from_f64(value.value.to_number_or_null())
+                    .ok_or(Error::ty("Failed to convert to value"))?;
+
+                if let Some(slot) = slice.get_mut(idx) {
+                    slot.0 = value;
+                } else {
+                    return Err(Error::range("Index out of bounds"));
+                }
+            });
+
+            Ok(DefinePropertyResult::Handled)
+        } else {
+            self.get_wrapped_object().define_property_attributes(name, value, realm)
+        }
+    }
+
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if self.is_detached() {
+                return self.get_wrapped_object().resolve_property(name, realm);
+            }
+
+            typed_array_run!({
+                return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
+            });
+        }
+
+        self.get_wrapped_object().resolve_property(name, realm)
+    }
+
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().get_own_property(name, realm);
+        }
+
+        if let InternalPropertyKey::Index(idx) = name {
+            typed_array_run!({
+                return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
+            });
+        }
+
+        self.get_wrapped_object().get_own_property(name, realm)
+    }
+
+    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+        if self.is_detached() {
+            return self.get_wrapped_object().define_getter(name, value, realm);
+        }
+
+        if matches!(name, InternalPropertyKey::Index(_)) {
+            return Ok(());
+        }
+
+        self.get_wrapped_object().define_getter(name, value, realm)
+    }
+
+    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+        if self.is_detached() {
+            return self.get_wrapped_object().define_setter(name, value, realm);
+        }
+
+        if matches!(name, InternalPropertyKey::Index(_)) {
+            return Ok(());
+        }
+
+        self.get_wrapped_object().define_setter(name, value, realm)
+    }
+
+    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().delete_property(name, realm);
+        }
+
+        if matches!(name, InternalPropertyKey::Index(_)) {
+            return Ok(None);
+        }
+
+        self.get_wrapped_object().delete_property(name, realm)
+    }
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if self.is_detached() {
+            return self.get_wrapped_object().contains_own_key(name, realm);
+        }
+
+        if let InternalPropertyKey::Index(idx) = name {
+            typed_array_run!({
+                return Ok(slice.get(idx).is_some());
+            });
+        }
+
+        self.get_wrapped_object().contains_own_key(name, realm)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if self.is_detached() {
+                return self.get_wrapped_object().contains_key(name, realm);
+            }
+
+            typed_array_run!({
+                return Ok(slice.get(idx).is_some());
+            });
+        }
+
+        self.get_wrapped_object().contains_key(name, realm)
+    }
+
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().properties(realm);
+        }
+
+        let mut props = typed_array_run!({
+            slice
+                .iter()
+                .enumerate()
+                .map(|(i, x)| (i.into(), to_value(x.0)))
+                .collect::<Vec<_>>()
+        });
+
+        props.append(&mut self.get_wrapped_object().properties(realm)?);
+
+        Ok(props)
+    }
+
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().keys(realm);
+        }
+
+        let mut keys = typed_array_run!({
+            slice
+                .iter()
+                .enumerate()
+                .map(|(i, _)| i.into())
+                .collect::<Vec<_>>()
+        });
+
+        keys.append(&mut self.get_wrapped_object().keys(realm)?);
+
+        Ok(keys)
+    }
+
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+        if self.is_detached() {
+            return self.get_wrapped_object().values(realm);
+        }
+
+        let mut values =
+            typed_array_run!({ slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>() });
+
+        values.append(&mut self.get_wrapped_object().values(realm)?);
+
+        Ok(values)
+    }
+
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        if self.is_detached() {
+            return self.get_wrapped_object().get_array_or_done(index, realm);
+        }
+
+        typed_array_run!({ Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))) })
+    }
 }
 
 impl TypedArray {
