@@ -110,6 +110,12 @@ impl From<Value> for PropertyKey {
     }
 }
 
+impl From<usize> for PropertyKey {
+    fn from(index: usize) -> Self {
+        Self::String(index.to_string().into())
+    }
+}
+
 impl From<PropertyKey> for Value {
     fn from(key: PropertyKey) -> Self {
         match key {
