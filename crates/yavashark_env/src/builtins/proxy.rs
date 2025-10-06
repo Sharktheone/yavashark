@@ -249,7 +249,7 @@ impl Obj for Proxy {
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-        self.inner.gc_refs()
+        self.inner.gc_refs() //TODO: this is not correct
     }
 }
 
