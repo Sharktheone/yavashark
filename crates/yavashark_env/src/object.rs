@@ -529,21 +529,19 @@ impl MutObj for MutObject {
     }
 
     fn define_property_attributes(&mut self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        let key = InternalPropertyKey::from(name);
-
-        if let InternalPropertyKey::Index(n) = key {
+        if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, value);
             return Ok(DefinePropertyResult::Handled);
         }
 
-        if let InternalPropertyKey::String(s) = &key {
+        if let InternalPropertyKey::String(s) = &name {
             if s == "__proto__" {
                 self.prototype = ObjectOrNull::try_from(value.value)?;
                 return Ok(DefinePropertyResult::Handled);
             }
         }
 
-        match self.properties.entry(key.into()) {
+        match self.properties.entry(name.into()) {
             Entry::Occupied(entry) => {
                 let Some(e) = self.values.get_mut(*entry.get()) else {
                     return Err(Error::new("Failed to get value for property"));
@@ -606,14 +604,12 @@ impl MutObj for MutObject {
     }
 
     fn define_getter(&mut self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
-        let key = InternalPropertyKey::from(name);
-
-        if let InternalPropertyKey::Index(n) = key {
+        if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, ObjectProperty::getter(value.into()));
             return Ok(());
         }
 
-        let key = key.into();
+        let key = name.into();
 
         let val = self
             .properties
@@ -685,8 +681,6 @@ impl MutObj for MutObject {
     }
 
     fn contains_own_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        let name = InternalPropertyKey::from(name.clone());
-
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(true);
         }
@@ -698,9 +692,7 @@ impl MutObj for MutObject {
         Ok(self.properties.contains_key::<PropertyKey>(&name.into()))
     }
 
-    fn contains_key(&mut self, name_val: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
-        let name = InternalPropertyKey::from(name_val.clone());
-
+    fn contains_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(true);
         }
@@ -709,12 +701,12 @@ impl MutObj for MutObject {
             return Ok(self.contains_array_key(n));
         }
 
-        if self.properties.contains_key::<PropertyKey>(&name.into()) {
+        if self.properties.contains_key::<PropertyKey>(&name.clone().into()) {
             return Ok(true);
         }
 
         if let ObjectOrNull::Object(obj) = &self.prototype {
-            return obj.contains_key(name_val, realm);
+            return obj.contains_key(name, realm);
         }
 
         Ok(false)
@@ -739,7 +731,7 @@ impl MutObj for MutObject {
             .filter_map(|(k, v)| {
                 let v = self.values.get(*v)?;
 
-                Some((k.clone().into(), v.value.copy()))
+                Some((k.clone(), v.value.copy()))
             })
             .collect())
     }
@@ -839,7 +831,7 @@ impl MutObj for MutObject {
     // }
 
     fn prototype(&self, realm: &mut Realm) -> Result<ObjectOrNull, Error> {
-        Ok(self.prototype.clone().into())
+        Ok(self.prototype.clone())
     }
 
     fn set_prototype(&mut self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
