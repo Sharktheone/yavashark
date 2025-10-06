@@ -3,7 +3,6 @@
 use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property};
 use std::cell::RefCell;
 use yavashark_garbage::GcRef;
-use yavashark_string::YSString;
 
 use crate::array::Array;
 use crate::function::bound::BoundFunction;

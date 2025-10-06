@@ -1,16 +1,16 @@
 pub use super::object_impl::*;
-use super::{Attributes, IntoValue, IntoValueRef, ObjectOrNull, PrimitiveValue, Value, Variable};
+use super::{Attributes, IntoValue, ObjectOrNull, PrimitiveValue, Value, Variable};
 use crate::error::Error;
 use crate::{GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm, Res, Symbol, ValueResult};
 use indexmap::Equivalent;
-use std::any::{Any, TypeId};
+use std::any::TypeId;
 use std::fmt::{Debug, Display, Formatter};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 #[cfg(feature = "dbg_object_gc")]
 use std::sync::atomic::AtomicIsize;
-use yavashark_garbage::{Collectable, Gc, GcRef, OwningGcGuard, Weak};
+use yavashark_garbage::{Collectable, Gc, GcRef, Weak};
 use yavashark_string::{ToYSString, YSString};
 use crate::value::property_key::IntoPropertyKey;
 

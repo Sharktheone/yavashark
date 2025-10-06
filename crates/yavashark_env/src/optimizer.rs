@@ -4,7 +4,7 @@ use crate::value::{
     BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull,
 };
 use crate::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, RuntimeResult,
+    ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, RuntimeResult,
     Value, ValueResult, Variable,
 };
 use std::any::Any;

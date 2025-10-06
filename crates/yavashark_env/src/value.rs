@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::{GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res};
+use crate::{GCd, ObjectHandle, PropertyKey, Realm, Res};
 pub use constructor::*;
 pub use conversion::*;
 pub use function::*;
@@ -14,7 +14,7 @@ use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 pub use symbol::*;
 pub use variable::*;
-use yavashark_garbage::{Collectable, GcRef, OwningGcGuard};
+use yavashark_garbage::{Collectable, GcRef};
 use yavashark_string::{ToYSString, YSString};
 use crate::value::property_key::IntoPropertyKey;
 

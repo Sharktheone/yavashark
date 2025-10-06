@@ -5,7 +5,7 @@ use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator}
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
-use crate::{MutObject, ObjectProperty};
+use crate::MutObject;
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};

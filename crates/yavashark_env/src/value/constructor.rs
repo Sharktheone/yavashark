@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::value::{BoxedObj, Obj, ObjectProperty, Value};
+use crate::value::{BoxedObj, Obj, Value};
 use crate::{ObjectHandle, Realm};
 use std::fmt::Debug;
 use yavashark_garbage::GcRef;

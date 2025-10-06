@@ -566,7 +566,7 @@ impl Promise {
         let fut = async move {
             let results = fut.await;
 
-            let mut values = Vec::new();
+            let values = Vec::new();
             for res in results {
                 match res? {
                     PromiseResult::Fulfilled(val) => {

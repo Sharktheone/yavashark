@@ -1,12 +1,10 @@
-use crate::error::Error;
-use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Object, ObjectProperty, Property, Value, Variable};
+use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property, Value, Variable};
 use crate::{InternalPropertyKey, ObjectHandle, ObjectOrNull, PreHashedPropertyKey, PrimitiveValue, PropertyKey, Realm, Res};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
-use yavashark_string::YSString;
 
 pub trait ObjectImpl: Debug + 'static {
     type Inner;

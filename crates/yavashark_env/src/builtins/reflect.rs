@@ -1,7 +1,7 @@
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
-use crate::value::{Obj, Property};
-use crate::{Error, InternalPropertyKey, MutObject, Object, ObjectHandle, ObjectOrNull, PropertyKey, Realm, Res, Value, ValueResult};
+use crate::value::Obj;
+use crate::{Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, ValueResult};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 

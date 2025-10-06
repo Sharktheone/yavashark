@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::cell::{Cell, RefCell, UnsafeCell};
 use crate::{Error, Realm, Res, Value};
 use crate::conversion::FromValueOutput;

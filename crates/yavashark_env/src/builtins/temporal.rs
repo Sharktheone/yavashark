@@ -9,7 +9,6 @@ mod plain_year_month;
 mod utils;
 mod zoned_date_time;
 
-use futures::future::ok;
 pub use crate::builtins::temporal::duration::*;
 pub use crate::builtins::temporal::instant::*;
 pub use crate::builtins::temporal::now::*;

@@ -1,7 +1,7 @@
 use crate::realm::Realm;
-use crate::value::property_key::{InternalPropertyKey, IntoPropertyKey, PropertyKey};
+use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
-use crate::{Error, ObjectHandle, ObjectProperty, Variable};
+use crate::{Error, ObjectHandle, ObjectProperty};
 use crate::{Res, Value};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
@@ -11,7 +11,6 @@ use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::Debug;
 use std::mem;
 use yavashark_garbage::GcRef;
-use yavashark_string::YSString;
 
 pub mod array;
 pub mod constructor;

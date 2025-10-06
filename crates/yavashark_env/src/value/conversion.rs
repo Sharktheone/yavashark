@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::value::{BoxedObj, Object, PrimitiveValue, Symbol, Value, WeakValue};
+use crate::value::{BoxedObj, Object, PrimitiveValue, Symbol, Value};
 use half::f16;
 use num_bigint::BigInt;
 use std::any::type_name;

@@ -7,7 +7,7 @@ use yavashark_macro::object;
 use yavashark_string::YSString;
 
 use crate::realm::Realm;
-use crate::{Error, MutObject, ObjectHandle, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{Error, MutObject, ObjectHandle, Res, Value, ValueResult, Variable};
 
 pub type ConstructorFn = Box<dyn Fn(Vec<Value>, &mut Realm) -> Res<ObjectHandle>>;
 

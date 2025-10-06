@@ -7,7 +7,6 @@ pub use prototype::*;
 use std::cell::{RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
-use yavashark_macro::custom_props;
 
 mod bound;
 mod class;

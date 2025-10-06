@@ -1,12 +1,10 @@
 use crate::realm::Realm;
 use crate::value::{BoxedObj, ConstructorFn, DefinePropertyResult, Obj, Property, Variable};
-use crate::{Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PropertyKey, Res, Value, ValueResult};
+use crate::{Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PropertyKey, Res, Value};
 use rustc_hash::FxHashMap;
-use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
-use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_macro::properties;
 use yavashark_string::YSString;

@@ -7,7 +7,6 @@ use rustyline::{Context, Helper};
 use rustyline_derive::{Completer, Hinter, Validator};
 use std::borrow::Cow;
 use std::collections::HashSet;
-use yavashark_env::Realm;
 use yavashark_env::scope::Scope;
 
 pub struct ScopeCompleter {

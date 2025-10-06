@@ -1,4 +1,4 @@
-use crate::value::{CustomGcRefUntyped, Property};
+use crate::value::CustomGcRefUntyped;
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;

@@ -3,7 +3,7 @@ use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{Constructor, CustomName, Func, MutObj, Obj, Property};
-use crate::{Error, MutObject, Object, ObjectHandle, ObjectProperty, PrimitiveValue, Realm, Res, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult};
 use std::cell::{RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};

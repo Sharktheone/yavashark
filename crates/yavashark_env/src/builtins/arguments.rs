@@ -1,12 +1,10 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
 use crate::value::{DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
-use crate::{InternalPropertyKey, MutObject, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
+use crate::{InternalPropertyKey, MutObject, Realm, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
-use swc_ecma_ast::PropOrSpread::Prop;
 use yavashark_macro::props;
-use yavashark_string::YSString;
 
 #[derive(Debug)]
 pub struct Arguments {
