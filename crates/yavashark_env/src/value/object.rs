@@ -20,6 +20,7 @@ pub enum DefinePropertyResult {
     Setter(ObjectHandle, Value),
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Property {
     Value(Variable),
     Getter(ObjectHandle),
@@ -1073,6 +1074,17 @@ impl ObjectProperty {
         )?;
 
         Ok(())
+    }
+
+    pub fn property(&self) -> Property {
+        if !self.set.is_undefined() || !self.get.is_undefined() {
+            Property::Getter(self.get.clone().to_object().unwrap_or(crate::Object::null()))
+        } else {
+            Property::Value(Variable {
+                value: self.value.clone(),
+                properties: self.attributes,
+            })
+        }
     }
 }
 

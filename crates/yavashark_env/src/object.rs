@@ -1,7 +1,7 @@
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
-use crate::{Error, ObjectHandle, ObjectProperty};
+use crate::{Error, ObjectHandle, ObjectProperty, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
@@ -356,31 +356,31 @@ impl MutObject {
     }
 
     #[must_use]
-    pub fn resolve_array(&self, index: usize) -> Option<ObjectProperty> {
+    pub fn resolve_array(&self, index: usize) -> Option<Property> {
         let (i, found) = self.array_position(index);
 
         if found {
             return self
                 .array
                 .get(i)
-                .and_then(|v| self.values.get(v.1).cloned());
+                .and_then(|v| self.values.get(v.1).map(|p| p.property()));
         }
 
         None
     }
 
     #[must_use]
-    pub fn get_array(&self, index: usize) -> Option<&ObjectProperty> {
+    pub fn get_array(&self, index: usize) -> Option<Property> {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).and_then(|v| self.values.get(v.1));
+            return self.array.get(i).and_then(|v| self.values.get(v.1).map(|p| p.property()));
         }
 
         None
     }
 
-    pub fn delete_array(&mut self, index: usize) -> Option<Value> {
+    pub fn delete_array(&mut self, index: usize) -> Option<Property> {
         let (i, found) = self.array_position(index);
 
         if found
@@ -397,7 +397,7 @@ impl MutObject {
             return self
                 .values
                 .get_mut(idx.1)
-                .map(|v| mem::replace(&mut v.value, Value::Undefined));
+                .map(|v| mem::replace(v, ObjectProperty::new(Value::Undefined)).property());
         }
 
         None
@@ -493,24 +493,22 @@ impl MutObject {
     }
 }
 
-/*
-impl MutObj for MutObject {
-    fn define_property(&mut self, name: Value, value: Value) -> Result<(), Error> {
-        let key = InternalPropertyKey::from(name);
 
-        if let InternalPropertyKey::Index(n) = key {
+impl MutObj for MutObject {
+    fn define_property(&mut self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, value);
-            return Ok(());
+            return Ok(DefinePropertyResult::Handled);
         }
 
-        if let InternalPropertyKey::String(s) = &key {
+        if let InternalPropertyKey::String(s) = &name {
             if s == "__proto__" {
                 self.prototype = ObjectOrNull::try_from(value)?;
-                return Ok(());
+                return Ok(DefinePropertyResult::Handled);
             }
         }
 
-        match self.properties.entry(key.into()) {
+        match self.properties.entry(name.into()) {
             Entry::Occupied(entry) => {
                 let Some(e) = self.values.get_mut(*entry.get()) else {
                     return Err(Error::new("Failed to get value for property"));
@@ -518,7 +516,7 @@ impl MutObj for MutObject {
 
                 if e.attributes.is_writable() {
                     e.value = value;
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
             }
             Entry::Vacant(entry) => {
@@ -527,21 +525,21 @@ impl MutObj for MutObject {
                 entry.insert(idx);
             }
         }
-        Ok(())
+        Ok(DefinePropertyResult::Handled)
     }
 
-    fn define_variable(&mut self, name: Value, value: Variable) -> Result<(), Error> {
+    fn define_property_attributes(&mut self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
         let key = InternalPropertyKey::from(name);
 
         if let InternalPropertyKey::Index(n) = key {
             self.insert_array(n, value);
-            return Ok(());
+            return Ok(DefinePropertyResult::Handled);
         }
 
         if let InternalPropertyKey::String(s) = &key {
             if s == "__proto__" {
                 self.prototype = ObjectOrNull::try_from(value.value)?;
-                return Ok(());
+                return Ok(DefinePropertyResult::Handled);
             }
         }
 
@@ -554,7 +552,7 @@ impl MutObj for MutObject {
                 if e.attributes.is_writable() {
                     *e = value.into();
 
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
             }
             Entry::Vacant(entry) => {
@@ -564,17 +562,16 @@ impl MutObj for MutObject {
             }
         }
 
-        Ok(())
+        Ok(DefinePropertyResult::Handled)
     }
 
-    fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        let key = InternalPropertyKey::from(name.clone());
-
-        if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
-            return Ok(Some(self.prototype.clone().into()));
+    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
+            let val: Value = self.prototype.clone().into();
+            return Ok(Some(val.into()));
         }
 
-        if let InternalPropertyKey::Index(n) = key {
+        if let InternalPropertyKey::Index(n) = name {
             if let Some(value) = self.resolve_array(n) {
                 return Ok(Some(value));
             }
@@ -583,38 +580,36 @@ impl MutObj for MutObject {
 
         Ok(self
             .properties
-            .get::<PropertyKey>(&key.into())
-            .and_then(|idx| self.values.get(*idx))
-            .cloned()
+            .get::<PropertyKey>(&name.clone().into())
+            .and_then(|idx| self.values.get(*idx).map(|v| v.property()))
             .or_else(|| match &self.prototype {
-                ObjectOrNull::Object(o) => o.resolve_property_no_get_set(name).ok().flatten(), //TODO: this is wrong, we need a realm here!
+                ObjectOrNull::Object(o) => o.resolve_property_no_get_set(name, realm).ok().flatten(), //TODO: this is wrong, we need a realm here!
                 _ => None,
             }))
     }
 
-    fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-        let key = InternalPropertyKey::from(name.clone());
-
-        if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
-            return Ok(Some(self.prototype.clone().into()));
+    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
+            let val: Value = self.prototype.clone().into();
+            return Ok(Some(val.into()));
         }
 
-        if let InternalPropertyKey::Index(n) = key {
-            return Ok(self.get_array(n).cloned());
+        if let InternalPropertyKey::Index(n) = name {
+            return Ok(self.get_array(n));
         }
 
-        if let Some(prop) = self.properties.get::<PropertyKey>(&key.into()) {
-            return Ok(self.values.get(*prop).cloned());
+        if let Some(prop) = self.properties.get::<PropertyKey>(&name.into()) {
+            return Ok(self.values.get(*prop).map(|v| v.property()));
         }
 
         Ok(None)
     }
 
-    fn define_getter(&mut self, name: Value, value: Value) -> Res {
+    fn define_getter(&mut self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
         let key = InternalPropertyKey::from(name);
 
         if let InternalPropertyKey::Index(n) = key {
-            self.insert_array(n, ObjectProperty::getter(value));
+            self.insert_array(n, ObjectProperty::getter(value.into()));
             return Ok(());
         }
 
@@ -626,26 +621,24 @@ impl MutObj for MutObject {
             .and_then(|idx| self.values.get_mut(*idx));
 
         if let Some(prop) = val {
-            prop.get = value;
+            prop.get = value.into();
             return Ok(());
         }
 
         let len = self.values.len();
-        self.values.push(ObjectProperty::getter(value));
+        self.values.push(ObjectProperty::getter(value.into()));
         self.properties.insert(key, len);
 
         Ok(())
     }
 
-    fn define_setter(&mut self, name: Value, value: Value) -> Res {
-        let key = InternalPropertyKey::from(name);
-
-        if let InternalPropertyKey::Index(n) = key {
-            self.insert_array(n, ObjectProperty::setter(value));
+    fn define_setter(&mut self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+        if let InternalPropertyKey::Index(n) = name {
+            self.insert_array(n, ObjectProperty::setter(value.into()));
             return Ok(());
         }
 
-        let key = key.into();
+        let key = name.into();
 
         let val = self
             .properties
@@ -653,29 +646,27 @@ impl MutObj for MutObject {
             .and_then(|idx| self.values.get_mut(*idx));
 
         if let Some(prop) = val {
-            prop.set = value;
+            prop.set = value.into();
             return Ok(());
         }
 
         let len = self.values.len();
-        self.values.push(ObjectProperty::setter(value));
+        self.values.push(ObjectProperty::setter(value.into()));
         self.properties.insert(key, len);
 
         Ok(())
     }
 
-    fn delete_property(&mut self, name: &Value) -> Result<Option<Value>, Error> {
-        let key = InternalPropertyKey::from(name.clone());
-
-        if matches!(&key, InternalPropertyKey::String(str) if str == "__proto__") {
+    fn delete_property(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+        if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(None);
         }
 
-        if let InternalPropertyKey::Index(n) = key {
+        if let InternalPropertyKey::Index(n) = name {
             return Ok(self.delete_array(n));
         }
 
-        if let Entry::Occupied(occ) = self.properties.entry(key.into()) {
+        if let Entry::Occupied(occ) = self.properties.entry(name.into()) {
             let prop = self
                 .values
                 .get_mut(*occ.get())
@@ -683,7 +674,7 @@ impl MutObj for MutObject {
 
             return if prop.attributes.is_configurable() {
                 occ.shift_remove();
-                Ok(Some(mem::replace(&mut prop.value, Value::Undefined)))
+                Ok(Some(mem::replace(prop, Value::Undefined.into()).property()))
             } else {
                 // Err(Error::ty("Property is not configurable")) // this is only in strict mode
                 Ok(None)
@@ -693,8 +684,8 @@ impl MutObj for MutObject {
         Ok(None)
     }
 
-    fn contains_key(&self, name_val: &Value) -> Result<bool, Error> {
-        let name = InternalPropertyKey::from(name_val.clone());
+    fn contains_own_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        let name = InternalPropertyKey::from(name.clone());
 
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(true);
@@ -707,19 +698,41 @@ impl MutObj for MutObject {
         Ok(self.properties.contains_key::<PropertyKey>(&name.into()))
     }
 
-    fn name(&self) -> String {
-        "Object".to_string()
+    fn contains_key(&mut self, name_val: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
+        let name = InternalPropertyKey::from(name_val.clone());
+
+        if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
+            return Ok(true);
+        }
+
+        if let InternalPropertyKey::Index(n) = name {
+            return Ok(self.contains_array_key(n));
+        }
+
+        if self.properties.contains_key::<PropertyKey>(&name.into()) {
+            return Ok(true);
+        }
+
+        if let ObjectOrNull::Object(obj) = &self.prototype {
+            return obj.contains_key(name_val, realm);
+        }
+
+        Ok(false)
     }
 
-    fn to_string(&self, _realm: &mut Realm) -> Result<YSString, Error> {
-        Ok("[object Object]".into())
-    }
+    // fn name(&self) -> String {
+    //     "Object".to_string()
+    // }
 
-    fn to_string_internal(&self) -> Result<YSString, Error> {
-        Ok("[object Object]".into())
-    }
+    // fn to_string(&self, _realm: &mut Realm) -> Result<YSString, Error> {
+    //     Ok("[object Object]".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Result<YSString, Error> {
+    //     Ok("[object Object]".into())
+    // }
 
-    fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         Ok(self
             .properties
             .iter()
@@ -731,157 +744,217 @@ impl MutObj for MutObject {
             .collect())
     }
 
-    fn keys(&self) -> Result<Vec<Value>, Error> {
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         Ok(self
             .array
             .iter()
-            .map(|(i, _)| Value::from(InternalPropertyKey::Index(*i)))
+            .map(|(i, _)| InternalPropertyKey::Index(*i).into())
             .chain(self.properties.keys().cloned().map(Into::into))
             .collect::<Vec<_>>())
     }
 
-    fn values(&self) -> Result<Vec<Value>, Error> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>, Error> {
         Ok(self.values.iter().map(|v| v.value.copy()).collect())
         //TODO: getter (and setter) values
     }
 
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        Ok(self
+            .properties
+            .iter()
+            .filter_map(|(k, v)| {
+                let v = self.values.get(*v)?;
+
+                if v.attributes.is_enumerable() {
+                    Some((k.clone().into(), v.value.copy()))
+                } else {
+                    None
+                }
+            })
+            .collect())
+
+    }
+
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        Ok(self
+            .array
+            .iter()
+            .map(|(i, _)| InternalPropertyKey::Index(*i).into())
+            .chain(self.properties.iter().filter_map(|(k, v)| {
+                let v = self.values.get(*v)?;
+
+                if v.attributes.is_enumerable() {
+                    Some(k.clone().into())
+                } else {
+                    None
+                }
+            }))
+            .collect::<Vec<_>>())
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        Ok(self
+            .values
+            .iter()
+            .filter_map(|v| {
+                if v.attributes.is_enumerable() {
+                    Some(v.value.copy())
+                } else {
+                    None
+                }
+            })
+            .collect())
+    }
+
+    fn clear_properties(&mut self, realm: &mut Realm) -> Res {
+        self.properties.clear();
+        self.array.clear();
+        self.values.clear();
+
+        Ok(())
+    }
+
+    fn get_array_or_done(&mut self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
         if let Some(value) = self.resolve_array(index) {
             let done = if let Some((i, _)) = self.array.last() {
                 index > *i
             } else {
                 true
             };
-            return Ok((done, Some(value.value)));
+            return Ok((done, Some(value.assert_value().value)));
         }
 
         if let ObjectOrNull::Object(obj) = &self.prototype {
-            return obj.get_array_or_done(index);
+            return obj.get_array_or_done(index, realm);
         }
 
         Ok((true, None))
     }
 
-    fn clear_values(&mut self) -> Res {
-        self.properties.clear();
-        self.array.clear();
+    // fn clear_values(&mut self) -> Res {
+    //     self.properties.clear();
+    //     self.array.clear();
+    //
+    //     Ok(())
+    // }
 
-        Ok(())
-    }
-
-    fn prototype(&self) -> Result<ObjectProperty, Error> {
+    fn prototype(&self, realm: &mut Realm) -> Result<ObjectOrNull, Error> {
         Ok(self.prototype.clone().into())
     }
 
-    fn set_prototype(&mut self, proto: ObjectProperty) -> Res {
-        self.prototype = proto.value.try_into()?;
+    fn set_prototype(&mut self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
+        self.prototype = proto;
         Ok(())
-    }
-
-    fn constructor(&self) -> Result<ObjectProperty, Error> {
-        if let Some(constructor) = self
-            .properties
-            .get(&PropertyKey::String("constructor".into()))
-        {
-            if let Some(value) = self.values.get(*constructor) {
-                return Ok(value.clone());
-            }
-        }
-
-        if let Value::Object(proto) = self.prototype()?.value {
-            let proto = proto.guard();
-
-            return proto.constructor();
-        }
-
-        Ok(Value::Undefined.into())
-    }
-}
-
-*/
-
-#[allow(unused)]
-impl MutObj for MutObject {
-    fn define_property(&mut self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        todo!()
-    }
-
-    fn define_property_attributes(&mut self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        todo!()
-    }
-
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
-    }
-
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
-    }
-
-    fn define_getter(&mut self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
-        todo!()
-    }
-
-    fn define_setter(&mut self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
-        todo!()
-    }
-
-    fn delete_property(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
-    }
-
-    fn contains_own_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        todo!()
-    }
-
-    fn contains_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        todo!()
-    }
-
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        todo!()
-    }
-
-    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        todo!()
-    }
-
-    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        todo!()
-    }
-
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        todo!()
-    }
-
-    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        todo!()
-    }
-
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        todo!()
-    }
-
-    fn clear_properties(&mut self, realm: &mut Realm) -> Res {
-        todo!()
-    }
-
-    fn get_array_or_done(&mut self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
-        todo!()
-    }
-
-    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
-        todo!()
-    }
-
-    fn set_prototype(&mut self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
-        todo!()
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         todo!()
     }
+
+    // fn constructor(&self) -> Result<ObjectProperty, Error> {
+    //     if let Some(constructor) = self
+    //         .properties
+    //         .get(&PropertyKey::String("constructor".into()))
+    //     {
+    //         if let Some(value) = self.values.get(*constructor) {
+    //             return Ok(value.clone());
+    //         }
+    //     }
+    //
+    //     if let Value::Object(proto) = self.prototype()?.value {
+    //         let proto = proto.guard();
+    //
+    //         return proto.constructor();
+    //     }
+    //
+    //     Ok(Value::Undefined.into())
+    // }
 }
+
+
+
+// #[allow(unused)]
+// impl MutObj for MutObject {
+//     fn define_property(&mut self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+//         todo!()
+//     }
+//
+//     fn define_property_attributes(&mut self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+//         todo!()
+//     }
+//
+//     fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+//         todo!()
+//     }
+//
+//     fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+//         todo!()
+//     }
+//
+//     fn define_getter(&mut self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+//         todo!()
+//     }
+//
+//     fn define_setter(&mut self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+//         todo!()
+//     }
+//
+//     fn delete_property(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+//         todo!()
+//     }
+//
+//     fn contains_own_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+//         todo!()
+//     }
+//
+//     fn contains_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+//         todo!()
+//     }
+//
+//     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+//         todo!()
+//     }
+//
+//     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+//         todo!()
+//     }
+//
+//     fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+//         todo!()
+//     }
+//
+//     fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+//         todo!()
+//     }
+//
+//     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+//         todo!()
+//     }
+//
+//     fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+//         todo!()
+//     }
+//
+//     fn clear_properties(&mut self, realm: &mut Realm) -> Res {
+//         todo!()
+//     }
+//
+//     fn get_array_or_done(&mut self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
+//         todo!()
+//     }
+//
+//     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
+//         todo!()
+//     }
+//
+//     fn set_prototype(&mut self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
+//         todo!()
+//     }
+//
+//     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
+//         todo!()
+//     }
+// }
 
 
 
