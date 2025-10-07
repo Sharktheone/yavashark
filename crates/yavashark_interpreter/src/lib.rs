@@ -77,7 +77,7 @@ impl Interpreter {
 
         let (mock, state) = yavashark_env::tests::mock_object(context);
 
-        scope.declare_global_var("mock".into(), mock);
+        scope.declare_global_var("mock".into(), mock, context);
 
         (
             Self::run_statements(context, script, &mut scope).or_else(|e| match e {
