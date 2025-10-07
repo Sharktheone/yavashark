@@ -74,15 +74,7 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
-        if self.revoke.get() {
-            return self.inner.contains_key(name, realm);
-        }
-
-        Err(Error::new("not yet implemented"))
-    }
-
-    fn cotnains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
         if self.revoke.get() {
             return self.inner.contains_own_key(name, realm);
         }
@@ -90,8 +82,12 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn name(&self) -> String {
-        self.inner.name()
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
+        if self.revoke.get() {
+            return self.inner.contains_key(name, realm);
+        }
+
+        Err(Error::new("not yet implemented"))
     }
 
     // fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
@@ -121,6 +117,39 @@ impl Obj for Proxy {
     fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
         if self.revoke.get() {
             return self.inner.values(realm);
+        }
+
+        Err(Error::new("not yet implemented"))
+    }
+
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        if self.revoke.get() {
+            return self.inner.enumerable_properties(realm);
+        }
+
+        Err(Error::new("not yet implemented"))
+
+    }
+
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        if self.revoke.get() {
+            return self.inner.enumerable_keys(realm);
+        }
+
+        Err(Error::new("not yet implemented"))
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        if self.revoke.get() {
+            return self.inner.enumerable_values(realm);
+        }
+
+        Err(Error::new("not yet implemented"))
+    }
+
+    fn clear_properties(&self, realm: &mut Realm) -> Res {
+        if self.revoke.get() {
+            return self.inner.clear_properties(realm);
         }
 
         Err(Error::new("not yet implemented"))
@@ -177,10 +206,6 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn class_name(&self) -> &'static str {
-        self.inner.class_name()
-    }
-
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
         if self.revoke.get() {
             return self.inner.construct(args, realm);
@@ -203,49 +228,16 @@ impl Obj for Proxy {
         self.inner.is_constructable()
     }
 
+    fn name(&self) -> String {
+        self.inner.name()
+    }
+
+    fn class_name(&self) -> &'static str {
+        self.inner.class_name()
+    }
+
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
         self.inner.inner_downcast(ty)
-    }
-
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if self.revoke.get() {
-            return self.inner.contains_own_key(name, realm);
-        }
-
-        Err(Error::new("not yet implemented"))
-    }
-
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        if self.revoke.get() {
-            return self.inner.enumerable_properties(realm);
-        }
-
-        Err(Error::new("not yet implemented"))
-
-    }
-
-    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        if self.revoke.get() {
-            return self.inner.enumerable_keys(realm);
-        }
-
-        Err(Error::new("not yet implemented"))
-    }
-
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        if self.revoke.get() {
-            return self.inner.enumerable_values(realm);
-        }
-
-        Err(Error::new("not yet implemented"))
-    }
-
-    fn clear_properties(&self, realm: &mut Realm) -> Res {
-        if self.revoke.get() {
-            return self.inner.clear_properties(realm);
-        }
-
-        Err(Error::new("not yet implemented"))
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
