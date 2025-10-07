@@ -12,13 +12,13 @@ use crate::{Error, InternalPropertyKey, MutObject, NativeConstructor, NativeFunc
 #[derive(Debug)]
 struct MutableFunctionPrototype {
     pub object: MutObject,
-    pub apply: ObjectProperty,
-    pub bind: ObjectProperty,
-    pub call: ObjectProperty,
-    pub constructor: ObjectProperty,
-    pub length: ObjectProperty,
-    pub name: ObjectProperty,
-    pub to_string: ObjectProperty,
+    pub apply: Variable,
+    pub bind: Variable,
+    pub call: Variable,
+    pub constructor: Variable,
+    pub length: Variable,
+    pub name: Variable,
+    pub to_string: Variable,
 }
 
 #[derive(Debug)]
@@ -151,370 +151,364 @@ fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     Ok(this.to_string(realm)?.into())
 }
 
-
-#[allow(unused)]
 impl Obj for FunctionPrototype {
-    fn define_property(&self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        todo!()
+    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        if let InternalPropertyKey::String(name) = &name {
+            match name.as_str() {
+                "apply" => {
+                    this.apply = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "bind" => {
+                    this.bind = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "call" => {
+                    this.call = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "constructor" => {
+                    this.constructor = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "length" => {
+                    this.length = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "name" => {
+                    this.name = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "toString" => {
+                    this.to_string = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+
+                _ => {}
+            }
+        }
+
+        this.object.define_property(name, value, realm)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        todo!()
+    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        if let InternalPropertyKey::String(name) = &name {
+            match name.as_str() {
+                "apply" => {
+                    this.apply = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "bind" => {
+                    this.bind = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "call" => {
+                    this.call = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "constructor" => {
+                    this.constructor = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "length" => {
+                    this.length = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "name" => {
+                    this.name = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                "toString" => {
+                    this.to_string = value.into();
+                    return Ok(DefinePropertyResult::Handled);
+                }
+                _ => {}
+            }
+        }
+
+        this.object.define_property_attributes(name, value, realm)
     }
 
     fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
+        let this = self.inner.try_borrow()?;
+
+        if let InternalPropertyKey::String(ref name) = name {
+            match name.as_str() {
+                "apply" => return Ok(Some(this.apply.clone().into())),
+                "bind" => return Ok(Some(this.bind.clone().into())),
+                "call" => return Ok(Some(this.call.clone().into())),
+                "constructor" => return Ok(Some(this.constructor.clone().into())),
+                "length" => return Ok(Some(this.length.clone().into())),
+                "name" => return Ok(Some(this.name.clone().into())),
+                "toString" => return Ok(Some(this.to_string.clone().into())),
+                _ => {}
+            }
+        }
+
+        this.object.resolve_property(name, realm)
     }
 
     fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
+        let this = self.inner.try_borrow()?;
+
+        if let InternalPropertyKey::String(ref name) = name {
+            match name.as_str() {
+                "apply" => return Ok(Some(this.apply.copy().into())),
+                "bind" => return Ok(Some(this.bind.copy().into())),
+                "call" => return Ok(Some(this.call.copy().into())),
+                "constructor" => return Ok(Some(this.constructor.copy().into())),
+                "length" => return Ok(Some(this.length.copy().into())),
+                "name" => return Ok(Some(this.name.copy().into())),
+                "toString" => return Ok(Some(this.to_string.copy().into())),
+                _ => {}
+            }
+        }
+
+        this.object.get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
-        todo!()
+    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
-        todo!()
+    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+        let mut this = self.inner.try_borrow_mut()?;
+        this.object.define_setter(name, value, realm)
     }
 
     fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        todo!()
-    }
+        let mut this = self.inner.try_borrow_mut()?;
 
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        todo!()
+        if let InternalPropertyKey::String(ref name) = name {
+            match name.as_str() {
+                "apply" => {
+                    let old = this.apply.value.copy();
+                    this.apply = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                "bind" => {
+                    let old = this.bind.value.copy();
+                    this.bind = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                "call" => {
+                    let old = this.call.value.copy();
+                    this.call = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                "constructor" => {
+                    let old = this.constructor.value.copy();
+                    this.constructor = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                "length" => {
+                    let old = this.length.value.copy();
+                    this.length = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                "name" => {
+                    let old = this.name.value.copy();
+                    this.name = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                "toString" => {
+                    let old = this.to_string.value.copy();
+                    this.to_string = Value::Undefined.into();
+                    return Ok(Some(old.into()));
+                }
+                _ => {}
+            }
+        }
+
+        this.object.delete_property(name, realm)
     }
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        todo!()
+        if let InternalPropertyKey::String(ref name) = name {
+            match name.as_str() {
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
+                    return Ok(true)
+                }
+                _ => {}
+            }
+        }
+
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.contains_key(name, realm)
     }
 
-    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        todo!()
+
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::String(ref name) = name {
+            match name.as_str() {
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
+                    return Ok(true)
+                }
+                _ => {}
+            }
+        }
+
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.contains_own_key(name, realm)
+    }
+
+    fn name(&self) -> String {
+        "FunctionPrototype".to_string()
+    }
+
+    // fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
+    //     Ok("function () { [Native code] } ".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Res<YSString> {
+    //     Ok("function () { [Native code <Function Prototype>] } ".into())
+    // }
+
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
+        let this = self.inner.try_borrow()?;
+
+        let mut props = this.object.properties(realm)?;
+        props.push((PropertyKey::String("apply".into()), this.apply.value.copy()));
+        props.push((PropertyKey::String("bind".into()), this.bind.value.copy()));
+        props.push((PropertyKey::String("call".into()), this.call.value.copy()));
+        props.push((
+            PropertyKey::String("constructor".into()),
+            this.constructor.value.copy(),
+        ));
+        props.push((PropertyKey::String("length".into()), this.length.value.copy()));
+        props.push((PropertyKey::String("name".into()), this.name.value.copy()));
+        props.push((
+            PropertyKey::String("toString".into()),
+            this.to_string.value.copy(),
+        ));
+
+        Ok(props)
     }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        todo!()
+        let this = self.inner.try_borrow()?;
+
+        let mut keys = this.object.keys(realm)?;
+        keys.push(PropertyKey::String("apply".into()));
+        keys.push(PropertyKey::String("bind".into()));
+        keys.push(PropertyKey::String("call".into()));
+        keys.push(PropertyKey::String("constructor".into()));
+        keys.push(PropertyKey::String("length".into()));
+        keys.push(PropertyKey::String("name".into()));
+        keys.push(PropertyKey::String("toString".into()));
+
+        Ok(keys)
     }
 
-    fn values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        todo!()
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
+        let this = self.inner.try_borrow()?;
+
+        let mut values = this.object.values(realm)?;
+        values.push(this.apply.value.copy());
+        values.push(this.bind.value.copy());
+        values.push(this.call.value.copy());
+        values.push(this.constructor.value.copy());
+        values.push(this.length.value.copy());
+        values.push(this.name.value.copy());
+        values.push(this.to_string.value.copy());
+
+        Ok(values)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        todo!()
-    }
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        let mut this = self.inner.try_borrow_mut()?;
 
-    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        todo!()
-    }
-
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        todo!()
+        this.object.get_array_or_done(index, realm)
     }
 
     fn clear_properties(&self, realm: &mut Realm) -> Res {
-        todo!()
-    }
+        let mut this = self.inner.try_borrow_mut()?;
 
-    fn get_array_or_done(&self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
-        todo!()
+        this.object.clear_properties(realm)?;
+        this.apply = Value::Undefined.into();
+        this.bind = Value::Undefined.into();
+        this.call = Value::Undefined.into();
+        this.constructor = Value::Undefined.into();
+        this.length = Value::Number(0.0).into();
+        this.name = Value::string("Function").into();
+        this.to_string = Value::Undefined.into();
+
+        Ok(())
     }
 
     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
-        todo!()
+        let this = self.inner.try_borrow()?;
+
+        this.object.prototype(realm)
+    }
+
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        let this = self.inner.try_borrow()?;
+
+        this.object.enumerable_properties(realm)
+
+    }
+
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        let this = self.inner.try_borrow()?;
+
+        this.object.enumerable_keys(realm)
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        let this = self.inner.try_borrow()?;
+
+        this.object.enumerable_values(realm)
     }
 
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
-        todo!()
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.set_prototype(prototype, realm)
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-        todo!()
+        let this = self.inner.borrow();
+
+        let mut refs = this.object.gc_refs();
+
+        if let Some(r) = this.apply.value.gc_ref() {
+            refs.push(r);
+        }
+
+        if let Some(r) = this.bind.value.gc_ref() {
+            refs.push(r);
+        }
+
+        if let Some(r) = this.call.value.gc_ref() {
+            refs.push(r);
+        }
+
+        if let Some(r) = this.constructor.value.gc_ref() {
+            refs.push(r);
+        }
+
+        if let Some(r) = this.length.value.gc_ref() {
+            refs.push(r);
+        }
+
+        if let Some(r) = this.name.value.gc_ref() {
+            refs.push(r);
+        }
+
+        if let Some(r) = this.to_string.value.gc_ref() {
+            refs.push(r);
+        }
+
+        refs
+
     }
 }
-
-// impl Obj for FunctionPrototype {
-//     fn define_property(&self, name: Value, value: Value) -> Res {
-//         let mut this = self.inner.try_borrow_mut()?;
-//
-//         if let Value::String(name) = &name {
-//             match name.as_str() {
-//                 "apply" => {
-//                     this.apply = value.into();
-//                     return Ok(());
-//                 }
-//                 "bind" => {
-//                     this.bind = value.into();
-//                     return Ok(());
-//                 }
-//                 "call" => {
-//                     this.call = value.into();
-//                     return Ok(());
-//                 }
-//                 "constructor" => {
-//                     this.constructor = value.into();
-//                     return Ok(());
-//                 }
-//                 "length" => {
-//                     this.length = value.into();
-//                     return Ok(());
-//                 }
-//                 "name" => {
-//                     this.name = value.into();
-//                     return Ok(());
-//                 }
-//                 "toString" => {
-//                     this.to_string = value.into();
-//                     return Ok(());
-//                 }
-//
-//                 _ => {}
-//             }
-//         }
-//
-//         this.object.define_property(name, value)
-//     }
-//
-//     fn define_variable(&self, name: Value, value: Variable) -> Res {
-//         let mut this = self.inner.try_borrow_mut()?;
-//
-//         if let Value::String(name) = &name {
-//             match name.as_str() {
-//                 "apply" => {
-//                     this.apply = value.into();
-//                     return Ok(());
-//                 }
-//                 "bind" => {
-//                     this.bind = value.into();
-//                     return Ok(());
-//                 }
-//                 "call" => {
-//                     this.call = value.into();
-//                     return Ok(());
-//                 }
-//                 "constructor" => {
-//                     this.constructor = value.into();
-//                     return Ok(());
-//                 }
-//                 "length" => {
-//                     this.length = value.into();
-//                     return Ok(());
-//                 }
-//                 "name" => {
-//                     this.name = value.into();
-//                     return Ok(());
-//                 }
-//                 "toString" => {
-//                     this.to_string = value.into();
-//                     return Ok(());
-//                 }
-//                 _ => {}
-//             }
-//         }
-//
-//         this.object.define_variable(name, value)
-//     }
-//
-//     fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-//         let this = self.inner.try_borrow()?;
-//
-//         if let Value::String(name) = name {
-//             match name.as_str() {
-//                 "apply" => return Ok(Some(this.apply.clone())),
-//                 "bind" => return Ok(Some(this.bind.clone())),
-//                 "call" => return Ok(Some(this.call.clone())),
-//                 "constructor" => return Ok(Some(this.constructor.clone())),
-//                 "length" => return Ok(Some(this.length.clone())),
-//                 "name" => return Ok(Some(this.name.clone())),
-//                 "toString" => return Ok(Some(this.to_string.clone())),
-//                 _ => {}
-//             }
-//         }
-//
-//         this.object.resolve_property(name)
-//     }
-//
-//     fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-//         let this = self.inner.try_borrow()?;
-//
-//         if let Value::String(name) = name {
-//             match name.as_str() {
-//                 "apply" => return Ok(Some(this.apply.copy())),
-//                 "bind" => return Ok(Some(this.bind.copy())),
-//                 "call" => return Ok(Some(this.call.copy())),
-//                 "constructor" => return Ok(Some(this.constructor.copy())),
-//                 "length" => return Ok(Some(this.length.copy())),
-//                 "name" => return Ok(Some(this.name.copy())),
-//                 "toString" => return Ok(Some(this.to_string.copy())),
-//                 _ => {}
-//             }
-//         }
-//
-//         this.object.get_property(name).map(|v| v.map(|v| v.copy()))
-//     }
-//
-//     fn define_getter(&self, name: Value, value: Value) -> Res {
-//         let mut this = self.inner.try_borrow_mut()?;
-//
-//         this.object.define_getter(name, value)
-//     }
-//
-//     fn define_setter(&self, name: Value, value: Value) -> Res {
-//         let mut this = self.inner.try_borrow_mut()?;
-//         this.object.define_setter(name, value)
-//     }
-//
-//     fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
-//         let mut this = self.inner.try_borrow_mut()?;
-//
-//         if let Value::String(name) = name {
-//             match name.as_str() {
-//                 "apply" => {
-//                     let old = this.apply.value.copy();
-//                     this.apply = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 "bind" => {
-//                     let old = this.bind.value.copy();
-//                     this.bind = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 "call" => {
-//                     let old = this.call.value.copy();
-//                     this.call = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 "constructor" => {
-//                     let old = this.constructor.value.copy();
-//                     this.constructor = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 "length" => {
-//                     let old = this.length.value.copy();
-//                     this.length = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 "name" => {
-//                     let old = this.name.value.copy();
-//                     this.name = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 "toString" => {
-//                     let old = this.to_string.value.copy();
-//                     this.to_string = Value::Undefined.into();
-//                     return Ok(Some(old));
-//                 }
-//                 _ => {}
-//             }
-//         }
-//
-//         this.object.delete_property(name)
-//     }
-//
-//     fn contains_key(&self, name: &Value) -> Res<bool> {
-//         if let Value::String(name) = name {
-//             match name.as_str() {
-//                 "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
-//                     return Ok(true)
-//                 }
-//                 _ => {}
-//             }
-//         }
-//
-//         let this = self.inner.try_borrow()?;
-//
-//         this.object.contains_key(name)
-//     }
-//
-//     fn name(&self) -> String {
-//         "FunctionPrototype".to_string()
-//     }
-//
-//     fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
-//         Ok("function () { [Native code] } ".into())
-//     }
-//
-//     fn to_string_internal(&self) -> Res<YSString> {
-//         Ok("function () { [Native code <Function Prototype>] } ".into())
-//     }
-//
-//     fn properties(&self) -> Res<Vec<(Value, Value)>> {
-//         let this = self.inner.try_borrow()?;
-//
-//         let mut props = this.object.properties()?;
-//         props.push((Value::String("apply".into()), this.apply.value.copy()));
-//         props.push((Value::String("bind".into()), this.bind.value.copy()));
-//         props.push((Value::String("call".into()), this.call.value.copy()));
-//         props.push((
-//             Value::String("constructor".into()),
-//             this.constructor.value.copy(),
-//         ));
-//         props.push((Value::String("length".into()), this.length.value.copy()));
-//         props.push((Value::String("name".into()), this.name.value.copy()));
-//         props.push((
-//             Value::String("toString".into()),
-//             this.to_string.value.copy(),
-//         ));
-//
-//         Ok(props)
-//     }
-//
-//     fn keys(&self) -> Res<Vec<Value>> {
-//         let this = self.inner.try_borrow()?;
-//
-//         let mut keys = this.object.keys()?;
-//         keys.push(Value::string("apply"));
-//         keys.push(Value::string("bind"));
-//         keys.push(Value::string("call"));
-//         keys.push(Value::string("constructor"));
-//         keys.push(Value::string("length"));
-//         keys.push(Value::string("name"));
-//         keys.push(Value::string("toString"));
-//
-//         Ok(keys)
-//     }
-//
-//     fn values(&self) -> Res<Vec<Value>> {
-//         let this = self.inner.try_borrow()?;
-//
-//         let mut values = this.object.values()?;
-//         values.push(this.apply.value.copy());
-//         values.push(this.bind.value.copy());
-//         values.push(this.call.value.copy());
-//         values.push(this.constructor.value.copy());
-//         values.push(this.length.value.copy());
-//         values.push(this.name.value.copy());
-//         values.push(this.to_string.value.copy());
-//
-//         Ok(values)
-//     }
-//
-//     fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
-//         let this = self.inner.try_borrow()?;
-//
-//         this.object.get_array_or_done(index)
-//     }
-//
-//     fn clear_values(&self) -> Res {
-//         let mut this = self.inner.try_borrow_mut()?;
-//
-//         this.object.clear_values()?;
-//         this.apply = Value::Undefined.into();
-//         this.bind = Value::Undefined.into();
-//         this.call = Value::Undefined.into();
-//         this.constructor = Value::Undefined.into();
-//         this.length = Value::Number(0.0).into();
-//         this.name = Value::string("Function").into();
-//         this.to_string = Value::Undefined.into();
-//
-//         Ok(())
-//     }
-//
-//     fn prototype(&self) -> Res<ObjectProperty> {
-//         let this = self.inner.try_borrow()?;
-//
-//         this.object.prototype()
-//     }
-// }
