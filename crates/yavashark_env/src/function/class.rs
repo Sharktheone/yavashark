@@ -107,14 +107,6 @@ impl Obj for Class {
         self.inner.delete_property(name, realm)
     }
 
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
-            Ok(true)
-        } else {
-            self.inner.contains_key(name, realm)
-        }
-    }
-
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
             Ok(true)
@@ -123,17 +115,13 @@ impl Obj for Class {
         }
     }
 
-    fn name(&self) -> String {
-        self.name.borrow().clone()
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
+            Ok(true)
+        } else {
+            self.inner.contains_key(name, realm)
+        }
     }
-
-    // fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
-    //     self.inner.to_string(realm)
-    // }
-    //
-    // fn to_string_internal(&self) -> Res<YSString> {
-    //     self.inner.to_string_internal()
-    // }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         let mut props = self.inner.properties(realm)?;
@@ -149,6 +137,14 @@ impl Obj for Class {
 
         Ok(props)
     }
+
+    // fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
+    //     self.inner.to_string(realm)
+    // }
+    //
+    // fn to_string_internal(&self) -> Res<YSString> {
+    //     self.inner.to_string_internal()
+    // }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         let mut keys = self.inner.keys(realm)?;
@@ -174,12 +170,52 @@ impl Obj for Class {
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
-        self.inner.get_array_or_done(index, realm)
+    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+        let mut props = self.inner.enumerable_properties(realm)?;
+
+        props.push((
+            PropertyKey::String("prototype".into()),
+            self.prototype.borrow().clone().into(),
+        ));
+
+        for (key, value) in &*self.private_props.try_borrow()? {
+            props.push((PropertyKey::String(key.clone().into()), value.as_value())); //TODO: is this correct?
+        }
+
+        Ok(props)
+
+    }
+
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        let mut keys = self.inner.enumerable_keys(realm)?;
+
+        keys.push(PropertyKey::String("prototype".into()));
+
+        for key in self.private_props.try_borrow()?.keys() {
+            keys.push(PropertyKey::String(key.clone().into())); //TODO: is this correct?
+        }
+
+        Ok(keys)
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        let mut values = self.inner.enumerable_values(realm)?;
+
+        values.push(self.prototype.borrow().clone().into());
+
+        for value in self.private_props.try_borrow()?.values() {
+            values.push(value.as_value()); //TODO: is this correct?
+        }
+
+        Ok(values)
     }
 
     fn clear_properties(&self, realm: &mut Realm) -> Res {
         self.inner.clear_properties(realm)
+    }
+
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        self.inner.get_array_or_done(index, realm)
     }
 
     fn call(&self, _args: Vec<Value>, _this: Value, realm: &mut Realm) -> ValueResult {
@@ -235,52 +271,16 @@ impl Obj for Class {
         true
     }
 
+    fn name(&self) -> String {
+        self.name.borrow().clone()
+    }
+
     unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
         if ty == TypeId::of::<Self>() {
             Some(NonNull::from(self).cast())
         } else {
             self.inner.inner_downcast(ty)
         }
-    }
-
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
-        let mut props = self.inner.enumerable_properties(realm)?;
-
-        props.push((
-            PropertyKey::String("prototype".into()),
-            self.prototype.borrow().clone().into(),
-        ));
-
-        for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_value())); //TODO: is this correct?
-        }
-
-        Ok(props)
-
-    }
-
-    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
-        let mut keys = self.inner.enumerable_keys(realm)?;
-
-        keys.push(PropertyKey::String("prototype".into()));
-
-        for key in self.private_props.try_borrow()?.keys() {
-            keys.push(PropertyKey::String(key.clone().into())); //TODO: is this correct?
-        }
-
-        Ok(keys)
-    }
-
-    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
-        let mut values = self.inner.enumerable_values(realm)?;
-
-        values.push(self.prototype.borrow().clone().into());
-
-        for value in self.private_props.try_borrow()?.values() {
-            values.push(value.as_value()); //TODO: is this correct?
-        }
-
-        Ok(values)
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
@@ -485,16 +485,12 @@ impl Obj for ClassInstance {
         self.inner.try_borrow()?.delete_property(name, realm)
     }
 
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        self.inner.try_borrow()?.contains_key(name, realm)
-    }
-
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         self.inner.try_borrow()?.contains_own_key(name, realm)
     }
 
-    fn name(&self) -> String {
-        self.name.clone()
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        self.inner.try_borrow()?.contains_key(name, realm)
     }
 
     // fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
@@ -535,30 +531,6 @@ impl Obj for ClassInstance {
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
-        self.inner.try_borrow()?.get_array_or_done(index, realm)
-    }
-
-    fn clear_properties(&self, realm: &mut Realm) -> Res {
-        self.inner.try_borrow()?.clear_properties(realm)
-    }
-
-    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
-        self.inner.try_borrow()?.prototype(realm)
-    }
-
-    fn set_prototype(&self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
-        self.inner.try_borrow()?.set_prototype(proto, realm)
-    }
-
-    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
-        if ty == TypeId::of::<Self>() {
-            Some(NonNull::from(self).cast())
-        } else {
-            self.inner.borrow().inner_downcast(ty)
-        }
-    }
-
     fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         self.inner.try_borrow()?.enumerable_properties(realm)
     }
@@ -569,6 +541,34 @@ impl Obj for ClassInstance {
 
     fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
         self.inner.try_borrow()?.enumerable_values(realm)
+    }
+
+    fn clear_properties(&self, realm: &mut Realm) -> Res {
+        self.inner.try_borrow()?.clear_properties(realm)
+    }
+
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        self.inner.try_borrow()?.get_array_or_done(index, realm)
+    }
+
+    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
+        self.inner.try_borrow()?.prototype(realm)
+    }
+
+    fn set_prototype(&self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
+        self.inner.try_borrow()?.set_prototype(proto, realm)
+    }
+
+    fn name(&self) -> String {
+        self.name.clone()
+    }
+
+    unsafe fn inner_downcast(&self, ty: TypeId) -> Option<NonNull<()>> {
+        if ty == TypeId::of::<Self>() {
+            Some(NonNull::from(self).cast())
+        } else {
+            self.inner.borrow().inner_downcast(ty)
+        }
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
