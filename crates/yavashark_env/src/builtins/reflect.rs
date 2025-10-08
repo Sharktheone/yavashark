@@ -1,6 +1,6 @@
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
-use crate::value::Obj;
+use crate::value::{Obj, Property};
 use crate::{
     Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value,
     ValueResult,
@@ -145,9 +145,18 @@ impl Reflect {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
-        let prop = target.resolve_property(prop, realm)?;
+        match target.resolve_property_no_get_set(prop, realm)? {
+            Some(Property::Value(v)) => Ok(v.value),
+            Some(Property::Getter(getter)) => {
+                let recv = receiver.unwrap_or_else(|| target.clone().into());
+                getter.call(Vec::new(), recv, realm)
+            }
+            None => Ok(Value::Undefined),
 
-        Ok(prop.unwrap_or(Value::Undefined))
+        }
+
+
+        // Ok(prop.unwrap_or(Value::Undefined))
     }
 
     #[prop("getOwnPropertyDescriptor")]
