@@ -566,26 +566,22 @@ impl Promise {
         let fut = async move {
             let results = fut.await;
 
-            let values = Vec::new();
+            let mut values = Vec::new();
             for res in results {
                 match res? {
                     PromiseResult::Fulfilled(val) => {
-                        let obj = Object::with_proto(obj_proto.clone());
-
-                        // obj.define_property("status".into(), "fulfilled".into(), realm)?;
-                        // obj.define_property("value".into(), val, realm)?; //TODO
-
-                        todo!();
+                        let obj = Object::from_values_with_proto(
+                            vec![("status".into(), "fulfilled".into()), ("value".into(), val)],
+                            obj_proto.clone(),
+                        )?;
 
                         values.push(obj.into());
                     }
                     PromiseResult::Rejected(val) => {
-                        let obj = Object::with_proto(obj_proto.clone());
-
-                        // obj.define_property("status".into(), "rejected".into(), realm)?;
-                        // obj.define_property("reason".into(), val, realm)?;
-
-                        todo!();
+                        let obj = Object::from_values_with_proto(
+                            vec![("status".into(), "rejected".into()), ("reason".into(), val)],
+                            obj_proto.clone(),
+                        )?;
 
                         values.push(obj.into());
                     }
