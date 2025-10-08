@@ -329,22 +329,6 @@ impl Obj for FunctionPrototype {
         this.object.delete_property(name, realm)
     }
 
-    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        if let InternalPropertyKey::String(ref name) = name {
-            match name.as_str() {
-                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
-                    return Ok(true)
-                }
-                _ => {}
-            }
-        }
-
-        let mut this = self.inner.try_borrow_mut()?;
-
-        this.object.contains_key(name, realm)
-    }
-
-
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
@@ -360,17 +344,21 @@ impl Obj for FunctionPrototype {
         this.object.contains_own_key(name, realm)
     }
 
-    fn name(&self) -> String {
-        "FunctionPrototype".to_string()
-    }
 
-    // fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
-    //     Ok("function () { [Native code] } ".into())
-    // }
-    //
-    // fn to_string_internal(&self) -> Res<YSString> {
-    //     Ok("function () { [Native code <Function Prototype>] } ".into())
-    // }
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::String(ref name) = name {
+            match name.as_str() {
+                "apply" | "bind" | "call" | "constructor" | "length" | "name" | "toString" => {
+                    return Ok(true)
+                }
+                _ => {}
+            }
+        }
+
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.contains_key(name, realm)
+    }
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         let this = self.inner.try_borrow()?;
@@ -392,6 +380,14 @@ impl Obj for FunctionPrototype {
 
         Ok(props)
     }
+
+    // fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
+    //     Ok("function () { [Native code] } ".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Res<YSString> {
+    //     Ok("function () { [Native code <Function Prototype>] } ".into())
+    // }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         let this = self.inner.try_borrow()?;
@@ -423,33 +419,6 @@ impl Obj for FunctionPrototype {
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
-        let mut this = self.inner.try_borrow_mut()?;
-
-        this.object.get_array_or_done(index, realm)
-    }
-
-    fn clear_properties(&self, realm: &mut Realm) -> Res {
-        let mut this = self.inner.try_borrow_mut()?;
-
-        this.object.clear_properties(realm)?;
-        this.apply = Value::Undefined.into();
-        this.bind = Value::Undefined.into();
-        this.call = Value::Undefined.into();
-        this.constructor = Value::Undefined.into();
-        this.length = Value::Number(0.0).into();
-        this.name = Value::string("Function").into();
-        this.to_string = Value::Undefined.into();
-
-        Ok(())
-    }
-
-    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
-        let this = self.inner.try_borrow()?;
-
-        this.object.prototype(realm)
-    }
-
     fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let this = self.inner.try_borrow()?;
 
@@ -469,10 +438,41 @@ impl Obj for FunctionPrototype {
         this.object.enumerable_values(realm)
     }
 
+    fn clear_properties(&self, realm: &mut Realm) -> Res {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.clear_properties(realm)?;
+        this.apply = Value::Undefined.into();
+        this.bind = Value::Undefined.into();
+        this.call = Value::Undefined.into();
+        this.constructor = Value::Undefined.into();
+        this.length = Value::Number(0.0).into();
+        this.name = Value::string("Function").into();
+        this.to_string = Value::Undefined.into();
+
+        Ok(())
+    }
+
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.get_array_or_done(index, realm)
+    }
+
+    fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull> {
+        let this = self.inner.try_borrow()?;
+
+        this.object.prototype(realm)
+    }
+
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.set_prototype(prototype, realm)
+    }
+
+    fn name(&self) -> String {
+        "FunctionPrototype".to_string()
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
