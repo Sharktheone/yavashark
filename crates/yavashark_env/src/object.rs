@@ -993,7 +993,29 @@ impl MutObj for MutObject {
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-        todo!()
+        let mut refs = Vec::new();
+
+        if let ObjectOrNull::Object(o) = &self.prototype {
+            if let Some(o) = o.gc_ref() {
+                refs.push(o);
+            }
+        }
+
+        for value in &self.values {
+            if let Some(getter) = value.get.gc_ref() {
+                refs.push(getter);
+            }
+
+            if let Some(setter) = value.set.gc_ref() {
+                refs.push(setter);
+            }
+
+            if let Some(o) = value.value.gc_ref() {
+                refs.push(o);
+            }
+        }
+
+        refs
     }
 
     // fn constructor(&self) -> Result<ObjectProperty, Error> {
