@@ -104,7 +104,7 @@ macro_rules! constructor {
         paste::paste! {
             pub fn [<$name _constructor>] (&self) -> Variable {
                 self.$name
-                    .resolve_property("constructor", &mut Realm::new().unwrap()) //TODO: this is bad, but we don't have access to a realm here
+                    .resolve_property("constructor", &mut Realm::default()) //TODO: this is bad, but we don't have access to a realm here
                     .unwrap_or(Value::Undefined.into())
                     .unwrap_or(Value::Undefined.into())
                     .into()
@@ -178,7 +178,7 @@ impl Intrinsics {
 #[allow(clippy::similar_names)]
 impl Intrinsics {
     pub(crate) fn new() -> Result<Self, Error> {
-        let realm = &mut Realm::new()?; //TODO: this will not work as the Realm::new() itself creates intrinsics, but to shut up the compiler for now it is okay
+        let realm = &mut Realm::default();
 
         let obj_prototype = ObjectHandle::new(Prototype::new());
 
