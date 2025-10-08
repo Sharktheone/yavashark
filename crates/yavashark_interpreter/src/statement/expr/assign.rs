@@ -8,9 +8,12 @@ use swc_ecma_ast::{
 
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
-use yavashark_env::value::Obj;
-use yavashark_env::{Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult, Value};
 use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::value::Obj;
+use yavashark_env::{
+    Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult,
+    Value,
+};
 use yavashark_string::YSString;
 
 impl Interpreter {
@@ -130,8 +133,7 @@ impl Interpreter {
 
         let obj = this.as_object()?;
 
-        let sup = obj.prototype(realm)?
-            .to_object()?;
+        let sup = obj.prototype(realm)?.to_object()?;
 
         match &super_prop.prop {
             SuperProp::Ident(i) => {
@@ -401,14 +403,15 @@ impl Interpreter {
 
         let obj = this.as_object()?;
 
-        let sup = obj.prototype(realm)?
-            .to_object()?;
+        let sup = obj.prototype(realm)?.to_object()?;
 
         match &super_prop.prop {
             SuperProp::Ident(i) => {
                 let name: InternalPropertyKey = i.sym.to_string().into();
 
-                let left = sup.resolve_property(name.clone(), realm)?.unwrap_or(Value::Undefined);
+                let left = sup
+                    .resolve_property(name.clone(), realm)?
+                    .unwrap_or(Value::Undefined);
 
                 let value = Self::run_assign_op(op, left, right, realm)?;
 
@@ -420,7 +423,9 @@ impl Interpreter {
 
                 let name = name.into_internal_property_key(realm)?;
 
-                let left = sup.resolve_property(name.clone(), realm)?.unwrap_or(Value::Undefined);
+                let left = sup
+                    .resolve_property(name.clone(), realm)?
+                    .unwrap_or(Value::Undefined);
 
                 let value = Self::run_assign_op(op, left, right, realm)?;
 

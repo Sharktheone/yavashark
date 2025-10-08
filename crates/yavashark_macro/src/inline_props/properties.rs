@@ -1,22 +1,15 @@
-use quote::quote;
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Name, Property};
+use quote::quote;
 
-pub fn generate_properties(
-    props: &[Property],
-    config: &Config,
-) -> proc_macro2::TokenStream {
-
+pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::TokenStream {
     let realm = &config.realm;
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
     let property_key = &config.property_key;
 
-
     let mut prop_items = Vec::with_capacity(props.len());
-
-
 
     for prop in props.iter().filter(|p| p.kind != Kind::Setter) {
         let key = &prop.name;
@@ -30,7 +23,6 @@ pub fn generate_properties(
             quote! {}
         };
 
-
         let get = if prop.copy && !prop.readonly {
             quote! {
                 #partial_get .get()
@@ -58,23 +50,19 @@ pub fn generate_properties(
             }
         };
 
-
         match key {
             Name::Str(s) => {
                 prop_items.push(quote::quote! {
                     (#property_key::from_static(#s), #value_expr)
                 });
-            },
+            }
             Name::Symbol(sym) => {
                 prop_items.push(quote::quote! {
                     (#property_key::from_symbol(#sym.clone()), #value_expr)
                 });
-            },
+            }
         }
     }
-
-
-
 
     quote::quote! {
         #[inline(always)]
@@ -88,24 +76,22 @@ pub fn generate_properties(
     }
 }
 
-
 pub fn generate_enumerable_properties(
     props: &[Property],
     config: &Config,
 ) -> proc_macro2::TokenStream {
-
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
     let property_key = &config.property_key;
     let realm = &config.realm;
 
-
     let mut prop_items = Vec::with_capacity(props.len());
 
-
-
-    for prop in props.iter().filter(|p| p.kind != Kind::Setter && p.enumerable) {
+    for prop in props
+        .iter()
+        .filter(|p| p.kind != Kind::Setter && p.enumerable)
+    {
         let key = &prop.name;
         let field = &prop.field;
 
@@ -144,23 +130,19 @@ pub fn generate_enumerable_properties(
             }
         };
 
-
         match key {
             Name::Str(s) => {
                 prop_items.push(quote::quote! {
                     (#property_key::from_static(#s), #value_expr)
                 });
-            },
+            }
             Name::Symbol(sym) => {
                 prop_items.push(quote::quote! {
                     (#property_key::from_symbol(#sym.clone()), #value_expr)
                 });
-            },
+            }
         }
     }
-
-
-
 
     quote::quote! {
         #[inline(always)]

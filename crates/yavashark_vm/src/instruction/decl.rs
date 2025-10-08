@@ -10,7 +10,9 @@ pub fn decl_const(data: impl Data, var: VarName, vm: &mut impl VM) -> Res {
         .ok_or(Error::new("Variable not found"))?
         .to_owned();
 
-    vm.get_scope_mut().clone().declare_read_only_var(name, data, vm.get_realm())
+    vm.get_scope_mut()
+        .clone()
+        .declare_read_only_var(name, data, vm.get_realm())
 }
 
 pub fn decl_var(data: impl Data, var: VarName, vm: &mut impl VM) -> Res {
@@ -20,7 +22,9 @@ pub fn decl_var(data: impl Data, var: VarName, vm: &mut impl VM) -> Res {
         .ok_or(Error::new("Variable not found"))?
         .to_owned();
 
-    vm.get_scope_mut().clone().declare_global_var(name, data, vm.get_realm())
+    vm.get_scope_mut()
+        .clone()
+        .declare_global_var(name, data, vm.get_realm())
 }
 
 pub fn decl_empty_var(var: VarName, vm: &mut impl VM) -> Res {
@@ -41,7 +45,9 @@ pub fn decl_let(data: impl Data, var: VarName, vm: &mut impl VM) -> Res {
         .ok_or(Error::new("Variable not found"))?
         .to_owned();
 
-    vm.get_scope_mut().clone().declare_var(name, data, vm.get_realm())
+    vm.get_scope_mut()
+        .clone()
+        .declare_var(name, data, vm.get_realm())
 }
 
 pub fn decl_empty_let(var: VarName, vm: &mut impl VM) -> Res {
@@ -50,5 +56,7 @@ pub fn decl_empty_let(var: VarName, vm: &mut impl VM) -> Res {
         .ok_or(Error::new("Variable not found"))?
         .to_owned();
 
-    vm.get_scope_mut().clone().declare_var(name, Value::Undefined, vm.get_realm())
+    vm.get_scope_mut()
+        .clone()
+        .declare_var(name, Value::Undefined, vm.get_realm())
 }

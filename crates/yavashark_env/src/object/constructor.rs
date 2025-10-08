@@ -2,13 +2,16 @@ use crate::array::Array;
 use crate::builtins::{BigIntObj, BooleanObj, NumberObj, StringObj, SymbolObj};
 use crate::object::common;
 use crate::utils::coerce_object;
+use crate::value::property_key::IntoPropertyKey;
 use crate::value::{Constructor, Func, IntoValue, Obj, ObjectOrNull, Property};
-use crate::{Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, InternalPropertyKey, MutObject, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
+    ValueResult, Variable,
+};
 use indexmap::IndexMap;
 use std::cell::RefCell;
 use std::mem;
 use yavashark_macro::{object, properties_new};
-use crate::value::property_key::IntoPropertyKey;
 
 #[object(constructor, function)]
 #[derive(Debug)]
@@ -57,7 +60,11 @@ impl ObjectConstructor {
 
 #[properties_new(raw)]
 impl ObjectConstructor {
-    fn create(proto: Value, properties: Option<ObjectHandle>, #[realm] realm: &mut Realm) -> Res<ObjectHandle> {
+    fn create(
+        proto: Value,
+        properties: Option<ObjectHandle>,
+        #[realm] realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let proto: ObjectOrNull = proto.try_into()?;
 
         let obj = Object::with_proto(proto);
@@ -148,7 +155,9 @@ impl ObjectConstructor {
 
                 let value = match value {
                     Property::Value(v) => v.value,
-                    Property::Getter(getter) => getter.call(Vec::new(), source.clone().into(), realm)?,
+                    Property::Getter(getter) => {
+                        getter.call(Vec::new(), source.clone().into(), realm)?
+                    }
                 };
 
                 target.define_property(key.into(), value, realm)?;
@@ -159,7 +168,11 @@ impl ObjectConstructor {
     }
 
     #[prop("defineProperties")]
-    fn define_properties(obj: ObjectHandle, props: &Value, #[realm] realm: &mut Realm) -> ValueResult {
+    fn define_properties(
+        obj: ObjectHandle,
+        props: &Value,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         let Ok(props) = props.as_object() else {
             return Ok(obj.into());
         };
@@ -227,8 +240,11 @@ impl ObjectConstructor {
                 continue;
             }
 
-            let desc =
-                common::get_own_property_descriptor(vec![key.clone().into()], obj.clone().into(), realm)?;
+            let desc = common::get_own_property_descriptor(
+                vec![key.clone().into()],
+                obj.clone().into(),
+                realm,
+            )?;
 
             props.push((key.into(), desc));
         }
@@ -242,8 +258,7 @@ impl ObjectConstructor {
 
         keys.retain(|k| !k.is_symbol());
 
-        let keys = keys.into_iter().map(|k| k.into())
-            .collect();
+        let keys = keys.into_iter().map(|k| k.into()).collect();
 
         Ok(Array::with_elements(realm, keys)?.into_value())
     }
@@ -254,8 +269,7 @@ impl ObjectConstructor {
 
         keys.retain(PropertyKey::is_symbol);
 
-        let keys = keys.into_iter().map(|k| k.into())
-            .collect();
+        let keys = keys.into_iter().map(|k| k.into()).collect();
 
         Ok(Array::with_elements(realm, keys)?.into_value())
     }
@@ -314,7 +328,11 @@ impl ObjectConstructor {
     }
 
     #[prop("hasOwn")]
-    fn has_own(obj: &ObjectHandle, key: InternalPropertyKey, #[realm] realm: &mut Realm) -> ValueResult {
+    fn has_own(
+        obj: &ObjectHandle,
+        key: InternalPropertyKey,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         Ok(obj.contains_own_key(key, realm)?.into())
     }
 
@@ -401,7 +419,11 @@ impl ObjectConstructor {
     }
 
     #[prop("setPrototypeOf")]
-    fn set_prototype_of(obj: Value, proto: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
+    fn set_prototype_of(
+        obj: Value,
+        proto: ObjectHandle,
+        #[realm] realm: &mut Realm,
+    ) -> ValueResult {
         if obj.instance_of(&proto.clone().into(), realm)? {
             return Err(Error::ty("Cannot set prototype to itself"));
         }

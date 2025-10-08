@@ -1,24 +1,20 @@
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Name, Property};
 
-pub fn generate_get_property(
-    props: &[Property],
-    config: &Config,
-) -> proc_macro2::TokenStream {
-
+pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2::TokenStream {
     let internal_property_key = &config.internal_property_key;
     let realm = &config.realm;
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
 
-
     let mut string_arms = Vec::with_capacity(props.len());
     let mut symbols = Vec::new();
 
-
-
-    for prop in props.iter().filter(|p| matches!(p.kind, Kind::Property | Kind::Getter)) {
+    for prop in props
+        .iter()
+        .filter(|p| matches!(p.kind, Kind::Property | Kind::Getter))
+    {
         let key = &prop.name;
         let ty = &prop.ty;
         let field = &prop.field;
@@ -63,14 +59,14 @@ pub fn generate_get_property(
                         #value_expr
                     }
                 });
-            },
+            }
             Name::Symbol(sym) => {
                 symbols.push(quote::quote! {
                     if symbol == #sym {
                         #value_expr
                     }
                 });
-            },
+            }
         }
     }
 
@@ -96,8 +92,6 @@ pub fn generate_get_property(
     } else {
         quote::quote! {}
     };
-
-
 
     quote::quote! {
         #[inline(always)]

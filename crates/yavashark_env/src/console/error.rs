@@ -55,7 +55,11 @@ fn error_message_pretty_circular(error: &Error, not: &mut Vec<usize>, realm: &mu
     }
 }
 
-fn error_message_pretty_circular_nl(error: &Error, not: &mut Vec<usize>, realm: &mut Realm) -> String {
+fn error_message_pretty_circular_nl(
+    error: &Error,
+    not: &mut Vec<usize>,
+    realm: &mut Realm,
+) -> String {
     match &error.kind {
         ErrorKind::Type(msg)
         | ErrorKind::Reference(msg)

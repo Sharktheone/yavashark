@@ -63,11 +63,17 @@ impl Object {
         }
     }
 
-    pub fn from_values(values: Vec<(PropertyKey, Value)>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
+    pub fn from_values(
+        values: Vec<(PropertyKey, Value)>,
+        realm: &mut Realm,
+    ) -> Result<ObjectHandle, Error> {
         Ok(ObjectHandle::new(Self::raw_from_values(values, realm)?))
     }
 
-    pub fn raw_from_values(values: Vec<(PropertyKey, Value)>, realm: &mut Realm) -> Result<Self, Error> {
+    pub fn raw_from_values(
+        values: Vec<(PropertyKey, Value)>,
+        realm: &mut Realm,
+    ) -> Result<Self, Error> {
         Ok(Self {
             inner: RefCell::new(MutObject::from_values(values, realm)?),
         })
@@ -95,32 +101,64 @@ impl Object {
 
 #[allow(unused)]
 impl Obj for Object {
-    fn define_property(&self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: crate::value::Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         self.inner_mut()?.define_property(name, value, realm)
-
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        self.inner_mut()?.define_property_attributes(name, value, realm)
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: crate::value::Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        self.inner_mut()?
+            .define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         self.inner()?.resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         self.inner()?.get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         self.inner_mut()?.define_getter(name, callback, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         self.inner_mut()?.define_setter(name, callback, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         self.inner_mut()?.delete_property(name, realm)
     }
 
@@ -144,7 +182,10 @@ impl Obj for Object {
         self.inner()?.values(realm)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         self.inner()?.enumerable_properties(realm)
     }
 
@@ -160,7 +201,11 @@ impl Obj for Object {
         self.inner_mut()?.clear_properties(realm)
     }
 
-    fn get_array_or_done(&self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<crate::value::Value>)> {
+    fn get_array_or_done(
+        &self,
+        idx: usize,
+        realm: &mut Realm,
+    ) -> Res<(bool, Option<crate::value::Value>)> {
         self.inner_mut()?.get_array_or_done(idx, realm)
     }
 
@@ -176,88 +221,87 @@ impl Obj for Object {
         self.inner.borrow().gc_refs()
     }
 
-
     // impl Obj for Object {
-//     fn define_property(&self, name: Value, value: Value) -> Result<(), Error> {
-//         self.inner_mut()?.define_property(name, value)
-//     }
-//
-//     fn define_variable(&self, name: Value, value: Variable) -> Result<(), Error> {
-//         self.inner_mut()?.define_variable(name, value)
-//     }
-//
-//     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-//         self.inner()?.resolve_property(name)
-//     }
-//
-//     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
-//         self.inner()?.get_property(name)
-//     }
-//
-//     fn define_getter(&self, name: Value, value: Value) -> Result<(), Error> {
-//         self.inner_mut()?.define_getter(name, value)
-//     }
-//
-//     fn define_setter(&self, name: Value, value: Value) -> Result<(), Error> {
-//         self.inner_mut()?.define_setter(name, value)
-//     }
-//
-//     fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error> {
-//         self.inner_mut()?.delete_property(name)
-//     }
-//
-//     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
-//         self.inner()?.contains_key(name)
-//     }
-//
-//     fn name(&self) -> String {
-//         self.inner()
-//             .map_or_else(|_| "Object".to_string(), |i| i.name())
-//     }
-//
-//     fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
-//         self.inner()?.to_string(realm)
-//     }
-//
-//     fn to_string_internal(&self) -> Result<YSString, Error> {
-//         self.inner()?.to_string_internal()
-//     }
-//
-//     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
-//         self.inner()?.properties()
-//     }
-//
-//     fn keys(&self) -> Result<Vec<Value>, Error> {
-//         self.inner()?.keys()
-//     }
-//
-//     fn values(&self) -> Result<Vec<Value>, Error> {
-//         self.inner()?.values()
-//     }
-//
-//     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
-//         self.inner()?.get_array_or_done(index)
-//     }
-//
-//     fn clear_values(&self) -> Result<(), Error> {
-//         self.inner_mut()?.clear_values()
-//     }
-//
-//     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
-//         self.inner_mut()?.call(realm, args, this)
-//     }
-//
-//     fn prototype(&self) -> Result<ObjectProperty, Error> {
-//         self.inner()?.prototype()
-//     }
-//
-//     fn constructor(&self) -> Result<ObjectProperty, Error> {
-//         self.inner()?.constructor()
-//     }
-//
-//     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
-//         self.inner().map(|o| o.custom_gc_refs()).unwrap_or_default()
-//     }
+    //     fn define_property(&self, name: Value, value: Value) -> Result<(), Error> {
+    //         self.inner_mut()?.define_property(name, value)
+    //     }
+    //
+    //     fn define_variable(&self, name: Value, value: Variable) -> Result<(), Error> {
+    //         self.inner_mut()?.define_variable(name, value)
+    //     }
+    //
+    //     fn resolve_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
+    //         self.inner()?.resolve_property(name)
+    //     }
+    //
+    //     fn get_property(&self, name: &Value) -> Result<Option<ObjectProperty>, Error> {
+    //         self.inner()?.get_property(name)
+    //     }
+    //
+    //     fn define_getter(&self, name: Value, value: Value) -> Result<(), Error> {
+    //         self.inner_mut()?.define_getter(name, value)
+    //     }
+    //
+    //     fn define_setter(&self, name: Value, value: Value) -> Result<(), Error> {
+    //         self.inner_mut()?.define_setter(name, value)
+    //     }
+    //
+    //     fn delete_property(&self, name: &Value) -> Result<Option<Value>, Error> {
+    //         self.inner_mut()?.delete_property(name)
+    //     }
+    //
+    //     fn contains_key(&self, name: &Value) -> Result<bool, Error> {
+    //         self.inner()?.contains_key(name)
+    //     }
+    //
+    //     fn name(&self) -> String {
+    //         self.inner()
+    //             .map_or_else(|_| "Object".to_string(), |i| i.name())
+    //     }
+    //
+    //     fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
+    //         self.inner()?.to_string(realm)
+    //     }
+    //
+    //     fn to_string_internal(&self) -> Result<YSString, Error> {
+    //         self.inner()?.to_string_internal()
+    //     }
+    //
+    //     fn properties(&self) -> Result<Vec<(Value, Value)>, Error> {
+    //         self.inner()?.properties()
+    //     }
+    //
+    //     fn keys(&self) -> Result<Vec<Value>, Error> {
+    //         self.inner()?.keys()
+    //     }
+    //
+    //     fn values(&self) -> Result<Vec<Value>, Error> {
+    //         self.inner()?.values()
+    //     }
+    //
+    //     fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+    //         self.inner()?.get_array_or_done(index)
+    //     }
+    //
+    //     fn clear_values(&self) -> Result<(), Error> {
+    //         self.inner_mut()?.clear_values()
+    //     }
+    //
+    //     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> Result<Value, Error> {
+    //         self.inner_mut()?.call(realm, args, this)
+    //     }
+    //
+    //     fn prototype(&self) -> Result<ObjectProperty, Error> {
+    //         self.inner()?.prototype()
+    //     }
+    //
+    //     fn constructor(&self) -> Result<ObjectProperty, Error> {
+    //         self.inner()?.constructor()
+    //     }
+    //
+    //     unsafe fn custom_gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
+    //         self.inner().map(|o| o.custom_gc_refs()).unwrap_or_default()
+    //     }
 }
 
 impl MutObject {
@@ -374,7 +418,10 @@ impl MutObject {
         let (i, found) = self.array_position(index);
 
         if found {
-            return self.array.get(i).and_then(|v| self.values.get(v.1).map(|p| p.property()));
+            return self
+                .array
+                .get(i)
+                .and_then(|v| self.values.get(v.1).map(|p| p.property()));
         }
 
         None
@@ -447,7 +494,10 @@ impl MutObject {
         }
     }
 
-    pub fn from_values(values: Vec<(PropertyKey, Value)>, realm: &mut Realm) -> Result<Self, Error> {
+    pub fn from_values(
+        values: Vec<(PropertyKey, Value)>,
+        realm: &mut Realm,
+    ) -> Result<Self, Error> {
         let mut object = Self::new(realm);
 
         for (key, value) in values {
@@ -493,9 +543,13 @@ impl MutObject {
     }
 }
 
-
 impl MutObj for MutObject {
-    fn define_property(&mut self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &mut self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, value);
             return Ok(DefinePropertyResult::Handled);
@@ -528,7 +582,12 @@ impl MutObj for MutObject {
         Ok(DefinePropertyResult::Handled)
     }
 
-    fn define_property_attributes(&mut self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &mut self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, value);
             return Ok(DefinePropertyResult::Handled);
@@ -563,7 +622,11 @@ impl MutObj for MutObject {
         Ok(DefinePropertyResult::Handled)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             let val: Value = self.prototype.clone().into();
             return Ok(Some(val.into()));
@@ -581,12 +644,18 @@ impl MutObj for MutObject {
             .get::<PropertyKey>(&name.clone().into())
             .and_then(|idx| self.values.get(*idx).map(|v| v.property()))
             .or_else(|| match &self.prototype {
-                ObjectOrNull::Object(o) => o.resolve_property_no_get_set(name, realm).ok().flatten(), //TODO: this is wrong, we need a realm here!
+                ObjectOrNull::Object(o) => {
+                    o.resolve_property_no_get_set(name, realm).ok().flatten()
+                } //TODO: this is wrong, we need a realm here!
                 _ => None,
             }))
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             let val: Value = self.prototype.clone().into();
             return Ok(Some(val.into()));
@@ -603,7 +672,12 @@ impl MutObj for MutObject {
         Ok(None)
     }
 
-    fn define_getter(&mut self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &mut self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, ObjectProperty::getter(value.into()));
             return Ok(());
@@ -628,7 +702,12 @@ impl MutObj for MutObject {
         Ok(())
     }
 
-    fn define_setter(&mut self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &mut self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if let InternalPropertyKey::Index(n) = name {
             self.insert_array(n, ObjectProperty::setter(value.into()));
             return Ok(());
@@ -653,7 +732,11 @@ impl MutObj for MutObject {
         Ok(())
     }
 
-    fn delete_property(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &mut self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(None);
         }
@@ -692,7 +775,11 @@ impl MutObj for MutObject {
         Ok(self.properties.contains_key::<PropertyKey>(&name.into()))
     }
 
-    fn contains_key(&mut self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
+    fn contains_key(
+        &mut self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<bool, Error> {
         if matches!(&name, InternalPropertyKey::String(str) if str == "__proto__") {
             return Ok(true);
         }
@@ -701,7 +788,10 @@ impl MutObj for MutObject {
             return Ok(self.contains_array_key(n));
         }
 
-        if self.properties.contains_key::<PropertyKey>(&name.clone().into()) {
+        if self
+            .properties
+            .contains_key::<PropertyKey>(&name.clone().into())
+        {
             return Ok(true);
         }
 
@@ -750,7 +840,10 @@ impl MutObj for MutObject {
         //TODO: getter (and setter) values
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         Ok(self
             .properties
             .iter()
@@ -764,7 +857,6 @@ impl MutObj for MutObject {
                 }
             })
             .collect())
-
     }
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
@@ -863,8 +955,6 @@ impl MutObj for MutObject {
     // }
 }
 
-
-
 // #[allow(unused)]
 // impl MutObj for MutObject {
 //     fn define_property(&mut self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
@@ -947,10 +1037,6 @@ impl MutObj for MutObject {
 //         todo!()
 //     }
 // }
-
-
-
-
 
 // #[cfg(test)]
 // mod tests {

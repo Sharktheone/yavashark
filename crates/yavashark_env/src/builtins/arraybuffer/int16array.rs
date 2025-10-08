@@ -37,5 +37,3 @@ impl Int16Array {
         Ok(Self::new(realm, ty)?.into_object())
     }
 }
-
-

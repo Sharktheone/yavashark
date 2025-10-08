@@ -8,7 +8,6 @@ use std::fmt::Debug;
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 
-
 pub enum DefinePropertyResult {
     Handled,
     ReadOnly,
@@ -19,7 +18,6 @@ pub enum Property {
     Value(Variable),
     Getter(ObjectHandle),
 }
-
 
 pub trait ObjV2: Debug + 'static {
     fn define_property(
@@ -197,7 +195,6 @@ pub trait ObjV2: Debug + 'static {
     }
 
     fn seal(&self) -> Res;
-
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
 }

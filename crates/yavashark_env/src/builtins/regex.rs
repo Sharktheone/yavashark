@@ -517,7 +517,12 @@ impl RegExp {
 }
 
 impl PrettyObjectOverride for RegExp {
-    fn pretty_inline(&self, _obj: &crate::value::Object, _not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        _not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = String::new();
         s.push('/');
         let escaped = escape_pattern(&self.original_source);
@@ -529,7 +534,7 @@ impl PrettyObjectOverride for RegExp {
 
     fn pretty_multiline(
         &self,
-        obj: &crate::value::Object, 
+        obj: &crate::value::Object,
         not: &mut Vec<usize>,
         realm: &mut Realm,
     ) -> Option<String> {

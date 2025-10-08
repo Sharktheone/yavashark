@@ -21,26 +21,40 @@ impl Interpreter {
         match val {
             DeclRet::Single(name, value) => {
                 scope.scope.declare_var(name.clone(), value.copy(), realm);
-                scope.module.exports.define_property(name.into(), value, realm); //TODO: if the value changes, the export should change too
+                scope
+                    .module
+                    .exports
+                    .define_property(name.into(), value, realm); //TODO: if the value changes, the export should change too
             }
             DeclRet::Var(vars) => {
                 for var in vars {
                     match var {
                         var::Variable::Var(name, value) => {
-                            scope.scope.declare_global_var(name.clone(), value.copy(), realm);
-                            scope.module.exports.define_property(name.into(), value, realm);
+                            scope
+                                .scope
+                                .declare_global_var(name.clone(), value.copy(), realm);
+                            scope
+                                .module
+                                .exports
+                                .define_property(name.into(), value, realm);
                             //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Let(name, value) => {
                             scope.scope.declare_var(name.clone(), value.copy(), realm);
-                            scope.module.exports.define_property(name.into(), value, realm);
+                            scope
+                                .module
+                                .exports
+                                .define_property(name.into(), value, realm);
                             //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Const(name, value) => {
                             scope
                                 .scope
                                 .declare_read_only_var(name.clone(), value.copy(), realm);
-                            scope.module.exports.define_property(name.into(), value, realm);
+                            scope
+                                .module
+                                .exports
+                                .define_property(name.into(), value, realm);
                             //TODO: if the value changes, the export should change too
                         }
                     }
@@ -120,10 +134,11 @@ impl Interpreter {
                     scope
                         .scope
                         .declare_var(name.clone(), module.exports.clone().into(), realm)?;
-                    scope
-                        .module
-                        .exports
-                        .define_property(name.into(), module.exports.clone().into(), realm);
+                    scope.module.exports.define_property(
+                        name.into(),
+                        module.exports.clone().into(),
+                        realm,
+                    );
                     //TODO: if the value changes, the export should change too
                 }
             }
@@ -185,7 +200,10 @@ impl Interpreter {
         let module = module.clone();
 
         for (name, val) in module.exports.properties(realm)? {
-            scope.module.exports.define_property(name.into(), val, realm); //TODO: if the value changes, the export should change too
+            scope
+                .module
+                .exports
+                .define_property(name.into(), val, realm); //TODO: if the value changes, the export should change too
         }
 
         Ok(Value::Undefined)

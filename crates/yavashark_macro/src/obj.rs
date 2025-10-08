@@ -46,7 +46,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let property = &conf.property;
     let define_property_result = &conf.define_property_result;
 
-
     let Fields::Named(fields) = &mut input.fields else {
         return syn::Error::new(input.span(), "Object must have named fields")
             .to_compile_error()
@@ -215,7 +214,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         quote! {
             //TODO
         }
-
     };
 
     let constructor = if args.constructor {

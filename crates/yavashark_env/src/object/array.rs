@@ -3,9 +3,12 @@ use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
-use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
+use crate::value::{
+    BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl,
+    ObjectOrNull, Property,
+};
 use crate::MutObject;
+use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::cmp::Ordering;
 use std::ops::{Deref, DerefMut};
@@ -34,7 +37,12 @@ impl ObjectImpl for Array {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
             let length = value.as_number() as usize;
 
@@ -43,7 +51,8 @@ impl ObjectImpl for Array {
             return Ok(DefinePropertyResult::Handled);
         }
 
-        self.get_wrapped_object().define_property(name, value, realm)?;
+        self.get_wrapped_object()
+            .define_property(name, value, realm)?;
 
         let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
         self.length.set(len);
@@ -51,7 +60,12 @@ impl ObjectImpl for Array {
         Ok(DefinePropertyResult::Handled)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
             let length = value.value.as_number() as usize;
 
@@ -60,7 +74,8 @@ impl ObjectImpl for Array {
             return Ok(DefinePropertyResult::Handled);
         }
 
-        self.get_wrapped_object().define_property_attributes(name, value, realm)?;
+        self.get_wrapped_object()
+            .define_property_attributes(name, value, realm)?;
 
         let len = self.get_inner().array.last().map_or(0, |(i, _)| *i + 1);
         self.length.set(len);
@@ -68,15 +83,25 @@ impl ObjectImpl for Array {
         Ok(DefinePropertyResult::Handled)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(Some(Property::Value(Variable::write(self.length.get().into()))));
+            return Ok(Some(Property::Value(Variable::write(
+                self.length.get().into(),
+            ))));
         }
 
         self.get_wrapped_object().resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
             return Ok(Some(Property::Value(self.length.get().into())));
         }
@@ -1089,7 +1114,7 @@ impl Array {
             let (right, right_val) = this.get_array_or_done(len - idx - 1, realm)?;
 
             if let Some(left_val) = left_val {
-                this.define_property((len - idx -1).into(), left_val, realm)?;
+                this.define_property((len - idx - 1).into(), left_val, realm)?;
             }
 
             if let Some(right_val) = right_val {
@@ -1426,9 +1451,7 @@ impl Array {
         val: &Value,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let len = this
-            .get_property("length", realm)?
-            .to_number(realm)? as usize;
+        let len = this.get_property("length", realm)?.to_number(realm)? as usize;
 
         let mut vals = Vec::with_capacity(len);
 
@@ -1510,7 +1533,12 @@ impl Array {
 }
 
 impl PrettyObjectOverride for Array {
-    fn pretty_inline(&self, _obj: &crate::value::Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let Ok(inner) = self.inner.try_borrow() else {
             return None;
         };

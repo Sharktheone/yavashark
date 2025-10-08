@@ -38,7 +38,7 @@ fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
         obj.resolve_property("constructor", realm)
             .ok()
             .flatten()
-            .unwrap_or(Value::Undefined)
+            .unwrap_or(Value::Undefined),
     )
 }
 
@@ -90,25 +90,44 @@ pub fn get_temporal(
         func_proto.clone().into(),
         realm,
     )?;
-    obj.define_property_attributes("PlainDateTime".into(), constr(&plain_date_time, realm), realm)?;
+    obj.define_property_attributes(
+        "PlainDateTime".into(),
+        constr(&plain_date_time, realm),
+        realm,
+    )?;
 
     let plain_month_day = PlainMonthDay::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
         realm,
     )?;
-    obj.define_property_attributes("PlainMonthDay".into(), constr(&plain_month_day, realm), realm)?;
+    obj.define_property_attributes(
+        "PlainMonthDay".into(),
+        constr(&plain_month_day, realm),
+        realm,
+    )?;
 
     let plain_year_month = PlainYearMonth::initialize_proto(
         Object::raw_with_proto(obj_proto.clone()),
         func_proto.clone().into(),
         realm,
     )?;
-    obj.define_property_attributes("PlainYearMonth".into(), constr(&plain_year_month, realm), realm)?;
+    obj.define_property_attributes(
+        "PlainYearMonth".into(),
+        constr(&plain_year_month, realm),
+        realm,
+    )?;
 
-    let zoned_date_time =
-        ZonedDateTime::initialize_proto(Object::raw_with_proto(obj_proto), func_proto.into(), realm)?;
-    obj.define_property_attributes("ZonedDateTime".into(), constr(&zoned_date_time, realm), realm)?;
+    let zoned_date_time = ZonedDateTime::initialize_proto(
+        Object::raw_with_proto(obj_proto),
+        func_proto.into(),
+        realm,
+    )?;
+    obj.define_property_attributes(
+        "ZonedDateTime".into(),
+        constr(&zoned_date_time, realm),
+        realm,
+    )?;
 
     Ok((
         obj,

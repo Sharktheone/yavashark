@@ -87,9 +87,10 @@ impl Config {
         value_result
             .segments
             .push(PathSegment::from(Ident::new("ValueResult", span)));
-        
+
         let mut res = env_path.clone();
-        res.segments.push(PathSegment::from(Ident::new("Res", span)));
+        res.segments
+            .push(PathSegment::from(Ident::new("Res", span)));
 
         let mut object_property = env_path.clone();
         object_property
@@ -104,12 +105,11 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("TryIntoValue", span)));
 
-
         let mut into_value = env_path.clone();
         into_value
             .segments
             .push(PathSegment::from(Ident::new("value", span)));
-        
+
         into_value
             .segments
             .push(PathSegment::from(Ident::new("IntoValue", span)));
@@ -147,12 +147,12 @@ impl Config {
         from_value_output
             .segments
             .push(PathSegment::from(Ident::new("FromValueOutput", span)));
-        
+
         let mut property_key = env_path.clone();
         property_key
             .segments
             .push(PathSegment::from(Ident::new("PropertyKey", span)));
-        
+
         let mut internal_property_key = env_path.clone();
         internal_property_key
             .segments

@@ -165,7 +165,8 @@ pub fn value_to_plain_month_day(
 
             let overflow = overflow.unwrap_or(Overflow::Constrain);
 
-            if (obj.contains_key("month".into(), realm)? || obj.contains_key("monthCode".into(), realm)?)
+            if (obj.contains_key("month".into(), realm)?
+                || obj.contains_key("monthCode".into(), realm)?)
                 && obj.contains_key("day".into(), realm)?
             {
                 let year = obj
@@ -253,7 +254,12 @@ pub fn value_to_partial_date(value: &ObjectHandle, realm: &mut Realm) -> Res<Par
 }
 
 impl PrettyObjectOverride for PlainMonthDay {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self.month_day.to_string();
 
         fmt_properties_to(obj, &mut s, not, realm);

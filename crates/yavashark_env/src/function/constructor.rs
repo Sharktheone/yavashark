@@ -132,8 +132,11 @@ impl NativeConstructor {
 
         let handle = ObjectHandle::new(this);
 
-        let _ =
-            handle.define_property_attributes("length".into(), Variable::config(Value::Number(len as f64)), realm);
+        let _ = handle.define_property_attributes(
+            "length".into(),
+            Variable::config(Value::Number(len as f64)),
+            realm,
+        );
 
         #[allow(clippy::expect_used)]
         {

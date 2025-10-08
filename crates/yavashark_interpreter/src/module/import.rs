@@ -47,7 +47,11 @@ impl Interpreter {
                 }
 
                 ImportSpecifier::Namespace(ns) => {
-                    scope.declare_var(ns.local.to_string(), module.exports.clone().into(), realm)?;
+                    scope.declare_var(
+                        ns.local.to_string(),
+                        module.exports.clone().into(),
+                        realm,
+                    )?;
                 }
             }
         }

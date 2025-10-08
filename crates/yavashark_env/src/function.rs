@@ -1,6 +1,9 @@
 use crate::realm::Realm;
 use crate::value::{MutObj, Obj, ObjectImpl};
-use crate::{Error, MutObject, Object, ObjectHandle, ObjectOrNull, ObjectProperty, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, MutObject, Object, ObjectHandle, ObjectOrNull, ObjectProperty, Res, Value, ValueResult,
+    Variable,
+};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
@@ -28,7 +31,6 @@ pub struct NativeFunction {
     pub constructor: bool,
     inner: RefCell<MutNativeFunction>,
 }
-
 
 // #[custom_props(constructor)]
 impl ObjectImpl for NativeFunction {
@@ -70,8 +72,10 @@ impl ObjectImpl for NativeFunction {
             )));
         }
 
-        let proto = Obj::resolve_property(self, "prototype".into(), realm)?
-            .map_or_else(|| realm.intrinsics.func.clone().into(), |p| p.assert_value());
+        let proto = Obj::resolve_property(self, "prototype".into(), realm)?.map_or_else(
+            || realm.intrinsics.func.clone().into(),
+            |p| p.assert_value(),
+        );
 
         let proto: ObjectOrNull = proto.value.try_into()?;
 
@@ -182,8 +186,10 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
-        let _ = handle.define_property_attributes("length".into(), Variable::config(len.into()), realm);
+        let _ =
+            handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+        let _ =
+            handle.define_property_attributes("length".into(), Variable::config(len.into()), realm);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -254,7 +260,8 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+        let _ =
+            handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
 
         let constructor = ObjectProperty::new(handle.clone().into());
 
@@ -289,8 +296,13 @@ impl NativeFunction {
         };
 
         let handle = ObjectHandle::new(this);
-        let _ = handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
-        let _ = handle.define_property_attributes("length".into(), Variable::config(Value::from(len)), realm);
+        let _ =
+            handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
+        let _ = handle.define_property_attributes(
+            "length".into(),
+            Variable::config(Value::from(len)),
+            realm,
+        );
 
         let constructor = ObjectProperty::new(handle.clone().into());
 

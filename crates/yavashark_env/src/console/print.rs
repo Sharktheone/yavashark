@@ -2,13 +2,23 @@ use colored::Colorize;
 
 use crate::array::Array;
 use crate::builtins::RegExp;
-use crate::{PrimitiveValue, PropertyKey, Realm};
 use crate::value::{Object, Value};
+use crate::{PrimitiveValue, PropertyKey, Realm};
 
 pub trait PrettyObjectOverride {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String>;
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String>;
 
-    fn pretty_multiline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_multiline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         self.pretty_inline(obj, not, realm)
     }
 }
@@ -116,7 +126,9 @@ impl PrettyPrint for Object {
             match prim {
                 PrimitiveValue::Null => "[Null] ".bright_green().to_string(),
                 PrimitiveValue::Undefined => "[Undefined] ".bright_green().to_string(),
-                PrimitiveValue::String(s) => format!("[String: \"{s}\"] ").bright_green().to_string(),
+                PrimitiveValue::String(s) => {
+                    format!("[String: \"{s}\"] ").bright_green().to_string()
+                }
                 PrimitiveValue::Number(n) => format!("[Number: {n}] ").bright_green().to_string(),
                 PrimitiveValue::Boolean(b) => format!("[Boolean: {b}] ").bright_green().to_string(),
                 _ => "[Primitive] ".bright_green().to_string(),
@@ -162,88 +174,88 @@ impl PrettyPrint for Object {
     fn pretty_print_circular_nl(&self, not: &mut Vec<usize>, realm: &mut Realm) -> String {
         // Try type-specific overrides first
         if let Some(array) = self.downcast::<crate::object::array::Array>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*array, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*array, self, not, realm,
+            ) {
                 return s;
             }
         }
         if let Some(re) = self.downcast::<crate::builtins::RegExp>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*re, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*re, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::Date>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::Duration>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::Instant>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::PlainDate>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::PlainDateTime>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::PlainMonthDay>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::PlainTime>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::PlainYearMonth>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
 
         if let Some(date) = self.downcast::<crate::builtins::temporal::ZonedDateTime>() {
-            if let Some(s) =
-                crate::console::print::PrettyObjectOverride::pretty_multiline(&*date, self, not, realm)
-            {
+            if let Some(s) = crate::console::print::PrettyObjectOverride::pretty_multiline(
+                &*date, self, not, realm,
+            ) {
                 return s;
             }
         }
@@ -264,7 +276,9 @@ impl PrettyPrint for Object {
             match prim {
                 PrimitiveValue::Null => "[Null]".bright_green().to_string(),
                 PrimitiveValue::Undefined => "[Undefined]".bright_green().to_string(),
-                PrimitiveValue::String(s) => format!("[String: \"{s}\"]").bright_green().to_string(),
+                PrimitiveValue::String(s) => {
+                    format!("[String: \"{s}\"]").bright_green().to_string()
+                }
                 PrimitiveValue::Number(n) => format!("[Number: {n}]").bright_green().to_string(),
                 PrimitiveValue::Boolean(b) => format!("[Boolean: {b}]").bright_green().to_string(),
                 _ => "[Primitive]".bright_green().to_string(),

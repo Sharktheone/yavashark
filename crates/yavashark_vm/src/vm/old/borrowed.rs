@@ -8,8 +8,10 @@ use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData, OutputDataTy
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult};
 use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    ControlFlow, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult,
+};
 
 pub struct OldBorrowedVM<'a> {
     regs: Registers,

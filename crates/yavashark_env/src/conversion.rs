@@ -1,6 +1,9 @@
 use crate::value::ops::BigIntOrNumber;
 use crate::value::{fmt_num, ops::ToNumber, BoxedObj, FromValue, Hint, IntoValue, Obj};
-use crate::{Error, GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value, ValueResult};
+use crate::{
+    Error, GCd, InternalPropertyKey, ObjectHandle, PropertyKey, Realm, Res, Symbol, Value,
+    ValueResult,
+};
 use num_bigint::BigInt;
 use std::fmt::Display;
 use std::mem;

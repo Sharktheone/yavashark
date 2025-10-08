@@ -87,4 +87,3 @@ impl Atomics {
         Ok(obj)
     }
 }
-

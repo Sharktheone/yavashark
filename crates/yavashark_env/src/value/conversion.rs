@@ -7,7 +7,6 @@ use std::rc::Rc;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
 
-
 impl From<&'static str> for Value {
     fn from(s: &'static str) -> Self {
         Self::String(YSString::new_static(s))
@@ -260,7 +259,6 @@ impl From<isize> for PrimitiveValue {
     }
 }
 
-
 impl From<f16> for PrimitiveValue {
     fn from(n: f16) -> Self {
         Self::Number(f64::from(n))
@@ -305,9 +303,6 @@ impl From<&Symbol> for PrimitiveValue {
 //         }
 //     }
 // }
-
-
-
 
 pub trait FromValue: Sized {
     fn from_value(value: Value) -> Result<Self, Error>;

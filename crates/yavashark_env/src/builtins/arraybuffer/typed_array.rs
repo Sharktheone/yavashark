@@ -16,7 +16,10 @@ use crate::builtins::unit8array::Uint8Array;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
 use crate::value::{DefinePropertyResult, MutObj, Obj, Property};
-use crate::{Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value,
+    ValueResult, Variable,
+};
 use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use conv::to_value;
 use half::f16;
@@ -108,7 +111,12 @@ impl crate::value::ObjectImpl for TypedArray {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         // if self.is_detached() {
         //     return self.get_wrapped_object().define_property(name, value, realm)
         // }
@@ -127,11 +135,17 @@ impl crate::value::ObjectImpl for TypedArray {
 
             Ok(DefinePropertyResult::Handled)
         } else {
-            self.get_wrapped_object().define_property(name, value, realm)
+            self.get_wrapped_object()
+                .define_property(name, value, realm)
         }
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         // if self.is_detached() {
         //     return self.get_wrapped_object().define_property_attributes(name, value, realm);
         // }
@@ -150,11 +164,16 @@ impl crate::value::ObjectImpl for TypedArray {
 
             Ok(DefinePropertyResult::Handled)
         } else {
-            self.get_wrapped_object().define_property_attributes(name, value, realm)
+            self.get_wrapped_object()
+                .define_property_attributes(name, value, realm)
         }
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if self.is_detached() {
                 return self.get_wrapped_object().resolve_property(name, realm);
@@ -168,7 +187,11 @@ impl crate::value::ObjectImpl for TypedArray {
         self.get_wrapped_object().resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if self.is_detached() {
             return self.get_wrapped_object().get_own_property(name, realm);
         }
@@ -182,7 +205,12 @@ impl crate::value::ObjectImpl for TypedArray {
         self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if self.is_detached() {
             return self.get_wrapped_object().define_getter(name, value, realm);
         }
@@ -194,7 +222,12 @@ impl crate::value::ObjectImpl for TypedArray {
         self.get_wrapped_object().define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if self.is_detached() {
             return self.get_wrapped_object().define_setter(name, value, realm);
         }
@@ -206,7 +239,11 @@ impl crate::value::ObjectImpl for TypedArray {
         self.get_wrapped_object().define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if self.is_detached() {
             return self.get_wrapped_object().delete_property(name, realm);
         }
@@ -504,9 +541,10 @@ impl TypedArray {
 
     #[call_constructor]
     pub fn construct() -> Res {
-        Err(Error::ty("Abstract class TypedArray not directly constructable") )
+        Err(Error::ty(
+            "Abstract class TypedArray not directly constructable",
+        ))
     }
-
 
     #[get("buffer")]
     pub fn get_buffer(&self) -> ObjectHandle {
@@ -765,7 +803,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call( args, this_arg.copy(), realm)?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     return Ok(idx as isize);

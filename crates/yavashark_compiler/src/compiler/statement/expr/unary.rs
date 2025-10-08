@@ -27,7 +27,6 @@ impl Compiler {
             UnaryOp::Plus => {
                 let data = self.compile_expr_data_acc(&expr.arg)?;
 
-
                 if let Some(out) = out {
                     self.instructions.push(Instruction::to_number(data, out));
                 }

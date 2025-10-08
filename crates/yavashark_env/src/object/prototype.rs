@@ -9,9 +9,12 @@ use yavashark_garbage::GcRef;
 
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
-use crate::realm::Realm;
-use crate::{InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, ObjectProperty, PropertyKey, Res, Value, Variable};
 use crate::realm::resolve::ResolveModuleResult;
+use crate::realm::Realm;
+use crate::{
+    InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, ObjectProperty, PropertyKey, Res,
+    Value, Variable,
+};
 
 pub mod common;
 
@@ -71,25 +74,34 @@ impl Prototype {
         }
     }
 
-    pub(crate) fn initialize(&self, func: ObjectHandle, this: ObjectHandle, realm: &mut Realm) -> Res {
+    pub(crate) fn initialize(
+        &self,
+        func: ObjectHandle,
+        this: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let obj_constructor = ObjectConstructor::new(this.clone(), func.clone(), realm)?;
 
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter = Variable::write_config(
-            NativeFunction::with_proto("__defineGetter__", define_getter, func.clone(), realm).into(),
+            NativeFunction::with_proto("__defineGetter__", define_getter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.defined_setter = Variable::write_config(
-            NativeFunction::with_proto("__defineSetter__", define_setter, func.clone(), realm).into(),
+            NativeFunction::with_proto("__defineSetter__", define_setter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.lookup_getter = Variable::write_config(
-            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.clone(), realm).into(),
+            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.lookup_setter = Variable::write_config(
-            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.clone(), realm).into(),
+            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.constructor = obj_constructor.into();
@@ -98,10 +110,15 @@ impl Prototype {
             .constructor
             .value
             .as_object()?
-            .define_property_attributes("prototype".into(), Variable::new_read_only(this.into()), realm)?;
+            .define_property_attributes(
+                "prototype".into(),
+                Variable::new_read_only(this.into()),
+                realm,
+            )?;
 
         this_borrow.has_own_property =
-            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.clone(), realm).into();
+            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.clone(), realm)
+                .into();
         this_borrow.get_own_property_descriptor = NativeFunction::with_proto(
             "getOwnPropertyDescriptor",
             get_own_property_descriptor,
@@ -110,7 +127,8 @@ impl Prototype {
         )
         .into();
         this_borrow.is_prototype_of =
-            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.clone(), realm).into();
+            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.clone(), realm)
+                .into();
         this_borrow.property_is_enumerable = NativeFunction::with_proto(
             "propertyIsEnumerable",
             property_is_enumerable,
@@ -119,7 +137,8 @@ impl Prototype {
         )
         .into();
         this_borrow.to_locale_string =
-            NativeFunction::with_proto("toLocaleString", to_locale_string, func.clone(), realm).into();
+            NativeFunction::with_proto("toLocaleString", to_locale_string, func.clone(), realm)
+                .into();
         this_borrow.to_string =
             NativeFunction::with_proto("toString", to_string, func.clone(), realm).into();
         this_borrow.value_of = NativeFunction::with_proto("valueOf", value_of, func, realm).into();
@@ -143,7 +162,12 @@ impl Prototype {
 }
 
 impl Obj for Prototype {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         let mut this = self.inner.try_borrow_mut()?;
 
         if let InternalPropertyKey::String(name) = &name {
@@ -214,13 +238,22 @@ impl Obj for Prototype {
         this.object.define_property(name, value, realm)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let this = self.inner.try_borrow()?;
 
         if let InternalPropertyKey::String(ref name) = name {
@@ -235,7 +268,9 @@ impl Obj for Prototype {
                     return Ok(Some(this.get_own_property_descriptor.value.clone().into()))
                 }
                 "isPrototypeOf" => return Ok(Some(this.is_prototype_of.value.clone().into())),
-                "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.value.clone().into())),
+                "propertyIsEnumerable" => {
+                    return Ok(Some(this.property_is_enumerable.value.clone().into()))
+                }
                 "toLocaleString" => return Ok(Some(this.to_locale_string.value.clone().into())),
                 "toString" => return Ok(Some(this.to_string.value.clone().into())),
                 "valueOf" => return Ok(Some(this.value_of.value.clone().into())),
@@ -245,7 +280,11 @@ impl Obj for Prototype {
         this.object.resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let this = self.inner.try_borrow()?;
 
         if let InternalPropertyKey::String(ref name) = name {
@@ -260,7 +299,9 @@ impl Obj for Prototype {
                     return Ok(Some(this.get_own_property_descriptor.value.clone().into()))
                 }
                 "isPrototypeOf" => return Ok(Some(this.is_prototype_of.value.clone().into())),
-                "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.value.clone().into())),
+                "propertyIsEnumerable" => {
+                    return Ok(Some(this.property_is_enumerable.value.clone().into()))
+                }
                 "toLocaleString" => return Ok(Some(this.to_locale_string.value.clone().into())),
                 "toString" => return Ok(Some(this.to_string.value.clone().into())),
                 "valueOf" => return Ok(Some(this.value_of.value.clone().into())),
@@ -271,19 +312,33 @@ impl Obj for Prototype {
         this.object.get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
                 "__defineGetter__" => {
@@ -357,7 +412,6 @@ impl Obj for Prototype {
     }
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-
         if let InternalPropertyKey::String(ref name) = name {
             if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
                 return Ok(true);
@@ -409,7 +463,10 @@ impl Obj for Prototype {
             PropertyKey::String("__lookupSetter__".into()),
             this.lookup_setter.value.copy(),
         ));
-        props.push((PropertyKey::String("constructor".into()), this.constructor.value.copy()));
+        props.push((
+            PropertyKey::String("constructor".into()),
+            this.constructor.value.copy(),
+        ));
         props.push((
             PropertyKey::String("hasOwnProperty".into()),
             this.has_own_property.value.copy(),
@@ -430,8 +487,14 @@ impl Obj for Prototype {
             PropertyKey::String("toLocaleString".into()),
             this.to_locale_string.value.copy(),
         ));
-        props.push((PropertyKey::String("toString".into()), this.to_string.value.copy()));
-        props.push((PropertyKey::String("valueOf".into()), this.value_of.value.copy()));
+        props.push((
+            PropertyKey::String("toString".into()),
+            this.to_string.value.copy(),
+        ));
+        props.push((
+            PropertyKey::String("valueOf".into()),
+            this.value_of.value.copy(),
+        ));
 
         Ok(props)
     }
@@ -469,7 +532,10 @@ impl Obj for Prototype {
         Ok(values)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let this = self.inner.try_borrow()?;
 
         let props = this.object.enumerable_properties(realm)?;

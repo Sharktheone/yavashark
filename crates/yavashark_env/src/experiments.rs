@@ -20,7 +20,11 @@ pub fn init(obj: &ObjectHandle, realm: &mut Realm) -> Res {
     obj.define_property_attributes("tcp".into(), Tcp::new(realm)?.into(), realm)?;
     obj.define_property_attributes("io".into(), io::Io::new(realm)?.into(), realm)?;
     obj.define_property_attributes("time".into(), time::Timer::new(realm)?.into(), realm)?;
-    obj.define_property_attributes("setTimeout".into(), timers::get_set_timeout(realm).into(), realm)?;
+    obj.define_property_attributes(
+        "setTimeout".into(),
+        timers::get_set_timeout(realm).into(),
+        realm,
+    )?;
 
     #[cfg(feature = "gui")]
     gui::init(realm)?;

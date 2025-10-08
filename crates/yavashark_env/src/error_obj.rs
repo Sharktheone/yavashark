@@ -133,5 +133,3 @@ impl ErrorObj {
         this.downcast::<Self>().is_some()
     }
 }
-
-

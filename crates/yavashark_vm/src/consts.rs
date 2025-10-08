@@ -7,9 +7,9 @@ use yavashark_bytecode::{
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Value, ValueResult};
-use yavashark_env::value::property_key::IntoPropertyKey;
 
 pub trait ConstIntoValue {
     fn into_value(self, vm: &mut impl VM) -> ValueResult;
@@ -105,7 +105,12 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                         vm.get_realm(),
                     )?;
 
-                    obj.define_getter(key.into_value(vm)?.into_internal_property_key(vm.get_realm())?, optim.into(), vm.get_realm())?;
+                    obj.define_getter(
+                        key.into_value(vm)?
+                            .into_internal_property_key(vm.get_realm())?,
+                        optim.into(),
+                        vm.get_realm(),
+                    )?;
 
                     continue;
                 }
@@ -126,7 +131,12 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                         vm.get_realm(),
                     )?;
 
-                    obj.define_setter(key.into_value(vm)?.into_internal_property_key(vm.get_realm())?, optim.into(), vm.get_realm())?;
+                    obj.define_setter(
+                        key.into_value(vm)?
+                            .into_internal_property_key(vm.get_realm())?,
+                        optim.into(),
+                        vm.get_realm(),
+                    )?;
 
                     continue;
                 }
@@ -134,7 +144,12 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                 _ => {}
             }
 
-            obj.define_property(key.into_value(vm)?.into_internal_property_key(vm.get_realm())?, value.into_value(vm)?, vm.get_realm())?;
+            obj.define_property(
+                key.into_value(vm)?
+                    .into_internal_property_key(vm.get_realm())?,
+                value.into_value(vm)?,
+                vm.get_realm(),
+            )?;
         }
 
         Ok(obj.into())

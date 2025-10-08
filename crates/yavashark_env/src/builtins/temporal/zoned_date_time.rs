@@ -648,7 +648,12 @@ pub fn partial_zoned_date_time(obj: &ObjectHandle, realm: &mut Realm) -> Res<Par
 }
 
 impl PrettyObjectOverride for ZonedDateTime {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self.date.to_string();
 
         fmt_properties_to(obj, &mut s, not, realm);

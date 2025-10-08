@@ -30,9 +30,9 @@ pub mod task_queue;
 pub mod tests;
 pub mod utils;
 // #[cfg(feature = "js")]
-pub mod value;
-pub mod inline_props;
 pub mod import;
+pub mod inline_props;
+pub mod value;
 
 pub mod partial_init;
 

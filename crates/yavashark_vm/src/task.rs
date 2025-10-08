@@ -108,7 +108,9 @@ impl BytecodeAsyncTask {
                                 .clone()
                                 .unwrap_or(Value::Undefined);
 
-                            self.state.as_mut().map(|state| state.continue_async(val, realm));
+                            self.state
+                                .as_mut()
+                                .map(|state| state.continue_async(val, realm));
 
                             return self.poll_next(realm);
                         }

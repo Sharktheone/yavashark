@@ -18,7 +18,7 @@ pub struct Protos {
 pub fn get_signal(
     obj_proto: ObjectHandle,
     func_proto: ObjectHandle,
-    realm: &mut Realm
+    realm: &mut Realm,
 ) -> Res<(ObjectHandle, Protos)> {
     let obj = Object::with_proto(obj_proto.clone());
 
@@ -35,8 +35,12 @@ pub fn get_signal(
 
     let computed = Computed::initialize_proto(proto, func_proto.into(), realm)?;
 
-    let state_constructor = state.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined);
-    let computed_constructor = computed.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined);
+    let state_constructor = state
+        .resolve_property("constructor", realm)?
+        .unwrap_or(Value::Undefined);
+    let computed_constructor = computed
+        .resolve_property("constructor", realm)?
+        .unwrap_or(Value::Undefined);
 
     obj.define_property("State".into(), state_constructor, realm);
 

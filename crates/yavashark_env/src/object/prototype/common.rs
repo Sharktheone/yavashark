@@ -1,9 +1,9 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
 use crate::realm::Realm;
-use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
-use crate::value::Property;
 use crate::value::property_key::IntoPropertyKey;
+use crate::value::Property;
+use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.len() < 2 {
@@ -98,8 +98,7 @@ pub fn get_own_property_descriptor(
         return Ok(Value::Undefined);
     };
 
-    let key = (&args[1])
-        .into_internal_property_key(realm)?;
+    let key = (&args[1]).into_internal_property_key(realm)?;
 
     let Some(prop) = obj.get_property_descriptor(key, realm)? else {
         return Ok(Value::Undefined);

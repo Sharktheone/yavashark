@@ -4,8 +4,8 @@ use std::rc::Rc;
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
 impl Interpreter {

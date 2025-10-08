@@ -1,12 +1,11 @@
-use std::cell::{Cell, RefCell, UnsafeCell};
-use crate::{Error, Realm, Res, Value};
 use crate::conversion::FromValueOutput;
+use crate::{Error, Realm, Res, Value};
+use std::cell::{Cell, RefCell, UnsafeCell};
 
 pub struct Partial<T, I: Initializer<T>> {
     value: UnsafeCell<Option<T>>,
     _init: std::marker::PhantomData<I>,
 }
-
 
 impl<T, I: Initializer<T>> Default for Partial<T, I> {
     fn default() -> Self {
@@ -29,15 +28,14 @@ impl<T, I: Initializer<T>> Partial<T, I> {
                 *self.value.get() = Some(v);
             }
 
-            (*self.value.get()).as_ref()
+            (*self.value.get())
+                .as_ref()
                 .ok_or_else(|| Error::new("Failed to initialize Partial value"))
         }
     }
 
     pub fn get_opt(&self) -> Option<&T> {
-        unsafe {
-            (*self.value.get()).as_ref()
-        }
+        unsafe { (*self.value.get()).as_ref() }
     }
 
     pub fn set(&self, value: T) -> Option<T> {
@@ -52,17 +50,13 @@ impl<T, I: Initializer<T>> Partial<T, I> {
     }
 
     pub fn is_initialized(&self) -> bool {
-        unsafe {
-            (*self.value.get()).is_some()
-        }
+        unsafe { (*self.value.get()).is_some() }
     }
 }
-
 
 pub trait Initializer<T> {
     fn initialize(realm: &mut Realm) -> Res<T>;
 }
-
 
 impl<T: FromValueOutput, I: Initializer<T>> FromValueOutput for Partial<T, I> {
     type Output = T::Output;
@@ -70,7 +64,6 @@ impl<T: FromValueOutput, I: Initializer<T>> FromValueOutput for Partial<T, I> {
         T::from_value_out(value, realm)
     }
 }
-
 
 impl<T, I: Initializer<T>> Initializer<RefCell<T>> for I {
     fn initialize(realm: &mut Realm) -> Res<RefCell<T>> {

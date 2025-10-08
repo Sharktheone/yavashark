@@ -22,7 +22,9 @@ use crate::builtins::{
     WeakRef, WeakSet, JSON,
 };
 use crate::error_obj::ErrorObj;
-use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value, Variable};
+use crate::{
+    Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value, Variable,
+};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
 
@@ -178,7 +180,6 @@ impl Intrinsics {
     pub(crate) fn new() -> Result<Self, Error> {
         let realm = &mut Realm::new()?; //TODO: this will not work as the Realm::new() itself creates intrinsics, but to shut up the compiler for now it is okay
 
-
         let obj_prototype = ObjectHandle::new(Prototype::new());
 
         let func_prototype =
@@ -269,17 +270,38 @@ impl Intrinsics {
             .unwrap_or(Value::Undefined.into())
             .to_object()?;
 
-        let type_error = get_type_error(error_prototype.clone().into(), error_constructor.clone(), realm)?;
-        let range_error =
-            get_range_error(error_prototype.clone().into(), error_constructor.clone(), realm)?;
-        let reference_error =
-            get_reference_error(error_prototype.clone().into(), error_constructor.clone(), realm)?;
-        let syntax_error =
-            get_syntax_error(error_prototype.clone().into(), error_constructor.clone(), realm)?;
+        let type_error = get_type_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
+        let range_error = get_range_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
+        let reference_error = get_reference_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
+        let syntax_error = get_syntax_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
 
-        let eval_error = get_eval_error(error_prototype.clone().into(), error_constructor.clone(), realm)?;
+        let eval_error = get_eval_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
 
-        let uri_error = get_uri_error(error_prototype.clone().into(), error_constructor.clone(), realm)?;
+        let uri_error = get_uri_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
 
         let aggregate_error =
             get_aggregate_error(error_prototype.clone().into(), error_constructor, realm)?;
@@ -422,13 +444,20 @@ impl Intrinsics {
             realm,
         )?;
 
-        let reflect = Reflect::new(obj_prototype.clone().into(), func_prototype.clone().into(), realm)?;
+        let reflect = Reflect::new(
+            obj_prototype.clone().into(),
+            func_prototype.clone().into(),
+            realm,
+        )?;
 
         let (temporal, temporal_protos) =
             get_temporal(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
-        let (signal, signal_protos) =
-            crate::builtins::signal::get_signal(obj_prototype.clone(), func_prototype.clone(), realm)?;
+        let (signal, signal_protos) = crate::builtins::signal::get_signal(
+            obj_prototype.clone(),
+            func_prototype.clone(),
+            realm,
+        )?;
 
         let promise = Promise::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),

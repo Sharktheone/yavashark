@@ -4,7 +4,11 @@ use crate::{Error, NativeConstructor, Object, ObjectHandle, Realm, Res, Variable
 
 macro_rules! error {
     ($name:ident, $create:ident, $get:ident) => {
-        pub fn $get(error: ObjectHandle, error_proto: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+        pub fn $get(
+            error: ObjectHandle,
+            error_proto: ObjectHandle,
+            realm: &mut Realm,
+        ) -> Res<ObjectHandle> {
             let proto = Object::with_proto(error);
 
             proto.define_property("name".into(), stringify!($name).into(), realm)?;
@@ -31,11 +35,23 @@ macro_rules! error {
                 Variable::new_read_only(proto.clone().into()),
                 realm,
             )?;
-            constr.define_property_attributes("name".into(), Variable::config(stringify!($name).into()), realm)?;
+            constr.define_property_attributes(
+                "name".into(),
+                Variable::config(stringify!($name).into()),
+                realm,
+            )?;
 
-            constr.define_property_attributes("length".into(), Variable::config(1.into()), realm)?;
+            constr.define_property_attributes(
+                "length".into(),
+                Variable::config(1.into()),
+                realm,
+            )?;
 
-            proto.define_property_attributes("constructor".into(), Variable::write_config(constr.into()), realm)?;
+            proto.define_property_attributes(
+                "constructor".into(),
+                Variable::write_config(constr.into()),
+                realm,
+            )?;
 
             Ok(proto.into())
         }

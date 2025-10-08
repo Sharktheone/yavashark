@@ -1,4 +1,5 @@
 use crate::error::Error;
+use crate::value::property_key::IntoPropertyKey;
 use crate::{GCd, ObjectHandle, PropertyKey, Realm, Res};
 pub use constructor::*;
 pub use conversion::*;
@@ -16,7 +17,6 @@ pub use symbol::*;
 pub use variable::*;
 use yavashark_garbage::{Collectable, GcRef};
 use yavashark_string::{ToYSString, YSString};
-use crate::value::property_key::IntoPropertyKey;
 
 mod constructor;
 mod conversion;
@@ -415,9 +415,7 @@ impl Value {
     }
 
     #[allow(clippy::needless_lifetimes)]
-    pub fn downcast<T: 'static>(
-        &self,
-    ) -> Res<Option<GCd<T>>> {
+    pub fn downcast<T: 'static>(&self) -> Res<Option<GCd<T>>> {
         let obj = self.as_object()?;
 
         Ok(obj.downcast())
@@ -623,19 +621,28 @@ impl Value {
         self.as_object()?.get_async_iter(realm)
     }
 
-    pub fn get_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<Self, Error> {
+    pub fn get_property(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<Self, Error> {
         let name = name.into_property_key(realm)?;
         match self {
-            Self::Object(o) => o
-                .resolve_property(name.clone(), realm)?
-                .ok_or(Error::reference_error(format!(
-                    "{name} does not exist on object"
-                ))),
+            Self::Object(o) => {
+                o.resolve_property(name.clone(), realm)?
+                    .ok_or(Error::reference_error(format!(
+                        "{name} does not exist on object"
+                    )))
+            }
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn get_property_opt(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<Option<Self>, Error> {
+    pub fn get_property_opt(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<Option<Self>, Error> {
         match self {
             Self::Object(o) => o.resolve_property(name, realm),
             _ => Err(Error::ty("Value is not an object")),
@@ -653,25 +660,33 @@ impl Value {
     //     }
     // }
 
-    pub fn define_property(&self, name: impl IntoPropertyKey, value: Self, realm: &mut Realm) -> Result<(), Error> {
-
+    pub fn define_property(
+        &self,
+        name: impl IntoPropertyKey,
+        value: Self,
+        realm: &mut Realm,
+    ) -> Result<(), Error> {
         match self {
             Self::Object(o) => {
                 let name = name.into_internal_property_key(realm)?;
                 o.define_property(name, value, realm)?;
 
                 Ok(())
-            },
+            }
             _ => Err(Error::ty("Value is not an object")),
         }
     }
 
-    pub fn contains_key(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
+    pub fn contains_key(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<bool, Error> {
         match self {
             Self::Object(o) => {
                 let name = name.into_internal_property_key(realm)?;
                 o.contains_own_key(name, realm)
-            },
+            }
             _ => Err(Error::ty("Value is not an object")),
         }
     }
@@ -681,7 +696,7 @@ impl Value {
             Self::Object(o) => {
                 let name = name.into_internal_property_key(realm)?;
                 o.contains_key(name, realm)
-            },
+            }
             _ => Err(Error::ty("Value is not an object")),
         }
     }

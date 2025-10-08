@@ -4,8 +4,8 @@ use crate::value::{
     BoxedObj, Constructor, ConstructorFn, CustomGcRefUntyped, CustomName, Func, ObjectOrNull,
 };
 use crate::{
-    ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, RuntimeResult,
-    Value, ValueResult, Variable,
+    ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, RuntimeResult, Value,
+    ValueResult, Variable,
 };
 use std::any::Any;
 use std::cell::RefCell;
@@ -126,7 +126,11 @@ impl RawOptimFunction {
 
         let args = ObjectHandle::new(args);
 
-        args.define_property_attributes("callee".into(), Variable::write_config(this.copy()), realm)?;
+        args.define_property_attributes(
+            "callee".into(),
+            Variable::write_config(this.copy()),
+            realm,
+        )?;
 
         if let Some(block) = &self.block {
             let func = block.borrow();

@@ -4,9 +4,12 @@ use swc_common::Span;
 use swc_ecma_ast::{
     BlockStmt, Class, ClassMember, Function, MethodKind, Param, ParamOrTsParamProp, PropName,
 };
-use yavashark_env::value::Obj;
-use yavashark_env::{scope::Scope, Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey, Realm, Res, Value, ValueResult, Variable};
 use yavashark_env::value::property_key::{BorrowedInternalPropertyKey, IntoPropertyKey};
+use yavashark_env::value::Obj;
+use yavashark_env::{
+    scope::Scope, Class as JSClass, ClassInstance, Error, InternalPropertyKey, Object, PropertyKey,
+    Realm, Res, Value, ValueResult, Variable,
+};
 use yavashark_string::{ToYSString, YSString};
 
 use crate::Interpreter;
@@ -19,9 +22,7 @@ pub fn create_class(
 ) -> Res<(JSClass, Vec<BlockStmt>)> {
     let (mut class, mut proto) = if let Some(class) = &stmt.super_class {
         let super_class = Interpreter::run_expr(realm, class, stmt.span, scope)?;
-        let p = super_class
-            .get_property("prototype", realm)?
-            .to_object()?;
+        let p = super_class.get_property("prototype", realm)?.to_object()?;
 
         (
             JSClass::with_super(super_class.to_object()?, name.clone(), realm)?,
@@ -128,7 +129,15 @@ pub fn create_class(
                     (|val| Interpreter::run_expr(realm, val, p.span, scope)),
                 )?;
 
-                define_on_class(name.into_internal_property_key(realm)?, value, &mut class, &mut proto, p.is_static, false, realm)?;
+                define_on_class(
+                    name.into_internal_property_key(realm)?,
+                    value,
+                    &mut class,
+                    &mut proto,
+                    p.is_static,
+                    false,
+                    realm,
+                )?;
             }
             ClassMember::AutoAccessor(_) => todo!("AutoAccessor"),
         }
@@ -311,20 +320,28 @@ fn define_method_on_class(
             MethodKind::Getter => class.define_getter(key.into(), value.to_object()?, realm),
             MethodKind::Setter => class.define_setter(key.into(), value.to_object()?, realm),
             MethodKind::Method => {
-                class.define_property_attributes(key.into(), Variable::write_config(value), realm)?;
+                class.define_property_attributes(
+                    key.into(),
+                    Variable::write_config(value),
+                    realm,
+                )?;
 
                 Ok(())
-            },
+            }
         };
     } else {
         match kind {
             MethodKind::Getter => proto.define_getter(key.into(), value.to_object()?, realm),
             MethodKind::Setter => proto.define_setter(key.into(), value.to_object()?, realm),
             MethodKind::Method => {
-                proto.define_property_attributes(key.into(), Variable::write_config(value), realm)?;
+                proto.define_property_attributes(
+                    key.into(),
+                    Variable::write_config(value),
+                    realm,
+                )?;
 
                 Ok(())
-            },
+            }
         };
     }
 

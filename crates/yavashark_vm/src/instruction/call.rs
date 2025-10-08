@@ -1,8 +1,8 @@
 use crate::data::{Data, OutputData};
+use crate::instruction::get_private_member;
 use crate::VM;
 use yavashark_env::utils::ValueIterator;
 use yavashark_env::{ControlFlow, ControlResult, Error, Res, Value};
-use crate::instruction::get_private_member;
 
 pub fn call(func: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
     let func = func.get(vm)?;
@@ -53,8 +53,6 @@ pub fn call_member_no_output(obj: impl Data, member: impl Data, vm: &mut impl VM
     Ok(())
 }
 
-
-
 pub fn call_private_member(
     obj: impl Data,
     member: impl Data,
@@ -80,7 +78,6 @@ pub fn call_private_member(
     output.set(res, vm)?;
 
     Ok(())
-
 }
 
 pub fn call_private_member_no_output(obj: impl Data, member: impl Data, vm: &mut impl VM) -> Res {
@@ -140,8 +137,7 @@ pub fn call_super(output: impl OutputData, vm: &mut impl VM) -> Res {
     let class = vm.get_scope().this()?;
     let realm = vm.get_realm();
 
-    let proto = class.prototype(realm)?
-        .to_object()?;
+    let proto = class.prototype(realm)?.to_object()?;
 
     let sup = proto.prototype(realm)?;
 
@@ -159,8 +155,7 @@ pub fn call_super_no_output(vm: &mut impl VM) -> Res {
     let class = vm.get_scope().this()?;
     let realm = vm.get_realm();
 
-    let proto = class.prototype(realm)?
-        .to_object()?;
+    let proto = class.prototype(realm)?.to_object()?;
 
     let sup = proto.prototype(realm)?;
 

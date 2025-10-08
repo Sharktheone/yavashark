@@ -389,7 +389,8 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
     }
 
     if obj.contains_key("year".into(), realm)?
-        && (obj.contains_key("month".into(), realm)? || obj.contains_key("monthCode".into(), realm)?)
+        && (obj.contains_key("month".into(), realm)?
+            || obj.contains_key("monthCode".into(), realm)?)
         && obj.contains_key("day".into(), realm)?
     {
         let year = obj
@@ -437,7 +438,12 @@ pub fn value_to_plain_date(info: Value, realm: &mut Realm) -> Res<temporal_rs::P
 }
 
 impl PrettyObjectOverride for PlainDate {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self.date.to_ixdtf_string(DisplayCalendar::Auto);
 
         fmt_properties_to(obj, &mut s, not, realm);

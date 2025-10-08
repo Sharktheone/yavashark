@@ -1,8 +1,11 @@
-use std::any::TypeId;
 use crate::realm::Realm;
 use crate::value::{BoxedObj, ConstructorFn, DefinePropertyResult, Obj, Property, Variable};
-use crate::{Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PropertyKey, Res, Value, ValueResult};
+use crate::{
+    Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PropertyKey,
+    Res, Value, ValueResult,
+};
 use rustc_hash::FxHashMap;
+use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
@@ -46,7 +49,12 @@ pub struct Class {
 }
 
 impl Obj for Class {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
             *self.prototype.borrow_mut() = value.to_object()?;
             Ok(DefinePropertyResult::Handled)
@@ -55,7 +63,12 @@ impl Obj for Class {
         }
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
             *self.prototype.borrow_mut() = value.value.to_object()?;
 
@@ -65,7 +78,11 @@ impl Obj for Class {
         }
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
             let val: Value = self.prototype.borrow().clone().into();
             Ok(Some(val.into()))
@@ -74,7 +91,11 @@ impl Obj for Class {
         }
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
             let val: Value = self.prototype.borrow().clone().into();
             Ok(Some(val.into()))
@@ -83,7 +104,12 @@ impl Obj for Class {
         }
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if matches!(&name, InternalPropertyKey::String(s) if s.as_str() == "prototype") {
             return Err(Error::new("Cannot set prototype property"));
         }
@@ -91,17 +117,26 @@ impl Obj for Class {
         self.inner.define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if matches!(&name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
-            return Err(Error::new("Cannot set prototype property"))
+            return Err(Error::new("Cannot set prototype property"));
         }
 
         self.inner.define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if matches!(name, InternalPropertyKey::String(ref s) if s.as_str() == "prototype") {
-           return Ok(None)
+            return Ok(None);
         }
 
         self.inner.delete_property(name, realm)
@@ -132,7 +167,8 @@ impl Obj for Class {
         ));
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_value())); //TODO: is this correct?
+            props.push((PropertyKey::String(key.clone().into()), value.as_value()));
+            //TODO: is this correct?
         }
 
         Ok(props)
@@ -170,7 +206,10 @@ impl Obj for Class {
         Ok(values)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let mut props = self.inner.enumerable_properties(realm)?;
 
         props.push((
@@ -179,11 +218,11 @@ impl Obj for Class {
         ));
 
         for (key, value) in &*self.private_props.try_borrow()? {
-            props.push((PropertyKey::String(key.clone().into()), value.as_value())); //TODO: is this correct?
+            props.push((PropertyKey::String(key.clone().into()), value.as_value()));
+            //TODO: is this correct?
         }
 
         Ok(props)
-
     }
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
@@ -296,7 +335,11 @@ impl Class {
     pub fn new_with_proto(proto: ObjectHandle, name: String, realm: &mut Realm) -> Res<Self> {
         let inner = Object::with_proto(proto);
 
-        inner.define_property_attributes("name".into(), Variable::write_config(name.clone().into()), realm)?;
+        inner.define_property_attributes(
+            "name".into(),
+            Variable::write_config(name.clone().into()),
+            realm,
+        )?;
 
         Ok(Self {
             inner,
@@ -311,7 +354,11 @@ impl Class {
     pub fn with_super(sup: ObjectHandle, name: String, realm: &mut Realm) -> Res<Self> {
         let inner = Object::with_proto(sup.clone());
 
-        inner.define_property_attributes("name".into(), Variable::write_config(name.clone().into()), realm)?;
+        inner.define_property_attributes(
+            "name".into(),
+            Variable::write_config(name.clone().into()),
+            realm,
+        )?;
 
         Ok(Self {
             inner,
@@ -419,8 +466,11 @@ impl Class {
                 let name_prop = self.inner.get_property_opt("name", realm)?;
 
                 if name_prop.is_none_or(|p| p.is_string()) {
-                    self.inner
-                        .define_property("name".into(), YSString::from_ref(n).into(), realm)?;
+                    self.inner.define_property(
+                        "name".into(),
+                        YSString::from_ref(n).into(),
+                        realm,
+                    )?;
                 }
             }
         }
@@ -438,14 +488,12 @@ impl Class {
         if let Value::Object(o) = this.copy() {
             let constructor = o.get("constructor", realm)?;
 
-            constructor.call(realm, args, this)?
-                .to_object()
+            constructor.call(realm, args, this)?.to_object()
         } else {
             Err(Error::ty("Class constructor called with invalid receiver"))
         }
     }
 }
-
 
 // #[object(name)]
 #[derive(Debug)]
@@ -457,31 +505,71 @@ pub struct ClassInstance {
 }
 
 impl Obj for ClassInstance {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         self.inner.try_borrow()?.define_property(name, value, realm)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
-        self.inner.try_borrow()?.define_property_attributes(name, value, realm)
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        self.inner
+            .try_borrow()?
+            .define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        self.inner.try_borrow()?.resolve_property_no_get_set(name, realm)
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        self.inner
+            .try_borrow()?
+            .resolve_property_no_get_set(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
-        Ok(self.inner.try_borrow()?.get_property_opt(name, realm)?.map(Into::into))
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        Ok(self
+            .inner
+            .try_borrow()?
+            .get_property_opt(name, realm)?
+            .map(Into::into))
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         self.inner.try_borrow()?.define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         self.inner.try_borrow()?.define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         self.inner.try_borrow()?.delete_property(name, realm)
     }
 
@@ -531,7 +619,10 @@ impl Obj for ClassInstance {
         Ok(values)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         self.inner.try_borrow()?.enumerable_properties(realm)
     }
 

@@ -4,9 +4,9 @@ use crate::utils::parse_file;
 use std::path::{Path, PathBuf};
 use swc_ecma_ast::Program;
 use yavashark_env::error_obj::ErrorObj;
+use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
-use yavashark_env::print::PrettyPrint;
 use yavashark_interpreter::Interpreter;
 
 pub fn run_file(file: PathBuf) -> Result<String, String> {
@@ -21,7 +21,8 @@ pub fn run_file(file: PathBuf) -> Result<String, String> {
     let async_ = metadata.flags.contains(Flags::ASYNC);
     #[cfg(feature = "timings")]
     let setup = std::time::Instant::now();
-    let (mut realm, mut scope, harness_dir) = setup_global(file.clone(), raw, async_).map_err(|e| e.to_string())?;
+    let (mut realm, mut scope, harness_dir) =
+        setup_global(file.clone(), raw, async_).map_err(|e| e.to_string())?;
     #[cfg(feature = "timings")]
     unsafe {
         crate::SETUP_DURATION = setup.elapsed();

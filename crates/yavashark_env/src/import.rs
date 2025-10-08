@@ -1,13 +1,13 @@
+use crate::builtins::{GcPromise, Promise};
+use crate::error_obj::ErrorObj;
+use crate::realm::resolve::{ModuleFinalizer, ResolveModuleResult};
+use crate::scope::Module;
+use crate::task_queue::{AsyncTask, AsyncTaskQueue};
+use crate::value::Obj;
+use crate::{Object, ObjectHandle, Realm, Res, Value};
 use std::path::{Path, PathBuf};
 use std::pin::Pin;
 use std::task::{Context, Poll};
-use crate::builtins::{GcPromise, Promise};
-use crate::{Object, ObjectHandle, Realm, Res, Value};
-use crate::error_obj::ErrorObj;
-use crate::task_queue::{AsyncTask, AsyncTaskQueue};
-use crate::realm::resolve::{ModuleFinalizer, ResolveModuleResult};
-use crate::scope::Module;
-use crate::value::Obj;
 
 pub struct DynamicImport {
     module: Pin<Box<dyn std::future::Future<Output = Res<ModuleFinalizer>>>>,
@@ -20,9 +20,8 @@ impl DynamicImport {
         specifier: &str,
         cur_path: &Path,
         cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
-        realm: &mut Realm
+        realm: &mut Realm,
     ) -> Res<ObjectHandle> {
-
         let promise = Promise::new(realm);
 
         let module = realm.get_module_async(specifier, cur_path, cb)?;
@@ -38,16 +37,14 @@ impl DynamicImport {
             ResolveModuleResult::Async(fut) => {
                 let promise = promise.into_object();
 
-
-                let prom_downcast = promise.downcast::<Promise>()
+                let prom_downcast = promise
+                    .downcast::<Promise>()
                     .ok_or(crate::Error::ty("failed to downcast promise"))?;
-
 
                 let task = Self {
                     module: fut,
                     promise: prom_downcast,
                 };
-
 
                 AsyncTaskQueue::queue_task(task, realm);
 
@@ -61,7 +58,6 @@ pub enum PromiseOrTask {
     Promise(ObjectHandle),
     Task(DynamicImport),
 }
-
 
 impl AsyncTask for DynamicImport {
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context, realm: &mut Realm) -> Poll<Res> {

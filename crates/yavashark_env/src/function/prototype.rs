@@ -7,7 +7,10 @@ use yavashark_garbage::GcRef;
 use crate::array::Array;
 use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
-use crate::{Error, InternalPropertyKey, MutObject, NativeConstructor, NativeFunction, ObjectHandle, ObjectOrNull, ObjectProperty, PropertyKey, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, InternalPropertyKey, MutObject, NativeConstructor, NativeFunction, ObjectHandle,
+    ObjectOrNull, ObjectProperty, PropertyKey, Res, Value, ValueResult, Variable,
+};
 
 #[derive(Debug)]
 struct MutableFunctionPrototype {
@@ -56,12 +59,17 @@ impl FunctionPrototype {
             func.clone(),
         )
         .into();
-        this.to_string = NativeFunction::with_proto("toString", to_string, func.clone(), realm).into();
+        this.to_string =
+            NativeFunction::with_proto("toString", to_string, func.clone(), realm).into();
 
         this.constructor
             .value
             .as_object()?
-            .define_property_attributes("prototype".into(), Variable::new_read_only(func.into()), realm)?;
+            .define_property_attributes(
+                "prototype".into(),
+                Variable::new_read_only(func.into()),
+                realm,
+            )?;
 
         Ok(())
     }
@@ -138,9 +146,9 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         return Err(Error::new("eval is not defined"));
     };
 
-    
-    Ok(eval.call(vec![Value::String(buf.into())], Value::Undefined, realm)?.to_object()?)
-        
+    Ok(eval
+        .call(vec![Value::String(buf.into())], Value::Undefined, realm)?
+        .to_object()?)
 }
 
 fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
@@ -152,7 +160,12 @@ fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
 }
 
 impl Obj for FunctionPrototype {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         let mut this = self.inner.try_borrow_mut()?;
 
         if let InternalPropertyKey::String(name) = &name {
@@ -193,7 +206,12 @@ impl Obj for FunctionPrototype {
         this.object.define_property(name, value, realm)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         let mut this = self.inner.try_borrow_mut()?;
 
         if let InternalPropertyKey::String(name) = &name {
@@ -233,7 +251,11 @@ impl Obj for FunctionPrototype {
         this.object.define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let this = self.inner.try_borrow()?;
 
         if let InternalPropertyKey::String(ref name) = name {
@@ -252,7 +274,11 @@ impl Obj for FunctionPrototype {
         this.object.resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let this = self.inner.try_borrow()?;
 
         if let InternalPropertyKey::String(ref name) = name {
@@ -271,18 +297,32 @@ impl Obj for FunctionPrototype {
         this.object.get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
         this.object.define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let mut this = self.inner.try_borrow_mut()?;
 
         if let InternalPropertyKey::String(ref name) = name {
@@ -344,7 +384,6 @@ impl Obj for FunctionPrototype {
         this.object.contains_own_key(name, realm)
     }
 
-
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
@@ -371,7 +410,10 @@ impl Obj for FunctionPrototype {
             PropertyKey::String("constructor".into()),
             this.constructor.value.copy(),
         ));
-        props.push((PropertyKey::String("length".into()), this.length.value.copy()));
+        props.push((
+            PropertyKey::String("length".into()),
+            this.length.value.copy(),
+        ));
         props.push((PropertyKey::String("name".into()), this.name.value.copy()));
         props.push((
             PropertyKey::String("toString".into()),
@@ -419,11 +461,13 @@ impl Obj for FunctionPrototype {
         Ok(values)
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let this = self.inner.try_borrow()?;
 
         this.object.enumerable_properties(realm)
-
     }
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
@@ -509,6 +553,5 @@ impl Obj for FunctionPrototype {
         }
 
         refs
-
     }
 }

@@ -62,8 +62,11 @@ impl Realm {
 
         self.intrinsics.eval = Some(eval_func.clone());
         let global = self.global.clone();
-        global
-            .define_property_attributes("eval".into(), Variable::write_config(eval_func.into()), self)?;
+        global.define_property_attributes(
+            "eval".into(),
+            Variable::write_config(eval_func.into()),
+            self,
+        )?;
 
         Ok(())
     }

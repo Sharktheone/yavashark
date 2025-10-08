@@ -93,9 +93,7 @@ impl ArrayLike {
             });
         }
 
-        let len = val
-            .get_property("length", realm)?
-            .to_number(realm)?;
+        let len = val.get_property("length", realm)?.to_number(realm)?;
 
         Ok(Self {
             val,

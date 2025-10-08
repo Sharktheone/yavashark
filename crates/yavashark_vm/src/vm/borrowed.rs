@@ -9,8 +9,10 @@ use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, ControlResult, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value};
 use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    ControlFlow, ControlResult, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
+};
 
 pub struct BorrowedVM<'a> {
     regs: Registers,
@@ -168,7 +170,8 @@ impl VM for BorrowedVM<'_> {
         let name = self
             .var_name(name)
             .ok_or(Error::reference("Invalid variable name"))?;
-        self.current_scope.update_or_define(name.into(), value, self.realm)
+        self.current_scope
+            .update_or_define(name.into(), value, self.realm)
     }
 
     fn set_register(&mut self, reg: Reg, value: Value) -> Res {

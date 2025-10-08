@@ -37,5 +37,3 @@ impl BigInt64Array {
         Ok(Self::new(realm, ty)?.into_object())
     }
 }
-
-

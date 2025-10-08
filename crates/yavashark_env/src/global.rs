@@ -25,14 +25,22 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         realm,
     )?;
     obj.define_property_attributes("null".into(), Variable::new_read_only(Value::Null), realm)?;
-    obj.define_property_attributes("true".into(), Variable::new_read_only(Value::Boolean(true)), realm)?;
+    obj.define_property_attributes(
+        "true".into(),
+        Variable::new_read_only(Value::Boolean(true)),
+        realm,
+    )?;
     obj.define_property_attributes(
         "false".into(),
         Variable::new_read_only(Value::Boolean(false)),
         realm,
     )?;
 
-    obj.define_property_attributes("console".into(), Variable::write_config(get_console(realm)), realm)?;
+    obj.define_property_attributes(
+        "console".into(),
+        Variable::write_config(get_console(realm)),
+        realm,
+    )?;
 
     obj.define_property_attributes(
         "Error".into(),
@@ -237,8 +245,16 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         realm,
     )?;
 
-    obj.define_property_attributes("escape".into(), Variable::write_config(get_escape(realm)), realm)?;
-    obj.define_property_attributes("unescape".into(), Variable::write_config(get_escape(realm)), realm)?;
+    obj.define_property_attributes(
+        "escape".into(),
+        Variable::write_config(get_escape(realm)),
+        realm,
+    )?;
+    obj.define_property_attributes(
+        "unescape".into(),
+        Variable::write_config(get_escape(realm)),
+        realm,
+    )?;
     obj.define_property_attributes(
         "encodeURI".into(),
         Variable::write_config(get_encode_uri(realm)),

@@ -1,5 +1,8 @@
 use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, Property, Value, Variable};
-use crate::{InternalPropertyKey, ObjectHandle, ObjectOrNull, PreHashedPropertyKey, PrimitiveValue, PropertyKey, Realm, Res};
+use crate::{
+    InternalPropertyKey, ObjectHandle, ObjectOrNull, PreHashedPropertyKey, PrimitiveValue,
+    PropertyKey, Realm, Res,
+};
 use std::any::TypeId;
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
@@ -15,8 +18,6 @@ pub trait ObjectImpl: Debug + 'static {
     fn get_inner(&self) -> impl Deref<Target = Self::Inner>;
 
     fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner>;
-
-
 
     fn define_property(
         &self,
@@ -255,39 +256,69 @@ pub trait ObjectImpl: Debug + 'static {
         self.get_wrapped_object().seal()
     }
 
-
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
         self.get_wrapped_object().gc_refs()
     }
-
 }
 
 impl<T: ObjectImpl> Obj for T {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         ObjectImpl::define_property(self, name, value, realm)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         ObjectImpl::define_property_attributes(self, name, value, realm)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         ObjectImpl::resolve_property(self, name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         ObjectImpl::get_own_property(self, name, realm)
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         ObjectImpl::define_getter(self, name, callback, realm)
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         ObjectImpl::define_setter(self, name, callback, realm)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         ObjectImpl::delete_property(self, name, realm)
     }
 
@@ -299,35 +330,71 @@ impl<T: ObjectImpl> Obj for T {
         ObjectImpl::contains_key(self, name, realm)
     }
 
-    fn define_property_pre_hash(&self, name: PreHashedPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         ObjectImpl::define_property_pre_hash(self, name, value, realm)
     }
 
-    fn define_property_attributes_pre_hash(&self, name: PreHashedPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         ObjectImpl::define_property_attributes_pre_hash(self, name, value, realm)
     }
 
-    fn resolve_property_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         ObjectImpl::resolve_property_pre_hash(self, name, realm)
     }
 
-    fn get_own_property_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         ObjectImpl::get_own_property_pre_hash(self, name, realm)
     }
 
-    fn define_getter_pre_hash(&self, name: PreHashedPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         ObjectImpl::define_getter_pre_hash(self, name, callback, realm)
     }
 
-    fn define_setter_pre_hash(&self, name: PreHashedPropertyKey, callback: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        callback: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         ObjectImpl::define_setter_pre_hash(self, name, callback, realm)
     }
 
-    fn delete_property_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         ObjectImpl::delete_property_pre_hash(self, name, realm)
     }
 
-    fn contains_own_key_pre_hash(&self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<bool> {
+    fn contains_own_key_pre_hash(
+        &self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<bool> {
         ObjectImpl::contains_own_key_pre_hash(self, name, realm)
     }
 

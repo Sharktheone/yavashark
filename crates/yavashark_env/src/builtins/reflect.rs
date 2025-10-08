@@ -1,7 +1,10 @@
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
 use crate::value::Obj;
-use crate::{Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value, ValueResult};
+use crate::{
+    Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value,
+    ValueResult,
+};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 
@@ -11,7 +14,11 @@ pub struct Reflect {}
 
 impl Reflect {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func_proto: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
+    pub fn new(
+        proto: ObjectHandle,
+        func_proto: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableReflect {
                 object: MutObject::with_proto(proto),
@@ -99,7 +106,12 @@ impl Reflect {
     //28.1.3 Reflect.defineProperty ( target, propertyKey, attributes ), https://tc39.es/ecma262/#sec-reflection
     #[prop("defineProperty")]
     #[must_use]
-    pub fn define_property(target: ObjectHandle, prop: InternalPropertyKey, desc: &ObjectHandle, #[realm] realm: &mut Realm) -> bool {
+    pub fn define_property(
+        target: ObjectHandle,
+        prop: InternalPropertyKey,
+        desc: &ObjectHandle,
+        #[realm] realm: &mut Realm,
+    ) -> bool {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
@@ -111,7 +123,11 @@ impl Reflect {
     //28.1.4 Reflect.deleteProperty ( target, propertyKey ), https://tc39.es/ecma262/#sec-reflection
     #[prop("deleteProperty")]
     #[must_use]
-    pub fn delete_property(target: &ObjectHandle, prop: InternalPropertyKey, #[realm] realm: &mut Realm) -> bool {
+    pub fn delete_property(
+        target: &ObjectHandle,
+        prop: InternalPropertyKey,
+        #[realm] realm: &mut Realm,
+    ) -> bool {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
@@ -152,7 +168,11 @@ impl Reflect {
         Ok(target.prototype(realm)?.into())
     }
 
-    pub fn has(target: &ObjectHandle, prop: InternalPropertyKey, #[realm] realm: &mut Realm) -> Res<bool> {
+    pub fn has(
+        target: &ObjectHandle,
+        prop: InternalPropertyKey,
+        #[realm] realm: &mut Realm,
+    ) -> Res<bool> {
         target.contains_own_key(prop, realm)
     }
 
@@ -174,12 +194,22 @@ impl Reflect {
     }
 
     #[must_use]
-    pub fn set(target: &ObjectHandle, prop: InternalPropertyKey, value: Value, _receiver: Option<Value>, #[realm] realm: &mut Realm) -> bool {
+    pub fn set(
+        target: &ObjectHandle,
+        prop: InternalPropertyKey,
+        value: Value,
+        _receiver: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> bool {
         target.define_property(prop, value, realm).is_ok()
     }
 
     #[prop("setPrototypeOf")]
-    pub fn set_prototype_of(target: &ObjectHandle, proto: Value, #[realm] realm: &mut Realm) -> Res<bool> {
+    pub fn set_prototype_of(
+        target: &ObjectHandle,
+        proto: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<bool> {
         let proto = if proto.is_null() {
             ObjectOrNull::Null
         } else {

@@ -3,7 +3,9 @@ use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
 use crate::value::{Constructor, CustomName, Func, MutObj, Obj, Property};
-use crate::{Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult};
+use crate::{
+    Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
+};
 use std::cell::{RefCell, RefMut};
 use std::cmp;
 use std::ops::{Deref, DerefMut};
@@ -66,7 +68,11 @@ impl crate::value::ObjectImpl for StringObj {
         self.inner.borrow_mut()
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(n) = name {
             let index = n as isize;
 
@@ -81,7 +87,11 @@ impl crate::value::ObjectImpl for StringObj {
         self.get_wrapped_object().resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(n) = name {
             let index = n as isize;
 
@@ -96,7 +106,11 @@ impl crate::value::ObjectImpl for StringObj {
         self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn get_array_or_done(&self, index: usize, _: &mut Realm) -> Result<(bool, Option<Value>), Error> {
+    fn get_array_or_done(
+        &self,
+        index: usize,
+        _: &mut Realm,
+    ) -> Result<(bool, Option<Value>), Error> {
         let inner = self.inner.borrow();
 
         if index >= inner.string.len() {

@@ -7,10 +7,12 @@ use crate::statement::expr::ArrowFunction;
 use crate::Interpreter;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::value::IntoValue;
 use yavashark_env::value::Obj;
-use yavashark_env::{Class, ClassInstance, Error, Object, PropertyKey, Realm, Res, Value, ValueResult};
-use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    Class, ClassInstance, Error, Object, PropertyKey, Realm, Res, Value, ValueResult,
+};
 use yavashark_string::YSString;
 use yavashark_vm::async_generator::AsyncGeneratorFunction;
 use yavashark_vm::generator::GeneratorFunction;
@@ -182,7 +184,9 @@ impl Interpreter {
             PropName::Ident(ident) => PropertyKey::String(YSString::from_ref(&ident.sym)),
             PropName::Str(str_) => PropertyKey::String(YSString::from_ref(&str_.value)),
             PropName::Num(num) => PropertyKey::String(num.value.to_string().into()),
-            PropName::Computed(expr) => Self::run_expr(realm, &expr.expr, expr.span, scope)?.into_property_key(realm)?,
+            PropName::Computed(expr) => {
+                Self::run_expr(realm, &expr.expr, expr.span, scope)?.into_property_key(realm)?
+            }
             PropName::BigInt(_) => todo!(),
         })
     }
@@ -199,7 +203,11 @@ pub fn set_value_name(name: &str, value: &Value, realm: &mut Realm) -> Res {
         }
 
         if let Some(arrow) = obj.downcast::<ArrowFunction>() {
-            arrow.define_property_attributes("name".into(), YSString::from_ref(name).into(), realm)?;
+            arrow.define_property_attributes(
+                "name".into(),
+                YSString::from_ref(name).into(),
+                realm,
+            )?;
         }
 
         if let Some(class) = obj.downcast::<Class>() {

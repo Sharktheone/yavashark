@@ -11,8 +11,8 @@ use yavashark_garbage::{Collectable, Gc, GcRef};
 use yavashark_string::YSString;
 
 use crate::realm::Realm;
-use crate::{Error, InternalPropertyKey, Object, ObjectHandle, PropertyKey, Res, Value, Variable};
 use crate::value::property_key::IntoPropertyKey;
+use crate::{Error, InternalPropertyKey, Object, ObjectHandle, PropertyKey, Res, Value, Variable};
 
 pub struct MutValue {
     pub name: String,
@@ -188,7 +188,7 @@ impl VariableReference {
     pub fn update(&self, value: Value, realm: &mut Realm) -> Res {
         let name = self.name.clone();
         let name = name.into_internal_property_key(realm)?;
-        self.object.define_property(name, value, realm,)?;
+        self.object.define_property(name, value, realm)?;
 
         Ok(())
     }
@@ -236,7 +236,7 @@ impl ObjectOrVariables {
         match self {
             Self::Object(o) => {
                 o.define_property_attributes(name.into(), variable, realm)?;
-            },
+            }
             Self::Variables(v) => {
                 v.insert(name, variable.into());
             }
@@ -249,7 +249,7 @@ impl ObjectOrVariables {
         match self {
             Self::Object(o) => {
                 o.define_property_attributes(name.into(), variable, realm)?;
-            },
+            }
             Self::Variables(v) => {
                 let entry = v.entry(name);
 
@@ -476,14 +476,17 @@ impl ScopeInternal {
         if let ObjectOrVariables::Object(obj) = &mut self.variables {
             obj.define_property(name.into(), value, realm)?;
         } else if self.state.is_function() {
-            self.variables.insert_opt(name, Variable::new(value), realm)?;
+            self.variables
+                .insert_opt(name, Variable::new(value), realm)?;
         } else {
             match &self.parent {
                 Some(p) => {
-                    p.borrow_mut()?.declare_global_var(name, value.copy(), realm)?;
+                    p.borrow_mut()?
+                        .declare_global_var(name, value.copy(), realm)?;
                 }
                 None => {
-                    self.variables.insert_opt(name, Variable::new(value), realm)?;
+                    self.variables
+                        .insert_opt(name, Variable::new(value), realm)?;
                 }
             }
         }
@@ -609,7 +612,11 @@ impl ScopeInternal {
                         return Ok(false);
                     }
 
-                    obj.define_property_attributes(name, Variable::with_attributes(value, prop.properties), realm)?;
+                    obj.define_property_attributes(
+                        name,
+                        Variable::with_attributes(value, prop.properties),
+                        realm,
+                    )?;
                     return Ok(true);
                 }
             }
@@ -642,7 +649,11 @@ impl ScopeInternal {
                         return Err(Error::ty("Assignment to constant variable"));
                     }
 
-                    obj.define_property_attributes(name, Variable::with_attributes(value, prop.properties), realm)?;
+                    obj.define_property_attributes(
+                        name,
+                        Variable::with_attributes(value, prop.properties),
+                        realm,
+                    )?;
                     return Ok(());
                 }
             }
@@ -790,11 +801,15 @@ impl Scope {
     }
 
     pub fn declare_read_only_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
-        self.scope.borrow_mut()?.declare_read_only_var(name, value, realm)
+        self.scope
+            .borrow_mut()?
+            .declare_read_only_var(name, value, realm)
     }
 
     pub fn declare_global_var(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
-        self.scope.borrow_mut()?.declare_global_var(name, value, realm)?;
+        self.scope
+            .borrow_mut()?
+            .declare_global_var(name, value, realm)?;
         Ok(())
     }
 
@@ -916,7 +931,9 @@ impl Scope {
     }
 
     pub fn update_or_define(&mut self, name: String, value: Value, realm: &mut Realm) -> Res {
-        self.scope.borrow_mut()?.update_or_define(name, value, realm)
+        self.scope
+            .borrow_mut()?
+            .update_or_define(name, value, realm)
     }
 
     pub fn child(&self) -> Res<Self> {
@@ -1059,7 +1076,9 @@ mod tests {
         scope
             .declare_read_only_var("test".to_string(), Value::Number(42.0), &mut realm)
             .unwrap();
-        let result = scope.update("test", Value::Number(43.0), &mut realm).unwrap();
+        let result = scope
+            .update("test", Value::Number(43.0), &mut realm)
+            .unwrap();
         assert!(!result);
     }
 

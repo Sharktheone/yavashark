@@ -1,7 +1,11 @@
 pub use super::object_impl::*;
 use super::{Attributes, IntoValue, ObjectOrNull, PrimitiveValue, Value, Variable};
 use crate::error::Error;
-use crate::{GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm, Res, Symbol, ValueResult};
+use crate::value::property_key::IntoPropertyKey;
+use crate::{
+    GCd, InternalPropertyKey, ObjectHandle, PreHashedPropertyKey, PropertyKey, Realm, Res, Symbol,
+    ValueResult,
+};
 use indexmap::Equivalent;
 use std::any::TypeId;
 use std::fmt::{Debug, Display, Formatter};
@@ -12,7 +16,6 @@ use std::ptr::NonNull;
 use std::sync::atomic::AtomicIsize;
 use yavashark_garbage::{Collectable, Gc, GcRef, Weak};
 use yavashark_string::{ToYSString, YSString};
-use crate::value::property_key::IntoPropertyKey;
 
 pub enum DefinePropertyResult {
     Handled,
@@ -94,13 +97,23 @@ impl PropertyDescriptor {
         let obj = crate::Object::new(realm);
 
         match self {
-            PropertyDescriptor::Data { value, writable, enumerable, configurable } => {
+            PropertyDescriptor::Data {
+                value,
+                writable,
+                enumerable,
+                configurable,
+            } => {
                 obj.define_property("value".into(), value, realm)?;
                 obj.define_property("writable".into(), writable.into(), realm)?;
                 obj.define_property("enumerable".into(), enumerable.into(), realm)?;
                 obj.define_property("configurable".into(), configurable.into(), realm)?;
-            },
-            PropertyDescriptor::Accessor { get, set, enumerable, configurable } => {
+            }
+            PropertyDescriptor::Accessor {
+                get,
+                set,
+                enumerable,
+                configurable,
+            } => {
                 if let Some(get) = get {
                     obj.define_property("get".into(), get.clone().into(), realm)?;
                 } else {
@@ -115,16 +128,14 @@ impl PropertyDescriptor {
 
                 obj.define_property("enumerable".into(), enumerable.into(), realm)?;
                 obj.define_property("configurable".into(), configurable.into(), realm)?;
-            },
+            }
         }
 
         Ok(obj.into())
     }
 }
 
-
 pub trait Obj: Debug + 'static {
-
     fn define_property(
         &self,
         name: InternalPropertyKey,
@@ -269,7 +280,8 @@ pub trait Obj: Debug + 'static {
     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull>;
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res;
 
-    fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> { //TODO: i think this somehow needs to work differently
+    fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+        //TODO: i think this somehow needs to work differently
         Err(Error::ty_error(format!(
             "{} is not constructable",
             self.class_name()
@@ -279,7 +291,11 @@ pub trait Obj: Debug + 'static {
         false
     }
 
-    fn get_property_descriptor(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<PropertyDescriptor>> {
+    fn get_property_descriptor(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<PropertyDescriptor>> {
         let Some(prop) = self.get_own_property(name, realm)? else {
             return Ok(None);
         };
@@ -298,7 +314,6 @@ pub trait Obj: Debug + 'static {
                 configurable: true,
             })),
         }
-
     }
 
     fn name(&self) -> String {
@@ -349,17 +364,21 @@ pub trait Obj: Debug + 'static {
         Ok(())
     }
 
-
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
 
-    fn into_object(self) -> Object where Self: Sized {
+    fn into_object(self) -> Object
+    where
+        Self: Sized,
+    {
         Object::from_boxed(Box::new(self))
     }
 
-    fn into_value(self) -> Value where Self: Sized {
+    fn into_value(self) -> Value
+    where
+        Self: Sized,
+    {
         Value::from(self.into_object())
     }
-
 }
 
 pub trait MutObj: Debug + 'static {
@@ -475,7 +494,11 @@ pub trait MutObj: Debug + 'static {
         self.contains_own_key(name.0, realm)
     }
 
-    fn contains_key_pre_hash(&mut self, name: PreHashedPropertyKey, realm: &mut Realm) -> Res<bool> {
+    fn contains_key_pre_hash(
+        &mut self,
+        name: PreHashedPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<bool> {
         self.contains_key(name.0, realm)
     }
 
@@ -507,7 +530,8 @@ pub trait MutObj: Debug + 'static {
     fn prototype(&self, realm: &mut Realm) -> Res<ObjectOrNull>;
     fn set_prototype(&mut self, prototype: ObjectOrNull, realm: &mut Realm) -> Res;
 
-    fn construct(&mut self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> { //TODO: i think this somehow needs to work differently
+    fn construct(&mut self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+        //TODO: i think this somehow needs to work differently
         Err(Error::ty_error(format!(
             "{} is not constructable",
             self.class_name()
@@ -561,9 +585,7 @@ pub trait MutObj: Debug + 'static {
         Ok(())
     }
 
-
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
-
 }
 #[cfg(feature = "dbg_object_gc")]
 pub struct ObjectCount(AtomicIsize);
@@ -654,7 +676,6 @@ impl Deref for Object {
     }
 }
 
-
 impl Display for Object {
     /// This function shouldn't be used in production code, only for debugging
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -696,39 +717,53 @@ impl PartialEq for Object {
 }
 
 impl Object {
-    pub fn resolve_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Option<Value>> {
-        let Some(p) = self.0.resolve_property(name.into_internal_property_key(realm)?, realm)? else {
+    pub fn resolve_property(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Value>> {
+        let Some(p) = self
+            .0
+            .resolve_property(name.into_internal_property_key(realm)?, realm)?
+        else {
             return Ok(None);
         };
 
         match p {
             Property::Value(v) => Ok(Some(v.value)),
-            Property::Getter(g) => {
-                g.call(Vec::new(), self.clone().into(), realm).map(Some)
-            },
+            Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
         }
     }
 
-    pub fn call_method(&self, name: impl IntoPropertyKey, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    pub fn call_method(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+        args: Vec<Value>,
+    ) -> ValueResult {
         let name = name.into_internal_property_key(realm)?;
 
         let method = self.resolve_property(name.clone(), realm)?.ok_or_else(|| {
-            Error::reference_error(format!(
-                "Cannot call {} on {}",
-                name,
-                self.class_name()
-            ))
+            Error::reference_error(format!("Cannot call {} on {}", name, self.class_name()))
         })?;
 
         method.call(realm, args, self.clone().into())
     }
-    pub fn resolve_property_no_get_set(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    pub fn resolve_property_no_get_set(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let name = name.into_internal_property_key(realm)?;
 
         self.0.resolve_property(name, realm)
     }
 
-    pub fn get_own_property_no_get_set(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Property> {
+    pub fn get_own_property_no_get_set(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Property> {
         let name = name.into_internal_property_key(realm)?;
         self.0
             .get_own_property(name.clone(), realm)?
@@ -737,14 +772,14 @@ impl Object {
             )))
     }
 
-
     pub fn get_own_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Value> {
         let name = name.into_internal_property_key(realm)?;
-        let property = self.0
-            .get_own_property(name.clone(), realm)?
-            .ok_or(Error::reference_error(format!(
-                "{name} does not exist on object"
-            )))?;
+        let property =
+            self.0
+                .get_own_property(name.clone(), realm)?
+                .ok_or(Error::reference_error(format!(
+                    "{name} does not exist on object"
+                )))?;
 
         match property {
             Property::Value(v) => Ok(v.value),
@@ -752,7 +787,11 @@ impl Object {
         }
     }
 
-    pub fn get_property_opt(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Option<Value>> {
+    pub fn get_property_opt(
+        &self,
+        name: impl IntoPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Value>> {
         let name = name.into_internal_property_key(realm)?;
         let Some(prop) = self.0.resolve_property(name, realm)? else {
             return Ok(None);
@@ -766,7 +805,6 @@ impl Object {
 
     #[must_use]
     pub fn name(&self) -> String {
-
         String::new()
     }
 
@@ -798,11 +836,9 @@ impl Object {
 
         self.0
             .resolve_property(name, realm)?
-            .map_or(Ok(Value::Undefined), |x| {
-                match x {
-                    Property::Value(v) => Ok(v.value),
-                    Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm),
-                }
+            .map_or(Ok(Value::Undefined), |x| match x {
+                Property::Value(v) => Ok(v.value),
+                Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm),
             })
     }
 
@@ -811,17 +847,15 @@ impl Object {
 
         self.0
             .resolve_property(name, realm)?
-            .map_or(Ok(None), |x| {
-                match x {
-                    Property::Value(v) => Ok(Some(v.value)),
-                    Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
-                }
+            .map_or(Ok(None), |x| match x {
+                Property::Value(v) => Ok(Some(v.value)),
+                Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
             })
     }
 
     pub fn to_primitive(&self, hint: Hint, realm: &mut Realm) -> ValueResult {
         if let Some(prim) = self.primitive(realm)? {
-            return Ok(prim.into())
+            return Ok(prim.into());
         }
 
         let to_prim = self.resolve_property(Symbol::TO_PRIMITIVE, realm)?;
@@ -1067,18 +1101,19 @@ impl ObjectProperty {
 
         obj.set("writable", self.attributes.is_writable(), realm)?;
         obj.set("enumerable", self.attributes.is_enumerable(), realm)?;
-        obj.set(
-            "configurable",
-            self.attributes.is_configurable(),
-            realm,
-        )?;
+        obj.set("configurable", self.attributes.is_configurable(), realm)?;
 
         Ok(())
     }
 
     pub fn property(&self) -> Property {
         if !self.set.is_undefined() || !self.get.is_undefined() {
-            Property::Getter(self.get.clone().to_object().unwrap_or(crate::Object::null()))
+            Property::Getter(
+                self.get
+                    .clone()
+                    .to_object()
+                    .unwrap_or(crate::Object::null()),
+            )
         } else {
             Property::Value(Variable {
                 value: self.value.clone(),

@@ -640,7 +640,12 @@ fn fixup(val: i32, max: i32, mut larger: i32) -> (u32, i32) {
 }
 
 impl PrettyObjectOverride for Date {
-    fn pretty_inline(&self, obj: &crate::value::Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self.date().format("%Y-%m-%d %H:%M:%S").to_string();
 
         fmt_properties_to(obj, &mut s, not, realm);
@@ -648,7 +653,12 @@ impl PrettyObjectOverride for Date {
         Some(s)
     }
 
-    fn pretty_multiline(&self, obj: &crate::value::Object, not: &mut Vec<usize>, realm: &mut Realm) -> Option<String> {
+    fn pretty_multiline(
+        &self,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         self.pretty_inline(obj, not, realm)
     }
 }

@@ -1,7 +1,10 @@
 #![allow(unused)]
 use crate::array::Array;
 use crate::value::{BoxedObj, DefinePropertyResult, Obj, Property};
-use crate::{Error, InternalPropertyKey, NativeFunction, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PrimitiveValue, PropertyKey, Realm, Res, Value, Variable};
+use crate::{
+    Error, InternalPropertyKey, NativeFunction, Object, ObjectHandle, ObjectOrNull, ObjectProperty,
+    PrimitiveValue, PropertyKey, Realm, Res, Value, Variable,
+};
 use std::any::TypeId;
 use std::cell::Cell;
 use std::ops::Deref;
@@ -18,7 +21,12 @@ pub struct Proxy {
 }
 
 impl Obj for Proxy {
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if self.revoke.get() {
             return self.inner.define_property(name, value, realm);
         }
@@ -26,7 +34,12 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if self.revoke.get() {
             return self.inner.define_property_attributes(name, value, realm);
         }
@@ -34,7 +47,11 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<Option<Property>, Error> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<Option<Property>, Error> {
         if self.revoke.get() {
             return self.inner.deref().resolve_property(name, realm);
         }
@@ -42,7 +59,11 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<Option<Property>, Error> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<Option<Property>, Error> {
         if self.revoke.get() {
             return self.inner.deref().get_own_property(name, realm);
         }
@@ -50,7 +71,12 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn define_getter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if self.revoke.get() {
             return self.inner.define_getter(name, value, realm);
         }
@@ -58,7 +84,12 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn define_setter(&self, name: InternalPropertyKey, value: ObjectHandle, realm: &mut Realm) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if self.revoke.get() {
             return self.inner.define_setter(name, value, realm);
         }
@@ -66,7 +97,11 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if self.revoke.get() {
             return self.inner.delete_property(name, realm);
         }
@@ -74,7 +109,11 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
+    fn contains_own_key(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Result<bool, Error> {
         if self.revoke.get() {
             return self.inner.contains_own_key(name, realm);
         }
@@ -122,13 +161,15 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         if self.revoke.get() {
             return self.inner.enumerable_properties(realm);
         }
 
         Err(Error::new("not yet implemented"))
-
     }
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
@@ -155,7 +196,11 @@ impl Obj for Proxy {
         Err(Error::new("not yet implemented"))
     }
 
-    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Result<(bool, Option<Value>), Error> {
+    fn get_array_or_done(
+        &self,
+        index: usize,
+        realm: &mut Realm,
+    ) -> Result<(bool, Option<Value>), Error> {
         if self.revoke.get() {
             return self.inner.get_array_or_done(index, realm);
         }
@@ -214,11 +259,13 @@ impl Obj for Proxy {
         if let Some(construct) = self.handler.get_opt("construct", realm)? {
             let construct = construct.to_object()?;
             let arguments = Array::with_elements(realm, args)?;
-            construct.call(
-                vec![self.inner.clone().into(), arguments.into_value()],
-                self.handler.clone().into(),
-                realm,
-            )?.to_object()
+            construct
+                .call(
+                    vec![self.inner.clone().into(), arguments.into_value()],
+                    self.handler.clone().into(),
+                    realm,
+                )?
+                .to_object()
         } else {
             self.inner.construct(args, realm)
         }

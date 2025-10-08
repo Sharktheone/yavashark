@@ -11,8 +11,8 @@ use yavashark_compiler::Compiler;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, ObjectHandle, Realm, Res, ValueResult};
-use yavashark_vm::async_bytecode_function::AsyncBytecodeFunction;
 use yavashark_vm::OldBorrowedVM;
+use yavashark_vm::async_bytecode_function::AsyncBytecodeFunction;
 use yavashark_vm::async_generator::AsyncGeneratorFunction;
 use yavashark_vm::bytecode_function::BytecodeFunction;
 use yavashark_vm::generator::GeneratorFunction;
@@ -95,7 +95,6 @@ impl ByteCodeInterpreter {
 
             return Ok(g.into_object());
         }
-
 
         if func.is_async {
             let f = AsyncBytecodeFunction::new(compiled.unwrap_or_default(), scope, realm, params);

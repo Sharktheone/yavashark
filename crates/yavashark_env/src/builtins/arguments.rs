@@ -53,7 +53,12 @@ impl ObjectImpl for Arguments {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: InternalPropertyKey, value: Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(v) = self.args.borrow_mut().get_mut(idx) {
                 *v = value;
@@ -68,10 +73,16 @@ impl ObjectImpl for Arguments {
             }
         }
 
-        self.get_wrapped_object().define_property(name, value, realm)
+        self.get_wrapped_object()
+            .define_property(name, value, realm)
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(v) = self.args.borrow_mut().get_mut(idx) {
                 *v = value.value;
@@ -86,10 +97,15 @@ impl ObjectImpl for Arguments {
             }
         }
 
-        self.get_wrapped_object().define_property_attributes(name, value, realm)
+        self.get_wrapped_object()
+            .define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
                 return Ok(Some(Property::Value(value.into())));
@@ -108,7 +124,11 @@ impl ObjectImpl for Arguments {
         self.get_wrapped_object().resolve_property(name, realm)
     }
 
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
                 return Ok(Some(value.into()));
@@ -139,7 +159,11 @@ impl ObjectImpl for Arguments {
     //     Ok("[object Arguments]".into())
     // }
 
-    fn get_array_or_done(&self, index: usize, _: &mut Realm) -> Result<(bool, Option<Value>), Error> {
+    fn get_array_or_done(
+        &self,
+        index: usize,
+        _: &mut Realm,
+    ) -> Result<(bool, Option<Value>), Error> {
         let args = self.args.borrow();
         if index < args.len() {
             Ok((false, Some(args[index].clone())))

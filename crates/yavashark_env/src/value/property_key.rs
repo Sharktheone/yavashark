@@ -1,8 +1,8 @@
 use crate::value::{fmt_num, Symbol, Value};
+use crate::{Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
 use yavashark_string::{ToYSString, YSString};
-use crate::{Realm, Res};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {
@@ -17,11 +17,11 @@ impl PropertyKey {
             Self::Symbol(s) => s.as_str(),
         }
     }
-    
+
     pub fn from_static(s: &'static str) -> Self {
         Self::String(YSString::new_static(s))
     }
-    
+
     pub fn from_symbol(s: Symbol) -> Self {
         Self::Symbol(s)
     }
@@ -33,7 +33,6 @@ impl PropertyKey {
     pub fn is_string(&self) -> bool {
         matches!(self, Self::String(_))
     }
-
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -163,7 +162,6 @@ impl From<PropertyKey> for InternalPropertyKey {
     }
 }
 
-
 impl From<InternalPropertyKey> for Value {
     fn from(key: InternalPropertyKey) -> Self {
         match key {
@@ -184,11 +182,9 @@ impl From<InternalPropertyKey> for PropertyKey {
     }
 }
 
-
 pub trait IntoPropertyKey: Sized {
     fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
-        self.into_internal_property_key(realm)
-            .map(Into::into)
+        self.into_internal_property_key(realm).map(Into::into)
     }
     fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey>;
 }
@@ -268,7 +264,6 @@ impl IntoPropertyKey for Symbol {
     }
 }
 
-
 impl IntoPropertyKey for &Symbol {
     fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
         Ok(PropertyKey::Symbol(self.clone()))
@@ -293,7 +288,6 @@ impl From<&'static str> for InternalPropertyKey {
     }
 }
 
-
 impl From<String> for InternalPropertyKey {
     fn from(s: String) -> Self {
         Self::String(s.into())
@@ -305,7 +299,6 @@ impl From<YSString> for InternalPropertyKey {
         Self::String(s)
     }
 }
-
 
 impl From<usize> for InternalPropertyKey {
     fn from(i: usize) -> Self {
@@ -354,7 +347,6 @@ impl From<YSString> for PropertyKey {
         Self::String(s)
     }
 }
-
 
 #[cfg(test)]
 mod tests {
