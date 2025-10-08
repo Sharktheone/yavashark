@@ -76,6 +76,20 @@ impl Realm {
     }
 }
 
+impl Default for Realm {
+    fn default() -> Self {
+        Self {
+            intrinsics: Intrinsics::default(),
+            global: Object::null(),
+            env: Environment {
+                modules: HashMap::new(),
+            },
+            queue: AsyncTaskQueue::new(),
+
+        }
+    }
+}
+
 pub trait Eval {
     fn eval(&self, code: &str, realm: &mut Realm, scope: &mut Scope) -> ValueResult;
 }
