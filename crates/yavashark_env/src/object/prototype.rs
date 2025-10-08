@@ -356,6 +356,19 @@ impl Obj for Prototype {
         this.object.delete_property(name, realm)
     }
 
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+
+        if let InternalPropertyKey::String(ref name) = name {
+            if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
+                return Ok(true);
+            }
+        }
+
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.contains_own_key(name, realm)
+    }
+
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if let InternalPropertyKey::String(ref name) = name {
             if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
@@ -366,10 +379,6 @@ impl Obj for Prototype {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.contains_key(name, realm)
-    }
-
-    fn name(&self) -> String {
-        "Object".to_string()
     }
 
     // fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
@@ -460,35 +469,6 @@ impl Obj for Prototype {
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
-        let mut this = self.inner.try_borrow_mut()?;
-
-        this.object.get_array_or_done(index, realm)
-    }
-
-    fn clear_properties(&self, realm: &mut Realm) -> Res {
-        let mut this = self.inner.try_borrow_mut()?;
-
-        this.object.clear_properties(realm)
-    }
-
-    fn prototype(&self, _: &mut Realm) -> Res<ObjectOrNull> {
-        Ok(ObjectOrNull::Null)
-    }
-
-    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-
-        if let InternalPropertyKey::String(ref name) = name {
-            if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
-                return Ok(true);
-            }
-        }
-
-        let mut this = self.inner.try_borrow_mut()?;
-
-        this.object.contains_own_key(name, realm)
-    }
-
     fn enumerable_properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let this = self.inner.try_borrow()?;
 
@@ -513,10 +493,30 @@ impl Obj for Prototype {
         Ok(values)
     }
 
+    fn clear_properties(&self, realm: &mut Realm) -> Res {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.clear_properties(realm)
+    }
+
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.get_array_or_done(index, realm)
+    }
+
+    fn prototype(&self, _: &mut Realm) -> Res<ObjectOrNull> {
+        Ok(ObjectOrNull::Null)
+    }
+
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
         this.object.set_prototype(prototype, realm)
+    }
+
+    fn name(&self) -> String {
+        "Object".to_string()
     }
 
     fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
