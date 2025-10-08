@@ -156,7 +156,8 @@ fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
         return Err(Error::ty("toString called on non-function"));
     }
 
-    Ok(this.to_string(realm)?.into())
+
+    Ok("function () { [Native code] } ".into())
 }
 
 impl Obj for FunctionPrototype {
