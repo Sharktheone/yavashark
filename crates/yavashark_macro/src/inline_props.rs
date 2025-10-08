@@ -82,8 +82,9 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
     let properties = properties::generate_properties(props, config);
     let keys = keys::generate_keys(props, config);
     let values = values::generate_values(props, config);
-    let enumerable_values = values::generate_enumerable_values(props, config);
     let enumerable_properties = properties::generate_enumerable_properties(props, config);
+    let enumerable_keys = keys::generate_enumerable_keys(props, config);
+    let enumerable_values = values::generate_enumerable_values(props, config);
 
     let env = &config.env_path;
 
@@ -95,8 +96,9 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
             #properties
             #keys
             #values
-            #enumerable_values
             #enumerable_properties
+            #enumerable_keys
+            #enumerable_values
 
 
             fn gc_refs(&self) -> impl Iterator<Item = yavashark_garbage::GcRef<#env::value::BoxedObj>> {
