@@ -79,6 +79,30 @@ impl Object {
         })
     }
 
+    pub fn from_values_with_proto(
+        values: Vec<(PropertyKey, Value)>,
+        proto: impl Into<ObjectOrNull>,
+    ) -> Result<ObjectHandle, Error> {
+        Ok(ObjectHandle::new(Self::raw_from_values_with_proto(
+            values, proto,
+        )?))
+    }
+
+    pub fn raw_from_values_with_proto(
+        values: Vec<(PropertyKey, Value)>,
+        proto: impl Into<ObjectOrNull>,
+    ) -> Result<Self, Error> {
+        let mut object = MutObject::with_proto(proto);
+
+        for (key, value) in values {
+            object.internal_define_property_no_realm(key.into(), value)?;
+        }
+
+        Ok(Self {
+            inner: RefCell::new(object),
+        })
+    }
+
     pub fn inner_mut(&self) -> Result<RefMut<'_, MutObject>, Error> {
         self.inner
             .try_borrow_mut()
@@ -540,6 +564,43 @@ impl MutObject {
         }
 
         Ok(())
+    }
+
+    fn internal_define_property_no_realm(
+        &mut self,
+        name: InternalPropertyKey,
+        value: Value,
+    ) -> Res<DefinePropertyResult> {
+        if let InternalPropertyKey::Index(n) = name {
+            self.insert_array(n, value);
+            return Ok(DefinePropertyResult::Handled);
+        }
+
+        if let InternalPropertyKey::String(s) = &name {
+            if s == "__proto__" {
+                self.prototype = ObjectOrNull::try_from(value)?;
+                return Ok(DefinePropertyResult::Handled);
+            }
+        }
+
+        match self.properties.entry(name.into()) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
+
+                if e.attributes.is_writable() {
+                    e.value = value;
+                    return Ok(DefinePropertyResult::Handled);
+                }
+            }
+            Entry::Vacant(entry) => {
+                let idx = self.values.len();
+                self.values.push(ObjectProperty::new(value));
+                entry.insert(idx);
+            }
+        }
+        Ok(DefinePropertyResult::Handled)
     }
 }
 
