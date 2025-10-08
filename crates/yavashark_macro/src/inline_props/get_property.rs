@@ -16,7 +16,6 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
         .filter(|p| matches!(p.kind, Kind::Property | Kind::Getter))
     {
         let key = &prop.name;
-        let ty = &prop.ty;
         let field = &prop.field;
 
         let partial_get = if prop.partial {

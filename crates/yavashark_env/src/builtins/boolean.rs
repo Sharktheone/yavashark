@@ -51,7 +51,7 @@ impl CustomName for BooleanConstructor {
 
 impl BooleanConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, _realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let this = Self {
             inner: RefCell::new(MutableBooleanConstructor {
                 object: MutObject::with_proto(func),

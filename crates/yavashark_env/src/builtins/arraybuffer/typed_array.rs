@@ -325,7 +325,7 @@ impl crate::value::ObjectImpl for TypedArray {
         }
 
         let mut values =
-            typed_array_run!({ slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>() });
+            typed_array_run!(slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>());
 
         values.append(&mut self.get_wrapped_object().values(realm)?);
 
@@ -337,7 +337,7 @@ impl crate::value::ObjectImpl for TypedArray {
             return self.get_wrapped_object().get_array_or_done(index, realm);
         }
 
-        typed_array_run!({ Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))) })
+        typed_array_run!(Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))))
     }
 }
 

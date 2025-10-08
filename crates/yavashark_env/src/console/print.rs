@@ -40,7 +40,7 @@ pub trait PrettyPrint {
 }
 
 impl PrettyPrint for Object {
-    fn pretty_print_key(&self, realm: &mut Realm) -> String {
+    fn pretty_print_key(&self, _realm: &mut Realm) -> String {
         format!("'{self}'").green().to_string()
     }
 
@@ -400,7 +400,7 @@ pub fn fmt_properties_to(obj: &Object, str: &mut String, not: &mut Vec<usize>, r
 }
 
 impl PrettyPrint for PropertyKey {
-    fn pretty_print_key(&self, realm: &mut Realm) -> String {
+    fn pretty_print_key(&self, _realm: &mut Realm) -> String {
         match self {
             Self::String(s) => format!("\"{s}\"").green().to_string(),
             Self::Symbol(s) => s.to_string().cyan().to_string(),

@@ -9,7 +9,7 @@ use crate::function::bound::BoundFunction;
 use crate::realm::Realm;
 use crate::{
     Error, InternalPropertyKey, MutObject, NativeConstructor, NativeFunction, ObjectHandle,
-    ObjectOrNull, ObjectProperty, PropertyKey, Res, Value, ValueResult, Variable,
+    ObjectOrNull, PropertyKey, Res, Value, ValueResult, Variable,
 };
 
 #[derive(Debug)]

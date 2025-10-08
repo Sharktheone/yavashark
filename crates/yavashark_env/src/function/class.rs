@@ -1,7 +1,7 @@
 use crate::realm::Realm;
 use crate::value::{BoxedObj, ConstructorFn, DefinePropertyResult, Obj, Property, Variable};
 use crate::{
-    Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PropertyKey,
+    Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey,
     Res, Value, ValueResult,
 };
 use rustc_hash::FxHashMap;
@@ -10,7 +10,6 @@ use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::ptr::NonNull;
-use swc_ecma_ast::Prop;
 use yavashark_garbage::GcRef;
 use yavashark_macro::properties;
 use yavashark_string::YSString;
@@ -257,7 +256,7 @@ impl Obj for Class {
         self.inner.get_array_or_done(index, realm)
     }
 
-    fn call(&self, _args: Vec<Value>, _this: Value, realm: &mut Realm) -> ValueResult {
+    fn call(&self, _args: Vec<Value>, _this: Value, _realm: &mut Realm) -> ValueResult {
         Err(Error::new(
             "Class constructor cannot be invoked without 'new'",
         ))

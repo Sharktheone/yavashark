@@ -11,6 +11,7 @@ use yavashark_env::scope::Scope;
 
 pub struct ScopeCompleter {
     filename: FilenameCompleter,
+    #[allow(unused)]
     scope: Scope,
 }
 

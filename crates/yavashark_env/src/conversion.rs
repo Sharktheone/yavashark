@@ -220,7 +220,7 @@ impl FromValueOutput for &BigIntOrNumber {
 impl FromValueOutput for InternalPropertyKey {
     type Output = Self;
 
-    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+    fn from_value_out(value: Value, _realm: &mut Realm) -> Res<Self::Output> {
         Ok(InternalPropertyKey::from(value))
     }
 }

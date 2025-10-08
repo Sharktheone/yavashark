@@ -1110,8 +1110,8 @@ impl Array {
         let mut idx = 0;
 
         while idx < len / 2 {
-            let (left, left_val) = this.get_array_or_done(idx, realm)?;
-            let (right, right_val) = this.get_array_or_done(len - idx - 1, realm)?;
+            let (_, left_val) = this.get_array_or_done(idx, realm)?;
+            let (_, right_val) = this.get_array_or_done(len - idx - 1, realm)?;
 
             if let Some(left_val) = left_val {
                 this.define_property((len - idx - 1).into(), left_val, realm)?;

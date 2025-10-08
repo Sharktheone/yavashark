@@ -13,7 +13,6 @@ impl ValueIterator {
 
     pub fn next(&self, realm: &mut Realm) -> Res<Option<Value>> {
         let res = self.0.call_method(&"next".into(), realm, Vec::new())?;
-        let this = res.clone();
 
         let res = res.as_object()?;
 

@@ -35,8 +35,8 @@ impl Realm {
         &mut self,
         spec: &str,
         cur_path: &Path,
-        cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
-    ) -> Res<ResolveModuleResult> {
+        cb: impl FnOnce(String, PathBuf, &mut Self) -> Res<Module> + 'static,
+    ) -> Res<ResolveModuleResult<'_>> {
         let path = resolve_path(spec, cur_path)?;
 
         if path == cur_path {

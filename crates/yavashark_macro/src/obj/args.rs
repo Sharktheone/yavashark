@@ -5,6 +5,7 @@ use quote::ToTokens;
 use syn::spanned::Spanned;
 use syn::{Error, FieldsNamed, Path};
 
+#[allow(unused)]
 #[derive(Debug, FromMeta)]
 pub struct ObjArgs {
     #[darling(default)]
@@ -93,6 +94,7 @@ impl FromMeta for DirectItem {
 }
 
 pub struct ItemArgs {
+    #[allow(unused)]
     pub gc: Vec<GcItem>,
     pub mutable_region: Vec<Ident>,
     pub primitive: Option<Ident>,
@@ -207,6 +209,7 @@ impl ItemArgs {
     }
 }
 
+#[allow(unused)]
 pub struct GcItem {
     pub name: Ident,
     pub ty: bool,

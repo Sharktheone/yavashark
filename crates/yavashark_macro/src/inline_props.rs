@@ -12,7 +12,7 @@ use proc_macro2::TokenStream;
 use syn::spanned::Spanned;
 
 pub fn inline_props(
-    attrs: proc_macro::TokenStream,
+    _attrs: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);

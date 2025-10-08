@@ -176,45 +176,45 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         quote! {}
     };
 
-    let custom_refs = if item_args.gc.is_empty() {
-        TokenStream::new()
-    } else {
-        let len = item_args.gc.len();
-
-        let refs = item_args
-            .gc
-            .into_iter()
-            .map(|gc| {
-                let mut func = if gc.ty {
-                    if gc.multi {
-                        Ident::new("gc_ref_multi", Span::call_site())
-                    } else {
-                        Ident::new("gc_ref", Span::call_site())
-                    }
-                } else if gc.multi {
-                    Ident::new("gc_untyped_ref_multi", Span::call_site())
-                } else {
-                    Ident::new("gc_untyped_ref", Span::call_site())
-                };
-
-                if let Some(f) = gc.func {
-                    func = f;
-                }
-
-                let field = gc.name;
-
-                quote! {
-                    if let Some(r) = self.#field.#func() {
-                        refs.push(r);
-                    }
-                }
-            })
-            .collect::<TokenStream>();
-
-        quote! {
-            //TODO
-        }
-    };
+    // let custom_refs = if item_args.gc.is_empty() {
+    //     TokenStream::new()
+    // } else {
+    //     let len = item_args.gc.len();
+    //
+    //     let refs = item_args
+    //         .gc
+    //         .into_iter()
+    //         .map(|gc| {
+    //             let mut func = if gc.ty {
+    //                 if gc.multi {
+    //                     Ident::new("gc_ref_multi", Span::call_site())
+    //                 } else {
+    //                     Ident::new("gc_ref", Span::call_site())
+    //                 }
+    //             } else if gc.multi {
+    //                 Ident::new("gc_untyped_ref_multi", Span::call_site())
+    //             } else {
+    //                 Ident::new("gc_untyped_ref", Span::call_site())
+    //             };
+    //
+    //             if let Some(f) = gc.func {
+    //                 func = f;
+    //             }
+    //
+    //             let field = gc.name;
+    //
+    //             quote! {
+    //                 if let Some(r) = self.#field.#func() {
+    //                     refs.push(r);
+    //                 }
+    //             }
+    //         })
+    //         .collect::<TokenStream>();
+    //
+    //     quote! {
+    //         //TODO
+    //     }
+    // };
 
     let constructor = if args.constructor {
         quote! {

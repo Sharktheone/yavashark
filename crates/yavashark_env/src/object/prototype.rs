@@ -9,10 +9,9 @@ use yavashark_garbage::GcRef;
 
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
-use crate::realm::resolve::ResolveModuleResult;
 use crate::realm::Realm;
 use crate::{
-    InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, ObjectProperty, PropertyKey, Res,
+    InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, PropertyKey, Res,
     Value, Variable,
 };
 
@@ -546,7 +545,7 @@ impl Obj for Prototype {
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         let this = self.inner.try_borrow()?;
 
-        let mut keys = this.object.enumerable_keys(realm)?;
+        let keys = this.object.enumerable_keys(realm)?;
 
         Ok(keys)
     }

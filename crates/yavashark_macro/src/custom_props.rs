@@ -5,7 +5,6 @@ use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());

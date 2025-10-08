@@ -191,12 +191,12 @@ impl RegExpConstructor {
         Ok(this.into_object())
     }
 
-    #[allow(clippy::unused_self)]
+    #[allow(clippy::unused_self, unused)]
     fn override_to_string_internal(&self) -> Res<YSString> {
         Ok("function RegExp() { [native code] }".into())
     }
 
-    #[allow(clippy::unused_self)]
+    #[allow(clippy::unused_self, unused)]
     fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
         Ok("function RegExp() { [native code] }".into())
     }
@@ -521,7 +521,7 @@ impl PrettyObjectOverride for RegExp {
         &self,
         _obj: &crate::value::Object,
         _not: &mut Vec<usize>,
-        realm: &mut Realm,
+        _realm: &mut Realm,
     ) -> Option<String> {
         let mut s = String::new();
         s.push('/');

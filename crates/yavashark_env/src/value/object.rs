@@ -264,6 +264,9 @@ pub trait Obj: Debug + 'static {
 
     fn get_array_or_done(&self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)>;
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Res<Value> {
+        _ = args;
+        _ = this;
+        _ = realm;
         Err(Error::ty_error(format!(
             "{} is not callable",
             self.class_name()
@@ -274,6 +277,7 @@ pub trait Obj: Debug + 'static {
     }
 
     fn primitive(&self, realm: &mut Realm) -> Res<Option<PrimitiveValue>> {
+        _ = realm;
         Ok(None)
     }
 
@@ -281,6 +285,8 @@ pub trait Obj: Debug + 'static {
     fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res;
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+        _ = args;
+        _ = realm;
         //TODO: i think this somehow needs to work differently
         Err(Error::ty_error(format!(
             "{} is not constructable",
@@ -514,6 +520,10 @@ pub trait MutObj: Debug + 'static {
 
     fn get_array_or_done(&mut self, idx: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)>;
     fn call(&mut self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Res<Value> {
+        _ = args;
+        _ = this;
+        _ = realm;
+
         Err(Error::ty_error(format!(
             "{} is not callable",
             self.class_name()
@@ -524,6 +534,7 @@ pub trait MutObj: Debug + 'static {
     }
 
     fn primitive(&mut self, realm: &mut Realm) -> Res<Option<PrimitiveValue>> {
+        _ = realm;
         Ok(None)
     }
 
@@ -531,6 +542,8 @@ pub trait MutObj: Debug + 'static {
     fn set_prototype(&mut self, prototype: ObjectOrNull, realm: &mut Realm) -> Res;
 
     fn construct(&mut self, args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+        _ = args;
+        _ = realm;
         //TODO: i think this somehow needs to work differently
         Err(Error::ty_error(format!(
             "{} is not constructable",
