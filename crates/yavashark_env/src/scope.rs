@@ -176,7 +176,7 @@ impl VariableReference {
     #[must_use]
     pub fn get(&self, realm: &mut Realm) -> Variable {
         self.object
-            .resolve_property_no_get_set(self.name.clone(), realm)
+            .get_own_property_no_get_set(self.name.clone(), realm)
             .ok()
             .flatten()
             .map_or(Value::Undefined.into(), |p| {
@@ -272,7 +272,7 @@ impl ObjectOrVariables {
     fn get(&self, name: &str, realm: &mut Realm) -> Option<Variable> {
         match self {
             Self::Object(o) => o
-                .resolve_property_no_get_set(YSString::from_ref(name), realm)
+                .get_own_property_no_get_set(YSString::from_ref(name), realm)
                 .ok()
                 .flatten()
                 .map(|x| {
@@ -286,7 +286,7 @@ impl ObjectOrVariables {
     fn contains_key(&self, name: &str, realm: &mut Realm) -> bool {
         match self {
             Self::Object(o) => o
-                .contains_key(YSString::from_ref(name).into(), realm)
+                .contains_own_key(YSString::from_ref(name).into(), realm)
                 .unwrap_or_default(),
             Self::Variables(v) => v.contains_key(name),
         }
@@ -606,7 +606,7 @@ impl ScopeInternal {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name: InternalPropertyKey = YSString::from_ref(name).into();
-                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(name.clone(), realm) {
+                if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
                     let prop = prop.assert_value();
                     if !prop.properties.is_writable() {
                         return Ok(false);
@@ -643,7 +643,7 @@ impl ScopeInternal {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name: InternalPropertyKey = name.clone().into();
-                if let Ok(Some(prop)) = obj.resolve_property_no_get_set(name.clone(), realm) {
+                if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
                     let prop = prop.assert_value();
                     if !prop.properties.is_writable() {
                         return Err(Error::ty("Assignment to constant variable"));

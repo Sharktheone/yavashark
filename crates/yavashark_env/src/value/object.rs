@@ -777,13 +777,10 @@ impl Object {
         &self,
         name: impl IntoPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Property> {
+    ) -> Res<Option<Property>> {
         let name = name.into_internal_property_key(realm)?;
         self.0
-            .get_own_property(name.clone(), realm)?
-            .ok_or(Error::reference_error(format!(
-                "{name} does not exist on object"
-            )))
+            .get_own_property(name.clone(), realm)
     }
 
     pub fn get_own_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Value> {
