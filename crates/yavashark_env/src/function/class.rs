@@ -532,7 +532,9 @@ impl Obj for ClassInstance {
     ) -> Res<Option<Property>> {
         self.inner
             .try_borrow()?
-            .resolve_property_no_get_set(name, realm)
+            .deref()
+            .deref()
+            .resolve_property(name, realm)
     }
 
     fn get_own_property(
@@ -540,11 +542,12 @@ impl Obj for ClassInstance {
         name: InternalPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        Ok(self
+        self
             .inner
             .try_borrow()?
-            .get_property_opt(name, realm)?
-            .map(Into::into))
+            .deref()
+            .deref()
+            .get_own_property(name, realm)
     }
 
     fn define_getter(
