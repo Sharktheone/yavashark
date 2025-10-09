@@ -29,6 +29,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
 
+
     let conf = Config::new(Span::call_site());
 
     let realm = &conf.realm;
@@ -409,6 +410,10 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
             #function
 
             #primitive
+
+            fn name(&self) -> String {
+                stringify!(#struct_name).to_string()
+            }
 
             #downcast
 

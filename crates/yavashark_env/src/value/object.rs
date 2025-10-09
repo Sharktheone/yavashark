@@ -270,7 +270,7 @@ pub trait Obj: Debug + 'static {
         _ = realm;
         Err(Error::ty_error(format!(
             "{} is not callable",
-            self.class_name()
+            self.name()
         )))
     }
     fn is_callable(&self) -> bool {
@@ -819,7 +819,7 @@ impl Object {
 
     #[must_use]
     pub fn name(&self) -> String {
-        String::new()
+        self.0.name()
     }
 
     #[must_use]
@@ -1122,12 +1122,15 @@ impl ObjectProperty {
 
     pub fn property(&self) -> Property {
         if !self.set.is_undefined() || !self.get.is_undefined() {
-            Property::Getter(
-                self.get
-                    .clone()
-                    .to_object()
-                    .unwrap_or(crate::Object::null()),
-            )
+            let Ok(obj) = self.get.clone().to_object() else {
+                return Property::Value(Variable {
+                    value: Value::Undefined,
+                    properties: Attributes::config(),
+                });
+            };
+
+
+            Property::Getter(obj)
         } else {
             Property::Value(Variable {
                 value: self.value.clone(),

@@ -210,7 +210,7 @@ pub trait ObjectImpl: Debug + 'static {
     }
 
     fn name(&self) -> String {
-        String::new()
+        "Object".into()
     }
 
     fn class_name(&self) -> &'static str {
@@ -460,6 +460,10 @@ impl<T: ObjectImpl> Obj for T {
 
     fn is_constructable(&self) -> bool {
         ObjectImpl::is_constructable(self)
+    }
+
+    fn name(&self) -> String {
+        ObjectImpl::name(self)
     }
 
     fn class_name(&self) -> &'static str {
