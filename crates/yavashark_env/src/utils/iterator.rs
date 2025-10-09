@@ -60,7 +60,7 @@ impl ArrayLike {
             return Ok(true);
         }
 
-        if o.contains_key("length".into(), realm)? {
+        if o.contains_own_key("length".into(), realm)? {
             return Ok(true);
         }
 
