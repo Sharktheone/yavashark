@@ -9,6 +9,7 @@ use std::any::TypeId;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
+use std::ops::Deref;
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 use yavashark_macro::properties;
@@ -86,7 +87,7 @@ impl Obj for Class {
             let val: Value = self.prototype.borrow().clone().into();
             Ok(Some(val.into()))
         } else {
-            self.inner.resolve_property_no_get_set(name, realm)
+            self.inner.deref().resolve_property(name, realm)
         }
     }
 
@@ -99,7 +100,7 @@ impl Obj for Class {
             let val: Value = self.prototype.borrow().clone().into();
             Ok(Some(val.into()))
         } else {
-            Ok(self.inner.get_property_opt(name, realm)?.map(Into::into))
+            self.inner.deref().get_own_property(name, realm)
         }
     }
 
