@@ -155,7 +155,7 @@ impl ObjectConstructor {
 
                 let value = match value {
                     Property::Value(v) => v.value,
-                    Property::Getter(getter) => {
+                    Property::Getter(getter, _) => {
                         getter.call(Vec::new(), source.clone().into(), realm)?
                     }
                 };
@@ -203,7 +203,7 @@ impl ObjectConstructor {
 
             let value = match value {
                 Property::Value(v) => v.value,
-                Property::Getter(getter) => getter.call(Vec::new(), obj.clone().into(), realm)?,
+                Property::Getter(getter, _) => getter.call(Vec::new(), obj.clone().into(), realm)?,
             };
 
             let arr = vec![key.into(), value];
@@ -409,7 +409,7 @@ impl ObjectConstructor {
 
             let value = match value {
                 Property::Value(v) => v.value,
-                Property::Getter(getter) => getter.call(Vec::new(), obj.clone().into(), realm)?,
+                Property::Getter(getter, _) => getter.call(Vec::new(), obj.clone().into(), realm)?,
             };
 
             props.push(value);

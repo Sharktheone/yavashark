@@ -47,7 +47,7 @@ pub fn lookup_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueR
     Ok(this
         .resolve_property_no_get_set(name, realm)?
         .map_or(Value::Undefined, |p| {
-            if let Property::Getter(get) = p {
+            if let Property::Getter(get, _) = p {
                 get.clone().into()
             } else {
                 Value::Undefined

@@ -26,13 +26,13 @@ pub enum DefinePropertyResult {
 #[derive(Debug, PartialEq, Eq)]
 pub enum Property {
     Value(Variable),
-    Getter(ObjectHandle),
+    Getter(ObjectHandle, Attributes),
 }
 
 impl From<ObjectProperty> for Property {
     fn from(prop: ObjectProperty) -> Self {
         if !prop.set.is_undefined() || !prop.get.is_undefined() {
-            Self::Getter(prop.get.to_object().unwrap_or(crate::Object::null()))
+            Self::Getter(prop.get.to_object().unwrap_or(crate::Object::null()), prop.attributes)
         } else {
             Self::Value(Variable {
                 value: prop.value,
@@ -61,7 +61,7 @@ impl Property {
     pub fn attributes(&self) -> Attributes {
         match self {
             Property::Value(v) => v.properties,
-            Property::Getter(_) => Attributes::config(),
+            Property::Getter(_, _) => Attributes::config(),
         }
     }
 
@@ -72,7 +72,7 @@ impl Property {
     pub fn assert_value(self) -> Variable {
         match self {
             Property::Value(v) => v,
-            Property::Getter(_) => Value::Undefined.into(),
+            Property::Getter(_, _) => Value::Undefined.into(),
         }
     }
 }
@@ -314,11 +314,11 @@ pub trait Obj: Debug + 'static {
                 enumerable: v.properties.is_enumerable(),
                 configurable: v.properties.is_configurable(),
             })),
-            Property::Getter(g) => Ok(Some(PropertyDescriptor::Accessor {
+            Property::Getter(g, props) => Ok(Some(PropertyDescriptor::Accessor {
                 get: Some(g),
                 set: None,
-                enumerable: true,
-                configurable: true,
+                enumerable: props.is_enumerable(),
+                configurable: props.is_configurable(),
             })),
         }
     }
@@ -745,7 +745,7 @@ impl Object {
 
         match p {
             Property::Value(v) => Ok(Some(v.value)),
-            Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
+            Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
         }
     }
 
@@ -797,7 +797,7 @@ impl Object {
 
         match property {
             Property::Value(v) => Ok(v.value),
-            Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm),
+            Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm),
         }
     }
 
@@ -813,7 +813,7 @@ impl Object {
 
         match prop {
             Property::Value(v) => Ok(Some(v.value)),
-            Property::Getter(g) => Ok(Some(g.call(Vec::new(), self.clone().into(), realm)?)),
+            Property::Getter(g, _) => Ok(Some(g.call(Vec::new(), self.clone().into(), realm)?)),
         }
     }
 
@@ -852,7 +852,7 @@ impl Object {
             .resolve_property(name, realm)?
             .map_or(Ok(Value::Undefined), |x| match x {
                 Property::Value(v) => Ok(v.value),
-                Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm),
+                Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm),
             })
     }
 
@@ -863,7 +863,7 @@ impl Object {
             .resolve_property(name, realm)?
             .map_or(Ok(None), |x| match x {
                 Property::Value(v) => Ok(Some(v.value)),
-                Property::Getter(g) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
+                Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
             })
     }
 
@@ -1130,7 +1130,7 @@ impl ObjectProperty {
             };
 
 
-            Property::Getter(obj)
+            Property::Getter(obj, self.attributes)
         } else {
             Property::Value(Variable {
                 value: self.value.clone(),

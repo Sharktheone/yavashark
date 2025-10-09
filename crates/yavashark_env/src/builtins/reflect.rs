@@ -147,7 +147,7 @@ impl Reflect {
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
         match target.resolve_property_no_get_set(prop, realm)? {
             Some(Property::Value(v)) => Ok(v.value),
-            Some(Property::Getter(getter)) => {
+            Some(Property::Getter(getter, _)) => {
                 let recv = receiver.unwrap_or_else(|| target.clone().into());
                 getter.call(Vec::new(), recv, realm)
             }

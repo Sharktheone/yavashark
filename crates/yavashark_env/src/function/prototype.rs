@@ -151,7 +151,7 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         .to_object()?)
 }
 
-fn to_string(_args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
+fn to_string(_args: Vec<Value>, this: Value, _realm: &mut Realm) -> ValueResult {
     if !this.is_callable() {
         return Err(Error::ty("toString called on non-function"));
     }
