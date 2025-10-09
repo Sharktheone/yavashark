@@ -110,15 +110,15 @@ impl ObjectConstructor {
 
         //TODO: there should be a obj.define_property which takes a descriptor
         if let Some(get) = descriptor.resolve_property("get", realm)? {
-            let get = get.to_object()?;
-
-            obj.define_getter(key.clone(), get, realm)?;
+            if let Ok(get) = get.to_object() {
+                obj.define_getter(key.clone(), get, realm)?;
+            }
         }
 
         if let Some(set) = descriptor.resolve_property("set", realm)? {
-            let set = set.to_object()?;
-
-            obj.define_setter(key, set, realm)?;
+            if let Ok(set) = set.to_object() {
+                obj.define_setter(key, set, realm)?;
+            }
         }
 
         Ok(obj.into())
