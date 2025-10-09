@@ -82,7 +82,7 @@ pub fn has_own_property(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 
     let key = (&args[0]).into_internal_property_key(realm)?;
 
-    Ok(obj.contains_key(key, realm)?.into())
+    Ok(obj.contains_own_key(key, realm)?.into())
 }
 
 pub fn get_own_property_descriptor(

@@ -77,6 +77,7 @@ impl Property {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PropertyDescriptor {
     Data {
         value: Value,
