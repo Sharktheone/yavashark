@@ -41,5 +41,20 @@ pub fn get_console(realm: &mut Realm) -> Value {
         realm,
     ); // This can only fail if we have an existing borrow to the object, which we clearly don't
 
+    let _ = console.define_property(
+        "printNativeStacktrace".into(),
+        NativeFunction::new(
+            "printNativeStacktrace",
+            |_, _, _| {
+                let bt = std::backtrace::Backtrace::force_capture();
+                eprintln!("{bt}");
+                Ok(Value::Undefined)
+            },
+            realm,
+    )
+        .into(),
+        realm,
+    );
+
     console.into()
 }
