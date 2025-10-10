@@ -21,7 +21,7 @@ impl Interpreter {
         stmt: &ForInStmt,
         scope: &mut Scope,
     ) -> RuntimeResult {
-        for key in obj.keys(realm)? {
+        for key in obj.enumerable_keys(realm)? {
             let scope = &mut Scope::with_parent(scope)?;
             let label = scope.last_label()?;
             scope.state_set_loop()?;

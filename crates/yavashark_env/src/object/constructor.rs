@@ -91,22 +91,22 @@ impl ObjectConstructor {
             .resolve_property("value", realm)?
             .unwrap_or(Value::Undefined);
 
-        let writable = descriptor
-            .resolve_property("writable", realm)?
-            .map(|v| v.is_truthy())
-            .unwrap_or(false);
-        let enumerable = descriptor
-            .resolve_property("enumerable", realm)?
-            .map(|v| v.is_truthy())
-            .unwrap_or(false);
-        let configurable = descriptor
-            .resolve_property("configurable", realm)?
-            .map(|v| v.is_truthy())
-            .unwrap_or(false);
+            let writable = descriptor
+                .resolve_property("writable", realm)?
+                .map(|v| v.is_truthy())
+                .unwrap_or(false);
+            let enumerable = descriptor
+                .resolve_property("enumerable", realm)?
+                .map(|v| v.is_truthy())
+                .unwrap_or(false);
+            let configurable = descriptor
+                .resolve_property("configurable", realm)?
+                .map(|v| v.is_truthy())
+                .unwrap_or(false);
 
-        let var = Variable::new_with_attributes(value, writable, enumerable, configurable);
+            let var = Variable::new_with_attributes(value, writable, enumerable, configurable);
 
-        obj.define_property_attributes(key.clone(), var, realm)?;
+            obj.define_property_attributes(key.clone(), var, realm)?;
 
         //TODO: there should be a obj.define_property which takes a descriptor
         if let Some(get) = descriptor.resolve_property("get", realm)? {
@@ -366,7 +366,7 @@ impl ObjectConstructor {
         };
 
         let keys = obj
-            .keys(realm)?
+            .enumerable_keys(realm)?
             .iter()
             .filter_map(|k| {
                 let v = obj.resolve_property_no_get_set(k.clone(), realm).ok()??; //TODO: This is absolutely not how this should be done (performance wise)
@@ -394,7 +394,7 @@ impl ObjectConstructor {
             _ => return Ok(Array::from_realm(realm).into_value()),
         };
 
-        let keys = obj.keys(realm)?;
+        let keys = obj.enumerable_keys(realm)?;
 
         let mut props = Vec::with_capacity(keys.len());
 
