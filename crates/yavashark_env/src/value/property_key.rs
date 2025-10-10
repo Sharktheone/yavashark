@@ -195,8 +195,8 @@ impl IntoPropertyKey for PropertyKey {
     }
     fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
         match self {
-            PropertyKey::String(s) => Ok(InternalPropertyKey::String(s)),
-            PropertyKey::Symbol(s) => Ok(InternalPropertyKey::Symbol(s)),
+            Self::String(s) => Ok(s.into()),
+            Self::Symbol(s) => Ok(InternalPropertyKey::Symbol(s)),
         }
     }
 }
@@ -224,7 +224,7 @@ impl IntoPropertyKey for String {
         Ok(PropertyKey::String(self.into()))
     }
     fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
-        Ok(InternalPropertyKey::String(self.into()))
+        Ok(string_to_internal_property_key(self.into()))
     }
 }
 
@@ -233,47 +233,51 @@ impl IntoPropertyKey for YSString {
         Ok(PropertyKey::String(self))
     }
     fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
-        Ok(InternalPropertyKey::String(self))
+        Ok(string_to_internal_property_key(self))
     }
 }
 
 impl IntoPropertyKey for Value {
     fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
         Ok(match self {
-            Value::String(s) => PropertyKey::String(s),
-            Value::Symbol(s) => PropertyKey::Symbol(s),
-            Value::Null => PropertyKey::String("null".into()),
-            Value::Undefined => PropertyKey::String("undefined".into()),
-            Value::Number(n) => PropertyKey::String(n.to_string().into()),
-            Value::Boolean(b) => PropertyKey::String(b.to_string().into()),
-            Value::BigInt(b) => PropertyKey::String(b.to_string().into()),
-            Value::Object(obj) => PropertyKey::String(obj.to_string(realm)?),
+            Self::String(s) => PropertyKey::String(s),
+            Self::Symbol(s) => PropertyKey::Symbol(s),
+            Self::Null => PropertyKey::String("null".into()),
+            Self::Undefined => PropertyKey::String("undefined".into()),
+            Self::Number(n) => PropertyKey::String(n.to_string().into()),
+            Self::Boolean(b) => PropertyKey::String(b.to_string().into()),
+            Self::BigInt(b) => PropertyKey::String(b.to_string().into()),
+            Self::Object(obj) => PropertyKey::String(obj.to_string(realm)?),
         })
     }
     fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
         Ok(match self {
-            Value::String(s) => {
-                s.parse::<usize>().map_or_else(
-                    |_| InternalPropertyKey::String(s),
-                    InternalPropertyKey::Index,
-                )
-                //TODO: this is a hack, we should not parse strings to usize
+            Self::String(s) => {
+                string_to_internal_property_key(s)
             }
-            Value::Symbol(s) => InternalPropertyKey::Symbol(s),
-            Value::Null => InternalPropertyKey::String("null".into()),
-            Value::Undefined => InternalPropertyKey::String("undefined".into()),
-            Value::Number(n) => {
+            Self::Symbol(s) => InternalPropertyKey::Symbol(s),
+            Self::Null => InternalPropertyKey::String("null".into()),
+            Self::Undefined => InternalPropertyKey::String("undefined".into()),
+            Self::Number(n) => {
                 if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
                     InternalPropertyKey::Index(n as usize)
                 } else {
                     InternalPropertyKey::String(fmt_num(n))
                 }
             }
-            Value::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
-            Value::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
-            Value::Object(obj) => InternalPropertyKey::String(obj.to_string(realm)?),
+            Self::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
+            Self::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
+            Self::Object(obj) => InternalPropertyKey::String(obj.to_string(realm)?),
         })
     }
+}
+
+fn string_to_internal_property_key(s: YSString) -> InternalPropertyKey {
+    s.parse::<usize>().map_or_else(
+        |_| InternalPropertyKey::String(s),
+        InternalPropertyKey::Index,
+    )
+    //TODO: this is a hack, we should not parse strings to usize
 }
 
 impl IntoPropertyKey for &Value {
@@ -320,13 +324,13 @@ impl From<&'static str> for InternalPropertyKey {
 
 impl From<String> for InternalPropertyKey {
     fn from(s: String) -> Self {
-        Self::String(s.into())
+        string_to_internal_property_key(s.into())
     }
 }
 
 impl From<YSString> for InternalPropertyKey {
     fn from(s: YSString) -> Self {
-        Self::String(s)
+        string_to_internal_property_key(s.into())
     }
 }
 
