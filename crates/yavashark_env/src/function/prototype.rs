@@ -134,11 +134,11 @@ fn constructor(mut args: Vec<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
         buf.push_str(&arg.to_string(realm)?);
     }
 
-    buf.push_str(") { ");
+    buf.push_str(") {\n ");
 
     buf.push_str(&body.to_string(realm)?);
 
-    buf.push_str(" }");
+    buf.push_str("\n }");
 
     buf.push_str("anonymous");
 
