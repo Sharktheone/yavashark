@@ -2,7 +2,7 @@ use crate::value::{fmt_num, Symbol, Value};
 use crate::{Realm, Res};
 use indexmap::Equivalent;
 use std::fmt::Display;
-use yavashark_string::{ToYSString, YSString};
+use yavashark_string::YSString;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum PropertyKey {
@@ -94,20 +94,20 @@ impl Display for InternalPropertyKey {
     }
 }
 
-impl From<Value> for PropertyKey {
-    fn from(value: Value) -> Self {
-        match value {
-            Value::String(s) => Self::String(s),
-            Value::Symbol(s) => Self::Symbol(s),
-            Value::Null => Self::String("null".into()),
-            Value::Undefined => Self::String("undefined".into()),
-            Value::Number(n) => Self::String(n.to_string().into()),
-            Value::Boolean(b) => Self::String(b.to_string().into()),
-            Value::BigInt(b) => Self::String(b.to_string().into()),
-            Value::Object(obj) => Self::String(obj.to_ys_string()),
-        }
-    }
-}
+// impl From<Value> for PropertyKey {
+//     fn from(value: Value) -> Self {
+//         match value {
+//             Value::String(s) => Self::String(s),
+//             Value::Symbol(s) => Self::Symbol(s),
+//             Value::Null => Self::String("null".into()),
+//             Value::Undefined => Self::String("undefined".into()),
+//             Value::Number(n) => Self::String(n.to_string().into()),
+//             Value::Boolean(b) => Self::String(b.to_string().into()),
+//             Value::BigInt(b) => Self::String(b.to_string().into()),
+//             Value::Object(obj) => Self::String(obj.to_ys_string()),
+//         }
+//     }
+// }
 
 impl From<usize> for PropertyKey {
     fn from(index: usize) -> Self {
@@ -124,30 +124,30 @@ impl From<PropertyKey> for Value {
     }
 }
 
-impl From<Value> for InternalPropertyKey {
-    fn from(value: Value) -> Self {
-        match value {
-            Value::String(s) => {
-                s.parse::<usize>()
-                    .map_or_else(|_| Self::String(s), Self::Index)
-                //TODO: this is a hack, we should not parse strings to usize
-            }
-            Value::Symbol(s) => Self::Symbol(s),
-            Value::Null => Self::String("null".into()),
-            Value::Undefined => Self::String("undefined".into()),
-            Value::Number(n) => {
-                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
-                    Self::Index(n as usize)
-                } else {
-                    Self::String(fmt_num(n))
-                }
-            }
-            Value::Boolean(b) => Self::String(b.to_string().into()),
-            Value::BigInt(b) => Self::String(b.to_string().into()),
-            Value::Object(obj) => Self::String(obj.to_ys_string()),
-        }
-    }
-}
+// impl From<Value> for InternalPropertyKey {
+//     fn from(value: Value) -> Self {
+//         match value {
+//             Value::String(s) => {
+//                 s.parse::<usize>()
+//                     .map_or_else(|_| Self::String(s), Self::Index)
+//                 //TODO: this is a hack, we should not parse strings to usize
+//             }
+//             Value::Symbol(s) => Self::Symbol(s),
+//             Value::Null => Self::String("null".into()),
+//             Value::Undefined => Self::String("undefined".into()),
+//             Value::Number(n) => {
+//                 if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
+//                     Self::Index(n as usize)
+//                 } else {
+//                     Self::String(fmt_num(n))
+//                 }
+//             }
+//             Value::Boolean(b) => Self::String(b.to_string().into()),
+//             Value::BigInt(b) => Self::String(b.to_string().into()),
+//             Value::Object(obj) => Self::String(obj.to_ys_string()),
+//         }
+//     }
+// }
 
 impl From<PropertyKey> for InternalPropertyKey {
     fn from(key: PropertyKey) -> Self {
@@ -238,20 +238,50 @@ impl IntoPropertyKey for YSString {
 }
 
 impl IntoPropertyKey for Value {
-    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
-        Ok(self.into())
+    fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
+        Ok(match self {
+            Value::String(s) => PropertyKey::String(s),
+            Value::Symbol(s) => PropertyKey::Symbol(s),
+            Value::Null => PropertyKey::String("null".into()),
+            Value::Undefined => PropertyKey::String("undefined".into()),
+            Value::Number(n) => PropertyKey::String(n.to_string().into()),
+            Value::Boolean(b) => PropertyKey::String(b.to_string().into()),
+            Value::BigInt(b) => PropertyKey::String(b.to_string().into()),
+            Value::Object(obj) => PropertyKey::String(obj.to_string(realm)?),
+        })
     }
-    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
-        Ok(self.into())
+    fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
+        Ok(match self {
+            Value::String(s) => {
+                s.parse::<usize>().map_or_else(
+                    |_| InternalPropertyKey::String(s),
+                    InternalPropertyKey::Index,
+                )
+                //TODO: this is a hack, we should not parse strings to usize
+            }
+            Value::Symbol(s) => InternalPropertyKey::Symbol(s),
+            Value::Null => InternalPropertyKey::String("null".into()),
+            Value::Undefined => InternalPropertyKey::String("undefined".into()),
+            Value::Number(n) => {
+                if !n.is_nan() && !n.is_infinite() && n.fract() == 0.0 && n.is_sign_positive() {
+                    InternalPropertyKey::Index(n as usize)
+                } else {
+                    InternalPropertyKey::String(fmt_num(n))
+                }
+            }
+            Value::Boolean(b) => InternalPropertyKey::String(b.to_string().into()),
+            Value::BigInt(b) => InternalPropertyKey::String(b.to_string().into()),
+            Value::Object(obj) => InternalPropertyKey::String(obj.to_string(realm)?),
+        })
     }
 }
 
 impl IntoPropertyKey for &Value {
-    fn into_property_key(self, _realm: &mut Realm) -> Res<PropertyKey> {
-        Ok(self.copy().into())
+    fn into_property_key(self, realm: &mut Realm) -> Res<PropertyKey> {
+        self.copy().into_property_key(realm)
     }
-    fn into_internal_property_key(self, _realm: &mut Realm) -> Res<InternalPropertyKey> {
-        Ok(self.copy().into())
+    fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
+        self.copy().into_internal_property_key(realm)
     }
 }
 

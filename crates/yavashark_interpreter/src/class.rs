@@ -44,7 +44,7 @@ pub fn create_class(
                     create_method(&method.key, &method.function, scope, realm, stmt.span)?;
 
                 define_method_on_class(
-                    name.to_string(realm)?,
+                    name.into_internal_property_key(realm)?,
                     func,
                     &mut class,
                     &mut proto,
@@ -84,7 +84,7 @@ pub fn create_class(
                 )?;
 
                 define_method_on_class(
-                    name.to_string(realm)?,
+                    name.into_internal_property_key(realm)?,
                     func,
                     &mut class,
                     &mut proto,
@@ -274,7 +274,7 @@ fn define_on_class(
 }
 
 fn define_method_on_class(
-    key: YSString,
+    key: InternalPropertyKey,
     value: Value,
     class: &mut JSClass,
     proto: &mut ClassInstance,
@@ -310,7 +310,7 @@ fn define_method_on_class(
 
         return Ok(());
     } else if is_static {
-        if key.as_str() == "prototype" {
+        if matches!(&key, InternalPropertyKey::String(key) if key.as_str() == "prototype") {
             return Err(Error::new(
                 "Classes may not have a static property named 'prototype'",
             ));

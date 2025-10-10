@@ -157,7 +157,7 @@ fn to_string(_args: Vec<Value>, this: Value, _realm: &mut Realm) -> ValueResult 
     }
 
 
-    Ok("function () { [Native code] } ".into())
+    Ok("function () { } ".into())
 }
 
 impl Obj for FunctionPrototype {

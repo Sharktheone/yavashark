@@ -87,10 +87,8 @@ impl ObjectConstructor {
         descriptor: &ObjectHandle,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let value = descriptor
-            .resolve_property("value", realm)?
-            .unwrap_or(Value::Undefined);
-
+        if let Some(value) = descriptor
+            .resolve_property("value", realm)? {
             let writable = descriptor
                 .resolve_property("writable", realm)?
                 .map(|v| v.is_truthy())
@@ -107,6 +105,7 @@ impl ObjectConstructor {
             let var = Variable::new_with_attributes(value, writable, enumerable, configurable);
 
             obj.define_property_attributes(key.clone(), var, realm)?;
+        }
 
         //TODO: there should be a obj.define_property which takes a descriptor
         if let Some(get) = descriptor.resolve_property("get", realm)? {

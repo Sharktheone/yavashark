@@ -533,10 +533,9 @@ impl MutObject {
 
     pub fn force_update_property_cb(
         &mut self,
-        name: Value,
+        key: PropertyKey,
         cb: impl FnOnce(Option<&mut ObjectProperty>) -> Option<Value>,
     ) -> Res {
-        let key = name.into();
 
         match self.properties.entry(key) {
             Entry::Occupied(entry) => {

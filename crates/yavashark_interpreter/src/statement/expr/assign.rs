@@ -144,7 +144,7 @@ impl Interpreter {
             SuperProp::Computed(p) => {
                 let name = Self::run_expr(realm, &p.expr, super_prop.span, scope)?;
 
-                sup.define_property(name.into(), value, realm)?;
+                sup.define_property(name.into_internal_property_key(realm)?, value, realm)?;
             }
         }
 

@@ -12,6 +12,7 @@ use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
+use crate::value::property_key::IntoPropertyKey;
 
 pub trait TryIntoValue: Sized {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult;
@@ -220,8 +221,8 @@ impl FromValueOutput for &BigIntOrNumber {
 impl FromValueOutput for InternalPropertyKey {
     type Output = Self;
 
-    fn from_value_out(value: Value, _realm: &mut Realm) -> Res<Self::Output> {
-        Ok(InternalPropertyKey::from(value))
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        value.into_internal_property_key(realm)
     }
 }
 
