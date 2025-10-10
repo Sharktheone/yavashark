@@ -154,9 +154,9 @@ pub fn to_locale_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 }
 
 pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    if let Value::Object(this) = this {
-        return Ok(format!("[object {}]", this.name()).into());
-    }
+    // if let Value::Object(this) = this {
+    //     return Ok(format!("[object {}]", this.name()).into());
+    // }
 
     Ok(format!("[object {}]", this.ty()).into())
 }
