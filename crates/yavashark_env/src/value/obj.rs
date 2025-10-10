@@ -78,7 +78,7 @@ pub trait Object: Debug + Any + 'static {
     #[allow(unused_variables)]
     fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult;
 
-    fn is_constructor(&self) -> bool {
+    fn is_constructable(&self) -> bool {
         false
     }
 

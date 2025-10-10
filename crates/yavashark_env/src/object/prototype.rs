@@ -1,16 +1,19 @@
-use crate::value::{MutObj, Obj, ObjectOrNull};
+use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
 use common::{
     define_getter, define_setter, has_own_property, is_prototype_of, lookup_getter, lookup_setter,
     property_is_enumerable, to_locale_string, to_string, value_of,
 };
 use std::any::Any;
 use std::cell::RefCell;
-use yavashark_string::YSString;
+use yavashark_garbage::GcRef;
 
 use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
 use crate::realm::Realm;
-use crate::{Error, MutObject, NativeFunction, ObjectHandle, ObjectProperty, Res, Value, Variable};
+use crate::{
+    InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, PropertyKey, Res,
+    Value, Variable,
+};
 
 pub mod common;
 
@@ -23,18 +26,18 @@ struct MutPrototype {
     object: MutObject,
 
     //common properties
-    defined_getter: ObjectProperty,
-    defined_setter: ObjectProperty,
-    lookup_getter: ObjectProperty,
-    lookup_setter: ObjectProperty,
-    constructor: ObjectProperty,
-    has_own_property: ObjectProperty,
-    get_own_property_descriptor: ObjectProperty,
-    is_prototype_of: ObjectProperty,
-    property_is_enumerable: ObjectProperty,
-    to_locale_string: ObjectProperty,
-    to_string: ObjectProperty,
-    value_of: ObjectProperty,
+    defined_getter: Variable,
+    defined_setter: Variable,
+    lookup_getter: Variable,
+    lookup_setter: Variable,
+    constructor: Variable,
+    has_own_property: Variable,
+    get_own_property_descriptor: Variable,
+    is_prototype_of: Variable,
+    property_is_enumerable: Variable,
+    to_locale_string: Variable,
+    to_string: Variable,
+    value_of: Variable,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -70,25 +73,34 @@ impl Prototype {
         }
     }
 
-    pub(crate) fn initialize(&self, func: ObjectHandle, this: ObjectHandle) -> Res {
-        let obj_constructor = ObjectConstructor::new(this.clone(), func.clone())?;
+    pub(crate) fn initialize(
+        &self,
+        func: ObjectHandle,
+        this: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
+        let obj_constructor = ObjectConstructor::new(this.clone(), func.clone(), realm)?;
 
         let mut this_borrow = self.inner.try_borrow_mut()?;
 
         this_borrow.defined_getter = Variable::write_config(
-            NativeFunction::with_proto("__defineGetter__", define_getter, func.clone()).into(),
+            NativeFunction::with_proto("__defineGetter__", define_getter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.defined_setter = Variable::write_config(
-            NativeFunction::with_proto("__defineSetter__", define_setter, func.clone()).into(),
+            NativeFunction::with_proto("__defineSetter__", define_setter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.lookup_getter = Variable::write_config(
-            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.clone()).into(),
+            NativeFunction::with_proto("__lookupGetter__", lookup_getter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.lookup_setter = Variable::write_config(
-            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.clone()).into(),
+            NativeFunction::with_proto("__lookupSetter__", lookup_setter, func.clone(), realm)
+                .into(),
         )
         .into();
         this_borrow.constructor = obj_constructor.into();
@@ -97,29 +109,38 @@ impl Prototype {
             .constructor
             .value
             .as_object()?
-            .define_variable("prototype".into(), Variable::new_read_only(this.into()))?;
+            .define_property_attributes(
+                "prototype".into(),
+                Variable::new_read_only(this.into()),
+                realm,
+            )?;
 
         this_borrow.has_own_property =
-            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.clone()).into();
+            NativeFunction::with_proto("hasOwnProperty", has_own_property, func.clone(), realm)
+                .into();
         this_borrow.get_own_property_descriptor = NativeFunction::with_proto(
             "getOwnPropertyDescriptor",
             get_own_property_descriptor,
             func.clone(),
+            realm,
         )
         .into();
         this_borrow.is_prototype_of =
-            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.clone()).into();
+            NativeFunction::with_proto("isPrototypeOf", is_prototype_of, func.clone(), realm)
+                .into();
         this_borrow.property_is_enumerable = NativeFunction::with_proto(
             "propertyIsEnumerable",
             property_is_enumerable,
             func.clone(),
+            realm,
         )
         .into();
         this_borrow.to_locale_string =
-            NativeFunction::with_proto("toLocaleString", to_locale_string, func.clone()).into();
+            NativeFunction::with_proto("toLocaleString", to_locale_string, func.clone(), realm)
+                .into();
         this_borrow.to_string =
-            NativeFunction::with_proto("toString", to_string, func.clone()).into();
-        this_borrow.value_of = NativeFunction::with_proto("valueOf", value_of, func).into();
+            NativeFunction::with_proto("toString", to_string, func.clone(), realm).into();
+        this_borrow.value_of = NativeFunction::with_proto("valueOf", value_of, func, realm).into();
 
         Ok(())
     }
@@ -140,153 +161,189 @@ impl Prototype {
 }
 
 impl Obj for Prototype {
-    fn define_property(&self, name: Value, value: Value) -> Res {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         let mut this = self.inner.try_borrow_mut()?;
 
-        if let Value::String(name) = &name {
+        if let InternalPropertyKey::String(name) = &name {
             match name.as_str() {
                 "__defineGetter__" => {
                     this.defined_getter = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
                 "__defineSetter__" => {
                     this.defined_setter = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "__lookupGetter__" => {
                     this.lookup_getter = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "__lookupSetter__" => {
                     this.lookup_setter = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "constructor" => {
                     this.constructor = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "hasOwnProperty" => {
                     this.has_own_property = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "getOwnPropertyDescriptor" => {
                     this.get_own_property_descriptor = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "isPrototypeOf" => {
                     this.is_prototype_of = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "propertyIsEnumerable" => {
                     this.property_is_enumerable = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "toLocaleString" => {
                     this.to_locale_string = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "toString" => {
                     this.to_string = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 "valueOf" => {
                     this.value_of = value.into();
-                    return Ok(());
+                    return Ok(DefinePropertyResult::Handled);
                 }
 
                 _ => {}
             }
         }
 
-        this.object.define_property(name, value)
+        this.object.define_property(name, value, realm)
     }
 
-    fn define_variable(&self, name: Value, value: Variable) -> Res {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         let mut this = self.inner.try_borrow_mut()?;
 
-        this.object.define_variable(name, value)
+        this.object.define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let this = self.inner.try_borrow()?;
 
-        if let Value::String(name) = name {
+        if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
-                "__defineGetter__" => return Ok(Some(this.defined_getter.copy())),
-                "__defineSetter__" => return Ok(Some(this.defined_setter.copy())),
-                "__lookupGetter__" => return Ok(Some(this.lookup_getter.copy())),
-                "__lookupSetter__" => return Ok(Some(this.lookup_setter.copy())),
-                "constructor" => return Ok(Some(this.constructor.copy())),
-                "hasOwnProperty" => return Ok(Some(this.has_own_property.copy())),
+                "__defineGetter__" => return Ok(Some(this.defined_getter.value.clone().into())),
+                "__defineSetter__" => return Ok(Some(this.defined_setter.value.clone().into())),
+                "__lookupGetter__" => return Ok(Some(this.lookup_getter.value.clone().into())),
+                "__lookupSetter__" => return Ok(Some(this.lookup_setter.value.clone().into())),
+                "constructor" => return Ok(Some(this.constructor.value.clone().into())),
+                "hasOwnProperty" => return Ok(Some(this.has_own_property.value.clone().into())),
                 "getOwnPropertyDescriptor" => {
-                    return Ok(Some(this.get_own_property_descriptor.copy()))
+                    return Ok(Some(this.get_own_property_descriptor.value.clone().into()))
                 }
-                "isPrototypeOf" => return Ok(Some(this.is_prototype_of.copy())),
-                "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.copy())),
-                "toLocaleString" => return Ok(Some(this.to_locale_string.copy())),
-                "toString" => return Ok(Some(this.to_string.copy())),
-                "valueOf" => return Ok(Some(this.value_of.copy())),
+                "isPrototypeOf" => return Ok(Some(this.is_prototype_of.value.clone().into())),
+                "propertyIsEnumerable" => {
+                    return Ok(Some(this.property_is_enumerable.value.clone().into()))
+                }
+                "toLocaleString" => return Ok(Some(this.to_locale_string.value.clone().into())),
+                "toString" => return Ok(Some(this.to_string.value.clone().into())),
+                "valueOf" => return Ok(Some(this.value_of.value.clone().into())),
                 _ => {}
             }
         }
-        this.object.resolve_property(name)
+        this.object.resolve_property(name, realm)
     }
 
-    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         let this = self.inner.try_borrow()?;
 
-        if let Value::String(name) = name {
+        if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
-                "__defineGetter__" => return Ok(Some(this.defined_getter.copy())),
-                "__defineSetter__" => return Ok(Some(this.defined_setter.copy())),
-                "__lookupGetter__" => return Ok(Some(this.lookup_getter.copy())),
-                "__lookupSetter__" => return Ok(Some(this.lookup_setter.copy())),
-                "constructor" => return Ok(Some(this.constructor.copy())),
-                "hasOwnProperty" => return Ok(Some(this.has_own_property.copy())),
+                "__defineGetter__" => return Ok(Some(this.defined_getter.value.clone().into())),
+                "__defineSetter__" => return Ok(Some(this.defined_setter.value.clone().into())),
+                "__lookupGetter__" => return Ok(Some(this.lookup_getter.value.clone().into())),
+                "__lookupSetter__" => return Ok(Some(this.lookup_setter.value.clone().into())),
+                "constructor" => return Ok(Some(this.constructor.value.clone().into())),
+                "hasOwnProperty" => return Ok(Some(this.has_own_property.value.clone().into())),
                 "getOwnPropertyDescriptor" => {
-                    return Ok(Some(this.get_own_property_descriptor.copy()))
+                    return Ok(Some(this.get_own_property_descriptor.value.clone().into()))
                 }
-                "isPrototypeOf" => return Ok(Some(this.is_prototype_of.copy())),
-                "propertyIsEnumerable" => return Ok(Some(this.property_is_enumerable.copy())),
-                "toLocaleString" => return Ok(Some(this.to_locale_string.copy())),
-                "toString" => return Ok(Some(this.to_string.copy())),
-                "valueOf" => return Ok(Some(this.value_of.copy())),
+                "isPrototypeOf" => return Ok(Some(this.is_prototype_of.value.clone().into())),
+                "propertyIsEnumerable" => {
+                    return Ok(Some(this.property_is_enumerable.value.clone().into()))
+                }
+                "toLocaleString" => return Ok(Some(this.to_locale_string.value.clone().into())),
+                "toString" => return Ok(Some(this.to_string.value.clone().into())),
+                "valueOf" => return Ok(Some(this.value_of.value.clone().into())),
                 _ => {}
             }
         }
 
-        this.object.get_property(name).map(|v| v.map(|v| v.copy()))
+        this.object.get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: Value, value: Value) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
-        this.object.define_getter(name, value)
+        this.object.define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: Value, value: Value) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
-        this.object.define_setter(name, value)
+        this.object.define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
-        if let Value::String(name) = name {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::String(ref name) = name {
             match name.as_str() {
                 "__defineGetter__" => {
                     let mut this = self.inner.try_borrow_mut()?;
                     this.defined_getter = Value::Undefined.into();
-                    return Ok(Some(Value::Undefined));
+                    return Ok(Some(Value::Undefined.into()));
                 }
                 "__defineSetter__" => {
                     let mut this = self.inner.try_borrow_mut()?;
@@ -350,96 +407,113 @@ impl Obj for Prototype {
 
         let mut this = self.inner.try_borrow_mut()?;
 
-        this.object.delete_property(name)
+        this.object.delete_property(name, realm)
     }
 
-    fn contains_key(&self, name: &Value) -> Res<bool> {
-        if let Value::String(name) = name {
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::String(ref name) = name {
             if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
                 return Ok(true);
             }
         }
 
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.contains_own_key(name, realm)
+    }
+
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::String(ref name) = name {
+            if Self::DIRECT_PROPERTIES.contains(&name.as_str()) {
+                return Ok(true);
+            }
+        }
+
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.contains_key(name, realm)
+    }
+
+    // fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
+    //     Ok("[object Object]".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Res<YSString> {
+    //     Ok("[object Prototype]".into())
+    // }
+
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         let this = self.inner.try_borrow()?;
 
-        this.object.contains_key(name)
-    }
-
-    fn name(&self) -> String {
-        "Object".to_string()
-    }
-
-    fn to_string(&self, _realm: &mut Realm) -> Res<YSString, Error> {
-        Ok("[object Object]".into())
-    }
-
-    fn to_string_internal(&self) -> Res<YSString> {
-        Ok("[object Prototype]".into())
-    }
-
-    fn properties(&self) -> Res<Vec<(Value, Value)>> {
-        let this = self.inner.try_borrow()?;
-
-        let mut props = this.object.properties()?;
+        let mut props = this.object.properties(realm)?;
         props.push((
-            Value::string("__defineGetter__"),
+            PropertyKey::String("__defineGetter__".into()),
             this.defined_getter.value.copy(),
         ));
         props.push((
-            Value::string("__defineSetter__"),
+            PropertyKey::String("__defineSetter__".into()),
             this.defined_setter.value.copy(),
         ));
         props.push((
-            Value::string("__lookupGetter__"),
+            PropertyKey::String("__lookupGetter__".into()),
             this.lookup_getter.value.copy(),
         ));
         props.push((
-            Value::string("__lookupSetter__"),
+            PropertyKey::String("__lookupSetter__".into()),
             this.lookup_setter.value.copy(),
         ));
-        props.push((Value::string("constructor"), this.constructor.value.copy()));
         props.push((
-            Value::string("hasOwnProperty"),
+            PropertyKey::String("constructor".into()),
+            this.constructor.value.copy(),
+        ));
+        props.push((
+            PropertyKey::String("hasOwnProperty".into()),
             this.has_own_property.value.copy(),
         ));
         props.push((
-            Value::string("getOwnPropertyDescriptor"),
+            PropertyKey::String("getOwnPropertyDescriptor".into()),
             this.get_own_property_descriptor.value.copy(),
         ));
         props.push((
-            Value::string("isPrototypeOf"),
+            PropertyKey::String("isPrototypeOf".into()),
             this.is_prototype_of.value.copy(),
         ));
         props.push((
-            Value::string("propertyIsEnumerable"),
+            PropertyKey::String("propertyIsEnumerable".into()),
             this.property_is_enumerable.value.copy(),
         ));
         props.push((
-            Value::string("toLocaleString"),
+            PropertyKey::String("toLocaleString".into()),
             this.to_locale_string.value.copy(),
         ));
-        props.push((Value::string("toString"), this.to_string.value.copy()));
-        props.push((Value::string("valueOf"), this.value_of.value.copy()));
+        props.push((
+            PropertyKey::String("toString".into()),
+            this.to_string.value.copy(),
+        ));
+        props.push((
+            PropertyKey::String("valueOf".into()),
+            this.value_of.value.copy(),
+        ));
 
         Ok(props)
     }
 
-    fn keys(&self) -> Res<Vec<Value>> {
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         let this = self.inner.try_borrow()?;
 
-        let mut keys = this.object.keys()?;
+        let mut keys = this.object.keys(realm)?;
 
         for key in Self::DIRECT_PROPERTIES {
-            keys.push(Value::string(key));
+            keys.push(PropertyKey::String((*key).into()));
         }
 
         Ok(keys)
     }
 
-    fn values(&self) -> Res<Vec<Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
         let this = self.inner.try_borrow()?;
 
-        let mut values = this.object.values()?;
+        let mut values = this.object.values(realm)?;
 
         values.push(this.defined_getter.value.copy());
         values.push(this.defined_setter.value.copy());
@@ -457,27 +531,120 @@ impl Obj for Prototype {
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
+    fn enumerable_properties(
+        &self,
+        realm: &mut Realm,
+    ) -> Res<Vec<(PropertyKey, crate::value::Value)>> {
         let this = self.inner.try_borrow()?;
 
-        this.object.get_array_or_done(index)
+        let props = this.object.enumerable_properties(realm)?;
+
+        Ok(props)
     }
 
-    fn clear_values(&self) -> Res {
+    fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
+        let this = self.inner.try_borrow()?;
+
+        let keys = this.object.enumerable_keys(realm)?;
+
+        Ok(keys)
+    }
+
+    fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
+        let this = self.inner.try_borrow()?;
+
+        let values = this.object.enumerable_values(realm)?;
+
+        Ok(values)
+    }
+
+    fn clear_properties(&self, realm: &mut Realm) -> Res {
         let mut this = self.inner.try_borrow_mut()?;
 
-        this.object.clear_values()
+        this.object.clear_properties(realm)
     }
 
-    fn prototype(&self) -> Res<ObjectProperty> {
-        Ok(Value::Null.into())
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.get_array_or_done(index, realm)
     }
 
-    fn constructor(&self) -> Res<ObjectProperty> {
-        let this = self.inner.try_borrow()?;
-
-        Ok(this.constructor.clone())
+    fn prototype(&self, _: &mut Realm) -> Res<ObjectOrNull> {
+        Ok(ObjectOrNull::Null)
     }
+
+    fn set_prototype(&self, prototype: ObjectOrNull, realm: &mut Realm) -> Res {
+        let mut this = self.inner.try_borrow_mut()?;
+
+        this.object.set_prototype(prototype, realm)
+    }
+
+    fn name(&self) -> String {
+        "Object".to_string()
+    }
+
+    fn gc_refs(&self) -> Vec<GcRef<BoxedObj>> {
+        let this = self.inner.borrow();
+
+        let mut refs = this.object.gc_refs();
+
+        if let Some(obj) = this.defined_getter.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.defined_setter.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.lookup_getter.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.lookup_setter.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.constructor.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.has_own_property.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.get_own_property_descriptor.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.is_prototype_of.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.property_is_enumerable.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.to_locale_string.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.to_string.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        if let Some(obj) = this.value_of.value.gc_ref() {
+            refs.push(obj);
+        }
+
+        refs
+    }
+
+    // fn constructor(&self) -> Res<ObjectProperty> {
+    //     let this = self.inner.try_borrow()?;
+    //
+    //     Ok(this.constructor.clone())
+    // }
 }
 
 impl Proto for Prototype {

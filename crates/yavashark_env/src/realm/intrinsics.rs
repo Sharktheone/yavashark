@@ -22,7 +22,9 @@ use crate::builtins::{
     WeakRef, WeakSet, JSON,
 };
 use crate::error_obj::ErrorObj;
-use crate::{Error, FunctionPrototype, Object, ObjectHandle, Prototype, Res, Value, Variable};
+use crate::{
+    Error, FunctionPrototype, Object, ObjectHandle, Prototype, Realm, Res, Value, Variable,
+};
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
 
@@ -102,9 +104,9 @@ macro_rules! constructor {
         paste::paste! {
             pub fn [<$name _constructor>] (&self) -> Variable {
                 self.$name
-                    .get_property(&"constructor".into())
+                    .resolve_property("constructor", &mut Realm::default()) //TODO: this is bad, but we don't have access to a realm here
                     .unwrap_or(Value::Undefined.into())
-                    .value //TODO: theoretically someone could use getters and setters here and then this would be wrong
+                    .unwrap_or(Value::Undefined.into())
                     .into()
             }
         }
@@ -176,6 +178,8 @@ impl Intrinsics {
 #[allow(clippy::similar_names)]
 impl Intrinsics {
     pub(crate) fn new() -> Result<Self, Error> {
+        let realm = &mut Realm::default();
+
         let obj_prototype = ObjectHandle::new(Prototype::new());
 
         let func_prototype =
@@ -185,233 +189,292 @@ impl Intrinsics {
             let obj_this = obj_prototype.clone().into();
             let obj = obj_prototype.guard();
 
-            let obj = obj.as_any();
-
             let proto = obj
-                .downcast_ref::<Prototype>()
+                .downcast::<Prototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<Prototype> failed"))?;
 
-            proto.initialize(func_prototype.clone().into(), obj_this)?;
+            proto.initialize(func_prototype.clone().into(), obj_this, realm)?;
         }
 
         {
             let func = func_prototype.guard();
 
-            let func = func.as_any();
-
             let proto = func
-                .downcast_ref::<FunctionPrototype>()
+                .downcast::<FunctionPrototype>()
                 .ok_or_else(|| Error::new("downcast_mut::<FunctionPrototype> failed"))?;
 
-            proto.initialize(func_prototype.clone().into())?;
+            proto.initialize(func_prototype.clone().into(), realm)?;
         }
 
         let array_prototype = Array::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let array_iter_prototype = ArrayIterator::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let error_prototype = ErrorObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
-        let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone())?;
+        let math_obj = Math::new(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
         let string_prototype = StringObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let number_prototype = NumberObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let boolean_prototype = BooleanObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let symbol_prototype = SymbolObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let bigint_prototype = BigIntObj::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let regex = RegExp::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
-        let json = JSON::new(obj_prototype.clone(), func_prototype.clone())?;
+        let json = JSON::new(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
         let error_constructor = error_prototype
-            .get_property(&"constructor".into())
+            .resolve_property("constructor", realm)
             .unwrap_or(Value::Undefined.into())
-            .value
+            .unwrap_or(Value::Undefined.into())
             .to_object()?;
 
-        let type_error = get_type_error(error_prototype.clone().into(), error_constructor.clone())?;
-        let range_error =
-            get_range_error(error_prototype.clone().into(), error_constructor.clone())?;
-        let reference_error =
-            get_reference_error(error_prototype.clone().into(), error_constructor.clone())?;
-        let syntax_error =
-            get_syntax_error(error_prototype.clone().into(), error_constructor.clone())?;
+        let type_error = get_type_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
+        let range_error = get_range_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
+        let reference_error = get_reference_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
+        let syntax_error = get_syntax_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
 
-        let eval_error = get_eval_error(error_prototype.clone().into(), error_constructor.clone())?;
+        let eval_error = get_eval_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
 
-        let uri_error = get_uri_error(error_prototype.clone().into(), error_constructor.clone())?;
+        let uri_error = get_uri_error(
+            error_prototype.clone().into(),
+            error_constructor.clone(),
+            realm,
+        )?;
 
         let aggregate_error =
-            get_aggregate_error(error_prototype.clone().into(), error_constructor)?;
+            get_aggregate_error(error_prototype.clone().into(), error_constructor, realm)?;
 
         let arraybuffer = ArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let sharedarraybuffer = SharedArrayBuffer::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let data_view = DataView::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let typed_array = TypedArray::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let int8array = Int8Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let uint8array = Uint8Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let uint8clampedarray = Uint8ClampedArray::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let int16array = Int16Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let uint16array = Uint16Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let int32array = Int32Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let uint32array = Uint32Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let float16array = Float16Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let float32array = Float32Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let float64array = Float64Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let bigint64array = BigInt64Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let biguint64array = BigUint64Array::initialize_proto(
             Object::raw_with_proto(typed_array.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let atomics = Atomics::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let map = Map::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let weak_map = WeakMap::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let set = Set::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let weak_set = WeakSet::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let weak_ref = WeakRef::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let date = Date::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
-        let reflect = Reflect::new(obj_prototype.clone().into(), func_prototype.clone().into())?;
+        let reflect = Reflect::new(
+            obj_prototype.clone().into(),
+            func_prototype.clone().into(),
+            realm,
+        )?;
 
         let (temporal, temporal_protos) =
-            get_temporal(obj_prototype.clone(), func_prototype.clone())?;
+            get_temporal(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
-        let (signal, signal_protos) =
-            crate::builtins::signal::get_signal(obj_prototype.clone(), func_prototype.clone())?;
+        let (signal, signal_protos) = crate::builtins::signal::get_signal(
+            obj_prototype.clone(),
+            func_prototype.clone(),
+            realm,
+        )?;
 
         let promise = Promise::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let arguments = Arguments::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         let proxy = Proxy::initialize_proto(
             Object::raw_with_proto(obj_prototype.clone()),
             func_prototype.clone().into(),
+            realm,
         )?;
 
         Ok(Self {
@@ -494,5 +557,78 @@ impl Intrinsics {
 
     pub fn insert<T: 'static>(&mut self, proto: ObjectHandle) {
         self.other.insert(TypeId::of::<T>(), proto);
+    }
+}
+
+impl Default for Intrinsics {
+    fn default() -> Self {
+        Self {
+            obj: Object::null(),
+            func: Object::null(),
+            array: Object::null(),
+            array_iter: Object::null(),
+            error: Object::null(),
+            math: Object::null(),
+            string: Object::null(),
+            number: Object::null(),
+            boolean: Object::null(),
+            symbol: Object::null(),
+            bigint: Object::null(),
+            regexp: Object::null(),
+            json: Object::null(),
+            type_error: Object::null(),
+            range_error: Object::null(),
+            reference_error: Object::null(),
+            syntax_error: Object::null(),
+            eval_error: Object::null(),
+            uri_error: Object::null(),
+            aggregate_error: Object::null(),
+            eval: None,
+            arraybuffer: Object::null(),
+            sharedarraybuffer: Object::null(),
+            data_view: Object::null(),
+            typed_array: Object::null(),
+            int8array: Object::null(),
+            uint8array: Object::null(),
+            uint8clampedarray: Object::null(),
+            int16array: Object::null(),
+            uint16array: Object::null(),
+            int32array: Object::null(),
+            uint32array: Object::null(),
+            float16array: Object::null(),
+            float32array: Object::null(),
+            float64array: Object::null(),
+            bigint64array: Object::null(),
+            biguint64array: Object::null(),
+            atomics: Object::null(),
+            map: Object::null(),
+            weak_map: Object::null(),
+            set: Object::null(),
+            weak_set: Object::null(),
+            weak_ref: Object::null(),
+            date: Object::null(),
+            reflect: Object::null(),
+            temporal: Object::null(),
+            temporal_duration: Object::null(),
+            temporal_instant: Object::null(),
+            temporal_now: Object::null(),
+            temporal_plain_date: Object::null(),
+            temporal_plain_time: Object::null(),
+            temporal_plain_date_time: Object::null(),
+            temporal_plain_month_day: Object::null(),
+            temporal_plain_year_month: Object::null(),
+            temporal_zoned_date_time: Object::null(),
+            promise: Object::null(),
+            generator_function: Object::null(),
+            generator: Object::null(),
+            async_generator_function: Object::null(),
+            async_generator: Object::null(),
+            signal: Object::null(),
+            signal_state: Object::null(),
+            signal_computed: Object::null(),
+            arguments: Object::null(),
+            proxy: Object::null(),
+            other: FxHashMap::default(),
+        }
     }
 }

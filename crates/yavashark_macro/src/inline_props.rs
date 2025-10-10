@@ -1,18 +1,18 @@
+mod contains_property;
+mod get_property;
+mod keys;
+mod properties;
 mod property;
 mod set_property;
-mod get_property;
-mod contains_property;
-mod properties;
-mod keys;
 mod values;
 
-use proc_macro2::TokenStream;
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Property};
+use proc_macro2::TokenStream;
 use syn::spanned::Spanned;
 
 pub fn inline_props(
-    attrs: proc_macro::TokenStream,
+    _attrs: proc_macro::TokenStream,
     item: proc_macro::TokenStream,
 ) -> proc_macro::TokenStream {
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
@@ -44,19 +44,21 @@ pub fn inline_props(
         if !prop.readonly {
             if prop.copy {
                 if prop.partial {
-                    field.ty = update_partial_type(field.ty.clone(), quote::quote! { ::core::cell::Cell });
+                    field.ty =
+                        update_partial_type(field.ty.clone(), quote::quote! { ::core::cell::Cell });
                 } else {
                     field.ty = syn::parse_quote! {
-                    ::core::cell::Cell<#ty>
-                };
+                        ::core::cell::Cell<#ty>
+                    };
                 }
             } else if prop.partial {
-                field.ty = update_partial_type(field.ty.clone(), quote::quote! { ::core::cell::RefCell });
+                field.ty =
+                    update_partial_type(field.ty.clone(), quote::quote! { ::core::cell::RefCell });
             } else {
                 //TODO: we would want to only have one cell for all mutable props -> we need to add a Mutable<#StructName> struct
                 field.ty = syn::parse_quote! {
-                ::core::cell::RefCell<#ty>
-            };
+                    ::core::cell::RefCell<#ty>
+                };
             }
         }
 
@@ -65,28 +67,24 @@ pub fn inline_props(
 
     let prop_impl = generate_impl(&input.ident, &props, &config);
 
-
     quote::quote! {
         #input
 
         #prop_impl
-    }.into()
+    }
+    .into()
 }
 
-
-fn generate_impl(
-    struct_name: &syn::Ident,
-    props: &[Property],
-    config: &Config,
-) -> TokenStream {
+fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) -> TokenStream {
     let set_property = set_property::generate_set_property(props, config);
     let get_property = get_property::generate_get_property(props, config);
     let contains_property = contains_property::generate_contains_property(props, config);
     let properties = properties::generate_properties(props, config);
     let keys = keys::generate_keys(props, config);
     let values = values::generate_values(props, config);
-    let enumerable_values = values::generate_enumerable_values(props, config);
     let enumerable_properties = properties::generate_enumerable_properties(props, config);
+    let enumerable_keys = keys::generate_enumerable_keys(props, config);
+    let enumerable_values = values::generate_enumerable_values(props, config);
 
     let env = &config.env_path;
 
@@ -98,8 +96,9 @@ fn generate_impl(
             #properties
             #keys
             #values
-            #enumerable_values
             #enumerable_properties
+            #enumerable_keys
+            #enumerable_values
 
 
             fn gc_refs(&self) -> impl Iterator<Item = yavashark_garbage::GcRef<#env::value::BoxedObj>> {
@@ -118,7 +117,6 @@ fn update_partial_type(mut ty: syn::Type, wrapper: TokenStream) -> syn::Type {
                         *inner_ty = syn::parse_quote! {
                             #wrapper<#inner_ty>
                         };
-
                     }
                 }
             }

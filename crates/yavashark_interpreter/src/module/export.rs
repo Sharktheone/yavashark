@@ -20,27 +20,41 @@ impl Interpreter {
 
         match val {
             DeclRet::Single(name, value) => {
-                scope.scope.declare_var(name.clone(), value.copy());
-                scope.module.exports.define_property(name.into(), value); //TODO: if the value changes, the export should change too
+                scope.scope.declare_var(name.clone(), value.copy(), realm);
+                scope
+                    .module
+                    .exports
+                    .define_property(name.into(), value, realm); //TODO: if the value changes, the export should change too
             }
             DeclRet::Var(vars) => {
                 for var in vars {
                     match var {
                         var::Variable::Var(name, value) => {
-                            scope.scope.declare_global_var(name.clone(), value.copy());
-                            scope.module.exports.define_property(name.into(), value);
+                            scope
+                                .scope
+                                .declare_global_var(name.clone(), value.copy(), realm);
+                            scope
+                                .module
+                                .exports
+                                .define_property(name.into(), value, realm);
                             //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Let(name, value) => {
-                            scope.scope.declare_var(name.clone(), value.copy());
-                            scope.module.exports.define_property(name.into(), value);
+                            scope.scope.declare_var(name.clone(), value.copy(), realm);
+                            scope
+                                .module
+                                .exports
+                                .define_property(name.into(), value, realm);
                             //TODO: if the value changes, the export should change too
                         }
                         var::Variable::Const(name, value) => {
                             scope
                                 .scope
-                                .declare_read_only_var(name.clone(), value.copy());
-                            scope.module.exports.define_property(name.into(), value);
+                                .declare_read_only_var(name.clone(), value.copy(), realm);
+                            scope
+                                .module
+                                .exports
+                                .define_property(name.into(), value, realm);
                             //TODO: if the value changes, the export should change too
                         }
                     }
@@ -67,6 +81,8 @@ impl Interpreter {
             realm,
         )?;
 
+        let module = module.clone();
+
         for spec in &stmt.specifiers {
             match spec {
                 ExportSpecifier::Named(named) => {
@@ -82,16 +98,17 @@ impl Interpreter {
 
                     let val = module
                         .exports
-                        .get_property(&name.clone().into())
+                        .resolve_property(name.clone(), realm)
                         .map_err(|_| {
                             Error::reference_error(format!("Export `{name}` not found in module"))
-                        })?;
+                        })?
+                        .unwrap_or(Value::Undefined);
 
-                    scope.scope.declare_var(export.clone(), val.value.copy())?;
+                    scope.scope.declare_var(export.clone(), val.copy(), realm)?;
                     scope
                         .module
                         .exports
-                        .define_property(export.into(), val.value); //TODO: if the value changes, the export should change too
+                        .define_property(export.into(), val, realm); //TODO: if the value changes, the export should change too
                 }
 
                 ExportSpecifier::Default(default) => {
@@ -101,11 +118,11 @@ impl Interpreter {
 
                     let name = default.exported.to_string();
 
-                    scope.scope.declare_var(name.clone(), val.copy())?;
+                    scope.scope.declare_var(name.clone(), val.copy(), realm)?;
                     scope
                         .module
                         .exports
-                        .define_property(name.into(), val.copy()); //TODO: if the value changes, the export should change too
+                        .define_property(name.into(), val.copy(), realm); //TODO: if the value changes, the export should change too
                 }
 
                 ExportSpecifier::Namespace(ns) => {
@@ -116,11 +133,12 @@ impl Interpreter {
 
                     scope
                         .scope
-                        .declare_var(name.clone(), module.exports.clone().into())?;
-                    scope
-                        .module
-                        .exports
-                        .define_property(name.into(), module.exports.clone().into());
+                        .declare_var(name.clone(), module.exports.clone().into(), realm)?;
+                    scope.module.exports.define_property(
+                        name.into(),
+                        module.exports.clone().into(),
+                        realm,
+                    );
                     //TODO: if the value changes, the export should change too
                 }
             }
@@ -179,8 +197,13 @@ impl Interpreter {
             realm,
         )?;
 
-        for (name, val) in module.exports.properties()? {
-            scope.module.exports.define_property(name, val); //TODO: if the value changes, the export should change too
+        let module = module.clone();
+
+        for (name, val) in module.exports.properties(realm)? {
+            scope
+                .module
+                .exports
+                .define_property(name.into(), val, realm); //TODO: if the value changes, the export should change too
         }
 
         Ok(Value::Undefined)

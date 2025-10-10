@@ -39,7 +39,7 @@ impl Duration {
 
         if let Value::Object(obj) = info {
             let mut extract =
-                |name: &'static str| match obj.resolve_property(&name.into(), realm)?.map(|v| {
+                |name: &'static str| match obj.resolve_property(name, realm)?.map(|v| {
                     v.to_number(realm).and_then(|n| {
                         if n.is_infinite() || n.is_nan() || n.fract() != 0.0 {
                             Err(Error::range("Invalid value for Duration"))
@@ -385,13 +385,18 @@ pub fn value_to_duration(value: Value, realm: &mut Realm) -> Res<temporal_rs::Du
 }
 
 impl PrettyObjectOverride for Duration {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self
             .dur
             .as_temporal_string(ToStringRoundingOptions::default())
             .ok()?;
 
-        fmt_properties_to(obj, &mut s, not);
+        fmt_properties_to(obj, &mut s, not, realm);
 
         Some(s)
     }

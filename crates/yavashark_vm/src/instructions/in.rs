@@ -6,7 +6,9 @@ pub fn in_(lhs: VarName, rhs: VarName, vm: &mut impl VM) -> ControlResult {
     let lhs = vm.get_variable(lhs)?;
     let rhs = vm.get_variable(rhs)?;
 
-    vm.set_acc(rhs.contains_key(&lhs)?.into());
+    let acc = rhs.contains_key(&lhs, vm.get_realm())?.into();
+
+    vm.set_acc(acc);
 
     Ok(())
 }
@@ -15,7 +17,9 @@ pub fn in_acc(reg: Reg, vm: &mut impl VM) -> ControlResult {
     let rhs = vm.get_register(reg)?;
     let lhs = vm.acc();
 
-    vm.set_acc(rhs.contains_key(&lhs)?.into());
+    let acc = rhs.contains_key(&lhs, vm.get_realm())?.into();
+
+    vm.set_acc(acc);
 
     Ok(())
 }
@@ -24,7 +28,9 @@ pub fn in_reg(rhs: Reg, lhs: Reg, vm: &mut impl VM) -> ControlResult {
     let rhs = vm.get_register(rhs)?;
     let lhs = vm.get_register(lhs)?;
 
-    vm.set_acc(rhs.contains_key(&lhs)?.into());
+    let acc = rhs.contains_key(&lhs, vm.get_realm())?.into();
+
+    vm.set_acc(acc);
 
     Ok(())
 }

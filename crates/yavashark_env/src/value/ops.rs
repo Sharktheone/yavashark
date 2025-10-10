@@ -15,7 +15,7 @@ mod xor;
 
 use super::{Hint, Value};
 use crate::error::Error;
-use crate::Realm;
+use crate::{ObjectOrNull, Realm};
 use num_bigint::BigInt;
 use num_traits::{FromPrimitive, Num, One, ToPrimitive, Zero};
 use std::cmp::Ordering;
@@ -905,7 +905,7 @@ impl Value {
 
         //TODO: this is kinda a hack, but should always work
         let Self::Object(constructor_proto) = constructor
-            .resolve_property(&"prototype".into(), realm)?
+            .resolve_property("prototype", realm)?
             .ok_or(Error::ty(
                 "Right-hand side of 'instanceof' is not a constructor",
             ))?
@@ -915,17 +915,17 @@ impl Value {
             ));
         };
 
-        let constructor_proto = constructor_proto.into();
+        let constructor_proto = ObjectOrNull::Object(constructor_proto.into());
 
-        let mut proto = Some(obj.prototype()?);
+        let mut proto = Some(obj.prototype(realm)?);
 
         while let Some(p) = proto {
-            if p.value == constructor_proto {
+            if p == constructor_proto {
                 return Ok(true);
             }
 
-            if let Self::Object(o) = p.value {
-                proto = Some(o.prototype()?);
+            if let ObjectOrNull::Object(o) = p {
+                proto = Some(o.prototype(realm)?);
             } else {
                 break;
             }

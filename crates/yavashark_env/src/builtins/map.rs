@@ -1,7 +1,7 @@
 use crate::array::Array;
 use crate::utils::ValueIterator;
 use crate::value::{Constructor, MutObj, Obj};
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Value, ValueResult};
+use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
 use rustc_hash::FxBuildHasher;
@@ -21,15 +21,15 @@ pub struct Map {
 pub struct MapConstructor {}
 
 impl Constructor for MapConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let mut map = IndexMap::<_, _, FxBuildHasher>::default();
 
         if let Some(iter) = args.first() {
             let iter = ValueIterator::new(iter, realm)?;
 
             while let Some(val) = iter.next(realm)? {
-                let key = val.get_property(&0.into(), realm)?;
-                let value = val.get_property(&1.into(), realm)?;
+                let key = val.get_property(0, realm)?;
+                let value = val.get_property(1, realm)?;
 
                 map.insert(key, value);
             }
@@ -42,20 +42,20 @@ impl Constructor for MapConstructor {
             }),
         };
 
-        Ok(map.into_value())
+        Ok(map.into_object())
     }
 }
 
 impl MapConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMapConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
@@ -132,7 +132,7 @@ impl Map {
     ) -> ValueResult {
         let mut inner = self.inner.borrow_mut();
 
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback must be a function"));
         }
 
@@ -140,7 +140,7 @@ impl Map {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
 
             Entry::Vacant(entry) => {
-                let value = callback.call(realm, vec![entry.key().copy()], Value::Undefined)?;
+                let value = callback.call(vec![entry.key().copy()], Value::Undefined, realm)?;
 
                 if !value.is_undefined() {
                     entry.insert(value.copy());

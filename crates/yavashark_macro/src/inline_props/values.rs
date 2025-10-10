@@ -1,21 +1,14 @@
-use quote::quote;
 use crate::config::Config;
-use crate::inline_props::property::{Kind, Name, Property};
+use crate::inline_props::property::{Kind, Property};
+use quote::quote;
 
-pub fn generate_values(
-    props: &[Property],
-    config: &Config,
-) -> proc_macro2::TokenStream {
-
+pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::TokenStream {
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
     let realm = &config.realm;
 
-
     let mut prop_items = Vec::with_capacity(props.len());
-
-
 
     for prop in props.iter().filter(|p| p.kind != Kind::Setter) {
         let field = &prop.field;
@@ -27,7 +20,7 @@ pub fn generate_values(
         } else {
             quote! {}
         };
-        
+
         let get = if prop.copy && !prop.readonly {
             quote! {
                 #partial_get .get()
@@ -42,7 +35,6 @@ pub fn generate_values(
             }
         };
 
-
         let value_expr = if prop.kind == Kind::Getter {
             quote! {
                 #env::inline_props::Property::Getter(self.#field #get)
@@ -56,12 +48,8 @@ pub fn generate_values(
             }
         };
 
-        
         prop_items.push(value_expr);
     }
-
-
-
 
     quote::quote! {
         #[inline(always)]
@@ -75,25 +63,19 @@ pub fn generate_values(
     }
 }
 
-
-pub fn generate_enumerable_values(
-    props: &[Property],
-    config: &Config,
-) -> proc_macro2::TokenStream {
-
+pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_macro2::TokenStream {
     let env = &config.env_path;
     let into_value = &config.into_value;
     let res = &config.res;
     let realm = &config.realm;
 
-
     let mut prop_items = Vec::with_capacity(props.len());
 
-
-
-    for prop in props.iter().filter(|p| p.kind != Kind::Setter && p.enumerable) {
+    for prop in props
+        .iter()
+        .filter(|p| p.kind != Kind::Setter && p.enumerable)
+    {
         let field = &prop.field;
-
 
         let partial_get = if prop.partial {
             quote! {
@@ -130,12 +112,8 @@ pub fn generate_enumerable_values(
             }
         };
 
-
         prop_items.push(value_expr);
     }
-
-
-
 
     quote::quote! {
         #[inline(always)]

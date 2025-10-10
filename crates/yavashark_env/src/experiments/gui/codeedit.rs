@@ -1,5 +1,5 @@
 use super::jswidget::{DynWidget, JSWidget};
-use crate::value::{MutObj, ObjectImpl};
+use crate::value::{MutObj, Obj, ObjectImpl};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res};
 use egui::{Response, TextEdit, Ui, Widget};
 use std::any::TypeId;
@@ -69,6 +69,7 @@ impl JSCodeEditor {
         let proto = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
+            realm,
         )?;
 
         realm.intrinsics.other.insert(TypeId::of::<Self>(), proto);

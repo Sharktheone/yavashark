@@ -8,7 +8,10 @@ use yavashark_bytecode::data::{ControlIdx, DataSection, Label, OutputData, Outpu
 use yavashark_bytecode::{instructions, BytecodeFunctionCode, ConstIdx, Reg, VarName};
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    ControlFlow, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult,
+};
 
 #[derive(Debug, Clone)]
 pub struct VmState<T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
@@ -28,7 +31,7 @@ pub struct VmState<T: VMStateFunctionCode = Rc<BytecodeFunctionCode>> {
     pub try_stack: Vec<TryBlock>,
     pub yield_star_val: Option<ObjectHandle>,
 
-    pub spread_stack: Vec<Vec<Value>>,
+    pub spread_stack: Vec<Vec<PropertyKey>>,
     pub throw: Option<Error>,
 }
 
@@ -87,7 +90,7 @@ impl<T: VMStateFunctionCode> VmState<T> {
             throw: None,
         }
     }
-    pub fn continue_async(&mut self, val: Value) -> Res {
+    pub fn continue_async(&mut self, val: Value, realm: &mut Realm) -> Res {
         if let Some(storage) = self.continue_storage.take() {
             match storage {
                 OutputDataType::Acc(_) => self.acc = val,
@@ -102,7 +105,7 @@ impl<T: VMStateFunctionCode> VmState<T> {
                         .map(String::as_str)
                         .ok_or(Error::reference("Invalid variable name"))?;
 
-                    self.current_scope.declare_var(name.into(), val)?;
+                    self.current_scope.declare_var(name.into(), val, realm)?;
                 }
             }
         }
@@ -379,14 +382,14 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
         self.state.acc = value;
     }
 
-    fn get_variable(&self, name: VarName) -> Res<Value> {
+    fn get_variable(&mut self, name: VarName) -> Res<Value> {
         let Some(name) = self.state.code.data_section().var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
 
         self.state
             .current_scope
-            .resolve(name)?
+            .resolve(name, self.realm)?
             .ok_or(Error::reference("Variable not found"))
     }
 
@@ -422,7 +425,7 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
             .ok_or(Error::reference("Invalid variable name"))?;
         self.state
             .current_scope
-            .update_or_define(name.into(), value)
+            .update_or_define(name.into(), value, self.realm)
     }
 
     fn set_register(&mut self, reg: Reg, value: Value) -> Res {
@@ -445,7 +448,7 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
         self.state.current_scope.this()
     }
 
-    fn get_constant(&self, const_idx: ConstIdx) -> Res<Value> {
+    fn get_constant(&mut self, const_idx: ConstIdx) -> Res<Value> {
         let val = self
             .state
             .code
@@ -577,7 +580,7 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
             return Err(Error::new("No spread in progress"));
         };
 
-        last.push(elem);
+        last.push(elem.into_property_key(self.realm)?);
 
         Ok(())
     }
@@ -591,7 +594,7 @@ impl<T: VMStateFunctionCode> VM for ResumableVM<'_, T> {
 
         let mut props = Vec::new();
 
-        for (name, value) in obj.properties()? {
+        for (name, value) in obj.properties(self.get_realm())? {
             if !not.contains(&name) {
                 props.push((name, value));
             }

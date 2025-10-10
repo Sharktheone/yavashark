@@ -9,7 +9,10 @@ use yavashark_bytecode::instructions::Instruction;
 use yavashark_bytecode::{ConstIdx, Reg, VarName};
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, ControlResult, Error, Object, ObjectHandle, Realm, Res, Value};
+use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    ControlFlow, ControlResult, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value,
+};
 
 pub struct OwnedVM {
     regs: Registers,
@@ -27,7 +30,7 @@ pub struct OwnedVM {
     realm: Realm,
     continue_storage: Option<OutputDataType>,
 
-    spread_stack: Vec<Vec<Value>>,
+    spread_stack: Vec<Vec<PropertyKey>>,
     try_stack: Vec<TryBlock>,
 
     throw: Option<Error>,
@@ -158,13 +161,13 @@ impl VM for OwnedVM {
         self.acc = value;
     }
 
-    fn get_variable(&self, name: VarName) -> Res<Value> {
+    fn get_variable(&mut self, name: VarName) -> Res<Value> {
         let Some(name) = self.data.var_names.get(name as usize) else {
             return Err(Error::reference("Invalid variable name"));
         };
 
         self.current_scope
-            .resolve(name)?
+            .resolve(name, &mut self.realm)?
             .ok_or(Error::reference("Variable not found"))
     }
 
@@ -190,7 +193,8 @@ impl VM for OwnedVM {
         let name = self
             .var_name(name)
             .ok_or(Error::reference("Invalid variable name"))?;
-        self.current_scope.update_or_define(name.into(), value)
+        self.current_scope
+            .update_or_define(name.into(), value, &mut self.realm)
     }
 
     fn set_register(&mut self, reg: Reg, value: Value) -> Res {
@@ -213,7 +217,7 @@ impl VM for OwnedVM {
         self.current_scope.this()
     }
 
-    fn get_constant(&self, const_idx: ConstIdx) -> Res<Value> {
+    fn get_constant(&mut self, const_idx: ConstIdx) -> Res<Value> {
         let val = self
             .data
             .constants
@@ -343,7 +347,7 @@ impl VM for OwnedVM {
             return Err(Error::new("No spread in progress"));
         };
 
-        last.push(elem);
+        last.push(elem.into_property_key(&mut self.realm)?);
 
         Ok(())
     }
@@ -356,7 +360,7 @@ impl VM for OwnedVM {
 
         let mut props = Vec::new();
 
-        for (name, value) in obj.properties()? {
+        for (name, value) in obj.properties(&mut self.realm)? {
             if !not.contains(&name) {
                 props.push((name, value));
             }

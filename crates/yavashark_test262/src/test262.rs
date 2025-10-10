@@ -39,7 +39,7 @@ pub struct Test262 {
 }
 
 impl Test262 {
-    pub fn new(realm: &Realm) -> Self {
+    pub fn new(realm: &mut Realm) -> Self {
         let mut this = Self {
             inner: RefCell::new(MutableTest262 {
                 object: MutObject::new(realm),
@@ -48,14 +48,14 @@ impl Test262 {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into())
+        this.initialize(realm.intrinsics.func.clone().into(), realm)
             .unwrap();
 
         this
     }
 
     #[allow(unused)]
-    pub fn with_realm(realm: &Realm, new_realm: Realm) -> Self {
+    pub fn with_realm(realm: &mut Realm, new_realm: Realm) -> Self {
         let mut this = Self {
             inner: RefCell::new(MutableTest262 {
                 object: MutObject::new(realm),
@@ -64,7 +64,7 @@ impl Test262 {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into())
+        this.initialize(realm.intrinsics.func.clone().into(), realm)
             .unwrap();
 
         this
@@ -75,7 +75,7 @@ impl Test262 {
 #[allow(clippy::needless_pass_by_value)]
 impl Test262 {
     #[prop("createRealm")]
-    fn create_realm(&self, #[realm] realm: &Realm) -> ValueResult {
+    fn create_realm(&self, #[realm] realm: &mut Realm) -> ValueResult {
         let mut new_realm = Realm::new().map_err(|e| Error::new_error(e.to_string()))?;
 
         new_realm.set_eval(InterpreterEval)?;
@@ -85,9 +85,9 @@ impl Test262 {
 
         let this: Value = ObjectHandle::new(Self::with_realm(realm, new_realm)).into();
 
-        global.define_property("$262".into(), this.copy())?;
+        global.define_property("$262".into(), this.copy(), realm)?;
 
-        this.define_property("global".into(), global.into())?;
+        this.define_property("global", global.into(), realm)?;
 
         Ok(this)
     }

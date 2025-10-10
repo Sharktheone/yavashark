@@ -13,25 +13,24 @@ impl ValueIterator {
 
     pub fn next(&self, realm: &mut Realm) -> Res<Option<Value>> {
         let res = self.0.call_method(&"next".into(), realm, Vec::new())?;
-        let this = res.clone();
 
         let res = res.as_object()?;
 
         if res
-            .get_property(&"done".into())?
-            .resolve(this.clone(), realm)?
+            .resolve_property("done", realm)?
+            .unwrap_or(Value::Undefined)
             .is_truthy()
         {
             return Ok(None);
         }
 
-        let val = res.get_property(&"value".into())?;
+        let val = res.resolve_property("value", realm)?;
 
-        Ok(Some(val.resolve(this, realm)?))
+        Ok(val)
     }
 
     pub fn close(self, realm: &mut Realm) -> Res {
-        if let Some(return_method) = self.0.get_property_opt(&"return".into(), realm)? {
+        if let Some(return_method) = self.0.get_property_opt("return", realm)? {
             return_method.call(realm, Vec::new(), self.0)?;
         }
 
@@ -48,7 +47,7 @@ pub struct ArrayLike {
 }
 
 impl ArrayLike {
-    pub fn is_array_like(val: &Value) -> Res<bool> {
+    pub fn is_array_like(val: &Value, realm: &mut Realm) -> Res<bool> {
         if let Ok(Some(_)) = val.downcast::<Array>() {
             return Ok(true);
         }
@@ -57,11 +56,11 @@ impl ArrayLike {
             return Ok(false);
         };
 
-        if o.contains_key(&Symbol::ITERATOR.into())? {
+        if o.contains_key(Symbol::ITERATOR.into(), realm)? {
             return Ok(true);
         }
 
-        if o.contains_key(&"length".into())? {
+        if o.contains_own_key("length".into(), realm)? {
             return Ok(true);
         }
 
@@ -81,7 +80,7 @@ impl ArrayLike {
             });
         }
 
-        if let Some(iter) = val.get_property_opt(&Symbol::ITERATOR.into(), realm)? {
+        if let Some(iter) = val.get_property_opt(Symbol::ITERATOR, realm)? {
             let iter = iter.call(realm, Vec::new(), val)?.to_object()?;
 
             return Ok(Self {
@@ -93,9 +92,7 @@ impl ArrayLike {
             });
         }
 
-        let len = val
-            .get_property(&"length".into(), realm)?
-            .to_number(realm)?;
+        let len = val.get_property("length", realm)?.to_number(realm)?;
 
         Ok(Self {
             val,
@@ -120,7 +117,7 @@ impl ArrayLike {
         }
 
         if let Some(iter) = &self.iter {
-            let next = iter.call_method(&"next".into(), realm, Vec::new())?;
+            let next = iter.call_method("next", realm, Vec::new())?;
             let next = next.as_object()?;
 
             let done = next
@@ -148,7 +145,7 @@ impl ArrayLike {
 
         let val = self
             .val
-            .get_property_opt(&idx.into(), realm)?
+            .get_property_opt(idx, realm)?
             .unwrap_or(Value::Undefined);
 
         self.idx.set(idx + 1);

@@ -10,8 +10,8 @@ use yavashark_macro::{object, props};
 pub struct Float16Array {}
 
 impl Float16Array {
-    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.float16array.clone().into())?;
+    pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.float16array.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableFloat16Array {}),

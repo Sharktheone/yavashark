@@ -1,20 +1,13 @@
-use quote::quote;
 use crate::config::Config;
-use crate::inline_props::property::{Kind, Name, Property};
+use crate::inline_props::property::{Name, Property};
+use quote::quote;
 
-pub fn generate_contains_property(
-    props: &[Property],
-    config: &Config,
-) -> proc_macro2::TokenStream {
-
+pub fn generate_contains_property(props: &[Property], config: &Config) -> proc_macro2::TokenStream {
     let internal_property_key = &config.internal_property_key;
     let res = &config.res;
 
-
     let mut string_arms = Vec::with_capacity(props.len());
     let mut symbols = Vec::new();
-
-
 
     for prop in props {
         let key = &prop.name;
@@ -23,7 +16,6 @@ pub fn generate_contains_property(
             return ::core::result::Result::Ok(true);
         };
 
-
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
@@ -31,14 +23,14 @@ pub fn generate_contains_property(
                         #value_expr
                     }
                 });
-            },
+            }
             Name::Symbol(sym) => {
                 symbols.push(quote::quote! {
                     if symbol == #sym {
                         #value_expr
                     }
                 });
-            },
+            }
         }
     }
 
@@ -64,8 +56,6 @@ pub fn generate_contains_property(
     } else {
         quote::quote! {}
     };
-
-
 
     quote::quote! {
         #[inline(always)]

@@ -12,14 +12,14 @@ pub struct Math {}
 
 impl Math {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
+    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableMath {
                 object: MutObject::with_proto(proto),
             }),
         };
 
-        this.initialize(func.into())?;
+        this.initialize(func.into(), realm)?;
 
         Ok(this.into_object())
     }

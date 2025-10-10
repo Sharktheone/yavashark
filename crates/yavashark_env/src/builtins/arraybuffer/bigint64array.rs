@@ -9,8 +9,8 @@ use yavashark_macro::{object, props};
 pub struct BigInt64Array {}
 
 impl BigInt64Array {
-    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.bigint64array.clone().into())?;
+    pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.bigint64array.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableBigInt64Array {}),

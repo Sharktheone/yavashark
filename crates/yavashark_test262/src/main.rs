@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use yavashark_env::print::PrettyPrint;
 #[cfg(feature = "parser_test")]
 use yavashark_test262::parsers::test_file;
 #[cfg(not(feature = "parser_test"))]
@@ -98,7 +97,7 @@ fn run() {
             }
 
             match res {
-                Err(e) => println!("FAIL:\n {}", e.pretty_print()),
+                Err(e) => println!("FAIL:\n {}", e),
                 Ok(v) => println!("PASS:\n {v}"),
             }
             return;
@@ -110,7 +109,7 @@ fn run() {
         }
 
         match run_file(path) {
-            Err(e) => println!("FAIL:\n {}", e.pretty_print()),
+            Err(e) => println!("FAIL:\n {}", e),
             Ok(v) => println!("PASS:\n {v}"),
         }
     }

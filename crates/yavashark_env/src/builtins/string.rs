@@ -2,9 +2,9 @@ use crate::array::Array;
 use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Constructor, CustomName, Func, MutObj, Obj};
+use crate::value::{Constructor, CustomName, Func, MutObj, Obj, Property};
 use crate::{
-    Error, MutObject, Object, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult,
+    Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
 };
 use std::cell::{RefCell, RefMut};
 use std::cmp;
@@ -68,9 +68,13 @@ impl crate::value::ObjectImpl for StringObj {
         self.inner.borrow_mut()
     }
 
-    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(n) = name {
-            let index = *n as isize;
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(n) = name {
+            let index = n as isize;
 
             let inner = self.inner.borrow();
 
@@ -80,22 +84,16 @@ impl crate::value::ObjectImpl for StringObj {
             return Ok(Some(chr.into()));
         }
 
-        let key = InternalPropertyKey::from(name.copy());
-
-        if let InternalPropertyKey::Index(index) = key {
-            let inner = self.inner.borrow();
-            let chr = Self::get_single_str(&inner.string, index as isize)
-                .map_or(Value::Undefined, Into::into);
-
-            return Ok(Some(chr.into()));
-        }
-
-        self.get_wrapped_object().resolve_property(name)
+        self.get_wrapped_object().resolve_property(name, realm)
     }
 
-    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(n) = name {
-            let index = *n as isize;
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(n) = name {
+            let index = n as isize;
 
             let inner = self.inner.borrow();
 
@@ -105,18 +103,14 @@ impl crate::value::ObjectImpl for StringObj {
             return Ok(Some(chr.into()));
         }
 
-        self.get_wrapped_object().get_property(name)
+        self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn name(&self) -> String {
-        "String".to_string()
-    }
-
-    fn primitive(&self) -> Option<crate::value::Value> {
-        Some(self.inner.borrow().string.clone().into())
-    }
-
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+    fn get_array_or_done(
+        &self,
+        index: usize,
+        _: &mut Realm,
+    ) -> Result<(bool, Option<Value>), Error> {
         let inner = self.inner.borrow();
 
         if index >= inner.string.len() {
@@ -128,6 +122,14 @@ impl crate::value::ObjectImpl for StringObj {
         let value = c.to_string().into();
 
         Ok((true, Some(value)))
+    }
+
+    fn primitive(&self, _: &mut Realm) -> Res<Option<PrimitiveValue>> {
+        Ok(Some(self.inner.borrow().string.clone().into()))
+    }
+
+    fn name(&self) -> String {
+        "String".to_string()
     }
 }
 
@@ -143,16 +145,16 @@ impl CustomName for StringConstructor {
 
 impl StringConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableStringConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.define_property("name".into(), "String".into())?;
+        this.define_property("name".into(), "String".into(), realm)?;
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
@@ -248,7 +250,7 @@ impl StringConstructor {
 }
 
 impl Constructor for StringConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let str = match args.first() {
             Some(v) => v.to_string(realm)?,
             None => YSString::new(),
@@ -256,7 +258,7 @@ impl Constructor for StringConstructor {
 
         let obj = StringObj::with_string(realm, str);
 
-        Ok(Obj::into_value(obj))
+        Ok(Obj::into_object(obj))
     }
 }
 

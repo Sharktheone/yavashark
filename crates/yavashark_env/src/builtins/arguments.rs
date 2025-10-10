@@ -1,11 +1,10 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
-use crate::value::{MutObj, Obj, ObjectImpl};
-use crate::{MutObject, ObjectProperty, Realm, Res, Value, ValueResult, Variable};
+use crate::value::{DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
+use crate::{InternalPropertyKey, MutObject, Realm, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::props;
-use yavashark_string::YSString;
 
 #[derive(Debug)]
 pub struct Arguments {
@@ -26,8 +25,8 @@ impl Arguments {
         }
     }
 
-    pub fn resolve_array(&self, idx: usize) -> Option<ObjectProperty> {
-        Some(self.args.borrow().get(idx)?.copy().into())
+    pub fn resolve_array(&self, idx: usize) -> Option<Value> {
+        Some(self.args.borrow().get(idx)?.copy())
     }
 
     pub fn set_array(&self, idx: usize, value: Value) -> Res<()> {
@@ -54,50 +53,89 @@ impl ObjectImpl for Arguments {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: Value, value: Value) -> Res<()> {
-        if let Value::Number(idx) = &name {
-            if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if let Some(v) = self.args.borrow_mut().get_mut(idx) {
                 *v = value;
-                return Ok(());
+                return Ok(DefinePropertyResult::Handled);
             }
         }
 
-        if let Value::String(s) = &name {
+        if let InternalPropertyKey::String(s) = &name {
             if s == "length" {
                 *self.length.borrow_mut() = value;
-                return Ok(());
+                return Ok(DefinePropertyResult::Handled);
             }
         }
 
-        self.get_wrapped_object().define_property(name, value)
+        self.get_wrapped_object()
+            .define_property(name, value, realm)
     }
 
-    fn define_variable(&self, name: Value, value: Variable) -> Res<()> {
-        if let Value::Number(idx) = &name {
-            if let Some(v) = self.args.borrow_mut().get_mut(*idx as usize) {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if let Some(v) = self.args.borrow_mut().get_mut(idx) {
                 *v = value.value;
-                return Ok(());
+                return Ok(DefinePropertyResult::Handled);
             }
         }
 
-        if let Value::String(s) = &name {
+        if let InternalPropertyKey::String(s) = &name {
             if s == "length" {
                 *self.length.borrow_mut() = value.value;
-                return Ok(());
+                return Ok(DefinePropertyResult::Handled);
             }
         }
 
-        self.get_wrapped_object().define_variable(name, value)
+        self.get_wrapped_object()
+            .define_property_attributes(name, value, realm)
     }
 
-    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(idx) = &name {
-            if let Some(value) = self.resolve_array(*idx as usize) {
-                return Ok(Some(value));
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if let Some(value) = self.resolve_array(idx) {
+                return Ok(Some(Property::Value(value.into())));
             }
         }
 
-        if let Value::String(s) = &name {
+        if let InternalPropertyKey::String(s) = &name {
+            if s == "length" {
+                return Ok(Some(Property::Value(self.length.borrow().clone().into())));
+            }
+            if s == "callee" {
+                return Ok(Some(Property::Value(self.callee.clone().into())));
+            }
+        }
+
+        self.get_wrapped_object().resolve_property(name, realm)
+    }
+
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(idx) = name {
+            if let Some(value) = self.resolve_array(idx) {
+                return Ok(Some(value.into()));
+            }
+        }
+
+        if let InternalPropertyKey::String(s) = &name {
             if s == "length" {
                 return Ok(Some(self.length.borrow().clone().into()));
             }
@@ -106,41 +144,26 @@ impl ObjectImpl for Arguments {
             }
         }
 
-        self.get_wrapped_object().resolve_property(name)
-    }
-
-    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        if let Value::Number(idx) = &name {
-            if let Some(value) = self.resolve_array(*idx as usize) {
-                return Ok(Some(value));
-            }
-        }
-
-        if let Value::String(s) = &name {
-            if s == "length" {
-                return Ok(Some(self.length.borrow().clone().into()));
-            }
-            if s == "callee" {
-                return Ok(Some(self.callee.clone().into()));
-            }
-        }
-
-        self.get_wrapped_object().get_property(name)
+        self.get_wrapped_object().get_own_property(name, realm)
     }
 
     fn name(&self) -> String {
         "Arguments".to_string()
     }
+    //
+    // fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
+    //     Ok("[object Arguments]".into())
+    // }
+    //
+    // fn to_string_internal(&self) -> Result<YSString, Error> {
+    //     Ok("[object Arguments]".into())
+    // }
 
-    fn to_string(&self, _: &mut Realm) -> Result<YSString, Error> {
-        Ok("[object Arguments]".into())
-    }
-
-    fn to_string_internal(&self) -> Result<YSString, Error> {
-        Ok("[object Arguments]".into())
-    }
-
-    fn get_array_or_done(&self, index: usize) -> Result<(bool, Option<Value>), Error> {
+    fn get_array_or_done(
+        &self,
+        index: usize,
+        _: &mut Realm,
+    ) -> Result<(bool, Option<Value>), Error> {
         let args = self.args.borrow();
         if index < args.len() {
             Ok((false, Some(args[index].clone())))

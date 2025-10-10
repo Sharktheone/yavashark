@@ -1,9 +1,9 @@
+use crate::compiler::statement::expr::member::MemberKey;
 use crate::node::ASTNode;
 use crate::{Compiler, Res};
 use swc_ecma_ast::{CallExpr, Callee, Expr};
 use yavashark_bytecode::data::{Acc, OutputData};
 use yavashark_bytecode::instructions::Instruction;
-use crate::compiler::statement::expr::member::MemberKey;
 
 impl Compiler {
     pub fn compile_call(&mut self, expr: &CallExpr, out: Option<impl OutputData>) -> Res {
@@ -14,7 +14,6 @@ impl Compiler {
                 if let Expr::Member(m) = &**expr {
                     let member = self.compile_member_prop(&m.prop)?;
                     let prop = self.compile_expr_data_acc(&m.obj)?;
-
 
                     match member {
                         MemberKey::Public(member) => {
@@ -36,7 +35,6 @@ impl Compiler {
                             }
                         }
                     }
-
 
                     self.dealloc(prop);
                     self.dealloc(member.data_type());

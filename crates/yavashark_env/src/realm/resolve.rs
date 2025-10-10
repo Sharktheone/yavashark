@@ -35,8 +35,8 @@ impl Realm {
         &mut self,
         spec: &str,
         cur_path: &Path,
-        cb: impl FnOnce(String, PathBuf, &mut Realm) -> Res<Module> + 'static,
-    ) -> Res<ResolveModuleResult> {
+        cb: impl FnOnce(String, PathBuf, &mut Self) -> Res<Module> + 'static,
+    ) -> Res<ResolveModuleResult<'_>> {
         let path = resolve_path(spec, cur_path)?;
 
         if path == cur_path {
@@ -52,11 +52,14 @@ impl Realm {
                 #[cfg(target_arch = "wasm32")]
                 let source = {
                     // load in sync with stdlib
-                    std::fs::read_to_string(&path)
-                        .map_err(|e| Error::new_error(e.to_string()))?
+                    std::fs::read_to_string(&path).map_err(|e| Error::new_error(e.to_string()))?
                 };
 
-                Ok(ModuleFinalizer { source, path, cb: Box::new(cb) })
+                Ok(ModuleFinalizer {
+                    source,
+                    path,
+                    cb: Box::new(cb),
+                })
             };
 
             return Ok(ResolveModuleResult::Async(Box::pin(fut)));
@@ -83,10 +86,7 @@ pub struct ModuleFinalizer {
 }
 
 impl ModuleFinalizer {
-    pub fn finalize(
-        self,
-        realm: &mut Realm,
-    ) -> Res<&Module> {
+    pub fn finalize(self, realm: &mut Realm) -> Res<&Module> {
         let module = (self.cb)(self.source, self.path.clone(), realm)?;
 
         realm.env.modules.insert(self.path.clone(), module);

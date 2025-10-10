@@ -1,7 +1,10 @@
 use crate::constructor::ObjectConstructor;
 use crate::utils::ArrayLike;
-use crate::value::Obj;
-use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use crate::value::{Obj, Property};
+use crate::{
+    Error, InternalPropertyKey, MutObject, ObjectHandle, ObjectOrNull, Realm, Res, Value,
+    ValueResult,
+};
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
 
@@ -11,14 +14,18 @@ pub struct Reflect {}
 
 impl Reflect {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func_proto: ObjectHandle) -> Res<ObjectHandle> {
+    pub fn new(
+        proto: ObjectHandle,
+        func_proto: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableReflect {
                 object: MutObject::with_proto(proto),
             }),
         };
 
-        this.initialize(func_proto)?;
+        this.initialize(func_proto, realm)?;
 
         Ok(this.into_object())
     }
@@ -49,11 +56,11 @@ impl Reflect {
         args: Value,
         new_target: &Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
-    ) -> ValueResult {
+    ) -> Res<ObjectHandle> {
         //This function performs the following steps when called:
 
         //     1. If IsConstructor(target) is false, throw a TypeError exception.
-        if !target.is_constructor() {
+        if !target.is_constructable() {
             return Err(Error::ty_error(format!(
                 "{} is not a constructor",
                 target.name()
@@ -62,7 +69,7 @@ impl Reflect {
         //     2. If newTarget is not present, set newTarget to target.
         let proto = if let Some(new_target) = new_target {
             //     3. Else if IsConstructor(newTarget) is false, throw a TypeError exception.
-            if !new_target.is_constructor() {
+            if !new_target.is_constructable() {
                 return Err(Error::ty_error(format!(
                     "{} is not a constructor",
                     new_target.name()
@@ -83,9 +90,15 @@ impl Reflect {
         let args = ArrayLike::new(args, realm)?.to_vec(realm)?;
 
         //     5. Return ? Construct(target, args, newTarget).
-        let val = target.construct(realm, args)?;
+        let val = target.construct(args, realm)?;
 
-        val.as_object()?.set_prototype(proto.into())?;
+        let proto = if proto.is_null() {
+            ObjectOrNull::Null
+        } else {
+            ObjectOrNull::Object(proto.to_object()?)
+        };
+
+        val.set_prototype(proto, realm)?;
 
         Ok(val)
     }
@@ -93,24 +106,33 @@ impl Reflect {
     //28.1.3 Reflect.defineProperty ( target, propertyKey, attributes ), https://tc39.es/ecma262/#sec-reflection
     #[prop("defineProperty")]
     #[must_use]
-    pub fn define_property(target: ObjectHandle, prop: &Value, desc: &ObjectHandle) -> bool {
+    pub fn define_property(
+        target: ObjectHandle,
+        prop: InternalPropertyKey,
+        desc: &ObjectHandle,
+        #[realm] realm: &mut Realm,
+    ) -> bool {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
         //3. Let desc be ? ToPropertyDescriptor(attributes).
         //4. Return ? target.[[DefineOwnProperty]](key, desc).
-        ObjectConstructor::define_property(target, prop, desc).is_ok()
+        ObjectConstructor::define_property(target, prop, desc, realm).is_ok()
     }
 
     //28.1.4 Reflect.deleteProperty ( target, propertyKey ), https://tc39.es/ecma262/#sec-reflection
     #[prop("deleteProperty")]
     #[must_use]
-    pub fn delete_property(target: &ObjectHandle, prop: &Value) -> bool {
+    pub fn delete_property(
+        target: &ObjectHandle,
+        prop: InternalPropertyKey,
+        #[realm] realm: &mut Realm,
+    ) -> bool {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
         //3. Return ? target.[[Delete]](key).
-        target.delete_property(prop).is_ok()
+        target.delete_property(prop, realm).is_ok()
     }
 
     //28.1.5 Reflect.get ( target, propertyKey [ , receiver ] ), https://tc39.es/ecma262/#sec-reflection
@@ -123,42 +145,44 @@ impl Reflect {
         //This function performs the following steps when called:
         //1. If target is not an Object, throw a TypeError exception. - done by the caller
         //2. Let key be ? ToPropertyKey(propertyKey). TODO
-        let prop = target.get_property(prop)?;
+        match target.resolve_property_no_get_set(prop, realm)? {
+            Some(Property::Value(v)) => Ok(v.value),
+            Some(Property::Getter(getter, _)) => {
+                let recv = receiver.unwrap_or_else(|| target.clone().into());
+                getter.call(Vec::new(), recv, realm)
+            }
+            None => Ok(Value::Undefined),
 
-        //3. If receiver is not present, then
-        //    a. Set receiver to target.
-        let receiver = receiver.unwrap_or_else(|| target.into());
+        }
 
-        //4. Return ? target.[[Get]](key, receiver).
-        prop.resolve(receiver, realm)
+
+        // Ok(prop.unwrap_or(Value::Undefined))
     }
 
     #[prop("getOwnPropertyDescriptor")]
     pub fn get_own_property_descriptor(
         target: &ObjectHandle,
-        prop: &Value,
+        prop: InternalPropertyKey,
         #[realm] realm: &mut Realm,
     ) -> ValueResult {
-        let obj = target.guard();
-
-        let Some(prop) = obj.get_property(prop)? else {
+        let Some(prop) = target.get_property_descriptor(prop, realm)? else {
             return Ok(Value::Undefined);
         };
 
-        let desc = Object::new(realm);
-
-        prop.descriptor(&desc)?;
-
-        Ok(desc.into())
+        prop.into_value(realm)
     }
 
     #[prop("getPrototypeOf")]
     pub fn get_prototype_of(target: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
-        target.prototype()?.resolve(target.into(), realm)
+        Ok(target.prototype(realm)?.into())
     }
 
-    pub fn has(target: &ObjectHandle, prop: &Value) -> Res<bool> {
-        target.contains_key(prop)
+    pub fn has(
+        target: &ObjectHandle,
+        prop: InternalPropertyKey,
+        #[realm] realm: &mut Realm,
+    ) -> Res<bool> {
+        target.contains_own_key(prop, realm)
     }
 
     #[prop("isExtensible")]
@@ -168,7 +192,7 @@ impl Reflect {
     }
 
     #[prop("ownKeys")]
-    pub fn own_keys(target: ObjectHandle, #[realm] realm: &Realm) -> ValueResult {
+    pub fn own_keys(target: ObjectHandle, #[realm] realm: &mut Realm) -> ValueResult {
         ObjectConstructor::keys_js(&target.into(), realm)
     }
 
@@ -179,13 +203,28 @@ impl Reflect {
     }
 
     #[must_use]
-    pub fn set(target: &ObjectHandle, prop: Value, value: Value, _receiver: Option<Value>) -> bool {
-        target.define_property(prop, value).is_ok()
+    pub fn set(
+        target: &ObjectHandle,
+        prop: InternalPropertyKey,
+        value: Value,
+        _receiver: Option<Value>,
+        #[realm] realm: &mut Realm,
+    ) -> bool {
+        target.define_property(prop, value, realm).is_ok()
     }
 
     #[prop("setPrototypeOf")]
-    #[must_use]
-    pub fn set_prototype_of(target: &ObjectHandle, proto: Value) -> bool {
-        target.set_prototype(proto.into()).is_ok()
+    pub fn set_prototype_of(
+        target: &ObjectHandle,
+        proto: Value,
+        #[realm] realm: &mut Realm,
+    ) -> Res<bool> {
+        let proto = if proto.is_null() {
+            ObjectOrNull::Null
+        } else {
+            ObjectOrNull::Object(proto.to_object()?)
+        };
+
+        Ok(target.set_prototype(proto, realm).is_ok())
     }
 }

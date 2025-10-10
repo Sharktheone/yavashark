@@ -15,16 +15,16 @@ pub enum Variable {
 
 impl Interpreter {
     pub fn decl_var(realm: &mut Realm, stmt: &VarDecl, scope: &mut Scope) -> Res {
-        let cb = |scope: &mut Scope, var| {
+        let cb = |scope: &mut Scope, var, realm: &mut Realm| {
             match var {
                 Variable::Var(name, value) => {
-                    scope.declare_global_var(name, value);
+                    scope.declare_global_var(name, value, realm);
                 }
                 Variable::Let(name, value) => {
-                    scope.declare_var(name, value);
+                    scope.declare_var(name, value, realm);
                 }
                 Variable::Const(name, value) => {
-                    scope.declare_read_only_var(name, value);
+                    scope.declare_read_only_var(name, value, realm);
                 }
             }
 
@@ -41,7 +41,7 @@ impl Interpreter {
     ) -> Res<Vec<Variable>> {
         let mut vars = Vec::with_capacity(stmt.decls.len());
 
-        let cb = |scope: &mut Scope, var| {
+        let cb = |scope: &mut Scope, var, realm: &mut Realm| {
             vars.push(var);
             Ok(())
         };
@@ -55,7 +55,7 @@ impl Interpreter {
         realm: &mut Realm,
         stmt: &VarDecl,
         scope: &mut Scope,
-        mut cb: impl FnMut(&mut Scope, Variable) -> Res,
+        mut cb: impl FnMut(&mut Scope, Variable, &mut Realm) -> Res,
     ) -> Res {
         match stmt.kind {
             VarDeclKind::Var => {
@@ -70,10 +70,10 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            &mut |scope, name, value| {
+                            &mut |scope, name, value, realm| {
                                 let var = Variable::Var(name, value);
 
-                                cb(scope, var)
+                                cb(scope, var, realm)
                             },
                         )?;
                     } else {
@@ -83,10 +83,10 @@ impl Interpreter {
                             scope,
                             &mut iter::once(Value::Undefined),
                             DUMMY_SP,
-                            &mut |scope, name, value| {
+                            &mut |scope, name, value, realm| {
                                 let var = Variable::Var(name, value);
 
-                                cb(scope, var)
+                                cb(scope, var, realm)
                             },
                         )?;
                     }
@@ -105,10 +105,10 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            &mut |scope, name, value| {
+                            &mut |scope, name, value, realm| {
                                 let var = Variable::Let(name, value);
 
-                                cb(scope, var)
+                                cb(scope, var, realm)
                             },
                         )?;
                     } else {
@@ -118,10 +118,10 @@ impl Interpreter {
                             scope,
                             &mut iter::once(Value::Undefined),
                             DUMMY_SP,
-                            &mut |scope, name, value| {
+                            &mut |scope, name, value, realm| {
                                 let var = Variable::Let(name, value);
 
-                                cb(scope, var)
+                                cb(scope, var, realm)
                             },
                         )?;
                     }
@@ -139,10 +139,10 @@ impl Interpreter {
                             scope,
                             &mut iter::once(value),
                             DUMMY_SP,
-                            &mut |scope, name, value| {
+                            &mut |scope, name, value, realm| {
                                 let var = Variable::Const(name, value);
 
-                                cb(scope, var)
+                                cb(scope, var, realm)
                             },
                         )?;
                     } else {

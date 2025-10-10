@@ -61,12 +61,32 @@ impl Realm {
         );
 
         self.intrinsics.eval = Some(eval_func.clone());
-        self.global
-            .define_variable("eval".into(), Variable::write_config(eval_func.into()))
+        let global = self.global.clone();
+        global.define_property_attributes(
+            "eval".into(),
+            Variable::write_config(eval_func.into()),
+            self,
+        )?;
+
+        Ok(())
     }
 
     pub async fn run_event_loop(&mut self) {
         self.queue.runner().run(self).await;
+    }
+}
+
+impl Default for Realm {
+    fn default() -> Self {
+        Self {
+            intrinsics: Intrinsics::default(),
+            global: Object::null(),
+            env: Environment {
+                modules: HashMap::new(),
+            },
+            queue: AsyncTaskQueue::new(),
+
+        }
     }
 }
 

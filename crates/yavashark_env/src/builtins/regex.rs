@@ -155,10 +155,10 @@ impl RegExp {
         ))
     }
 
-    fn set_last_index_value(&self, this: &Value, value: usize, _realm: &mut Realm) -> Res<()> {
+    fn set_last_index_value(&self, this: &Value, value: usize, realm: &mut Realm) -> Res<()> {
         let obj = this.as_object()?;
 
-        obj.define_property("lastIndex".into(), value.into())?;
+        obj.define_property("lastIndex".into(), value.into(), realm)?;
 
         self.last_index.set(value);
 
@@ -179,31 +179,31 @@ impl RegExpConstructor {
 
 impl RegExpConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableRegExpConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }
 
-    #[allow(clippy::unused_self)]
+    #[allow(clippy::unused_self, unused)]
     fn override_to_string_internal(&self) -> Res<YSString> {
         Ok("function RegExp() { [native code] }".into())
     }
 
-    #[allow(clippy::unused_self)]
+    #[allow(clippy::unused_self, unused)]
     fn override_to_string(&self, _: &mut Realm) -> Res<YSString> {
         Ok("function RegExp() { [native code] }".into())
     }
 }
 
 impl Constructor for RegExpConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let regex = args.first().map_or(Res::<String>::Ok(String::new()), |v| {
             Ok(v.to_string(realm)?.to_string())
         })?;
@@ -214,13 +214,13 @@ impl Constructor for RegExpConstructor {
 
         let obj = RegExp::new_from_str_with_flags(realm, &regex, &flags)?;
 
-        Ok(obj.into())
+        Ok(obj)
     }
 }
 
 impl Func for RegExpConstructor {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, _this: Value) -> ValueResult {
-        Constructor::construct(self, realm, args)
+        Ok(Constructor::construct(self, realm, args)?.into())
     }
 }
 
@@ -273,8 +273,8 @@ impl RegExp {
         let result = Array::from_realm(realm);
         let matched_slice = input.get(match_start..match_end).unwrap_or("");
         result.insert_array(YSString::from_ref(matched_slice).into(), 0)?;
-        result.define_property("index".into(), match_start.into())?;
-        result.define_property("input".into(), inp.clone().into())?;
+        result.define_property("index".into(), match_start.into(), realm)?;
+        result.define_property("input".into(), inp.clone().into(), realm)?;
 
         let indices_array = if self.flags.has_indices {
             let arr = Array::from_realm(realm);
@@ -305,7 +305,7 @@ impl RegExp {
                     .and_then(|range| input.get(range))
                     .map_or(Value::Undefined, |slice| YSString::from_ref(slice).into());
 
-                groups_obj.define_property(name.clone().into(), capture_value)?;
+                groups_obj.define_property(name.clone().into(), capture_value, realm)?;
 
                 if let Some(indices_obj) = indices_groups_obj.as_ref() {
                     let indices_value = if let Some(range) = range_opt {
@@ -314,7 +314,7 @@ impl RegExp {
                     } else {
                         Value::Undefined
                     };
-                    indices_obj.define_property(name.into(), indices_value)?;
+                    indices_obj.define_property(name.into(), indices_value, realm)?;
                 }
             }
 
@@ -323,7 +323,7 @@ impl RegExp {
             (groups_obj.into(), indices_groups_value)
         };
 
-        result.define_property("groups".into(), groups_value)?;
+        result.define_property("groups".into(), groups_value, realm)?;
 
         for index in 1..=matched.captures.len() {
             let capture = matched.group(index);
@@ -346,8 +346,8 @@ impl RegExp {
         }
 
         if let Some(indices_arr) = indices_array {
-            indices_arr.define_property("groups".into(), indices_groups_value)?;
-            result.define_property("indices".into(), indices_arr.into_value())?;
+            indices_arr.define_property("groups".into(), indices_groups_value, realm)?;
+            result.define_property("indices".into(), indices_arr.into_value(), realm)?;
         }
 
         Ok(result.into_value())
@@ -517,7 +517,12 @@ impl RegExp {
 }
 
 impl PrettyObjectOverride for RegExp {
-    fn pretty_inline(&self, _obj: &crate::value::Object, _not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        _obj: &crate::value::Object,
+        _not: &mut Vec<usize>,
+        _realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = String::new();
         s.push('/');
         let escaped = escape_pattern(&self.original_source);
@@ -529,10 +534,11 @@ impl PrettyObjectOverride for RegExp {
 
     fn pretty_multiline(
         &self,
-        _obj: &crate::value::Object,
-        _not: &mut Vec<usize>,
+        obj: &crate::value::Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
     ) -> Option<String> {
-        self.pretty_inline(_obj, _not)
+        self.pretty_inline(obj, not, realm)
     }
 }
 

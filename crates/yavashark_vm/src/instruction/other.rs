@@ -4,8 +4,11 @@ use yavashark_bytecode::data::{ControlIdx, Label};
 use yavashark_bytecode::JmpAddr;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
-use yavashark_env::value::{ObjectImpl, ObjectOrNull};
-use yavashark_env::{Class, ClassInstance, ControlFlow, ControlResult, Error, Object, PrivateMember, Realm, Res, Value};
+use yavashark_env::value::{Obj, ObjectOrNull};
+use yavashark_env::{
+    Class, ClassInstance, ControlFlow, ControlResult, Error, Object, PrivateMember, PropertyKey,
+    Realm, Res, Value,
+};
 
 pub fn nullish_coalescing(
     left: impl Data,
@@ -29,7 +32,7 @@ pub fn in_(left: impl Data, right: impl Data, output: impl OutputData, vm: &mut 
     let left = left.get(vm)?;
     let right = right.get(vm)?;
 
-    let result = left.contains_key(&right)?.into();
+    let result = left.contains_key(&right, vm.get_realm())?.into();
 
     output.set(result, vm)
 }
@@ -62,7 +65,6 @@ pub fn load_member(
     output.set(result.unwrap_or(Value::Undefined), vm)
 }
 
-
 pub fn load_private_member(
     left: impl Data,
     right: impl Data,
@@ -82,17 +84,12 @@ pub fn load_private_member(
     output.set(res, vm)
 }
 
-pub fn store_member(
-    obj: impl Data,
-    prop: impl Data,
-    value: impl Data,
-    vm: &mut impl VM,
-) -> Res {
+pub fn store_member(obj: impl Data, prop: impl Data, value: impl Data, vm: &mut impl VM) -> Res {
     let obj = obj.get(vm)?;
     let prop = prop.get(vm)?;
     let value = value.get(vm)?;
 
-    obj.define_property(prop, value)?;
+    obj.define_property(prop, value, vm.get_realm())?;
 
     Ok(())
 }
@@ -122,7 +119,9 @@ pub fn store_private_member(
         return Ok(());
     }
 
-    Err(Error::ty("Private member can only be set on class instance or class"))
+    Err(Error::ty(
+        "Private member can only be set on class instance or class",
+    ))
 }
 
 pub fn load_var(data: impl Data, output: impl OutputData, vm: &mut impl VM) -> Res {
@@ -265,14 +264,14 @@ pub fn continue_label(label: Label, vm: &impl VM) -> ControlResult {
 pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
     let obj = data.get(vm)?;
 
-    let scope = vm.get_scope_mut();
+    let mut scope = vm.get_scope_mut().clone();
 
-    for (key, value) in obj.properties()? {
-        let Value::String(key) = key else {
+    for (key, value) in obj.properties(vm.get_realm())? {
+        let PropertyKey::String(key) = key else {
             continue;
         };
 
-        scope.declare_var(key.to_string(), value)?;
+        scope.declare_var(key.to_string(), value, vm.get_realm())?;
     }
 
     Ok(())
@@ -281,21 +280,21 @@ pub fn with(data: impl Data, vm: &mut impl VM) -> Res {
 pub fn load_super(output: impl OutputData, vm: &mut impl VM) -> Res {
     let this = vm.get_scope().this()?;
 
-    let proto = this.prototype(vm.get_realm())?;
-    let sup = proto.prototype(vm.get_realm())?;
+    let proto = this.prototype(vm.get_realm())?.to_object()?;
 
-    output.set(sup, vm)
+    let sup = proto.prototype(vm.get_realm())?.to_object()?;
+
+    output.set(sup.into(), vm)
 }
 
 pub fn load_super_constructor(output: impl OutputData, vm: &mut impl VM) -> Res {
     let this = vm.get_scope().this()?;
 
-    let proto = this.prototype(vm.get_realm())?;
-    let sup = proto.prototype(vm.get_realm())?;
+    let proto = this.prototype(vm.get_realm())?.to_object()?;
 
-    let constructor = sup.as_object()?.constructor()?;
+    let sup = proto.prototype(vm.get_realm())?.to_object()?;
 
-    let constructor = constructor.resolve(proto.copy(), vm.get_realm())?;
+    let constructor = sup.get("constructor", vm.get_realm())?;
 
     output.set(constructor, vm)
 }
@@ -536,13 +535,11 @@ pub fn bitwise_not(data: impl Data, output: impl OutputData, vm: &mut impl VM) -
     output.set(num, vm)
 }
 
-
 pub fn get_new_target(output: impl OutputData, vm: &mut impl VM) -> Res {
     let new_target = vm.get_scope().get_target()?;
 
     output.set(new_target, vm)
 }
-
 
 pub fn get_import_meta(output: impl OutputData, vm: &mut impl VM) -> Res {
     let obj = Object::with_proto(ObjectOrNull::Null);
@@ -554,9 +551,10 @@ pub fn get_import_meta(output: impl OutputData, vm: &mut impl VM) -> Res {
             .to_string_lossy()
             .into_owned()
             .into(),
+        vm.get_realm(),
     )?;
 
-    obj.define_property("resolve".into(), Value::Undefined)?; //TODO
+    obj.define_property("resolve".into(), Value::Undefined, vm.get_realm())?; //TODO
 
     output.set(obj.into(), vm)
 }
@@ -571,8 +569,7 @@ pub(crate) fn resolve_private_member(
         PrivateMember::Method(func) => Ok((func, Some(base))),
         PrivateMember::Accessor { get, .. } => {
             if let Some(getter) = get {
-                let result = getter
-                    .call(realm, vec![], base.copy())?;
+                let result = getter.call(realm, vec![], base.copy())?;
 
                 Ok((result, None))
             } else {
@@ -582,7 +579,6 @@ pub(crate) fn resolve_private_member(
     }
 }
 
-
 pub fn get_private_member(
     realm: &mut Realm,
     base: Value,
@@ -591,17 +587,17 @@ pub fn get_private_member(
     let obj = base.as_object()?;
 
     if let Some(class) = obj.downcast::<ClassInstance>() {
-        let member = class.get_private_prop(&&name)?.ok_or_else(|| {
-            ControlFlow::error_type(format!("Private name {name} not found"))
-        })?;
+        let member = class
+            .get_private_prop(&&name, realm)?
+            .ok_or_else(|| ControlFlow::error_type(format!("Private name {name} not found")))?;
 
         return resolve_private_member(realm, member, base.copy());
     }
 
     if let Some(class) = obj.downcast::<Class>() {
-        let member = class.get_private_prop(&name).ok_or_else(|| {
-            ControlFlow::error_type(format!("Private name {name} not found"))
-        })?;
+        let member = class
+            .get_private_prop(&name)
+            .ok_or_else(|| ControlFlow::error_type(format!("Private name {name} not found")))?;
 
         return resolve_private_member(realm, member, base.copy());
     }
@@ -609,5 +605,4 @@ pub fn get_private_member(
     return Err(Error::ty_error(format!(
         "Private name {name} can only be used in class"
     )));
-
 }

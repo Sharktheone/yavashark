@@ -4,11 +4,12 @@ use crate::utils::parse_file;
 use std::path::{Path, PathBuf};
 use swc_ecma_ast::Program;
 use yavashark_env::error_obj::ErrorObj;
+use yavashark_env::print::PrettyPrint;
 use yavashark_env::scope::Scope;
 use yavashark_env::{Error, Realm};
 use yavashark_interpreter::Interpreter;
 
-pub fn run_file(file: PathBuf) -> Result<String, Error> {
+pub fn run_file(file: PathBuf) -> Result<String, String> {
     #[cfg(feature = "timings")]
     let parse = std::time::Instant::now();
     let (stmt, metadata) = parse_file(&file);
@@ -20,13 +21,17 @@ pub fn run_file(file: PathBuf) -> Result<String, Error> {
     let async_ = metadata.flags.contains(Flags::ASYNC);
     #[cfg(feature = "timings")]
     let setup = std::time::Instant::now();
-    let (mut realm, mut scope, harness_dir) = setup_global(file.clone(), raw, async_)?;
+    let (mut realm, mut scope, harness_dir) =
+        setup_global(file.clone(), raw, async_).map_err(|e| e.to_string())?;
     #[cfg(feature = "timings")]
     unsafe {
         crate::SETUP_DURATION = setup.elapsed();
     }
 
-    run_file_in(file, &mut realm, &mut scope, stmt, metadata, &harness_dir)
+    match run_file_in(file, &mut realm, &mut scope, stmt, metadata, &harness_dir) {
+        Ok(v) => Ok(v),
+        Err(e) => Err(e.pretty_print(&mut realm)),
+    }
 }
 
 pub fn run_file_in(
@@ -63,7 +68,7 @@ pub fn run_file_in(
             if negative.ty.is_empty() {
                 res = Ok("".to_string());
             } else {
-                let Some(err) = scope.resolve(&negative.ty)? else {
+                let Some(err) = scope.resolve(&negative.ty, realm)? else {
                     return Err(Error::ty("Error type not found"));
                 };
 

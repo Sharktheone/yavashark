@@ -1,6 +1,6 @@
 use proc_macro2::Ident;
-use syn::{Expr, Field, Path, Type};
 use syn::spanned::Spanned;
+use syn::{Expr, Field, Path, Type};
 
 pub struct Property {
     pub copy: bool,
@@ -47,9 +47,10 @@ impl Property {
     pub fn from_field(field: &mut Field) -> syn::Result<Self> {
         let mut flags = Property::default();
 
-        let name = field.ident.as_ref().ok_or_else(|| {
-            syn::Error::new(field.span(), "Expected named field")
-        })?;
+        let name = field
+            .ident
+            .as_ref()
+            .ok_or_else(|| syn::Error::new(field.span(), "Expected named field"))?;
 
         flags.name = Name::Str(name.to_string());
         flags.field = name.clone();
@@ -64,9 +65,8 @@ impl Property {
 
         field.attrs.retain(|attr| {
             let Some(id) = attr.meta.path().get_ident() else {
-                return true
+                return true;
             };
-
 
             match id.to_string().as_str() {
                 "copy" => {
@@ -99,7 +99,6 @@ impl Property {
                         }
                     };
 
-
                     let name = match n {
                         Expr::Lit(expr_lit) => {
                             if let syn::Lit::Str(lit_str) = &expr_lit.lit {
@@ -128,7 +127,7 @@ impl Property {
                     flags.name = name;
 
                     false
-                },
+                }
                 "get" => {
                     flags.kind = Kind::Getter;
                     false
@@ -159,13 +158,9 @@ impl Property {
             flags.partial = type_is_partial(&field.ty);
         }
 
-
-
         Ok(flags)
     }
 }
-
-
 
 fn type_is_copy(ty: &syn::Type) -> bool {
     match ty {
@@ -176,9 +171,19 @@ fn type_is_copy(ty: &syn::Type) -> bool {
             if let Some(ident) = type_path.path.get_ident() {
                 matches!(
                     ident.to_string().as_str(),
-                    "u8" | "u16" | "u32" | "u64" | "u128" |
-                    "i8" | "i16" | "i32" | "i64" | "i128" |
-                    "f32" | "f64" | "bool" | "char"
+                    "u8" | "u16"
+                        | "u32"
+                        | "u64"
+                        | "u128"
+                        | "i8"
+                        | "i16"
+                        | "i32"
+                        | "i64"
+                        | "i128"
+                        | "f32"
+                        | "f64"
+                        | "bool"
+                        | "char"
                 )
             } else {
                 false
@@ -195,10 +200,7 @@ fn type_is_partial(ty: &syn::Type) -> bool {
                 return false;
             }
             if let Some(ident) = type_path.path.segments.last().map(|s| &s.ident) {
-                matches!(
-                    ident.to_string().as_str(),
-                    "Partial"
-                )
+                matches!(ident.to_string().as_str(), "Partial")
             } else {
                 false
             }
@@ -206,7 +208,6 @@ fn type_is_partial(ty: &syn::Type) -> bool {
         _ => false,
     }
 }
-
 
 fn get_partial_type(ty: &syn::Type) -> &Type {
     match ty {

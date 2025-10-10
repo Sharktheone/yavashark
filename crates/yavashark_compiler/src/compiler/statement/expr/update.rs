@@ -1,9 +1,9 @@
+use crate::compiler::statement::expr::member::MemberKey;
 use crate::{Compiler, Res};
 use anyhow::bail;
 use swc_ecma_ast::{Expr, SimpleAssignTarget, UpdateExpr, UpdateOp};
 use yavashark_bytecode::data::OutputData;
 use yavashark_bytecode::instructions::Instruction;
-use crate::compiler::statement::expr::member::MemberKey;
 
 impl Compiler {
     pub fn compile_update(&mut self, expr: &UpdateExpr, out: Option<impl OutputData>) -> Res {

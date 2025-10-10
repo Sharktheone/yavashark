@@ -56,12 +56,12 @@ impl AsyncGeneratorFunction {
         }
     }
 
-    pub fn update_name(&self, n: &str) -> Res {
+    pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {
         let name = self
-            .get_property(&"name".into())
+            .resolve_property("name".into(), realm)
             .ok()
             .flatten()
-            .and_then(|v| v.value.to_string_no_realm().ok())
+            .and_then(|v| v.assert_value().value.to_string(realm).ok())
             .unwrap_or_default();
 
         if name.is_empty() {
@@ -116,7 +116,7 @@ impl AsyncGeneratorFunction {
             return Err(Error::new("eval is not defined"));
         };
 
-        eval.call(realm, vec![Value::String(buf.into())], Value::Undefined)
+        eval.call(vec![Value::String(buf.into())], Value::Undefined, realm)
     }
 }
 
@@ -143,7 +143,7 @@ impl Func for AsyncGeneratorFunction {
 
         let args = ObjectHandle::new(args);
 
-        scope.declare_var("arguments".to_string(), args.into())?;
+        scope.declare_var("arguments".to_string(), args.into(), realm)?;
 
         let generator = AsyncGenerator::new(realm, Rc::clone(&self.code), scope);
 
@@ -174,11 +174,13 @@ impl AsyncGenerator {
         let gf = AsyncGeneratorFunction::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
+            realm,
         )?;
 
         let g = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
+            realm,
         )?;
 
         realm.intrinsics.async_generator_function = gf;

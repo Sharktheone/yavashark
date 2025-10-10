@@ -25,6 +25,11 @@ pub struct Config {
     pub from_value_output: Path,
     pub property_key: Path,
     pub internal_property_key: Path,
+
+    pub primitive_value: Path,
+    pub object_or_null: Path,
+    pub property: Path,
+    pub define_property_result: Path,
 }
 
 impl Config {
@@ -82,9 +87,10 @@ impl Config {
         value_result
             .segments
             .push(PathSegment::from(Ident::new("ValueResult", span)));
-        
+
         let mut res = env_path.clone();
-        res.segments.push(PathSegment::from(Ident::new("Res", span)));
+        res.segments
+            .push(PathSegment::from(Ident::new("Res", span)));
 
         let mut object_property = env_path.clone();
         object_property
@@ -99,12 +105,11 @@ impl Config {
             .segments
             .push(PathSegment::from(Ident::new("TryIntoValue", span)));
 
-
         let mut into_value = env_path.clone();
         into_value
             .segments
             .push(PathSegment::from(Ident::new("value", span)));
-        
+
         into_value
             .segments
             .push(PathSegment::from(Ident::new("IntoValue", span)));
@@ -142,16 +147,42 @@ impl Config {
         from_value_output
             .segments
             .push(PathSegment::from(Ident::new("FromValueOutput", span)));
-        
+
         let mut property_key = env_path.clone();
         property_key
             .segments
             .push(PathSegment::from(Ident::new("PropertyKey", span)));
-        
+
         let mut internal_property_key = env_path.clone();
         internal_property_key
             .segments
             .push(PathSegment::from(Ident::new("InternalPropertyKey", span)));
+
+        let mut primitive_value = env_path.clone();
+        primitive_value
+            .segments
+            .push(PathSegment::from(Ident::new("PrimitiveValue", span)));
+
+        let mut object_or_null = env_path.clone();
+        object_or_null
+            .segments
+            .push(PathSegment::from(Ident::new("ObjectOrNull", span)));
+
+        let mut property = env_path.clone();
+        property
+            .segments
+            .push(PathSegment::from(Ident::new("value", span)));
+        property
+            .segments
+            .push(PathSegment::from(Ident::new("Property", span)));
+
+        let mut define_property_result = env_path.clone();
+        define_property_result
+            .segments
+            .push(PathSegment::from(Ident::new("value", span)));
+        define_property_result
+            .segments
+            .push(PathSegment::from(Ident::new("DefinePropertyResult", span)));
 
         Self {
             env_path,
@@ -176,6 +207,10 @@ impl Config {
             from_value_output,
             property_key,
             internal_property_key,
+            primitive_value,
+            object_or_null,
+            property,
+            define_property_result,
         }
     }
 }

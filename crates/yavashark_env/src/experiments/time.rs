@@ -9,14 +9,14 @@ pub struct Timer {}
 
 impl Timer {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableTimer {
                 object: MutObject::new(realm),
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into())?;
+        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
 
         Ok(this.into_object())
     }

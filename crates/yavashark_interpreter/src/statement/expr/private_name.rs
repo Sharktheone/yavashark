@@ -15,7 +15,7 @@ impl Interpreter {
 
         if let Some(instance) = this.downcast::<ClassInstance>()? {
             let member = instance
-                .get_private_prop(name)?
+                .get_private_prop(name, realm)?
                 .ok_or_else(|| Error::ty_error(format!("Private name {name} not found")))?;
 
             return Self::resolve_private_member(realm, member, this.copy())

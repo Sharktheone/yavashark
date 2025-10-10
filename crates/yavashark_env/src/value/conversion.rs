@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::value::{BoxedObj, Object, Symbol, Value};
+use crate::value::{BoxedObj, Object, PrimitiveValue, Symbol, Value};
 use half::f16;
 use num_bigint::BigInt;
 use std::any::type_name;
@@ -150,6 +150,159 @@ impl<O: Into<Object>> From<O> for Value {
         Self::Object(o.into())
     }
 }
+
+impl From<&'static str> for PrimitiveValue {
+    fn from(s: &'static str) -> Self {
+        Self::String(YSString::new_static(s))
+    }
+}
+
+impl From<String> for PrimitiveValue {
+    fn from(s: String) -> Self {
+        Self::String(YSString::from_string(s))
+    }
+}
+
+impl From<&String> for PrimitiveValue {
+    fn from(s: &String) -> Self {
+        Self::String(YSString::from_ref(s))
+    }
+}
+
+impl From<YSString> for PrimitiveValue {
+    fn from(s: YSString) -> Self {
+        Self::String(s)
+    }
+}
+
+impl From<&YSString> for PrimitiveValue {
+    fn from(s: &YSString) -> Self {
+        Self::String(s.clone())
+    }
+}
+
+impl From<()> for PrimitiveValue {
+    fn from((): ()) -> Self {
+        Self::Undefined
+    }
+}
+
+impl From<f64> for PrimitiveValue {
+    fn from(n: f64) -> Self {
+        Self::Number(n)
+    }
+}
+
+impl From<bool> for PrimitiveValue {
+    fn from(b: bool) -> Self {
+        Self::Boolean(b)
+    }
+}
+
+impl From<u8> for PrimitiveValue {
+    fn from(n: u8) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<u16> for PrimitiveValue {
+    fn from(n: u16) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<u32> for PrimitiveValue {
+    fn from(n: u32) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<u64> for PrimitiveValue {
+    fn from(n: u64) -> Self {
+        Self::Number(n as f64)
+    }
+}
+
+impl From<i8> for PrimitiveValue {
+    fn from(n: i8) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<i16> for PrimitiveValue {
+    fn from(n: i16) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<i32> for PrimitiveValue {
+    fn from(n: i32) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<i64> for PrimitiveValue {
+    fn from(n: i64) -> Self {
+        Self::Number(n as f64)
+    }
+}
+
+impl From<usize> for PrimitiveValue {
+    fn from(n: usize) -> Self {
+        Self::Number(n as f64)
+    }
+}
+
+impl From<isize> for PrimitiveValue {
+    fn from(n: isize) -> Self {
+        Self::Number(n as f64)
+    }
+}
+
+impl From<f16> for PrimitiveValue {
+    fn from(n: f16) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<f32> for PrimitiveValue {
+    fn from(n: f32) -> Self {
+        Self::Number(f64::from(n))
+    }
+}
+
+impl From<BigInt> for PrimitiveValue {
+    fn from(n: BigInt) -> Self {
+        Self::BigInt(Rc::new(n))
+    }
+}
+
+impl From<Rc<BigInt>> for PrimitiveValue {
+    fn from(n: Rc<BigInt>) -> Self {
+        Self::BigInt(n)
+    }
+}
+
+impl From<Symbol> for PrimitiveValue {
+    fn from(n: Symbol) -> Self {
+        Self::Symbol(n)
+    }
+}
+
+impl From<&Symbol> for PrimitiveValue {
+    fn from(n: &Symbol) -> Self {
+        Self::Symbol(n.clone())
+    }
+}
+
+// impl From<WeakValue> for PrimitiveValue {
+//     fn from(v: WeakValue) -> Self {
+//         match v.upgrade() {
+//             Some(strong) => strong.into(),
+//             None => PrimitiveValue::Undefined,
+//         }
+//     }
+// }
 
 pub trait FromValue: Sized {
     fn from_value(value: Value) -> Result<Self, Error>;
@@ -348,7 +501,7 @@ impl<V: 'static> FromValue for OwningGcGuard<'_, BoxedObj, V> {
         obj.maybe_map(BoxedObj::downcast).map_err(|obj| {
             Error::ty_error(format!(
                 "Expected an object of type {:?}, found {:?}",
-                obj.name(),
+                obj.class_name(),
                 type_name::<V>(),
             ))
         })

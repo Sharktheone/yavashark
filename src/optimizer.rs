@@ -6,17 +6,18 @@ use yavashark_interpreter::function::OptimizedJSFunction;
 use yavashark_vm::function_code::OldBytecodeFunction;
 use yavashark_vm::yavashark_bytecode::data::DataSection;
 
-pub fn define_optimizer(realm: &Realm) -> Res {
+pub fn define_optimizer(realm: &mut Realm) -> Res {
     let optimizer = get_optimizer(realm);
 
     realm
         .global
-        .define_variable("optimize".into(), optimizer.into())?;
+        .clone()
+        .define_property_attributes("optimize".into(), optimizer.into(), realm)?;
 
     Ok(())
 }
 
-fn get_optimizer(realm: &Realm) -> ObjectHandle {
+fn get_optimizer(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
         "optimizer",
         |args, _, _| {

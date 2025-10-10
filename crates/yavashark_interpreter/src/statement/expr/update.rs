@@ -39,13 +39,13 @@ impl Interpreter {
             Expr::Ident(i) => {
                 let name = i.sym.to_string();
                 let value = scope
-                    .resolve(&name)?
+                    .resolve(&name, realm)?
                     .ok_or(Error::reference_error(format!("{name} is not defined")))?;
                 let up = update(value, stmt.op, realm)?;
 
                 let ret = if stmt.prefix { up.0.copy() } else { up.1 };
 
-                scope.update_or_define(name, up.0);
+                scope.update_or_define(name, up.0, realm);
 
                 Ok(ret)
             }

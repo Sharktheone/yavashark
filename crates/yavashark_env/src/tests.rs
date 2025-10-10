@@ -86,7 +86,7 @@ pub struct State {
 }
 
 #[must_use]
-pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
+pub fn mock_object(realm: &mut Realm) -> (Value, Rc<RefCell<State>>) {
     let obj = Object::new(realm);
 
     let state = Rc::new(RefCell::new(State {
@@ -108,6 +108,7 @@ pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
             realm,
         )
         .into(),
+        realm,
     );
 
     let values_state = Rc::clone(&state);
@@ -124,6 +125,7 @@ pub fn mock_object(realm: &Realm) -> (Value, Rc<RefCell<State>>) {
             realm,
         )
         .into(),
+        realm,
     );
 
     (obj.into(), state)

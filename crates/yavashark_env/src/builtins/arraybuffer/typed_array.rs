@@ -15,10 +15,10 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::unit8array::Uint8Array;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
-use crate::value::property_key::InternalPropertyKey;
-use crate::value::{MutObj, Obj};
+use crate::value::{DefinePropertyResult, MutObj, Obj, Property};
 use crate::{
-    Error, GCd, MutObject, ObjectHandle, ObjectProperty, Realm, Res, Value, ValueResult, Variable,
+    Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value,
+    ValueResult, Variable,
 };
 use bytemuck::{try_cast_vec, AnyBitPattern, NoUninit, Zeroable};
 use conv::to_value;
@@ -111,14 +111,17 @@ impl crate::value::ObjectImpl for TypedArray {
         self.inner.borrow_mut()
     }
 
-    fn define_property(&self, name: Value, value: Value) -> Res {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         // if self.is_detached() {
-        //     return self.get_wrapped_object().define_property(name, value)
+        //     return self.get_wrapped_object().define_property(name, value, realm)
         // }
 
-        let key = InternalPropertyKey::from(name);
-
-        if let InternalPropertyKey::Index(idx) = key {
+        if let InternalPropertyKey::Index(idx) = name {
             typed_array_run_mut!({
                 let value: TY = FromPrimitive::from_f64(value.to_number_or_null())
                     .ok_or(Error::ty("Failed to convert to value"))?;
@@ -130,20 +133,24 @@ impl crate::value::ObjectImpl for TypedArray {
                 }
             });
 
-            Ok(())
+            Ok(DefinePropertyResult::Handled)
         } else {
-            self.get_wrapped_object().define_property(key.into(), value)
+            self.get_wrapped_object()
+                .define_property(name, value, realm)
         }
     }
 
-    fn define_variable(&self, name: Value, value: Variable) -> Res {
-        if self.is_detached() {
-            return self.get_wrapped_object().define_variable(name, value);
-        }
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
+        // if self.is_detached() {
+        //     return self.get_wrapped_object().define_property_attributes(name, value, realm);
+        // }
 
-        let key = InternalPropertyKey::from(name);
-
-        if let InternalPropertyKey::Index(idx) = key {
+        if let InternalPropertyKey::Index(idx) = name {
             typed_array_run_mut!({
                 let value: TY = FromPrimitive::from_f64(value.value.to_number_or_null())
                     .ok_or(Error::ty("Failed to convert to value"))?;
@@ -155,18 +162,21 @@ impl crate::value::ObjectImpl for TypedArray {
                 }
             });
 
-            Ok(())
+            Ok(DefinePropertyResult::Handled)
         } else {
-            self.get_wrapped_object().define_variable(key.into(), value)
+            self.get_wrapped_object()
+                .define_property_attributes(name, value, realm)
         }
     }
 
-    fn resolve_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
-        let key = InternalPropertyKey::from(name.copy());
-
-        if let InternalPropertyKey::Index(idx) = key {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
+        if let InternalPropertyKey::Index(idx) = name {
             if self.is_detached() {
-                return self.get_wrapped_object().get_property(name);
+                return self.get_wrapped_object().resolve_property(name, realm);
             }
 
             typed_array_run!({
@@ -174,86 +184,95 @@ impl crate::value::ObjectImpl for TypedArray {
             });
         }
 
-        self.get_wrapped_object().resolve_property(&key.into())
+        self.get_wrapped_object().resolve_property(name, realm)
     }
 
-    fn get_property(&self, name: &Value) -> Res<Option<ObjectProperty>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if self.is_detached() {
-            return self.get_wrapped_object().get_property(name);
+            return self.get_wrapped_object().get_own_property(name, realm);
         }
 
-        let key = InternalPropertyKey::from(name.copy());
-
-        if let InternalPropertyKey::Index(idx) = key {
+        if let InternalPropertyKey::Index(idx) = name {
             typed_array_run!({
                 return Ok(slice.get(idx).map(|x| to_value(x.0).into()));
             });
         }
 
-        self.get_wrapped_object().get_property(&key.into())
+        self.get_wrapped_object().get_own_property(name, realm)
     }
 
-    fn define_getter(&self, name: Value, value: Value) -> Res {
+    fn define_getter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if self.is_detached() {
-            return self.get_wrapped_object().define_getter(name, value);
+            return self.get_wrapped_object().define_getter(name, value, realm);
         }
 
-        let key = InternalPropertyKey::from(name);
-        if matches!(key, InternalPropertyKey::Index(_)) {
+        if matches!(name, InternalPropertyKey::Index(_)) {
             return Ok(());
         }
 
-        self.get_wrapped_object().define_getter(key.into(), value)
+        self.get_wrapped_object().define_getter(name, value, realm)
     }
 
-    fn define_setter(&self, name: Value, value: Value) -> Res {
+    fn define_setter(
+        &self,
+        name: InternalPropertyKey,
+        value: ObjectHandle,
+        realm: &mut Realm,
+    ) -> Res {
         if self.is_detached() {
-            return self.get_wrapped_object().define_setter(name, value);
+            return self.get_wrapped_object().define_setter(name, value, realm);
         }
 
-        let key = InternalPropertyKey::from(name);
-        if matches!(key, InternalPropertyKey::Index(_)) {
+        if matches!(name, InternalPropertyKey::Index(_)) {
             return Ok(());
         }
 
-        self.get_wrapped_object().define_setter(key.into(), value)
+        self.get_wrapped_object().define_setter(name, value, realm)
     }
 
-    fn delete_property(&self, name: &Value) -> Res<Option<Value>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if self.is_detached() {
-            return self.get_wrapped_object().delete_property(name);
+            return self.get_wrapped_object().delete_property(name, realm);
         }
 
-        let key = InternalPropertyKey::from(name.copy());
-        if matches!(key, InternalPropertyKey::Index(_)) {
+        if matches!(name, InternalPropertyKey::Index(_)) {
             return Ok(None);
         }
 
-        self.get_wrapped_object().delete_property(&key.into())
+        self.get_wrapped_object().delete_property(name, realm)
     }
 
-    fn contains_key(&self, name: &Value) -> Res<bool> {
+    fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
         if self.is_detached() {
-            return self.get_wrapped_object().contains_key(name);
+            return self.get_wrapped_object().contains_own_key(name, realm);
         }
 
-        let key = InternalPropertyKey::from(name.copy());
-
-        if let InternalPropertyKey::Index(idx) = key {
+        if let InternalPropertyKey::Index(idx) = name {
             typed_array_run!({
                 return Ok(slice.get(idx).is_some());
             });
         }
 
-        self.get_wrapped_object().contains_key(&key.into())
+        self.get_wrapped_object().contains_own_key(name, realm)
     }
 
-    fn has_key(&self, name: &Value) -> Res<bool> {
-        let key = InternalPropertyKey::from(name.copy());
-
-        if let InternalPropertyKey::Index(idx) = key {
+    fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
+        if let InternalPropertyKey::Index(idx) = name {
             if self.is_detached() {
-                return self.get_wrapped_object().contains_key(name);
+                return self.get_wrapped_object().contains_key(name, realm);
             }
 
             typed_array_run!({
@@ -261,12 +280,12 @@ impl crate::value::ObjectImpl for TypedArray {
             });
         }
 
-        self.get_wrapped_object().has_key(&key.into())
+        self.get_wrapped_object().contains_key(name, realm)
     }
 
-    fn properties(&self) -> Res<Vec<(Value, Value)>> {
+    fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         if self.is_detached() {
-            return self.get_wrapped_object().properties();
+            return self.get_wrapped_object().properties(realm);
         }
 
         let mut props = typed_array_run!({
@@ -277,14 +296,14 @@ impl crate::value::ObjectImpl for TypedArray {
                 .collect::<Vec<_>>()
         });
 
-        props.append(&mut self.get_wrapped_object().properties()?);
+        props.append(&mut self.get_wrapped_object().properties(realm)?);
 
         Ok(props)
     }
 
-    fn keys(&self) -> Res<Vec<Value>> {
+    fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         if self.is_detached() {
-            return self.get_wrapped_object().keys();
+            return self.get_wrapped_object().keys(realm);
         }
 
         let mut keys = typed_array_run!({
@@ -295,30 +314,30 @@ impl crate::value::ObjectImpl for TypedArray {
                 .collect::<Vec<_>>()
         });
 
-        keys.append(&mut self.get_wrapped_object().keys()?);
+        keys.append(&mut self.get_wrapped_object().keys(realm)?);
 
         Ok(keys)
     }
 
-    fn values(&self) -> Res<Vec<Value>> {
+    fn values(&self, realm: &mut Realm) -> Res<Vec<Value>> {
         if self.is_detached() {
-            return self.get_wrapped_object().values();
+            return self.get_wrapped_object().values(realm);
         }
 
         let mut values =
-            typed_array_run!({ slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>() });
+            typed_array_run!(slice.iter().map(|x| to_value(x.0)).collect::<Vec<_>>());
 
-        values.append(&mut self.get_wrapped_object().values()?);
+        values.append(&mut self.get_wrapped_object().values(realm)?);
 
         Ok(values)
     }
 
-    fn get_array_or_done(&self, index: usize) -> Res<(bool, Option<Value>)> {
+    fn get_array_or_done(&self, index: usize, realm: &mut Realm) -> Res<(bool, Option<Value>)> {
         if self.is_detached() {
-            return self.get_wrapped_object().get_array_or_done(index);
+            return self.get_wrapped_object().get_array_or_done(index, realm);
         }
 
-        typed_array_run!({ Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))) })
+        typed_array_run!(Ok((index < slice.len(), slice.get(index).map(|x| to_value(x.0)))))
     }
 }
 
@@ -332,7 +351,7 @@ impl TypedArray {
     ) -> Res<Self> {
         let buf = if let Ok(buf) = downcast_obj::<ArrayBuffer>(buffer.copy()) {
             buf
-        } else if buffer.has_key(&"length".into()).ok().unwrap_or(false) {
+        } else if buffer.has_key("length", realm).ok().unwrap_or(false) {
             let iter = ValueIterator::new(&buffer, realm)?;
 
             let mut items = Vec::new();
@@ -522,9 +541,10 @@ impl TypedArray {
 
     #[call_constructor]
     pub fn construct() -> Res {
-        Err(Error::ty("Abstract class TypedArray not directly constructable") )
+        Err(Error::ty(
+            "Abstract class TypedArray not directly constructable",
+        ))
     }
-
 
     #[get("buffer")]
     pub fn get_buffer(&self) -> ObjectHandle {
@@ -649,7 +669,7 @@ impl TypedArray {
         #[realm] realm: &mut Realm,
         callback: &ObjectHandle,
     ) -> Res<bool> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -659,7 +679,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, Value::Undefined)?;
+                let res = callback.call(args, Value::Undefined, realm)?;
 
                 if !res.is_truthy() {
                     return Ok(false);
@@ -708,7 +728,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<ObjectHandle> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -722,7 +742,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     results.extend_from_slice(x.0.to_le_bytes().as_slice());
@@ -740,7 +760,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<Value> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -752,7 +772,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     return Ok(to_value(x.0));
@@ -771,7 +791,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<isize> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -783,7 +803,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     return Ok(idx as isize);
@@ -802,7 +822,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<Value> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -814,7 +834,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate().rev() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     return Ok(to_value(x.0));
@@ -833,7 +853,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<isize> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -845,7 +865,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate().rev() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     return Ok(idx as isize);
@@ -864,7 +884,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<()> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -876,7 +896,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                callback.call(realm, args, this_arg.copy())?;
+                callback.call(args, this_arg.copy(), realm)?;
             }
         });
 
@@ -1024,7 +1044,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<ObjectHandle> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -1038,7 +1058,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 let num: TY = FromPrimitive::from_f64(res.to_number_or_null())
                     .ok_or(Error::ty("Failed to convert to value"))?;
@@ -1057,7 +1077,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         initial_value: Option<Value>,
     ) -> Res<Value> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -1082,7 +1102,7 @@ impl TypedArray {
             for (idx, x) in iter {
                 let args = vec![acc, to_value(x.0), idx.into(), array.copy()];
 
-                acc = callback.call(realm, args, Value::Undefined)?;
+                acc = callback.call(args, Value::Undefined, realm)?;
             }
         });
 
@@ -1097,7 +1117,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         initial_value: Option<Value>,
     ) -> Res<Value> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -1122,7 +1142,7 @@ impl TypedArray {
             for (idx, x) in iter {
                 let args = vec![acc, to_value(x.0), idx.into(), array.copy()];
 
-                acc = callback.call(realm, args, Value::Undefined)?;
+                acc = callback.call(args, Value::Undefined, realm)?;
             }
         });
 
@@ -1148,7 +1168,7 @@ impl TypedArray {
 
         let bytes = if let Ok(ta) = downcast_obj::<TypedArray>(source.copy()) {
             ta.buffer.get_slice()?.to_vec()
-        } else if source.has_key(&"length".into()).ok().unwrap_or(false) {
+        } else if source.has_key("length", realm).ok().unwrap_or(false) {
             let iter = ValueIterator::new(source, realm)?;
 
             let mut bytes = Vec::new();
@@ -1211,7 +1231,7 @@ impl TypedArray {
         callback: &ObjectHandle,
         this_arg: Option<Value>,
     ) -> Res<bool> {
-        if !callback.is_function() {
+        if !callback.is_callable() {
             return Err(Error::ty("Callback is not a function"));
         }
 
@@ -1223,7 +1243,7 @@ impl TypedArray {
             for (idx, x) in owned.into_iter().enumerate() {
                 let args = vec![to_value(x.0), idx.into(), array.copy()];
 
-                let res = callback.call(realm, args, this_arg.copy())?;
+                let res = callback.call(args, this_arg.copy(), realm)?;
 
                 if res.is_truthy() {
                     return Ok(true);
@@ -1242,7 +1262,7 @@ impl TypedArray {
         compare_fn: Option<ObjectHandle>,
     ) -> Res<Value> {
         if let Some(compare_fn) = &compare_fn {
-            if !compare_fn.is_function() {
+            if !compare_fn.is_callable() {
                 return Err(Error::ty("Compare function is not a function"));
             }
         }
@@ -1257,7 +1277,7 @@ impl TypedArray {
                 vec.sort_by(|a, b| {
                     let args = vec![to_value(a.0), to_value(b.0)];
 
-                    let res = compare_fn.call(realm, args, Value::Undefined);
+                    let res = compare_fn.call(args, Value::Undefined, realm);
 
                     match res {
                         Ok(v) => {
@@ -1361,7 +1381,7 @@ impl TypedArray {
         compare_fn: Option<ObjectHandle>,
     ) -> Res<ObjectHandle> {
         if let Some(compare_fn) = &compare_fn {
-            if !compare_fn.is_function() {
+            if !compare_fn.is_callable() {
                 return Err(Error::ty("Compare function is not a function"));
             }
         }
@@ -1375,7 +1395,7 @@ impl TypedArray {
                 owned.sort_by(|a, b| {
                     let args = vec![to_value(a.0), to_value(b.0)];
 
-                    let res = compare_fn.call(realm, args, Value::Undefined);
+                    let res = compare_fn.call(args, Value::Undefined, realm);
 
                     match res {
                         Ok(v) => {

@@ -8,7 +8,10 @@ use yavashark_bytecode::data::{ControlIdx, DataSection, OutputData, OutputDataTy
 use yavashark_bytecode::{ConstIdx, Instruction, Reg, VarName};
 use yavashark_env::error_obj::ErrorObj;
 use yavashark_env::scope::Scope;
-use yavashark_env::{ControlFlow, Error, Object, ObjectHandle, Realm, Res, Value, ValueResult};
+use yavashark_env::value::property_key::IntoPropertyKey;
+use yavashark_env::{
+    ControlFlow, Error, Object, ObjectHandle, PropertyKey, Realm, Res, Value, ValueResult,
+};
 
 pub struct OldBorrowedVM<'a> {
     regs: Registers,
@@ -27,7 +30,7 @@ pub struct OldBorrowedVM<'a> {
 
     continue_storage: Option<OutputDataType>,
 
-    spread_stack: Vec<Vec<Value>>,
+    spread_stack: Vec<Vec<PropertyKey>>,
     try_stack: Vec<TryBlock>,
 
     throw: Option<Error>,
@@ -170,7 +173,7 @@ impl VM for OldBorrowedVM<'_> {
         self.set_acc(value);
     }
 
-    fn get_variable(&self, name: VarName) -> yavashark_env::Res<Value> {
+    fn get_variable(&mut self, name: VarName) -> yavashark_env::Res<Value> {
         self.get_variable(name)
     }
 
@@ -210,7 +213,7 @@ impl VM for OldBorrowedVM<'_> {
         self.get_this()
     }
 
-    fn get_constant(&self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
+    fn get_constant(&mut self, const_idx: ConstIdx) -> yavashark_env::Res<Value> {
         self.get_constant(const_idx)
     }
 
@@ -321,7 +324,7 @@ impl VM for OldBorrowedVM<'_> {
             return Err(Error::new("No spread in progress"));
         };
 
-        last.push(elem);
+        last.push(elem.into_property_key(self.realm)?);
 
         Ok(())
     }
@@ -334,7 +337,7 @@ impl VM for OldBorrowedVM<'_> {
 
         let mut props = Vec::new();
 
-        for (name, value) in obj.properties()? {
+        for (name, value) in obj.properties(self.realm)? {
             if !not.contains(&name) {
                 props.push((name, value));
             }

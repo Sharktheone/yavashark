@@ -6,7 +6,7 @@ use std::iter::Peekable;
 use std::str::Chars;
 
 #[must_use]
-pub fn get_escape(realm: &Realm) -> Value {
+pub fn get_escape(realm: &mut Realm) -> Value {
     NativeFunction::with_len(
         "escape",
         |args, _, realm| {
@@ -42,7 +42,7 @@ pub fn get_escape(realm: &Realm) -> Value {
 }
 
 #[must_use]
-pub fn get_encode_uri(realm: &Realm) -> Value {
+pub fn get_encode_uri(realm: &mut Realm) -> Value {
     NativeFunction::with_len(
         "encodeURI",
         |args, _, realm| {
@@ -72,7 +72,7 @@ pub fn get_encode_uri(realm: &Realm) -> Value {
 }
 
 #[must_use]
-pub fn get_encode_uri_component(realm: &Realm) -> Value {
+pub fn get_encode_uri_component(realm: &mut Realm) -> Value {
     NativeFunction::with_len(
         "encodeURIComponent",
         |args, _, realm| {
@@ -102,7 +102,7 @@ pub fn get_encode_uri_component(realm: &Realm) -> Value {
 }
 
 #[must_use]
-pub fn get_unescape(realm: &Realm) -> Value {
+pub fn get_unescape(realm: &mut Realm) -> Value {
     NativeFunction::with_len(
         "unescape",
         |args, _, realm| {
@@ -132,7 +132,7 @@ pub fn get_unescape(realm: &Realm) -> Value {
 }
 
 #[must_use]
-pub fn get_decode_uri(realm: &Realm) -> Value {
+pub fn get_decode_uri(realm: &mut Realm) -> Value {
     NativeFunction::with_len(
         "decodeURI",
         |args, _, realm| {
@@ -150,7 +150,7 @@ pub fn get_decode_uri(realm: &Realm) -> Value {
 }
 
 #[must_use]
-pub fn get_decode_uri_component(realm: &Realm) -> Value {
+pub fn get_decode_uri_component(realm: &mut Realm) -> Value {
     NativeFunction::with_len(
         "decodeURIComponent",
         |args, _, realm| {

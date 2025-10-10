@@ -8,30 +8,41 @@ use std::fmt::Debug;
 use std::ptr::NonNull;
 use yavashark_garbage::GcRef;
 
+pub enum DefinePropertyResult {
+    Handled,
+    ReadOnly,
+    Setter(ObjectHandle, Value),
+}
+
+pub enum Property {
+    Value(Variable),
+    Getter(ObjectHandle),
+}
+
 pub trait ObjV2: Debug + 'static {
     fn define_property(
         &self,
         name: InternalPropertyKey,
         value: Value,
         realm: &mut Realm,
-    ) -> Res<bool>;
+    ) -> Res<DefinePropertyResult>;
     fn define_property_attributes(
         &self,
         name: InternalPropertyKey,
         value: Variable,
         realm: &mut Realm,
-    ) -> Res<bool>;
+    ) -> Res<DefinePropertyResult>;
 
     fn resolve_property(
         &self,
         name: InternalPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Option<Variable>>;
+    ) -> Res<Option<Property>>;
     fn get_own_property(
         &self,
         name: InternalPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Option<Variable>>;
+    ) -> Res<Option<Property>>;
 
     fn define_getter(
         &self,
@@ -50,7 +61,7 @@ pub trait ObjV2: Debug + 'static {
         &self,
         name: InternalPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Option<Variable>>;
+    ) -> Res<Option<Property>>;
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool>;
 
@@ -61,7 +72,7 @@ pub trait ObjV2: Debug + 'static {
         name: PreHashedPropertyKey,
         value: Value,
         realm: &mut Realm,
-    ) -> Res<bool> {
+    ) -> Res<DefinePropertyResult> {
         self.define_property(name.0, value, realm)
     }
     fn define_property_attributes_pre_hash(
@@ -69,7 +80,7 @@ pub trait ObjV2: Debug + 'static {
         name: PreHashedPropertyKey,
         value: Variable,
         realm: &mut Realm,
-    ) -> Res<bool> {
+    ) -> Res<DefinePropertyResult> {
         self.define_property_attributes(name.0, value, realm)
     }
 
@@ -77,14 +88,14 @@ pub trait ObjV2: Debug + 'static {
         &self,
         name: PreHashedPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Option<Variable>> {
+    ) -> Res<Option<Property>> {
         self.resolve_property(name.0, realm)
     }
     fn get_own_property_pre_hash(
         &self,
         name: PreHashedPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Option<Variable>> {
+    ) -> Res<Option<Property>> {
         self.get_own_property(name.0, realm)
     }
 
@@ -109,7 +120,7 @@ pub trait ObjV2: Debug + 'static {
         &self,
         name: PreHashedPropertyKey,
         realm: &mut Realm,
-    ) -> Res<Option<Variable>> {
+    ) -> Res<Option<Property>> {
         self.delete_property(name.0, realm)
     }
 
@@ -185,6 +196,5 @@ pub trait ObjV2: Debug + 'static {
 
     fn seal(&self) -> Res;
 
-
-    fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
+    fn gc_refs(&self) -> Vec<GcRef<BoxedObj>>;
 }

@@ -149,7 +149,7 @@ fn main() {
             ) {
                 Ok(v) => v,
                 Err(e) => {
-                    println!("Error: {}", e.pretty_print());
+                    println!("Error: {}", e.pretty_print(&mut realm));
                     return;
                 }
             };
@@ -187,7 +187,7 @@ fn main() {
                         return;
                     }
                     Err(ControlFlow::Error(err)) => {
-                        println!("Error: {}", err.pretty_print());
+                        println!("Error: {}", err.pretty_print(vm.get_realm()));
                         return;
                     }
                     Err(ControlFlow::Yield(_) | ControlFlow::YieldStar(_)) => {

@@ -133,7 +133,7 @@ impl Interpreter {
 
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
                 let right = Self::run_expr(realm, &stmt.right, stmt.span, scope)?;
-                right.has_key(&left)?.into()
+                right.has_key(&left, realm)?.into()
             }
             BinaryOp::InstanceOf => {
                 let left = Self::run_expr(realm, &stmt.left, stmt.span, scope)?;
@@ -159,7 +159,7 @@ impl Interpreter {
 
     pub fn contains_private_name(realm: &mut Realm, pn: &PrivateName, val: &Value) -> Res<bool> {
         Ok(val.downcast::<ClassInstance>()?.is_some_and(|c| {
-            c.get_private_prop(pn.name.as_str())
+            c.get_private_prop(pn.name.as_str(), realm)
                 .is_ok_and(|v| v.is_some())
         }))
     }

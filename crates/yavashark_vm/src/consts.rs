@@ -7,15 +7,16 @@ use yavashark_bytecode::{
 use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::value::Obj;
 use yavashark_env::{Error, Object, Value, ValueResult};
 
 pub trait ConstIntoValue {
-    fn into_value(self, vm: &impl VM) -> ValueResult;
+    fn into_value(self, vm: &mut impl VM) -> ValueResult;
 }
 
 impl ConstIntoValue for ConstValue {
-    fn into_value(self, vm: &impl VM) -> ValueResult {
+    fn into_value(self, vm: &mut impl VM) -> ValueResult {
         Ok(match self {
             Self::Null => Value::Null,
             Self::Undefined => Value::Undefined,
@@ -38,7 +39,7 @@ impl ConstIntoValue for ConstValue {
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
-                    vm.get_realm_ref(),
+                    vm.get_realm(),
                 )?;
 
                 optim.into()
@@ -57,7 +58,7 @@ impl ConstIntoValue for ConstValue {
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
-                    vm.get_realm_ref(),
+                    vm.get_realm(),
                 )?;
 
                 optim.into()
@@ -71,7 +72,7 @@ impl ConstIntoValue for ConstValue {
 }
 
 impl ConstIntoValue for ArrayLiteralBlueprint {
-    fn into_value(self, vm: &impl VM) -> ValueResult {
+    fn into_value(self, vm: &mut impl VM) -> ValueResult {
         let props = self
             .properties
             .into_iter()
@@ -83,7 +84,7 @@ impl ConstIntoValue for ArrayLiteralBlueprint {
 }
 
 impl ConstIntoValue for ObjectLiteralBlueprint {
-    fn into_value(self, vm: &impl VM) -> ValueResult {
+    fn into_value(self, vm: &mut impl VM) -> ValueResult {
         let obj = Object::new(vm.get_realm_ref());
 
         for (key, value) in self.properties {
@@ -101,10 +102,15 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                         bp.params,
                         Some(func),
                         vm.get_scope().clone(),
-                        vm.get_realm_ref(),
+                        vm.get_realm(),
                     )?;
 
-                    obj.define_getter(key.into_value(vm)?, optim.into())?;
+                    obj.define_getter(
+                        key.into_value(vm)?
+                            .into_internal_property_key(vm.get_realm())?,
+                        optim.into(),
+                        vm.get_realm(),
+                    )?;
 
                     continue;
                 }
@@ -122,10 +128,15 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                         bp.params,
                         Some(func),
                         vm.get_scope().clone(),
-                        vm.get_realm_ref(),
+                        vm.get_realm(),
                     )?;
 
-                    obj.define_setter(key.into_value(vm)?, optim.into())?;
+                    obj.define_setter(
+                        key.into_value(vm)?
+                            .into_internal_property_key(vm.get_realm())?,
+                        optim.into(),
+                        vm.get_realm(),
+                    )?;
 
                     continue;
                 }
@@ -133,7 +144,12 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
                 _ => {}
             }
 
-            obj.define_property(key.into_value(vm)?, value.into_value(vm)?)?;
+            obj.define_property(
+                key.into_value(vm)?
+                    .into_internal_property_key(vm.get_realm())?,
+                value.into_value(vm)?,
+                vm.get_realm(),
+            )?;
         }
 
         Ok(obj.into())
@@ -141,7 +157,7 @@ impl ConstIntoValue for ObjectLiteralBlueprint {
 }
 
 impl ConstIntoValue for DataTypeValue {
-    fn into_value(self, vm: &impl VM) -> ValueResult {
+    fn into_value(self, vm: &mut impl VM) -> ValueResult {
         Ok(match self {
             Self::Null => Value::Null,
             Self::Undefined => Value::Undefined,
@@ -163,7 +179,7 @@ impl ConstIntoValue for DataTypeValue {
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
-                    vm.get_realm_ref(),
+                    vm.get_realm(),
                 )?;
 
                 optim.into()
@@ -181,7 +197,7 @@ impl ConstIntoValue for DataTypeValue {
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
-                    vm.get_realm_ref(),
+                    vm.get_realm(),
                 )?;
 
                 optim.into()
@@ -199,7 +215,7 @@ impl ConstIntoValue for DataTypeValue {
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
-                    vm.get_realm_ref(),
+                    vm.get_realm(),
                 )?;
 
                 optim.into()
@@ -218,7 +234,7 @@ impl ConstIntoValue for DataTypeValue {
                     bp.params,
                     Some(func),
                     vm.get_scope().clone(),
-                    vm.get_realm_ref(),
+                    vm.get_realm(),
                 )?;
 
                 optim.into()

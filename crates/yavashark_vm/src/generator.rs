@@ -51,12 +51,12 @@ impl GeneratorFunction {
         }
     }
 
-    pub fn update_name(&self, n: &str) -> Res {
+    pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {
         let name = self
-            .get_property(&"name".into())
+            .resolve_property("name".into(), realm)
             .ok()
             .flatten()
-            .and_then(|v| v.value.to_string_no_realm().ok())
+            .and_then(|v| v.assert_value().value.to_string(realm).ok())
             .unwrap_or_default();
 
         if name.is_empty() {
@@ -111,7 +111,7 @@ impl GeneratorFunction {
             return Err(Error::new("eval is not defined"));
         };
 
-        eval.call(realm, vec![Value::String(buf.into())], Value::Undefined)
+        eval.call(vec![Value::String(buf.into())], Value::Undefined, realm)
     }
 }
 
@@ -129,7 +129,7 @@ impl Func for GeneratorFunction {
 
         let args = ObjectHandle::new(args);
 
-        scope.declare_var("arguments".to_string(), args.into())?;
+        scope.declare_var("arguments".to_string(), args.into(), realm)?;
 
         let generator = Generator::new(realm, Rc::clone(&self.code), scope);
 
@@ -158,11 +158,13 @@ impl Generator {
         let gf = GeneratorFunction::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone(),
+            realm,
         )?;
 
         let g = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone(),
+            realm,
         )?;
 
         realm.intrinsics.generator_function = gf;
@@ -178,8 +180,8 @@ impl Generator {
         let Some(state) = self.state.take() else {
             let obj = Object::new(realm);
 
-            obj.define_property("done".into(), true.into())?;
-            obj.define_property("value".into(), Value::Undefined)?;
+            obj.define_property("done".into(), true.into(), realm)?;
+            obj.define_property("value".into(), Value::Undefined, realm)?;
 
             return Ok(obj);
         };
@@ -192,8 +194,8 @@ impl Generator {
 
                 let obj = Object::new(realm);
 
-                obj.define_property("done".into(), false.into())?;
-                obj.define_property("value".into(), val)?;
+                obj.define_property("done".into(), false.into(), realm)?;
+                obj.define_property("value".into(), val, realm)?;
 
                 Ok(obj)
             }
@@ -202,8 +204,8 @@ impl Generator {
 
                 let obj = Object::new(realm);
 
-                obj.define_property("done".into(), true.into())?;
-                obj.define_property("value".into(), val)?;
+                obj.define_property("done".into(), true.into(), realm)?;
+                obj.define_property("value".into(), val, realm)?;
 
                 Ok(obj)
             }

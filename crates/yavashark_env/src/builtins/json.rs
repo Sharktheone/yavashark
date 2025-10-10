@@ -11,19 +11,19 @@ pub struct JSON {}
 
 impl JSON {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(proto: ObjectHandle, func: ObjectHandle) -> Res<ObjectHandle> {
+    pub fn new(proto: ObjectHandle, func: ObjectHandle, realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableJSON {
                 object: MutObject::with_proto(proto),
             }),
         };
 
-        this.initialize(func.into())?;
+        this.initialize(func.into(), realm)?;
 
         Ok(this.into_object())
     }
 
-    fn value_from_serde(value: serde_json::Value, realm: &Realm) -> Res<Value> {
+    fn value_from_serde(value: serde_json::Value, realm: &mut Realm) -> Res<Value> {
         Ok(match value {
             serde_json::Value::Null => Value::Null,
             serde_json::Value::Bool(b) => Value::Boolean(b),
@@ -43,7 +43,7 @@ impl JSON {
                 for (k, v) in o {
                     let val = Self::value_from_serde(v, realm)?;
 
-                    obj.define_property(k.into(), val)?;
+                    obj.define_property(k.into(), val, realm)?;
                 }
 
                 Object::from_mut(obj).into_value()
@@ -81,7 +81,7 @@ impl JSON {
                     let mut array = Vec::new();
 
                     loop {
-                        let (done, value) = o.get_array_or_done(index)?;
+                        let (done, value) = o.get_array_or_done(index, realm)?;
 
                         if done {
                             break;
@@ -104,21 +104,21 @@ impl JSON {
                     return Ok(Some(serde_json::Value::Array(array)));
                 }
 
-                if let Some(prim) = o.primitive() {
-                    return Self::value_to_serde(prim, realm, visited);
+                if let Some(prim) = o.primitive(realm)? {
+                    return Self::value_to_serde(prim.into(), realm, visited);
                 }
 
-                let props = o.enum_properties()?;
+                let props = o.enum_properties(realm)?;
                 //TODO: handle getters
 
                 let mut map = Map::with_capacity(props.len());
 
                 for (k, v) in props {
-                    let Some(val) = Self::value_to_serde(v.value, realm, visited)? else {
+                    let Some(val) = Self::value_to_serde(v, realm, visited)? else {
                         continue;
                     };
 
-                    let k = k.to_string(realm)?;
+                    let k = k.to_string();
 
                     map.insert(k.to_string(), val);
                 }

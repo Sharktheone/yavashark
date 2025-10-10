@@ -10,14 +10,14 @@ pub struct Fs {}
 
 impl Fs {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &Realm) -> Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableFs {
                 object: MutObject::new(realm),
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into())?;
+        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
 
         Ok(this.into_object())
     }

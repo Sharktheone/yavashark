@@ -25,6 +25,7 @@ impl Gui {
         let proto = Self::initialize_proto(
             Object::raw_with_proto(realm.intrinsics.obj.clone()),
             realm.intrinsics.func.clone().into(),
+            realm,
         )?;
 
         realm.intrinsics.other.insert(TypeId::of::<Self>(), proto);
@@ -55,7 +56,7 @@ impl Gui {
     }
 
     pub fn run(&self, f: ObjectHandle, #[realm] realm: &mut Realm) -> Res {
-        if !f.is_function() {
+        if !f.is_callable() {
             return Err(Error::ty("passed non function value to Gui.run"));
         }
 
@@ -146,7 +147,7 @@ impl App for GuiApp<'_> {
 
             if let Err(e) = self
                 .f
-                .call(self.realm, vec![self.ui.clone().into()], global.into())
+                .call(vec![self.ui.clone().into()], global.into(), self.realm)
             {
                 *self.error.borrow_mut() = Some(e);
                 ctx.send_viewport_cmd(ViewportCommand::Close);

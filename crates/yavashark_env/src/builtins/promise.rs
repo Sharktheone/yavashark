@@ -97,7 +97,7 @@ impl Debug for Callable {
 impl Callable {
     pub fn call(&self, realm: &mut Realm, arg: Value, this: Value) -> ValueResult {
         match self {
-            Self::JsFunction(func) => func.call(realm, vec![arg], this),
+            Self::JsFunction(func) => func.call(vec![arg], this, realm),
             Self::NativeFunction(func) => {
                 func(arg, this, realm)?;
 
@@ -178,7 +178,7 @@ impl Promise {
         }
 
         for handler in inner.finally.drain(..) {
-            handler.call(realm, vec![], Value::Undefined)?;
+            handler.call(vec![], Value::Undefined, realm)?;
         }
 
         self.notify.finished();
@@ -202,7 +202,7 @@ impl Promise {
         //TODO: handle unhandled rejection
 
         for handler in inner.finally.drain(..) {
-            handler.call(realm, vec![], Value::Undefined)?;
+            handler.call(vec![], Value::Undefined, realm)?;
         }
 
         self.notify.finished();
@@ -261,9 +261,9 @@ impl Promise {
         let on_rejected = Self::get_rejected(gc, realm);
 
         if let Err(e) = callback.call(
-            realm,
             vec![on_fullfilled.into(), on_rejected.into()],
             Value::Undefined,
+            realm,
         ) {
             let val = ErrorObj::error_to_value(e, realm);
             let gc = Self::get_gc(promise.clone())?;
@@ -355,7 +355,7 @@ impl Promise {
             PromiseState::Pending => {
                 inner.finally.push(f);
             }
-            _ => match f.call(realm, vec![], Value::Undefined) {
+            _ => match f.call(vec![], Value::Undefined, realm) {
                 Err(e) => {
                     let val = ErrorObj::error_to_value(e, realm);
                     promise.reject(&val, realm)?;
@@ -383,7 +383,7 @@ impl Promise {
 
     #[prop("resolve")]
     fn resolve_(val: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -396,7 +396,7 @@ impl Promise {
 
     #[prop("reject")]
     fn reject_(val: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -410,13 +410,13 @@ impl Promise {
         #[realm] realm: &mut Realm,
         #[this] this: Value,
     ) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
         let promise = Self::new(realm);
 
-        let ret = callback.call(realm, args, this);
+        let ret = callback.call(args, this, realm);
 
         promise.set_res(ret, realm)?;
 
@@ -425,7 +425,7 @@ impl Promise {
 
     #[prop("withResolvers")]
     fn with_resolvers(#[realm] realm: &mut Realm, this: Value) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -446,7 +446,7 @@ impl Promise {
     }
 
     pub fn all(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -472,10 +472,10 @@ impl Promise {
             }
         } {
             let then = p
-                .get_property_opt(&"then".into(), realm)?
+                .get_property_opt("then", realm)?
                 .unwrap_or(Value::Undefined);
 
-            if !then.is_function() {
+            if !then.is_callable() {
                 p = Self::resolved(&p, realm)?.into();
             }
 
@@ -516,7 +516,7 @@ impl Promise {
         #[realm] realm: &mut Realm,
         this: &Value,
     ) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -542,10 +542,10 @@ impl Promise {
             }
         } {
             let then = p
-                .get_property_opt(&"then".into(), realm)?
+                .get_property_opt("then", realm)?
                 .unwrap_or(Value::Undefined);
 
-            if !then.is_function() {
+            if !then.is_callable() {
                 p = Self::resolved(&p, realm)?.into();
             }
 
@@ -570,18 +570,18 @@ impl Promise {
             for res in results {
                 match res? {
                     PromiseResult::Fulfilled(val) => {
-                        let obj = Object::with_proto(obj_proto.clone());
-
-                        obj.define_property("status".into(), "fulfilled".into())?;
-                        obj.define_property("value".into(), val)?;
+                        let obj = Object::from_values_with_proto(
+                            vec![("status".into(), "fulfilled".into()), ("value".into(), val)],
+                            obj_proto.clone(),
+                        )?;
 
                         values.push(obj.into());
                     }
                     PromiseResult::Rejected(val) => {
-                        let obj = Object::with_proto(obj_proto.clone());
-
-                        obj.define_property("status".into(), "rejected".into())?;
-                        obj.define_property("reason".into(), val)?;
+                        let obj = Object::from_values_with_proto(
+                            vec![("status".into(), "rejected".into()), ("reason".into(), val)],
+                            obj_proto.clone(),
+                        )?;
 
                         values.push(obj.into());
                     }
@@ -597,7 +597,7 @@ impl Promise {
     }
 
     fn any(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -623,10 +623,10 @@ impl Promise {
             }
         } {
             let then = p
-                .get_property_opt(&"then".into(), realm)?
+                .get_property_opt("then", realm)?
                 .unwrap_or(Value::Undefined);
 
-            if !then.is_function() {
+            if !then.is_callable() {
                 p = Self::resolved(&p, realm)?.into();
             }
 
@@ -680,7 +680,7 @@ impl Promise {
     }
 
     fn race(promises: &Value, #[realm] realm: &mut Realm, this: &Value) -> Res<ObjectHandle> {
-        if !this.is_constructor() {
+        if !this.is_constructable() {
             return Err(Error::ty("Promise capability must be a constructor"));
         }
 
@@ -706,10 +706,10 @@ impl Promise {
             }
         } {
             let then = p
-                .get_property_opt(&"then".into(), realm)?
+                .get_property_opt("then", realm)?
                 .unwrap_or(Value::Undefined);
 
-            if !then.is_function() {
+            if !then.is_callable() {
                 p = Self::resolved(&p, realm)?.into();
             }
 

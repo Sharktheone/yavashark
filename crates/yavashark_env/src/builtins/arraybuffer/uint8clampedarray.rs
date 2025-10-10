@@ -9,8 +9,8 @@ use yavashark_macro::{object, props};
 pub struct Uint8ClampedArray {}
 
 impl Uint8ClampedArray {
-    pub fn new(realm: &Realm, ty: TypedArray) -> Res<Self> {
-        ty.set_prototype(realm.intrinsics.uint8clampedarray.clone().into())?;
+    pub fn new(realm: &mut Realm, ty: TypedArray) -> Res<Self> {
+        ty.set_prototype(realm.intrinsics.uint8clampedarray.clone().into(), realm)?;
 
         Ok(Self {
             inner: RefCell::new(MutableUint8ClampedArray {}),

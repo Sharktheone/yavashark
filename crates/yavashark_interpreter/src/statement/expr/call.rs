@@ -4,11 +4,11 @@ use swc_ecma_ast::{CallExpr, Callee, Expr, ExprOrSpread, MemberExpr};
 
 use crate::location::get_location;
 use crate::Interpreter;
+use yavashark_env::import::DynamicImport;
 use yavashark_env::scope::Scope;
 use yavashark_env::utils::ValueIterator;
 use yavashark_env::value::Obj;
 use yavashark_env::{ClassInstance, ControlFlow, Error, Realm, Value, ValueResult};
-use yavashark_env::import::DynamicImport;
 
 impl Interpreter {
     pub fn run_call(realm: &mut Realm, stmt: &CallExpr, scope: &mut Scope) -> ValueResult {
@@ -27,12 +27,11 @@ impl Interpreter {
                     .downcast::<ClassInstance>()?
                     .ok_or(Error::ty("`super` can only be used in class constructor"))?;
 
-                let proto = class.prototype()?;
-                let sup = proto.value.prototype(realm)?;
+                let proto = class.prototype(realm)?.to_object()?;
 
-                let constructor = sup.as_object()?.constructor()?;
+                let sup = proto.prototype(realm)?;
 
-                let constructor = constructor.resolve(proto.value.copy(), realm)?;
+                let constructor = sup.to_object()?.get("constructor", realm)?;
 
                 let constructor = constructor.as_object()?;
 
@@ -54,13 +53,12 @@ impl Interpreter {
 
                 //TODO: we somehow need to run the constructor ON the super class
                 let instance = constructor
-                    .construct(realm, values) //In strict mode, this is undefined
+                    .construct(values, realm) //In strict mode, this is undefined
                     .map_err(|mut e| {
                         e.attach_function_stack(constructor.name(), get_location(stmt.span, scope));
 
                         e
-                    })?
-                    .to_object()?;
+                    })?;
 
                 *class.inner.try_borrow_mut()? = instance;
 
@@ -72,19 +70,18 @@ impl Interpreter {
                     return Err(Error::ty("import() requires at least one argument"));
                 }
 
-                let module_name = Self::run_expr(
-                    realm,
-                    &stmt.args[0].expr,
-                    stmt.args[0].span(),
-                    scope,
-                )?;
+                let module_name =
+                    Self::run_expr(realm, &stmt.args[0].expr, stmt.args[0].span(), scope)?;
 
                 let name = module_name.to_string(realm)?;
                 let path = scope.get_current_path()?;
 
-                let prom = DynamicImport::new(&name, &path,|source, path, realm| {
-                    Self::run_module_source(&source, path, realm)
-                }, realm)?;
+                let prom = DynamicImport::new(
+                    &name,
+                    &path,
+                    |source, path, realm| Self::run_module_source(&source, path, realm),
+                    realm,
+                )?;
 
                 Ok(prom.into())
             }
@@ -116,7 +113,7 @@ impl Interpreter {
                 }
             }
 
-            f.call(realm, values, this) //In strict mode, this is undefined
+            f.call(values, this, realm) //In strict mode, this is undefined
                 .map_err(|mut e| {
                     e.attach_function_stack(f.name(), get_location(span, scope));
 

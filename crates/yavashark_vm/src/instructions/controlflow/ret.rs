@@ -17,7 +17,7 @@ pub fn return_reg(reg: Reg, vm: &impl VM) -> ControlResult {
     Err(ControlFlow::Return(value))
 }
 
-pub fn return_var(var: VarName, vm: &impl VM) -> ControlResult {
+pub fn return_var(var: VarName, vm: &mut impl VM) -> ControlResult {
     let value = vm.get_variable(var)?;
     Err(ControlFlow::Return(value))
 }

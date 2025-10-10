@@ -4,6 +4,7 @@ use std::rc::Rc;
 use swc_common::Spanned;
 use swc_ecma_ast::{ObjectLit, Param, Prop, PropName, PropOrSpread};
 use yavashark_env::scope::Scope;
+use yavashark_env::value::property_key::IntoPropertyKey;
 use yavashark_env::{ControlFlow, Object, Realm, RuntimeResult, Value};
 use yavashark_string::YSString;
 
@@ -16,9 +17,9 @@ impl Interpreter {
                 PropOrSpread::Spread(spread) => {
                     let expr = Self::run_expr(realm, &spread.expr, spread.dot3_token, scope)?;
 
-                    if let Ok(props) = expr.properties() {
+                    if let Ok(props) = expr.properties(realm) {
                         for (name, value) in props {
-                            obj.define_property(name, value);
+                            obj.define_property(name.into(), value, realm);
                         }
                     }
                 }
@@ -27,34 +28,36 @@ impl Interpreter {
                     match &**prop {
                         Prop::Shorthand(ident) => {
                             let name = ident.sym.to_string();
-                            let value = scope.resolve(&name)?.ok_or(
+                            let value = scope.resolve(&name, realm)?.ok_or(
                                 ControlFlow::error_reference(format!("{name} is not defined")),
                             )?;
 
-                            obj.define_property(name.into(), value);
+                            obj.define_property(name.into(), value, realm);
                         }
                         Prop::KeyValue(kv) => {
-                            let key = Self::run_prop_name(realm, &kv.key, scope)?;
+                            let key = Self::run_prop_name(realm, &kv.key, scope)?
+                                .into_internal_property_key(realm)?;
 
                             let value = Self::run_expr(realm, &kv.value, prop.span(), scope)?;
 
-                            obj.define_property(key, value);
+                            obj.define_property(key, value, realm);
                         }
                         Prop::Assign(assign) => {
                             let key = assign.key.sym.to_string();
 
                             let value = Self::run_expr(realm, &assign.value, prop.span(), scope)?;
 
-                            obj.define_property(key.into(), value);
+                            obj.define_property(key.into(), value, realm);
                         }
 
                         Prop::Method(method) => {
-                            let key = Self::run_prop_name(realm, &method.key, scope)?;
+                            let key = Self::run_prop_name(realm, &method.key, scope)?
+                                .into_internal_property_key(realm)?;
                             let mut fn_scope = Scope::with_parent(scope)?;
 
                             fn_scope.state_set_function();
 
-                            let name = key.to_string(realm)?; // TODO, what should the name be here? (and wrong to_string function)
+                            let name = key.to_string(); // TODO, what should the name be here? (and wrong to_string function)
                             let function = if method.function.is_async
                                 || method.function.is_generator
                             {
@@ -88,10 +91,11 @@ impl Interpreter {
 
                             let value = function.into();
 
-                            obj.define_property(key, value);
+                            obj.define_property(key, value, realm);
                         }
                         Prop::Setter(set) => {
-                            let key = Self::run_prop_name(realm, &set.key, scope)?;
+                            let key = Self::run_prop_name(realm, &set.key, scope)?
+                                .into_internal_property_key(realm)?;
 
                             let param = Param::from((*set.param).clone());
                             let params = vec![param];
@@ -101,7 +105,7 @@ impl Interpreter {
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
-                                key.to_string(realm)?.to_string(),
+                                key.to_string(),
                                 params,
                                 set.body.clone(),
                                 fn_scope,
@@ -109,17 +113,18 @@ impl Interpreter {
                             )?
                             .into();
 
-                            obj.define_setter(key, func)?;
+                            obj.define_setter(key, func, realm)?;
                         }
                         Prop::Getter(get) => {
-                            let key = Self::run_prop_name(realm, &get.key, scope)?;
+                            let key = Self::run_prop_name(realm, &get.key, scope)?
+                                .into_internal_property_key(realm)?;
 
                             let mut fn_scope = Scope::with_parent(scope)?;
 
                             fn_scope.state_set_function()?;
 
                             let func = JSFunction::new(
-                                key.to_string(realm)?.to_string(),
+                                key.to_string(),
                                 vec![],
                                 get.body.clone(),
                                 fn_scope,
@@ -127,7 +132,7 @@ impl Interpreter {
                             )?
                             .into();
 
-                            obj.define_getter(key, func)?;
+                            obj.define_getter(key, func, realm)?;
                         }
                     }
                 }

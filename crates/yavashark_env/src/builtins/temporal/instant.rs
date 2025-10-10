@@ -253,13 +253,18 @@ pub fn value_to_instant(value: Value, realm: &mut Realm) -> Res<temporal_rs::Ins
 }
 
 impl PrettyObjectOverride for Instant {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self
             .stamp
             .to_ixdtf_string(None, ToStringRoundingOptions::default())
             .ok()?;
 
-        fmt_properties_to(obj, &mut s, not);
+        fmt_properties_to(obj, &mut s, not, realm);
 
         Some(s)
     }

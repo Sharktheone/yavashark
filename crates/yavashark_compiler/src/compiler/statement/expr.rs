@@ -23,12 +23,12 @@ mod unary;
 mod update;
 mod yield_;
 
+use crate::compiler::statement::expr::member::MemberKey;
 use crate::{Compiler, Res};
 use anyhow::anyhow;
 use swc_ecma_ast::{Expr, ExprStmt};
 use yavashark_bytecode::data::{Acc, Data, DataType, OutputData};
 use yavashark_bytecode::instructions::Instruction;
-use crate::compiler::statement::expr::member::MemberKey;
 
 #[must_use]
 pub struct MoveOptimization {
@@ -157,7 +157,6 @@ impl Compiler {
                             .push(Instruction::store_private_member(obj, member, value));
                     }
                 }
-
             }
             Expr::SuperProp(super_prop) => {
                 todo!()

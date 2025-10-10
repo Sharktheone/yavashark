@@ -56,12 +56,14 @@ pub fn setup_global(file: PathBuf, raw: bool, async_: bool) -> Res<(Realm, Scope
     }
     let mut s = Scope::global(&r, file);
 
-    let t262 = ObjectHandle::new(Test262::new(&r));
+    let t262 = ObjectHandle::new(Test262::new(&mut r));
 
-    r.global.define_property("$262".into(), t262.into())?;
+    let global = r.global.clone();
+
+    global.define_property("$262".into(), t262.into(), &mut r)?;
 
     let print = print(&mut r).into();
-    r.global.define_property("print".into(), print)?;
+    global.define_property("print".into(), print, &mut r)?;
 
     let p = s.get_current_path()?;
 

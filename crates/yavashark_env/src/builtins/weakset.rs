@@ -1,6 +1,6 @@
 use crate::utils::ValueIterator;
 use crate::value::{Constructor, MutObj, Obj};
-use crate::{MutObject, Object, ObjectHandle, Realm, Value, ValueResult, WeakValue};
+use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
 use indexmap::IndexSet;
 use std::cell::RefCell;
 use yavashark_macro::{object, properties_new};
@@ -33,7 +33,7 @@ impl WeakSet {
 pub struct WeakSetConstructor {}
 
 impl Constructor for WeakSetConstructor {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let mut set = IndexSet::new();
 
         if let Some(iter) = args.first() {
@@ -44,20 +44,20 @@ impl Constructor for WeakSetConstructor {
             }
         }
 
-        Ok(WeakSet::with_set(realm, set).into_value())
+        Ok(WeakSet::with_set(realm, set).into_object())
     }
 }
 
 impl WeakSetConstructor {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(_: &Object, func: ObjectHandle) -> crate::Res<ObjectHandle> {
+    pub fn new(_: &Object, func: ObjectHandle, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableWeakSetConstructor {
                 object: MutObject::with_proto(func.clone()),
             }),
         };
 
-        this.initialize(func)?;
+        this.initialize(func, realm)?;
 
         Ok(this.into_object())
     }

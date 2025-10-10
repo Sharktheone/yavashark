@@ -130,10 +130,11 @@ pub fn properties(attrs: TokenStream1, item: TokenStream1) -> syn::Result<TokenS
     let value = &config.value;
     let error = &config.error;
     let env = &config.env_path;
+    let realm = &config.realm;
 
     let init_fn = quote! {
-        pub fn initialize_proto(mut obj: #proto_object, func_proto: #object_handle) -> ::core::result::Result<#object_handle, #error> {
-            use #env::value::{AsAny, Obj, IntoValue, FromValue};
+        pub fn initialize_proto(mut obj: #proto_object, func_proto: #object_handle, realm: &mut #realm) -> ::core::result::Result<#object_handle, #error> {
+            use #env::value::{Obj, IntoValue, FromValue};
             use #try_into_value;
 
             #init
@@ -190,7 +191,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_variable(#name.into(), #variable::#var_create(prop.into()))?;
+                        obj.define_property_attributes(#name.into(), #variable::#var_create(prop.into()), realm)?;
                     }
                 }
             }
@@ -198,7 +199,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_getter(#name.into(), prop.into())?;
+                        obj.define_getter(#name.into(), prop.into(), realm)?;
                     }
                 }
             }
@@ -206,7 +207,7 @@ fn init_props(props: Vec<Prop>, config: &Config, self_ty: Option<TokenStream>) -
                 quote! {
                     {
                         let prop = #prop_tokens;
-                        obj.define_setter(#name.into(), prop.into())?;
+                        obj.define_setter(#name.into(), prop.into(), realm)?;
                     }
                 }
             }
@@ -260,11 +261,11 @@ fn init_constructor(
 
         constructor_tokens.extend(quote! {
             impl #env::value::Constructor for #name {
-                fn construct(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>) -> ::core::result::Result<#value, #error> {
-                    use #env::value::{AsAny, Obj, IntoValue, FromValue};
+                fn construct(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>) -> ::core::result::Result<#object_handle, #error> {
+                    use #env::value::{Obj, IntoValue, FromValue};
                     use #try_into_value;
 
-                    #fn_tok
+                    #fn_tok?.to_object()
                 }
             }
         });
@@ -278,7 +279,7 @@ fn init_constructor(
         constructor_tokens.extend(quote! {
             impl #env::value::Func for #name {
                 fn call(&self, realm: &mut #realm, mut args: std::vec::Vec<#value>, this: #value) -> crate::ValueResult {
-                    use #env::value::{AsAny, Obj, IntoValue, FromValue};
+                    use #env::value::{Obj, IntoValue, FromValue};
                     use #try_into_value;
 
                     #fn_tok
@@ -294,7 +295,7 @@ fn init_constructor(
         constructor_tokens.extend(quote! {
             impl #name {
                 #[allow(clippy::new_ret_no_self)]
-                pub fn new(func: & #object_handle) -> ::core::result::Result<#object_handle, #error> {
+                pub fn new(func: & #object_handle, realm: &mut #realm) -> ::core::result::Result<#object_handle, #error> {
                     use #env::value::Obj;
                     let mut this = Self {
                         inner: ::core::cell::RefCell::new(#mut_name {
@@ -302,13 +303,13 @@ fn init_constructor(
                         }),
                     };
 
-                    this.initialize(func.clone())?;
+                    this.initialize(func.clone(), realm)?;
 
                     Ok(this.into_object())
                 }
 
-                pub fn initialize(&mut self, func_proto: #object_handle) -> core::result::Result<(), #error> {
-                    use #env::value::{AsAny, Obj, IntoValue, FromValue};
+                pub fn initialize(&mut self, func_proto: #object_handle, realm: &mut #realm) -> core::result::Result<(), #error> {
+                    use #env::value::{Obj, IntoValue, FromValue};
                     use #try_into_value;
                     let obj = self;
 
@@ -324,20 +325,20 @@ fn init_constructor(
 
     let constr_proto = if extends {
         quote! { {
-            &obj.prototype()?.value.get_property_no_get_set(&"constructor".into())?.value.to_object()?
+            &obj.prototype(realm)?.to_object()?.resolve_property("constructor", realm)?.unwrap_or(Value::Undefined).to_object()?
         } }
     } else {
         quote! { &func_proto }
     };
 
     let init_tokens = quote! {
-        let constructor = #name::new(#constr_proto)?;
+        let constructor = #name::new(#constr_proto, realm)?;
 
-        obj.define_variable("constructor".into(), #variable::write_config(constructor.clone().into()))?;
+        obj.define_property_attributes("constructor".into(), #variable::write_config(constructor.clone().into()), realm)?;
 
-        constructor.define_variable("prototype".into(), #variable::new_read_only(obj.clone().into()))?;
-        constructor.define_variable("length".into(), #variable::config(#value::from(#constructor_length)).into())?;
-        constructor.define_variable("name".into(), #variable::config(#value::from(stringify!(#ty_name)).into()))?;
+        constructor.define_property_attributes("prototype".into(), #variable::new_read_only(obj.clone().into()), realm)?;
+        constructor.define_property_attributes("length".into(), #variable::config(#value::from(#constructor_length)).into(), realm)?;
+        constructor.define_property_attributes("name".into(), #variable::config(#value::from(stringify!(#ty_name)).into()), realm)?;
 
 
     };

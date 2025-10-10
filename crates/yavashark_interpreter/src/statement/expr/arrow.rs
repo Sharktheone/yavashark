@@ -35,7 +35,7 @@ impl Func for ArrowFunction {
                 pat,
                 scope,
                 &mut args_iter,
-                &mut |scope, name, value| scope.declare_var(name, value),
+                &mut |scope, name, value, realm| scope.declare_var(name, value, realm),
             )?;
         }
 
@@ -77,7 +77,7 @@ impl Interpreter {
 
         let arrow = ObjectHandle::new(arrow);
 
-        arrow.define_property("name".into(), "".into())?;
+        arrow.define_property("name".into(), "".into(), realm)?;
 
         let len = stmt.params.last().map_or(0, |last| {
             if last.is_rest() {
@@ -87,7 +87,7 @@ impl Interpreter {
             }
         });
 
-        arrow.define_property("length".into(), len.into())?;
+        arrow.define_property("length".into(), len.into(), realm)?;
 
         Ok(arrow.into())
     }

@@ -1,5 +1,5 @@
 use crate::value::{Constructor, Func};
-use crate::{Error, MutObject, ObjectHandle, Realm, Value, ValueResult, Variable};
+use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
 use std::cell::RefCell;
 use yavashark_macro::object;
 
@@ -29,25 +29,25 @@ impl Func for BoundFunction {
 }
 
 impl Constructor for BoundFunction {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
-        self.func.as_object()?.construct(realm, args)
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
+        self.func.as_object()?.construct(args, realm)
     }
 }
 
 impl BoundFunction {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(func: Value, this: Value, args: Vec<Value>, realm: &Realm) -> ValueResult {
+    pub fn new(func: Value, this: Value, args: Vec<Value>, realm: &mut Realm) -> ValueResult {
         let f = func.as_object()?;
 
-        if !f.is_function() {
+        if !f.is_callable() {
             return Err(Error::ty("Function.bind must be called on a function"));
         }
 
         let length = f
-            .get_property_opt(&"length".into())?
+            .get_property_opt("length", realm)?
             .unwrap_or(Value::Undefined.into());
 
-        let length = Variable::config(length.value);
+        let length = Variable::config(length);
 
         let obj = ObjectHandle::new(Self {
             func,
@@ -58,7 +58,7 @@ impl BoundFunction {
             bound_args: args,
         });
 
-        obj.define_variable("length".into(), length)?;
+        obj.define_property_attributes("length".into(), length, realm)?;
 
         Ok(obj.into())
     }

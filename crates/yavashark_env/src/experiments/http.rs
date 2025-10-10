@@ -15,14 +15,14 @@ pub struct Http {}
 
 impl Http {
     #[allow(clippy::new_ret_no_self)]
-    pub fn new(realm: &Realm) -> crate::Res<ObjectHandle> {
+    pub fn new(realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let mut this = Self {
             inner: RefCell::new(MutableHttp {
                 object: MutObject::new(realm),
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into())?;
+        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
 
         Ok(this.into_object())
     }
@@ -48,9 +48,9 @@ impl Http {
             let res = response.into_object();
 
             let res = callback.call(
-                realm,
                 vec![obj.into(), res.into()],
                 callback.clone().into_value(),
+                realm,
             );
 
             if let Err(err) = res {
@@ -85,7 +85,7 @@ struct HttpResponseWriter {
 }
 
 impl HttpResponseWriter {
-    fn new(stream: std::net::TcpStream, realm: &Realm) -> Res<Self> {
+    fn new(stream: std::net::TcpStream, realm: &mut Realm) -> Res<Self> {
         let mut this = Self {
             inner: RefCell::new(MutableHttpResponseWriter {
                 object: MutObject::new(realm),
@@ -96,7 +96,7 @@ impl HttpResponseWriter {
             }),
         };
 
-        this.initialize(realm.intrinsics.func.clone().into())?;
+        this.initialize(realm.intrinsics.func.clone().into(), realm)?;
 
         Ok(this)
     }
@@ -152,21 +152,21 @@ impl HttpResponseWriter {
 }
 
 impl HttpRequest {
-    fn into_object(self, realm: &Realm) -> crate::Res<ObjectHandle> {
+    fn into_object(self, realm: &mut Realm) -> crate::Res<ObjectHandle> {
         let obj = Object::new(realm);
-        obj.define_property("method".into(), self.method.into_value())?;
-        obj.define_property("url".into(), self.url.into_value())?;
+        obj.define_property("method".into(), self.method.into_value(), realm)?;
+        obj.define_property("url".into(), self.url.into_value(), realm)?;
 
         let headers = self
             .headers
             .into_iter()
-            .map(|(key, value)| (key.into_value(), value.into_value()))
+            .map(|(key, value)| (key.into(), value.into_value()))
             .collect::<Vec<_>>();
 
         let headers = Object::from_values(headers, realm)?;
 
-        obj.define_property("headers".into(), headers.into())?;
-        obj.define_property("body".into(), self.body.into_value())?;
+        obj.define_property("headers".into(), headers.into(), realm)?;
+        obj.define_property("body".into(), self.body.into_value(), realm)?;
 
         Ok(obj)
     }

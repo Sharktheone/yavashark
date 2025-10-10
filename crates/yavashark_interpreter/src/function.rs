@@ -93,11 +93,12 @@ impl JSFunction {
 
         let handle = ObjectHandle::new(this);
 
-        handle.define_variable("name".into(), Variable::config(name.into()))?;
-        handle.define_variable("length".into(), Variable::config(len.into()))?;
-        prototype.define_variable(
+        handle.define_property_attributes("name".into(), Variable::config(name.into()), realm)?;
+        handle.define_property_attributes("length".into(), Variable::config(len.into()), realm)?;
+        prototype.define_property_attributes(
             "constructor".into(),
             Variable::write_config(handle.clone().into()),
+            realm,
         );
 
         Ok(handle)
@@ -163,8 +164,8 @@ impl RawJSFunction {
                 &p.pat,
                 scope,
                 &mut iter,
-                &mut |scope, name, value| {
-                    scope.declare_var(name, value);
+                &mut |scope, name, value, realm| {
+                    scope.declare_var(name, value, realm);
                     Ok(())
                 },
             )?;
@@ -178,7 +179,7 @@ impl RawJSFunction {
 
         let args = ObjectHandle::new(args);
 
-        scope.declare_var("arguments".into(), args.into());
+        scope.declare_var("arguments".to_string(), args.into(), realm);
 
         if let Some(block) = &self.block {
             if let Err(e) = Interpreter::run_block_this(realm, block, scope, this) {
@@ -207,21 +208,21 @@ impl CustomGcRefUntyped for RawJSFunction {
 }
 
 impl Constructor for JSFunction {
-    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> ValueResult {
+    fn construct(&self, realm: &mut Realm, args: Vec<Value>) -> Res<ObjectHandle> {
         let this = self.new_instance(realm)?;
 
         if let Value::Object(obj) = self.raw.call(realm, args, this.copy())? {
             return Ok(obj.into());
         }
 
-        Ok(this)
+        this.to_object()
     }
 
-    fn construct_proto(&self) -> Res<ObjectProperty> {
-        let inner = self.inner.try_borrow()?;
-
-        Ok(inner.prototype.clone())
-    }
+    // fn construct_proto(&self) -> Res<ObjectProperty> {
+    //     let inner = self.inner.try_borrow()?;
+    //
+    //     Ok(inner.prototype.clone())
+    // }
 }
 
 impl ConstructorFn for RawJSFunction {

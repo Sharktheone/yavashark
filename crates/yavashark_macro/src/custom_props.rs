@@ -5,7 +5,6 @@ use darling::FromMeta;
 use proc_macro::TokenStream as TokenStream1;
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::Path;
 
 pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let conf = Config::new(Span::call_site());
@@ -34,11 +33,13 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
     let value = &conf.value;
     let variable = &conf.variable;
     let obj_prop = &conf.object_property;
+    let realm = &conf.realm;
+    let internal_property_key = &conf.internal_property_key;
 
-    let properties_define = match_prop(&direct, Act::Set, value);
+    let properties_define = match_prop(&direct, Act::Set, &conf);
 
     item.items.push(syn::parse_quote! {
-        fn define_property(&self, name: Value, value: Value) -> Result<(), #error> {
+        fn define_property(&self, name: #internal_property_key, value: #value, &mut #realm) -> Result<(), #error> {
             let mut inner = self.get_inner_mut();
             #properties_define
 
@@ -48,20 +49,20 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties_variable_define = match_prop(&direct, Act::SetVar, value);
+    let properties_variable_define = match_prop(&direct, Act::SetVar, &conf);
 
     item.items.push(syn::parse_quote! {
-        fn define_variable(&self, name: Value, value: #variable) -> Result<(), #error> {
+        fn define_property_attribute(&self, name: #internal_property_key, value: #variable, realm: &mut #realm) -> Result<(), #error> {
             let mut inner = self.get_inner_mut();
             #properties_variable_define
 
             drop(inner);
 
-            self.get_wrapped_object().define_variable(name, value)
+            self.get_wrapped_object().define_property_attributes(name, value, realm)
         }
     });
 
-    let properties_resolve = match_prop(&direct, Act::None, value);
+    let properties_resolve = match_prop(&direct, Act::None, &conf);
 
     item.items.push(syn::parse_quote! {
         fn resolve_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
@@ -74,7 +75,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties_get = match_prop(&direct, Act::Get, value);
+    let properties_get = match_prop(&direct, Act::Get, &conf);
 
     item.items.push(syn::parse_quote! {
         fn get_property(&self, name: & #value) -> Result<Option<#obj_prop>, #error> {
@@ -87,7 +88,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties_delete = match_prop(&direct, Act::Delete, value);
+    let properties_delete = match_prop(&direct, Act::Delete, &conf);
 
     item.items.push(syn::parse_quote! {
         fn delete_property(&self, name: &Value) -> Result<Option<Value>, #error> {
@@ -100,7 +101,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties_contains = match_prop(&direct, Act::Contains, value);
+    let properties_contains = match_prop(&direct, Act::Contains, &conf);
 
     item.items.push(syn::parse_quote! {
         fn contains_key(&self, name: & #value) -> Result<bool, #error> {
@@ -113,7 +114,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let properties = match_list(&direct, List::Properties, value);
+    let properties = match_list(&direct, List::Properties, &conf);
 
     item.items.push(syn::parse_quote! {
         fn properties(&self) -> Result<Vec<(#value, #value)>, #error> {
@@ -128,7 +129,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let keys = match_list(&direct, List::Keys, value);
+    let keys = match_list(&direct, List::Keys, &conf);
 
     item.items.push(syn::parse_quote! {
         fn keys(&self) -> Result<Vec<#value>, #error> {
@@ -143,7 +144,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let values = match_list(&direct, List::Values, value);
+    let values = match_list(&direct, List::Values, &conf);
 
     item.items.push(syn::parse_quote! {
         fn values(&self) -> Result<Vec<#value>, #error> {
@@ -158,7 +159,7 @@ pub fn custom_props(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         }
     });
 
-    let clear = match_list(&direct, List::Clear, value);
+    let clear = match_list(&direct, List::Clear, &conf);
 
     item.items.push(syn::parse_quote! {
         fn clear_values(&self) -> Result<(), #error> {
@@ -187,7 +188,12 @@ pub enum Act {
     Delete,
 }
 
-pub fn match_prop(properties: &[DirectItem], r: Act, value_path: &Path) -> TokenStream {
+pub fn match_prop(properties: &[DirectItem], r: Act, config: &Config) -> TokenStream {
+    let value_path = &config.value;
+    let internal_property_key = &config.internal_property_key;
+    let define_property_result = &config.define_property_result;
+    let property = &config.property;
+
     let mut match_properties_define = TokenStream::new();
     let match_non_string = TokenStream::new();
 
@@ -195,17 +201,17 @@ pub fn match_prop(properties: &[DirectItem], r: Act, value_path: &Path) -> Token
         let field = &item.field;
 
         let act = match r {
-            Act::Get => quote! {Some(inner.#field.clone())},
+            Act::Get => quote! {Some(inner.#field.clone().into())},
             // Act::RefMut => quote! {Some(&mut self.#field.value)},
-            Act::None => quote! {Some(inner.#field.clone())},
-            Act::Set => quote! {inner.#field = value.into()},
-            Act::SetVar => quote! {inner.#field = value.into()},
+            Act::None => quote! {Some(inner.#field.clone().into())},
+            Act::Set => quote! {{inner.#field = value.into(); #define_property_result::Handled}},
+            Act::SetVar => quote! {{inner.#field = value.into(); #define_property_result::Handled}},
             Act::Contains => quote! {true},
             Act::Delete => quote! {
                 {
                     let old = inner.#field.value.copy();
                     inner.#field.value = #value_path::Undefined;
-                    Some(old)
+                    Some(#property::Value(old.into())) //TODO: this is not correct for setters / getters
                 }
             },
         };
@@ -215,7 +221,7 @@ pub fn match_prop(properties: &[DirectItem], r: Act, value_path: &Path) -> Token
                 quote! {
                     stringify!(#rename) => {
                         #act;
-                        return Ok(());
+                        return Ok(#define_property_result::Handled);
                     }
                 }
             } else {
@@ -241,7 +247,7 @@ pub fn match_prop(properties: &[DirectItem], r: Act, value_path: &Path) -> Token
 
     if !match_properties_define.is_empty() {
         match_properties_define = quote! {
-            if let #value_path::String(name) = &name {
+            if let #internal_property_key::String(name) = &name {
                 match name.as_str() {
                     #match_properties_define
                     _ => {}
@@ -271,17 +277,19 @@ pub enum List {
     Clear,
 }
 
-pub fn match_list(properties: &[DirectItem], r: List, value: &Path) -> TokenStream {
+pub fn match_list(properties: &[DirectItem], r: List, config: &Config) -> TokenStream {
+    let value = &config.value;
+    let property_key = &config.property_key;
     let mut add = TokenStream::new();
 
     for item in properties {
         let field = &item.field;
 
         let name = if let Some(rename) = &item.rename {
-            quote! { #value::string(stringify!(#rename)) }
+            quote! { #property_key::from(stringify!(#rename)) }
         } else {
             quote! {
-                #value::string(stringify!(#field))
+                #property_key::from(stringify!(#field))
             }
         };
 

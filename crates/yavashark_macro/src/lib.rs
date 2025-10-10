@@ -4,16 +4,16 @@ use std::env;
 
 mod config;
 mod custom_props;
+mod data_object;
+mod inline_props;
 mod instruction;
 mod mutable_region;
+mod native_object;
 mod obj;
 mod properties;
 mod properties_new;
 mod props;
 mod typed_array;
-mod inline_props;
-mod data_object;
-mod native_object;
 
 #[proc_macro_attribute]
 pub fn object(
@@ -75,7 +75,6 @@ pub fn inline_props(
     inline_props::inline_props(attrs, item)
 }
 
-
 #[proc_macro_attribute]
 pub fn data_object(
     attrs: proc_macro::TokenStream,
@@ -83,7 +82,6 @@ pub fn data_object(
 ) -> proc_macro::TokenStream {
     data_object::data_object(attrs, item)
 }
-
 
 #[proc_macro_attribute]
 pub fn native_object(

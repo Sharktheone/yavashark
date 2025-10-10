@@ -292,8 +292,7 @@ pub fn value_to_plain_year_month(
                 .unwrap_or_default();
 
             let calendar = obj
-                .get_property_opt(&"calendar".into())?
-                .map(|v| v.value)
+                .get_property_opt("calendar", realm)?
                 .and_then(|v| v.to_string(realm).ok());
 
             // let era = obj
@@ -307,14 +306,13 @@ pub fn value_to_plain_year_month(
             //     .and_then(|v| v.to_number(realm).ok());
 
             let month = obj
-                .get_property_opt(&"month".into())?
-                .map(|v| v.value)
+                .get_property_opt("month", realm)?
                 .and_then(|v| v.to_number(realm).ok())
                 .map(|v| v as u8)
                 .ok_or_else(|| Error::ty("Expected month to be a number"))?;
 
             let month = if month == 0 {
-                obj.resolve_property(&"monthCode".into(), realm)?
+                obj.resolve_property("monthCode", realm)?
                     .and_then(|v| v.to_string(realm).ok())
                     .and_then(|s| {
                         if s.is_empty() {
@@ -328,7 +326,10 @@ pub fn value_to_plain_year_month(
                 month
             };
 
-            let year = obj.get_property(&"year".into())?.value.to_number(realm)?;
+            let year = obj
+                .resolve_property("year", realm)?
+                .unwrap_or(Value::Undefined)
+                .to_number(realm)?;
 
             let year = year as i32;
 
@@ -346,10 +347,15 @@ pub fn value_to_plain_year_month(
 }
 
 impl PrettyObjectOverride for PlainYearMonth {
-    fn pretty_inline(&self, obj: &Object, not: &mut Vec<usize>) -> Option<String> {
+    fn pretty_inline(
+        &self,
+        obj: &Object,
+        not: &mut Vec<usize>,
+        realm: &mut Realm,
+    ) -> Option<String> {
         let mut s = self.year_month.to_string();
 
-        fmt_properties_to(obj, &mut s, not);
+        fmt_properties_to(obj, &mut s, not, realm);
 
         Some(s)
     }

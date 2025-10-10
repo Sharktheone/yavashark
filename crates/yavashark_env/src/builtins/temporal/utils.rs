@@ -22,7 +22,7 @@ pub fn opt_relative_to_wrap(
 }
 
 pub fn relative_to_wrap(obj: &ObjectHandle, realm: &mut Realm) -> Res<Option<RelativeTo>> {
-    let rel = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
+    let rel = obj.get_property_opt("relativeTo", realm)?;
 
     rel.map_or_else(|| Ok(None), |rel| relative_to(rel, realm))
 }
@@ -172,7 +172,7 @@ pub fn rounding_options(
             )
         };
 
-        let r = obj.get_property_opt(&"relativeTo".into())?.map(|v| v.value);
+        let r = obj.get_property_opt("relativeTo", realm)?;
 
         rel = match r {
             Some(Value::Object(obj)) => {

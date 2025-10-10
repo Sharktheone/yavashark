@@ -1,15 +1,15 @@
+use crate::params::VMParams;
+use crate::{BorrowedVM, VMStateFunctionCode, VM};
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 use yavashark_bytecode::{BytecodeFunctionCode, BytecodeFunctionParams};
-use yavashark_env::{ControlFlow, Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use yavashark_env::builtins::Arguments;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::{Func, Obj};
+use yavashark_env::{ControlFlow, Error, MutObject, ObjectHandle, Realm, Res, Value, ValueResult};
 use yavashark_macro::object;
 use yavashark_string::YSString;
-use crate::params::VMParams;
-use crate::{BorrowedVM, VMStateFunctionCode, VM};
 
 #[object(function)]
 #[derive(Debug)]
@@ -18,7 +18,6 @@ pub struct BytecodeFunction {
     scope: Scope,
     params: VMParams,
 }
-
 
 impl BytecodeFunction {
     #[must_use]
@@ -50,12 +49,12 @@ impl BytecodeFunction {
         }
     }
 
-    pub fn update_name(&self, n: &str) -> Res {
+    pub fn update_name(&self, n: &str, realm: &mut Realm) -> Res {
         let name = self
-            .get_property(&"name".into())
+            .resolve_property("name".into(), realm)
             .ok()
             .flatten()
-            .and_then(|v| v.value.to_string_no_realm().ok())
+            .and_then(|v| v.assert_value().value.to_string(realm).ok())
             .unwrap_or_default();
 
         if name.is_empty() {
@@ -77,7 +76,6 @@ impl BytecodeFunction {
     }
 }
 
-
 impl Func for BytecodeFunction {
     fn call(&self, realm: &mut Realm, args: Vec<Value>, this: Value) -> ValueResult {
         let scope = &mut Scope::with_parent(&self.scope)?;
@@ -92,7 +90,7 @@ impl Func for BytecodeFunction {
 
         let args = ObjectHandle::new(args);
 
-        scope.declare_var("arguments".to_string(), args.into())?;
+        scope.declare_var("arguments".to_string(), args.into(), realm)?;
 
         let ds = self.code.data_section();
 
@@ -105,9 +103,7 @@ impl Func for BytecodeFunction {
                     ControlFlow::Error(e) => Err(e),
                     ControlFlow::Return(v) => Ok(v),
                     ControlFlow::Break(_) => Err(Error::syn("Illegal break statement")),
-                    ControlFlow::Continue(_) => {
-                        Err(Error::syn("Illegal continue statement"))
-                    }
+                    ControlFlow::Continue(_) => Err(Error::syn("Illegal continue statement")),
                     ControlFlow::Yield(_) => Err(Error::syn("Illegal yield statement")),
                     ControlFlow::Await(_) | ControlFlow::YieldStar(_) => {
                         Err(Error::syn("Illegal await statement"))
