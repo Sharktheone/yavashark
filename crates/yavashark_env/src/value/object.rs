@@ -61,7 +61,7 @@ impl Property {
     pub fn attributes(&self) -> Attributes {
         match self {
             Property::Value(v) => v.properties,
-            Property::Getter(_, _) => Attributes::config(),
+            Property::Getter(_, a) => *a
         }
     }
 
@@ -167,12 +167,34 @@ pub trait Obj: Debug + 'static {
         callback: ObjectHandle,
         realm: &mut Realm,
     ) -> Res;
+
+    fn define_getter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        _ = attributes;
+        self.define_getter(name, callback, realm)
+    }
     fn define_setter(
         &self,
         name: InternalPropertyKey,
         callback: ObjectHandle,
         realm: &mut Realm,
     ) -> Res;
+
+    fn define_setter_attributes(
+        &self,
+        name: InternalPropertyKey,
+        callback: ObjectHandle,
+        attributes: Attributes,
+        realm: &mut Realm,
+    ) -> Res {
+        _ = attributes;
+        self.define_setter(name, callback, realm)
+    }
 
     fn delete_property(
         &self,
@@ -967,8 +989,12 @@ impl Object {
     }
 
     pub fn to_string(&self, realm: &mut Realm) -> Res<YSString> {
-        self.get("toString", realm)?
-            .call(realm, vec![], self.clone().into())?
+        let Some(to_string) = self.get_opt("toString", realm)? else {
+            return Ok(format!("[object {}]", self.name()).into());
+        };
+
+
+        to_string.call(realm, vec![], self.clone().into())?
             .to_string(realm)
     }
 }

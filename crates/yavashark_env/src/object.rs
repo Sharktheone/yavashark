@@ -630,6 +630,9 @@ impl MutObj for MutObject {
                 };
 
                 if e.attributes.is_writable() {
+                    e.set = Value::Undefined;
+                    e.get = Value::Undefined;
+
                     e.value = value;
                     return Ok(DefinePropertyResult::Handled);
                 }
@@ -756,9 +759,23 @@ impl MutObj for MutObject {
             return Ok(());
         }
 
-        let len = self.values.len();
-        self.values.push(ObjectProperty::getter(value.into()));
-        self.properties.insert(key, len);
+        match self.properties.entry(key) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
+
+
+                e.value = Value::Undefined;
+                e.get = value.into();
+                return Ok(());
+            }
+            Entry::Vacant(entry) => {
+                let idx = self.values.len();
+                self.values.push(ObjectProperty::getter(value.into()));
+                entry.insert(idx);
+            }
+        }
 
         Ok(())
     }
@@ -786,9 +803,24 @@ impl MutObj for MutObject {
             return Ok(());
         }
 
-        let len = self.values.len();
-        self.values.push(ObjectProperty::setter(value.into()));
-        self.properties.insert(key, len);
+
+        match self.properties.entry(key) {
+            Entry::Occupied(entry) => {
+                let Some(e) = self.values.get_mut(*entry.get()) else {
+                    return Err(Error::new("Failed to get value for property"));
+                };
+
+
+                e.value = Value::Undefined;
+                e.set = value.into();
+                return Ok(());
+            }
+            Entry::Vacant(entry) => {
+                let idx = self.values.len();
+                self.values.push(ObjectProperty::setter(value.into()));
+                entry.insert(idx);
+            }
+        }
 
         Ok(())
     }
