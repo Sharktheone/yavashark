@@ -379,13 +379,15 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
+            let name = name.into_internal_property_key(realm)?;
+
             let left = obj
-                .resolve_property(&name, realm)?
+                .resolve_property(name.clone(), realm)?
                 .unwrap_or(Value::Undefined);
 
             let value = Self::run_assign_op(op, left, right, realm)?;
 
-            obj.define_property(name.into_internal_property_key(realm)?, value.copy(), realm);
+            obj.define_property(name, value.copy(), realm);
             Ok(value)
         } else {
             Err(Error::ty_error(format!("Invalid left-hand side in assignment: {obj}")).into())
