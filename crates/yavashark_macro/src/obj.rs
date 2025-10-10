@@ -235,6 +235,21 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
         TokenStream::new()
     };
 
+    let name = if args.name {
+        quote! {
+            fn name(&self) -> String {
+                #env::value::CustomName::custom_name(self)
+            }
+        }
+    } else {
+        quote! {
+
+            fn name(&self) -> String {
+                stringify!(#struct_name).to_owned()
+            }
+        }
+    };
+
     let primitive = if let Some(primitive) = item_args.primitive {
         let is_mutable = mutable_region.contains(&primitive);
 
@@ -411,9 +426,7 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
             #primitive
 
-            fn name(&self) -> String {
-                stringify!(#struct_name).to_string()
-            }
+            #name
 
             #downcast
 

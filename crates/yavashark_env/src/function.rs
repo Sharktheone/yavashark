@@ -89,7 +89,7 @@ impl ObjectImpl for NativeFunction {
     }
 
     fn name(&self) -> String {
-        "Function".to_string()
+        self.name.into()
     }
 }
 
