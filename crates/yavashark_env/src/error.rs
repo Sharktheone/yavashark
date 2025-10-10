@@ -3,6 +3,7 @@ use crate::Realm;
 use std::fmt::{Debug, Display, Formatter};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::mem;
 use std::ops::Range;
 use std::path::{Path, PathBuf};
 use yavashark_string::{ToYSString, YSString};
@@ -286,7 +287,11 @@ impl StackTrace {
         }
     }
 
-    fn attach_function_stack(&mut self, function: String, loc: Location) {
+    fn attach_function_stack(&mut self, mut function: String, loc: Location) {
+        if let Some(last) = self.frames.last_mut() {
+            last.function = mem::take(&mut function);
+        }
+
         self.frames.push(StackFrame { function, loc });
     }
 }
