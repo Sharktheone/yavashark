@@ -4,6 +4,10 @@ use crate::realm::Realm;
 use crate::value::property_key::IntoPropertyKey;
 use crate::value::Property;
 use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
+use crate::array::Array;
+use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
+use crate::error_obj::ErrorObj;
+use crate::utils::coerce_object;
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.len() < 2 {
@@ -154,11 +158,42 @@ pub fn to_locale_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> Val
 }
 
 pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
-    // if let Value::Object(this) = this {
-    //     return Ok(format!("[object {}]", this.name()).into());
-    // }
+    if this.is_null() {
+        return Ok("[object Null]".into());
+    }
 
-    Ok(format!("[object {}]", this.ty()).into())
+    if this.is_undefined() {
+        return Ok("[object Undefined]".into());
+    }
+
+    let this = coerce_object(this, realm)?;
+
+    let tag = if this.is_callable() {
+        "Function"
+    } else if this.downcast::<Array>().is_some() {
+        "Array"
+    } else if this.downcast::<Arguments>().is_some() {
+        "Arguments"
+    } else if this.downcast::<ErrorObj>().is_some() {
+         "Error"
+    } else if this.downcast::<BooleanObj>().is_some() {
+         "Boolean"
+    } else if this.downcast::<NumberObj>().is_some() {
+        "Number"
+    } else if this.downcast::<StringObj>().is_some() {
+        "String"
+    } else if this.downcast::<Date>().is_some() {
+        "Date"
+    } else if this.downcast::<RegExp>().is_some() {
+        "RegExp"
+    } else {
+        "Object"
+    };
+
+    //TODO: we need to check Symbol.toStringTag
+
+
+    Ok(format!("[object {tag}]").into())
 }
 
 pub fn value_of(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
