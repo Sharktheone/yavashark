@@ -25,7 +25,7 @@ pub enum DefinePropertyResult {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Property {
-    Value(Variable),
+    Value(Value, Attributes),
     Getter(ObjectHandle, Attributes),
 }
 
@@ -34,45 +34,42 @@ impl From<ObjectProperty> for Property {
         if !prop.set.is_undefined() || !prop.get.is_undefined() {
             Self::Getter(prop.get.to_object().unwrap_or(crate::Object::null()), prop.attributes)
         } else {
-            Self::Value(Variable {
-                value: prop.value,
-                properties: prop.attributes,
-            })
+            Self::Value(prop.value, prop.attributes)
         }
     }
 }
 
 impl From<Variable> for Property {
     fn from(var: Variable) -> Self {
-        Self::Value(var)
+        Self::Value(var.value, var.properties)
     }
 }
 
 impl From<Value> for Property {
     fn from(value: Value) -> Self {
-        Self::Value(Variable {
+        Self::Value(
             value,
-            properties: Attributes::default(),
-        })
+            Attributes::default()
+        )
     }
 }
 
 impl Property {
-    pub fn attributes(&self) -> Attributes {
+    pub const fn attributes(&self) -> Attributes {
         match self {
-            Property::Value(v) => v.properties,
+            Property::Value(_, attributes) => *attributes,
             Property::Getter(_, a) => *a
         }
     }
 
-    pub fn is_data(&self) -> bool {
-        matches!(self, Property::Value(_))
+    pub const fn is_data(&self) -> bool {
+        matches!(self, Property::Value(_, _))
     }
 
     pub fn assert_value(self) -> Variable {
         match self {
-            Property::Value(v) => v,
-            Property::Getter(_, _) => Value::Undefined.into(),
+            Property::Value(v, attributes) => Variable::with_attributes(v, attributes),
+            Property::Getter(_, attributes) => Variable::with_attributes(Value::Undefined, attributes),
         }
     }
 }
@@ -330,11 +327,11 @@ pub trait Obj: Debug + 'static {
         };
 
         match prop {
-            Property::Value(v) => Ok(Some(PropertyDescriptor::Data {
-                value: v.value,
-                writable: v.properties.is_writable(),
-                enumerable: v.properties.is_enumerable(),
-                configurable: v.properties.is_configurable(),
+            Property::Value(v, a) => Ok(Some(PropertyDescriptor::Data {
+                value: v,
+                writable: a.is_writable(),
+                enumerable: a.is_enumerable(),
+                configurable: a.is_configurable(),
             })),
             Property::Getter(g, props) => Ok(Some(PropertyDescriptor::Accessor {
                 get: Some(g),
@@ -766,7 +763,7 @@ impl Object {
         };
 
         match p {
-            Property::Value(v) => Ok(Some(v.value)),
+            Property::Value(v, _) => Ok(Some(v)),
             Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
         }
     }
@@ -815,7 +812,7 @@ impl Object {
                 )))?;
 
         match property {
-            Property::Value(v) => Ok(v.value),
+            Property::Value(v, _) => Ok(v),
             Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm),
         }
     }
@@ -831,7 +828,7 @@ impl Object {
         };
 
         match prop {
-            Property::Value(v) => Ok(Some(v.value)),
+            Property::Value(v, _) => Ok(Some(v)),
             Property::Getter(g, _) => Ok(Some(g.call(Vec::new(), self.clone().into(), realm)?)),
         }
     }
@@ -870,7 +867,7 @@ impl Object {
         self.0
             .resolve_property(name, realm)?
             .map_or(Ok(Value::Undefined), |x| match x {
-                Property::Value(v) => Ok(v.value),
+                Property::Value(v, _) => Ok(v),
                 Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm),
             })
     }
@@ -881,7 +878,7 @@ impl Object {
         self.0
             .resolve_property(name, realm)?
             .map_or(Ok(None), |x| match x {
-                Property::Value(v) => Ok(Some(v.value)),
+                Property::Value(v, _) => Ok(Some(v)),
                 Property::Getter(g, _) => g.call(Vec::new(), self.clone().into(), realm).map(Some),
             })
     }
@@ -1146,19 +1143,19 @@ impl ObjectProperty {
     pub fn property(&self) -> Property {
         if !self.set.is_undefined() || !self.get.is_undefined() {
             let Ok(obj) = self.get.clone().to_object() else {
-                return Property::Value(Variable {
-                    value: Value::Undefined,
-                    properties: Attributes::config(),
-                });
+                return Property::Value(
+                    Value::Undefined,
+                    Attributes::config(),
+                );
             };
 
 
             Property::Getter(obj, self.attributes)
         } else {
-            Property::Value(Variable {
-                value: self.value.clone(),
-                properties: self.attributes,
-            })
+            Property::Value(
+                self.value.clone(),
+                self.attributes,
+            )
         }
     }
 }

@@ -211,7 +211,7 @@ pub fn match_prop(properties: &[DirectItem], r: Act, config: &Config) -> TokenSt
                 {
                     let old = inner.#field.value.copy();
                     inner.#field.value = #value_path::Undefined;
-                    Some(#property::Value(old.into())) //TODO: this is not correct for setters / getters
+                    Some(#property::Value(old.into(), inner.#field.attributes)) //TODO: this is not correct for setters / getters
                 }
             },
         };

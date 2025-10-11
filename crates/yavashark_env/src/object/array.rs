@@ -3,10 +3,7 @@ use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{
-    BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl,
-    ObjectOrNull, Property,
-};
+use crate::value::{Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
 use crate::MutObject;
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
@@ -89,9 +86,10 @@ impl ObjectImpl for Array {
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(Some(Property::Value(Variable::write(
+            return Ok(Some(Property::Value(
                 self.length.get().into(),
-            ))));
+                Attributes::write()
+            )));
         }
 
         self.get_wrapped_object().resolve_property(name, realm)
@@ -103,7 +101,7 @@ impl ObjectImpl for Array {
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(Some(Property::Value(self.length.get().into())));
+            return Ok(Some(Property::Value(self.length.get().into(), Attributes::write())));
         }
 
         self.get_wrapped_object().get_own_property(name, realm)

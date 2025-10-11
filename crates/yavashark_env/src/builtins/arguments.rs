@@ -1,6 +1,6 @@
 use crate::array::{ArrayIterator, MutableArrayIterator};
 use crate::error::Error;
-use crate::value::{DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
+use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
 use crate::{InternalPropertyKey, MutObject, Realm, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
 use std::ops::{Deref, DerefMut};
@@ -108,16 +108,16 @@ impl ObjectImpl for Arguments {
     ) -> Res<Option<Property>> {
         if let InternalPropertyKey::Index(idx) = name {
             if let Some(value) = self.resolve_array(idx) {
-                return Ok(Some(Property::Value(value.into())));
+                return Ok(Some(Property::Value(value, Attributes::new())));
             }
         }
 
         if let InternalPropertyKey::String(s) = &name {
             if s == "length" {
-                return Ok(Some(Property::Value(self.length.borrow().clone().into())));
+                return Ok(Some(Property::Value(self.length.borrow().clone(), Attributes::write_config())));
             }
             if s == "callee" {
-                return Ok(Some(Property::Value(self.callee.clone().into())));
+                return Ok(Some(Property::Value(self.callee.clone(), Attributes::write_config())));
             }
         }
 
