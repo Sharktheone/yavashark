@@ -5,7 +5,18 @@ impl<'a> Validator<'a> {
     pub fn validate_assign_expr(&mut self, assign: &'a AssignExpr) -> Result<(), String> {
         match &assign.left {
             AssignTarget::Simple(simple) => match simple {
-                SimpleAssignTarget::Ident(ident) => self.validate_ident(&ident.id)?,
+                SimpleAssignTarget::Ident(ident) => {
+                    self.validate_ident(&ident.id)?;
+
+                    if self.in_strict_mode() {
+                        let name = ident.id.sym.as_ref();
+                        if matches!(name, "eval" | "arguments") {
+                            return Err(format!(
+                                "Cannot assign to '{name}' in strict mode"
+                            ));
+                        }
+                    }
+                }
                 SimpleAssignTarget::Member(member) => self.validate_member_expr(member)?,
                 SimpleAssignTarget::SuperProp(prop) => {
                     self.validate_super_prop_expr(prop)?;

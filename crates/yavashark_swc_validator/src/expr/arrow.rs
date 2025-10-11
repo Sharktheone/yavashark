@@ -1,9 +1,16 @@
+use crate::utils::block_has_use_strict;
 use crate::Validator;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 impl<'a> Validator<'a> {
     pub fn validate_arrow_expr(&mut self, arrow: &'a ArrowExpr) -> Result<(), String> {
         let scope = self.enter_function_context(arrow.is_async, false);
+
+    if let BlockStmtOrExpr::BlockStmt(block) = &*arrow.body {
+            if block_has_use_strict(block) {
+                self.set_current_function_strict();
+            }
+        }
 
         let mut seen_params = Some(Vec::new());
 
@@ -15,8 +22,14 @@ impl<'a> Validator<'a> {
             }
         }
 
+        if let Some(params) = seen_params {
+            for name in params {
+                self.register_param_name(name);
+            }
+        }
+
         let res = match &*arrow.body {
-            BlockStmtOrExpr::BlockStmt(block) => self.validate_block(block),
+            BlockStmtOrExpr::BlockStmt(block) => self.validate_block_with_shadow(block, false),
             BlockStmtOrExpr::Expr(expr) => self.validate_expr(expr),
         };
 

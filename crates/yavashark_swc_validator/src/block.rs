@@ -125,6 +125,17 @@ fn collect_lexical_names<'a>(stmt: &'a Stmt, out: &mut Vec<&'a str>) {
 
 impl<'a> Validator<'a> {
     pub fn validate_block(&mut self, block: &'a BlockStmt) -> Result<(), String> {
+        self.validate_block_with_shadow(block, true)
+    }
+
+    pub fn validate_block_with_shadow(
+        &mut self,
+        block: &'a BlockStmt,
+        allow_param_shadow: bool,
+    ) -> Result<(), String> {
+        let guard = self.enter_block_scope(allow_param_shadow);
+
+        let result = (|| {
         let mut lexical = Vec::new();
         let mut var_names = Vec::new();
 
@@ -164,5 +175,9 @@ impl<'a> Validator<'a> {
         }
 
         self.validate_statements(&block.stmts)
+        })();
+
+        guard.exit(self);
+        result
     }
 }

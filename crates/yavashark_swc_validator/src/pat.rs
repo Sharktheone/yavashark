@@ -35,6 +35,13 @@ impl<'a> Validator<'a> {
                 }
 
                 self.validate_ident(&ident.id)?;
+                if self.in_strict_mode() && matches!(ident.id.sym.as_ref(), "eval" | "arguments")
+                {
+                    return Err(format!(
+                        "Identifier '{}' is not allowed in strict mode",
+                        ident.id.sym
+                    ));
+                }
             }
             Pat::Array(array) => self.validate_array_pat(array, idents)?,
             Pat::Rest(rest) => self.validate_pat_internal(&rest.arg, idents)?,
@@ -69,7 +76,32 @@ impl<'a> Validator<'a> {
                     self.validate_pat_internal(&kv.value, idents)?;
                 }
                 ObjectPatProp::Assign(assign) => {
+                    if let Some(idents) = idents {
+                        if assign.key.as_ref() != "_" {
+                            if idents.contains(&&*assign.key.sym) {
+                                return Err(format!(
+                                    "Identifier '{}' has already been declared",
+                                    assign.key.sym
+                                ));
+                            }
+
+                            idents.push(&assign.key.sym);
+                        }
+                    }
+
                     self.validate_ident(&assign.key)?;
+                    if self.in_strict_mode()
+                        && matches!(assign.key.sym.as_ref(), "eval" | "arguments")
+                    {
+                        return Err(format!(
+                            "Identifier '{}' is not allowed in strict mode",
+                            assign.key.sym
+                        ));
+                    }
+
+                    if let Some(value) = &assign.value {
+                        self.validate_expr(value)?;
+                    }
                 }
                 ObjectPatProp::Rest(rest) => {
                     assert_last = true;
@@ -103,6 +135,31 @@ impl<'a> Validator<'a> {
         }
 
         Ok(())
+    }
+}
+
+pub fn collect_bound_names<'a>(pat: &'a Pat, out: &mut Vec<&'a str>) {
+    match pat {
+        Pat::Ident(ident) => out.push(&ident.id.sym),
+        Pat::Array(array) => {
+            for elem in &array.elems {
+                if let Some(elem) = elem {
+                    collect_bound_names(elem, out);
+                }
+            }
+        }
+        Pat::Rest(rest) => collect_bound_names(&rest.arg, out),
+        Pat::Object(object) => {
+            for prop in &object.props {
+                match prop {
+                    ObjectPatProp::KeyValue(kv) => collect_bound_names(&kv.value, out),
+                    ObjectPatProp::Assign(assign) => out.push(&assign.key.sym),
+                    ObjectPatProp::Rest(rest) => collect_bound_names(&rest.arg, out),
+                }
+            }
+        }
+        Pat::Assign(assign) => collect_bound_names(&assign.left, out),
+        Pat::Expr(_) | Pat::Invalid(_) => {}
     }
 }
 

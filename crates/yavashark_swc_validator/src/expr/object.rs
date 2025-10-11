@@ -29,8 +29,19 @@ impl<'a> Validator<'a> {
             }
             Prop::Getter(getter) => {
                 self.validate_prop_name(&getter.key)?;
-                if let Some(stmt) = &getter.body {
-                    self.validate_block(stmt)?;
+                if let Some(body) = &getter.body {
+                    let scope = self.enter_function_context(false, false);
+                    self.set_super_property_allowed(true);
+                    self.set_super_call_allowed(true);
+                    let super_prop_guard = self.enter_super_property_scope();
+                    let super_call_guard = self.enter_super_call_scope();
+
+                    let result = self.validate_block(body);
+
+                    super_call_guard.exit(self);
+                    super_prop_guard.exit(self);
+                    scope.exit(self);
+                    result?;
                 }
             }
             Prop::Setter(setter) => {
@@ -40,14 +51,25 @@ impl<'a> Validator<'a> {
                     self.validate_pat(this_param)?;
                 }
 
-                if let Some(stmt) = &setter.body {
-                    self.validate_block(stmt)?;
+                if let Some(body) = &setter.body {
+                    let scope = self.enter_function_context(false, false);
+                    self.set_super_property_allowed(true);
+                    self.set_super_call_allowed(true);
+                    let super_prop_guard = self.enter_super_property_scope();
+                    let super_call_guard = self.enter_super_call_scope();
+
+                    let result = self.validate_block(body);
+
+                    super_call_guard.exit(self);
+                    super_prop_guard.exit(self);
+                    scope.exit(self);
+                    result?;
                 }
             }
             Prop::Method(method) => {
                 self.validate_prop_name(&method.key)?;
 
-                self.validate_function(&method.function)?;
+                self.validate_function(&method.function, None, true, false)?;
             }
         }
 

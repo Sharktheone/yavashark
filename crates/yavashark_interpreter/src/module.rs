@@ -54,7 +54,7 @@ impl Interpreter {
 
     pub fn run_module_source(source: &str, path: PathBuf, realm: &mut Realm) -> Res<Module> {
         let module =
-            crate::parse::parse_module(source).map_err(|e| Error::syn_error(format!("{e:?}")))?;
+            crate::parse::parse_module(source)?;
 
         let scope = Scope::global(realm, path);
 

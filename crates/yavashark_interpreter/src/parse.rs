@@ -3,8 +3,10 @@ use swc_common::util::take::Take;
 use swc_common::BytePos;
 use swc_ecma_ast::{Module, Program, Script};
 use swc_ecma_parser::{EsSyntax, PResult, Parser, Syntax};
+use yavashark_env::{Error, Res};
+use yavashark_swc_validator::Validator;
 
-pub fn parse_module(input: &str) -> PResult<Module> {
+pub fn parse_module(input: &str) -> Res<Module> {
     if input.is_empty() {
         return Ok(Module::dummy());
     }
@@ -26,5 +28,22 @@ pub fn parse_module(input: &str) -> PResult<Module> {
             explicit_resource_management: true,
         }), input, None);
 
-    p.parse_module()
+    let m =  p.parse_module()
+        .map_err(|e| Error::syn_error(format!("{e:?}")))?;
+
+
+    let errors = p.take_errors();
+
+    if !errors.is_empty() {
+        return Err(Error::syn_error(format!("Parse errors: {errors:?}")));
+    }
+
+    if let Err(e) = Validator::new().validate_module_items(&m.body) {
+        return Err(Error::syn_error(e));
+
+    }
+
+
+
+    Ok(m)
 }

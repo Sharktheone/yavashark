@@ -4,6 +4,8 @@ use crate::Validator;
 use regex_data::{BINARY_PROPERTIES, PROPERTY_VALUE_PAIRS, STRING_PROPERTIES};
 use swc_ecma_ast::{Lit, Regex};
 
+const RESERVED_DOUBLE_PUNCTUATORS: &[&str] = &["!!", "##", "$$", "%%", "**", "++", ",,", "..", "::", ";;", "<<", "==", ">>", "??", "@@", "``", "~~", "^^", "||"];
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum ClassToken {
     Atom,
@@ -31,10 +33,15 @@ impl<'a> Validator<'a> {
             );
         }
 
+        if has_v_flag {
+            VFlagValidator::new(&pattern).validate()?;
+        }
+
         let mut idx = 0usize;
         let mut in_class = false;
         let mut first_in_class = false;
-        let mut class_tokens: Vec<ClassToken> = Vec::new();
+    let mut class_tokens: Vec<ClassToken> = Vec::new();
+    let track_property_ranges = !has_v_flag;
 
         while idx < pattern.len() {
             let ch = pattern[idx];
@@ -48,17 +55,27 @@ impl<'a> Validator<'a> {
                 let mut next = pattern[idx];
 
                 if next == '\\' {
-                    if idx + 1 >= pattern.len() {
-                        return Err("Dangling escape in regular expression literal".to_string());
-                    }
+                    if idx + 1 < pattern.len() {
+                        let candidate = pattern[idx + 1];
+                        if candidate == 'p' || candidate == 'P' {
+                            idx += 1;
+                            next = candidate;
+                        } else {
+                            if in_class {
+                                if track_property_ranges {
+                                    class_tokens.push(ClassToken::Atom);
+                                }
+                                first_in_class = false;
+                            }
 
-                    let candidate = pattern[idx + 1];
-                    if candidate == 'p' || candidate == 'P' {
-                        idx += 1;
-                        next = candidate;
+                            idx += 1;
+                            continue;
+                        }
                     } else {
                         if in_class {
-                            class_tokens.push(ClassToken::Atom);
+                            if track_property_ranges {
+                                class_tokens.push(ClassToken::Atom);
+                            }
                             first_in_class = false;
                         }
 
@@ -120,13 +137,6 @@ impl<'a> Validator<'a> {
                                     "Unicode string properties cannot be negated".to_string()
                                 );
                             }
-
-                            if in_class {
-                                return Err(
-                                    "Unicode string properties cannot appear inside character classes"
-                                        .to_string(),
-                                );
-                            }
                         }
 
                         if !is_valid_binary_property(name) {
@@ -135,7 +145,9 @@ impl<'a> Validator<'a> {
                     }
 
                     if in_class {
-                        class_tokens.push(ClassToken::Property);
+                        if track_property_ranges {
+                            class_tokens.push(ClassToken::Property);
+                        }
                         first_in_class = false;
                     }
 
@@ -144,7 +156,9 @@ impl<'a> Validator<'a> {
                 }
 
                 if in_class {
-                    class_tokens.push(ClassToken::Atom);
+                    if track_property_ranges {
+                        class_tokens.push(ClassToken::Atom);
+                    }
                     first_in_class = false;
                 }
 
@@ -161,14 +175,18 @@ impl<'a> Validator<'a> {
                     }
 
                     if ch == '-' {
-                        class_tokens.push(ClassToken::Atom);
+                        if track_property_ranges {
+                            class_tokens.push(ClassToken::Atom);
+                        }
                         first_in_class = false;
                         idx += 1;
                         continue;
                     }
 
                     if ch == ']' {
-                        class_tokens.push(ClassToken::Atom);
+                        if track_property_ranges {
+                            class_tokens.push(ClassToken::Atom);
+                        }
                         first_in_class = false;
                         idx += 1;
                         continue;
@@ -176,17 +194,23 @@ impl<'a> Validator<'a> {
                 }
 
                 if ch == ']' {
-                    ensure_no_property_ranges(&class_tokens)?;
+                    if track_property_ranges {
+                        ensure_no_property_ranges(&class_tokens)?;
+                    }
                     in_class = false;
-                    class_tokens.clear();
+                    if track_property_ranges {
+                        class_tokens.clear();
+                    }
                     idx += 1;
                     continue;
                 }
 
-                if ch == '-' {
-                    class_tokens.push(ClassToken::Dash);
-                } else {
-                    class_tokens.push(ClassToken::Atom);
+                if track_property_ranges {
+                    if ch == '-' {
+                        class_tokens.push(ClassToken::Dash);
+                    } else {
+                        class_tokens.push(ClassToken::Atom);
+                    }
                 }
 
                 first_in_class = false;
@@ -197,13 +221,310 @@ impl<'a> Validator<'a> {
             if ch == '[' {
                 in_class = true;
                 first_in_class = true;
-                class_tokens.clear();
+                if track_property_ranges {
+                    class_tokens.clear();
+                }
             }
 
             idx += 1;
         }
 
         Ok(())
+    }
+}
+
+struct VFlagValidator<'a> {
+    pattern: &'a [char],
+    idx: usize,
+}
+
+enum OperandKind {
+    Consumed,
+    Negation,
+}
+
+enum OperatorAction {
+    ExpectOperand,
+    StayAfterOperand,
+}
+
+impl<'a> VFlagValidator<'a> {
+    fn new(pattern: &'a [char]) -> Self {
+        Self { pattern, idx: 0 }
+    }
+
+    fn validate(mut self) -> Result<(), String> {
+        while let Some(ch) = self.current() {
+            match ch {
+                '[' => self.parse_class_set()?,
+                '\\' => {
+                    self.parse_escape()?;
+                }
+                _ => {
+                    self.idx += 1;
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn parse_class_set(&mut self) -> Result<(), String> {
+        self.idx += 1; // skip '['
+
+        let mut first = true;
+        let mut expect_operand = true;
+        let mut consumed_any = false;
+
+        loop {
+            let Some(ch) = self.current() else {
+                return Err("Unterminated character class".to_string());
+            };
+
+            if ch == ']' {
+                if !consumed_any {
+                    return Err("Character class cannot be empty under the /v flag".to_string());
+                }
+
+                if expect_operand {
+                    return Err(
+                        "Character class set operator is missing a right-hand operand".to_string(),
+                    );
+                }
+
+                self.idx += 1;
+                return Ok(());
+            }
+
+            if expect_operand {
+                match self.parse_operand(first)? {
+                    OperandKind::Consumed => {
+                        consumed_any = true;
+                        expect_operand = false;
+                        first = false;
+                    }
+                    OperandKind::Negation => {
+                        first = false;
+                    }
+                }
+                continue;
+            }
+
+            if let Some(action) = self.try_parse_operator()? {
+                match action {
+                    OperatorAction::ExpectOperand => {
+                        expect_operand = true;
+                    }
+                    OperatorAction::StayAfterOperand => {
+                        // range operator keeps us in operand-consumed state
+                        expect_operand = false;
+                    }
+                }
+                continue;
+            }
+
+            // implicit union: next token is another operand
+            expect_operand = true;
+        }
+    }
+
+    fn parse_operand(&mut self, allow_caret: bool) -> Result<OperandKind, String> {
+        let Some(ch) = self.current() else {
+            return Err("Unterminated character class".to_string());
+        };
+
+        if ch == '^' && allow_caret {
+            self.idx += 1;
+            return Ok(OperandKind::Negation);
+        }
+
+        if ch == '\\' {
+            self.parse_escape()?;
+            return Ok(OperandKind::Consumed);
+        }
+
+        if self.matches_reserved_double_punctuator() {
+            let token = self.collect_double_punctuator();
+            return Err(format!(
+                "Reserved punctuator `{token}` must be escaped in character classes with the /v flag"
+            ));
+        }
+
+        match ch {
+            '[' => {
+                self.parse_class_set()?;
+                return Ok(OperandKind::Consumed);
+            }
+            '(' => {
+                return Err(
+                    "Parenthesized character class expressions require nested set syntax under the /v flag".
+                        to_string(),
+                );
+            }
+            ')' | '}' | '{' | '|' | '/' => {
+                return Err(format!(
+                    "Character `{ch}` must be escaped inside Unicode sets with the /v flag"
+                ));
+            }
+            '&' => {
+                if self.peek_char(1) == Some('&') {
+                    return Err("Set operator `&&` is missing a left-hand operand".to_string());
+                }
+            }
+            '-' => {
+                if allow_caret {
+                    return Err("'-' cannot begin a set element under the /v flag; escape it or rearrange the expression".to_string());
+                }
+
+                self.idx += 1;
+                return Ok(OperandKind::Consumed);
+            }
+            _ => {}
+        }
+
+        self.idx += 1;
+        Ok(OperandKind::Consumed)
+    }
+
+    fn try_parse_operator(&mut self) -> Result<Option<OperatorAction>, String> {
+        let Some(ch) = self.current() else {
+            return Ok(None);
+        };
+
+        match ch {
+            '&' if self.peek_char(1) == Some('&') => {
+                self.idx += 2;
+                return Ok(Some(OperatorAction::ExpectOperand));
+            }
+            '-' => {
+                if self.peek_char(1) == Some('-') {
+                    self.idx += 2;
+                    return Ok(Some(OperatorAction::ExpectOperand));
+                }
+
+                self.idx += 1;
+                self.expect_operand_after_range()?;
+                return Ok(Some(OperatorAction::StayAfterOperand));
+            }
+            _ => {}
+        }
+
+        if self.matches_reserved_double_punctuator() {
+            let token = self.collect_double_punctuator();
+            return Err(format!(
+                "Reserved punctuator `{token}` must be escaped in character classes with the /v flag"
+            ));
+        }
+
+        Ok(None)
+    }
+
+    fn expect_operand_after_range(&mut self) -> Result<(), String> {
+        if self.current() == Some(']') {
+            return Err(
+                "Range in character class requires a right-hand operand before the closing bracket".to_string(),
+            );
+        }
+
+        let result = self.parse_operand(false)?;
+        match result {
+            OperandKind::Consumed => Ok(()),
+            OperandKind::Negation => Err("Negation marker `^` is only allowed at the start of a character class".to_string()),
+        }
+    }
+
+    fn parse_escape(&mut self) -> Result<(), String> {
+        self.idx += 1; // skip '\'
+
+        let Some(ch) = self.current() else {
+            return Err("Dangling escape in regular expression literal".to_string());
+        };
+
+        match ch {
+            'p' | 'P' | 'q' | 'Q' => {
+                self.idx += 1;
+                self.expect_char('{')?;
+                self.consume_until('}')?;
+                self.idx += 1; // skip '}'
+            }
+            'u' | 'x' => {
+                if self.peek_char(1) == Some('{') {
+                    self.idx += 2; // skip char and '{'
+                    self.consume_until('}')?;
+                    self.idx += 1;
+                } else {
+                    let required = if ch == 'u' { 4 } else { 2 };
+                    self.idx += 1;
+                    for _ in 0..required {
+                        let Some(hex) = self.current() else {
+                            return Err("Incomplete hexadecimal escape".to_string());
+                        };
+                        if !hex.is_ascii_hexdigit() {
+                            return Err("Hexadecimal escape contains non-hex digit".to_string());
+                        }
+                        self.idx += 1;
+                    }
+                }
+            }
+            _ => {
+                self.idx += 1;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn expect_char(&mut self, ch: char) -> Result<(), String> {
+        match self.current() {
+            Some(current) if current == ch => {
+                self.idx += 1;
+                Ok(())
+            }
+            _ => Err(format!("Expected `{ch}` in escape sequence")),
+        }
+    }
+
+    fn consume_until(&mut self, terminator: char) -> Result<(), String> {
+        while let Some(ch) = self.current() {
+            if ch == terminator {
+                return Ok(());
+            }
+            self.idx += 1;
+        }
+
+        Err(format!("Escape sequence is missing closing `{terminator}`"))
+    }
+
+    fn matches_reserved_double_punctuator(&self) -> bool {
+        RESERVED_DOUBLE_PUNCTUATORS
+            .iter()
+            .any(|token| self.starts_with(token))
+    }
+
+    fn collect_double_punctuator(&self) -> String {
+        let mut buf = String::new();
+        if let Some(first) = self.peek_char(0) {
+            buf.push(first);
+        }
+        if let Some(second) = self.peek_char(1) {
+            buf.push(second);
+        }
+        buf
+    }
+
+    fn starts_with(&self, token: &str) -> bool {
+        token
+            .chars()
+            .enumerate()
+            .all(|(offset, expected)| self.peek_char(offset) == Some(expected))
+    }
+
+    fn current(&self) -> Option<char> {
+        self.pattern.get(self.idx).copied()
+    }
+
+    fn peek_char(&self, offset: usize) -> Option<char> {
+        self.pattern.get(self.idx + offset).copied()
     }
 }
 

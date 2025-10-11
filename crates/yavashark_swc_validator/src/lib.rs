@@ -21,7 +21,7 @@ mod utils;
 mod whle;
 mod with;
 
-use crate::utils::FunctionContext;
+use crate::utils::{statements_have_use_strict, FunctionContext};
 use std::collections::HashSet;
 use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
 
@@ -29,6 +29,13 @@ use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
 pub struct Validator<'a> {
     function_ctx: Option<FunctionContext>,
     private_names: Vec<HashSet<&'a str>>,
+    param_shadow_stack: Vec<bool>,
+    script_strict: bool,
+    script_prologue_checked: bool,
+    await_restriction_depth: usize,
+    await_relax_depth: usize,
+    super_property_scope: usize,
+    super_call_scope: usize,
 }
 
 impl<'a> Validator<'a> {
@@ -37,6 +44,14 @@ impl<'a> Validator<'a> {
     }
 
     pub fn validate_statements(&mut self, ast: &'a [Stmt]) -> Result<(), String> {
+        if !self.script_prologue_checked && !self.in_function_context() {
+            if statements_have_use_strict(ast) {
+                self.script_strict = true;
+            }
+
+            self.script_prologue_checked = true;
+        }
+
         for stmt in ast {
             self.validate_statement(stmt)?;
         }
@@ -85,13 +100,24 @@ impl<'a> Validator<'a> {
     }
 
     pub fn validate_module_items(&mut self, ast: &'a [ModuleItem]) -> Result<(), String> {
-        for item in ast {
-            match item {
-                ModuleItem::Stmt(stmt) => self.validate_statement(stmt)?,
-                ModuleItem::ModuleDecl(item) => self.validate_module_decl(item)?,
+        self.script_strict = true;
+        self.script_prologue_checked = true;
+
+        let await_guard = self.enter_await_restriction();
+
+        let result = (|| {
+            for item in ast {
+                match item {
+                    ModuleItem::Stmt(stmt) => self.validate_statement(stmt)?,
+                    ModuleItem::ModuleDecl(item) => self.validate_module_decl(item)?,
+                }
             }
-        }
-        Ok(())
+
+            Ok(())
+        })();
+
+        await_guard.exit(self);
+        result
     }
 
     pub fn validate_module_decl(&mut self, _decl: &ModuleDecl) -> Result<(), String> {

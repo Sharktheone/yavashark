@@ -7,7 +7,11 @@ impl<'a> Validator<'a> {
 
         match &call.callee {
             Callee::Expr(expr) => self.validate_expr(expr)?,
-            Callee::Super(_) => {}
+            Callee::Super(_) => {
+                if !self.can_use_super_call() {
+                    return Err("'super()' is only allowed in derived class constructors".to_string());
+                }
+            }
             Callee::Import(_) => {}
         }
 

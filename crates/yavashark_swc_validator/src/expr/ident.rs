@@ -13,7 +13,7 @@ impl<'a> Validator<'a> {
         }
 
         if sym == "await" && self.is_await_restricted() {
-            return Err("Identifier 'await' is reserved in async functions".to_string());
+            return Err("Identifier 'await' is reserved in async contexts".to_string());
         }
 
         if sym == "yield" && self.is_yield_restricted() {

@@ -35,11 +35,3 @@ oxc = ["dep:oxc"]
 parser_test = []
 pprof = ["dep:pprof", "dep:flate2"]
 timings = []
-
-
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
-strip = false
-debug = true

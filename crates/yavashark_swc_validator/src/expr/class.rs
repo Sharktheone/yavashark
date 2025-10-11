@@ -61,6 +61,7 @@ impl<'a> Validator<'a> {
     pub fn validate_class(&mut self, class: &'a Class) -> Result<(), String> {
         let mut private_registry: HashMap<&'a str, PrivateNameEntry> = HashMap::new();
         let mut has_constructor = false;
+        let is_derived = class.super_class.is_some();
 
         for member in &class.body {
             match member {
@@ -109,7 +110,7 @@ impl<'a> Validator<'a> {
         let scope = self.enter_private_name_scope(private_names);
 
         for member in &class.body {
-            if let Err(e) = self.validate_class_member(member) {
+            if let Err(e) = self.validate_class_member(member, is_derived) {
                 scope.exit(self);
                 return Err(e);
             }
@@ -120,29 +121,50 @@ impl<'a> Validator<'a> {
         Ok(())
     }
 
-    fn validate_class_member(&mut self, class: &'a ClassMember) -> Result<(), String> {
+    fn validate_class_member(&mut self, class: &'a ClassMember, is_derived: bool) -> Result<(), String> {
         match class {
             ClassMember::Constructor(constructor) => {
                 self.validate_prop_name(&constructor.key)?;
 
-                for param in &constructor.params {
-                    if let ParamOrTsParamProp::Param(param) = param {
-                        self.validate_pat(&param.pat)?;
-                    }
-                }
+                let ctx = self.enter_function_context(false, false);
+                self.set_super_property_allowed(is_derived);
+                self.set_super_call_allowed(is_derived);
 
-                if let Some(body) = &constructor.body {
-                    self.validate_block(body)?;
-                }
+                let result: Result<(), String> = (|| {
+                    for param in &constructor.params {
+                        if let ParamOrTsParamProp::Param(param) = param {
+                            self.validate_pat(&param.pat)?;
+                        }
+                    }
+
+                    if let Some(body) = &constructor.body {
+                        self.validate_block(body)?;
+                    }
+
+                    Ok(())
+                })();
+
+                ctx.exit(self);
+                result?;
             }
             ClassMember::Method(method) => {
                 self.validate_prop_name(&method.key)?;
 
-                self.validate_function(&method.function)?;
+                if method.is_static {
+                    if let Some(name) = prop_name_to_string(&method.key) {
+                        if name == "prototype" {
+                            return Err("Static method cannot be named 'prototype'".to_string());
+                        }
+                    }
+                }
+
+                let allow_super_property = is_derived || method.is_static;
+                self.validate_function(&method.function, None, allow_super_property, false)?;
             }
             ClassMember::PrivateMethod(private_method) => {
                 self.validate_private_name_expr(&private_method.key)?;
-                self.validate_function(&private_method.function)?;
+                let allow_super_property = is_derived || private_method.is_static;
+                self.validate_function(&private_method.function, None, allow_super_property, false)?;
             }
             ClassMember::ClassProp(prop) => {
                 self.validate_prop_name(&prop.key)?;
@@ -167,7 +189,10 @@ impl<'a> Validator<'a> {
                 }
             }
             ClassMember::StaticBlock(static_block) => {
-                self.validate_block(&static_block.body)?;
+                let guard = self.enter_await_restriction();
+                let result = self.validate_block(&static_block.body);
+                guard.exit(self);
+                result?;
             }
             _ => {}
         }

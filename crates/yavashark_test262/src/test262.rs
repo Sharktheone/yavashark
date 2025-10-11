@@ -11,6 +11,7 @@ use yavashark_env::{
 };
 use yavashark_interpreter::eval::InterpreterEval;
 use yavashark_macro::{object, properties_new};
+use yavashark_swc_validator::Validator;
 
 pub fn print(realm: &mut Realm) -> ObjectHandle {
     NativeFunction::new(
@@ -131,6 +132,17 @@ impl Test262 {
         let script = p
             .parse_script()
             .map_err(|e| Error::syn_error(format!("{e:?}")))?;
+
+        let errors = p.take_errors();
+
+        if !errors.is_empty() {
+            return Err(Error::syn_error(format!("Parse errors: {errors:?}")));
+        }
+
+
+        if let Err(e) = Validator::new().validate_statements(&script.body) {
+            return Err(Error::syn_error(e));
+        }
 
         let mut inner = self.inner.try_borrow_mut()?;
 
