@@ -5,10 +5,12 @@ mod properties;
 mod property;
 mod set_property;
 mod values;
+mod delete_property;
 
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Property};
 use proc_macro2::TokenStream;
+use syn::Fields;
 use syn::spanned::Spanned;
 
 pub fn inline_props(
@@ -65,6 +67,33 @@ pub fn inline_props(
         props.push(prop);
     }
 
+    let config_amount = props.iter().filter(|p| p.configurable).count();
+
+    if config_amount > 0 {
+        let Fields::Named(fields) = &mut input.fields else {
+            return syn::Error::new_spanned(input, "Expected a struct with named fields")
+                .to_compile_error()
+                .into();
+        };
+
+        let ty = if let Some(t) = bits_to_int_type(config_amount) {
+            t
+        } else {
+            return syn::Error::new_spanned(
+                input,
+                "Too many configurable properties (max 128)",
+            )
+            .to_compile_error()
+            .into();
+        };
+
+
+        fields.named.push(syn::parse_quote! {
+            __deleted_properties: ::core::cell::Cell<#ty>
+        });
+    }
+
+
     let prop_impl = generate_impl(&input.ident, &props, &config);
 
     quote::quote! {
@@ -85,6 +114,7 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
     let enumerable_properties = properties::generate_enumerable_properties(props, config);
     let enumerable_keys = keys::generate_enumerable_keys(props, config);
     let enumerable_values = values::generate_enumerable_values(props, config);
+    let delete_property = delete_property::generate_delete_property(props, config);
 
     let env = &config.env_path;
 
@@ -99,6 +129,7 @@ fn generate_impl(struct_name: &syn::Ident, props: &[Property], config: &Config) 
             #enumerable_properties
             #enumerable_keys
             #enumerable_values
+            #delete_property
 
 
             fn gc_refs(&self) -> impl Iterator<Item = yavashark_garbage::GcRef<#env::value::BoxedObj>> {
@@ -124,4 +155,16 @@ fn update_partial_type(mut ty: syn::Type, wrapper: TokenStream) -> syn::Type {
     }
 
     ty
+}
+
+fn bits_to_int_type(bits: usize) -> Option<syn::Type> {
+    Some(match bits {
+        0 => return None,
+        1..=8 => syn::parse_quote! { u8 },
+        9..=16 => syn::parse_quote! { u16 },
+        17..=32 => syn::parse_quote! { u32 },
+        33..=64 => syn::parse_quote! { u64 },
+        65..=128 => syn::parse_quote! { u128 },
+        _ => return None,
+    })
 }

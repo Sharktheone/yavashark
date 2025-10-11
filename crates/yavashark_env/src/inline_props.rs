@@ -1,5 +1,5 @@
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
-use crate::value::BoxedObj;
+use crate::value::{Property, BoxedObj};
 use crate::{ObjectHandle, Realm, Res, Value};
 use yavashark_garbage::GcRef;
 
@@ -8,11 +8,6 @@ pub enum UpdatePropertyResult {
     NotHandled(Value),
     Setter(ObjectHandle, Value),
     ReadOnly,
-}
-
-pub enum Property {
-    Value(Value),
-    Getter(ObjectHandle),
 }
 
 pub trait PropertiesHook {
@@ -42,6 +37,11 @@ pub trait PropertiesHook {
     fn enumerable_values(&self, realm: &mut Realm) -> Res<impl Iterator<Item = Property>> {
         self.values(realm)
     }
+    fn delete_property(
+        &self,
+        key: &InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<bool>;
 
     fn gc_refs(&self) -> impl Iterator<Item = GcRef<BoxedObj>>;
 }

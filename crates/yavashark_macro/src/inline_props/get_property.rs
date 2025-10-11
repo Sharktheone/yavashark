@@ -11,12 +11,26 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
     let mut string_arms = Vec::with_capacity(props.len());
     let mut symbols = Vec::new();
 
-    for prop in props
-        .iter()
-        .filter(|p| matches!(p.kind, Kind::Property | Kind::Getter))
-    {
+    let mut config_idx = 0usize;
+
+    let has_configurable = props.iter().any(|p| p.configurable);
+
+    for prop in props {
+        if !matches!(prop.kind, Kind::Property | Kind::Getter) {
+            if prop.configurable {
+                config_idx += 1;
+            }
+
+            continue;
+        }
+
         let key = &prop.name;
         let field = &prop.field;
+
+        let c = config_idx;
+        if prop.configurable {
+            config_idx += 1;
+        }
 
         let partial_get = if prop.partial {
             quote::quote! {
@@ -26,30 +40,50 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
             quote::quote! {}
         };
 
+        let attributes = prop.attributes(config);
+
         let value_expr = if prop.readonly {
             if prop.kind == Kind::Getter {
                 quote::quote! {
-                    return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Getter(self.#field #partial_get .clone())));
+                    return ::core::result::Result::Ok(::core::option::Option::Some(#env::value::Property::Getter(self.#field #partial_get .clone(), #attributes)));
                 }
             } else {
                 quote::quote! {
                     let val = #into_value::into_value(self.#field #partial_get.clone());
-                    return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Value(val)));
+                    return ::core::result::Result::Ok(::core::option::Option::Some(#env::value::Property::Value(val, #attributes)));
                 }
             }
         } else if prop.copy {
             quote::quote! {
                 let val = #into_value::into_value(self.#field #partial_get .get());
-                return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Value(val)));
+                return ::core::result::Result::Ok(::core::option::Option::Some(#env::value::Property::Value(val, #attributes)));
             }
         } else {
             quote::quote! {
                 let val = self.#field #partial_get.borrow().clone();
                 let val = #into_value::into_value(val);
 
-                return ::core::result::Result::Ok(::core::option::Option::Some(#env::inline_props::Property::Value(val)));
+                return ::core::result::Result::Ok(::core::option::Option::Some(#env::value::Property::Value(val, #attributes)));
             }
         };
+
+
+        let value_expr = if !has_configurable {
+            value_expr
+        } else if prop.configurable {
+            quote::quote! {
+                if (self.__deleted_properties.get() & (1 << #c)) == 0 {
+                    #value_expr
+                } else {
+                    return ::core::result::Result::Ok(::core::option::Option::None);
+                }
+            }
+        } else {
+            quote::quote! {
+                Some(#value_expr)
+            }
+        };
+
 
         match key {
             Name::Str(s) => {
@@ -94,14 +128,12 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
 
     quote::quote! {
         #[inline(always)]
-        fn get_property(&self, key: &#internal_property_key, realm: &mut #realm) -> #res<::core::option::Option<#env::inline_props::Property>> {
+        fn get_property(&self, key: &#internal_property_key, realm: &mut #realm) -> #res<::core::option::Option<#env::value::Property>> {
             match key {
                 #str_check
                 #symbol_check
                 _ => {}
-
             }
-
 
             ::core::result::Result::Ok(::core::option::Option::None)
         }

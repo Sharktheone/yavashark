@@ -1,6 +1,7 @@
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream};
 use syn::spanned::Spanned;
 use syn::{Expr, Field, Path, Type};
+use crate::config::Config;
 
 pub struct Property {
     pub copy: bool,
@@ -91,6 +92,14 @@ impl Property {
                     flags.enumerable = false;
                     false
                 }
+                "configurable" => {
+                    flags.configurable = true;
+                    false
+                }
+                "enumerable" => {
+                    flags.enumerable = true;
+                    false
+                }
                 "prop" => {
                     let n = match attr.parse_args().map_err(|e| syn::Error::new(e.span(), e)) {
                         Ok(n) => n,
@@ -159,6 +168,17 @@ impl Property {
         }
 
         Ok(flags)
+    }
+
+    pub fn attributes(&self, config: &Config) -> TokenStream {
+        let env = &config.env_path;
+        let enumerable = self.enumerable;
+        let configurable = self.configurable;
+        let writable = !self.readonly && !matches!(self.kind, Kind::Getter | Kind::Setter);
+
+        quote::quote! {
+            #env::value::Attributes::from_values(#writable, #enumerable, #configurable)
+        }
     }
 }
 

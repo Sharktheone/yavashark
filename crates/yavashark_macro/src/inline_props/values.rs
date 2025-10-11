@@ -10,8 +10,24 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
 
     let mut prop_items = Vec::with_capacity(props.len());
 
-    for prop in props.iter().filter(|p| p.kind != Kind::Setter) {
+    let mut config_idx = 0usize;
+
+    let has_configurable = props.iter().any(|p| p.configurable);
+
+    for prop in props {
+        if prop.kind == Kind::Setter {
+            if prop.configurable {
+                config_idx += 1;
+            }
+            continue;
+        }
+
         let field = &prop.field;
+
+        let c = config_idx;
+        if prop.configurable {
+            config_idx += 1;
+        }
 
         let partial_get = if prop.partial {
             quote! {
@@ -35,29 +51,60 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
             }
         };
 
+        let attributes = prop.attributes(config);
+
         let value_expr = if prop.kind == Kind::Getter {
             quote! {
-                #env::inline_props::Property::Getter(self.#field #get)
+                #env::value::Property::Getter(self.#field #get, #attributes)
             }
         } else {
             quote! {
                 {
                 let val = #into_value::into_value(self.#field #get);
-                #env::inline_props::Property::Value(val)
+                #env::value::Property::Value(val, #attributes)
                 }
             }
         };
 
+
+        let value_expr = if !has_configurable {
+            value_expr
+        } else if prop.configurable {
+            quote! {
+                if (self.__deleted_properties.get() & (1 << #c)) == 0 {
+                    Some(#value_expr)
+                } else {
+                    None
+                }
+            }
+        } else {
+            quote! {
+                Some(#value_expr)
+            }
+        };
+
+
+
         prop_items.push(value_expr);
     }
 
+
+    let configurable_flatten = if has_configurable {
+        quote::quote! {
+            .flatten()
+        }
+    } else {
+        quote::quote! {}
+    };
+
     quote::quote! {
         #[inline(always)]
-        fn values(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=#env::inline_props::Property>> {
+        fn values(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=#env::value::Property>> {
             ::core::result::Result::Ok(
                 ::core::iter::IntoIterator::into_iter([
                     #(#prop_items),*
                 ])
+                #configurable_flatten
             )
         }
     }
@@ -71,11 +118,26 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
 
     let mut prop_items = Vec::with_capacity(props.len());
 
-    for prop in props
-        .iter()
-        .filter(|p| p.kind != Kind::Setter && p.enumerable)
-    {
+    let mut config_idx = 0usize;
+
+    let has_configurable = props.iter().any(|p| p.configurable);
+
+    for prop in props {
+
+        if prop.kind != Kind::Getter && !prop.enumerable {
+            if prop.configurable {
+                config_idx += 1;
+            }
+            continue;
+        }
+
         let field = &prop.field;
+
+        let c = config_idx;
+        if prop.configurable {
+            config_idx += 1;
+        }
+
 
         let partial_get = if prop.partial {
             quote! {
@@ -99,29 +161,59 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
             }
         };
 
+        let attributes = prop.attributes(config);
+
+
         let value_expr = if prop.kind == Kind::Getter {
             quote! {
-                #env::inline_props::Property::Getter(self.#field #get)
+                #env::value::Property::Getter(self.#field #get, #attributes)
             }
         } else {
             quote! {
                 {
                 let val = #into_value::into_value(self.#field #get);
-                #env::inline_props::Property::Value(val)
+                #env::value::Property::Value(val, #attributes)
                 }
             }
         };
 
+
+        let value_expr = if !has_configurable {
+            value_expr
+        } else if prop.configurable {
+            quote! {
+                if (self.__deleted_properties.get() & (1 << #c)) == 0 {
+                    Some(#value_expr)
+                } else {
+                    None
+                }
+            }
+        } else {
+            quote! {
+                Some(#value_expr)
+            }
+        };
+
+
         prop_items.push(value_expr);
     }
 
+    let configurable_flatten = if has_configurable {
+        quote::quote! {
+            .flatten()
+        }
+    } else {
+        quote::quote! {}
+    };
+
     quote::quote! {
         #[inline(always)]
-        fn enumerable_values(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=#env::inline_props::Property>> {
+        fn enumerable_values(&self, realm: &mut #realm) -> #res<impl ::core::iter::Iterator<Item=#env::value::Property>> {
             ::core::result::Result::Ok(
                 ::core::iter::IntoIterator::into_iter([
                     #(#prop_items),*
                 ])
+                #configurable_flatten
             )
         }
     }
