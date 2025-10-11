@@ -122,7 +122,18 @@ fn run_input(
     }
 
     let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
-    let syn = Syntax::Es(EsSyntax::default());
+    let syn = Syntax::Es( EsSyntax {
+            jsx: false,
+            fn_bind: false,
+            decorators: true,
+            decorators_before_export: true,
+            export_default_from: true,
+            import_attributes: true,
+            allow_super_outside_method: false,
+            allow_return_outside_function: false,
+            auto_accessors: true,
+            explicit_resource_management: true,
+        });
 
     let mut p = Parser::new(syn, input, None);
 

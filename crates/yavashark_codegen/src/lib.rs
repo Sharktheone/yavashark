@@ -67,7 +67,18 @@ fn test_compile() {
 
     let input = StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
-    let c = EsSyntax::default();
+    let c =  EsSyntax {
+            jsx: false,
+            fn_bind: false,
+            decorators: true,
+            decorators_before_export: true,
+            export_default_from: true,
+            import_attributes: true,
+            allow_super_outside_method: false,
+            allow_return_outside_function: false,
+            auto_accessors: true,
+            explicit_resource_management: true,
+        };
 
     let mut p = Parser::new(Syntax::Es(c), input, None);
     let script = p.parse_script().unwrap();

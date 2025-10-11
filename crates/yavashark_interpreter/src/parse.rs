@@ -13,7 +13,18 @@ pub fn parse_module(input: &str) -> PResult<Module> {
 
     let input = StringInput::new(input, BytePos(0), end);
 
-    let mut p = Parser::new(Syntax::Es(EsSyntax::default()), input, None);
+    let mut p = Parser::new(Syntax::Es( EsSyntax {
+            jsx: false,
+            fn_bind: false,
+            decorators: true,
+            decorators_before_export: true,
+            export_default_from: true,
+            import_attributes: true,
+            allow_super_outside_method: false,
+            allow_return_outside_function: false,
+            auto_accessors: true,
+            explicit_resource_management: true,
+        }), input, None);
 
     p.parse_module()
 }
