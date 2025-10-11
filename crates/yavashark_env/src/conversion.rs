@@ -255,6 +255,18 @@ impl FromValueOutput for &PropertyKey {
     }
 }
 
+impl<T: FromValueOutput> FromValueOutput for Option<T> {
+    type Output = Option<T::Output>;
+
+    fn from_value_out(value: Value, realm: &mut Realm) -> Res<Self::Output> {
+        if value.is_undefined() {
+            return Ok(None);
+        }
+
+        Ok(Some(T::from_value_out(value, realm)?))
+    }
+}
+
 pub struct Stringable(String);
 
 impl Deref for Stringable {
@@ -517,23 +529,23 @@ impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
     }
 }
 
-impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
-    type Output = Option<T::Output>;
-
-    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
-        let Some(val) = self.values.next() else {
-            return Ok(None);
-        };
-
-        if val.is_undefined() {
-            return Ok(None);
-        }
-
-        let val = mem::replace(val, Value::Undefined);
-
-        Ok(Some(T::from_value_out(val, realm)?))
-    }
-}
+// impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
+//     type Output = Option<T::Output>;
+//
+//     fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
+//         let Some(val) = self.values.next() else {
+//             return Ok(None);
+//         };
+//
+//         if val.is_undefined() {
+//             return Ok(None);
+//         }
+//
+//         let val = mem::replace(val, Value::Undefined);
+//
+//         Ok(Some(T::from_value_out(val, realm)?))
+//     }
+// }
 
 impl<T: FromValueOutput> ExtractValue<&Option<T>> for Extractor<'_> {
     type Output = Option<T::Output>;

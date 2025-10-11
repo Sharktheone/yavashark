@@ -464,6 +464,12 @@ impl IntoValue for () {
     }
 }
 
+impl<T: IntoValue> IntoValue for Option<T> {
+    fn into_value(self) -> Value {
+        self.map_or(Value::Undefined, IntoValue::into_value)
+    }
+}
+
 macro_rules! impl_from_value {
     ($($t:ty),*) => {
         $(

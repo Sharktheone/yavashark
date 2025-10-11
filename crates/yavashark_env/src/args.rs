@@ -31,17 +31,3 @@ impl<T: FromValueOutput> ExtractValue<T> for Extractor<'_> {
         T::from_value_out(val, realm)
     }
 }
-
-impl<T: FromValueOutput> ExtractValue<Option<T>> for Extractor<'_> {
-    type Output = Option<T::Output>;
-
-    fn extract(&mut self, realm: &mut Realm) -> Res<Self::Output> {
-        let Some(val) = self.args.next() else {
-            return Ok(None);
-        };
-
-        let val = mem::replace(val, Value::Undefined);
-
-        Ok(Some(T::from_value_out(val, realm)?))
-    }
-}
