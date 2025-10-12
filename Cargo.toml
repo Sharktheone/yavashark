@@ -43,7 +43,7 @@ clap = "4.5.18"
 rustyline = { version = "15.0.0", features = ["derive"] }
 rustyline-derive = "0.11.0"
 tokio = { version = "1.47.1", features = ["full"] }
-yavashark_env = { path = "crates/yavashark_env", features = ["out-of-spec-experiments", "gui"] }
+yavashark_env = { path = "crates/yavashark_env" }
 
 [lib]
 crate-type = ["cdylib"]
@@ -52,6 +52,8 @@ crate-type = ["cdylib"]
 default = ["simple_bytecode"]
 vm = ["dep:yavashark_vm", "dep:yavashark_codegen", "dep:yavashark_compiler", "yavashark_interpreter/vm"]
 simple_bytecode = ["vm", "yavashark_vm/simple_bytecode", "yavashark_interpreter/simple_bytecode"]
+out_of_spec_experiments = ["yavashark_env/out-of-spec-experiments"]
+gui = ["yavashark_env/gui"]
 
 
 [profile.release]
