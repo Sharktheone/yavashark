@@ -80,6 +80,7 @@ pub struct GcRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
 
 impl<T: CellCollectable<RefCell<T>>, V> Drop for GcRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
+        #[cfg(feature = "actual_gc")]
         unsafe {
             if self.value.is_some() {
                 GcBox::update_refs(self.gc);
@@ -201,6 +202,7 @@ pub struct GcMutRefCellGuard<'a, T: CellCollectable<RefCell<T>>, V = T> {
 
 impl<T: CellCollectable<RefCell<T>>, V> Drop for GcMutRefCellGuard<'_, T, V> {
     fn drop(&mut self) {
+        #[cfg(feature = "actual_gc")]
         unsafe {
             if self.value.is_some() {
                 drop(self.value.take());

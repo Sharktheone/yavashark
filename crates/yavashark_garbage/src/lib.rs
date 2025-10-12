@@ -355,6 +355,7 @@ impl<T: Collectable, V: Debug> Debug for OwningGcGuard<'_, T, V> {
 impl<T: Collectable, V> Drop for GcGuard<'_, T, V> {
     fn drop(&mut self) {
         //we now need to update the references => look what is still there and what is not
+        #[cfg(feature = "actual_gc")]
         unsafe {
             GcBox::update_refs(self.gc);
         }
@@ -590,6 +591,7 @@ impl<T: Collectable> Gc<T> {
         #[cfg(feature = "easy_debug")]
         let name = value.trace_name();
 
+        #[cfg(feature = "actual_gc")]
         let ref_to = value.get_refs();
 
         let value = Box::new(value);
@@ -608,6 +610,7 @@ impl<T: Collectable> Gc<T> {
         let gc_box = Box::new(gc_box);
         let gc_box = unsafe { NonNull::new_unchecked(Box::into_raw(gc_box)) }; //Unsafe, since we know that Box::into_raw will not return null
 
+        #[cfg(feature = "actual_gc")]
         unsafe {
             for x in &ref_to {
                 x.add_ref_by(gc_box);
@@ -1224,7 +1227,7 @@ impl<T: Collectable> Drop for GcBox<T> {
         if !self.flags.is_externally_dropped() {
             // Drop all references that this GcBox has and check if all references to this GcBox have been dropped
 
-            #[cfg(debug_assertions)]
+            #[cfg(all(debug_assertions, feature = "actual_gc"))]
             if let Some(ref_by) = self.refs.read_ref_by() {
                 //TODO: try drop or some thing here
                 #[cfg(debug_assertions)]
@@ -1258,6 +1261,7 @@ impl<T: Collectable> Drop for GcBox<T> {
             }
 
             let self_raw = self as *mut Self;
+            #[cfg(feature = "actual_gc")]
             if let Some(refs) = self.refs.read_refs() {
                 for r in &*refs {
                     unsafe {
@@ -1299,6 +1303,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 let ptr = (*self.inner.as_ptr()).value.as_ptr();
 
                 //Drop all references
+                #[cfg(feature = "actual_gc")]
                 if let Some(mut refs) = (*self.inner.as_ptr()).refs.write_refs() {
                     for r in &*refs {
                         (*r.box_ptr().as_ptr())
@@ -1330,12 +1335,16 @@ impl<T: Collectable> Drop for Gc<T> {
                 let _ = Box::from_raw(ptr);
                 (*self.inner.as_ptr()).flags.set_value_dropped();
 
+                #[cfg(feature = "actual_gc")]
                 let Some(refs) = (*self.inner.as_ptr()).refs.read_ref_by() else {
                     warn!("Failed to read references - leaking memory");
                     //we don't need to execute GcBox::collect because it will also read `refs.ref_by` and we just failed to do so,
                     //so it also won't succeed.
                     return;
                 };
+
+                #[cfg(not(feature = "actual_gc"))]
+                let refs: [i32; 0] = [];
 
                 if (*self.inner.as_ptr()).refs.weak() == 0 && refs.is_empty() {
                     drop(refs);
@@ -1347,6 +1356,7 @@ impl<T: Collectable> Drop for Gc<T> {
                         //it also would be highly unsafe to continue, since we might have already dropped the GcBox
             }
 
+            #[cfg(feature = "actual_gc")]
             GcBox::collect(&self.inner.into());
         }
     }
