@@ -22,6 +22,7 @@ pub mod temporal;
 mod weakmap;
 mod weakref;
 mod weakset;
+pub(crate) mod intl;
 
 pub use arguments::*;
 pub use arraybuffer::*;

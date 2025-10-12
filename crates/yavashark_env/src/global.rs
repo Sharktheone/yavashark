@@ -356,6 +356,12 @@ pub fn init_global_obj(handle: &ObjectHandle, realm: &mut Realm) -> Res {
         realm,
     )?;
 
+    obj.define_property_attributes(
+        "Intl".into(),
+        Variable::write_config(realm.intrinsics.intl_obj().value),
+        realm,
+    )?;
+
     #[cfg(feature = "out-of-spec-experiments")]
     crate::experiments::init(handle, realm)?;
 

@@ -95,6 +95,19 @@ pub struct Intrinsics {
     pub signal_computed: ObjectHandle,
     pub arguments: ObjectHandle,
     pub proxy: ObjectHandle,
+    pub intl: ObjectHandle,
+    pub intl_collator: ObjectHandle,
+    pub intl_date_time_format: ObjectHandle,
+    pub intl_display_names: ObjectHandle,
+    pub intl_duration_format: ObjectHandle,
+    pub intl_list_format: ObjectHandle,
+    pub intl_locale: ObjectHandle,
+    pub intl_number_format: ObjectHandle,
+    pub intl_plural_rules: ObjectHandle,
+    pub intl_relative_time_format: ObjectHandle,
+    pub intl_segmenter: ObjectHandle,
+    pub intl_get_canonical_locales: ObjectHandle,
+    pub intl_supported_locales_of: ObjectHandle,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
@@ -173,6 +186,7 @@ impl Intrinsics {
     obj!(reflect);
     obj!(temporal);
     obj!(signal);
+    obj!(intl);
 }
 
 #[allow(clippy::similar_names)]
@@ -453,6 +467,12 @@ impl Intrinsics {
         let (temporal, temporal_protos) =
             get_temporal(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
+        let (intl, intl_protos) = crate::builtins::intl::get_intl(
+            obj_prototype.clone(),
+            func_prototype.clone(),
+            realm,
+        )?;
+
         let (signal, signal_protos) = crate::builtins::signal::get_signal(
             obj_prototype.clone(),
             func_prototype.clone(),
@@ -544,6 +564,20 @@ impl Intrinsics {
             arguments,
             proxy,
 
+            intl,
+            intl_collator: intl_protos.collator,
+            intl_date_time_format: intl_protos.date_time_format,
+            intl_display_names: intl_protos.display_names,
+            intl_duration_format: intl_protos.duration_format,
+            intl_list_format: intl_protos.list_format,
+            intl_locale: intl_protos.locale,
+            intl_number_format: intl_protos.number_format,
+            intl_plural_rules: intl_protos.plural_rules,
+            intl_relative_time_format: intl_protos.relative_time_format,
+            intl_segmenter: intl_protos.segmenter,
+            intl_get_canonical_locales: intl_protos.get_canonical_locales,
+            intl_supported_locales_of: intl_protos.supported_values_of,
+
             other: FxHashMap::default(),
         })
     }
@@ -628,6 +662,19 @@ impl Default for Intrinsics {
             signal_computed: Object::null(),
             arguments: Object::null(),
             proxy: Object::null(),
+            intl: Object::null(),
+            intl_collator: Object::null(),
+            intl_date_time_format: Object::null(),
+            intl_display_names: Object::null(),
+            intl_duration_format: Object::null(),
+            intl_list_format: Object::null(),
+            intl_locale: Object::null(),
+            intl_number_format: Object::null(),
+            intl_plural_rules: Object::null(),
+            intl_relative_time_format: Object::null(),
+            intl_segmenter: Object::null(),
+            intl_get_canonical_locales: Object::null(),
+            intl_supported_locales_of: Object::null(),
             other: FxHashMap::default(),
         }
     }
