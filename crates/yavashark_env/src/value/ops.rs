@@ -833,6 +833,10 @@ impl Value {
             return Ok(lhs == rhs);
         }
 
+        if (self.is_object() && rhs.is_nullish()) || (rhs.is_object() && self.is_nullish()) {
+            return Ok(false);
+        }
+
         let lhs = self.to_primitive(Hint::None, realm)?;
         let rhs = rhs.to_primitive(Hint::None, realm)?;
 
