@@ -14,7 +14,7 @@ use yavashark_string::YSString;
 pub struct Proxy {
     inner: ObjectHandle,
     handler: ObjectHandle,
-    this: RefCell<Option<WeakObjectHandle>>,
+    this: RefCell<Option<ObjectHandle>>,
     revoke: Cell<bool>,
 }
 
@@ -459,7 +459,7 @@ impl Proxy {
         .into_object();
 
         if let Some(proxy) = this.downcast::<Self>() {
-            proxy.this.replace(Some(WeakObjectHandle::new(&this)));
+            proxy.this.replace(Some(this.clone()));
         } else {
             return Err(Error::ty("Failed to create proxy"));
         }
@@ -481,7 +481,7 @@ impl Proxy {
         .into_object();
 
         if let Some(p) = proxy.downcast::<Self>() {
-            p.this.replace(Some(WeakObjectHandle::new(&proxy)));
+            p.this.replace(Some(proxy.clone()));
         } else {
             return Err(Error::ty("Failed to create proxy"));
         }
@@ -512,6 +512,8 @@ impl Proxy {
         self.this
             .borrow()
             .as_ref()
-            .map_or(Value::Undefined, |w| w.upgrade().map_or(Value::Undefined, Into::into))
+            .cloned()
+            .map_or(Value::Undefined, Into::into)
+            // .map_or(Value::Undefined, |w| w.upgrade().map_or(Value::Undefined, Into::into))
     }
 }
