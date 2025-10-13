@@ -106,8 +106,6 @@ pub struct Intrinsics {
     pub intl_plural_rules: ObjectHandle,
     pub intl_relative_time_format: ObjectHandle,
     pub intl_segmenter: ObjectHandle,
-    pub intl_get_canonical_locales: ObjectHandle,
-    pub intl_supported_locales_of: ObjectHandle,
 
     pub other: FxHashMap<TypeId, ObjectHandle>,
 }
@@ -575,8 +573,6 @@ impl Intrinsics {
             intl_plural_rules: intl_protos.plural_rules,
             intl_relative_time_format: intl_protos.relative_time_format,
             intl_segmenter: intl_protos.segmenter,
-            intl_get_canonical_locales: intl_protos.get_canonical_locales,
-            intl_supported_locales_of: intl_protos.supported_values_of,
 
             other: FxHashMap::default(),
         })
@@ -673,8 +669,6 @@ impl Default for Intrinsics {
             intl_plural_rules: Object::null(),
             intl_relative_time_format: Object::null(),
             intl_segmenter: Object::null(),
-            intl_get_canonical_locales: Object::null(),
-            intl_supported_locales_of: Object::null(),
             other: FxHashMap::default(),
         }
     }

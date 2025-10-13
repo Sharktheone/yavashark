@@ -39,7 +39,6 @@ pub struct Protos {
     pub plural_rules: ObjectHandle,
     pub relative_time_format: ObjectHandle,
     pub segmenter: ObjectHandle,
-    pub get_canonical_locales: ObjectHandle,
 }
 
 fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
@@ -146,6 +145,5 @@ pub fn get_intl(
         plural_rules,
         relative_time_format,
         segmenter,
-        get_canonical_locales,
     }))
 }
