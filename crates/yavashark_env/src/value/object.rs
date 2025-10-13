@@ -51,6 +51,19 @@ impl From<Value> for Property {
             value,
             Attributes::default()
         )
+    } 
+}
+
+impl From<PropertyDescriptor> for Property {
+    fn from(desc: PropertyDescriptor) -> Self {
+        match desc {
+            PropertyDescriptor::Data { value, writable, enumerable, configurable } => {
+                Self::Value(value, Attributes::from_values(writable, enumerable, configurable))
+            }
+            PropertyDescriptor::Accessor { get, set: _, enumerable, configurable } => {
+                Self::Getter(get.unwrap_or(crate::Object::null()), Attributes::from_values(false, enumerable, configurable))
+            }
+        }
     }
 }
 
