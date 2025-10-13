@@ -10,6 +10,7 @@ mod relative_time_format;
 mod segmenter;
 mod get_canonical_locales;
 mod supported_values_of;
+mod utils;
 
 pub use collator::*;
 pub use date_time_format::*;
