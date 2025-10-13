@@ -133,6 +133,28 @@ impl PropertyDescriptor {
     }
 }
 
+impl From<Value> for PropertyDescriptor {
+    fn from(value: Value) -> Self {
+        PropertyDescriptor::Data {
+            value,
+            writable: true,
+            enumerable: true,
+            configurable: true,
+        }
+    }
+}
+
+impl From<Variable> for PropertyDescriptor {
+    fn from(var: Variable) -> Self {
+        PropertyDescriptor::Data {
+            value: var.value,
+            writable: var.properties.is_writable(),
+            enumerable: var.properties.is_enumerable(),
+            configurable: var.properties.is_configurable(),
+        }
+    }
+}
+
 pub trait Obj: Debug + 'static {
     fn define_property(
         &self,
