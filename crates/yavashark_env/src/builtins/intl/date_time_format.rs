@@ -19,7 +19,7 @@ impl DateTimeFormat {
 
 #[props]
 impl DateTimeFormat {
-    #[constructor]
+    #[call_constructor]
     fn construct() {}
 
 }
