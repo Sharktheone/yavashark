@@ -40,7 +40,6 @@ pub struct Protos {
     pub relative_time_format: ObjectHandle,
     pub segmenter: ObjectHandle,
     pub get_canonical_locales: ObjectHandle,
-    pub supported_values_of: ObjectHandle,
 }
 
 fn constr(obj: &ObjectHandle, realm: &mut Realm) -> Variable {
@@ -136,12 +135,8 @@ pub fn get_intl(
     )?;
     obj.define_property_attributes("getCanonicalLocales".into(), constr(&get_canonical_locales, realm), realm)?;
     
-    let supported_values_of = SupportedValuesOf::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
-        realm,
-    )?;
-    obj.define_property_attributes("supportedValuesOf".into(), constr(&supported_values_of, realm), realm)?;
+    let supported_values_of = get_supported_values_of(realm);
+    obj.define_property_attributes("supportedValuesOf".into(), Variable::write_config(supported_values_of.into()), realm)?;
 
 
     Ok((obj, Protos {
@@ -156,6 +151,5 @@ pub fn get_intl(
         relative_time_format,
         segmenter,
         get_canonical_locales,
-        supported_values_of,
     }))
 }
