@@ -1,25 +1,15 @@
-use std::cell::RefCell;
-use yavashark_macro::{object, props};
-use crate::{MutObject, Realm};
+use crate::{NativeFunction, ObjectHandle, Realm, Value};
 
-#[object]
-#[derive(Debug)]
-pub struct GetCanonicalLocales {}
+pub fn get_get_canonical_locales(realm: &mut Realm) -> ObjectHandle {
+    NativeFunction::with_len(
+        "getCanonicalLocales",
+        |args, _, realm| {
+            let _ = args;
+            let _ = realm;
 
-impl GetCanonicalLocales {
-    pub fn new(realm: &mut Realm) -> Self {
-        Self {
-            inner: RefCell::new(MutableGetCanonicalLocales {
-                object: MutObject::with_proto(realm.intrinsics.intl_get_canonical_locales.clone()),
-            }),
-        }
-    }
-}
-
-
-#[props]
-impl GetCanonicalLocales {
-    #[constructor]
-    fn construct() {}
-
+            Ok(Value::Undefined)
+        },
+        realm,
+        1,
+    )
 }

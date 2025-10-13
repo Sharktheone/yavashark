@@ -128,12 +128,8 @@ pub fn get_intl(
     )?;
     obj.define_property_attributes("Segmenter".into(), constr(&segmenter, realm), realm)?;
     
-    let get_canonical_locales = GetCanonicalLocales::initialize_proto(
-        Object::raw_with_proto(obj_proto.clone()),
-        func_proto.clone().into(),
-        realm,
-    )?;
-    obj.define_property_attributes("getCanonicalLocales".into(), constr(&get_canonical_locales, realm), realm)?;
+    let get_canonical_locales = get_get_canonical_locales(realm);
+    obj.define_property_attributes("getCanonicalLocales".into(), Variable::write_config(get_canonical_locales.into()), realm)?;
     
     let supported_values_of = get_supported_values_of(realm);
     obj.define_property_attributes("supportedValuesOf".into(), Variable::write_config(supported_values_of.into()), realm)?;
