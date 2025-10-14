@@ -1,5 +1,5 @@
 use crate::utils::ValueIterator;
-use crate::value::{Constructor, MutObj, Obj};
+use crate::value::{Constructor, IntoValue, MutObj, Obj};
 use crate::{MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
 use indexmap::IndexSet;
 use std::cell::RefCell;

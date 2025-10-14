@@ -3,7 +3,7 @@ use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
+use crate::value::{Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
 use crate::MutObject;
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
@@ -180,7 +180,7 @@ impl Array {
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
 
-        inner.set_array(elements);
+        inner.set_array(elements.into_iter());
 
         drop(inner);
 
@@ -188,6 +188,33 @@ impl Array {
     }
 
     pub fn with_elements_and_proto(proto: ObjectHandle, elements: Vec<Value>) -> Res<Self> {
+        let array = Self::new(proto);
+
+        let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
+
+        inner.set_array(elements.into_iter());
+
+        drop(inner);
+
+        Ok(array)
+    }
+
+
+    pub fn from_iter(realm: &Realm, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.array.clone());
+
+        let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
+
+        inner.set_array(elements);
+
+        drop(inner);
+
+        Ok(array)
+    }
+
+    pub fn from_iter_and_proto(proto: ObjectHandle, elements: impl ExactSizeIterator<Item= Value>) -> Res<Self> {
         let array = Self::new(proto);
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -422,7 +449,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     #[prop("copyWithin")]
@@ -563,7 +590,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     fn find(#[this] this: Value, #[realm] realm: &mut Realm, func: &ObjectHandle) -> ValueResult {
@@ -735,7 +762,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     #[prop("flatMap")]
@@ -779,7 +806,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     #[prop("forEach")]
@@ -983,7 +1010,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     fn pop(#[this] this: Value, #[realm] realm: &mut Realm) -> ValueResult {
@@ -1179,7 +1206,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     fn some(
@@ -1330,7 +1357,7 @@ impl Array {
 
         this.define_property("length".into(), new_len.into(), realm)?;
 
-        Ok(Obj::into_value(Self::with_elements(realm, deleted)?))
+        Ok(Self::with_elements(realm, deleted)?.into_value())
     }
 
     #[prop("toReversed")]
@@ -1353,7 +1380,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(array))
+        Ok(array.into_value())
     }
 
     #[prop("toSorted")]
@@ -1397,7 +1424,7 @@ impl Array {
             values.sort_by_key(|a| a.to_string(realm).unwrap_or_default());
         }
 
-        Ok(Obj::into_value(Self::with_elements(realm, values)?))
+        Ok(Self::with_elements(realm, values)?.into_value())
     }
 
     fn unshift(#[this] this: Value, args: Vec<Value>, #[realm] realm: &mut Realm) -> ValueResult {
@@ -1463,7 +1490,7 @@ impl Array {
             }
         }
 
-        Ok(Obj::into_value(Self::with_elements(realm, vals)?))
+        Ok(Self::with_elements(realm, vals)?.into_value())
     }
 
     #[prop(crate::Symbol::ITERATOR)]
@@ -1605,7 +1632,7 @@ impl Constructor for ArrayConstructor {
 
         let mut inner = this.inner.try_borrow_mut()?;
 
-        inner.set_array(args);
+        inner.set_array(args.into_iter());
         this.length.set(inner.array.len());
 
         drop(inner);

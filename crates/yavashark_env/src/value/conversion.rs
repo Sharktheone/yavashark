@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::value::{BoxedObj, Object, PrimitiveValue, Symbol, Value};
+use crate::value::{BoxedObj, Obj, Object, PrimitiveValue, Symbol, Value};
 use half::f16;
 use num_bigint::BigInt;
 use std::any::type_name;
@@ -428,6 +428,12 @@ impl IntoValue for bool {
     }
 }
 
+
+impl<T: Obj> IntoValue for T {
+    fn into_value(self) -> Value {
+        Value::Object(self.into_object())
+    }
+}
 impl IntoValue for Object {
     fn into_value(self) -> Value {
         Value::Object(self)

@@ -1,6 +1,6 @@
 use crate::builtins::buf::ArrayBuffer;
 use crate::builtins::typed_array::{Type, TypedArray};
-use crate::value::Obj;
+use crate::value::{IntoValue, Obj};
 use crate::{Error, Object, ObjectHandle, Realm, Res, Value};
 use base64::alphabet::{STANDARD, URL_SAFE};
 use base64::{engine, Engine};

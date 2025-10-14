@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::utils::ValueIterator;
-use crate::value::{Constructor, MutObj, Obj};
+use crate::value::{Constructor, IntoValue, MutObj, Obj};
 use crate::{Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult, WeakValue};
 use indexmap::map::Entry;
 use indexmap::IndexMap;

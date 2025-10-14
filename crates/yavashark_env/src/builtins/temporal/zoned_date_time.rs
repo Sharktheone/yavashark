@@ -10,7 +10,7 @@ use crate::builtins::temporal::utils::{
 };
 use crate::print::{fmt_properties_to, PrettyObjectOverride};
 use crate::value::ops::BigIntOrNumber;
-use crate::value::{Obj, Object};
+use crate::value::{IntoValue, Obj, Object};
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, Value};
 use num_bigint::BigInt;
 use num_traits::ToPrimitive;

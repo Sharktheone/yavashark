@@ -4,7 +4,7 @@ use yavashark_bytecode::data::{ControlIdx, Label};
 use yavashark_bytecode::JmpAddr;
 use yavashark_env::array::Array;
 use yavashark_env::builtins::Promise;
-use yavashark_env::value::{Obj, ObjectOrNull};
+use yavashark_env::value::{IntoValue, Obj, ObjectOrNull};
 use yavashark_env::{
     Class, ClassInstance, ControlFlow, ControlResult, Error, Object, PrivateMember, PropertyKey,
     Realm, Res, Value,

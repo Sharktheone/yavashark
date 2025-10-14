@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::console::print::PrettyObjectOverride;
-use crate::value::{Constructor, Func, Obj, Symbol};
+use crate::value::{Constructor, Func, IntoValue, Obj, Symbol};
 use crate::{ControlFlow, Error, MutObject, Object, ObjectHandle, Realm, Res, Value, ValueResult};
 use regress::{Range, Regex};
 use std::cell::{Cell, RefCell};

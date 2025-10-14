@@ -2,7 +2,7 @@ use crate::array::Array;
 use crate::conversion::{ActualString, Stringable};
 use crate::utils::{ArrayLike, ProtoDefault};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Constructor, CustomName, Func, MutObj, Obj, Property};
+use crate::value::{Constructor, CustomName, Func, IntoValue, MutObj, Obj, Property};
 use crate::{
     Error, MutObject, Object, ObjectHandle, PrimitiveValue, Realm, Res, Value, ValueResult,
 };

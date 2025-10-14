@@ -2,7 +2,7 @@ use crate::Interpreter;
 use swc_ecma_ast::ArrayLit;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
-use yavashark_env::value::Obj;
+use yavashark_env::value::{IntoValue, Obj};
 use yavashark_env::{Realm, RuntimeResult, Value};
 
 impl Interpreter {

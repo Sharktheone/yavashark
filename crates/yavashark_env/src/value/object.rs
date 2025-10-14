@@ -433,13 +433,6 @@ pub trait Obj: Debug + 'static {
     {
         Object::from_boxed(Box::new(self))
     }
-
-    fn into_value(self) -> Value
-    where
-        Self: Sized,
-    {
-        Value::from(self.into_object())
-    }
 }
 
 pub trait MutObj: Debug + 'static {

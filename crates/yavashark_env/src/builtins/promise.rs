@@ -6,7 +6,7 @@ use crate::array::Array;
 use crate::conversion::downcast_obj;
 use crate::error_obj::ErrorObj;
 use crate::utils::ValueIterator;
-use crate::value::{BoxedObj, Obj};
+use crate::value::{BoxedObj, IntoValue, Obj};
 use crate::{
     Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
 };

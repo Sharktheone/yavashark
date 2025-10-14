@@ -474,14 +474,14 @@ impl MutObject {
         None
     }
 
-    pub fn set_array(&mut self, elements: Vec<Value>) {
+    pub fn set_array(&mut self, elements: impl ExactSizeIterator<Item = Value>) {
         self.array.clear();
 
         let len = self.values.len();
         let elements_len = elements.len();
 
         self.values
-            .extend(elements.into_iter().map(ObjectProperty::new));
+            .extend(elements.map(ObjectProperty::new));
 
         for i in 0..elements_len {
             self.array.push((i, len + i));

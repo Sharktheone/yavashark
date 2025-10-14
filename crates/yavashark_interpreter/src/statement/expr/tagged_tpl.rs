@@ -4,7 +4,7 @@ use swc_common::Spanned;
 use swc_ecma_ast::TaggedTpl;
 use yavashark_env::array::Array;
 use yavashark_env::scope::Scope;
-use yavashark_env::value::Obj;
+use yavashark_env::value::{IntoValue, Obj};
 use yavashark_env::{ControlFlow, Realm, RuntimeResult, Value};
 
 impl Interpreter {

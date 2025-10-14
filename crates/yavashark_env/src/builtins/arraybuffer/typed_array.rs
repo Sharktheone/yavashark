@@ -15,7 +15,7 @@ use crate::builtins::uint32array::Uint32Array;
 use crate::builtins::unit8array::Uint8Array;
 use crate::conversion::downcast_obj;
 use crate::utils::ValueIterator;
-use crate::value::{DefinePropertyResult, MutObj, Obj, Property};
+use crate::value::{DefinePropertyResult, IntoValue, MutObj, Obj, Property};
 use crate::{
     Error, GCd, InternalPropertyKey, MutObject, ObjectHandle, PropertyKey, Realm, Res, Value,
     ValueResult, Variable,

@@ -1,5 +1,5 @@
 use crate::realm::Realm;
-use crate::value::{BoxedObj, ConstructorFn, DefinePropertyResult, Obj, Property, Variable};
+use crate::value::{BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable};
 use crate::{
     Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey,
     Res, Value, ValueResult,
