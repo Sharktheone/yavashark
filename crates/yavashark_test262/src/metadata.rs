@@ -18,7 +18,7 @@ pub struct Negative {
     pub ty: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NegativePhase {
     Parse,
     Resolution,

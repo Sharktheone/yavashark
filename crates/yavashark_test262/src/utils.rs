@@ -43,7 +43,7 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let metadata = parse_metadata(input);
 
-    if metadata.flags.contains(Flags::ONLY_STRICT) {
+    if metadata.flags.contains(Flags::ONLY_STRICT) && !metadata.negative.as_ref().is_some_and(|neg| neg.phase == NegativePhase::Parse) {
         println!("SKIP");
         return (Program::Script(Script::dummy()), Metadata::default());
     }
