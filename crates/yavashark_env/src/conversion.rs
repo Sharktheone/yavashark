@@ -12,6 +12,7 @@ use std::rc::Rc;
 use std::slice::IterMut;
 use yavashark_garbage::OwningGcGuard;
 use yavashark_string::YSString;
+use crate::array::Array;
 use crate::value::property_key::IntoPropertyKey;
 
 pub trait TryIntoValue: Sized {
@@ -27,6 +28,21 @@ impl<T: IntoValue> TryIntoValue for T {
 impl<T: TryIntoValue> TryIntoValue for Res<T, Error> {
     fn try_into_value(self, realm: &mut Realm) -> ValueResult {
         self?.try_into_value(realm)
+    }
+}
+
+
+impl<T: TryIntoValue> TryIntoValue for Vec<T> {
+    fn try_into_value(self, realm: &mut Realm) -> ValueResult {
+        let proto = realm.intrinsics.array.clone();
+
+
+        let iter = self
+            .into_iter()
+            .map(|v| v.try_into_value(realm));
+
+
+        Ok(Array::from_iter_res_and_proto(proto, iter)?.into_value())
     }
 }
 

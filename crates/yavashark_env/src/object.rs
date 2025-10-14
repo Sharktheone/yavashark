@@ -1,7 +1,7 @@
 use crate::realm::Realm;
 use crate::value::property_key::{InternalPropertyKey, PropertyKey};
 use crate::value::{BoxedObj, DefinePropertyResult, MutObj, Obj, ObjectOrNull, Property};
-use crate::{Error, ObjectHandle, ObjectProperty, Variable};
+use crate::{Error, ObjectHandle, ObjectProperty, ValueResult, Variable};
 use crate::{Res, Value};
 use indexmap::map::Entry;
 use indexmap::IndexMap;
@@ -487,6 +487,26 @@ impl MutObject {
             self.array.push((i, len + i));
         }
     }
+
+    pub fn set_array_res(&mut self, elements: impl ExactSizeIterator<Item = ValueResult>) -> Res {
+        self.array.clear();
+
+        let len = self.values.len();
+        let elements_len = elements.len();
+        
+        for val in elements {
+            let val = val?;
+            self.values.push(ObjectProperty::new(val));
+            
+        }
+
+        for i in 0..elements_len {
+            self.array.push((i, len + i));
+        }
+        
+        Ok(())
+    }
+
 
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);

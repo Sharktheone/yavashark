@@ -214,13 +214,41 @@ impl Array {
         Ok(array)
     }
 
-    pub fn from_iter_and_proto(proto: ObjectHandle, elements: impl ExactSizeIterator<Item= Value>) -> Res<Self> {
+    pub fn from_iter_res(realm: &Realm, elements: impl ExactSizeIterator<Item = ValueResult>) -> Res<Self> {
+        let array = Self::new(realm.intrinsics.array.clone());
+
+        let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
+
+        inner.set_array_res(elements)?;
+
+        drop(inner);
+
+        Ok(array)
+    }
+
+
+    pub fn from_iter_and_proto(proto: ObjectHandle, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
         let array = Self::new(proto);
 
         let mut inner = array.inner.try_borrow_mut()?;
         array.length.set(elements.len());
 
         inner.set_array(elements);
+
+        drop(inner);
+
+        Ok(array)
+    }
+
+
+    pub fn from_iter_res_and_proto(proto: ObjectHandle, elements: impl ExactSizeIterator<Item = ValueResult>) -> Res<Self> {
+        let array = Self::new(proto);
+
+        let mut inner = array.inner.try_borrow_mut()?;
+        array.length.set(elements.len());
+
+        inner.set_array_res(elements)?;
 
         drop(inner);
 
