@@ -479,6 +479,10 @@ impl ScopeInternal {
             self.variables
                 .insert_opt(name, Variable::new(value), realm)?;
         } else {
+            if self.variables.contains_key(&name, realm) {
+                return Ok(())
+            }
+
             match &self.parent {
                 Some(p) => {
                     p.borrow_mut()?
