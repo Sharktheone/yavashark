@@ -43,6 +43,11 @@ impl<'a> Validator<'a> {
         Self::default()
     }
 
+    pub const fn enable_script_strict_mode(&mut self) {
+        self.script_strict = true;
+        self.script_prologue_checked = true;
+    }
+
     pub fn validate_statements(&mut self, ast: &'a [Stmt]) -> Result<(), String> {
         if !self.script_prologue_checked && !self.in_function_context() {
             if statements_have_use_strict(ast) {

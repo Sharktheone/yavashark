@@ -24,11 +24,6 @@ impl<'a> Validator<'a> {
         self.set_super_property_allowed(allow_super_property);
         self.set_super_call_allowed(allow_super_call);
 
-        let ctx = self.enter_function_context(function.is_async, function.is_generator);
-
-        self.set_super_property_allowed(allow_super_property);
-        self.set_super_call_allowed(allow_super_call);
-
         if let Some(body) = &function.body {
             if block_has_use_strict(body) {
                 self.set_current_function_strict();

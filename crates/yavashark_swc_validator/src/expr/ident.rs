@@ -20,6 +20,25 @@ impl<'a> Validator<'a> {
             return Err("Identifier 'yield' is reserved in generator functions".to_string());
         }
 
+        if self.in_strict_mode()
+            && matches!(
+                sym,
+                "implements"
+                    | "interface"
+                    | "package"
+                    | "private"
+                    | "protected"
+                    | "public"
+                    | "static"
+            )
+        {
+            return Err(format!("Identifier '{}' is reserved in strict mode", sym));
+        }
+
+        if self.in_strict_mode() && sym == "yield" {
+            return Err("Identifier 'yield' is reserved in strict mode".to_string());
+        }
+
         Ok(())
     }
 

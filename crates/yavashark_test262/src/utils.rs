@@ -69,7 +69,13 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
                         panic!()
                     }
 
-                    if let Err(e) = Validator::new().validate_statements(&script.body) {
+                    let mut validator = Validator::new();
+
+                    if metadata.flags.contains(Flags::ONLY_STRICT) {
+                        validator.enable_script_strict_mode();
+                    }
+
+                    if let Err(e) = validator.validate_statements(&script.body) {
                         if let Some(neg) = &metadata.negative {
                             if neg.phase == NegativePhase::Parse {
                                 return (Program::Script(Script::dummy()), Metadata::default());

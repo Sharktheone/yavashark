@@ -47,7 +47,20 @@ impl<'a> Validator<'a> {
         expr: &'a Expr,
     ) -> Result<(), String> {
         match expr {
-            Expr::Ident(ident) => self.validate_ident(ident),
+            Expr::Ident(ident) => {
+                self.validate_ident(ident)?;
+
+                if self.in_strict_mode() {
+                    let name = ident.sym.as_ref();
+                    if matches!(name, "eval" | "arguments") {
+                        return Err(format!(
+                            "Cannot assign to '{name}' in strict mode"
+                        ));
+                    }
+                }
+
+                Ok(())
+            }
             Expr::Member(member) => self.validate_member_expr(member),
             Expr::SuperProp(super_prop) => self.validate_super_prop_expr(super_prop),
             Expr::Paren(paren) => self.ensure_valid_assignment_target_expr(&paren.expr),
