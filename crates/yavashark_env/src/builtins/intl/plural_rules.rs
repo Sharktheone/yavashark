@@ -22,8 +22,8 @@ impl PluralRules {
 impl PluralRules {
     #[constructor]
     fn construct(
-        locales: Option<String>,
-        options: Option<ObjectHandle>,
+        _locales: Option<String>,
+        _options: Option<ObjectHandle>,
         realm: &mut Realm,
     ) -> ObjectHandle {
         Self::new(realm).into_object()
@@ -48,7 +48,7 @@ impl PluralRules {
     }
 
     #[prop("selectRange")]
-    fn select_range(&self, _duration: ObjectHandle, realm: &Realm) -> String {
+    fn select_range(&self, _duration: ObjectHandle, _realm: &Realm) -> String {
         String::new()
     }
 }

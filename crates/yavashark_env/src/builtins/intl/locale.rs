@@ -7,6 +7,7 @@ use yavashark_macro::{object, props};
 pub struct Locale {}
 
 impl Locale {
+    #[allow(unused)]
     pub fn new(realm: &mut Realm) -> Self {
         Self {
             inner: RefCell::new(MutableLocale {

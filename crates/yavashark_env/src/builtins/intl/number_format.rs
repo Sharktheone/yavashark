@@ -227,7 +227,7 @@ impl NumberFormat {
 
     pub fn supported_locales_of(
         locales: Value,
-        options: Option<ObjectHandle>,
+        _options: Option<ObjectHandle>,
         #[realm] realm: &mut Realm,
     ) -> Res<ObjectHandle> {
         let list = canonicalize_locale_list(Some(locales), realm)?;

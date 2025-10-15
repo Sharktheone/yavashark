@@ -22,8 +22,8 @@ impl Segmenter {
 impl Segmenter {
     #[constructor]
     fn construct(
-        locales: Option<String>,
-        options: Option<ObjectHandle>,
+        _locales: Option<String>,
+        _options: Option<ObjectHandle>,
         realm: &mut Realm,
     ) -> ObjectHandle {
         Self::new(realm).into_object()

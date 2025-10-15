@@ -1,5 +1,5 @@
 use crate::array::convert_index;
-use crate::value::{IntoValue, Obj};
+use crate::value::IntoValue;
 use crate::{Error, MutObject, ObjectHandle, Realm, Res, ValueResult};
 use std::cell::{Ref, RefCell, RefMut};
 use yavashark_macro::{object, props};

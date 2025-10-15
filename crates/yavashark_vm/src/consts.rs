@@ -8,7 +8,7 @@ use yavashark_env::array::Array;
 use yavashark_env::builtins::RegExp;
 use yavashark_env::optimizer::{FunctionCode, OptimFunction};
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::value::{IntoValue, Obj};
+use yavashark_env::value::IntoValue;
 use yavashark_env::{Error, Object, Value, ValueResult};
 
 pub trait ConstIntoValue {
