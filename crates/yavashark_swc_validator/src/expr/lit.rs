@@ -14,11 +14,98 @@ enum ClassToken {
 }
 
 impl<'a> Validator<'a> {
-    pub fn validate_lit(lit: &Lit) -> Result<(), String> {
+    pub fn validate_lit(&mut self, lit: &Lit) -> Result<(), String> {
         match lit {
             Lit::Regex(regex) => Self::validate_regex_lit(regex),
+            Lit::Num(num) => self.validate_num_lit(num),
             _ => Ok(()),
         }
+    }
+    
+    fn validate_num_lit(&self, num: &swc_ecma_ast::Number) -> Result<(), String> {
+        let raw = num.raw.as_ref().map(|a| a.as_ref());
+        
+        if let Some(raw_str) = raw {
+            if raw_str.starts_with('0') && raw_str.len() >= 2 {
+                let chars: Vec<char> = raw_str.chars().collect();
+                if chars.len() > 1 {
+                    let second = chars[1];
+                    
+                    if second == 'x' || second == 'X' || second == 'b' || second == 'B' || 
+                       second == 'o' || second == 'O' || second == '.' {
+                        return Ok(());
+                    }
+                    
+                    let mut has_separator = false;
+                    let mut all_digits = true;
+                    
+                    for i in 1..chars.len() {
+                        let ch = chars[i];
+                        
+                        if ch == '.' || ch == 'e' || ch == 'E' {
+                            all_digits = false;
+                            break;
+                        }
+                        
+                        if ch == '_' {
+                            has_separator = true;
+                        } else if !ch.is_ascii_digit() {
+                            all_digits = false;
+                            break;
+                        }
+                    }
+                    
+                    if has_separator && all_digits {
+                        return Err(format!(
+                            "Numeric separators are not allowed in legacy octal-like or non-octal decimal integer literals: {raw_str}",
+                        ));
+                    }
+                }
+            }
+            
+            if self.in_strict_mode() {
+                if raw_str.len() >= 2 && raw_str.starts_with('0') {
+                    let Some(second_char) = raw_str.chars().nth(1) else {
+                        return Ok(());
+                    };
+                    
+                    if second_char.is_ascii_digit() && second_char != '8' && second_char != '9' {
+                        if second_char != '.' {
+                            return Err(format!(
+                                "Legacy octal literals are not allowed in strict mode: {}",
+                                raw_str
+                            ));
+                        }
+                    }
+                    
+                    if raw_str.starts_with('0') && raw_str.len() >= 2 {
+                        let chars: Vec<char> = raw_str.chars().collect();
+                        if chars[1].is_ascii_digit() {
+                            for i in 1..chars.len() {
+                                let ch = chars[i];
+                                if ch == '8' || ch == '9' {
+                                    let before = &raw_str[..i];
+                                    if !before.contains('.') && !before.contains('e') && !before.contains('E') {
+                                        return Err(format!(
+                                            "Non-octal decimal integer literals are not allowed in strict mode: {}",
+                                            raw_str
+                                        ));
+                                    }
+                                }
+                                if ch == '.' || ch == 'e' || ch == 'E' {
+                                    break;
+                                }
+                                if !ch.is_ascii_digit() && ch != '_' {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        Ok(())
     }
 
     fn validate_regex_lit(regex: &Regex) -> Result<(), String> {

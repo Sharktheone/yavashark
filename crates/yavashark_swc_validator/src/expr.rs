@@ -48,7 +48,7 @@ impl<'a> Validator<'a> {
             Expr::New(new) => self.validate_new_expr(new),
             Expr::Seq(seq) => self.validate_seq_expr(seq),
             Expr::Ident(ident) => self.validate_ident(ident),
-            Expr::Lit(lit) => Self::validate_lit(lit),
+            Expr::Lit(lit) => self.validate_lit(lit),
             Expr::Tpl(tpl) => self.validate_tpl_expr(tpl),
             Expr::TaggedTpl(tagged_tpl) => self.validate_tagged_tpl_expr(tagged_tpl),
             Expr::Arrow(arrow) => self.validate_arrow_expr(arrow),

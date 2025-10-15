@@ -25,6 +25,7 @@ impl<'a> Validator<'a> {
                 sym,
                 "implements"
                     | "interface"
+                    | "let"
                     | "package"
                     | "private"
                     | "protected"
