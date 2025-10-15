@@ -117,7 +117,7 @@ impl Collator {
         let ignore_punctuation =
             get_option_bool(&options_obj, "ignorePunctuation", realm)?.unwrap_or(false);
 
-        let mut collator = Self::new(realm);
+        let collator = Self::new(realm);
 
         {
             let mut inner = collator.inner.borrow_mut();
@@ -146,7 +146,7 @@ impl Collator {
 
         let func = NativeFunction::with_proto_and_len(
             "compare",
-            |mut args, this, realm| {
+            |args, this, realm| {
                 let collator = downcast_obj::<Self>(this.copy())?;
                 let left = args.get(0).map_or(Value::Undefined, Value::copy);
                 let right = args.get(1).map_or(Value::Undefined, Value::copy);

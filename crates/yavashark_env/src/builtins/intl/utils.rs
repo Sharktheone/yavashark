@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::value::Obj;
-use crate::{Error, Object, ObjectHandle, Realm, Res, Value};
+use crate::{Error, ObjectHandle, Realm, Res, Value};
 use std::fmt::Display;
 
 const DEFAULT_LOCALE: &str = "und";

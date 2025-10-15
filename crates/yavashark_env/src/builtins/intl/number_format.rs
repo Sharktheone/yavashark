@@ -1,6 +1,6 @@
 use crate::array::Array;
 use crate::builtins::intl::utils::{
-    canonicalize_locale_list, get_option_bool, get_option_string, validate_currency_code,
+    canonicalize_locale_list, get_option_string, validate_currency_code,
 };
 use crate::conversion::downcast_obj;
 use crate::value::Obj;
@@ -120,7 +120,7 @@ impl NumberFormat {
             3
         };
 
-        let mut nf = Self::new(realm);
+        let nf = Self::new(realm);
 
         {
             let mut inner = nf.inner.borrow_mut();
@@ -148,7 +148,7 @@ impl NumberFormat {
 
         let func = NativeFunction::with_proto_and_len(
             "format",
-            |mut args, this, realm| {
+            |args, this, realm| {
                 let nf = downcast_obj::<Self>(this.copy())?;
                 nf.ensure_initialized()?;
 
