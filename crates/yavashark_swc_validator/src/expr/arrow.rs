@@ -1,12 +1,12 @@
-use crate::utils::block_has_use_strict;
 use crate::Validator;
+use crate::utils::block_has_use_strict;
 use swc_ecma_ast::{ArrowExpr, BlockStmtOrExpr};
 
 impl<'a> Validator<'a> {
     pub fn validate_arrow_expr(&mut self, arrow: &'a ArrowExpr) -> Result<(), String> {
         let scope = self.enter_function_context(arrow.is_async, false);
 
-    if let BlockStmtOrExpr::BlockStmt(block) = &*arrow.body {
+        if let BlockStmtOrExpr::BlockStmt(block) = &*arrow.body {
             if block_has_use_strict(block) {
                 self.set_current_function_strict();
             }

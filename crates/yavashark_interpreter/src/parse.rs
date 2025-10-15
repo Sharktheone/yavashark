@@ -15,7 +15,8 @@ pub fn parse_module(input: &str) -> Res<Module> {
 
     let input = StringInput::new(input, BytePos(0), end);
 
-    let mut p = Parser::new(Syntax::Es( EsSyntax {
+    let mut p = Parser::new(
+        Syntax::Es(EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,
@@ -26,11 +27,14 @@ pub fn parse_module(input: &str) -> Res<Module> {
             allow_return_outside_function: false,
             auto_accessors: true,
             explicit_resource_management: true,
-        }), input, None);
+        }),
+        input,
+        None,
+    );
 
-    let m =  p.parse_module()
+    let m = p
+        .parse_module()
         .map_err(|e| Error::syn_error(format!("{e:?}")))?;
-
 
     let errors = p.take_errors();
 
@@ -40,10 +44,7 @@ pub fn parse_module(input: &str) -> Res<Module> {
 
     if let Err(e) = Validator::new().validate_module_items(&m.body) {
         return Err(Error::syn_error(e));
-
     }
-
-
 
     Ok(m)
 }

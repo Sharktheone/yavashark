@@ -1,8 +1,10 @@
 use crate::realm::Realm;
-use crate::value::{BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable};
+use crate::value::{
+    BoxedObj, ConstructorFn, DefinePropertyResult, IntoValue, Obj, Property, Variable,
+};
 use crate::{
-    Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey,
-    Res, Value, ValueResult,
+    Error, InternalPropertyKey, Object, ObjectHandle, ObjectOrNull, PropertyKey, Res, Value,
+    ValueResult,
 };
 use rustc_hash::FxHashMap;
 use std::any::TypeId;
@@ -542,8 +544,7 @@ impl Obj for ClassInstance {
         name: InternalPropertyKey,
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
-        self
-            .inner
+        self.inner
             .try_borrow()?
             .deref()
             .deref()

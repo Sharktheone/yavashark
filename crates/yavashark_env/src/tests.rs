@@ -13,7 +13,7 @@ macro_rules! test_eval {
         let src = $code;
         let input = swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
-        let c =  EsSyntax {
+        let c = EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,
@@ -44,7 +44,7 @@ macro_rules! test_eval {
         let src = $code;
         let input = swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
-        let c =  EsSyntax {
+        let c = EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,
@@ -75,7 +75,7 @@ macro_rules! test_eval {
         let src = $code;
         let input = swc_ecma_parser::StringInput::new(src, BytePos(0), BytePos(src.len() as u32));
 
-        let c =  EsSyntax {
+        let c = EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,

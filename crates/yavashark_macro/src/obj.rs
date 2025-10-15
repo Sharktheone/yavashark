@@ -29,7 +29,6 @@ pub fn object(attrs: TokenStream1, item: TokenStream1) -> TokenStream1 {
 
     let mut input: syn::ItemStruct = syn::parse_macro_input!(item);
 
-
     let conf = Config::new(Span::call_site());
 
     let realm = &conf.realm;

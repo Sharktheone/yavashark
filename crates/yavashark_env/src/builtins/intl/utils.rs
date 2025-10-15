@@ -1,7 +1,7 @@
-use crate::{Error, ObjectHandle, Object, Realm, Res, Value};
-use std::fmt::Display;
 use crate::array::Array;
 use crate::value::Obj;
+use crate::{Error, Object, ObjectHandle, Realm, Res, Value};
+use std::fmt::Display;
 
 const DEFAULT_LOCALE: &str = "und";
 
@@ -53,7 +53,8 @@ pub fn canonicalize_locale_list(locales: Option<Value>, realm: &mut Realm) -> Re
                 continue;
             }
             let tag = v.to_string(realm)?.to_string();
-            let canonical = canonicalize_locale_tag(&tag).map_err(|e| Error::range_error(e.to_string()))?;
+            let canonical =
+                canonicalize_locale_tag(&tag).map_err(|e| Error::range_error(e.to_string()))?;
             out.push(canonical);
             idx += 1;
         }
@@ -68,12 +69,16 @@ pub fn canonicalize_locale_list(locales: Option<Value>, realm: &mut Realm) -> Re
         if s.trim().is_empty() {
             Ok(vec![DEFAULT_LOCALE.to_string()])
         } else {
-            Ok(vec![canonicalize_locale_tag(&s.trim()).map_err(|e| Error::range_error(e.to_string()))?])
+            Ok(vec![canonicalize_locale_tag(&s.trim())
+                .map_err(|e| Error::range_error(e.to_string()))?])
         }
     }
 }
 
-pub fn get_canonical_locales_object(locales: Option<Value>, realm: &mut Realm) -> Res<ObjectHandle> {
+pub fn get_canonical_locales_object(
+    locales: Option<Value>,
+    realm: &mut Realm,
+) -> Res<ObjectHandle> {
     let list = canonicalize_locale_list(locales, realm)?
         .into_iter()
         .map(Into::into)
@@ -81,24 +86,42 @@ pub fn get_canonical_locales_object(locales: Option<Value>, realm: &mut Realm) -
 
     let arr = Array::with_elements(realm, list)?;
 
-
     Ok(arr.into_object())
 }
 
-pub fn get_option_string(options: &ObjectHandle, key: &'static str, allowed: &[&str], realm: &mut Realm) -> Res<Option<String>> {
+pub fn get_option_string(
+    options: &ObjectHandle,
+    key: &'static str,
+    allowed: &[&str],
+    realm: &mut Realm,
+) -> Res<Option<String>> {
     let v = options.get(key, realm)?;
     if v.is_undefined() {
         return Ok(None);
     }
     let raw = v.to_string(realm)?.to_string();
     let normalized = raw.trim().to_lowercase();
-    if !allowed.is_empty() && !allowed.iter().any(|entry| entry.eq_ignore_ascii_case(&normalized)) {
-        return Err(Error::range_error(format!("Invalid value for Intl option {key}")));
+    if !allowed.is_empty()
+        && !allowed
+            .iter()
+            .any(|entry| entry.eq_ignore_ascii_case(&normalized))
+    {
+        return Err(Error::range_error(format!(
+            "Invalid value for Intl option {key}"
+        )));
     }
-    Ok(Some(if allowed.is_empty() { raw.trim().to_string() } else { normalized }))
+    Ok(Some(if allowed.is_empty() {
+        raw.trim().to_string()
+    } else {
+        normalized
+    }))
 }
 
-pub fn get_option_bool(options: &ObjectHandle, key: &'static str, realm: &mut Realm) -> Res<Option<bool>> {
+pub fn get_option_bool(
+    options: &ObjectHandle,
+    key: &'static str,
+    realm: &mut Realm,
+) -> Res<Option<bool>> {
     let v = options.get(key, realm)?;
     if v.is_undefined() {
         return Ok(None);
@@ -115,7 +138,9 @@ pub fn supported_values_of(key: &str) -> Result<Vec<&'static str>, Error> {
         "numberingSystem" => Ok(vec!["latn", "arab", "arabext"]),
         "calendar" => Ok(vec!["gregory", "buddhist", "iso8601"]),
         "timeZone" => Ok(vec!["UTC", "Etc/UTC"]),
-        _ => Err(Error::ty_error(format!("Unsupported key for supportedValuesOf: {key}"))),
+        _ => Err(Error::ty_error(format!(
+            "Unsupported key for supportedValuesOf: {key}"
+        ))),
     }
 }
 

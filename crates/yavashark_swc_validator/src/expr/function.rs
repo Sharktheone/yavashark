@@ -1,6 +1,6 @@
+use crate::Validator;
 use crate::pat::collect_bound_names;
 use crate::utils::block_has_use_strict;
-use crate::Validator;
 use swc_ecma_ast::{FnExpr, Function, Ident, Param, Pat};
 
 impl<'a> Validator<'a> {
@@ -107,5 +107,7 @@ impl<'a> Validator<'a> {
 }
 
 fn is_simple_parameter_list(params: &[Param]) -> bool {
-    params.iter().all(|param| matches!(&param.pat, Pat::Ident(_)))
+    params
+        .iter()
+        .all(|param| matches!(&param.pat, Pat::Ident(_)))
 }

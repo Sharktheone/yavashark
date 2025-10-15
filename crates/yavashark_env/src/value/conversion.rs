@@ -428,7 +428,6 @@ impl IntoValue for bool {
     }
 }
 
-
 impl<T: Obj> IntoValue for T {
     fn into_value(self) -> Value {
         Value::Object(self.into_object())

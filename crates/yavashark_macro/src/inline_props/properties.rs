@@ -23,7 +23,7 @@ pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::
 
             continue;
         }
-        
+
         let key = &prop.name;
         let field = &prop.field;
 
@@ -69,7 +69,7 @@ pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::
             }
         };
 
-        let value_expr =  match key {
+        let value_expr = match key {
             Name::Str(s) => {
                 quote::quote! {
                     (#property_key::from_static(#s), #value_expr)
@@ -99,9 +99,7 @@ pub fn generate_properties(props: &[Property], config: &Config) -> proc_macro2::
         };
 
         prop_items.push(value_expr);
-
     }
-
 
     let configurable_flatten = if has_configurable {
         quote::quote! {
@@ -135,14 +133,11 @@ pub fn generate_enumerable_properties(
 
     let mut prop_items = Vec::with_capacity(props.len());
 
-
     let has_configurable = props.iter().any(|p| p.configurable);
-
 
     let mut config_idx = 0usize;
 
     for prop in props {
-        
         if prop.kind == Kind::Setter || !prop.enumerable {
             if prop.configurable {
                 config_idx += 1;
@@ -150,8 +145,7 @@ pub fn generate_enumerable_properties(
 
             continue;
         }
-        
-        
+
         let key = &prop.name;
         let field = &prop.field;
 
@@ -197,7 +191,7 @@ pub fn generate_enumerable_properties(
             }
         };
 
-        let value_expr =  match key {
+        let value_expr = match key {
             Name::Str(s) => {
                 quote::quote! {
                     (#property_key::from_static(#s), #value_expr)
@@ -227,9 +221,7 @@ pub fn generate_enumerable_properties(
         };
 
         prop_items.push(value_expr);
-
     }
-
 
     let configurable_flatten = if has_configurable {
         quote::quote! {

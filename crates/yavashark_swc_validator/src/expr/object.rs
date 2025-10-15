@@ -55,13 +55,13 @@ impl<'a> Validator<'a> {
 
                 if let Some(body) = &setter.body {
                     let scope = self.enter_function_context(false, false);
-                    
+
                     if crate::utils::block_has_use_strict(body) {
                         self.set_current_function_strict();
                     }
-                    
+
                     self.validate_pat(&setter.param)?;
-                    
+
                     self.set_super_property_allowed(true);
                     self.set_super_call_allowed(true);
                     let super_prop_guard = self.enter_super_property_scope();

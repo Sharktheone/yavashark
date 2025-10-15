@@ -480,8 +480,7 @@ impl MutObject {
         let len = self.values.len();
         let elements_len = elements.len();
 
-        self.values
-            .extend(elements.map(ObjectProperty::new));
+        self.values.extend(elements.map(ObjectProperty::new));
 
         for i in 0..elements_len {
             self.array.push((i, len + i));
@@ -493,20 +492,18 @@ impl MutObject {
 
         let len = self.values.len();
         let elements_len = elements.len();
-        
+
         for val in elements {
             let val = val?;
             self.values.push(ObjectProperty::new(val));
-            
         }
 
         for i in 0..elements_len {
             self.array.push((i, len + i));
         }
-        
+
         Ok(())
     }
-
 
     pub fn get_array_mut(&mut self, index: usize) -> Option<&mut Value> {
         let (i, found) = self.array_position(index);
@@ -556,7 +553,6 @@ impl MutObject {
         key: PropertyKey,
         cb: impl FnOnce(Option<&mut ObjectProperty>) -> Option<Value>,
     ) -> Res {
-
         match self.properties.entry(key) {
             Entry::Occupied(entry) => {
                 let idx = *entry.get();
@@ -784,7 +780,6 @@ impl MutObj for MutObject {
                     return Err(Error::new("Failed to get value for property"));
                 };
 
-
                 e.value = Value::Undefined;
                 e.get = value.into();
                 return Ok(());
@@ -822,13 +817,11 @@ impl MutObj for MutObject {
             return Ok(());
         }
 
-
         match self.properties.entry(key) {
             Entry::Occupied(entry) => {
                 let Some(e) = self.values.get_mut(*entry.get()) else {
                     return Err(Error::new("Failed to get value for property"));
                 };
-
 
                 e.value = Value::Undefined;
                 e.set = value.into();

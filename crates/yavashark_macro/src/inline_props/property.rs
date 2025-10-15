@@ -1,7 +1,7 @@
+use crate::config::Config;
 use proc_macro2::{Ident, TokenStream};
 use syn::spanned::Spanned;
 use syn::{Expr, Field, Path, Type};
-use crate::config::Config;
 
 pub struct Property {
     pub copy: bool,

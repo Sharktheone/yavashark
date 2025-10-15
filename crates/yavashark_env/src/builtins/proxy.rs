@@ -1,7 +1,13 @@
 #![allow(unused)]
 use crate::array::Array;
-use crate::value::{Attributes, BoxedObj, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor, WeakObject};
-use crate::{Error, InternalPropertyKey, NativeFunction, Object, ObjectHandle, ObjectOrNull, ObjectProperty, PrimitiveValue, PropertyKey, Realm, Res, Value, Variable, WeakObjectHandle};
+use crate::value::{
+    Attributes, BoxedObj, DefinePropertyResult, IntoValue, Obj, Property, PropertyDescriptor,
+    WeakObject,
+};
+use crate::{
+    Error, InternalPropertyKey, NativeFunction, Object, ObjectHandle, ObjectOrNull, ObjectProperty,
+    PrimitiveValue, PropertyKey, Realm, Res, Value, Variable, WeakObjectHandle,
+};
 use std::any::TypeId;
 use std::cell::{Cell, RefCell};
 use std::ops::Deref;
@@ -32,14 +38,8 @@ impl Obj for Proxy {
         if let Some(define_property) = self.handler.get_opt("set", realm)? {
             let define_property = define_property.to_object()?;
 
-
             let result = define_property.call(
-                vec![
-                    self.inner.clone().into(),
-                    name.into(),
-                    value,
-                    self.this(),
-                ],
+                vec![self.inner.clone().into(), name.into(), value, self.this()],
                 self.handler.clone().into(),
                 realm,
             )?;
@@ -47,12 +47,13 @@ impl Obj for Proxy {
             if result.is_truthy() {
                 Ok(DefinePropertyResult::Handled)
             } else {
-                Err(Error::ty("Proxy handler's defineProperty method returned false"))
+                Err(Error::ty(
+                    "Proxy handler's defineProperty method returned false",
+                ))
             }
         } else {
             self.inner.define_property(name, value, realm)
         }
-
     }
 
     fn define_property_attributes(
@@ -82,14 +83,13 @@ impl Obj for Proxy {
             if result.is_truthy() {
                 Ok(DefinePropertyResult::Handled)
             } else {
-                Err(Error::ty("Proxy handler's defineProperty method returned false"))
+                Err(Error::ty(
+                    "Proxy handler's defineProperty method returned false",
+                ))
             }
         } else {
             self.inner.define_property_attributes(name, value, realm)
         }
-
-
-
     }
 
     fn resolve_property(
@@ -117,7 +117,6 @@ impl Obj for Proxy {
         } else {
             self.inner.deref().resolve_property(name, realm)
         }
-
     }
 
     fn get_own_property(
@@ -132,11 +131,7 @@ impl Obj for Proxy {
         if let Some(get_own_property) = self.handler.get_opt("get", realm)? {
             let get_own_property = get_own_property.to_object()?;
             let result = get_own_property.call(
-                vec![
-                    self.inner.clone().into(),
-                    name.into(),
-                    self.this(),
-                ],
+                vec![self.inner.clone().into(), name.into(), self.this()],
                 self.handler.clone().into(),
                 realm,
             )?;
@@ -149,7 +144,6 @@ impl Obj for Proxy {
         } else {
             self.inner.deref().get_own_property(name, realm)
         }
-
     }
 
     fn define_getter(
@@ -168,7 +162,6 @@ impl Obj for Proxy {
         realm: &mut Realm,
     ) -> Res {
         self.inner.define_setter(name, value, realm)
-
     }
 
     fn delete_property(
@@ -183,11 +176,7 @@ impl Obj for Proxy {
         if let Some(delete_property) = self.handler.get_opt("deleteProperty", realm)? {
             let delete_property = delete_property.to_object()?;
             let result = delete_property.call(
-                vec![
-                    self.inner.clone().into(),
-                    name.into(),
-                    self.this(),
-                ],
+                vec![self.inner.clone().into(), name.into(), self.this()],
                 self.handler.clone().into(),
                 realm,
             )?;
@@ -195,12 +184,13 @@ impl Obj for Proxy {
             if result.is_truthy() {
                 Ok(Some(Property::Value(Value::Undefined, Attributes::new())))
             } else {
-                Err(Error::ty("Proxy handler's deleteProperty method returned false"))
+                Err(Error::ty(
+                    "Proxy handler's deleteProperty method returned false",
+                ))
             }
         } else {
             self.inner.delete_property(name, realm)
         }
-
     }
 
     fn contains_own_key(
@@ -215,11 +205,7 @@ impl Obj for Proxy {
         if let Some(has) = self.handler.get_opt("has", realm)? {
             let has = has.to_object()?;
             let result = has.call(
-                vec![
-                    self.inner.clone().into(),
-                    name.into(),
-                    self.this(),
-                ],
+                vec![self.inner.clone().into(), name.into(), self.this()],
                 self.handler.clone().into(),
                 realm,
             )?;
@@ -228,7 +214,6 @@ impl Obj for Proxy {
         } else {
             self.inner.contains_own_key(name, realm)
         }
-
     }
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Result<bool, Error> {
@@ -239,11 +224,7 @@ impl Obj for Proxy {
         if let Some(has) = self.handler.get_opt("has", realm)? {
             let has = has.to_object()?;
             let result = has.call(
-                vec![
-                    self.inner.clone().into(),
-                    name.into(),
-                    self.this(),
-                ],
+                vec![self.inner.clone().into(), name.into(), self.this()],
                 self.handler.clone().into(),
                 realm,
             )?;
@@ -252,7 +233,6 @@ impl Obj for Proxy {
         } else {
             self.inner.contains_key(name, realm)
         }
-
     }
 
     // fn to_string(&self, realm: &mut Realm) -> Result<YSString, Error> {
@@ -265,7 +245,6 @@ impl Obj for Proxy {
 
     fn properties(&self, realm: &mut Realm) -> Res<Vec<(PropertyKey, Value)>> {
         self.inner.properties(realm)
-
     }
 
     fn keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
@@ -285,17 +264,14 @@ impl Obj for Proxy {
 
     fn enumerable_keys(&self, realm: &mut Realm) -> Res<Vec<PropertyKey>> {
         self.inner.enumerable_keys(realm)
-
     }
 
     fn enumerable_values(&self, realm: &mut Realm) -> Res<Vec<crate::value::Value>> {
         self.inner.enumerable_values(realm)
-
     }
 
     fn clear_properties(&self, realm: &mut Realm) -> Res {
         self.inner.clear_properties(realm)
-
     }
 
     fn get_array_or_done(
@@ -323,7 +299,6 @@ impl Obj for Proxy {
         } else {
             self.inner.get_array_or_done(index, realm)
         }
-
     }
 
     fn call(&self, args: Vec<Value>, this: Value, realm: &mut Realm) -> Result<Value, Error> {
@@ -336,7 +311,12 @@ impl Obj for Proxy {
 
             let arguments = Array::with_elements(realm, args)?;
             apply.call(
-                vec![self.inner.clone().into(), this, arguments.into_value(), self.this()],
+                vec![
+                    self.inner.clone().into(),
+                    this,
+                    arguments.into_value(),
+                    self.this(),
+                ],
                 self.handler.clone().into(),
                 realm,
             )
@@ -369,12 +349,13 @@ impl Obj for Proxy {
             if result.is_null() || result.is_object() {
                 result.try_into()
             } else {
-                Err(Error::ty("Proxy handler's getPrototypeOf method did not return an object or null"))
+                Err(Error::ty(
+                    "Proxy handler's getPrototypeOf method did not return an object or null",
+                ))
             }
         } else {
             self.inner.prototype(realm)
         }
-
     }
 
     fn set_prototype(&self, proto: ObjectOrNull, realm: &mut Realm) -> Res {
@@ -393,12 +374,13 @@ impl Obj for Proxy {
             if result.is_truthy() {
                 Ok(())
             } else {
-                Err(Error::ty("Proxy handler's setPrototypeOf method returned false"))
+                Err(Error::ty(
+                    "Proxy handler's setPrototypeOf method returned false",
+                ))
             }
         } else {
             self.inner.set_prototype(proto, realm)
         }
-
     }
 
     fn construct(&self, args: Vec<Value>, realm: &mut Realm) -> Result<ObjectHandle, Error> {
@@ -411,7 +393,11 @@ impl Obj for Proxy {
             let arguments = Array::with_elements(realm, args)?;
             construct
                 .call(
-                    vec![self.inner.clone().into(), arguments.into_value(), self.this()],
+                    vec![
+                        self.inner.clone().into(),
+                        arguments.into_value(),
+                        self.this(),
+                    ],
                     self.handler.clone().into(),
                     realm,
                 )?
@@ -514,6 +500,6 @@ impl Proxy {
             .as_ref()
             .cloned()
             .map_or(Value::Undefined, Into::into)
-            // .map_or(Value::Undefined, |w| w.upgrade().map_or(Value::Undefined, Into::into))
+        // .map_or(Value::Undefined, |w| w.upgrade().map_or(Value::Undefined, Into::into))
     }
 }

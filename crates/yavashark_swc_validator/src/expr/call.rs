@@ -9,7 +9,9 @@ impl<'a> Validator<'a> {
             Callee::Expr(expr) => self.validate_expr(expr)?,
             Callee::Super(_) => {
                 if !self.can_use_super_call() {
-                    return Err("'super()' is only allowed in derived class constructors".to_string());
+                    return Err(
+                        "'super()' is only allowed in derived class constructors".to_string()
+                    );
                 }
             }
             Callee::Import(_) => {}

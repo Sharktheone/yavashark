@@ -465,11 +465,8 @@ impl Intrinsics {
         let (temporal, temporal_protos) =
             get_temporal(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
-        let (intl, intl_protos) = crate::builtins::intl::get_intl(
-            obj_prototype.clone(),
-            func_prototype.clone(),
-            realm,
-        )?;
+        let (intl, intl_protos) =
+            crate::builtins::intl::get_intl(obj_prototype.clone(), func_prototype.clone(), realm)?;
 
         let (signal, signal_protos) = crate::builtins::signal::get_signal(
             obj_prototype.clone(),

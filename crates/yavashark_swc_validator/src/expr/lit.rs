@@ -4,7 +4,10 @@ use crate::Validator;
 use regex_data::{BINARY_PROPERTIES, PROPERTY_VALUE_PAIRS, STRING_PROPERTIES};
 use swc_ecma_ast::{Lit, Regex};
 
-const RESERVED_DOUBLE_PUNCTUATORS: &[&str] = &["!!", "##", "$$", "%%", "**", "++", ",,", "..", "::", ";;", "<<", "==", ">>", "??", "@@", "``", "~~", "^^", "||"];
+const RESERVED_DOUBLE_PUNCTUATORS: &[&str] = &[
+    "!!", "##", "$$", "%%", "**", "++", ",,", "..", "::", ";;", "<<", "==", ">>", "??", "@@", "``",
+    "~~", "^^", "||",
+];
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum ClassToken {
@@ -21,32 +24,38 @@ impl<'a> Validator<'a> {
             _ => Ok(()),
         }
     }
-    
+
     fn validate_num_lit(&self, num: &swc_ecma_ast::Number) -> Result<(), String> {
         let raw = num.raw.as_ref().map(|a| a.as_ref());
-        
+
         if let Some(raw_str) = raw {
             if raw_str.starts_with('0') && raw_str.len() >= 2 {
                 let chars: Vec<char> = raw_str.chars().collect();
                 if chars.len() > 1 {
                     let second = chars[1];
-                    
-                    if second == 'x' || second == 'X' || second == 'b' || second == 'B' || 
-                       second == 'o' || second == 'O' || second == '.' {
+
+                    if second == 'x'
+                        || second == 'X'
+                        || second == 'b'
+                        || second == 'B'
+                        || second == 'o'
+                        || second == 'O'
+                        || second == '.'
+                    {
                         return Ok(());
                     }
-                    
+
                     let mut has_separator = false;
                     let mut all_digits = true;
-                    
+
                     for i in 1..chars.len() {
                         let ch = chars[i];
-                        
+
                         if ch == '.' || ch == 'e' || ch == 'E' {
                             all_digits = false;
                             break;
                         }
-                        
+
                         if ch == '_' {
                             has_separator = true;
                         } else if !ch.is_ascii_digit() {
@@ -54,7 +63,7 @@ impl<'a> Validator<'a> {
                             break;
                         }
                     }
-                    
+
                     if has_separator && all_digits {
                         return Err(format!(
                             "Numeric separators are not allowed in legacy octal-like or non-octal decimal integer literals: {raw_str}",
@@ -62,13 +71,13 @@ impl<'a> Validator<'a> {
                     }
                 }
             }
-            
+
             if self.in_strict_mode() {
                 if raw_str.len() >= 2 && raw_str.starts_with('0') {
                     let Some(second_char) = raw_str.chars().nth(1) else {
                         return Ok(());
                     };
-                    
+
                     if second_char.is_ascii_digit() && second_char != '8' && second_char != '9' {
                         if second_char != '.' {
                             return Err(format!(
@@ -77,7 +86,7 @@ impl<'a> Validator<'a> {
                             ));
                         }
                     }
-                    
+
                     if raw_str.starts_with('0') && raw_str.len() >= 2 {
                         let chars: Vec<char> = raw_str.chars().collect();
                         if chars[1].is_ascii_digit() {
@@ -85,7 +94,10 @@ impl<'a> Validator<'a> {
                                 let ch = chars[i];
                                 if ch == '8' || ch == '9' {
                                     let before = &raw_str[..i];
-                                    if !before.contains('.') && !before.contains('e') && !before.contains('E') {
+                                    if !before.contains('.')
+                                        && !before.contains('e')
+                                        && !before.contains('E')
+                                    {
                                         return Err(format!(
                                             "Non-octal decimal integer literals are not allowed in strict mode: {}",
                                             raw_str
@@ -104,7 +116,7 @@ impl<'a> Validator<'a> {
                 }
             }
         }
-        
+
         Ok(())
     }
 
@@ -127,8 +139,8 @@ impl<'a> Validator<'a> {
         let mut idx = 0usize;
         let mut in_class = false;
         let mut first_in_class = false;
-    let mut class_tokens: Vec<ClassToken> = Vec::new();
-    let track_property_ranges = !has_v_flag;
+        let mut class_tokens: Vec<ClassToken> = Vec::new();
+        let track_property_ranges = !has_v_flag;
 
         while idx < pattern.len() {
             let ch = pattern[idx];
@@ -509,14 +521,17 @@ impl<'a> VFlagValidator<'a> {
     fn expect_operand_after_range(&mut self) -> Result<(), String> {
         if self.current() == Some(']') {
             return Err(
-                "Range in character class requires a right-hand operand before the closing bracket".to_string(),
+                "Range in character class requires a right-hand operand before the closing bracket"
+                    .to_string(),
             );
         }
 
         let result = self.parse_operand(false)?;
         match result {
             OperandKind::Consumed => Ok(()),
-            OperandKind::Negation => Err("Negation marker `^` is only allowed at the start of a character class".to_string()),
+            OperandKind::Negation => Err(
+                "Negation marker `^` is only allowed at the start of a character class".to_string(),
+            ),
         }
     }
 

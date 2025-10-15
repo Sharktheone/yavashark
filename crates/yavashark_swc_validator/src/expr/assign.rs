@@ -11,9 +11,7 @@ impl<'a> Validator<'a> {
                     if self.in_strict_mode() {
                         let name = ident.id.sym.as_ref();
                         if matches!(name, "eval" | "arguments") {
-                            return Err(format!(
-                                "Cannot assign to '{name}' in strict mode"
-                            ));
+                            return Err(format!("Cannot assign to '{name}' in strict mode"));
                         }
                     }
                 }
@@ -53,9 +51,7 @@ impl<'a> Validator<'a> {
                 if self.in_strict_mode() {
                     let name = ident.sym.as_ref();
                     if matches!(name, "eval" | "arguments") {
-                        return Err(format!(
-                            "Cannot assign to '{name}' in strict mode"
-                        ));
+                        return Err(format!("Cannot assign to '{name}' in strict mode"));
                     }
                 }
 

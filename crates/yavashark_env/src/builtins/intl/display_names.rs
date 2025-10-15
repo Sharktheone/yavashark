@@ -1,8 +1,8 @@
-use std::cell::RefCell;
-use yavashark_macro::{object, props};
-use crate::{MutObject, Object, ObjectHandle, Realm};
 use crate::array::Array;
 use crate::value::Obj;
+use crate::{MutObject, Object, ObjectHandle, Realm};
+use std::cell::RefCell;
+use yavashark_macro::{object, props};
 
 #[object]
 #[derive(Debug)]
@@ -18,7 +18,6 @@ impl DisplayNames {
     }
 }
 
-
 #[props]
 impl DisplayNames {
     #[constructor]
@@ -27,7 +26,11 @@ impl DisplayNames {
     }
 
     #[prop("supportedLocalesOf")]
-    fn supported_locales_of(_locales: String, _options: Option<ObjectHandle>, realm: &Realm) -> ObjectHandle {
+    fn supported_locales_of(
+        _locales: String,
+        _options: Option<ObjectHandle>,
+        realm: &Realm,
+    ) -> ObjectHandle {
         Array::from_realm(realm).into_object()
     }
 
@@ -39,5 +42,4 @@ impl DisplayNames {
     fn resolved_options(&self, realm: &Realm) -> ObjectHandle {
         Object::new(realm)
     }
-    
 }

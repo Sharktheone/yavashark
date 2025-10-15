@@ -152,9 +152,7 @@ impl Reflect {
                 getter.call(Vec::new(), recv, realm)
             }
             None => Ok(Value::Undefined),
-
         }
-
 
         // Ok(prop.unwrap_or(Value::Undefined))
     }

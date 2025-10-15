@@ -480,7 +480,7 @@ impl ScopeInternal {
                 .insert_opt(name, Variable::new(value), realm)?;
         } else {
             if self.variables.contains_key(&name, realm) {
-                return Ok(())
+                return Ok(());
             }
 
             match &self.parent {

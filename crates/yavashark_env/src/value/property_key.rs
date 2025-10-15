@@ -252,9 +252,7 @@ impl IntoPropertyKey for Value {
     }
     fn into_internal_property_key(self, realm: &mut Realm) -> Res<InternalPropertyKey> {
         Ok(match self {
-            Self::String(s) => {
-                string_to_internal_property_key(s)
-            }
+            Self::String(s) => string_to_internal_property_key(s),
             Self::Symbol(s) => InternalPropertyKey::Symbol(s),
             Self::Null => InternalPropertyKey::String("null".into()),
             Self::Undefined => InternalPropertyKey::String("undefined".into()),

@@ -3,7 +3,10 @@ use crate::object::Object;
 use crate::realm::Realm;
 use crate::utils::{coerce_object_strict, ArrayLike, ProtoDefault, ValueIterator};
 use crate::value::property_key::InternalPropertyKey;
-use crate::value::{Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj, Obj, ObjectImpl, ObjectOrNull, Property};
+use crate::value::{
+    Attributes, BoxedObj, Constructor, CustomName, DefinePropertyResult, Func, IntoValue, MutObj,
+    Obj, ObjectImpl, ObjectOrNull, Property,
+};
 use crate::MutObject;
 use crate::{Error, ObjectHandle, Res, Value, ValueResult, Variable};
 use std::cell::{Cell, RefCell};
@@ -88,7 +91,7 @@ impl ObjectImpl for Array {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
             return Ok(Some(Property::Value(
                 self.length.get().into(),
-                Attributes::write()
+                Attributes::write(),
             )));
         }
 
@@ -101,7 +104,10 @@ impl ObjectImpl for Array {
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
         if matches!(&name, InternalPropertyKey::String(s) if s == "length") {
-            return Ok(Some(Property::Value(self.length.get().into(), Attributes::write())));
+            return Ok(Some(Property::Value(
+                self.length.get().into(),
+                Attributes::write(),
+            )));
         }
 
         self.get_wrapped_object().get_own_property(name, realm)
@@ -200,7 +206,6 @@ impl Array {
         Ok(array)
     }
 
-
     pub fn from_iter(realm: &Realm, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone());
 
@@ -214,7 +219,10 @@ impl Array {
         Ok(array)
     }
 
-    pub fn from_iter_res(realm: &Realm, elements: impl ExactSizeIterator<Item = ValueResult>) -> Res<Self> {
+    pub fn from_iter_res(
+        realm: &Realm,
+        elements: impl ExactSizeIterator<Item = ValueResult>,
+    ) -> Res<Self> {
         let array = Self::new(realm.intrinsics.array.clone());
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -227,8 +235,10 @@ impl Array {
         Ok(array)
     }
 
-
-    pub fn from_iter_and_proto(proto: ObjectHandle, elements: impl ExactSizeIterator<Item = Value>) -> Res<Self> {
+    pub fn from_iter_and_proto(
+        proto: ObjectHandle,
+        elements: impl ExactSizeIterator<Item = Value>,
+    ) -> Res<Self> {
         let array = Self::new(proto);
 
         let mut inner = array.inner.try_borrow_mut()?;
@@ -241,8 +251,10 @@ impl Array {
         Ok(array)
     }
 
-
-    pub fn from_iter_res_and_proto(proto: ObjectHandle, elements: impl ExactSizeIterator<Item = ValueResult>) -> Res<Self> {
+    pub fn from_iter_res_and_proto(
+        proto: ObjectHandle,
+        elements: impl ExactSizeIterator<Item = ValueResult>,
+    ) -> Res<Self> {
         let array = Self::new(proto);
 
         let mut inner = array.inner.try_borrow_mut()?;

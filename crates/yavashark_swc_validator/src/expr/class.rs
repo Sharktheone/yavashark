@@ -121,7 +121,11 @@ impl<'a> Validator<'a> {
         Ok(())
     }
 
-    fn validate_class_member(&mut self, class: &'a ClassMember, is_derived: bool) -> Result<(), String> {
+    fn validate_class_member(
+        &mut self,
+        class: &'a ClassMember,
+        is_derived: bool,
+    ) -> Result<(), String> {
         match class {
             ClassMember::Constructor(constructor) => {
                 self.validate_prop_name(&constructor.key)?;
@@ -164,7 +168,12 @@ impl<'a> Validator<'a> {
             ClassMember::PrivateMethod(private_method) => {
                 self.validate_private_name_expr(&private_method.key)?;
                 let allow_super_property = is_derived || private_method.is_static;
-                self.validate_function(&private_method.function, None, allow_super_property, false)?;
+                self.validate_function(
+                    &private_method.function,
+                    None,
+                    allow_super_property,
+                    false,
+                )?;
             }
             ClassMember::ClassProp(prop) => {
                 self.validate_prop_name(&prop.key)?;

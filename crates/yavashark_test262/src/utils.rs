@@ -28,22 +28,27 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
         return (Program::Script(Script::dummy()), Metadata::default());
     }
 
-    let c =  EsSyntax {
-            jsx: false,
-            fn_bind: false,
-            decorators: true,
-            decorators_before_export: true,
-            export_default_from: true,
-            import_attributes: true,
-            allow_super_outside_method: false,
-            allow_return_outside_function: false,
-            auto_accessors: true,
-            explicit_resource_management: true,
-        };
+    let c = EsSyntax {
+        jsx: false,
+        fn_bind: false,
+        decorators: true,
+        decorators_before_export: true,
+        export_default_from: true,
+        import_attributes: true,
+        allow_super_outside_method: false,
+        allow_return_outside_function: false,
+        auto_accessors: true,
+        explicit_resource_management: true,
+    };
 
     let metadata = parse_metadata(input);
 
-    if metadata.flags.contains(Flags::ONLY_STRICT) && !metadata.negative.as_ref().is_some_and(|neg| neg.phase == NegativePhase::Parse) {
+    if metadata.flags.contains(Flags::ONLY_STRICT)
+        && !metadata
+            .negative
+            .as_ref()
+            .is_some_and(|neg| neg.phase == NegativePhase::Parse)
+    {
         println!("SKIP");
         return (Program::Script(Script::dummy()), Metadata::default());
     }
@@ -172,18 +177,18 @@ fn parse_metadata_comments(input: &str) -> Metadata {
 
     let comments = SingleThreadedComments::default();
 
-    let c =  EsSyntax {
-            jsx: false,
-            fn_bind: false,
-            decorators: true,
-            decorators_before_export: true,
-            export_default_from: true,
-            import_attributes: true,
-            allow_super_outside_method: false,
-            allow_return_outside_function: false,
-            auto_accessors: true,
-            explicit_resource_management: true,
-        };
+    let c = EsSyntax {
+        jsx: false,
+        fn_bind: false,
+        decorators: true,
+        decorators_before_export: true,
+        export_default_from: true,
+        import_attributes: true,
+        allow_super_outside_method: false,
+        allow_return_outside_function: false,
+        auto_accessors: true,
+        explicit_resource_management: true,
+    };
 
     let mut p = Parser::new(Syntax::Es(c), input, Some(&comments));
 

@@ -67,7 +67,6 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
             }
         };
 
-
         let value_expr = if !has_configurable {
             value_expr
         } else if prop.configurable {
@@ -83,7 +82,6 @@ pub fn generate_get_property(props: &[Property], config: &Config) -> proc_macro2
                 Some(#value_expr)
             }
         };
-
 
         match key {
             Name::Str(s) => {

@@ -51,7 +51,7 @@ pub fn get_console(realm: &mut Realm) -> Value {
                 Ok(Value::Undefined)
             },
             realm,
-    )
+        )
         .into(),
         realm,
     );

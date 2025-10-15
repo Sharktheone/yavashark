@@ -11,8 +11,7 @@ use crate::object::constructor::ObjectConstructor;
 use crate::object::prototype::common::get_own_property_descriptor;
 use crate::realm::Realm;
 use crate::{
-    InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, PropertyKey, Res,
-    Value, Variable,
+    InternalPropertyKey, MutObject, NativeFunction, ObjectHandle, PropertyKey, Res, Value, Variable,
 };
 
 pub mod common;

@@ -120,7 +120,7 @@ fn main() {
 
         let input = StringInput::new(&input, BytePos(0), BytePos(input.len() as u32));
 
-        let c =  EsSyntax {
+        let c = EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,

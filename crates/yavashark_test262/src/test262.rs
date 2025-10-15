@@ -114,7 +114,7 @@ impl Test262 {
 
         let input = StringInput::new(input, BytePos(0), BytePos(input.len() as u32));
 
-        let c =  EsSyntax {
+        let c = EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,
@@ -138,7 +138,6 @@ impl Test262 {
         if !errors.is_empty() {
             return Err(Error::syn_error(format!("Parse errors: {errors:?}")));
         }
-
 
         if let Err(e) = Validator::new().validate_statements(&script.body) {
             return Err(Error::syn_error(e));

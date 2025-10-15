@@ -6,6 +6,7 @@ mod boolean;
 mod date;
 mod error;
 mod escape;
+pub(crate) mod intl;
 mod json;
 mod map;
 mod math;
@@ -22,7 +23,6 @@ pub mod temporal;
 mod weakmap;
 mod weakref;
 mod weakset;
-pub(crate) mod intl;
 
 pub use arguments::*;
 pub use arraybuffer::*;

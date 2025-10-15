@@ -1,13 +1,13 @@
 #![allow(clippy::needless_pass_by_value, unused)]
 
-use crate::realm::Realm;
-use crate::value::property_key::IntoPropertyKey;
-use crate::value::Property;
-use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
 use crate::array::Array;
 use crate::builtins::{Arguments, BooleanObj, Date, NumberObj, RegExp, StringObj};
 use crate::error_obj::ErrorObj;
+use crate::realm::Realm;
 use crate::utils::coerce_object;
+use crate::value::property_key::IntoPropertyKey;
+use crate::value::Property;
+use crate::{Error, Object, ObjectOrNull, Value, ValueResult};
 
 pub fn define_getter(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResult {
     if args.len() < 2 {
@@ -175,9 +175,9 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
     } else if this.downcast::<Arguments>().is_some() {
         "Arguments"
     } else if this.downcast::<ErrorObj>().is_some() {
-         "Error"
+        "Error"
     } else if this.downcast::<BooleanObj>().is_some() {
-         "Boolean"
+        "Boolean"
     } else if this.downcast::<NumberObj>().is_some() {
         "Number"
     } else if this.downcast::<StringObj>().is_some() {
@@ -191,7 +191,6 @@ pub fn to_string(args: Vec<Value>, this: Value, realm: &mut Realm) -> ValueResul
     };
 
     //TODO: we need to check Symbol.toStringTag
-
 
     Ok(format!("[object {tag}]").into())
 }

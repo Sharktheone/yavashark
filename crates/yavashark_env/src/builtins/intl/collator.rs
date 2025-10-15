@@ -1,12 +1,15 @@
 use crate::conversion::downcast_obj;
 use crate::utils::coerce_object;
-use crate::{Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult, Variable};
+use crate::value::Obj;
+use crate::{
+    Error, MutObject, NativeFunction, Object, ObjectHandle, Realm, Res, Value, ValueResult,
+    Variable,
+};
 use std::cell::RefCell;
 use std::cmp::Ordering;
 use std::str::FromStr;
 use unicode_normalization::{char::is_combining_mark, UnicodeNormalization};
 use yavashark_macro::{object, props};
-use crate::value::Obj;
 
 const DEFAULT_LOCALE: &str = "und";
 const USAGE_SORT: &str = "sort";
@@ -59,7 +62,6 @@ impl Collator {
     }
 }
 
-
 #[props]
 impl Collator {
     #[constructor]
@@ -85,8 +87,13 @@ impl Collator {
 
         let numeric = get_option_bool(&options_obj, "numeric", realm)?.unwrap_or(false);
 
-        let case_first = get_option_string(&options_obj, "caseFirst", &["upper", "lower", CASE_FIRST_FALSE], realm)?
-            .unwrap_or_else(|| CASE_FIRST_FALSE.to_string());
+        let case_first = get_option_string(
+            &options_obj,
+            "caseFirst",
+            &["upper", "lower", CASE_FIRST_FALSE],
+            realm,
+        )?
+        .unwrap_or_else(|| CASE_FIRST_FALSE.to_string());
 
         let sensitivity_default = if usage == USAGE_SEARCH {
             SENSITIVITY_ACCENT
@@ -97,12 +104,18 @@ impl Collator {
         let sensitivity = get_option_string(
             &options_obj,
             "sensitivity",
-            &[SENSITIVITY_BASE, SENSITIVITY_ACCENT, SENSITIVITY_CASE, SENSITIVITY_VARIANT],
+            &[
+                SENSITIVITY_BASE,
+                SENSITIVITY_ACCENT,
+                SENSITIVITY_CASE,
+                SENSITIVITY_VARIANT,
+            ],
             realm,
         )?
         .unwrap_or_else(|| sensitivity_default.to_string());
 
-        let ignore_punctuation = get_option_bool(&options_obj, "ignorePunctuation", realm)?.unwrap_or(false);
+        let ignore_punctuation =
+            get_option_bool(&options_obj, "ignorePunctuation", realm)?.unwrap_or(false);
 
         let mut collator = Self::new(realm);
 
@@ -218,7 +231,12 @@ impl Collator {
         }
     }
 
-    fn compare_values(collator: &Self, realm: &mut Realm, left: Value, right: Value) -> ValueResult {
+    fn compare_values(
+        collator: &Self,
+        realm: &mut Realm,
+        left: Value,
+        right: Value,
+    ) -> ValueResult {
         collator.ensure_initialized()?;
 
         let left_s = left.to_string(realm)?.to_string();
@@ -302,14 +320,28 @@ fn get_option_string(
     let raw = value.to_string(realm)?.to_string();
     let normalized = raw.trim().to_lowercase();
 
-    if !allowed.is_empty() && !allowed.iter().any(|entry| entry.eq_ignore_ascii_case(&normalized)) {
-        return Err(Error::range_error(format!("Invalid value for Intl.Collator option {key}")));
+    if !allowed.is_empty()
+        && !allowed
+            .iter()
+            .any(|entry| entry.eq_ignore_ascii_case(&normalized))
+    {
+        return Err(Error::range_error(format!(
+            "Invalid value for Intl.Collator option {key}"
+        )));
     }
 
-    Ok(Some(if allowed.is_empty() { raw.trim().to_string() } else { normalized }))
+    Ok(Some(if allowed.is_empty() {
+        raw.trim().to_string()
+    } else {
+        normalized
+    }))
 }
 
-fn get_option_bool(options: &ObjectHandle, key: &'static str, realm: &mut Realm) -> Res<Option<bool>> {
+fn get_option_bool(
+    options: &ObjectHandle,
+    key: &'static str,
+    realm: &mut Realm,
+) -> Res<Option<bool>> {
     let value = options.get(key, realm)?;
 
     if value.is_undefined() {
@@ -339,7 +371,10 @@ fn parse_numeric(value: &str) -> Option<f64> {
 
 fn preprocess_string(input: &str, sensitivity: &str, ignore_punctuation: bool) -> String {
     let filtered = if ignore_punctuation {
-        input.chars().filter(|c| !is_punctuation(*c)).collect::<String>()
+        input
+            .chars()
+            .filter(|c| !is_punctuation(*c))
+            .collect::<String>()
     } else {
         input.to_string()
     };

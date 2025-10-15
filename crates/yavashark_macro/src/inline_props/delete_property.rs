@@ -1,19 +1,14 @@
-use proc_macro2::TokenStream;
 use crate::config::Config;
 use crate::inline_props::property::{Name, Property};
+use proc_macro2::TokenStream;
 
-pub fn generate_delete_property(
-    props: &[Property],
-    config: &Config,
-) -> TokenStream {
+pub fn generate_delete_property(props: &[Property], config: &Config) -> TokenStream {
     let res = &config.res;
     let realm = &config.realm;
     let internal_property_key = &config.internal_property_key;
 
-
     let mut string_arms = Vec::with_capacity(props.len());
     let mut symbols = Vec::new();
-
 
     let mut prop_items = Vec::new();
     let mut has_configurable = false;
@@ -37,8 +32,6 @@ pub fn generate_delete_property(
             return ::core::result::Result::Ok(true);
         };
 
-
-
         match key {
             Name::Str(s) => {
                 string_arms.push(quote::quote! {
@@ -58,7 +51,6 @@ pub fn generate_delete_property(
 
         prop_items.push(value_expr);
     }
-
 
     let str_check = if !string_arms.is_empty() {
         quote::quote! {
@@ -95,23 +87,21 @@ pub fn generate_delete_property(
             }
         }
     } else {
-
         quote::quote! {
-        #[inline(always)]
-        fn delete_property(
-            &self,
-            key: &#internal_property_key,
-            realm: &mut #realm
-        ) -> #res<bool> {
-            match key {
-                #str_check
-                #symbol_check
-                _ => {}
-            }
+            #[inline(always)]
+            fn delete_property(
+                &self,
+                key: &#internal_property_key,
+                realm: &mut #realm
+            ) -> #res<bool> {
+                match key {
+                    #str_check
+                    #symbol_check
+                    _ => {}
+                }
 
-            ::core::result::Result::Ok(false)
+                ::core::result::Result::Ok(false)
+            }
         }
     }
-    }
-
 }

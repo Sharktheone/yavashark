@@ -1,6 +1,6 @@
+use crate::{MutObject, Realm};
 use std::cell::RefCell;
 use yavashark_macro::{object, props};
-use crate::{MutObject, Realm};
 
 #[object]
 #[derive(Debug)]
@@ -16,10 +16,8 @@ impl Locale {
     }
 }
 
-
 #[props]
 impl Locale {
     #[constructor]
     fn construct() {}
-
 }

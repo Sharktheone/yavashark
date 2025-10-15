@@ -20,14 +20,14 @@ pub fn generate_keys(props: &[Property], config: &Config) -> proc_macro2::TokenS
 
             continue;
         }
-        
+
         let key = &prop.name;
 
         let c = config_idx;
         if prop.configurable {
             config_idx += 1;
         }
-        
+
         let value_expr = match key {
             Name::Str(s) => {
                 quote::quote! {
@@ -56,7 +56,7 @@ pub fn generate_keys(props: &[Property], config: &Config) -> proc_macro2::TokenS
                 Some(#value_expr)
             }
         };
-        
+
         prop_items.push(value_expr);
     }
 
@@ -89,7 +89,7 @@ pub fn generate_enumerable_keys(props: &[Property], config: &Config) -> proc_mac
     let mut prop_items = Vec::with_capacity(props.len());
 
     let has_configurable = props.iter().any(|p| p.configurable);
-    
+
     let mut config_idx = 0usize;
 
     for prop in props {
@@ -100,7 +100,7 @@ pub fn generate_enumerable_keys(props: &[Property], config: &Config) -> proc_mac
 
             continue;
         }
-        
+
         let key = &prop.name;
 
         let c = config_idx;
@@ -138,10 +138,7 @@ pub fn generate_enumerable_keys(props: &[Property], config: &Config) -> proc_mac
         };
 
         prop_items.push(value_expr);
-
     }
-
-
 
     let configurable_flatten = if has_configurable {
         quote::quote! {

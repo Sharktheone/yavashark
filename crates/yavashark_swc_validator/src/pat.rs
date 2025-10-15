@@ -35,8 +35,7 @@ impl<'a> Validator<'a> {
                 }
 
                 self.validate_ident(&ident.id)?;
-                if self.in_strict_mode() && matches!(ident.id.sym.as_ref(), "eval" | "arguments")
-                {
+                if self.in_strict_mode() && matches!(ident.id.sym.as_ref(), "eval" | "arguments") {
                     return Err(format!(
                         "Identifier '{}' is not allowed in strict mode",
                         ident.id.sym

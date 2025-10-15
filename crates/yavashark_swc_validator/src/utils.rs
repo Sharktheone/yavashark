@@ -91,12 +91,13 @@ impl<'a> Validator<'a> {
         is_async: bool,
         is_generator: bool,
     ) -> FunctionContextScope {
-        let await_restricted =
-            is_async || self.function_ctx.as_ref().map_or(false, |ctx| ctx.await_restricted);
-        let (allow_super_property, allow_super_call) = self
-            .function_ctx
-            .as_ref()
-            .map_or((false, false), |ctx| {
+        let await_restricted = is_async
+            || self
+                .function_ctx
+                .as_ref()
+                .map_or(false, |ctx| ctx.await_restricted);
+        let (allow_super_property, allow_super_call) =
+            self.function_ctx.as_ref().map_or((false, false), |ctx| {
                 (ctx.allow_super_property, ctx.allow_super_call)
             });
         let inherited_strict = self
@@ -198,12 +199,7 @@ impl<'a> Validator<'a> {
     }
 
     pub fn ensure_not_function_param(&self, name: &str) -> Result<(), String> {
-        if self
-            .param_shadow_stack
-            .last()
-            .copied()
-            .unwrap_or(true)
-        {
+        if self.param_shadow_stack.last().copied().unwrap_or(true) {
             return Ok(());
         }
 

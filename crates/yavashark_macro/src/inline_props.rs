@@ -1,17 +1,17 @@
 mod contains_property;
+mod delete_property;
 mod get_property;
 mod keys;
 mod properties;
 mod property;
 mod set_property;
 mod values;
-mod delete_property;
 
 use crate::config::Config;
 use crate::inline_props::property::{Kind, Property};
 use proc_macro2::TokenStream;
-use syn::Fields;
 use syn::spanned::Spanned;
+use syn::Fields;
 
 pub fn inline_props(
     _attrs: proc_macro::TokenStream,
@@ -79,20 +79,15 @@ pub fn inline_props(
         let ty = if let Some(t) = bits_to_int_type(config_amount) {
             t
         } else {
-            return syn::Error::new_spanned(
-                input,
-                "Too many configurable properties (max 128)",
-            )
-            .to_compile_error()
-            .into();
+            return syn::Error::new_spanned(input, "Too many configurable properties (max 128)")
+                .to_compile_error()
+                .into();
         };
-
 
         fields.named.push(syn::parse_quote! {
             __deleted_properties: ::core::cell::Cell<#ty>
         });
     }
-
 
     let prop_impl = generate_impl(&input.ident, &props, &config);
 

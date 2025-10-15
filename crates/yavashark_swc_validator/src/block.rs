@@ -136,45 +136,45 @@ impl<'a> Validator<'a> {
         let guard = self.enter_block_scope(allow_param_shadow);
 
         let result = (|| {
-        let mut lexical = Vec::new();
-        let mut var_names = Vec::new();
+            let mut lexical = Vec::new();
+            let mut var_names = Vec::new();
 
-        for stmt in &block.stmts {
-            collect_lexical_names(stmt, &mut lexical);
-            collect_var_declared_names(stmt, &mut var_names);
-        }
-
-        let mut seen = HashSet::new();
-        for name in &lexical {
-            if *name == "_" {
-                continue;
+            for stmt in &block.stmts {
+                collect_lexical_names(stmt, &mut lexical);
+                collect_var_declared_names(stmt, &mut var_names);
             }
-            if !seen.insert(*name) {
-                return Err(format!(
-                    "Identifier '{name}' has already been declared in this block"
-                ));
-            }
-        }
 
-        if !lexical.is_empty() && !var_names.is_empty() {
-            let set_lex: HashSet<&str> = lexical
-                .iter()
-                .copied()
-                .filter(|name| *name != "_")
-                .collect();
-            if let Some(name) = var_names
-                .iter()
-                .copied()
-                .filter(|name| *name != "_")
-                .find(|name| set_lex.contains(name))
-            {
-                return Err(format!(
-                    "Identifier '{name}' conflicts with lexical declaration in this block"
-                ));
+            let mut seen = HashSet::new();
+            for name in &lexical {
+                if *name == "_" {
+                    continue;
+                }
+                if !seen.insert(*name) {
+                    return Err(format!(
+                        "Identifier '{name}' has already been declared in this block"
+                    ));
+                }
             }
-        }
 
-        self.validate_statements(&block.stmts)
+            if !lexical.is_empty() && !var_names.is_empty() {
+                let set_lex: HashSet<&str> = lexical
+                    .iter()
+                    .copied()
+                    .filter(|name| *name != "_")
+                    .collect();
+                if let Some(name) = var_names
+                    .iter()
+                    .copied()
+                    .filter(|name| *name != "_")
+                    .find(|name| set_lex.contains(name))
+                {
+                    return Err(format!(
+                        "Identifier '{name}' conflicts with lexical declaration in this block"
+                    ));
+                }
+            }
+
+            self.validate_statements(&block.stmts)
         })();
 
         guard.exit(self);

@@ -1,4 +1,4 @@
-use crate::{pat::collect_bound_names, Validator};
+use crate::{Validator, pat::collect_bound_names};
 use swc_ecma_ast::{VarDecl, VarDeclKind};
 
 impl<'a> Validator<'a> {

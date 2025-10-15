@@ -66,7 +66,6 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
             }
         };
 
-
         let value_expr = if !has_configurable {
             value_expr
         } else if prop.configurable {
@@ -83,11 +82,8 @@ pub fn generate_values(props: &[Property], config: &Config) -> proc_macro2::Toke
             }
         };
 
-
-
         prop_items.push(value_expr);
     }
-
 
     let configurable_flatten = if has_configurable {
         quote::quote! {
@@ -123,7 +119,6 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
     let has_configurable = props.iter().any(|p| p.configurable);
 
     for prop in props {
-
         if prop.kind != Kind::Getter && !prop.enumerable {
             if prop.configurable {
                 config_idx += 1;
@@ -137,7 +132,6 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
         if prop.configurable {
             config_idx += 1;
         }
-
 
         let partial_get = if prop.partial {
             quote! {
@@ -163,7 +157,6 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
 
         let attributes = prop.attributes(config);
 
-
         let value_expr = if prop.kind == Kind::Getter {
             quote! {
                 #env::value::Property::Getter(self.#field #get, #attributes)
@@ -176,7 +169,6 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
                 }
             }
         };
-
 
         let value_expr = if !has_configurable {
             value_expr
@@ -193,7 +185,6 @@ pub fn generate_enumerable_values(props: &[Property], config: &Config) -> proc_m
                 Some(#value_expr)
             }
         };
-
 
         prop_items.push(value_expr);
     }

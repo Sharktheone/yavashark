@@ -32,7 +32,10 @@ pub enum Property {
 impl From<ObjectProperty> for Property {
     fn from(prop: ObjectProperty) -> Self {
         if !prop.set.is_undefined() || !prop.get.is_undefined() {
-            Self::Getter(prop.get.to_object().unwrap_or(crate::Object::null()), prop.attributes)
+            Self::Getter(
+                prop.get.to_object().unwrap_or(crate::Object::null()),
+                prop.attributes,
+            )
         } else {
             Self::Value(prop.value, prop.attributes)
         }
@@ -47,22 +50,31 @@ impl From<Variable> for Property {
 
 impl From<Value> for Property {
     fn from(value: Value) -> Self {
-        Self::Value(
-            value,
-            Attributes::default()
-        )
-    } 
+        Self::Value(value, Attributes::default())
+    }
 }
 
 impl From<PropertyDescriptor> for Property {
     fn from(desc: PropertyDescriptor) -> Self {
         match desc {
-            PropertyDescriptor::Data { value, writable, enumerable, configurable } => {
-                Self::Value(value, Attributes::from_values(writable, enumerable, configurable))
-            }
-            PropertyDescriptor::Accessor { get, set: _, enumerable, configurable } => {
-                Self::Getter(get.unwrap_or(crate::Object::null()), Attributes::from_values(false, enumerable, configurable))
-            }
+            PropertyDescriptor::Data {
+                value,
+                writable,
+                enumerable,
+                configurable,
+            } => Self::Value(
+                value,
+                Attributes::from_values(writable, enumerable, configurable),
+            ),
+            PropertyDescriptor::Accessor {
+                get,
+                set: _,
+                enumerable,
+                configurable,
+            } => Self::Getter(
+                get.unwrap_or(crate::Object::null()),
+                Attributes::from_values(false, enumerable, configurable),
+            ),
         }
     }
 }
@@ -71,7 +83,7 @@ impl Property {
     pub const fn attributes(&self) -> Attributes {
         match self {
             Property::Value(_, attributes) => *attributes,
-            Property::Getter(_, a) => *a
+            Property::Getter(_, a) => *a,
         }
     }
 
@@ -82,7 +94,9 @@ impl Property {
     pub fn assert_value(self) -> Variable {
         match self {
             Property::Value(v, attributes) => Variable::with_attributes(v, attributes),
-            Property::Getter(_, attributes) => Variable::with_attributes(Value::Undefined, attributes),
+            Property::Getter(_, attributes) => {
+                Variable::with_attributes(Value::Undefined, attributes)
+            }
         }
     }
 }
@@ -322,10 +336,7 @@ pub trait Obj: Debug + 'static {
         _ = args;
         _ = this;
         _ = realm;
-        Err(Error::ty_error(format!(
-            "{} is not callable",
-            self.name()
-        )))
+        Err(Error::ty_error(format!("{} is not callable", self.name())))
     }
     fn is_callable(&self) -> bool {
         false
@@ -826,8 +837,7 @@ impl Object {
         realm: &mut Realm,
     ) -> Res<Option<Property>> {
         let name = name.into_internal_property_key(realm)?;
-        self.0
-            .get_own_property(name.clone(), realm)
+        self.0.get_own_property(name.clone(), realm)
     }
 
     pub fn get_own_property(&self, name: impl IntoPropertyKey, realm: &mut Realm) -> Res<Value> {
@@ -1018,8 +1028,8 @@ impl Object {
             return Ok(format!("[object {}]", self.name()).into());
         };
 
-
-        to_string.call(realm, vec![], self.clone().into())?
+        to_string
+            .call(realm, vec![], self.clone().into())?
             .to_string(realm)
     }
 }
@@ -1171,19 +1181,12 @@ impl ObjectProperty {
     pub fn property(&self) -> Property {
         if !self.set.is_undefined() || !self.get.is_undefined() {
             let Ok(obj) = self.get.clone().to_object() else {
-                return Property::Value(
-                    Value::Undefined,
-                    Attributes::config(),
-                );
+                return Property::Value(Value::Undefined, Attributes::config());
             };
-
 
             Property::Getter(obj, self.attributes)
         } else {
-            Property::Value(
-                self.value.clone(),
-                self.attributes,
-            )
+            Property::Value(self.value.clone(), self.attributes)
         }
     }
 }

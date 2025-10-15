@@ -114,10 +114,16 @@ impl ObjectImpl for Arguments {
 
         if let InternalPropertyKey::String(s) = &name {
             if s == "length" {
-                return Ok(Some(Property::Value(self.length.borrow().clone(), Attributes::write_config())));
+                return Ok(Some(Property::Value(
+                    self.length.borrow().clone(),
+                    Attributes::write_config(),
+                )));
             }
             if s == "callee" {
-                return Ok(Some(Property::Value(self.callee.clone(), Attributes::write_config())));
+                return Ok(Some(Property::Value(
+                    self.callee.clone(),
+                    Attributes::write_config(),
+                )));
             }
         }
 

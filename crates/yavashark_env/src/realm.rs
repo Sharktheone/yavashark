@@ -85,7 +85,6 @@ impl Default for Realm {
                 modules: HashMap::new(),
             },
             queue: AsyncTaskQueue::new(),
-
         }
     }
 }

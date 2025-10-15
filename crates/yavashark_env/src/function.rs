@@ -1,6 +1,10 @@
+use crate::inline_props::{PropertiesHook, UpdatePropertyResult};
 use crate::realm::Realm;
 use crate::value::{Attributes, DefinePropertyResult, MutObj, Obj, ObjectImpl, Property};
-use crate::{Error, InternalPropertyKey, MutObject, Object, ObjectHandle, ObjectOrNull, Res, Value, ValueResult, Variable};
+use crate::{
+    Error, InternalPropertyKey, MutObject, Object, ObjectHandle, ObjectOrNull, Res, Value,
+    ValueResult, Variable,
+};
 pub use class::*;
 pub use constructor::*;
 pub use prototype::*;
@@ -8,7 +12,6 @@ use std::cell::{Cell, RefCell, RefMut};
 use std::fmt::Debug;
 use std::ops::{Deref, DerefMut};
 use yavashark_macro::inline_props;
-use crate::inline_props::{PropertiesHook, UpdatePropertyResult};
 
 mod bound;
 mod class;
@@ -19,7 +22,6 @@ type NativeFn = Box<dyn Fn(Vec<Value>, Value, &mut Realm) -> ValueResult>;
 
 pub struct NativeFunctionBuilder(NativeFunction, bool);
 
-
 #[inline_props]
 pub struct NativeFunctionProps {
     #[readonly]
@@ -28,9 +30,8 @@ pub struct NativeFunctionProps {
     #[readonly]
     #[no_enumerable]
     pub name: &'static str,
-    pub constructor: Option<ObjectHandle>
+    pub constructor: Option<ObjectHandle>,
 }
-
 
 pub struct MutNativeFunction {
     pub object: MutObject,
@@ -57,41 +58,58 @@ impl ObjectImpl for NativeFunction {
     fn get_inner_mut(&self) -> impl DerefMut<Target = Self::Inner> {
         self.inner.borrow_mut()
     }
-    fn define_property(&self, name: InternalPropertyKey, value: crate::value::Value, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property(
+        &self,
+        name: InternalPropertyKey,
+        value: crate::value::Value,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         Ok(match self.props.set_property(&name, value, realm)? {
             UpdatePropertyResult::Handled => DefinePropertyResult::Handled,
-            UpdatePropertyResult::NotHandled(value) => {
-                self.get_wrapped_object().define_property(name, value, realm)?
-            }
-            UpdatePropertyResult::Setter(set, value) => {
-                DefinePropertyResult::Setter(set, value)
-            }
+            UpdatePropertyResult::NotHandled(value) => self
+                .get_wrapped_object()
+                .define_property(name, value, realm)?,
+            UpdatePropertyResult::Setter(set, value) => DefinePropertyResult::Setter(set, value),
             UpdatePropertyResult::ReadOnly => DefinePropertyResult::ReadOnly,
         })
     }
 
-    fn define_property_attributes(&self, name: InternalPropertyKey, value: crate::value::Variable, realm: &mut Realm) -> Res<DefinePropertyResult> {
+    fn define_property_attributes(
+        &self,
+        name: InternalPropertyKey,
+        value: crate::value::Variable,
+        realm: &mut Realm,
+    ) -> Res<DefinePropertyResult> {
         Ok(match self.props.set_property(&name, value.value, realm)? {
             UpdatePropertyResult::Handled => DefinePropertyResult::Handled,
             UpdatePropertyResult::NotHandled(v) => {
-                self.get_wrapped_object().define_property_attributes(name, Variable::with_attributes(v, value.properties) , realm)?
+                self.get_wrapped_object().define_property_attributes(
+                    name,
+                    Variable::with_attributes(v, value.properties),
+                    realm,
+                )?
             }
-            UpdatePropertyResult::Setter(set, value) => {
-                DefinePropertyResult::Setter(set, value)
-            }
+            UpdatePropertyResult::Setter(set, value) => DefinePropertyResult::Setter(set, value),
             UpdatePropertyResult::ReadOnly => DefinePropertyResult::ReadOnly,
         })
     }
 
-
-    fn get_own_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn get_own_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         Ok(match self.props.get_property(&name, realm)? {
             Some(prop) => Some(prop),
             None => self.get_wrapped_object().get_own_property(name, realm)?,
         })
     }
 
-    fn resolve_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn resolve_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         Ok(match self.props.get_property(&name, realm)? {
             Some(prop) => Some(prop),
             None => self.get_wrapped_object().resolve_property(name, realm)?,
@@ -99,16 +117,25 @@ impl ObjectImpl for NativeFunction {
     }
 
     fn contains_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        Ok(self.props.contains_property(&name)? || self.get_wrapped_object().contains_key(name, realm)?)
+        Ok(self.props.contains_property(&name)?
+            || self.get_wrapped_object().contains_key(name, realm)?)
     }
 
     fn contains_own_key(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<bool> {
-        Ok(self.props.contains_property(&name)? || self.get_wrapped_object().contains_own_key(name, realm)?)
+        Ok(self.props.contains_property(&name)?
+            || self.get_wrapped_object().contains_own_key(name, realm)?)
     }
 
-    fn delete_property(&self, name: InternalPropertyKey, realm: &mut Realm) -> Res<Option<Property>> {
+    fn delete_property(
+        &self,
+        name: InternalPropertyKey,
+        realm: &mut Realm,
+    ) -> Res<Option<Property>> {
         if self.props.delete_property(&name, realm)? {
-            return Ok(Some(Property::Value(Value::Undefined, Attributes::config())));
+            return Ok(Some(Property::Value(
+                Value::Undefined,
+                Attributes::config(),
+            )));
         }
 
         self.get_wrapped_object().delete_property(name, realm)
@@ -183,7 +210,6 @@ impl NativeFunction {
         #[allow(clippy::expect_used)]
         {
             let this = handle.downcast::<Self>().expect("unreachable");
-
 
             let mut ctor = this.props.constructor.borrow_mut();
 
@@ -288,7 +314,6 @@ impl NativeFunction {
             let mut ctor = this.props.constructor.borrow_mut();
 
             *ctor = Some(handle.clone());
-
         }
 
         handle
@@ -317,14 +342,12 @@ impl NativeFunction {
 
         let handle = ObjectHandle::new(this);
 
-
         #[allow(clippy::expect_used)]
         {
             let this = handle.downcast::<Self>().expect("unreachable");
 
             let mut ctor = this.props.constructor.borrow_mut();
             *ctor = Some(handle.clone());
-
         }
 
         handle
@@ -355,7 +378,6 @@ impl NativeFunction {
         let handle = ObjectHandle::new(this);
         let _ =
             handle.define_property_attributes("name".into(), Variable::config(name.into()), realm);
-
 
         #[allow(clippy::expect_used)]
         {
@@ -500,7 +522,6 @@ impl NativeFunctionBuilder {
     #[allow(clippy::missing_panics_doc)]
     pub fn build(self, _realm: &mut Realm) -> ObjectHandle {
         let handle = ObjectHandle::new(self.0);
-
 
         #[allow(clippy::expect_used)]
         {

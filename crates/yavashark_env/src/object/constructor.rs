@@ -121,13 +121,16 @@ impl ObjectConstructor {
         } else {
             if !obj.contains_own_key(key.clone(), realm)? {
                 //TODO setup the attributes, not perfect, but works for now
-                let var = Variable::new_with_attributes(Value::Undefined, writable, enumerable, configurable);
+                let var = Variable::new_with_attributes(
+                    Value::Undefined,
+                    writable,
+                    enumerable,
+                    configurable,
+                );
 
                 obj.define_property_attributes(key.clone(), var, realm)?;
-
             }
         }
-
 
         //TODO: there should be a obj.define_property which takes a descriptor
         if let Some(get) = descriptor.resolve_property("get", realm)? {

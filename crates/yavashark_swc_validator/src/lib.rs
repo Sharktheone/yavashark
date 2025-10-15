@@ -21,7 +21,7 @@ mod utils;
 mod whle;
 mod with;
 
-use crate::utils::{statements_have_use_strict, FunctionContext};
+use crate::utils::{FunctionContext, statements_have_use_strict};
 use std::collections::HashSet;
 use swc_ecma_ast::{ModuleDecl, ModuleItem, Stmt};
 

@@ -156,7 +156,6 @@ fn to_string(_args: Vec<Value>, this: Value, _realm: &mut Realm) -> ValueResult 
         return Err(Error::ty("toString called on non-function"));
     }
 
-
     Ok("function () { } ".into())
 }
 

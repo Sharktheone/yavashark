@@ -16,7 +16,7 @@ impl Eval for InterpreterEval {
         }
 
         let input = StringInput::new(code, BytePos(0), BytePos(code.len() as u32));
-        let syn = Syntax::Es( EsSyntax {
+        let syn = Syntax::Es(EsSyntax {
             jsx: false,
             fn_bind: false,
             decorators: true,
