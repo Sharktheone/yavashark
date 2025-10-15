@@ -65,7 +65,14 @@ impl DataView {
         })
     }
 
-    pub fn extract<T: FromBytes>(&self, offset: usize, le: bool) -> Res<T> {
+    pub fn extract<T: FromBytes>(&self, offset: isize, le: bool) -> Res<T> {
+        if offset < 0 {
+            return Err(Error::range("Out of bounds"));
+        }
+
+        let offset = offset as usize;
+
+
         if offset > self.byte_length {
             return Err(Error::range("Out of bounds"));
         }
@@ -91,7 +98,14 @@ impl DataView {
         Ok(T::from_bytes(bytes, le))
     }
 
-    pub fn set<T: FromBytes>(&self, offset: usize, value: T, le: bool) -> Res {
+    pub fn set<T: FromBytes>(&self, offset: isize, value: T, le: bool) -> Res {
+        if offset < 0 {
+            return Err(Error::range("Out of bounds"));
+        }
+
+        let offset = offset as usize;
+
+
         if offset > self.byte_length {
             return Err(Error::range("Out of bounds"));
         }
@@ -137,7 +151,7 @@ impl DataView {
     }
 
     #[prop("getFloat16")]
-    pub fn get_float16(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_float16(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         let value = self.extract::<f16>(offset, le)?;
@@ -145,7 +159,7 @@ impl DataView {
         Ok(value.into())
     }
     #[prop("getFloat32")]
-    pub fn get_float32(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_float32(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         let value = self.extract::<f32>(offset, le)?;
@@ -154,7 +168,7 @@ impl DataView {
     }
 
     #[prop("getFloat64")]
-    pub fn get_float64(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_float64(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<f64>(offset, le)?;
 
@@ -162,7 +176,7 @@ impl DataView {
     }
 
     #[prop("getInt8")]
-    pub fn get_int8(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_int8(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<i8>(offset, le)?;
 
@@ -170,7 +184,7 @@ impl DataView {
     }
 
     #[prop("getInt16")]
-    pub fn get_int16(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_int16(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<i16>(offset, le)?;
 
@@ -178,7 +192,7 @@ impl DataView {
     }
 
     #[prop("getInt32")]
-    pub fn get_int32(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_int32(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<i32>(offset, le)?;
 
@@ -186,7 +200,7 @@ impl DataView {
     }
 
     #[prop("getBigInt64")]
-    pub fn get_big_int64(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_big_int64(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<i64>(offset, le)?;
 
@@ -194,7 +208,7 @@ impl DataView {
     }
 
     #[prop("getUint8")]
-    pub fn get_uint8(&self, offset: usize, le: Option<bool>) -> ValueResult {
+    pub fn get_uint8(&self, offset: isize, le: Option<bool>) -> ValueResult {
         let le = le.unwrap_or(false);
         let value = self.extract::<u8>(offset, le)?;
 
@@ -202,7 +216,7 @@ impl DataView {
     }
 
     #[prop("getUint16")]
-    pub fn get_uint16(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_uint16(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<u16>(offset, le)?;
 
@@ -210,7 +224,7 @@ impl DataView {
     }
 
     #[prop("getUint32")]
-    pub fn get_uint32(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_uint32(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<u32>(offset, le)?;
 
@@ -218,7 +232,7 @@ impl DataView {
     }
 
     #[prop("getBigUint64")]
-    pub fn get_big_uint64(&self, offset: usize, little: Option<bool>) -> ValueResult {
+    pub fn get_big_uint64(&self, offset: isize, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = self.extract::<u64>(offset, le)?;
 
@@ -226,7 +240,7 @@ impl DataView {
     }
 
     #[prop("setFloat16")]
-    pub fn set_float16(&self, offset: usize, value: f32, little: Option<bool>) -> ValueResult {
+    pub fn set_float16(&self, offset: isize, value: f32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
         let value = f16::from_f32(value);
 
@@ -236,7 +250,7 @@ impl DataView {
     }
 
     #[prop("setFloat32")]
-    pub fn set_float32(&self, offset: usize, value: f32, little: Option<bool>) -> ValueResult {
+    pub fn set_float32(&self, offset: isize, value: f32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -245,7 +259,7 @@ impl DataView {
     }
 
     #[prop("setFloat64")]
-    pub fn set_float64(&self, offset: usize, value: f64, little: Option<bool>) -> ValueResult {
+    pub fn set_float64(&self, offset: isize, value: f64, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -254,7 +268,7 @@ impl DataView {
     }
 
     #[prop("setInt8")]
-    pub fn set_int8(&self, offset: usize, value: i8, little: Option<bool>) -> ValueResult {
+    pub fn set_int8(&self, offset: isize, value: i8, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -263,7 +277,7 @@ impl DataView {
     }
 
     #[prop("setInt16")]
-    pub fn set_int16(&self, offset: usize, value: i16, little: Option<bool>) -> ValueResult {
+    pub fn set_int16(&self, offset: isize, value: i16, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -272,7 +286,7 @@ impl DataView {
     }
 
     #[prop("setInt32")]
-    pub fn set_int32(&self, offset: usize, value: i32, little: Option<bool>) -> ValueResult {
+    pub fn set_int32(&self, offset: isize, value: i32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -283,7 +297,7 @@ impl DataView {
     #[prop("setBigInt64")]
     pub fn set_big_int64(
         &self,
-        offset: usize,
+        offset: isize,
         value: &BigInt,
         little: Option<bool>,
     ) -> ValueResult {
@@ -297,7 +311,7 @@ impl DataView {
     }
 
     #[prop("setUint8")]
-    pub fn set_uint8(&self, offset: usize, value: u8, little: Option<bool>) -> ValueResult {
+    pub fn set_uint8(&self, offset: isize, value: u8, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -306,7 +320,7 @@ impl DataView {
     }
 
     #[prop("setUint16")]
-    pub fn set_uint16(&self, offset: usize, value: u16, little: Option<bool>) -> ValueResult {
+    pub fn set_uint16(&self, offset: isize, value: u16, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -315,7 +329,7 @@ impl DataView {
     }
 
     #[prop("setUint32")]
-    pub fn set_uint32(&self, offset: usize, value: u32, little: Option<bool>) -> ValueResult {
+    pub fn set_uint32(&self, offset: isize, value: u32, little: Option<bool>) -> ValueResult {
         let le = little.unwrap_or(false);
 
         self.set(offset, value, le)?;
@@ -326,7 +340,7 @@ impl DataView {
     #[prop("setBigUint64")]
     pub fn set_big_uint64(
         &self,
-        offset: usize,
+        offset: isize,
         value: &BigInt,
         little: Option<bool>,
     ) -> ValueResult {
