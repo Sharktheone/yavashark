@@ -2,7 +2,9 @@
 #![cfg_attr(miri, feature(strict_provenance, exposed_provenance))]
 
 use log::warn;
-use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+#[cfg(feature = "actual_gc")]
+use parking_lot::{RwLockReadGuard, RwLockWriteGuard};
+use parking_lot::RwLock;
 use std::fmt::{Debug, Formatter};
 use std::future::Future;
 use std::ops::{Deref, DerefMut};
@@ -11,12 +13,14 @@ use std::ptr::NonNull;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::task::{Context, Poll};
 
+#[cfg(feature = "actual_gc")]
 use spin_lock::SpinLock;
 
 use crate::tagged_ptr::TaggedPtr;
 #[cfg(feature = "easy_debug")]
 use crate::trace::{TraceID, TRACER};
 
+#[cfg(feature = "actual_gc")]
 pub(crate) mod spin_lock;
 
 pub mod collectable;
@@ -206,6 +210,7 @@ impl<T: Collectable> Clone for GcRef<T> {
 }
 
 impl<T: Collectable> GcRef<T> {
+    #[cfg(feature = "actual_gc")]
     fn add_ref_by(&self, r: impl Into<Self>) {
         let r = r.into();
 
@@ -224,6 +229,7 @@ impl<T: Collectable> GcRef<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn cast<U: Collectable>(&self) -> GcRef<U> {
         if self.ptr.tag() {
             let untyped: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
@@ -250,6 +256,7 @@ impl<T: Collectable> GcRef<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn cast_with_dealloc<U: Collectable>(&self, dealloc: DeallocFn) -> GcRef<U> {
         if self.ptr.tag() {
             let untyped: NonNull<UntypedGcRef> = self.ptr.ptr().cast();
@@ -665,6 +672,7 @@ impl<T: Collectable> Gc<T> {
 
 type MaybeNull<T> = NonNull<T>;
 
+#[allow(unused)]
 struct Refs<T: Collectable> {
     ref_by: RwLock<Vec<GcRef<T>>>,
     ref_to: RwLock<Vec<GcRef<T>>>,
@@ -688,6 +696,7 @@ impl<T: Collectable> Refs<T> {
     }
 
     #[allow(clippy::needless_pass_by_ref_mut)]
+    #[cfg(feature = "actual_gc")]
     fn add_ref_by(&mut self, other: impl Into<GcRef<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.push(other.into());
@@ -697,6 +706,7 @@ impl<T: Collectable> Refs<T> {
     }
 
     #[allow(clippy::needless_pass_by_ref_mut)]
+    #[cfg(feature = "actual_gc")]
     fn remove_ref_by(&mut self, other: NonNull<GcBox<T>>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.retain(|x| x.box_ptr() != other.cast());
@@ -706,6 +716,7 @@ impl<T: Collectable> Refs<T> {
     }
 
     #[allow(clippy::needless_pass_by_ref_mut)]
+    #[cfg(feature = "actual_gc")]
     fn remove_ref_by_ptr(&mut self, other: *mut GcBox<T>) {
         if let Some(mut lock) = self.ref_by.spin_write() {
             lock.retain(|x| x.box_ptr().as_ptr() != other.cast());
@@ -732,14 +743,17 @@ impl<T: Collectable> Refs<T> {
         self.strong.load(Ordering::Relaxed)
     }
 
+    #[cfg(feature = "actual_gc")]
     fn read_refs(&self) -> Option<RwLockReadGuard<'_, Vec<GcRef<T>>>> {
         self.ref_to.spin_read()
     }
 
+    #[cfg(feature = "actual_gc")]
     fn read_ref_by(&self) -> Option<RwLockReadGuard<'_, Vec<GcRef<T>>>> {
         self.ref_by.spin_read()
     }
 
+    #[cfg(feature = "actual_gc")]
     fn write_refs(&self) -> Option<RwLockWriteGuard<'_, Vec<GcRef<T>>>> {
         self.ref_to.spin_write()
     }
@@ -860,6 +874,7 @@ impl Flags {
     }
 }
 
+#[cfg(feature = "actual_gc")]
 #[derive(Debug, PartialEq, Eq)]
 enum RootStatus {
     #[allow(dead_code)]
@@ -876,6 +891,7 @@ pub struct WeakGc<T: Collectable> {
 }
 
 impl<T: Collectable> GcBox<T> {
+    #[cfg(feature = "actual_gc")]
     fn shake_tree(this_ref: &GcRef<T>) {
         let mut unmark = Vec::new();
         unsafe {
@@ -933,6 +949,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn mark_dead(this_ptr: NonNull<GcBox<()>>, look_later: Option<&mut Vec<NonNull<GcBox<()>>>>) {
         let this = this_ptr.as_ptr();
 
@@ -995,10 +1012,12 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     const fn unmark(&mut self) {
         self.flags.unmark();
     }
 
+    #[cfg(feature = "actual_gc")]
     unsafe fn nuke_value(this_ptr: TaggedPtr<Self>) {
         if this_ptr.tag() {
             //The ptr doesn't point to a self ref, but instead to a GcTreeRef
@@ -1031,6 +1050,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     /// The caller is responsible for making sure that the `this_ptr` already has the `EXTERNALLY_DROPPED` flag set
     unsafe fn nuke(this_ptr: NonNull<GcBox<()>>) {
         unsafe {
@@ -1040,6 +1060,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     unsafe fn nuke_refs(this_ptr: NonNull<GcBox<()>>) {
         unsafe {
             let this = this_ptr.as_ptr();
@@ -1053,6 +1074,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     fn you_have_root(this_ptr: &GcRef<T>, unmark: &mut Vec<GcRef<T>>) -> RootStatus {
         let this = this_ptr.box_ptr().as_ptr();
         unsafe {
@@ -1127,6 +1149,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     unsafe fn update_refs(this_ptr: NonNull<Self>) {
         let value = (*this_ptr.as_ptr()).value.as_ref();
 
@@ -1200,6 +1223,7 @@ impl<T: Collectable> GcBox<T> {
         }
     }
 
+    #[cfg(feature = "actual_gc")]
     unsafe fn collect(this: &GcRef<T>) {
         let this_ptr = this.box_ptr().as_ptr();
 
@@ -1260,6 +1284,7 @@ impl<T: Collectable> Drop for GcBox<T> {
                 warn!("Dropping a GcBox that still has references - this might be bad");
             }
 
+            #[cfg(feature = "actual_gc")]
             let self_raw = self as *mut Self;
             #[cfg(feature = "actual_gc")]
             if let Some(refs) = self.refs.read_refs() {
@@ -1347,6 +1372,7 @@ impl<T: Collectable> Drop for Gc<T> {
                 let refs: [i32; 0] = [];
 
                 if (*self.inner.as_ptr()).refs.weak() == 0 && refs.is_empty() {
+                    #[cfg(feature = "actual_gc")]
                     drop(refs);
                     //we can drop the complete GcBox
                     let _ = Box::from_raw(self.inner.as_ptr());
