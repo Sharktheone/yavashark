@@ -16,7 +16,7 @@ impl Interpreter {
             Callee::Expr(callee_expr) => {
                 let (callee, this) = Self::run_call_expr(realm, callee_expr, stmt.span, scope)?;
 
-                let this = this.unwrap_or(scope.this()?);
+                let this = this.unwrap_or(scope.fn_this()?);
 
                 Self::run_call_on(realm, &callee, this, &stmt.args, stmt.span, scope)
             }

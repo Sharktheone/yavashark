@@ -49,7 +49,7 @@ fn run(stmt: &OptChainExpr, scope: &mut Scope, realm: &mut Realm) -> RuntimeResu
                 return Err(ControlFlow::OptChainShortCircuit);
             }
 
-            let this = this.unwrap_or(scope.this()?);
+            let this = this.unwrap_or(scope.fn_this()?);
 
             Ok(Interpreter::run_call_on(
                 realm, &callee, this, &call.args, call.span, scope,

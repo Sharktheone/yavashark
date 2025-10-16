@@ -977,6 +977,17 @@ impl Scope {
         Ok(self.scope.borrow()?.this.copy())
     }
 
+
+    pub fn fn_this(&self) -> Res<Value> {
+        let s = self.scope.borrow()?;
+        
+        if s.state.is_strict_mode() {
+            return Ok(Value::Undefined)
+        }
+        
+        Ok(s.this.copy())
+    }
+
     pub fn parent(&self) -> Res<Option<Gc<RefCell<ScopeInternal>>>> {
         Ok(self.scope.borrow()?.parent.clone())
     }
