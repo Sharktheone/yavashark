@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use swc_ecma_ast::{ModuleItem, Program, Stmt};
+use swc_ecma_ast::{BlockStmt, Expr, ExprStmt, Lit, ModuleItem, Program, Stmt};
 
 use yavashark_env::scope::{ModuleScope, Scope};
 use yavashark_env::{scope, ControlFlow, Realm, Res, Value, ValueResult};
@@ -38,7 +38,31 @@ impl Interpreter {
         })
     }
 
+    pub fn is_strict(stmts: &[Stmt]) -> bool {
+        for stmt in stmts {
+            match stmt {
+                Stmt::Empty(_) => continue,
+                Stmt::Expr(ExprStmt { expr, .. }) => match &**expr {
+                    Expr::Lit(Lit::Str(str_lit)) if str_lit.value == *"use strict" => {
+                        return true;
+                    }
+                    Expr::Lit(Lit::Str(_)) => continue,
+                    _ => break,
+                },
+                _ => break,
+            }
+        }
+
+        false
+    }
+
+
     pub fn run_in(script: &Vec<Stmt>, realm: &mut Realm, scope: &mut Scope) -> Res<Value> {
+        if Self::is_strict(script) {
+            scope.set_strict_mode()?;
+        }
+
+
         Self::run_statements(realm, script, scope).or_else(|e| match e {
             ControlFlow::Error(e) => Err(e),
             ControlFlow::Return(v) => Ok(v),
@@ -60,6 +84,8 @@ impl Interpreter {
         realm: &mut Realm,
         scope: &mut ModuleScope,
     ) -> Res<Value> {
+        scope.scope.set_strict_mode()?;
+
         Self::run_module_items(realm, script, scope).or_else(|e| match e {
             ControlFlow::Error(e) => Err(e),
             ControlFlow::Return(v) => Ok(v),
