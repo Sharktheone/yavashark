@@ -9,7 +9,7 @@ use swc_ecma_ast::{
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::value::Obj;
+use yavashark_env::value::{DefinePropertyResult, Obj};
 use yavashark_env::{
     Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult,
     Value,
@@ -37,6 +37,9 @@ impl Interpreter {
             AssignTarget::Simple(t) => match t {
                 SimpleAssignTarget::Ident(i) => {
                     let name = i.sym.to_string();
+                    if scope.is_strict_mode()? && !scope.has_value(&name, realm)? {
+                        return Err(Error::reference_error(format!("{name} is not defined")));
+                    }
                     scope.update_or_define(name, value, realm)
                 }
                 SimpleAssignTarget::Member(m) => Self::assign_member(realm, m, value, scope),
@@ -114,7 +117,13 @@ impl Interpreter {
                 MemberProp::Computed(c) => Self::run_expr(realm, &c.expr, c.span, scope)?,
             };
 
-            obj.define_property(name.into_internal_property_key(realm)?, value, realm);
+            match obj.define_property(name.into_internal_property_key(realm)?, value, realm)? {
+                DefinePropertyResult::Handled => {},
+                DefinePropertyResult::ReadOnly => {
+                    return Err(Error::ty("Cannot assign to read only property"));
+                }
+                DefinePropertyResult::Setter(_, _) => {}
+            }
             Ok(())
         } else {
             Err(Error::ty_error(format!(
