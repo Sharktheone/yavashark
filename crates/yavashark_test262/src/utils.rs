@@ -43,16 +43,6 @@ pub(crate) fn parse_code(input: &str) -> (Program, Metadata) {
 
     let metadata = parse_metadata(input);
 
-    if metadata.flags.contains(Flags::ONLY_STRICT)
-        && !metadata
-            .negative
-            .as_ref()
-            .is_some_and(|neg| neg.phase == NegativePhase::Parse)
-    {
-        println!("SKIP");
-        return (Program::Script(Script::dummy()), Metadata::default());
-    }
-
     let end = BytePos(input.len() as u32);
 
     let input = StringInput::new(input, BytePos(0), end);
