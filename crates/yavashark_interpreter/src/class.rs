@@ -65,11 +65,14 @@ pub fn create_class(
                     params.push(param.clone());
                 }
 
+                let is_strict = constructor.body.as_ref().map(|b| Interpreter::is_strict(&b.stmts)).unwrap_or(false);
+
                 let raw_fn = RawJSFunction {
                     name: RefCell::new("constructor".into()),
                     params,
                     block: constructor.body.clone(),
                     scope: scope.clone(),
+                    is_strict,
                 };
 
                 class.set_constructor(raw_fn);
