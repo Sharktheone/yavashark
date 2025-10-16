@@ -1,4 +1,4 @@
-use crate::value::CustomGcRefUntyped;
+use crate::value::{CustomGcRefUntyped, DefinePropertyResult};
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::collections::hash_map::Entry;
@@ -661,24 +661,27 @@ impl ScopeInternal {
         match &mut self.variables {
             ObjectOrVariables::Object(obj) => {
                 let name: InternalPropertyKey = name.clone().into();
-                if let Ok(Some(prop)) = obj.get_own_property_no_get_set(name.clone(), realm) {
-                    let prop = prop.assert_value();
-                    if !prop.properties.is_writable() {
-                        return Err(Error::ty("Assignment to constant variable"));
-                    }
 
-                    obj.define_property_attributes(
-                        name,
-                        Variable::with_attributes(value, prop.properties),
-                        realm,
-                    )?;
-                    return Ok(());
+                return match obj.define_property(name, value, realm)? {
+                    DefinePropertyResult::Handled => Ok(()),
+                    DefinePropertyResult::ReadOnly => {
+                        if self.state.is_strict_mode() {
+                            Err(Error::ty("Assignment to constant variable"))
+                        } else {
+                            Ok(())
+                        }
+                    }
+                    DefinePropertyResult::Setter(_, _) => Ok(()),
                 }
             }
             ObjectOrVariables::Variables(v) => {
                 if let Some(var) = v.get_mut(&name) {
                     if !var.get(realm).properties.is_writable() {
-                        return Err(Error::ty("Assignment to constant variable"));
+                        if self.state.is_strict_mode() {
+                            return Err(Error::ty("Assignment to constant variable"));
+                        } else {
+                            return Ok(());
+                        }
                     }
 
                     var.update(value, realm)?;
