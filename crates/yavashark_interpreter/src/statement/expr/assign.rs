@@ -9,7 +9,7 @@ use swc_ecma_ast::{
 use crate::Interpreter;
 use yavashark_env::scope::Scope;
 use yavashark_env::value::property_key::IntoPropertyKey;
-use yavashark_env::value::{DefinePropertyResult, Obj};
+use yavashark_env::value::{DefinePropertyResult, Obj, Property};
 use yavashark_env::{
     Class, ClassInstance, Error, InternalPropertyKey, PrivateMember, Realm, Res, RuntimeResult,
     Value,
@@ -390,9 +390,15 @@ impl Interpreter {
 
             let name = name.into_internal_property_key(realm)?;
 
-            let left = obj
-                .resolve_property(name.clone(), realm)?
-                .unwrap_or(Value::Undefined);
+            let (left, writable) = (obj
+                .resolve_property_no_get_set(name.clone(), realm)?).map_or_else(|| (Value::Undefined, true), |v| match v {
+                        Property::Value(v, a) => (v, a.is_writable()),
+                        Property::Getter(_, _) => (Value::Undefined, false),
+            });
+
+            if !writable {
+                return Err(Error::ty("Cannot assign to read only property").into());
+            }
 
             let value = Self::run_assign_op(op, left, right, realm)?;
 
