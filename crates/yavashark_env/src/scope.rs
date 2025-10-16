@@ -34,6 +34,7 @@ impl ScopeState {
     const RETURNABLE: u8 = 0b10000;
     const CONTINUABLE: u8 = 0b10_0000;
     const OPT_CHAIN: u8 = 0b100_0000;
+    const STRICT_MODE: u8 = 0b1000_0000;
     const STATE_NONE: Self = Self { state: Self::NONE };
     const STATE_FUNCTION: Self = Self {
         state: Self::FUNCTION,
@@ -54,6 +55,10 @@ impl ScopeState {
 
     const STATE_OPT_CHAIN: Self = Self {
         state: Self::OPT_CHAIN,
+    };
+
+    const STATE_STRICT_MODE: Self = Self {
+        state: Self::STRICT_MODE,
     };
 
     #[must_use]
@@ -97,6 +102,10 @@ impl ScopeState {
         self.state |= Self::OPT_CHAIN;
     }
 
+    pub const fn set_strict_mode(&mut self) {
+        self.state |= Self::STRICT_MODE;
+    }
+
     #[must_use]
     pub const fn is_function(&self) -> bool {
         self.state & Self::FUNCTION != 0
@@ -129,6 +138,11 @@ impl ScopeState {
     #[must_use]
     pub const fn is_opt_chain(&self) -> bool {
         self.state & Self::OPT_CHAIN != 0
+    }
+
+    #[must_use]
+    pub const fn is_strict_mode(&self) -> bool {
+        self.state & Self::STRICT_MODE != 0
     }
 }
 
@@ -924,6 +938,15 @@ impl Scope {
 
     pub fn state_is_opt_chain(&self) -> Res<bool> {
         Ok(self.scope.borrow()?.state_is_opt_chain())
+    }
+
+    pub fn set_strict_mode(&mut self) -> Res {
+        self.scope.borrow_mut()?.state.set_strict_mode();
+        Ok(())
+    }
+
+    pub fn is_strict_mode(&self) -> Res<bool> {
+        Ok(self.scope.borrow()?.state.is_strict_mode())
     }
 
     pub fn has_value(&self, name: &str, realm: &mut Realm) -> Res<bool> {
